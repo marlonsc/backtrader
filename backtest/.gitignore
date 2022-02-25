@@ -32,47 +32,12 @@ var/
 pip-log.txt
 pip-delete-this-directory.txt
 
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.coverage
-.cache
-nosetests.xml
-coverage.xml
-
-# Translations
-*.mo
-*.pot
-
-# Django stuff:
-*.log
-
-# Sphinx documentation
-docs/_build/
-docs2/_build/
-
 # PyBuilder
 target/
 
-# Backups
-*.bak
-*~
-.#*
-*#
-*.swp
-*.swo
-
 .ipynb*
-samples2/
 
 # Ignore test files in Datas
-datas/*.py
-
-# Ignore nose tests temp files
-.noseids
-
-# PyCharm dirs:
 .idea/
-
-samples/1/stock_data/*
 datas/
+*.pyc
