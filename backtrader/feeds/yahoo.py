@@ -268,6 +268,7 @@ class YahooFinanceData(YahooFinanceCSVData):
 
         crumb = None
         sess = requests.Session()
+        sess.headers['User-Agent'] = 'backtrader'
         for i in range(self.p.retries + 1):  # at least once
             resp = sess.get(url, **sesskwargs)
             if resp.status_code != requests.codes.ok:
@@ -306,13 +307,18 @@ class YahooFinanceData(YahooFinanceCSVData):
 
         urlargs = []
         posix = date(1970, 1, 1)
+
+        if self.p.fromdate is not None:
+            period1 = (self.p.fromdate.date() - posix).total_seconds()
+        else:
+            period1 = 0
+        urlargs.append('period1={}'.format(int(period1)))
         if self.p.todate is not None:
             period2 = (self.p.todate.date() - posix).total_seconds()
-            urlargs.append('period2={}'.format(int(period2)))
-
-        if self.p.todate is not None:
-            period1 = (self.p.fromdate.date() - posix).total_seconds()
-            urlargs.append('period1={}'.format(int(period1)))
+        else:
+            # use current time as todate if not provided
+            period2 = (datetime.utcnow().date() - posix).total_seconds()
+        urlargs.append('period2={}'.format(int(period2)))
 
         intervals = {
             bt.TimeFrame.Days: '1d',
