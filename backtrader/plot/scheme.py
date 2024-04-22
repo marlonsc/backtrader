@@ -130,7 +130,7 @@ class PlotScheme(object):
 
         # Wether to plot volume or not. Note: if the data in question has no
         # volume values, volume plotting will be skipped even if this is True
-        self.volume = True
+        self.volume = False
 
         # Wether to overlay the volume on the data or use a separate subchart
         self.voloverlay = True
