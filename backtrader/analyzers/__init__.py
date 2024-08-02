@@ -2,7 +2,8 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
+# Added by @baobach
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,6 +29,7 @@ from .annualreturn import *
 from .drawdown import *
 from .timereturn import *
 from .sharpe import *
+from .sortino import *
 from .tradeanalyzer import *
 from .sqn import *
 from .leverage import *

@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2024 Daniel Rodriguez
+# Added by: @baobach (2024)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,14 +29,13 @@ from backtrader import Analyzer, TimeFrame
 from backtrader.mathsupport import average, standarddev
 from backtrader.analyzers import TimeReturn, AnnualReturn
 
-
-class SharpeRatio(Analyzer):
-    '''This analyzer calculates the SharpeRatio of a strategy using a risk free
+class SortinoRatio(Analyzer):
+    '''This analyzer calculates the Sortino Ratio of a strategy using a risk free
     asset which is simply an interest rate
 
     See also:
 
-      - https://en.wikipedia.org/wiki/Sharpe_ratio
+      - https://en.wikipedia.org/wiki/Sortino_ratio
 
     Params:
 
@@ -67,10 +66,10 @@ class SharpeRatio(Analyzer):
 
       - ``annualize`` (default: ``False``)
 
-        If ``convertrate`` is ``True``, the *SharpeRatio* will be delivered in
+        If ``convertrate`` is ``True``, the *SortinoRatio* will be delivered in
         the ``timeframe`` of choice.
 
-        In most occasions the SharpeRatio is delivered in annualized form.
+        In most occasions the SortinoRatio is delivered in annualized form.
         Convert the ``riskfreerate`` from annual to monthly, weekly or daily
         rate. Sub-day conversions are not supported
 
@@ -106,9 +105,10 @@ class SharpeRatio(Analyzer):
 
       - get_analysis
 
-        Returns a dictionary with key "sharperatio" holding the ratio
+        Returns a dictionary with key "sortinoratio" holding the ratio
 
     '''
+
     params = (
         ('timeframe', TimeFrame.Years),
         ('compression', 1),
@@ -117,8 +117,6 @@ class SharpeRatio(Analyzer):
         ('convertrate', True),
         ('annualize', False),
         ('stddev_sample', False),
-
-        # old behavior
         ('daysfactor', None),
         ('legacyannual', False),
         ('fund', None),
@@ -132,90 +130,62 @@ class SharpeRatio(Analyzer):
     }
 
     def __init__(self):
-        if self.p.legacyannual:
-            self.anret = AnnualReturn()
-        else:
-            self.timereturn = TimeReturn(
-                timeframe=self.p.timeframe,
-                compression=self.p.compression,
-                fund=self.p.fund)
+        self.timereturn = TimeReturn(
+            timeframe=self.p.timeframe,
+            compression=self.p.compression,
+            fund=self.p.fund)
 
     def stop(self):
-        super(SharpeRatio, self).stop()
-        if self.p.legacyannual:
-            rate = self.p.riskfreerate
-            retavg = average([r - rate for r in self.anret.rets])
-            retdev = standarddev(self.anret.rets)
+        super(SortinoRatio, self).stop()
 
-            self.ratio = retavg / retdev
-        else:
-            # Get the returns from the subanalyzer
-            returns = list(itervalues(self.timereturn.get_analysis()))
+        # Get the returns from the subanalyzer
+        returns = list(itervalues(self.timereturn.get_analysis()))
 
-            rate = self.p.riskfreerate  #
+        rate = self.p.riskfreerate  
 
-            factor = None
+        factor = None
 
-            # Hack to identify old code
-            if self.p.timeframe == TimeFrame.Days and \
-               self.p.daysfactor is not None:
+        if self.p.factor is not None:
+            factor = self.p.factor  # user specified factor
+        elif self.p.timeframe in self.RATEFACTORS:
+            # Get the conversion factor from the default table
+            factor = self.RATEFACTORS[self.p.timeframe]
 
-                factor = self.p.daysfactor
+        if factor is not None:
+            # A factor was found
 
+            if self.p.convertrate:
+                # Standard: downgrade annual returns to timeframe factor
+                rate = pow(1.0 + rate, 1.0 / factor) - 1.0
             else:
-                if self.p.factor is not None:
-                    factor = self.p.factor  # user specified factor
-                elif self.p.timeframe in self.RATEFACTORS:
-                    # Get the conversion factor from the default table
-                    factor = self.RATEFACTORS[self.p.timeframe]
+                # Else upgrade returns to yearly returns
+                returns = [pow(1.0 + x, factor) - 1.0 for x in returns]
 
-            if factor is not None:
-                # A factor was found
+        lrets = len(returns) - self.p.stddev_sample
+        # Check if the ratio can be calculated
+        if lrets:
+            # Get the excess returns 
+            ret_free = [r - rate for r in returns]
+            ret_free_avg = average(ret_free)
 
-                if self.p.convertrate:
-                    # Standard: downgrade annual returns to timeframe factor
-                    rate = pow(1.0 + rate, 1.0 / factor) - 1.0
-                else:
-                    # Else upgrade returns to yearly returns
-                    returns = [pow(1.0 + x, factor) - 1.0 for x in returns]
+            # Calculate downside deviation
+            downside_returns = [x for x in ret_free if x < 0]
+            retdev = standarddev(downside_returns, avgx=ret_free_avg,
+                                 bessel=self.p.stddev_sample)
 
-            lrets = len(returns) - self.p.stddev_sample
-            # Check if the ratio can be calculated
-            if lrets:
-                # Get the excess returns - arithmetic mean - original sharpe
-                ret_free = [r - rate for r in returns]
-                ret_free_avg = average(ret_free)
-                retdev = standarddev(ret_free, avgx=ret_free_avg,
-                                     bessel=self.p.stddev_sample)
+            try:
+                ratio = ret_free_avg / retdev
 
-                try:
-                    ratio = ret_free_avg / retdev
+                if factor is not None and \
+                   self.p.convertrate and self.p.annualize:
 
-                    if factor is not None and \
-                       self.p.convertrate and self.p.annualize:
-
-                        ratio = math.sqrt(factor) * ratio
-                except (ValueError, TypeError, ZeroDivisionError):
-                    ratio = None
-            else:
-                # no returns or stddev_sample was active and 1 return
+                    ratio = math.sqrt(factor) * ratio
+            except (ValueError, TypeError, ZeroDivisionError):
                 ratio = None
+        else:
+            # no returns or stddev_sample was active and 1 return
+            ratio = None
 
-            self.ratio = ratio
+        self.ratio = ratio
 
-        self.rets['sharperatio'] = self.ratio
-
-
-class SharpeRatio_A(SharpeRatio):
-    '''Extension of the SharpeRatio which returns the Sharpe Ratio directly in
-    annualized form
-
-    The following param has been changed from ``SharpeRatio``
-
-      - ``annualize`` (default: ``True``)
-
-    '''
-
-    params = (
-        ('annualize', True),
-    )
+        self.rets['sortinoratio'] = self.ratio
