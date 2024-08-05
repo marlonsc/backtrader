@@ -148,33 +148,38 @@ class VWR(TimeFrameAnalyzerBase):
         # make n 1 based in enumerate (number of periods and not index)
         # skip initial placeholders for synchronization
         dts = []
-        dts_downside = []
-        
+        downsides = []
+
+        # Collect deviations and downside deviations
         for n, pipn in enumerate(zip(self._pis, self._pns), 1):
             pi, pn = pipn
-
             dt = pn / (pi * math.exp(ravg * n)) - 1.0
-            if dt < 0:
-              dts_downside.append(dt)
             dts.append(dt)
+            if dt < 0:  # Collect only downside deviations
+                downsides.append(dt)
 
+        # Calculate standard deviation of all deviations
         sdev_p = standarddev(dts, bessel=True)
-        sdev_p_downside = standarddev(dts_downside, bessel=True)
 
+        # Calculate downside deviation (Sortino's deviation)
+        sdev_sortino = standarddev(downsides, bessel=True) if downsides else 0
+
+        # Calculate normal VWR
         if 0 <= sdev_p <= self.p.sdev_max:
             vwr = rnorm100 * (1.0 - pow(sdev_p / self.p.sdev_max, self.p.tau))
         else:
             vwr = 0
 
-        if 0 <= sdev_p_downside <= self.p.sdev_max:
-            vwrs = rnorm100 * (1.0 - pow(sdev_p_downside / self.p.sdev_max, self.p.tau))
+        # Calculate VWR using Sortino's deviation
+        if 0 <= sdev_sortino <= self.p.sdev_max:
+            vwrs = rnorm100 * (1.0 - pow(sdev_sortino / self.p.sdev_max, self.p.tau))
         else:
-            vwrs = 0 
+            vwrs = 0
                       
         self.rets['vwr'] = vwr
         self.rets['vwrs'] = vwrs
         self.rets['sdev_p'] = sdev_p
-        self.rets['sdev_p_downside'] = sdev_p_downside
+        self.rets['sdev_sortino'] = sdev_sortino
 
     def notify_fund(self, cash, value, fundvalue, shares):
         if not self._fundmode:
