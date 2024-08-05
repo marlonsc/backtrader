@@ -100,7 +100,7 @@ class VWR(TimeFrameAnalyzerBase):
     params = (
         ('tann', None),
         ('tau', 0.20),
-        ('sdev_max', 2.0),
+        ('sdev_max', 10.0),
         ('fund', None),
     )
 
@@ -162,6 +162,7 @@ class VWR(TimeFrameAnalyzerBase):
             vwr = 0
           
         self.rets['vwr'] = vwr
+        self.rets['sdev_p'] = sdev_p
 
     def notify_fund(self, cash, value, fundvalue, shares):
         if not self._fundmode:
