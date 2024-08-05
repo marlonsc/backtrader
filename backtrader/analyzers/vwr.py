@@ -154,7 +154,7 @@ class VWR(TimeFrameAnalyzerBase):
             pi, pn = pipn
 
             dt = pn / (pi * math.exp(ravg * n)) - 1.0
-            if dt < 0 
+            if dt < 0:
               dts_downside.append(dt)
             dts.append(dt)
 
