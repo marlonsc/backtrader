@@ -204,6 +204,8 @@ class SharpeRatio(Analyzer):
             self.ratio = ratio
 
         self.rets['sharperatio'] = self.ratio
+        self.rets['ret_free_avg'] = ret_free_avg
+        self.rets['retdev'] = retdev
 
 
 class SharpeRatio_A(SharpeRatio):
