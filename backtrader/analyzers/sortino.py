@@ -189,3 +189,5 @@ class SortinoRatio(Analyzer):
         self.ratio = ratio
 
         self.rets['sortinoratio'] = self.ratio
+        self.rets['ret_free_avg'] = ret_free_avg
+        self.rets['retdev'] = retdev
