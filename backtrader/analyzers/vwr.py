@@ -162,7 +162,7 @@ class VWR(TimeFrameAnalyzerBase):
         sdev_p = standarddev(dts, bessel=True)
 
         # Calculate downside deviation (Sortino's deviation)
-        if len(downsides) > 1:
+        if len(downsides) > 2:
             sdev_sortino = standarddev(downsides, bessel=True)
         else:
             sdev_sortino = 0
