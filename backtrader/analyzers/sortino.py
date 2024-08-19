@@ -167,13 +167,13 @@ class SortinoRatio(Analyzer):
             # Get the excess returns 
             ret_free = [r - rate for r in returns]
             ret_free_avg = average(ret_free)
-
-            # Calculate downside deviation
-            downside_returns = [x for x in ret_free if x < 0]
-            retdev = standarddev(downside_returns, avgx=ret_free_avg,
-                                 bessel=self.p.stddev_sample)
-
             try:
+
+                # Calculate downside deviation
+                downside_returns = [x for x in ret_free if x < 0]
+                retdev = standarddev(downside_returns, avgx=ret_free_avg,
+                                 bessel=self.p.stddev_sample)
+          
                 ratio = ret_free_avg / retdev
 
                 if factor is not None and \
