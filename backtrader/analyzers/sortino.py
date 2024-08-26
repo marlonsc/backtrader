@@ -137,7 +137,9 @@ class SortinoRatio(Analyzer):
 
     def stop(self):
         super(SortinoRatio, self).stop()
-
+        ret_free_avg = None
+        retdev = None
+      
         # Get the returns from the subanalyzer
         returns = list(itervalues(self.timereturn.get_analysis()))
 
@@ -185,7 +187,6 @@ class SortinoRatio(Analyzer):
         else:
             # no returns or stddev_sample was active and 1 return
             ratio = None
-            retdev = None
 
         self.ratio = ratio
 
