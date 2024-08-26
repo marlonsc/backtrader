@@ -200,6 +200,7 @@ class SharpeRatio(Analyzer):
             else:
                 # no returns or stddev_sample was active and 1 return
                 ratio = None
+                retdev = None
 
             self.ratio = ratio
 
