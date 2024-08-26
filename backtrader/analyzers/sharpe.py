@@ -142,6 +142,9 @@ class SharpeRatio(Analyzer):
 
     def stop(self):
         super(SharpeRatio, self).stop()
+        ret_free_avg = None
+        retdev = None
+      
         if self.p.legacyannual:
             rate = self.p.riskfreerate
             retavg = average([r - rate for r in self.anret.rets])
@@ -200,7 +203,6 @@ class SharpeRatio(Analyzer):
             else:
                 # no returns or stddev_sample was active and 1 return
                 ratio = None
-                retdev = None
 
             self.ratio = ratio
 
