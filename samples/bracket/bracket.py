@@ -54,7 +54,8 @@ class St(bt.Strategy):
             self.orefs.remove(order.ref)
 
     def __init__(self):
-        ma1, ma2 = self.p.ma(period=self.p.p1), self.p.ma(period=self.p.p2)
+        ma1 = self.p.ma(period=self.p.p1)
+        ma2 = self.p.ma(period=self.p.p2)
         self.cross = bt.ind.CrossOver(ma1, ma2)
 
         self.orefs = list()

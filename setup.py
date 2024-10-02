@@ -91,6 +91,8 @@ setuptools.setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
 
         # Operating Systems on which it runs
         'Operating System :: OS Independent',

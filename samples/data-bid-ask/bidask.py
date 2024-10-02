@@ -29,7 +29,7 @@ import backtrader.indicators as btind
 
 
 class BidAskCSV(btfeeds.GenericCSVData):
-    linesoverride = True  # discard usual OHLC structure
+    linesoverride = True  # discard usual Open, High, Low, Close (OHLC) structure
     # datetime must be present and last
     lines = ('bid', 'ask', 'datetime')
     # datetime (always 1st) and then the desired order for
@@ -48,12 +48,12 @@ class St(bt.Strategy):
             self.sma = btind.SMA(self.data, period=self.p.period)
 
     def next(self):
-        dtstr = self.data.datetime.datetime().isoformat()
-        txt = '%4d: %s - Bid %.4f - %.4f Ask' % (
-            (len(self), dtstr, self.data.bid[0], self.data.ask[0]))
+        txt = (f'{len(self):4d}: {self.data.datetime.datetime().isoformat()} '
+               f'- Bid {self.data.bid[0]:.4f} '
+               f'- {self.data.ask[0]:.4f} Ask')
 
         if self.p.sma:
-            txt += ' - SMA: %.4f' % self.sma[0]
+            txt += f' - SMA: {self.sma[0]:.4f}'
         print(txt)
 
 

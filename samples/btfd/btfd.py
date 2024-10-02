@@ -193,7 +193,7 @@ def parse_args(pargs=None):
     parser.add_argument('--offline', required=False, action='store_true',
                         help='Use offline file with ticker name')
 
-    parser.add_argument('--data', required=False, default='^GSPC',
+    parser.add_argument('--data', required=False, default='NVDA',
                         metavar='TICKER', help='Yahoo ticker to download')
 
     parser.add_argument('--fromdate', required=False, default='1990-01-01',
