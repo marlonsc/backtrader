@@ -42,11 +42,11 @@ class SMAStrategy(bt.Strategy):
 
     def prenext(self):
         self.counter += 1
-        print('prenext len %d - counter %d' % (len(self), self.counter))
+        print(f'prenext len {len(self)} - counter {self.counter}')
 
     def next(self):
         self.counter += 1
-        print('---next len %d - counter %d' % (len(self), self.counter))
+        print(f'---next len {len(self)} - counter {self.counter}')
 
 
 def runstrat():

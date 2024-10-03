@@ -58,35 +58,24 @@ class SMAStrategy(bt.Strategy):
     def next(self):
         print('Strategy:', len(self))
 
-        txt = list()
-        txt.append('Data0')
-        txt.append('%04d' % len(self.data0))
-        dtfmt = '%Y-%m-%dT%H:%M:%S.%f'
-        txt.append('{:f}'.format(self.data.datetime[0]))
-        txt.append('%s' % self.data.datetime.datetime(0).strftime(dtfmt))
-        # txt.append('{:f}'.format(self.data.open[0]))
-        # txt.append('{:f}'.format(self.data.high[0]))
-        # txt.append('{:f}'.format(self.data.low[0]))
-        txt.append('{:f}'.format(self.data.close[0]))
-        # txt.append('{:6d}'.format(int(self.data.volume[0])))
-        # txt.append('{:d}'.format(int(self.data.openinterest[0])))
-        # txt.append('{:f}'.format(self.sma_small[0]))
+        txt = [
+            'Data0',
+            f'{len(self.data0):04d}',
+            f'{self.data.datetime[0]:f}',
+            f'{self.data.datetime.datetime(0).strftime("%Y-%m-%dT%H:%M:%S.%f")}',
+            f'{self.data.close[0]:f}'
+        ]
         print(', '.join(txt))
 
+        # More than 1 bar and data1 has been preloaded?
         if len(self.datas) > 1 and len(self.data1):
-            txt = list()
-            txt.append('Data1')
-            txt.append('%04d' % len(self.data1))
-            dtfmt = '%Y-%m-%dT%H:%M:%S.%f'
-            txt.append('{:f}'.format(self.data1.datetime[0]))
-            txt.append('%s' % self.data1.datetime.datetime(0).strftime(dtfmt))
-            # txt.append('{}'.format(self.data1.open[0]))
-            # txt.append('{}'.format(self.data1.high[0]))
-            # txt.append('{}'.format(self.data1.low[0]))
-            txt.append('{}'.format(self.data1.close[0]))
-            # txt.append('{}'.format(self.data1.volume[0]))
-            # txt.append('{}'.format(self.data1.openinterest[0]))
-            # txt.append('{}'.format(float('NaN')))
+            txt = [
+                'Data1',
+                f'{len(self.data1):04d}',
+                f'{self.data1.datetime[0]:f}',
+                f'{self.data1.datetime.datetime(0).strftime("%Y-%m-%dT%H:%M:%S.%f")}',
+                f'{self.data1.close[0]:f}'
+            ]
             print(', '.join(txt))
 
 
@@ -215,7 +204,7 @@ def parse_args():
     parser.add_argument('--period', default=10, required=False, type=int,
                         help='Period to apply to indicator')
 
-    parser.add_argument('--plot', required=False, action='store_true',
+    parser.add_argument('--plot', required=False, action='store_true', default=True,
                         help='Plot the chart')
 
     return parser.parse_args()
