@@ -412,7 +412,7 @@ class BackBroker(bt.BrokerBase):
 
             return self._value if not lever else self._valuelever
 
-        return self._get_value(datas=datas, lever=lever)
+        return self._get_value_new(datas=datas, lever=lever)
 
     getvalue = get_value
 
@@ -420,6 +420,34 @@ class BackBroker(bt.BrokerBase):
         return self.get_value(datas=datas, mkt=mkt)
 
     def _get_value(self, datas=None, lever=False):
+        """
+        The _get_value method calculates the portfolio value, considering both leveraged and unleveraged positions.
+
+        Initialization:
+        pos_value, pos_value_unlever, and unrealized are initialized to 0.0.
+
+        Process Cash Additions:
+        While there are cash additions in _cash_addition, they are processed by updating _fundshares and cash.
+
+        Calculate Position Values:
+            For each data in datas or self.positions:
+                Retrieve commission information (comminfo) and the current position.
+                Calculate the value of the position (dvalue) and unrealized profit/loss (dunrealized).
+                If only one data is provided and leveraging is requested, adjust dvalue accordingly and return it.
+                Adjust dvalue for short positions if shortcash is not enabled.
+                Accumulate dvalue and dunrealized into pos_value and unrealized.
+                For long positions, adjust dvalue for leverage and accumulate into pos_value_unlever.
+
+        Update Fund Values:
+        If there is no fund history, calculate _value and _fundval based on cash and pos_value_unlever.
+        Otherwise, process the fund history to update _value, cash, _fundval, and _fundshares.
+
+        Set Market Values:
+        Update _valuemkt, _valuelever, _valuemktlever, _leverage, and _unrealized based on the calculated values.
+
+        Return Value:
+        Return _value if lever is False, otherwise return _valuelever.
+        """
         pos_value = 0.0
         pos_value_unlever = 0.0
         unrealized = 0.0
@@ -481,6 +509,67 @@ class BackBroker(bt.BrokerBase):
         self._valuelever = self.cash + pos_value
         self._valuemktlever = pos_value
 
+        self._leverage = pos_value / (pos_value_unlever or 1.0)
+        self._unrealized = unrealized
+
+        return self._value if not lever else self._valuelever
+
+    def _get_value_new(self, datas=None, lever=False):
+        pos_value = 0.0
+        pos_value_unlever = 0.0
+        unrealized = 0.0
+
+        while self._cash_addition:
+            c = self._cash_addition.popleft()
+            self._fundshares += c / self._fundval
+            self.cash += c
+
+        for data in datas or self.positions:
+            comminfo = self.getcommissioninfo(data)
+            position = self.positions[data]
+            close_price = data.close[0]
+            size = position.size
+            price = position.price
+
+            dvalue = comminfo.getvalue(position, close_price) if not self.p.shortcash else comminfo.getvaluesize(
+                size, close_price
+                )
+            dunrealized = comminfo.profitandloss(size, price, close_price)
+
+            if datas and len(datas) == 1:
+                if lever and dvalue > 0:
+                    dvalue -= dunrealized
+                    return (dvalue / comminfo.get_leverage()) + dunrealized
+                return dvalue
+
+            if not self.p.shortcash:
+                dvalue = abs(dvalue)
+
+            pos_value += dvalue
+            unrealized += dunrealized
+
+            if dvalue > 0:
+                dvalue -= dunrealized
+                pos_value_unlever += (dvalue / comminfo.get_leverage()) + dunrealized
+            else:
+                pos_value_unlever += dvalue
+
+        if not self._fundhist:
+            self._value = self.cash + pos_value_unlever
+            self._fundval = self._value / self._fundshares
+        else:
+            fval, fvalue = self._process_fund_history()
+            self._value = fvalue
+            self.cash = fvalue - pos_value_unlever
+            self._fundval = fval
+            self._fundshares = fvalue / fval
+            lev = pos_value / (pos_value_unlever or 1.0)
+            pos_value_unlever = fvalue
+            pos_value = fvalue * lev
+
+        self._valuemkt = pos_value_unlever
+        self._valuelever = self.cash + pos_value
+        self._valuemktlever = pos_value
         self._leverage = pos_value / (pos_value_unlever or 1.0)
         self._unrealized = unrealized
 

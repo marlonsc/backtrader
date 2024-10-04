@@ -13,6 +13,7 @@ matplotlib = "^3.9.2"
 requests = "^2.32.3"
 polars = "^1.9.0"
 yfinance = "^0.2.44"
+setuptools = "^75.1.0"
 
 
 [build-system]
