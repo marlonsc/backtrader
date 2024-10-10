@@ -10,6 +10,23 @@ import backtrader as bt
 # globals
 
 # functions
+# Create a Strategy
+class TestStrategy(bt.Strategy):
+
+    def log(self, txt, dt=None):
+        """
+        Logging function for this strategy
+        """
+        dt = dt or self.datas[0].datetime.date(0)
+        print(f'{dt.isoformat()}, {txt}')
+
+    def __init__(self):
+        # Keep a reference to the "close" line in the data[0] data series
+        self.dataclose = self.datas[0].close
+
+    def next(self):
+        # Simply log the closing price of the series from the reference
+        self.log(txt=f'Close, {self.dataclose[0]:,.2f}' )
 
 
 if __name__ == '__main__':
@@ -33,6 +50,8 @@ if __name__ == '__main__':
 
     # Set our desired cash start
     cerebro.broker.setcash(100_000)
+
+    cerebro.addstrategy(TestStrategy)
 
     # Print out the starting conditions
     print(f'Starting Portfolio Value: {cerebro.broker.getvalue():,.2f}')
