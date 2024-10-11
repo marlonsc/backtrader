@@ -5,6 +5,7 @@
 import datetime  # For datetime objects
 from pathlib import Path
 from colorama import Fore, Style
+import polars as pl
 
 import backtrader as bt
 
@@ -13,6 +14,7 @@ import backtrader as bt
 # functions
 # Create a Strategy
 class TestStrategy(bt.Strategy):
+    # TODO understand len(self)
 
     def log(self, txt, dt=None):
         """
@@ -27,72 +29,107 @@ class TestStrategy(bt.Strategy):
 
         # To keep track of pending orders
         self.order = None
+
         # 105
         self.buyprice = None
         self.buycomm = None
+
+        # 105a
+        self.trade_results = pl.DataFrame({
+            'date': pl.Date,
+            'price': pl.Float64,
+            'status': pl.Utf8,
+            'pnl': pl.Float64,
+            'pnlcomm': pl.Float64
+        }
+        )
 
     def next(self):
         # Log the closing price of the series from the reference
         self.log(f'{Style.DIM}Close {self.dataclose[0]:,.2f}{Style.RESET_ALL}')
 
         # Check if an order is pending ... if yes, we cannot send a 2nd one
-        # Kind of a race condition
         if self.order:
             self.log(f'{Fore.RED}Order pending: {self.order.isbuy()}{Fore.RESET}')
             return
 
-        # Check if we are in the market
+        # Check if we are in the market. Every completed order creates a position?
         if not self.position:
-            # Check if there is are three day close decrease
+            # My strategy: Buy if there is are three day close decrease
             if self.dataclose[0] < self.dataclose[-1] < self.dataclose[-2]:
                 # BUY, BUY, BUY!!! (with all possible default parameters)
-                self.log(f'{Fore.GREEN}BUY CREATE {self.dataclose[0]:,.2f}{Fore.RESET}')
+                self.log(f'{Fore.GREEN}Create BUY order {self.dataclose[0]:,.2f}{Fore.RESET}')
                 self.order = self.buy()
         else:
-            # Already in the market ... we might sell
+            # Already in the market (positions exist) ... we might sell
             if len(self) >= (self.bar_executed + 5):
                 # SELL, SELL, SELL!!! (with all possible default parameters)
-                self.log(f'{Fore.YELLOW}SELL CREATE {self.dataclose[0]:,.2f}{Fore.RESET}')
+                self.log(f'{Fore.YELLOW}Create SELL order {self.dataclose[0]:,.2f}{Fore.RESET}')
                 # Keep track of the created order to avoid a 2nd order
                 self.order = self.sell()
 
 
     def notify_order(self, order):
         """
-        This method will be called whenever an order has been completed
+        This method will be called whenever an order status changes
+        Order details can be analyzed
         """
+        action = f'{Fore.GREEN}BUY{Fore.RESET}' if order.isbuy() else f'{Fore.YELLOW}SELL{Fore.RESET}'
+
         if order.status in {order.Submitted, order.Accepted}:
-            # Buy/Sell order submitted/accepted to/by broker - Nothing to do
+            self.log(f'{action} order {order.Status[order.status]} to/by broker - Nothing to do')
             return
 
         # Check if an order has been completed
         # Attention: broker could reject order if not enough cash
         if order.status == order.Completed:
-            action = f'{Fore.GREEN}BUY' if order.isbuy() else f'{Fore.YELLOW}SELL'
-            action = f'{action}{Fore.RESET}'
-            self.log(f'{Style.BRIGHT}{action} EXECUTED, {order.executed.price:,.2f}{Style.RESET_ALL}')
+            self.log(f'{Style.BRIGHT}{action} order executed at {order.executed.price:,.2f}{Style.RESET_ALL}')
 
             # 105
             if order.isbuy():
                 self.buyprice = order.executed.price
                 self.buycomm = order.executed.comm
 
+            # TODO Verstehen! Ist das die Zeile im Datensatz?
             self.bar_executed = len(self)   # Save the bar where the order was executed
+
         elif order.status in {order.Canceled, order.Margin, order.Rejected}:
-            self.log(f'{Fore.RED}Order Canceled/Margin/Rejected{Fore.RESET}')
+            self.log(f'{Fore.RED}Order note executed! Status = {order.status} (Canceled/Margin/Rejected){Fore.RESET}')
 
         # Write down: no pending order
         self.order = None
 
     # 105
     def notify_trade(self, trade):
+        """
+        Notify the trade result
+        """
+        self.log(f'Trade status: {trade.status_names[trade.status]}')
         if not trade.isclosed:
+            self.log('Nothing to do!')
             return
 
-        self.log(f'OPERATION PROFIT, GROSS {trade.pnl:.2f}, NET {trade.pnlcomm:.2f}')
+        self.log(f'OPERATION PROFIT, GROSS {trade.pnl:,.2f}, NET {trade.pnlcomm:,.2f}')
+        # date = pl.lit(self.datas[0].datetime.date(0)).cast(pl.Date)
+        date = self.datas[0].datetime.date(0)
+        test_df = pl.DataFrame({'date': [date]}).with_columns(pl.col('date').cast(pl.Date))
+        price = trade.price
+        status = trade.status_names[trade.status]
+        pnl = trade.pnl
+        pnlcomm = trade.pnlcomm
 
+        new_row = pl.DataFrame({
+            'date': pl.lit(self.datas[0].datetime.date(0)).cast(pl.Date),
+            'price': trade.price,
+            'status': trade.status_names[trade.status],
+            'pnl': trade.pnl,
+            'pnlcomm': trade.pnlcomm
+        }
+        )
+        self.trade_results = self.trade_results.vstack(new_row)
 
     def next_simple(self):
+        # 104
         # Simply log the closing price of the series from the reference
         # Index [0] is the most recent price
         self.log(txt=f'Close, {self.dataclose[0]:,.2f}' )
@@ -130,6 +167,11 @@ if __name__ == '__main__':
 
     # Run over everything
     cerebro.run()
+
+    print('Trade Results:')
+    df = cerebro.runstrats[0][0].trade_results
+    df.vstack(df.select(pl.all().sum()))
+    print(df)
 
     # Print out the final result
     print(f'Final Portfolio Value: {cerebro.broker.getvalue():,.2f}')

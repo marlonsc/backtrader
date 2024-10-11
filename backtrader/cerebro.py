@@ -1036,7 +1036,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
 
         It has different return values:
 
-          - For No Optimization: a list contanining instances of the Strategy
+          - For No Optimization: a list containing instances of the Strategy
             classes added with ``addstrategy``
 
           - For Optimization: a list of lists which contain instances of the
