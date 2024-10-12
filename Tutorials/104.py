@@ -5,7 +5,7 @@
 import datetime  # For datetime objects
 from pathlib import Path
 from colorama import Fore, Style
-import polars as pl
+import pandas as pd
 
 import backtrader as bt
 
@@ -35,14 +35,15 @@ class TestStrategy(bt.Strategy):
         self.buycomm = None
 
         # 105a
-        self.trade_results = pl.DataFrame({
-            'date': pl.Date,
-            'price': pl.Float64,
-            'status': pl.Utf8,
-            'pnl': pl.Float64,
-            'pnlcomm': pl.Float64
+        self.trade_results = pd.DataFrame({
+            'date': pd.Series(dtype='str'),
+            'price': pd.Series(dtype='float64'),
+            'status': pd.Series(dtype='str'),
+            'pnl': pd.Series(dtype='float64'),
+            'pnlcomm': pd.Series(dtype='float64')
         }
         )
+
 
     def next(self):
         # Log the closing price of the series from the reference
@@ -110,23 +111,18 @@ class TestStrategy(bt.Strategy):
             return
 
         self.log(f'OPERATION PROFIT, GROSS {trade.pnl:,.2f}, NET {trade.pnlcomm:,.2f}')
-        # date = pl.lit(self.datas[0].datetime.date(0)).cast(pl.Date)
-        date = self.datas[0].datetime.date(0)
-        test_df = pl.DataFrame({'date': [date]}).with_columns(pl.col('date').cast(pl.Date))
-        price = trade.price
-        status = trade.status_names[trade.status]
-        pnl = trade.pnl
-        pnlcomm = trade.pnlcomm
 
-        new_row = pl.DataFrame({
-            'date': pl.lit(self.datas[0].datetime.date(0)).cast(pl.Date),
-            'price': trade.price,
+        # 105a
+        new_row = {
+            'date': self.datas[0].datetime.date(0).isoformat(),
+            'price': float(trade.price),
             'status': trade.status_names[trade.status],
-            'pnl': trade.pnl,
-            'pnlcomm': trade.pnlcomm
+            'pnl': float(trade.pnl),
+            'pnlcomm': float(trade.pnlcomm)
         }
-        )
-        self.trade_results = self.trade_results.vstack(new_row)
+
+        # Append the new row to the DataFrame
+        self.trade_results = self.trade_results._append(new_row, ignore_index=True)
 
     def next_simple(self):
         # 104
@@ -169,9 +165,10 @@ if __name__ == '__main__':
     cerebro.run()
 
     print('Trade Results:')
-    df = cerebro.runstrats[0][0].trade_results
-    df.vstack(df.select(pl.all().sum()))
+    df: pd.DataFrame = cerebro.runstrats[0][0].trade_results
     print(df)
+    print(f'Profit (w/o commission):\t{df.pnl.sum():,.2f}')
+    print(f'Profit (incl. commission)\t{df.pnlcomm.sum():,.2f}')
 
     # Print out the final result
     print(f'Final Portfolio Value: {cerebro.broker.getvalue():,.2f}')
