@@ -107,23 +107,25 @@ class TestStrategy(bt.Strategy):
         if trade.isclosed:
             result = 'profit' if trade.pnlcomm > 0 else 'loss'
             self.log(
-                f'Trade is closed. Operation {result}, gross: {trade.pnl:,.2f}, net (incl.commission): {trade.pnlcomm:,.2f}'
-                )
+                    f'Trade is closed. Operation {result}, gross: {trade.pnl:,.2f}, net (incl.commission): {trade.pnlcomm:,.2f}'
+            )
+            # 105a Log the trade results
+            new_row = {
+                'date': self.datas[0].datetime.date(0).isoformat(),
+                'price': float(trade.price),
+                'status': trade.status_names[trade.status],
+                'pnl': float(trade.pnl),
+                'pnlcomm': float(trade.pnlcomm)
+            }
+
+            # Append the new row to the DataFrame
+            self.trade_results = self.trade_results._append(new_row, ignore_index=True)
+
         else:
             self.log(f'Trade status: {trade.status_names[trade.status]}\tNothing to do!')
             return
 
-        # 105a
-        new_row = {
-            'date': self.datas[0].datetime.date(0).isoformat(),
-            'price': float(trade.price),
-            'status': trade.status_names[trade.status],
-            'pnl': float(trade.pnl),
-            'pnlcomm': float(trade.pnlcomm)
-        }
 
-        # Append the new row to the DataFrame
-        self.trade_results = self.trade_results._append(new_row, ignore_index=True)
 
     def next_simple(self):
         # 104
