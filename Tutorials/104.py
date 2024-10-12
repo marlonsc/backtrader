@@ -9,6 +9,7 @@ import pandas as pd
 
 import backtrader as bt
 
+
 # globals
 
 # functions
@@ -44,7 +45,6 @@ class TestStrategy(bt.Strategy):
         }
         )
 
-
     def next(self):
         # Log the closing price of the series from the reference
         self.log(f'{Style.DIM}Close {self.dataclose[0]:,.2f}{Style.RESET_ALL}')
@@ -69,7 +69,6 @@ class TestStrategy(bt.Strategy):
                 # Keep track of the created order to avoid a 2nd order
                 self.order = self.sell()
 
-
     def notify_order(self, order):
         """
         This method will be called whenever an order status changes
@@ -92,7 +91,7 @@ class TestStrategy(bt.Strategy):
                 self.buycomm = order.executed.comm
 
             # TODO Verstehen! Ist das die Zeile im Datensatz?
-            self.bar_executed = len(self)   # Save the bar where the order was executed
+            self.bar_executed = len(self)  # Save the bar where the order was executed
 
         elif order.status in {order.Canceled, order.Margin, order.Rejected}:
             self.log(f'{Fore.RED}Order note executed! Status = {order.status} (Canceled/Margin/Rejected){Fore.RESET}')
@@ -105,12 +104,14 @@ class TestStrategy(bt.Strategy):
         """
         Notify the trade result
         """
-        self.log(f'Trade status: {trade.status_names[trade.status]}')
-        if not trade.isclosed:
-            self.log('Nothing to do!')
+        if trade.isclosed:
+            result = 'profit' if trade.pnlcomm > 0 else 'loss'
+            self.log(
+                f'Trade is closed. Operation {result}, gross: {trade.pnl:,.2f}, net (incl.commission): {trade.pnlcomm:,.2f}'
+                )
+        else:
+            self.log(f'Trade status: {trade.status_names[trade.status]}\tNothing to do!')
             return
-
-        self.log(f'OPERATION PROFIT, GROSS {trade.pnl:,.2f}, NET {trade.pnlcomm:,.2f}')
 
         # 105a
         new_row = {
@@ -128,7 +129,7 @@ class TestStrategy(bt.Strategy):
         # 104
         # Simply log the closing price of the series from the reference
         # Index [0] is the most recent price
-        self.log(txt=f'Close, {self.dataclose[0]:,.2f}' )
+        self.log(txt=f'Close, {self.dataclose[0]:,.2f}')
 
 
 if __name__ == '__main__':
@@ -165,6 +166,7 @@ if __name__ == '__main__':
     cerebro.run()
 
     print('Trade Results:')
+
     df: pd.DataFrame = cerebro.runstrats[0][0].trade_results
     print(df)
     print(f'Profit (w/o commission):\t{df.pnl.sum():,.2f}')
