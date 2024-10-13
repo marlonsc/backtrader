@@ -109,9 +109,9 @@ class PairTradingStrategy(bt.Strategy):
             print('y + self.qty2 is', y + self.qty2)
 
             # Placing the order
-            self.log('SELL CREATE %s, price = %.2f, qty = %d' % ("PEP", self.data0.close[0], x + self.qty1))
+            self.log('SELL CREATE %s, price = %.2f, qty = %d' % (self.data0._name, self.data0.close[0], x + self.qty1))
             self.sell(data=self.data0, size=(x + self.qty1))  # Place an order for buying y + qty2 shares
-            self.log('BUY CREATE %s, price = %.2f, qty = %d' % ("KO", self.data1.close[0], y + self.qty2))
+            self.log('BUY CREATE %s, price = %.2f, qty = %d' % (self.data1._name, self.data1.close[0], y + self.qty2))
             self.buy(data=self.data1, size=(y + self.qty2))  # Place an order for selling x + qty1 shares
 
             # Updating the counters with new value
@@ -132,9 +132,9 @@ class PairTradingStrategy(bt.Strategy):
             print('y + self.qty2 is', y + self.qty2)
 
             # Place the order
-            self.log('BUY CREATE %s, price = %.2f, qty = %d' % ("PEP", self.data0.close[0], x + self.qty1))
+            self.log('BUY CREATE %s, price = %.2f, qty = %d' % (self.data0._name, self.data0.close[0], x + self.qty1))
             self.buy(data=self.data0, size=(x + self.qty1))  # Place an order for buying x + qty1 shares
-            self.log('SELL CREATE %s, price = %.2f, qty = %d' % ("KO", self.data1.close[0], y + self.qty2))
+            self.log('SELL CREATE %s, price = %.2f, qty = %d' % (self.data1._name, self.data1.close[0], y + self.qty2))
             self.sell(data=self.data1, size=(y + self.qty2))  # Place an order for selling y + qty2 shares
 
             # Updating the counters with new value
@@ -177,7 +177,7 @@ def runstrategy():
         todate=todate)
 
     # Add the 1st data to cerebro
-    cerebro.adddata(data0)
+    cerebro.adddata(data0, name="PEP")
 
     # Create the 2nd data
     data1 = btfeeds.YahooFinanceCSVData(
@@ -186,7 +186,7 @@ def runstrategy():
         todate=todate)
 
     # Add the 2nd data to cerebro
-    cerebro.adddata(data1)
+    cerebro.adddata(data1, name="KO")
 
     # Add the strategy
     cerebro.addstrategy(PairTradingStrategy,
