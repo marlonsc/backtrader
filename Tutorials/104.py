@@ -17,8 +17,8 @@ import backtrader as bt
 # Create a Strategy
 class TestStrategy(bt.Strategy):
     params = (
-        ('days_decline', 3),
-        ('exitbars', 5),
+        ('bars_decline', 3),
+        ('bars_since_last_sell', 5),
     )
 
     def __init__(self):
@@ -59,18 +59,27 @@ class TestStrategy(bt.Strategy):
         """
         # Log the closing price of the series from the reference
         # self.log(f'{Style.DIM}Close {self.dataclose[0]:,.2f}{Style.RESET_ALL}\tNumber of bars processed: {len(self)}')
-        self.log(f'{self.data.open[0]:,.2f} {self.data.high[0]:,.2f} {self.data.low[0]:,.2f}'
-                 f' {Style.BRIGHT}{self.data.close[0]:,.2f}{Style.NORMAL}  Vol: {self.data.volume[0]:,.2f}')
+        # self.log(f'{self.data.open[0]:,.2f} {self.data.high[0]:,.2f} {self.data.low[0]:,.2f}'
+        #          f' {Style.BRIGHT}{self.data.close[0]:,.2f}{Style.NORMAL}  Vol: {self.data.volume[0]:,.2f}')
 
         # Check if an order is pending ... if yes, we cannot send a 2nd one
         if self.order:
-            self.log(f'{Fore.RED}Order pending: {self.order.isbuy()}{Fore.RESET}')
+            self.log(f'{Fore.RED}Order pending: {self.order.isbuy()} No new order allowed!{Fore.RESET}')
             return
+
+        size = self.position.size
+        cash = self.broker.get_cash()
+        value = self.broker.get_value()
+        investment = value - cash
+        self.log(f'Portfolio: Position size: {size} shares,'
+                 f' Available cash: {cash:,.2f}'
+                 f' Investment value: {investment:,.2f}'
+                 f' Portfolio value: {value:,.2f}',)
 
         # Check if we are in the market. Every completed order creates a position?
         if not self.position:
             # Check if the closing prices have decreased over the last `days_decline` bars
-            decline = all(self.dataclose[-i] < self.dataclose[-(i+1)] for i in range(self.p.days_decline-1))
+            decline = all(self.dataclose[-i] < self.dataclose[-(i+1)] for i in range(self.p.bars_decline-1))
 
             if decline:
                 # BUY, BUY, BUY!!! (with all possible default parameters)
@@ -78,7 +87,7 @@ class TestStrategy(bt.Strategy):
                 self.order = self.buy()
         else:
             # Already in the market (positions exist) ... we might sell
-            if len(self) >= (self.bar_executed + self.p.exitbars):
+            if len(self) >= (self.bar_executed + self.p.bars_since_last_sell):
                 # SELL, SELL, SELL!!! (with all possible default parameters)
                 self.log(f'{Fore.YELLOW}Create SELL order {self.dataclose[0]:,.2f}{Fore.RESET}')
                 # Keep track of the created order to avoid a 2nd order
@@ -191,8 +200,9 @@ if __name__ == '__main__':
 
     # 105 Set the commission - 0.1% --> 0.001
     cerebro.broker.setcommission(commission=0.001)
+    cerebro.addsizer(bt.sizers.FixedSize, stake=10)
 
-    cerebro.addstrategy(TestStrategy)
+    cerebro.addstrategy(TestStrategy, bars_since_last_sell=5)   # see params in TestStrategy
 
     # Print out the starting conditions
     print(f'Starting Portfolio Value: {cerebro.broker.getvalue():,.2f}')
