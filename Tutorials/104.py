@@ -19,19 +19,21 @@ class TestStrategy(bt.Strategy):
     params = (
         ('bars_decline', 3),
         ('bars_since_last_sell', 5),
+        ('ma_period', 15),
     )
 
     def __init__(self):
         # Keep a reference to the "close" line (column) in the data[0] data series
         # self.data is equivalent to self.datas[0] or self.data_0, if there is more than one data feed
-        self.dataclose = self.data.close
+        self._dataclose = self.datas[0].close
 
         # To keep track of pending orders
-        self.order = None
+        self._order = None
 
         # 105
-        # self.buyprice = None
-        # self.buycomm = None
+        self._bar_executed = 0
+        # self._buyprice = None
+        # self._buycomm = None
 
         # 105a For logging trade results only
         self.trade_results = pd.DataFrame({
@@ -39,8 +41,10 @@ class TestStrategy(bt.Strategy):
             'price': pd.Series(dtype='float64'),
             'pnl': pd.Series(dtype='float64'),
             'pnlcomm': pd.Series(dtype='float64')
-        }
-        )
+        })
+
+        #106
+        self._sma = bt.indicators.MovingAverageSimple(self.datas[0], period=self.params.ma_period)
 
     def log(self, txt, dt=None):
         """
@@ -62,36 +66,34 @@ class TestStrategy(bt.Strategy):
         # self.log(f'{self.data.open[0]:,.2f} {self.data.high[0]:,.2f} {self.data.low[0]:,.2f}'
         #          f' {Style.BRIGHT}{self.data.close[0]:,.2f}{Style.NORMAL}  Vol: {self.data.volume[0]:,.2f}')
 
+        self.log(f'Portfolio: Position size: {self.position.size} shares,'
+                 f' Available cash: {self.broker.get_cash():,.2f}'
+                 f' Investment value: {self.broker.get_value() - self.broker.get_cash():,.2f}'
+                 f' Portfolio value: {self.broker.get_value():,.2f}', )
+
         # Check if an order is pending ... if yes, we cannot send a 2nd one
-        if self.order:
-            self.log(f'{Fore.RED}Order pending: {self.order.isbuy()} No new order allowed!{Fore.RESET}')
+        if self._order:
+            self.log(f'{Fore.RED}Order pending: {self._order.isbuy()} No new order allowed!{Fore.RESET}')
             return
 
-        size = self.position.size
-        cash = self.broker.get_cash()
-        value = self.broker.get_value()
-        investment = value - cash
-        self.log(f'Portfolio: Position size: {size} shares,'
-                 f' Available cash: {cash:,.2f}'
-                 f' Investment value: {investment:,.2f}'
-                 f' Portfolio value: {value:,.2f}',)
+        # 105 Check if the closing prices have decreased over the last `days_decline` bars
+        buy_condition = all(self._dataclose[-i] < self._dataclose[-(i + 1)] for i in range(self.p.bars_decline - 1))
+        sell_condition = len(self) >= (self._bar_executed + self.p.bars_since_last_sell)
 
-        # Check if we are in the market. Every completed order creates a position?
+        # Check if we are in the market. Every completed BUY order creates a position?
         if not self.position:
-            # Check if the closing prices have decreased over the last `days_decline` bars
-            decline = all(self.dataclose[-i] < self.dataclose[-(i+1)] for i in range(self.p.bars_decline-1))
-
-            if decline:
+            # Not yet ... we MIGHT BUY if ...
+            if all(self._dataclose[-i] < self._dataclose[-(i + 1)] for i in range(self.p.bars_decline - 1)):
                 # BUY, BUY, BUY!!! (with all possible default parameters)
-                self.log(f'{Fore.GREEN}Create BUY order {self.dataclose[0]:,.2f}{Fore.RESET}')
-                self.order = self.buy()
+                self.log(f'{Fore.GREEN}Create BUY order {self._dataclose[0]:,.2f}{Fore.RESET}')
+                self._order = self.buy()
         else:
             # Already in the market (positions exist) ... we might sell
-            if len(self) >= (self.bar_executed + self.p.bars_since_last_sell):
+            if len(self) >= (self._bar_executed + self.p.bars_since_last_sell):
                 # SELL, SELL, SELL!!! (with all possible default parameters)
-                self.log(f'{Fore.YELLOW}Create SELL order {self.dataclose[0]:,.2f}{Fore.RESET}')
+                self.log(f'{Fore.YELLOW}Create SELL order {self._dataclose[0]:,.2f}{Fore.RESET}')
                 # Keep track of the created order to avoid a 2nd order
-                self.order = self.sell()
+                self._order = self.sell()
 
     def notify_order(self, order):
         """
@@ -127,13 +129,13 @@ class TestStrategy(bt.Strategy):
                 # self.buycomm = order.executed.comm
 
             # len(self) is the number of bars processed
-            self.bar_executed = len(self)  # Save the bar where the order was executed
+            self._bar_executed = len(self)  # Save the bar where the order was executed
 
         elif order.status in {order.Canceled, order.Margin, order.Rejected}:
             self.log(f'{Fore.RED}Order note executed! Status = {order.status} (Canceled/Margin/Rejected){Fore.RESET}')
 
         # Write down: no pending order
-        self.order = None
+        self._order = None
 
     # 105
     def notify_trade(self, trade):
@@ -173,7 +175,7 @@ class TestStrategy(bt.Strategy):
         # 104
         # Simply log the closing price of the series from the reference
         # Index [0] is the most recent price
-        self.log(txt=f'Close, {self.dataclose[0]:,.2f}')
+        self.log(txt=f'Close, {self._dataclose[0]:,.2f}')
 
 
 if __name__ == '__main__':
