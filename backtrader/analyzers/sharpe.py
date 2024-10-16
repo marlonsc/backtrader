@@ -112,7 +112,7 @@ class SharpeRatio(Analyzer):
     params = (
         ('timeframe', TimeFrame.Years),
         ('compression', 1),
-        ('riskfreerate', 0.01),
+        ('riskfreerate', 0.00),
         ('factor', None),
         ('convertrate', True),
         ('annualize', False),
