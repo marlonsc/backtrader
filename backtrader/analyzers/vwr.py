@@ -18,6 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
+
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
@@ -50,15 +51,13 @@ class VWR(TimeFrameAnalyzerBase):
         time constraints
 
       - ``compression`` (default: ``None``)
-
-        Only used for sub-day timeframes to for example work on an hourly
-        timeframe by specifying "TimeFrame.Minutes" and 60 as compression
+        Only used for sub-day timeframes to, for example, work on an hourly
+        timeframe by specifying ``TimeFrame.Minutes`` and 60 as compression
 
         If ``None`` then the compression of the 1st data of the system will be
         used
 
       - ``tann`` (default: ``None``)
-
         Number of periods to use for the annualization (normalization) of the
         average returns. If ``None``, then standard ``t`` values will be used,
         namely:
@@ -69,39 +68,47 @@ class VWR(TimeFrameAnalyzerBase):
           - ``years: 1``
 
       - ``tau`` (default: ``2.0``)
+        Factor for the calculation (see the literature)
 
-        factor for the calculation (see the literature)
-
-      - ``sdev_max`` (default: ``0.20``)
-
-        max standard deviation (see the literature)
+      - ``sdev_max`` (default: ``0.3``)
+        Max standard deviation (see the literature)
 
       - ``fund`` (default: ``None``)
-
-        If ``None`` the actual mode of the broker (fundmode - True/False) will
+        If ``None``, the actual mode of the broker (fundmode - True/False) will
         be autodetected to decide if the returns are based on the total net
         asset value or on the fund value. See ``set_fundmode`` in the broker
         documentation
 
         Set it to ``True`` or ``False`` for a specific behavior
 
+      - ``riskfreerate`` (default: ``0.01``)
+        The risk-free rate used in the calculation of excess returns
+
+      - ``stddev_sample`` (default: ``False``)
+        If ``True``, use the sample standard deviation (Bessel's correction).
+        If ``False``, use the population standard deviation.
+
     Methods:
 
-      - get_analysis
-
+      - ``get_analysis``
         Returns a dictionary with returns as values and the datetime points for
         each return as keys
 
         The returned dict contains the following keys:
 
-          - ``vwr``: Variability-Weighted Return
+          - ``vwr``: Variability-Weighted Return using total standard deviation
+          - ``vwrs``: Variability-Weighted Return using downside deviation
+          - ``sdev_p``: Total standard deviation of deviations
+          - ``sdev_sortino``: Downside standard deviation (Sortino's deviation)
     '''
 
     params = (
         ('tann', None),
-        ('tau', 0.20),
-        ('sdev_max', 10.0),
+        ('tau', 2.0),
+        ('sdev_max', 0.3),
         ('fund', None),
+        ('riskfreerate', 0.01),  # Risk-free rate parameter
+        ('stddev_sample', False),  # Use sample standard deviation if True
     )
 
     _TANN = {
@@ -112,10 +119,12 @@ class VWR(TimeFrameAnalyzerBase):
     }
 
     def __init__(self):
-        # Children log return analyzer
-        self._returns = Returns(timeframe=self.p.timeframe,
-                                compression=self.p.compression,
-                                tann=self.p.tann)
+        # Child log return analyzer
+        self._returns = Returns(
+            timeframe=self.p.timeframe,
+            compression=self.p.compression,
+            tann=self.p.tann
+        )
 
     def start(self):
         super(VWR, self).start()
@@ -126,11 +135,11 @@ class VWR(TimeFrameAnalyzerBase):
             self._fundmode = self.p.fund
 
         if not self._fundmode:
-            self._pis = [self.strategy.broker.getvalue()]  # keep initial value
+            self._pis = [self.strategy.broker.getvalue()]  # Keep initial value
         else:
-            self._pis = [self.strategy.broker.fundvalue]  # keep initial value
+            self._pis = [self.strategy.broker.fundvalue]  # Keep initial value
 
-        self._pns = [None]  # keep final prices (value)
+        self._pns = [None]  # Keep final prices (value)
 
     def stop(self):
         super(VWR, self).stop()
@@ -140,45 +149,56 @@ class VWR(TimeFrameAnalyzerBase):
             self._pis.pop()
             self._pns.pop()
 
-        # Get results from children
+        # Get results from child analyzer
         rs = self._returns.get_analysis()
         ravg = rs['ravg']
-        rnorm100 = rs['rnorm100']
 
-        # make n 1 based in enumerate (number of periods and not index)
-        # skip initial placeholders for synchronization
+        # Adjust average return for risk-free rate
+        ravg_excess = ravg - self.p.riskfreerate
+
+        # Get annualization factor
+        tann = self.p.tann
+        if tann is None:
+            tframe = self._returns.get_timeframe()
+            tann = self._TANN.get(tframe, 252.0)  # Default to 252
+
+        # Recalculate normalized return
+        rnorm_excess = ravg_excess * tann * 100
+
+        # Make n 1-based in enumerate (number of periods and not index)
+        # Skip initial placeholders for synchronization
         dts = []
         downsides = []
 
         # Collect deviations and downside deviations
         for n, pipn in enumerate(zip(self._pis, self._pns), 1):
             pi, pn = pipn
-            dt = pn / (pi * math.exp(ravg * n)) - 1.0
+            dt = pn / (pi * math.exp(ravg_excess * n)) - 1.0
             dts.append(dt)
             if dt < 0:  # Collect only downside deviations
                 downsides.append(dt)
 
         # Calculate standard deviation of all deviations
-        sdev_p = standarddev(dts, bessel=True)
+        sdev_p = standarddev(dts, bessel=self.p.stddev_sample)
 
         # Calculate downside deviation (Sortino's deviation)
         if len(downsides) > 2:
-            sdev_sortino = standarddev(downsides, bessel=True)
+            sdev_sortino = standarddev(downsides, bessel=self.p.stddev_sample)
         else:
             sdev_sortino = 0
 
         # Calculate normal VWR
         if 0 <= sdev_p <= self.p.sdev_max:
-            vwr = rnorm100 * (1.0 - pow(sdev_p / self.p.sdev_max, self.p.tau))
+            vwr = rnorm_excess * (1.0 - pow(sdev_p / self.p.sdev_max, self.p.tau))
         else:
             vwr = 0
 
         # Calculate VWR using Sortino's deviation
         if 0 <= sdev_sortino <= self.p.sdev_max:
-            vwrs = rnorm100 * (1.0 - pow(sdev_sortino / self.p.sdev_max, self.p.tau))
+            vwrs = rnorm_excess * (1.0 - pow(sdev_sortino / self.p.sdev_max, self.p.tau))
         else:
             vwrs = 0
-                      
+
         self.rets['vwr'] = vwr
         self.rets['vwrs'] = vwrs
         self.rets['sdev_p'] = sdev_p
@@ -186,13 +206,13 @@ class VWR(TimeFrameAnalyzerBase):
 
     def notify_fund(self, cash, value, fundvalue, shares):
         if not self._fundmode:
-            self._pns[-1] = value  # annotate last seen pn for current period
+            self._pns[-1] = value  # Annotate last seen pn for current period
         else:
-            self._pns[-1] = fundvalue  # annotate last pn for current period
+            self._pns[-1] = fundvalue  # Annotate last pn for current period
 
     def _on_dt_over(self):
-        self._pis.append(self._pns[-1])  # last pn is pi in next period
-        self._pns.append(None)  # placeholder for [-1] operation
+        self._pis.append(self._pns[-1])  # Last pn is pi in next period
+        self._pns.append(None)  # Placeholder for [-1] operation
 
 
 VariabilityWeightedReturn = VWR
