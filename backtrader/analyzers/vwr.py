@@ -18,7 +18,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
@@ -31,84 +30,17 @@ from ..mathsupport import standarddev
 
 
 class VWR(TimeFrameAnalyzerBase):
-    '''Variability-Weighted Return: Better SharpeRatio with Log Returns
-
-    Alias:
-
-      - VariabilityWeightedReturn
-
-    See:
-
-      - https://www.crystalbull.com/sharpe-ratio-better-with-log-returns/
-
-    Params:
-
-      - ``timeframe`` (default: ``None``)
-        If ``None`` then the complete return over the entire backtested period
-        will be reported
-
-        Pass ``TimeFrame.NoTimeFrame`` to consider the entire dataset with no
-        time constraints
-
-      - ``compression`` (default: ``None``)
-        Only used for sub-day timeframes to, for example, work on an hourly
-        timeframe by specifying ``TimeFrame.Minutes`` and 60 as compression
-
-        If ``None`` then the compression of the 1st data of the system will be
-        used
-
-      - ``tann`` (default: ``None``)
-        Number of periods to use for the annualization (normalization) of the
-        average returns. If ``None``, then standard ``t`` values will be used,
-        namely:
-
-          - ``days: 252``
-          - ``weeks: 52``
-          - ``months: 12``
-          - ``years: 1``
-
-      - ``tau`` (default: ``2.0``)
-        Factor for the calculation (see the literature)
-
-      - ``sdev_max`` (default: ``0.3``)
-        Max standard deviation (see the literature)
-
-      - ``fund`` (default: ``None``)
-        If ``None``, the actual mode of the broker (fundmode - True/False) will
-        be autodetected to decide if the returns are based on the total net
-        asset value or on the fund value. See ``set_fundmode`` in the broker
-        documentation
-
-        Set it to ``True`` or ``False`` for a specific behavior
-
-      - ``riskfreerate`` (default: ``0.01``)
-        The risk-free rate used in the calculation of excess returns
-
-      - ``stddev_sample`` (default: ``False``)
-        If ``True``, use the sample standard deviation (Bessel's correction).
-        If ``False``, use the population standard deviation.
-
-    Methods:
-
-      - ``get_analysis``
-        Returns a dictionary with returns as values and the datetime points for
-        each return as keys
-
-        The returned dict contains the following keys:
-
-          - ``vwr``: Variability-Weighted Return using total standard deviation
-          - ``vwrs``: Variability-Weighted Return using downside deviation
-          - ``sdev_p``: Total standard deviation of deviations
-          - ``sdev_sortino``: Downside standard deviation (Sortino's deviation)
-    '''
+    '''Variability-Weighted Return Analyzer'''
 
     params = (
+        ('timeframe', bt.TimeFrame.Days),  # Default to Days
+        ('compression', None),
         ('tann', None),
         ('tau', 2.0),
         ('sdev_max', 0.3),
         ('fund', None),
-        ('riskfreerate', 0.00),  # Risk-free rate parameter
-        ('stddev_sample', False),  # Use sample standard deviation if True
+        ('riskfreerate', 0.01),
+        ('stddev_sample', False),
     )
 
     _TANN = {
@@ -123,7 +55,7 @@ class VWR(TimeFrameAnalyzerBase):
         self._returns = Returns(
             timeframe=self.p.timeframe,
             compression=self.p.compression,
-            tann=self.p.tann
+            tann=self.p.tann,
         )
 
     def start(self):
@@ -144,7 +76,6 @@ class VWR(TimeFrameAnalyzerBase):
     def stop(self):
         super(VWR, self).stop()
         # Check if no value has been seen after the last 'dt_over'
-        # If so, there is one 'pi' out of place and a None 'pn'. Purge
         if self._pns[-1] is None:
             self._pis.pop()
             self._pns.pop()
@@ -159,41 +90,39 @@ class VWR(TimeFrameAnalyzerBase):
         # Get annualization factor
         tann = self.p.tann
         if tann is None:
-            tframe = self._returns.get_timeframe()
+            tframe = self._returns.p.timeframe  # Access timeframe from parameters
+            if tframe is None:
+                tframe = bt.TimeFrame.Days  # Default to Days if not set
             tann = self._TANN.get(tframe, 252.0)  # Default to 252
 
         # Recalculate normalized return
         rnorm_excess = ravg_excess * tann * 100
 
         # Make n 1-based in enumerate (number of periods and not index)
-        # Skip initial placeholders for synchronization
         dts = []
         downsides = []
 
         # Collect deviations and downside deviations
-        for n, pipn in enumerate(zip(self._pis, self._pns), 1):
-            pi, pn = pipn
+        for n, (pi, pn) in enumerate(zip(self._pis, self._pns), 1):
             dt = pn / (pi * math.exp(ravg_excess * n)) - 1.0
             dts.append(dt)
-            if dt < 0:  # Collect only downside deviations
+            if dt < 0:
                 downsides.append(dt)
 
-        # Calculate standard deviation of all deviations
+        # Calculate standard deviations
         sdev_p = standarddev(dts, bessel=self.p.stddev_sample)
 
-        # Calculate downside deviation (Sortino's deviation)
         if len(downsides) > 2:
             sdev_sortino = standarddev(downsides, bessel=self.p.stddev_sample)
         else:
             sdev_sortino = 0
 
-        # Calculate normal VWR
+        # Calculate VWRs
         if 0 <= sdev_p <= self.p.sdev_max:
             vwr = rnorm_excess * (1.0 - pow(sdev_p / self.p.sdev_max, self.p.tau))
         else:
             vwr = 0
 
-        # Calculate VWR using Sortino's deviation
         if 0 <= sdev_sortino <= self.p.sdev_max:
             vwrs = rnorm_excess * (1.0 - pow(sdev_sortino / self.p.sdev_max, self.p.tau))
         else:
