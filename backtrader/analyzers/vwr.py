@@ -107,7 +107,7 @@ class VWR(TimeFrameAnalyzerBase):
         ('tau', 2.0),
         ('sdev_max', 0.3),
         ('fund', None),
-        ('riskfreerate', 0.01),  # Risk-free rate parameter
+        ('riskfreerate', 0.00),  # Risk-free rate parameter
         ('stddev_sample', False),  # Use sample standard deviation if True
     )
 
