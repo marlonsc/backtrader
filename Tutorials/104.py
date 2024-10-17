@@ -12,10 +12,15 @@ import backtrader as bt
 
 
 # globals
+debug = False
 
-# functions
-# Create a Strategy
+# functions/classes
+
+
 class TestStrategy(bt.Strategy):
+    """
+    Sandbox for different test strategies
+    """
     params = (
         ('bars_decline', 3),
         ('bars_since_last_sell', 5),
@@ -171,20 +176,14 @@ class TestStrategy(bt.Strategy):
             self.log(f'Trade status: {trade.status_names[trade.status]}\tNothing to do!')
             return
 
-    def next_simple(self):
-        # 104
-        # Simply log the closing price of the series from the reference
-        # Index [0] is the most recent price
-        self.log(txt=f'Close, {self._dataclose[0]:,.2f}')
-
 
 if __name__ == '__main__':
     # Datas are in a subfolder of the samples.
-    datapath = Path.cwd().parent / 'datas/orcl-1995-2014.txt'
+    ticker_data = Path.cwd().parent / 'datas/orcl-1995-2014.txt'
 
     # Create a Data Feed
-    data = bt.feeds.YahooFinanceCSVData(
-            dataname=datapath,
+    data_0 = bt.feeds.YahooFinanceCSVData(
+            dataname=ticker_data,
             # Do not pass values before this date
             fromdate=datetime(2000, 1, 1),
             # Do not pass values after this date
@@ -192,10 +191,11 @@ if __name__ == '__main__':
             reverse=False
     )
 
+
     cerebro = bt.Cerebro()
 
     # Add the Data Feed to Cerebro
-    cerebro.adddata(data)
+    cerebro.adddata(data_0)
 
     # Set our desired cash start
     cerebro.broker.setcash(100_000)
@@ -221,3 +221,14 @@ if __name__ == '__main__':
 
     # Print out the final result
     print(f'Final Portfolio Value: {cerebro.broker.getvalue():,.2f}')
+
+    if debug:    # Print out the final result
+        print('#\tDate\t\tOpen\tHigh\tLow\tClose\t\tVolume\tAdj Close')
+        for i in range(len(data_0)):
+            x = data_0._load()
+            print(
+                f'{i}\t{data_0.datetime.date(0)}\t{data_0.open[0]:.2f}\t'
+                f'{data_0.high[0]:.2f}\t{data_0.low[0]:.2f}\t{data_0.close[0]:.2f}\t'
+                f'{data_0.volume[0]:.2f}\t{data_0.close[0]:.2f}'
+                )
+
