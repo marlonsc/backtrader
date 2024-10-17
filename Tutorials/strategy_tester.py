@@ -10,13 +10,10 @@ import pandas as pd
 import backtrader as bt
 from test_strategies import TestStrategy_SMA
 
-
 # globals
 debug = False
 
 # functions/classes
-
-
 
 
 if __name__ == '__main__':
@@ -62,6 +59,8 @@ if __name__ == '__main__':
 
     # Print out the final result
     print(f'Final Portfolio Value: {cerebro.broker.getvalue():,.2f}')
+
+    cerebro.plot()
 
     if debug:    # Print out the final result
         print('#\tDate\t\tOpen\tHigh\tLow\tClose\t\tVolume\tAdj Close')

@@ -18,7 +18,7 @@ class TestStrategy_SMA(bt.Strategy):
     params = (
         ('bars_decline', 3),
         ('bars_since_last_sell', 5),
-        ('ma_period', 20),
+        ('ma_period', 15),
     )
 
     def __init__(self):
@@ -47,6 +47,16 @@ class TestStrategy_SMA(bt.Strategy):
         # A SMA needs a certain number of bars (params.ma_period) to calculate the average.
         # No call to next() will be made until the SMA has enough bars to calculate the average.
         self._sma = bt.indicators.MovingAverageSimple(self.datas[0], period=self.params.ma_period)
+
+        # 107 Add more indicators
+        bt.indicators.ExponentialMovingAverage(self.datas[0], period=25)
+        bt.indicators.WeightedMovingAverage(self.datas[0], period=25,
+                                            subplot=True)
+        bt.indicators.StochasticSlow(self.datas[0])
+        bt.indicators.MACDHisto(self.datas[0])
+        rsi = bt.indicators.RSI(self.datas[0])
+        bt.indicators.SmoothedMovingAverage(rsi, period=10)
+        bt.indicators.ATR(self.datas[0], plot=False)
 
     def log(self, txt, dt=None):
         """
@@ -79,19 +89,22 @@ class TestStrategy_SMA(bt.Strategy):
             return
 
         # 105 Check if the closing prices have decreased over the last `days_decline` bars
-        buy_condition = all(self._dataclose[-i] < self._dataclose[-(i + 1)] for i in range(self.p.bars_decline - 1))
-        sell_condition = len(self) >= (self._bar_executed + self.p.bars_since_last_sell)
+        # buy_condition = all(self._dataclose[-i] < self._dataclose[-(i + 1)] for i in range(self.p.bars_decline - 1))
+        # sell_condition = len(self) >= (self._bar_executed + self.p.bars_since_last_sell)
+
+        buy_condition = self._dataclose[0] > self._sma[0] # better to buy when the price is above the moving average
+        sell_condition = self._dataclose[0] < self._sma[0] # sell when the price is below the moving average
 
         # Check if we are in the market. Every completed BUY order creates a position?
         if not self.position:
             # Not yet ... we MIGHT BUY if ...
-            if all(self._dataclose[-i] < self._dataclose[-(i + 1)] for i in range(self.p.bars_decline - 1)):
+            if buy_condition:
                 # BUY, BUY, BUY!!! (with all possible default parameters)
                 self.log(f'{Fore.GREEN}Create BUY order {self._dataclose[0]:,.2f}{Fore.RESET}')
                 self._order = self.buy()
         else:
             # Already in the market (positions exist) ... we might sell
-            if len(self) >= (self._bar_executed + self.p.bars_since_last_sell):
+            if sell_condition:
                 # SELL, SELL, SELL!!! (with all possible default parameters)
                 self.log(f'{Fore.YELLOW}Create SELL order {self._dataclose[0]:,.2f}{Fore.RESET}')
                 # Keep track of the created order to avoid a 2nd order
