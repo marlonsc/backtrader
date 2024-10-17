@@ -79,7 +79,7 @@ def parse_args():
     parser.add_argument('--compression', required=False, default=2, type=int,
                         help='How much to compress the bars')
 
-    parser.add_argument('--plot', required=False, action='store_true', default=False,
+    parser.add_argument('--plot', required=False, action='store_true',
                         help='Plot the vars')
 
     return parser.parse_args()

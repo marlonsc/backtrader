@@ -26,9 +26,6 @@ from datetime import date, datetime, time
 from .. import feed
 from ..utils import date2num
 
-from typing import List, Union, Iterator
-from datetime import date, datetime, time
-
 
 class BacktraderCSVData(feed.CSVDataBase):
     '''
@@ -39,17 +36,17 @@ class BacktraderCSVData(feed.CSVDataBase):
       - ``dataname``: The filename to parse or a file-like object
     '''
 
-    def _loadline(self, linetokens: List[str]) -> bool:
-        itoken: Iterator[str] = iter(linetokens)
+    def _loadline(self, linetokens):
+        itoken = iter(linetokens)
 
-        dttxt: str = next(itoken)  # Format is YYYY-MM-DD - skip char 4 and 7
-        dt: date = date(int(dttxt[0:4]), int(dttxt[5:7]), int(dttxt[8:10]))
+        dttxt = next(itoken)  # Format is YYYY-MM-DD - skip char 4 and 7
+        dt = date(int(dttxt[0:4]), int(dttxt[5:7]), int(dttxt[8:10]))
 
         if len(linetokens) == 8:
-            tmtxt: str = next(itoken)  # Format if present HH:MM:SS, skip 3 and 6
-            tm: time = time(int(tmtxt[0:2]), int(tmtxt[3:5]), int(tmtxt[6:8]))
+            tmtxt = next(itoken)  # Format if present HH:MM:SS, skip 3 and 6
+            tm = time(int(tmtxt[0:2]), int(tmtxt[3:5]), int(tmtxt[6:8]))
         else:
-            tm: time = self.p.sessionend  # end of the session parameter
+            tm = self.p.sessionend  # end of the session parameter
 
         self.lines.datetime[0] = date2num(datetime.combine(dt, tm))
         self.lines.open[0] = float(next(itoken))
@@ -60,6 +57,7 @@ class BacktraderCSVData(feed.CSVDataBase):
         self.lines.openinterest[0] = float(next(itoken))
 
         return True
+
 
 class BacktraderCSV(feed.CSVFeedBase):
     DataCls = BacktraderCSVData

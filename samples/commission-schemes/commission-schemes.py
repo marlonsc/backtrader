@@ -48,12 +48,17 @@ class SMACrossOver(bt.Strategy):
         # Check if an order has been completed
         # Attention: broker could reject order if not enougth cash
         if order.status in [order.Completed, order.Canceled, order.Margin]:
-            action = 'BUY' if order.isbuy() else 'SELL'
-            self.log(
-                    f'{action} EXECUTED, Price: {order.executed.price:.2f}, '
-                    f'Cost: {order.executed.value:.2f}, '
-                    f'Comm {order.executed.comm:.2f}'
-            )
+            if order.isbuy():
+                self.log(
+                    'BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f' %
+                    (order.executed.price,
+                     order.executed.value,
+                     order.executed.comm))
+            else:  # Sell
+                self.log('SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f' %
+                         (order.executed.price,
+                          order.executed.value,
+                          order.executed.comm))
 
     def notify_trade(self, trade):
         if trade.isclosed:

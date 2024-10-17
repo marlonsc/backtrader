@@ -32,8 +32,6 @@ import backtrader.filters as btfilters
 
 def runstrat():
     args = parse_args()
-    #SRL: Added this line to plot the data
-    args.plot = True
 
     # Create a cerebro entity
     cerebro = bt.Cerebro(stdstats=False)

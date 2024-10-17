@@ -139,7 +139,7 @@ def parse_args():
     parser.add_argument('--wrcsv', '-wc', action='store_true',
                         help='Enable CSV Output in the writer')
 
-    parser.add_argument('--plot', '-p', action='store_true', default=True,
+    parser.add_argument('--plot', '-p', action='store_true',
                         help='Plot the read data')
 
     parser.add_argument('--numfigs', '-n', default=1,

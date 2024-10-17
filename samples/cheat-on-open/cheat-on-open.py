@@ -29,7 +29,7 @@ import backtrader as bt
 
 class St(bt.Strategy):
     params = dict(
-        periods=[10, 30,],
+        periods=[10, 30],
         matype=bt.ind.SMA,
     )
 
