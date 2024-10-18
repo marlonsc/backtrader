@@ -52,11 +52,11 @@ class TestStrategy_SMA(bt.Strategy):
         bt.indicators.ExponentialMovingAverage(self.datas[0], period=25)
         bt.indicators.WeightedMovingAverage(self.datas[0], period=25,
                                             subplot=True)
-        bt.indicators.StochasticSlow(self.datas[0])
+        bt.indicators.StochasticSlow(self.datas[0]) # Stochastic Oscillator
         bt.indicators.MACDHisto(self.datas[0])
-        rsi = bt.indicators.RSI(self.datas[0])
-        bt.indicators.SmoothedMovingAverage(rsi, period=10)
-        bt.indicators.ATR(self.datas[0], plot=False)
+        rsi = bt.indicators.RSI(self.datas[0]) # Relative Strength Index
+        bt.indicators.SmoothedMovingAverage(rsi, period=10) # to smooth the RSI
+        bt.indicators.ATR(self.datas[0], plot=False) # Average True Range
 
     def log(self, txt, dt=None):
         """
