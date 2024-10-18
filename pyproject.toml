@@ -16,6 +16,7 @@ yfinance = "^0.2.44"
 setuptools = "^75.1.0"
 ansicolor = "^0.3.2"
 colorama = "^0.4.6"
+tk = "^0.1.0"
 
 
 [build-system]
