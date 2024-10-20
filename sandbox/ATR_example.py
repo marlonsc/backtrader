@@ -18,13 +18,16 @@ def calculate_true_range(high:Series, low:Series, close:Series) -> pd.DataFrame:
     # Absolute difference between low and the previous close
     tr3 = abs(low - close.shift(1))
 
-    # The True Range is the maximum of the three values
+    # The True Range is the maximum of the three values for each day
     true_range = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
     return true_range
 
 def calculate_atr(high:Series, low:Series, close:Series, period:int=5) -> pd.DataFrame:
-    true_range = calculate_true_range(high, low, close)
-    atr = true_range.rolling(window=period).mean()
+    """
+    Calculate the Average True Range (ATR) for a given set of high, low, and close prices over a specified period.
+    """
+    true_range:pd.DataFrame = calculate_true_range(high, low, close)
+    atr:pd.DataFrame = true_range.rolling(window=period).mean()
     return atr
 
 # Example usage with a DataFrame containing 'High', 'Low', and 'Close' columns
