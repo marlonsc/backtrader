@@ -54,7 +54,8 @@ if __name__ == '__main__':
     print(f'Starting Portfolio Value: {cerebro.broker.getvalue():,.2f}')
 
     # Run over everything
-    cerebro.run()
+    # maxcpus=1 ist wichtig, wenn mehrere Varianten über optstrategy analysiert werden
+    cerebro.run(maxcpus=1)
 
     print('Trade Results:')
 
