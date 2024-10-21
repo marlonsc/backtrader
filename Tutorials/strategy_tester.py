@@ -36,13 +36,19 @@ if __name__ == '__main__':
     cerebro.adddata(data_0)
 
     # Set our desired cash start
-    cerebro.broker.setcash(100_000)
+    cerebro.broker.setcash(1000)
 
     # 105 Set the commission - 0.1% --> 0.001
-    cerebro.broker.setcommission(commission=0.001)
+    cerebro.broker.setcommission(commission=0.00)
     cerebro.addsizer(bt.sizers.FixedSize, stake=10)
 
-    cerebro.addstrategy(TestStrategy_SMA, bars_since_last_sell=5)   # see params in TestStrategy
+    # aDD one strategy with a parameter
+    # cerebro.addstrategy(TestStrategy_SMA, ma_period = range(10,31))   # see params in TestStrategy
+
+    # Try the strategy w multiple parameters
+    strats = cerebro.optstrategy(
+        TestStrategy_SMA,
+        ma_period=range(10, 31))
 
     # Print out the starting conditions
     print(f'Starting Portfolio Value: {cerebro.broker.getvalue():,.2f}')
@@ -52,15 +58,16 @@ if __name__ == '__main__':
 
     print('Trade Results:')
 
-    df: pd.DataFrame = cerebro.runstrats[0][0].trade_results
-    print(df)
-    print(f'Profit (w/o commission):\t{df.pnl.sum():,.2f}')
-    print(f'Profit (incl. commission)\t{df.pnlcomm.sum():,.2f}')
+    if debug:
+        df: pd.DataFrame = cerebro.runstrats[0][0].trade_results
+        print(df)
+        print(f'Profit (w/o commission):\t{df.pnl.sum():,.2f}')
+        print(f'Profit (incl. commission)\t{df.pnlcomm.sum():,.2f}')
 
-    # Print out the final result
-    print(f'Final Portfolio Value: {cerebro.broker.getvalue():,.2f}')
+        # Print out the final result
+        print(f'Final Portfolio Value: {cerebro.broker.getvalue():,.2f}')
 
-    cerebro.plot()
+    # cerebro.plot()
 
     if debug:    # Print out the final result
         print('#\tDate\t\tOpen\tHigh\tLow\tClose\t\tVolume\tAdj Close')
