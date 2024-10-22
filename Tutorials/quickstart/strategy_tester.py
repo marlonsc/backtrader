@@ -18,7 +18,7 @@ debug = False
 
 if __name__ == '__main__':
     # Datas are in a subfolder of the samples.
-    ticker_data = Path.cwd().parent / 'datas/orcl-1995-2014.txt'
+    ticker_data = Path.cwd().parent.parent / 'datas/orcl-1995-2014.txt'
 
     # Create a Data Feed
     data_0 = bt.feeds.YahooFinanceCSVData(
@@ -48,7 +48,9 @@ if __name__ == '__main__':
     # Try the strategy w multiple parameters
     strats = cerebro.optstrategy(
         TestStrategy_SMA,
-        ma_period=range(10, 31))
+        ma_period=[3,10,15,18,22,35], #range(10, 31),
+        log_by_default = False,
+    )
 
     # Print out the starting conditions
     print(f'Starting Portfolio Value: {cerebro.broker.getvalue():,.2f}')

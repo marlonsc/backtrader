@@ -21,6 +21,7 @@ class TestStrategy_SMA(bt.Strategy):
         ('bars_since_last_sell', 5),
         ('ma_period', 15),
         ('long_period', 25),
+        ('log_by_default', True),
     )
 
     def __init__(self):
@@ -48,7 +49,14 @@ class TestStrategy_SMA(bt.Strategy):
         # Adding an indicator changes the strategy's behavior!
         # A SMA needs a certain number of bars (params.ma_period) to calculate the average.
         # No call to next() will be made until the SMA has enough bars to calculate the average.
-        self._sma = bt.indicators.MovingAverageSimple(self.datas[0], period=self.p.ma_period)
+        self._sma = bt.indicators.MovingAverageSimple(self._dataclose, period=self.p.ma_period)
+
+        # Delayed indexing. Der Wert von self._dataclose[-1] wird erst in next evaluiert
+        # Wenn ich hier self._dataclose[-delay] nehme, wird der jetzt aktuelle Wert genommen
+        # Die Formulierung hier ist äquivalent zu self._dataclose[-1] > self._sma[-1] in next()
+        delay = 1
+        self._buy_condition = self._dataclose(-delay) > self._sma
+        self._sell_condition = self._dataclose(-delay) < self._sma
 
         # 107 Add more indicators
         # Carefull: Adding indicators might change the strategy's behavior! next() will not be called until all
@@ -68,6 +76,9 @@ class TestStrategy_SMA(bt.Strategy):
         #self._atr = bt.indicators.ATR(self.datas[0],)   # plot=False) # Average True Range
 
     def stop(self):
+        """
+        Called when the backtest is finished
+        """
         final_value = self.broker.getvalue()
         self.log(f'(MA Period {self.p.ma_period})\tEnding Value {final_value:,.2f}', caller='stop', print_it=True)
 
@@ -75,7 +86,7 @@ class TestStrategy_SMA(bt.Strategy):
         """
         Logging function for this strategy
         """
-        if not print_it:
+        if not print_it and not self.p.log_by_default:
             return
 
         if caller is None:
@@ -86,6 +97,8 @@ class TestStrategy_SMA(bt.Strategy):
         bars_processed = len(self)
 
         print(f'{bars_processed:3} {caller:15}\t{formatted_date} {txt}')
+
+
 
     def next(self):
         """
@@ -104,6 +117,10 @@ class TestStrategy_SMA(bt.Strategy):
                  f' Investment value: {self.broker.get_value() - self.broker.get_cash():,.2f}'
                  f' Portfolio value: {self.broker.get_value():,.2f}', caller='next', )
 
+        # demo for lines.get-method
+        # slice = self._dataclose.get(size=5)
+        # self.log(f'Close prices: {slice}', caller='next', print_it=True)
+
         # Check if an order is pending ... if yes, we cannot send a 2nd one
         if self._order:
             self.log(f'{Fore.RED}Order pending: {self._order.isbuy()} No new order allowed!{Fore.RESET}', caller='func next')
@@ -113,26 +130,21 @@ class TestStrategy_SMA(bt.Strategy):
         # buy_condition = all(self._dataclose[-i] < self._dataclose[-(i + 1)] for i in range(self.p.bars_decline - 1))
         # sell_condition = len(self) >= (self._bar_executed + self.p.bars_since_last_sell)
 
-        # prob = 1 # random.choice([1, 0]) # 50% chance for a buy order
-        buy_condition = self._dataclose[0] > self._sma[0]  # better to buy when the price is above the moving average
-        sell_condition = self._dataclose[0] < self._sma[0] # sell when the price falls below the moving average
-
-        # based on  volatility
-        # buy_condition = self._atr[0] < 2.0
-        # sell_condition = self._atr[0] > 2.2
-
+        delay = 1
+        _buy_condition = self._dataclose[-delay] > self._sma
+        _sell_condition = self._dataclose[-delay] < self._sma
 
         # Check if we are in the market. Every completed BUY order creates a position?
         if not self.position:
             # Noch nicht im Markt ... wir KÖNNTEN kaufen, wenn ...
-            if buy_condition:
+            if _buy_condition: # (identisch zu self._buy_condition)
                 # KAUFEN, KAUFEN, KAUFEN!!! (mit allen möglichen Standardparametern)
                 buy_order_message = f'{Fore.GREEN}Erstelle KAUF-Bestellung {self._dataclose[0]:,.2f}{Fore.RESET}'
                 self.log(buy_order_message, caller='func next')
                 self._order = self.buy()
         else:
             # Bereits im Markt (Positionen existieren) ... wir könnten verkaufen
-            if sell_condition:
+            if _sell_condition:
                 # VERKAUFEN, VERKAUFEN, VERKAUFEN!!! (mit allen möglichen Standardparametern)
                 sell_order_message = f'{Fore.YELLOW}Erstelle VERKAUF-Bestellung {self._dataclose[0]:,.2f}{Fore.RESET}'
                 self.log(sell_order_message, )
