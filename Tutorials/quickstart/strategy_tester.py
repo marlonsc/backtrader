@@ -8,7 +8,7 @@ from pathlib import Path
 import pandas as pd
 
 import backtrader as bt
-from test_strategies import TestStrategy_SMA
+from quickstart.test_strategies import DelayedIndexing, TestStrategy_SMA
 
 # globals
 debug = False
@@ -46,11 +46,14 @@ if __name__ == '__main__':
     # cerebro.addstrategy(TestStrategy_SMA, ma_period = range(10,31))   # see params in TestStrategy
 
     # Try the strategy w multiple parameters
-    strats = cerebro.optstrategy(
-        TestStrategy_SMA,
-        ma_period=[3,10,15,18,22,35], #range(10, 31),
-        log_by_default = False,
-    )
+    if False:
+        strats = cerebro.optstrategy(
+            TestStrategy_SMA,
+            ma_period=[3,10,15,18,22,35], #range(10, 31),
+            log_by_default = False,
+        )
+
+    cerebro.addstrategy(DelayedIndexing)
 
     # Print out the starting conditions
     print(f'Starting Portfolio Value: {cerebro.broker.getvalue():,.2f}')

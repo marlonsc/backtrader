@@ -5,8 +5,7 @@
 from colorama import Fore, Style
 import inspect
 import pandas as pd
-# import random
-# from datetime import datetime  # For datetime objects
+
 import backtrader as bt
 
 # globals
@@ -22,6 +21,7 @@ class TestStrategy_SMA(bt.Strategy):
         ('ma_period', 15),
         ('long_period', 25),
         ('log_by_default', True),
+        ('delay', 1),
     )
 
     def __init__(self):
@@ -42,7 +42,7 @@ class TestStrategy_SMA(bt.Strategy):
             'date': pd.Series(dtype='str'),
             'price': pd.Series(dtype='float64'),
             'pnl': pd.Series(dtype='float64'),
-            'pnlcomm': pd.Series(dtype='float64')
+            'pnlcomm': pd.Series(dtype='float64'),
         })
 
         #106 Add a Moving Average indicator.
@@ -51,12 +51,12 @@ class TestStrategy_SMA(bt.Strategy):
         # No call to next() will be made until the SMA has enough bars to calculate the average.
         self._sma = bt.indicators.MovingAverageSimple(self._dataclose, period=self.p.ma_period)
 
-        # Delayed indexing. Der Wert von self._dataclose[-1] wird erst in next evaluiert
-        # Wenn ich hier self._dataclose[-delay] nehme, wird der jetzt aktuelle Wert genommen
-        # Die Formulierung hier ist äquivalent zu self._dataclose[-1] > self._sma[-1] in next()
-        delay = 1
-        self._buy_condition = self._dataclose(-delay) > self._sma
-        self._sell_condition = self._dataclose(-delay) < self._sma
+        # Delayed indexing.
+        # Wenn ich hier self._dataclose[-delay] nehme, wird der *jetzt* aktuelle Wert genommen
+        # Die Formulierung hier ist äquivalent zu self._dataclose[-1] > self._sma in next()
+        # Hier wird ein LineOwnOperation erzeugt, kein Wert (bool)
+        self._buy_condition:bt.LineOwnOperation = self._dataclose(-self.p.delay) > self._sma
+        self._sell_condition:bt.LineOwnOperation = self._dataclose(-self.p.delay) < self._sma
 
         # 107 Add more indicators
         # Carefull: Adding indicators might change the strategy's behavior! next() will not be called until all
@@ -98,8 +98,6 @@ class TestStrategy_SMA(bt.Strategy):
 
         print(f'{bars_processed:3} {caller:15}\t{formatted_date} {txt}')
 
-
-
     def next(self):
         """
         Die Methode next() in einer Backtrader-Strategie wird bei jedem neuen Datenpunkt (Bar) aufgerufen und enthält
@@ -130,21 +128,17 @@ class TestStrategy_SMA(bt.Strategy):
         # buy_condition = all(self._dataclose[-i] < self._dataclose[-(i + 1)] for i in range(self.p.bars_decline - 1))
         # sell_condition = len(self) >= (self._bar_executed + self.p.bars_since_last_sell)
 
-        delay = 1
-        _buy_condition = self._dataclose[-delay] > self._sma
-        _sell_condition = self._dataclose[-delay] < self._sma
-
         # Check if we are in the market. Every completed BUY order creates a position?
         if not self.position:
             # Noch nicht im Markt ... wir KÖNNTEN kaufen, wenn ...
-            if _buy_condition: # (identisch zu self._buy_condition)
+            if self._buy_condition: # (identisch zu self._buy_condition)
                 # KAUFEN, KAUFEN, KAUFEN!!! (mit allen möglichen Standardparametern)
                 buy_order_message = f'{Fore.GREEN}Erstelle KAUF-Bestellung {self._dataclose[0]:,.2f}{Fore.RESET}'
                 self.log(buy_order_message, caller='func next')
                 self._order = self.buy()
         else:
             # Bereits im Markt (Positionen existieren) ... wir könnten verkaufen
-            if _sell_condition:
+            if self._sell_condition:
                 # VERKAUFEN, VERKAUFEN, VERKAUFEN!!! (mit allen möglichen Standardparametern)
                 sell_order_message = f'{Fore.YELLOW}Erstelle VERKAUF-Bestellung {self._dataclose[0]:,.2f}{Fore.RESET}'
                 self.log(sell_order_message, )
@@ -226,6 +220,44 @@ class TestStrategy_SMA(bt.Strategy):
         else:
             self.log(f'Trade status: {trade.status_names[trade.status]}\tNothing to do!')
             return
+
+
+class DelayedIndexing(TestStrategy_SMA):
+    params = (  ('period',20),
+                ('log_by_default', False),
+                ('delay', 1),
+                )
+
+    def __init__(self):
+        self._dataclose = self.data.close
+        self._sma = bt.indicators.SimpleMovingAverage(self._dataclose, period=self.p.period)
+        self._cmpval:bt.linebuffer.LinesOperation = self._dataclose(-self.p.delay) > self._sma
+        
+    def next(self):
+        if len(self) < self.p.delay:
+            return
+
+        self.log(f'Close: {self._dataclose[0]:,.2f}'
+                 f'SMA: {self._sma[0]:,.2f}', caller='next', print_it=False)
+
+        # delayed
+        # print(f'Using delayed indexing: {bool(self._cmpval)=}')
+
+        # Using __call__ method
+        # Ganz blöde Idee, weil _bei jedem Aufruf_ die Berechnung neu gemacht wird und ein neues
+        # Objekt erzeugt wird. Das ist nicht nur ineffizient, sondern auch fehleranfällig.
+        # buy_condition_call:bt.linebuffer.LinesOperatio = self._dataclose(-self.p.delay) > self._sma
+        # if len(buy_condition_call) > 0:
+        #     print(f'Using __call__: {buy_condition_call[0]=}')
+        # else:
+        #     print(f'Using __call__: {buy_condition_call=}')
+
+        # Using direct negative indexing
+        buy_condition_index:bool = self._dataclose[-self.p.delay] > self._sma
+        self.log(f'Index and delayed call are {"identical" if buy_condition_index == self._cmpval else "different"}', caller='next', print_it=True)
+        # print(f'Using direct indexing: {buy_condition_index=}')
+
+
 
 class TestStrategy_simple(bt.Strategy):
 
