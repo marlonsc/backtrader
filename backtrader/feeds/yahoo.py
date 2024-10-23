@@ -138,7 +138,7 @@ class YahooFinanceCSVData(feed.CSVDataBase):
 
         # 2018-11-16 ... Adjusted Close seems to always be delivered after
         # the close and before the volume columns
-        adjustedclose = float(linetokens[next(i)])
+        adjustedclose = float(linetokens[next(i)]) or 1.0   # SRL or 1.0 if empty
         try:
             v = float(linetokens[next(i)])
         except:  # cover the case in which volume is "null"
