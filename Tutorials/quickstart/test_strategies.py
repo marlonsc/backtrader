@@ -254,9 +254,35 @@ class DelayedIndexing(TestStrategy_SMA):
 
         # Using direct negative indexing
         buy_condition_index:bool = self._dataclose[-self.p.delay] > self._sma
-        self.log(f'Index and delayed call are {"identical" if buy_condition_index == self._cmpval else "different"}', caller='next', print_it=True)
+        # self.log(f'Index and delayed call are {"identical" if buy_condition_index == self._cmpval else "different"}', caller='next', print_it=True)
         # print(f'Using direct indexing: {buy_condition_index=}')
 
+        #slice = self._dataclose.get(ago = -1, size=5)
+        slice_len = 5
+        if len(self) > slice_len+1:
+            my_slice = self._dataclose[-slice_len:]
+        self.log(f'Close prices: {my_slice}', caller='next', print_it=True)
+
+
+class EmptyCall(TestStrategy_SMA):
+
+    def __init__(self):
+        self._dataclose_daily = self.data0.close
+        self._dataclose_weekly = self.data1.close
+
+        self._sma_daily = bt.indicators.SimpleMovingAverage(self.data0, period=20)
+        self._sma_weekly = bt.indicators.SimpleMovingAverage(self.data1, period=2)
+
+
+        self._buysig = self._sma_daily > self._sma_weekly
+
+    def next(self):
+        # This strategy does nothing
+
+        if self.buysig[0] or True:
+            self.log(f'Daily close: {self._dataclose_daily:,.2f} Weekly close: {self._dataclose_weekly:,.2f}'
+                     f'\tSMA (Daily): {self._sma_daily:,.2f} SMA (Weekly): {self._sma_weekly:,.2f}',
+                     caller='next', print_it=True)
 
 
 class TestStrategy_simple(bt.Strategy):

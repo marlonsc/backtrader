@@ -8,7 +8,7 @@ from pathlib import Path
 import pandas as pd
 
 import backtrader as bt
-from quickstart.test_strategies import DelayedIndexing, TestStrategy_SMA
+from test_strategies import DelayedIndexing, TestStrategy_SMA, EmptyCall
 
 # globals
 debug = False
@@ -18,22 +18,37 @@ debug = False
 
 if __name__ == '__main__':
     # Datas are in a subfolder of the samples.
-    ticker_data = Path.cwd().parent.parent / 'datas/orcl-1995-2014.txt'
+    datas = Path.cwd().parent.parent / 'datas'
+    ticker_data = datas / '2006-day-001.txt'        # 'datas/orcl-1995-2014.txt'
+    ticker_weekly = datas / '2006-week-001.txt'
 
     # Create a Data Feed
     data_0 = bt.feeds.YahooFinanceCSVData(
             dataname=ticker_data,
             # Do not pass values before this date
-            fromdate=datetime(2000, 1, 1),
+            fromdate=datetime(2006, 1, 1),
             # Do not pass values after this date
-            todate=datetime(2000, 12, 31),
-            reverse=False
+            todate=datetime(2006, 12, 31),
+            reverse=False,
+            adjclose=False,
+            adjvolume=False,
+    )
+    data_weekly = bt.feeds.YahooFinanceCSVData(
+            dataname=ticker_weekly,
+            # Do not pass values before this date
+            fromdate=datetime(2006, 1, 1),
+            # Do not pass values after this date
+            todate=datetime(2006, 12, 31),
+            reverse=False,
+            adjclose=False,
+            adjvolume=False,
     )
 
     cerebro = bt.Cerebro()
 
     # Add the Data Feed to Cerebro
     cerebro.adddata(data_0)
+    cerebro.adddata(data_weekly)
 
     # Set our desired cash start
     cerebro.broker.setcash(1000)
@@ -53,7 +68,8 @@ if __name__ == '__main__':
             log_by_default = False,
         )
 
-    cerebro.addstrategy(DelayedIndexing)
+    # cerebro.addstrategy(DelayedIndexing)
+    cerebro.addstrategy(EmptyCall)
 
     # Print out the starting conditions
     print(f'Starting Portfolio Value: {cerebro.broker.getvalue():,.2f}')
