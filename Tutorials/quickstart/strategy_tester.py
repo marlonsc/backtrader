@@ -58,7 +58,7 @@ if __name__ == '__main__':
     cerebro.addsizer(bt.sizers.FixedSize, stake=10)
 
     # aDD one strategy with a parameter
-    # cerebro.addstrategy(TestStrategy_SMA, ma_period = range(10,31))   # see params in TestStrategy
+    # cerebro.addstrategy(TestStrategy_SMA, ma_period = 17)   # see params in TestStrategy
 
     # Try the strategy w multiple parameters
     if False:
