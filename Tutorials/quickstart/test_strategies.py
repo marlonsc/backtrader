@@ -263,6 +263,27 @@ class DelayedIndexing(TestStrategy_SMA):
             my_slice = self._dataclose[-slice_len:]
         self.log(f'Close prices: {my_slice}', caller='next', print_it=True)
 
+class TestUsingOperators(TestStrategy_SMA):
+    def __init(self):
+        super().__init__()
+
+        # operator > overload
+        close_over_sma = self._dataclose > self._sma
+        # operator - overload
+        sma_dist_to_high = self._sma - self.data.high
+        # operator < overload
+        sma_dist_small = sma_dist_to_high < 3
+
+        self._sell_signal = bt.indicators.And(close_over_sma, sma_dist_small)
+
+    def next(self):
+        # This strategy does nothing
+
+        if self._sell_signal or True:
+            self.log(f'Daily close: {self._dataclose_daily:,.2f} Weekly close: {self._dataclose_weekly:,.2f}'
+                     f'\tSMA (Daily): {self._sma_daily:,.2f} SMA (Weekly): {self._sma_weekly:,.2f}',
+                     caller='next', print_it=True)
+
 
 class EmptyCall(TestStrategy_SMA):
 
@@ -270,11 +291,11 @@ class EmptyCall(TestStrategy_SMA):
         self._dataclose_daily = self.data0.close
         self._dataclose_weekly = self.data1.close
 
-        self._sma_daily = bt.indicators.SimpleMovingAverage(self.data0, period=20)
-        self._sma_weekly = bt.indicators.SimpleMovingAverage(self.data1, period=2)
-
-
-        self._buysig = self._sma_daily > self._sma_weekly
+        sma_daily = bt.indicators.SimpleMovingAverage(self.data0, period=20)
+        sma_weekly = bt.indicators.SimpleMovingAverage(self.data1, period=5)
+        # Erzeugt einen Indexfehler, weil die Daten unterschiedlich lang sind
+        # sma_daily: 255, sma_weekly: 50
+        self._buysig = sma_daily > sma_weekly()
 
     def next(self):
         # This strategy does nothing
