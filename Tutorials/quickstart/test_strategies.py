@@ -264,14 +264,14 @@ class DelayedIndexing(TestStrategy_SMA):
         self.log(f'Close prices: {my_slice}', caller='next', print_it=True)
 
 class TestUsingOperators(TestStrategy_SMA):
-    def __init(self):
+    def __init__(self):
         super().__init__()
 
         # operator > overload
         close_over_sma = self._dataclose > self._sma
         # operator - overload
         sma_dist_to_high = self._sma - self.data.high
-        # operator < overload
+        # operator < overload; line-Object of bools
         sma_dist_small = sma_dist_to_high < 3
 
         self._sell_signal = bt.indicators.And(close_over_sma, sma_dist_small)
@@ -279,10 +279,9 @@ class TestUsingOperators(TestStrategy_SMA):
     def next(self):
         # This strategy does nothing
 
-        if self._sell_signal or True:
-            self.log(f'Daily close: {self._dataclose_daily:,.2f} Weekly close: {self._dataclose_weekly:,.2f}'
-                     f'\tSMA (Daily): {self._sma_daily:,.2f} SMA (Weekly): {self._sma_weekly:,.2f}',
-                     caller='next', print_it=True)
+        action = "SELL" if self._sell_signal else "HOLD"
+        self.log(f'{action}\tDaily close: {self._dataclose[0]:,.2f} SMA: {self._sma[0]:,.2f}',
+                     caller='TestUsingOperators.next', print_it=True)
 
 
 class EmptyCall(TestStrategy_SMA):
