@@ -58,6 +58,7 @@ class TestStrategy_SMA(bt.Strategy):
         self._buy_condition:bt.LineOwnOperation = self._dataclose(-self.p.delay) > self._sma
         self._sell_condition:bt.LineOwnOperation = self._dataclose(-self.p.delay) < self._sma
 
+        #beginregion More Indicators
         # 107 Add more indicators
         # Carefull: Adding indicators might change the strategy's behavior! next() will not be called until all
         # indicators have enough bars to calculate, e.g. the SMA above.
@@ -74,6 +75,8 @@ class TestStrategy_SMA(bt.Strategy):
         #bt.indicators.SmoothedMovingAverage(rsi, period=10)
         # Average True Range = volatility indicator
         #self._atr = bt.indicators.ATR(self.datas[0],)   # plot=False) # Average True Range
+        #endregion
+
 
     def stop(self):
         """
@@ -282,6 +285,47 @@ class TestUsingOperators(TestStrategy_SMA):
         action = "SELL" if self._sell_signal else "HOLD"
         self.log(f'{action}\tDaily close: {self._dataclose[0]:,.2f} SMA: {self._sma[0]:,.2f}',
                      caller='TestUsingOperators.next', print_it=True)
+
+class MySimpleMovingAverage(bt.indicators.SimpleMovingAverage):
+    lines = ('sma',)
+
+    params = (
+        ('period', 20),
+        ('log_by_default', True),
+    )
+
+    def __init__(self):
+        # self.__super().__init__()
+
+
+    def prenext(self):
+        print('prenext:: current period:', len(self))
+
+    def nextstart(self):
+        print('nextstart:: current period:', len(self))
+        # emulate default behavior ... call next
+        self.next()
+
+    def next(self):
+        print('next:: current period:', len(self))
+
+
+
+class PlayWithIndicators(TestStrategy_SMA):
+    def __init__(self):
+        self.p.log_by_default = True
+        self.sma = MySimpleMovingAverage(self.data, period=20)
+
+    def next(self):
+        self.log(f'Current Bar: {len(self):3}', caller='next', print_it=True)
+
+    def prenext(self):
+        self.log(f'Current Bar: {len(self):3}', caller='prenext', print_it=True)
+
+    def nextstart(self):
+        self.log(f'Current Bar: {len(self):3}', caller='nextstart', print_it=True)
+        # emulates the regular behavior of nextstart()
+        self.next()
 
 
 class EmptyCall(TestStrategy_SMA):

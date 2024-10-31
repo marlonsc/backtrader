@@ -8,7 +8,7 @@ from pathlib import Path
 import pandas as pd
 
 import backtrader as bt
-from test_strategies import DelayedIndexing, TestStrategy_SMA, EmptyCall, TestUsingOperators
+from test_strategies import DelayedIndexing, TestStrategy_SMA, EmptyCall, TestUsingOperators, PlayWithIndicators
 
 # globals
 debug = False
@@ -57,7 +57,7 @@ if __name__ == '__main__':
     cerebro.broker.setcommission(commission=0.00)
     cerebro.addsizer(bt.sizers.FixedSize, stake=10)
 
-    # aDD one strategy with a parameter
+    # add one strategy with a parameter
     # cerebro.addstrategy(TestStrategy_SMA, ma_period = 17)   # see params in TestStrategy
 
     # Try the strategy w multiple parameters
@@ -69,7 +69,7 @@ if __name__ == '__main__':
         )
 
     # cerebro.addstrategy(DelayedIndexing)
-    cerebro.addstrategy(TestUsingOperators)
+    cerebro.addstrategy(PlayWithIndicators)
 
     # Print out the starting conditions
     print(f'Starting Portfolio Value: {cerebro.broker.getvalue():,.2f}')
