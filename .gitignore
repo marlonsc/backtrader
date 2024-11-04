@@ -71,3 +71,4 @@ datas/*.py
 .idea/
 
 poetry.lock
+.venv/
