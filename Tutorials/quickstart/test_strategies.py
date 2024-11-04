@@ -295,19 +295,19 @@ class MySimpleMovingAverage(bt.indicators.SimpleMovingAverage):
     )
 
     def __init__(self):
-        # self.__super().__init__()
-
+        super().__init__()
+        print(f'Created SimpleMovingAverage with period {self.p.period}',)
 
     def prenext(self):
-        print('prenext:: current period:', len(self))
+        print('MySimpleMovingAverage.prenext:: current period:', len(self))
 
     def nextstart(self):
-        print('nextstart:: current period:', len(self))
+        print('MySimpleMovingAverage.nextstart:: current period:', len(self))
         # emulate default behavior ... call next
         self.next()
 
     def next(self):
-        print('next:: current period:', len(self))
+        print('MySimpleMovingAverage.next:: current period:', len(self))
 
 
 
@@ -317,13 +317,13 @@ class PlayWithIndicators(TestStrategy_SMA):
         self.sma = MySimpleMovingAverage(self.data, period=20)
 
     def next(self):
-        self.log(f'Current Bar: {len(self):3}', caller='next', print_it=True)
+        self.log(f'Current Bar: {len(self):3}', caller='PlayWithIndicators.next', print_it=True)
 
     def prenext(self):
-        self.log(f'Current Bar: {len(self):3}', caller='prenext', print_it=True)
+        self.log(f'Current Bar: {len(self):3}', caller='PlayWithIndicators.prenext', print_it=True)
 
     def nextstart(self):
-        self.log(f'Current Bar: {len(self):3}', caller='nextstart', print_it=True)
+        self.log(f'Current Bar: {len(self):3}', caller='PlayWithIndicators.nextstart', print_it=True)
         # emulates the regular behavior of nextstart()
         self.next()
 
