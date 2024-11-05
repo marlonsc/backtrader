@@ -234,6 +234,7 @@ class DelayedIndexing(TestStrategy_SMA):
     def __init__(self):
         self._dataclose = self.data.close
         self._sma = bt.indicators.SimpleMovingAverage(self._dataclose, period=self.p.period)
+        # _cmpval wird erst in next() berechnet (verzögert)
         self._cmpval:bt.linebuffer.LinesOperation = self._dataclose(-self.p.delay) > self._sma
         
     def next(self):
@@ -331,21 +332,28 @@ class PlayWithIndicators(TestStrategy_SMA):
 class EmptyCall(TestStrategy_SMA):
 
     def __init__(self):
+       
+        # self._buysig = self._dataclose_daily(-self.p.delay) > self._sma
+        if len(self.datas) < 2:
+            raise Exception('No weekly data to compare with')  # Default to no signal if no weekly data
+        
         self._dataclose_daily = self.data0.close
         self._dataclose_weekly = self.data1.close
 
-        sma_daily = bt.indicators.SimpleMovingAverage(self.data0, period=20)
-        sma_weekly = bt.indicators.SimpleMovingAverage(self.data1, period=5)
+        self._sma0 = bt.indicators.SimpleMovingAverage(self._dataclose_daily, period=20)
+        self._sma1 = bt.indicators.SimpleMovingAverage(self._dataclose_weekly, period=5)
         # Erzeugt einen Indexfehler, weil die Daten unterschiedlich lang sind
         # sma_daily: 255, sma_weekly: 50
-        self._buysig = sma_daily > sma_weekly()
-
+        self._buysig = self._sma0 > self._sma1(-1)
+        
     def next(self):
         # This strategy does nothing
 
-        if self.buysig[0] or True:
-            self.log(f'Daily close: {self._dataclose_daily:,.2f} Weekly close: {self._dataclose_weekly:,.2f}'
-                     f'\tSMA (Daily): {self._sma_daily:,.2f} SMA (Weekly): {self._sma_weekly:,.2f}',
+        if self._buysig[0] or True:
+            self.log(f'Daily close: {self._dataclose_daily[0]:,.2f} '
+                     f'Weekly close: {self._dataclose_weekly[0]:,.2f} '
+                     f'SMA (Daily): {self._sma0[0]:,.2f} '
+                     f'SMA (Weekly): {self._sma1[0]:,.2f}',
                      caller='next', print_it=True)
 
 

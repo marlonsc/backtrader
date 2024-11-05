@@ -24,7 +24,7 @@ if __name__ == '__main__':
     # Datas are in a subfolder of the samples.
     datas = Path.cwd() / 'datas'
     ticker_data = datas / '2006-day-001.txt'        # 'datas/orcl-1995-2014.txt'
-    # ticker_weekly = datas / '2006-week-001.txt'
+    ticker_weekly = datas / '2006-week-001.txt'
 
     # Create a Data Feed
     data_0 = bt.feeds.YahooFinanceCSVData(
@@ -36,24 +36,26 @@ if __name__ == '__main__':
             reverse=False,
             adjclose=False,
             adjvolume=False,
+            timeframe=bt.TimeFrame.Days,
     )
    
-    # data_weekly = bt.feeds.YahooFinanceCSVData(
-    #         dataname=ticker_weekly,
-    #         # Do not pass values before this date
-    #         fromdate=datetime(2006, 1, 1),
-    #         # Do not pass values after this date
-    #         todate=datetime(2006, 12, 31),
-    #         reverse=False,
-    #         adjclose=False,
-    #         adjvolume=False,
-    # )
+    data_weekly = bt.feeds.YahooFinanceCSVData(
+            dataname=ticker_weekly,
+            # Do not pass values before this date
+            fromdate=datetime(2006, 1, 1),
+            # Do not pass values after this date
+            todate=datetime(2006, 12, 31),
+            reverse=False,
+            adjclose=False,
+            adjvolume=False,
+            timeframe=bt.TimeFrame.Weeks,
+    )
    
     cerebro = bt.Cerebro()
 
     # Add the Data Feed to Cerebro
     cerebro.adddata(data_0)
-    # cerebro.adddata(data_weekly)
+    cerebro.adddata(data_weekly)
 
     # Set our desired cash start
     cerebro.broker.setcash(1_000)
@@ -74,7 +76,8 @@ if __name__ == '__main__':
         )
 
     # cerebro.addstrategy(DelayedIndexing)
-    cerebro.addstrategy(PlayWithIndicators)
+    # cerebro.addstrategy(PlayWithIndicators)
+    cerebro.addstrategy(EmptyCall)
 
     # Print out the starting conditions
     print(f'Starting Portfolio Value: {cerebro.broker.getvalue():,.2f}')
