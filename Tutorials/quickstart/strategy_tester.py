@@ -8,7 +8,11 @@ from pathlib import Path
 import pandas as pd
 
 import backtrader as bt
-from test_strategies import DelayedIndexing, TestStrategy_SMA, EmptyCall, TestUsingOperators, PlayWithIndicators
+from test_strategies import (DelayedIndexing, 
+                             TestStrategy_SMA, 
+                             EmptyCall, 
+                             TestUsingOperators, 
+                             PlayWithIndicators)
 
 # globals
 debug = False
@@ -18,9 +22,9 @@ debug = False
 
 if __name__ == '__main__':
     # Datas are in a subfolder of the samples.
-    datas = Path.cwd().parent.parent / 'datas'
+    datas = Path.cwd() / 'datas'
     ticker_data = datas / '2006-day-001.txt'        # 'datas/orcl-1995-2014.txt'
-    ticker_weekly = datas / '2006-week-001.txt'
+    # ticker_weekly = datas / '2006-week-001.txt'
 
     # Create a Data Feed
     data_0 = bt.feeds.YahooFinanceCSVData(
@@ -33,17 +37,18 @@ if __name__ == '__main__':
             adjclose=False,
             adjvolume=False,
     )
-    data_weekly = bt.feeds.YahooFinanceCSVData(
-            dataname=ticker_weekly,
-            # Do not pass values before this date
-            fromdate=datetime(2006, 1, 1),
-            # Do not pass values after this date
-            todate=datetime(2006, 12, 31),
-            reverse=False,
-            adjclose=False,
-            adjvolume=False,
-    )
-
+   
+    # data_weekly = bt.feeds.YahooFinanceCSVData(
+    #         dataname=ticker_weekly,
+    #         # Do not pass values before this date
+    #         fromdate=datetime(2006, 1, 1),
+    #         # Do not pass values after this date
+    #         todate=datetime(2006, 12, 31),
+    #         reverse=False,
+    #         adjclose=False,
+    #         adjvolume=False,
+    # )
+   
     cerebro = bt.Cerebro()
 
     # Add the Data Feed to Cerebro
