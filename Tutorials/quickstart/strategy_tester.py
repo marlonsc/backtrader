@@ -76,9 +76,9 @@ if __name__ == '__main__':
         )
 
     # cerebro.addstrategy(DelayedIndexing)
-    # cerebro.addstrategy(PlayWithIndicators)
+    cerebro.addstrategy(PlayWithIndicators)
     # cerebro.addstrategy(EmptyCall)
-    cerebro.addstrategy(TestUsingOperators)
+    # cerebro.addstrategy(TestUsingOperators)
 
     # Print out the starting conditions
     print(f'Starting Portfolio Value: {cerebro.broker.getvalue():,.2f}')

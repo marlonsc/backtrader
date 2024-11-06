@@ -316,12 +316,19 @@ class MySimpleMovingAverage(bt.indicators.SimpleMovingAverage):
     def next(self):
         print('MySimpleMovingAverage.next:: current period:', len(self))
 
+    def start(self):
+        self.log(f'Current Bar: {len(self):3}', caller='MySimpleMovingAverage.start', print_it=True)
+
 
 
 class PlayWithIndicators(TestStrategy_SMA):
     def __init__(self):
         self.p.log_by_default = True
         self.sma = MySimpleMovingAverage(self.data, period=20)
+        
+    def start(self):
+        self.log(f'Current Bar: {len(self):3}', caller='PlayWithIndicators.start', print_it=True)
+
 
     def next(self):
         self.log(f'Current Bar: {len(self):3}', caller='PlayWithIndicators.next', print_it=True)
