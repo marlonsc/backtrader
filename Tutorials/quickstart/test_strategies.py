@@ -8,6 +8,9 @@ import pandas as pd
 
 import backtrader as bt
 
+# from loguru import logger
+# from icecream import ic
+
 # globals
 
 # functions/classes
@@ -59,7 +62,6 @@ class TestStrategy_SMA(bt.Strategy):
         self._sell_condition:bt.LineOwnOperation = self._dataclose(-self.p.delay) < self._sma
 
         #beginregion More Indicators
-        # 107 Add more indicators
         # Carefull: Adding indicators might change the strategy's behavior! next() will not be called until all
         # indicators have enough bars to calculate, e.g. the SMA above.
         # Exponential Moving Average = trend indicator
@@ -273,12 +275,16 @@ class TestUsingOperators(TestStrategy_SMA):
 
         # operator > overload
         close_over_sma = self._dataclose > self._sma
+        print(f'close_over_sma: {type(close_over_sma)=}')
         # operator - overload
         sma_dist_to_high = self._sma - self.data.high
+        print(f'sma_dist_to_high: {type(sma_dist_to_high)=}')
         # operator < overload; line-Object of bools
         sma_dist_small = sma_dist_to_high < 3
-
+        print(f'sma_dist_small: {type(sma_dist_small)=}')
+        
         self._sell_signal = bt.indicators.And(close_over_sma, sma_dist_small)
+        print(f'sell_signal: {type(self._sell_signal)=}')
 
     def next(self):
         # This strategy does nothing
@@ -344,7 +350,7 @@ class EmptyCall(TestStrategy_SMA):
         self._sma1 = bt.indicators.SimpleMovingAverage(self._dataclose_weekly, period=5)
         # Erzeugt einen Indexfehler, weil die Daten unterschiedlich lang sind
         # sma_daily: 255, sma_weekly: 50
-        self._buysig = self._sma0 > self._sma1(-1)
+        self._buysig = self._sma0 > self._sma1(-1  )
         
     def next(self):
         # This strategy does nothing

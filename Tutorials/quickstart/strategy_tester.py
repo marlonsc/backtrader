@@ -55,7 +55,7 @@ if __name__ == '__main__':
 
     # Add the Data Feed to Cerebro
     cerebro.adddata(data_0)
-    cerebro.adddata(data_weekly)
+    # cerebro.adddata(data_weekly)
 
     # Set our desired cash start
     cerebro.broker.setcash(1_000)
@@ -77,7 +77,8 @@ if __name__ == '__main__':
 
     # cerebro.addstrategy(DelayedIndexing)
     # cerebro.addstrategy(PlayWithIndicators)
-    cerebro.addstrategy(EmptyCall)
+    # cerebro.addstrategy(EmptyCall)
+    cerebro.addstrategy(TestUsingOperators)
 
     # Print out the starting conditions
     print(f'Starting Portfolio Value: {cerebro.broker.getvalue():,.2f}')
