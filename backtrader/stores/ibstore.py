@@ -30,8 +30,8 @@ import random
 import threading
 import time
 
-from ib.ext.Contract import Contract
-import ib.opt as ibopt
+#from ib.ext.Contract import Contract
+#import ib.opt as ibopt
 
 from backtrader import TimeFrame, Position
 from backtrader.metabase import MetaParams

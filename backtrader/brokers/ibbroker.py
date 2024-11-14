@@ -27,9 +27,7 @@ from datetime import date, datetime, timedelta
 import threading
 import uuid
 
-import ib.ext.Order
-import ib.opt as ibopt
-
+import ib_insync
 from backtrader.feed import DataBase
 from backtrader import (TimeFrame, num2date, date2num, BrokerBase,
                         Order, OrderBase, OrderData)
@@ -37,7 +35,7 @@ from backtrader.utils.py3 import bytes, bstr, with_metaclass, queue, MAXFLOAT
 from backtrader.metabase import MetaParams
 from backtrader.comminfo import CommInfoBase
 from backtrader.position import Position
-from backtrader.stores import ibstore
+from backtrader.stores import ibstore, ibstore_insync
 from backtrader.utils import AutoDict, AutoOrderedDict
 from backtrader.comminfo import CommInfoBase
 
@@ -52,20 +50,22 @@ class IBOrderState(object):
 
     def __init__(self, orderstate):
         for f in self._fields:
-            fname = 'm_' + f
+             # fname = 'm_' + f
+            fname =  f
             setattr(self, fname, getattr(orderstate, fname))
 
     def __str__(self):
         txt = list()
         txt.append('--- ORDERSTATE BEGIN')
         for f in self._fields:
-            fname = 'm_' + f
+            # fname = 'm_' + f
+            fname = f
             txt.append('{}: {}'.format(f.capitalize(), getattr(self, fname)))
         txt.append('--- ORDERSTATE END')
         return '\n'.join(txt)
 
 
-class IBOrder(OrderBase, ib.ext.Order.Order):
+class IBOrder(OrderBase,  ib_insync.order.Order):
     '''Subclasses the IBPy order to provide the minimum extra functionality
     needed to be compatible with the internally defined orders
 
@@ -96,14 +96,14 @@ class IBOrder(OrderBase, ib.ext.Order.Order):
         basetxt = super(IBOrder, self).__str__()
         tojoin = [basetxt]
         tojoin.append('Ref: {}'.format(self.ref))
-        tojoin.append('orderId: {}'.format(self.m_orderId))
-        tojoin.append('Action: {}'.format(self.m_action))
-        tojoin.append('Size (ib): {}'.format(self.m_totalQuantity))
-        tojoin.append('Lmt Price: {}'.format(self.m_lmtPrice))
-        tojoin.append('Aux Price: {}'.format(self.m_auxPrice))
-        tojoin.append('OrderType: {}'.format(self.m_orderType))
-        tojoin.append('Tif (Time in Force): {}'.format(self.m_tif))
-        tojoin.append('GoodTillDate: {}'.format(self.m_goodTillDate))
+        tojoin.append('orderId: {}'.format(self.orderId))
+        tojoin.append('Action: {}'.format(self.action))
+        tojoin.append('Size (ib): {}'.format(self.totalQuantity))
+        tojoin.append('Lmt Price: {}'.format(self.lmtPrice))
+        tojoin.append('Aux Price: {}'.format(self.auxPrice))
+        tojoin.append('OrderType: {}'.format(self.orderType))
+        tojoin.append('Tif (Time in Force): {}'.format(self.tif))
+        tojoin.append('GoodTillDate: {}'.format(self.goodTillDate))
         return '\n'.join(tojoin)
 
     # Map backtrader order types to the ib specifics
@@ -128,81 +128,81 @@ class IBOrder(OrderBase, ib.ext.Order.Order):
         self.ordtype = self.Buy if action == 'BUY' else self.Sell
 
         super(IBOrder, self).__init__()
-        ib.ext.Order.Order.__init__(self)  # Invoke 2nd base class
+        ibapi.order.Order.__init__(self)  # Invoke 2nd base class
 
         # Now fill in the specific IB parameters
-        self.m_orderType = self._IBOrdTypes[self.exectype]
-        self.m_permid = 0
+        self.orderType = self._IBOrdTypes[self.exectype]
+        self.permid = 0
 
         # 'B' or 'S' should be enough
-        self.m_action = bytes(action)
+        self.action = bytes(action)
 
         # Set the prices
-        self.m_lmtPrice = 0.0
-        self.m_auxPrice = 0.0
+        self.lmtPrice = 0.0
+        self.auxPrice = 0.0
 
         if self.exectype == self.Market:  # is it really needed for Market?
             pass
         elif self.exectype == self.Close:  # is it ireally needed for Close?
             pass
         elif self.exectype == self.Limit:
-            self.m_lmtPrice = self.price
+            self.lmtPrice = self.price
         elif self.exectype == self.Stop:
-            self.m_auxPrice = self.price  # stop price / exec is market
+            self.auxPrice = self.price  # stop price / exec is market
         elif self.exectype == self.StopLimit:
-            self.m_lmtPrice = self.pricelimit  # req limit execution
-            self.m_auxPrice = self.price  # trigger price
+            self.lmtPrice = self.pricelimit  # req limit execution
+            self.auxPrice = self.price  # trigger price
         elif self.exectype == self.StopTrail:
             if self.trailamount is not None:
-                self.m_auxPrice = self.trailamount
+                self.auxPrice = self.trailamount
             elif self.trailpercent is not None:
                 # value expected in % format ... multiply 100.0
                 self.m_trailingPercent = self.trailpercent * 100.0
         elif self.exectype == self.StopTrailLimit:
-            self.m_trailStopPrice = self.m_lmtPrice = self.price
+            self.m_trailStopPrice = self.lmtPrice = self.price
             # The limit offset is set relative to the price difference in TWS
-            self.m_lmtPrice = self.pricelimit
+            self.lmtPrice = self.pricelimit
             if self.trailamount is not None:
-                self.m_auxPrice = self.trailamount
+                self.auxPrice = self.trailamount
             elif self.trailpercent is not None:
                 # value expected in % format ... multiply 100.0
                 self.m_trailingPercent = self.trailpercent * 100.0
 
-        self.m_totalQuantity = abs(self.size)  # ib takes only positives
+        self.totalQuantity = abs(self.size)  # ib takes only positives
 
-        self.m_transmit = self.transmit
+         # self.m_transmit = self.transmit
         if self.parent is not None:
-            self.m_parentId = self.parent.m_orderId
+            self.m_parentId = self.parent.orderId
 
         # Time In Force: DAY, GTC, IOC, GTD
         if self.valid is None:
             tif = 'GTC'  # Good til cancelled
         elif isinstance(self.valid, (datetime, date)):
             tif = 'GTD'  # Good til date
-            self.m_goodTillDate = bytes(self.valid.strftime('%Y%m%d %H:%M:%S'))
+            self.goodTillDate = bytes(self.valid.strftime('%Y%m%d %H:%M:%S'))
         elif isinstance(self.valid, (timedelta,)):
             if self.valid == self.DAY:
                 tif = 'DAY'
             else:
                 tif = 'GTD'  # Good til date
                 valid = datetime.now() + self.valid  # .now, using localtime
-                self.m_goodTillDate = bytes(valid.strftime('%Y%m%d %H:%M:%S'))
+                self.goodTillDate = bytes(valid.strftime('%Y%m%d %H:%M:%S'))
 
         elif self.valid == 0:
             tif = 'DAY'
         else:
             tif = 'GTD'  # Good til date
             valid = num2date(self.valid)
-            self.m_goodTillDate = bytes(valid.strftime('%Y%m%d %H:%M:%S'))
+            self.goodTillDate = bytes(valid.strftime('%Y%m%d %H:%M:%S'))
 
-        self.m_tif = bytes(tif)
+        self.tif = bytes(tif)
 
         # OCA
-        self.m_ocaType = 1  # Cancel all remaining orders with block
+        self.ocaType = 1  # Cancel all remaining orders with block
 
         # pass any custom arguments to the order
-        for k in kwargs:
-            setattr(self, (not hasattr(self, k)) * 'm_' + k, kwargs[k])
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
 
 class IBCommInfo(CommInfoBase):
@@ -226,7 +226,7 @@ class IBCommInfo(CommInfoBase):
     def getoperationcost(self, size, price):
         '''Returns the needed amount of cash an operation would cost'''
         # Same reasoning as above
-        return abs(size) * price
+        return abs(float(size)) * float(price)
 
 
 class MetaIBBroker(BrokerBase.__class__):
@@ -235,6 +235,8 @@ class MetaIBBroker(BrokerBase.__class__):
         # Initialize the class
         super(MetaIBBroker, cls).__init__(name, bases, dct)
         ibstore.IBStore.BrokerCls = cls
+        ibstore_insync.IBStoreInsync.BrokerCls = cls
+        
 
 
 class IBBroker(with_metaclass(MetaIBBroker, BrokerBase)):
@@ -260,12 +262,15 @@ class IBBroker(with_metaclass(MetaIBBroker, BrokerBase)):
         loss would also be calculated locally), but could be considered to be
         defeating the purpose of working with a live broker
     '''
-    params = ()
+    params = (
+        ('cash', 10000.0),
+    )
 
     def __init__(self, **kwargs):
         super(IBBroker, self).__init__()
 
-        self.ib = ibstore.IBStore(**kwargs)
+        #self.ib = ibstore.IBStore(**kwargs)
+        self.ib = ibstore_insync.IBStoreInsync(**kwargs)
 
         self.startingcash = self.cash = 0.0
         self.startingvalue = self.value = 0.0
@@ -281,13 +286,14 @@ class IBBroker(with_metaclass(MetaIBBroker, BrokerBase)):
         super(IBBroker, self).start()
         self.ib.start(broker=self)
 
-        if self.ib.connected():
-            self.ib.reqAccountUpdates()
+        if self.ib.isConnected():
             self.startingcash = self.cash = self.ib.get_acc_cash()
             self.startingvalue = self.value = self.ib.get_acc_value()
         else:
             self.startingcash = self.cash = 0.0
             self.startingvalue = self.value = 0.0
+
+        print(f"cash: {self.startingcash}")
 
     def stop(self):
         super(IBBroker, self).stop()
@@ -307,18 +313,18 @@ class IBBroker(with_metaclass(MetaIBBroker, BrokerBase)):
 
     def cancel(self, order):
         try:
-            o = self.orderbyid[order.m_orderId]
+            o = self.orderbyid[order.orderId]
         except (ValueError, KeyError):
             return  # not found ... not cancellable
 
         if order.status == Order.Cancelled:  # already cancelled
             return
 
-        self.ib.cancelOrder(order.m_orderId)
+        self.ib.cancelOrder(order.orderId)
 
     def orderstatus(self, order):
         try:
-            o = self.orderbyid[order.m_orderId]
+            o = self.orderbyid[order.orderId]
         except (ValueError, KeyError):
             o = order
 
@@ -329,12 +335,12 @@ class IBBroker(with_metaclass(MetaIBBroker, BrokerBase)):
 
         # ocoize if needed
         if order.oco is None:  # Generate a UniqueId
-            order.m_ocaGroup = bytes(uuid.uuid4())
+            order.ocaGroup = bytes(uuid.uuid4())
         else:
-            order.m_ocaGroup = self.orderbyid[order.oco.m_orderId].m_ocaGroup
+            order.ocaGroup = self.orderbyid[order.oco.orderId].ocaGroup
 
-        self.orderbyid[order.m_orderId] = order
-        self.ib.placeOrder(order.m_orderId, order.data.tradecontract, order)
+        self.orderbyid[order.orderId] = order
+        self.ib.placeOrder(order.orderId, order.data.tradecontract, order)
         self.notify(order)
 
         return order
@@ -342,11 +348,11 @@ class IBBroker(with_metaclass(MetaIBBroker, BrokerBase)):
     def getcommissioninfo(self, data):
         contract = data.tradecontract
         try:
-            mult = float(contract.m_multiplier)
+            mult = float(contract.multiplier)
         except (ValueError, TypeError):
             mult = 1.0
 
-        stocklike = contract.m_secType not in ('FUT', 'OPT', 'FOP',)
+        stocklike = contract.secType not in ('FUT', 'OPT', 'FOP',)
 
         return IBCommInfo(mult=mult, stocklike=stocklike)
 
@@ -354,13 +360,14 @@ class IBBroker(with_metaclass(MetaIBBroker, BrokerBase)):
                    size, price=None, plimit=None,
                    exectype=None, valid=None,
                    tradeid=0, **kwargs):
-
+        
+        orderId=self.ib.nextOrderId()							 
         order = IBOrder(action, owner=owner, data=data,
                         size=size, price=price, pricelimit=plimit,
                         exectype=exectype, valid=valid,
                         tradeid=tradeid,
-                        m_clientId=self.ib.clientId,
-                        m_orderId=self.ib.nextOrderId(),
+                        clientId=self.ib.clientId,
+                        orderId=orderId,
                         **kwargs)
 
         order.addcomminfo(self.getcommissioninfo(data))
@@ -475,59 +482,69 @@ class IBBroker(with_metaclass(MetaIBBroker, BrokerBase)):
             pass
 
     def push_execution(self, ex):
-        self.executions[ex.m_execId] = ex
+        self.executions[ex.execId] = ex
 
     def push_commissionreport(self, cr):
         with self._lock_orders:
-            ex = self.executions.pop(cr.m_execId)
-            oid = ex.m_orderId
-            order = self.orderbyid[oid]
-            ostatus = self.ordstatus[oid].pop(ex.m_cumQty)
-
-            position = self.getposition(order.data, clone=False)
-            pprice_orig = position.price
-            size = ex.m_shares if ex.m_side[0] == 'B' else -ex.m_shares
-            price = ex.m_price
-            # use pseudoupdate and let the updateportfolio do the real update?
-            psize, pprice, opened, closed = position.update(size, price)
-
-            # split commission between closed and opened
-            comm = cr.m_commission
-            closedcomm = comm * closed / size
-            openedcomm = comm - closedcomm
-
-            comminfo = order.comminfo
-            closedvalue = comminfo.getoperationcost(closed, pprice_orig)
-            openedvalue = comminfo.getoperationcost(opened, price)
-
-            # default in m_pnl is MAXFLOAT
-            pnl = cr.m_realizedPNL if closed else 0.0
-
-            # The internal broker calc should yield the same result
-            # pnl = comminfo.profitandloss(-closed, pprice_orig, price)
-
-            # Use the actual time provided by the execution object
-            # The report from TWS is in actual local time, not the data's tz
-            dt = date2num(datetime.strptime(ex.m_time, '%Y%m%d  %H:%M:%S'))
-
-            # Need to simulate a margin, but it plays no role, because it is
-            # controlled by a real broker. Let's set the price of the item
-            margin = order.data.close[0]
-
-            order.execute(dt, size, price,
-                          closed, closedvalue, closedcomm,
+            try:
+                ex = self.executions.pop(cr.execId)
+                oid = ex.orderId
+                order = self.orderbyid[oid]
+                ostatus = self.ordstatus[oid].pop(ex.cumQty)
+                
+                position = self.getposition(order.data, clone=False)
+                pprice_orig = position.price
+                size = ex.shares if ex.side[0] == 'B' else -ex.shares
+                price = ex.price
+                # use pseudoupdate and let the updateportfolio do the real update?
+                psize, pprice, opened, closed = position.update(float(size), price)
+                
+                # split commission between closed and opened
+                comm = cr.commission
+                closedcomm = comm *  float(closed) / float(size)
+                openedcomm = comm - closedcomm
+                
+                comminfo = order.comminfo
+                closedvalue = comminfo.getoperationcost(closed, pprice_orig)
+                openedvalue = comminfo.getoperationcost(opened, price)
+                
+                # default in m_pnl is MAXFLOAT
+                pnl = cr.realizedPNL if closed else 0.0
+				
+				# The internal broker calc should yield the same result
+				# pnl = comminfo.profitandloss(-closed, pprice_orig, price)
+				
+				# Use the actual time provided by the execution object
+				# The report from TWS is in actual local time, not the data's tz
+				#dt = date2num(datetime.strptime(ex.time, '%Y%m%d  %H:%M:%S'))
+                dt_array = [] if ex.time == None else ex.time.split(" ")
+                if dt_array and len(dt_array) > 1:
+                    dt_array.pop()
+                    ex_time = " ".join(dt_array)
+                    dt = date2num(datetime.strptime(ex_time, '%Y%m%d %H:%M:%S'))
+                else:
+                    dt = date2num(datetime.strptime(ex.time, '%Y%m%d %H:%M:%S %A'))															 
+					
+				# Need to simulate a margin, but it plays no role, because it is
+				# controlled by a real broker. Let's set the price of the item
+                margin = order.data.close[0]
+                
+                order.execute(dt, float(size),  price,
+                          float(closed), closedvalue, closedcomm,
                           opened, openedvalue, openedcomm,
                           margin, pnl,
-                          psize, pprice)
-
-            if ostatus.status == self.FILLED:
-                order.completed()
-                self.ordstatus.pop(oid)  # nothing left to be reported
-            else:
-                order.partial()
-
-            if oid not in self.tonotify:  # Lock needed
-                self.tonotify.append(oid)
+                          float(psize), pprice)
+                
+                if ostatus.status == self.FILLED:
+                    order.completed()
+                    self.ordstatus.pop(oid)  # nothing left to be reported
+                else:
+                    order.partial()
+                
+                if oid not in self.tonotify:  # Lock needed
+                    self.tonotify.append(oid)
+            except Exception as e:
+                logger.exception(f"Exception: {e}")						  
 
     def push_portupdate(self):
         # If the IBStore receives a Portfolio update, then this method will be
@@ -569,7 +586,7 @@ class IBBroker(with_metaclass(MetaIBBroker, BrokerBase)):
             except (KeyError, AttributeError):
                 return  # no order or no id in error
 
-            if msg.orderState.m_status in ['PendingCancel', 'Cancelled',
+            if msg.orderState.status in ['PendingCancel', 'Cancelled',
                                            'Canceled']:
                 # This is most likely due to an expiration]
                 order._willexpire = True

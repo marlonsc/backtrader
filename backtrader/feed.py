@@ -127,8 +127,8 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
         ('name', ''),
         ('compression', 1),
         ('timeframe', TimeFrame.Days),
-        ('fromdate', None),
-        ('todate', None),
+        ('fromdate', ''),
+        ('todate', ''),
         ('sessionstart', None),
         ('sessionend', None),
         ('filters', []),
@@ -177,14 +177,10 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
         self._tzinput = bt.utils.date.Localizer(self._gettzinput())
 
         # Convert user input times to the output timezone (or min/max)
-        if self.p.fromdate is None:
-            self.fromdate = float('-inf')
-        else:
+        if self.p.fromdate != '':
             self.fromdate = self.date2num(self.p.fromdate)
 
-        if self.p.todate is None:
-            self.todate = float('inf')
-        else:
+        if self.p.todate != '':
             self.todate = self.date2num(self.p.todate)
 
         # FIXME: These two are never used and could be removed
@@ -198,6 +194,14 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
             self._calendar = PandasMarketCalendar(calendar=cal)
 
         self._started = True
+
+    def _start_updatedate(self):
+        # Convert user input times to the output timezone (or min/max)
+        if self.p.fromdate != '':
+            self.fromdate = self.date2num(self.p.fromdate)
+
+        if self.p.todate != '':
+            self.todate = self.date2num(self.p.todate)
 
     def _start(self):
         self.start()
@@ -244,7 +248,7 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
         return tzparse(self.p.tz)
 
     def date2num(self, dt):
-        if self._tz is not None:
+        if self._tz is not None and dt.tzinfo is None:
             return date2num(self._tz.localize(dt))
 
         return date2num(dt)
@@ -503,11 +507,11 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
                 self.lines.datetime[0] = dt = date2num(dtime)  # keep UTC val
 
             # Check standard date from/to filters
-            if dt < self.fromdate:
+            if  self.p.fromdate != '' and dt < self.fromdate:
                 # discard loaded bar and carry on
                 self.backwards()
                 continue
-            if dt > self.todate:
+            if  self.p.todate != '' and dt > self.todate:
                 # discard loaded bar and break out
                 self.backwards(force=True)
                 break

@@ -20,7 +20,7 @@
 ###############################################################################
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
-
+import time
 import datetime
 import collections
 import itertools
@@ -667,12 +667,13 @@ class Cerebro(with_metaclass(MetaParams, object)):
         self.observers.append((True, obscls, args, kwargs))
 
     def addstorecb(self, callback):
-        '''Adds a callback to get messages which would be handled by the
+        '''
+        Adds a callback to get messages which would be handled by the
         notify_store method
 
         The signature of the callback must support the following:
 
-          - callback(msg, \*args, \*\*kwargs)
+          - callback(msg, *args, **kwargs)
 
         The actual ``msg``, ``*args`` and ``**kwargs`` received are
         implementation defined (depend entirely on the *data/broker/store*) but
@@ -709,12 +710,13 @@ class Cerebro(with_metaclass(MetaParams, object)):
                     strat.notify_store(msg, *args, **kwargs)
 
     def adddatacb(self, callback):
-        '''Adds a callback to get messages which would be handled by the
+        '''
+        Adds a callback to get messages which would be handled by the
         notify_data method
 
         The signature of the callback must support the following:
 
-          - callback(data, status, \*args, \*\*kwargs)
+          - callback(data, status, *args, **kwargs)
 
         The actual ``*args`` and ``**kwargs`` received are implementation
         defined (depend entirely on the *data/broker/store*) but in general one
@@ -1178,6 +1180,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
         for store in self.stores:
             store.start()
 
+
         if self.p.cheat_on_open and self.p.broker_coo:
             # try to activate in broker
             if hasattr(self._broker, 'set_coo'):
@@ -1193,7 +1196,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
 
         for feed in self.feeds:
             feed.start()
-
+  
         if self.writers_csv:
             wheaders = list()
             for data in self.datas:
@@ -1212,6 +1215,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
                 data.reset()
                 if self._exactbars < 1:  # datas can be full length
                     data.extend(size=self.params.lookahead)
+                
                 data._start()
                 if self._dopreload:
                     data.preload()
@@ -1228,7 +1232,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
             if self.p.tradehistory:
                 strat.set_tradehistory()
             runstrats.append(strat)
-
+        
         tz = self.p.tz
         if isinstance(tz, integer_types):
             tz = self.datas[tz]._tz
@@ -1388,6 +1392,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
             self._storenotify()
             if self._event_stop:  # stop if requested
                 return
+            print("_datanotify 1")
             self._datanotify()
             if self._event_stop:  # stop if requested
                 return
@@ -1416,6 +1421,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
                     break
 
             # Datas may have generated a new notification after next
+            print("_datanotify 2")
             self._datanotify()
             if self._event_stop:  # stop if requested
                 return
@@ -1433,6 +1439,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
                     self._next_writers(runstrats)
 
         # Last notification chance before stopping
+        print("_datanotify 3")
         self._datanotify()
         if self._event_stop:  # stop if requested
             return
@@ -1519,6 +1526,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
         lastqcheck = False
         dt0 = date2num(datetime.datetime.max) - 2  # default at max
         while d0ret or d0ret is None:
+            self.broker.ib.sleep(1)
             # if any has live data in the buffer, no data will wait anything
             newqcheck = not any(d.haslivedata() for d in datas)
             if not newqcheck:
@@ -1533,6 +1541,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
             self._storenotify()
             if self._event_stop:  # stop if requested
                 return
+
             self._datanotify()
             if self._event_stop:  # stop if requested
                 return
@@ -1540,9 +1549,11 @@ class Cerebro(with_metaclass(MetaParams, object)):
             # record starting time and tell feeds to discount the elapsed time
             # from the qcheck value
             drets = []
-            qstart = datetime.datetime.utcnow()
+            #qstart = datetime.datetime.utcnow()
+            qstart = datetime.datetime.now(datetime.UTC)
             for d in datas:
-                qlapse = datetime.datetime.utcnow() - qstart
+                #qlapse = datetime.datetime.utcnow() - qstart
+                qlapse = datetime.datetime.now(datetime.UTC) - qstart
                 d.do_qcheck(newqcheck, qlapse.total_seconds())
                 drets.append(d.next(ticks=False))
 
@@ -1612,7 +1623,9 @@ class Cerebro(with_metaclass(MetaParams, object)):
                     # Only go extra round if something was changed by "lasts"
                     break
 
+            
             # Datas may have generated a new notification after next
+
             self._datanotify()
             if self._event_stop:  # stop if requested
                 return
@@ -1628,7 +1641,6 @@ class Cerebro(with_metaclass(MetaParams, object)):
             self._brokernotify()
             if self._event_stop:  # stop if requested
                 return
-
             if d0ret or lastret:  # bars produced by data or filters
                 self._check_timers(runstrats, dt0, cheat=False)
                 for strat in runstrats:
@@ -1638,7 +1650,9 @@ class Cerebro(with_metaclass(MetaParams, object)):
 
                     self._next_writers(runstrats)
 
+        print("_runnext step 11")
         # Last notification chance before stopping
+        print("_datanotify 6")
         self._datanotify()
         if self._event_stop:  # stop if requested
             return
@@ -1668,8 +1682,13 @@ class Cerebro(with_metaclass(MetaParams, object)):
             # Check next incoming date in the datas
             dts = [d.advance_peek() for d in datas]
             dt0 = min(dts)
+
             if dt0 == float('inf'):
+                #print("Error: Input is infinity.")
                 break  # no data delivers anything
+
+            dtime = num2date(dt0)
+            #print(f"process data {dtime.year}-{dtime.month}-{dtime.day}")
 
             # Timemaster if needed be
             # dmaster = datas[dts.index(dt0)]  # and timemaster
