@@ -1215,7 +1215,6 @@ class Cerebro(with_metaclass(MetaParams, object)):
                 data.reset()
                 if self._exactbars < 1:  # datas can be full length
                     data.extend(size=self.params.lookahead)
-                
                 data._start()
                 if self._dopreload:
                     data.preload()
@@ -1392,7 +1391,6 @@ class Cerebro(with_metaclass(MetaParams, object)):
             self._storenotify()
             if self._event_stop:  # stop if requested
                 return
-            print("_datanotify 1")
             self._datanotify()
             if self._event_stop:  # stop if requested
                 return
@@ -1421,7 +1419,6 @@ class Cerebro(with_metaclass(MetaParams, object)):
                     break
 
             # Datas may have generated a new notification after next
-            print("_datanotify 2")
             self._datanotify()
             if self._event_stop:  # stop if requested
                 return
@@ -1439,7 +1436,6 @@ class Cerebro(with_metaclass(MetaParams, object)):
                     self._next_writers(runstrats)
 
         # Last notification chance before stopping
-        print("_datanotify 3")
         self._datanotify()
         if self._event_stop:  # stop if requested
             return
@@ -1541,7 +1537,6 @@ class Cerebro(with_metaclass(MetaParams, object)):
             self._storenotify()
             if self._event_stop:  # stop if requested
                 return
-
             self._datanotify()
             if self._event_stop:  # stop if requested
                 return
@@ -1650,9 +1645,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
 
                     self._next_writers(runstrats)
 
-        print("_runnext step 11")
         # Last notification chance before stopping
-        print("_datanotify 6")
         self._datanotify()
         if self._event_stop:  # stop if requested
             return
@@ -1684,7 +1677,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
             dt0 = min(dts)
 
             if dt0 == float('inf'):
-                #print("Error: Input is infinity.")
+                print("Error: Input is infinity.")
                 break  # no data delivers anything
 
             dtime = num2date(dt0)

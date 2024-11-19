@@ -226,7 +226,7 @@ class BackBroker(bt.BrokerBase):
         ('checksubmit', True),
         ('eosbar', False),
         ('filler', None),
-        # slippage options
+        # slippage options 滑点
         ('slip_perc', 0.0),
         ('slip_fixed', 0.0),
         ('slip_open', False),

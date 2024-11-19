@@ -103,13 +103,6 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
         if not hasattr(self.p.scheme, 'locbg'):
             setattr(self.p.scheme, 'locbg', 'white')
             setattr(self.p.scheme, 'locbgother', 'white')
-        # this import must not happen before matplotlib.use
-        try:
-            import matplotlib.pyplot as mpyplot
-        except Exception as e:
-                print(f"Exception: {e}")
-
-        self.mpyplot = mpyplot
 
     def drawtag(self, ax, x, y, facecolor, edgecolor, alpha=0.9, **kwargs):
 
@@ -135,6 +128,10 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
         if iplot:
             if 'ipykernel' in sys.modules:
                 matplotlib.use('nbagg')
+
+        # this import must not happen before matplotlib.use
+        import matplotlib.pyplot as mpyplot
+        self.mpyplot = mpyplot
 
         self.pinf = PInfo(self.p.scheme)
         self.sortdataindicators(strategy)

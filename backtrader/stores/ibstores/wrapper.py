@@ -178,7 +178,6 @@ class Wrapper:
         for future in self._futures.values():
             if not future.done():
                 future.set_exception(error)
-        self.ib.connectionClosed()
         globalErrorEvent.emit(error)
         self.reset()
 
@@ -299,10 +298,8 @@ class Wrapper:
         key = (account, tag, currency, '')
         acctVal = AccountValue(account, tag, val, currency, '')
         self.accountValues[key] = acctVal
-        self.ib.accountValueEvent.emit(acctVal)
-        #print("UpdateAccountValue. Key:", key, "Value:", val, "Currency:", 
-        #      currency, "AccountName:", account)
-        self.ib.updateAccountValue(tag, val, currency, account)
+        self.ib.accountValueEvent.emit(tag, val, currency, account)
+        print("UpdateAccountValue. Key:", key, "acctVal:", acctVal)
 
     def accountDownloadEnd(self, _account: str):
         # sent after updateAccountValue and updatePortfolio both finished
@@ -316,7 +313,7 @@ class Wrapper:
         key = (account, tag, currency, modelCode)
         acctVal = AccountValue(account, tag, val, currency, modelCode)
         self.accountValues[key] = acctVal
-        self.ib.accountValueEvent.emit(acctVal)
+        self.ib.accountValueEvent.emit(tag, val, currency, account)
 
     def accountUpdateMultiEnd(self, reqId: int):
         self._endReq(reqId)
@@ -366,8 +363,8 @@ class Wrapper:
         results = self._results.get('positions')
         if results is not None:
             results.append(position)
-        self.ib.position(account, contract, posSize, avgCost)
         self.ib.positionEvent.emit(position)
+        print("Position.", "Account:", account, "Contract:", contract, "Position:", position, "Avg cost:", avgCost)
 
     def positionEnd(self):
         self._endReq('positions')
@@ -419,9 +416,9 @@ class Wrapper:
         if order.whatIf:
             # response to whatIfOrder
             if orderState.initMarginChange != str(UNSET_DOUBLE):
-                self._endReq(order.orderId, orderState)
+                self._endReq(order.OrderId, orderState)
         else:
-            key = self.orderKey(order.clientId, order.orderId, order.permId)
+            key = self.orderKey(order.clientId, order.OrderId, order.permId)
             trade = self.trades.get(key)
             if trade:
                 trade.order.permId = order.permId
@@ -443,7 +440,6 @@ class Wrapper:
                 self._logger.info(f'openOrder: {trade}')
             self.permId2Trade.setdefault(order.permId, trade)
             results = self._results.get('openOrders')
-            self.ib.openOrder(orderId, contract, order, orderState)
             if results is None:
                 self.ib.openOrderEvent.emit(trade)
             else:
@@ -463,12 +459,13 @@ class Wrapper:
             self, contract: Contract, order: Order, orderState: OrderState):
         contract = Contract.create(**dataclassAsDict(contract))
         orderStatus = OrderStatus(
-            orderId=order.orderId, status=orderState.status)
+            orderId=order.OrderId, status=orderState.status)
         trade = Trade(contract, order, orderStatus, [], [])
         self._results['completedOrders'].append(trade)
         if order.permId not in self.permId2Trade:
             self.trades[order.permId] = trade
             self.permId2Trade[order.permId] = trade
+        print("completedOrder orderId", contract, order, orderState)
 
     def completedOrdersEnd(self):
         self._endReq('completedOrders')
@@ -480,9 +477,6 @@ class Wrapper:
             mktCapPrice: float = 0.0):
         key = self.orderKey(clientId, orderId, permId)
         trade = self.trades.get(key)
-        self.ib.orderStatus(orderId , status, filled, remaining, avgFillPrice, 
-                            permId, parentId, lastFillPrice, clientId, whyHeld,
-                            mktCapPrice)
         if trade:
             msg: Optional[str]
             oldStatus = trade.orderStatus.status
@@ -556,10 +550,9 @@ class Wrapper:
                 if isLive:
                     self._logger.info(f'execDetails: {fill}')
                     self.ib.execDetailsEvent.emit(trade, fill)
-                    trade.fillEvent(trade, fill)
+                    trade.fillEvent.emit(trade, fill)
         if not isLive:
             self._results[reqId].append(fill)
-        self.ib.execDetails(reqId, contract, execution)
 
     def execDetailsEnd(self, reqId: int):
         self._endReq(reqId)
@@ -570,7 +563,6 @@ class Wrapper:
         if commissionReport.realizedPNL == UNSET_DOUBLE:
             commissionReport.realizedPNL = 0.0
         fill = self.fills.get(commissionReport.execId)
-        self.ib.commissionReport(commissionReport)
         if fill:
             report = dataclassUpdate(fill.commissionReport, commissionReport)
             self._logger.info(f'commissionReport: {report}')
@@ -685,8 +677,6 @@ class Wrapper:
     def historicalTicks(
             self, reqId: int, ticks: List[HistoricalTick], done: bool):
         result = self._results.get(reqId)
-        for tick in ticks:
-            self.ib.historicalTicks(reqId, tick, type = 'RT_TICK_MIDPOINT')
         if result is not None:
             result += ticks
         if done:
@@ -695,8 +685,6 @@ class Wrapper:
     def historicalTicksBidAsk(
             self, reqId: int, ticks: List[HistoricalTickBidAsk], done: bool):
         result = self._results.get(reqId)
-        for tick in ticks:
-            self.ib.historicalTicks(reqId, tick, type = 'RT_TICK_BID_ASK')
         if result is not None:
             result += ticks
         if done:
@@ -705,8 +693,6 @@ class Wrapper:
     def historicalTicksLast(
             self, reqId: int, ticks: List[HistoricalTickLast], done: bool):
         result = self._results.get(reqId)
-        for tick in ticks:
-            self.ib.historicalTicks(reqId, tick, type = 'RT_TICK_LAST')
         if result is not None:
             result += ticks
         if done:
@@ -837,7 +823,6 @@ class Wrapper:
             tick = TickData(self.lastTime, tickType, price, size)
             ticker.ticks.append(tick)
         self.pendingTickers.add(ticker)
-        self.ib.tickSize(reqId, tickType, size)
 
     def tickSnapshotEnd(self, reqId: int):
         self._endReq(reqId)
@@ -861,8 +846,6 @@ class Wrapper:
             exchange, specialConditions)
         ticker.tickByTicks.append(tick)
         self.pendingTickers.add(ticker)
-        self.ib.tickByTickAllLast(reqId, tickType, time, price, size, tickAttribLast, 
-                                  exchange, specialConditions)
 
     def tickByTickBidAsk(
             self, reqId: int, time: int, bidPrice: float, askPrice: float,
@@ -889,8 +872,6 @@ class Wrapper:
             tickAttribBidAsk)
         ticker.tickByTicks.append(tick)
         self.pendingTickers.add(ticker)
-        self.ib.tickByTickBidAsk(reqId, time, bidPrice, askPrice, bidSize, 
-                                 askSize, tickAttribBidAsk)
 
     def tickByTickMidPoint(self, reqId: int, time: int, midPoint: float):
         ticker = self.reqId2Ticker.get(reqId)
@@ -900,7 +881,6 @@ class Wrapper:
         tick = TickByTickMidPoint(self.lastTime, midPoint)
         ticker.tickByTicks.append(tick)
         self.pendingTickers.add(ticker)
-        self.ib.tickByTickBidAsk(reqId, time, midPoint)
 
     def tickString(self, reqId: int, tickType: int, value: str):
         ticker = self.reqId2Ticker.get(reqId)
@@ -964,7 +944,6 @@ class Wrapper:
                     parseIBDatetime(nextDate) if nextDate else None,
                     float(nextAmount) if nextAmount else None)
             self.pendingTickers.add(ticker)
-            self.ib.tickString(self, reqId, tickType, value)
         except ValueError:
             self._logger.error(
                 f'tickString with tickType {tickType}: '
@@ -998,7 +977,6 @@ class Wrapper:
         tick = TickData(self.lastTime, tickType, value, 0)
         ticker.ticks.append(tick)
         self.pendingTickers.add(ticker)
-        self.ib.tickGeneric(reqId, tickType, value)
 
     def tickReqParams(
             self, reqId: int, minTick: float, bboExchange: str,
@@ -1171,7 +1149,6 @@ class Wrapper:
 
     def currentTime(self, time: int):
         dt = datetime.fromtimestamp(time, timezone.utc)
-        self.ib.currentTime(time)
         self._endReq('currentTime', dt)
 
     def tickEFP(
@@ -1284,7 +1261,6 @@ class Wrapper:
                     bars.useRTH, bars.formatDate, bars.keepUpToDate,
                     bars.chartOptions)
 
-        self.ib.error(reqId, errorCode, errorString, advancedOrderRejectJson)
         self.ib.errorEvent.emit(reqId, errorCode, errorString, contract)
 
     def tcpDataArrived(self):

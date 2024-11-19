@@ -82,7 +82,7 @@ class OpenOrderMsg(object):
     def __init__(self, orderId, contract, order, orderState):
         self.vars = vars()
         del self.vars['self']
-        self.orderId = orderId
+        self.OrderId = orderId
         self.contract = contract
         self.order = order
         self.orderState = orderState
@@ -96,7 +96,7 @@ class OrderStatusMsg(object):
                     parentId, lastFillPrice, clientId,
                     whyHeld, mktCapPrice):
         self.vars = vars()
-        self.orderId = orderId
+        self.OrderId = orderId
         self.status = status
         self.filled = filled
         self.remaining = remaining
@@ -285,7 +285,7 @@ class IBStoreInsync(IBStore):
         self.histfmt = dict()  # holds datetimeformat for request
         self.histsend = dict()  # holds sessionend (data time) for request
         self.histtz = dict()  # holds sessionend (data time) for request
-
+        
         self.acc_cash = AutoDict()  # current total cash per account
         self.acc_value = AutoDict()  # current total value per account
         self.acc_upds = AutoDict()  # current account valueinfos per account
@@ -311,6 +311,8 @@ class IBStoreInsync(IBStore):
 
         # ibpy connection object
         self._createEvents()
+        self.accountValueEvent +=  self.updateAccountValue
+        
         self.wrapper = Wrapper(self)
         self.client = Client(self.wrapper)
         self.errorEvent += self._onError
@@ -325,6 +327,9 @@ class IBStoreInsync(IBStore):
             time.sleep(1)
             count += 1
 
+        
+        
+        self.positions = self.wrapper.positions  # actual positions
         self._debug = self.p._debug
         # register a printall method if requested
         if self.p._debug or self.p.notifyall:
@@ -333,6 +338,9 @@ class IBStoreInsync(IBStore):
 
         # This utility key function transforms a barsize into a:
         #   (Timeframe, Compression) tuple which can be sorted
+
+        
+
         def keyfn(x):
             n, t = x.split()
             tf, comp = self._sizes[t]
@@ -360,7 +368,10 @@ class IBStoreInsync(IBStore):
         for barsize in self.revdur:
             self.revdur[barsize].sort(key=key2fn)
     
-    
+    def nextOrderId(self) -> int:
+        return self.client.getReqId()
+
+
     def start(self, data=None, broker=None):
         self.reconnect(fromstart=True)  # reconnect should be an invariant
 
@@ -445,36 +456,6 @@ class IBStoreInsync(IBStore):
                 self.broker.push_portupdate()
 
                 self.port_update = False
-
-    def updatePortfolio(self, contract, pos,
-                        marketPrice, marketValue,
-                        averageCost, unrealizedPNL,
-                        realizedPNL, accountName):									  
-        # Lock access to the position dicts. This is called in sub-thread and
-        # can kick in at any time
-        with self._lock_pos:
-            try:
-                if not self._event_accdownload.is_set():  # 1st event seen
-                    position = Position(float(pos), float(averageCost))
-                    print(f"POSITIONS INITIAL: {self.positions}")
-                    # self.positions[contract.conId] = position
-                    self.positions.setdefault(contract.conId, position)
-                else:
-                    position = self.positions[contract.conId]
-                    print(f"POSITION UPDATE: {position}")
-                    if not position.fix(float(pos), averageCost):
-                        err = ('The current calculated position and '
-                            'the position reported by the broker do not match. '
-                            'Operation can continue, but the trades '
-                            'calculated in the strategy may be wrong')
-
-                        self.notifs.put((err, (), {}))
-
-                    # Flag signal to broker at the end of account download
-                    # self.port_update = True
-                    self.broker.push_portupdate()
-            except Exception as e:
-                print(f"Exception: {e}")
     
     def contractDetailsEnd(self, reqId):
         '''Signal end of contractdetails'''
@@ -609,15 +590,20 @@ class IBStoreInsync(IBStore):
         curtime = bars[0].time
         print(f"tickId:{bars.reqId} size:{len(bars)}, new data {curtime}")
 
-    def getposition(self, contract, clone=False):
+    def getposition(self, account=None, contract=None, clone=False):
         # Lock access to the position dicts. This is called from main thread
         # and updates could be happening in the background
-        with self._lock_pos:
-            position = self.positions[contract.conId]
-            if clone:
-                return copy(position)
+        if account is None:
+            account = self.managed_accounts[0]
 
-            return position
+        positions = self.positions[account]
+        print(f"conId: {contract.conId} positions:{positions}")
+        position = positions.get(contract.conId, None)
+        
+        if clone and (position is not None):
+            return copy(position)
+
+        return position
 
     def historicalData(self, reqId: int, bar):
         '''Receives the events of a historical data request'''
@@ -742,7 +728,7 @@ class IBStoreInsync(IBStore):
         # actually be of interest to the user
         msg = ErrorMsg(reqId, errorCode, errorString, advancedOrderRejectJson)
         if msg.reqId > 0:
-            print(f"Error: {msg}")
+            print(f"Error WY: {msg}")
         else:
             print(f"{msg}")
 
@@ -863,31 +849,6 @@ class IBStoreInsync(IBStore):
         execution.shares = float(execution.shares)
         execution.cumQty = float(execution.cumQty)
         self.broker.push_execution(execution)
-
-    def position(self, account, contract, posSize, avgCost):
-        '''Receive event positions'''
-        # Lock access to the position dicts. This is called in sub-thread and
-        # can kick in at any time
-        with self._lock_pos:
-            try:
-                if not self._event_accdownload.is_set():  # 1st event seen
-                    position = Position(float(posSize), float(avgCost))
-                    print(f"POSITIONS INITIAL: {self.positions}")
-                    self.positions[contract.conId] = position
-                else:
-                    position = self.positions[contract.conId]
-                    print(f"POSITION UPDATE: {position}")
-                    if not position.fix(float(posSize), avgCost):
-                        err = ('The current calculated position and '
-                            'the position reported by the broker do not match. '
-                            'Operation can continue, but the trades '
-                            'calculated in the strategy may be wrong')
-
-                        self.notifs.put((err, (), {}))
-
-                    # self.broker.push_portupdate()
-            except Exception as e:
-                print(f"Exception: {e}")
 
     def reuseQueue(self, tickerId):
         '''Reuses queue for tickerId, returning the new tickerId and q'''
@@ -1486,13 +1447,13 @@ class IBStoreInsync(IBStore):
             reverseAction, quantity, takeProfitPrice,
             orderId=self.client.getReqId(),
             transmit=False,
-            parentId=parent.orderId,
+            parentId=parent.OrderId,
             **kwargs)
         stopLoss = StopOrder(
             reverseAction, quantity, stopLossPrice,
             orderId=self.client.getReqId(),
             transmit=True,
-            parentId=parent.orderId,
+            parentId=parent.OrderId,
             **kwargs)
         return BracketOrder(parent, takeProfit, stopLoss)
 
@@ -1535,7 +1496,7 @@ class IBStoreInsync(IBStore):
             contract: Contract to use for order.
             order: The order to be placed.
         """
-        orderId = order.orderId or self.client.getReqId()
+        orderId = order.OrderId or self.client.getReqId()
         self.client.placeOrder(orderId, contract, order)
         now = datetime.now(timezone.utc)
         key = self.wrapper.orderKey(
@@ -1552,7 +1513,7 @@ class IBStoreInsync(IBStore):
         else:
             # this is a new order
             order.clientId = self.wrapper.clientId
-            order.orderId = orderId
+            order.OrderId = orderId
             orderStatus = OrderStatus(
                 orderId=orderId, status=OrderStatus.PendingSubmit)
             logEntry = TradeLogEntry(now, orderStatus.status)
@@ -1571,10 +1532,10 @@ class IBStoreInsync(IBStore):
             order: The order to be canceled.
             manualCancelOrderTime: For audit trail.
         """
-        self.client.cancelOrder(order.orderId, manualCancelOrderTime)
+        self.client.cancelOrder(order.OrderId, manualCancelOrderTime)
         now = datetime.now(timezone.utc)
         key = self.wrapper.orderKey(
-            order.clientId, order.orderId, order.permId)
+            order.clientId, order.OrderId, order.permId)
         trade = self.wrapper.trades.get(key)
         if trade:
             if not trade.isDone():
@@ -1595,7 +1556,7 @@ class IBStoreInsync(IBStore):
                 if newStatus == OrderStatus.Cancelled:
                     trade.cancelledEvent.emit(trade)
         else:
-            self._logger.error(f'cancelOrder: Unknown orderId {order.orderId}')
+            self._logger.error(f'cancelOrder: Unknown orderId {order.OrderId}')
         return trade
 
     def reqGlobalCancel(self):

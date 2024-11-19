@@ -78,7 +78,7 @@ class MetaLineIterator(LineSeries.__class__):
         _obj.ddatas = {x: None for x in _obj.datas}
 
         # For each found data add access member -
-        # for the first data 2 (data and data0)
+        # for the first data 2 (data and data0) #这一段可以优化，第一个for可以包含在第二个for中，第二个for当d = 0就是第一个for执行的内容
         if _obj.datas:
             _obj.data = data = _obj.datas[0]
 

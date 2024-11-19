@@ -229,6 +229,7 @@ class OrderBase(with_metaclass(MetaParams, object)):
         ('simulated', False),
         # To support historical order evaluation
         ('histnotify', False),
+        ('OrderId', 0),
     )
 
     DAY = datetime.timedelta()  # constant for DAY order identification

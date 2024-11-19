@@ -807,13 +807,17 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         # contains open/high/low/close/volume prices
         # The historical data has the same data but with 'date' instead of
         # 'time' for datetime
+        # print(f'_load_rtbar rtbar:{rtbar}')
         dt = date2num(rtbar.time if not hist else rtbar.date)
         if dt < self.lines.datetime[-1] and not self.p.latethrough:
             return False  # cannot deliver earlier than already delivered
 
         self.lines.datetime[0] = dt
         # Put the tick into the bar
-        self.lines.open[0] = rtbar.open_
+        if hist is False:
+            self.lines.open[0] = rtbar.open_
+        else:
+            self.lines.open[0] = rtbar.open
         self.lines.high[0] = rtbar.high
         self.lines.low[0] = rtbar.low
         self.lines.close[0] = rtbar.close
