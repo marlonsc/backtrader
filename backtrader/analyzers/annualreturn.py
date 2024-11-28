@@ -64,7 +64,7 @@ class AnnualReturn(Analyzer):
 
             if dt.year > cur_year:
                 if cur_year >= 0:
-                    annualret = (value_end / value_start) - 1.0
+                    annualret = round(((value_end / value_start) - 1.0), 6)
                     self.rets.append(annualret)
                     self.ret[cur_year] = annualret
 
@@ -81,7 +81,7 @@ class AnnualReturn(Analyzer):
 
         if cur_year not in self.ret:
             # finish calculating pending data
-            annualret = (value_end / value_start) - 1.0
+            annualret = round(((value_end / value_start) - 1.0), 6)
             self.rets.append(annualret)
             self.ret[cur_year] = annualret
 

@@ -36,6 +36,7 @@ from .transactions import *
 from .pyfolio import *
 from .returns import *
 from .vwr import *
+from .sortino import *
 
 from .logreturnsrolling import *
 

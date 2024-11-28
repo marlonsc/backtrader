@@ -134,10 +134,10 @@ class Returns(TimeFrameAnalyzerBase):
             else:
                 rtot = math.log(nlrtot)
 
-        self.rets['rtot'] = rtot
+        self.rets['rtot'] = round(rtot, 6)
 
         # Average return
-        self.rets['ravg'] = ravg = rtot / self._tcount
+        self.rets['ravg'] = ravg = round(rtot / self._tcount, 6)
 
         # Annualized normalized return
         tann = self.p.tann or self._TANN.get(self.timeframe, None)
@@ -145,11 +145,11 @@ class Returns(TimeFrameAnalyzerBase):
             tann = self._TANN.get(self.data._timeframe, 1.0)  # assign default
 
         if ravg > float('-inf'):
-            self.rets['rnorm'] = rnorm = math.expm1(ravg * tann)
+            self.rets['rnorm'] = rnorm = round(math.expm1(ravg * tann), 6)
         else:
-            self.rets['rnorm'] = rnorm = ravg
+            self.rets['rnorm'] = rnorm = round(ravg, 6)
 
-        self.rets['rnorm100'] = rnorm * 100.0  # human readable %
+        self.rets['rnorm100'] = round(rnorm * 100.0, 4)  # human readable %
 
     def _on_dt_over(self):
         self._tcount += 1  # count the subperiod

@@ -1522,7 +1522,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
         lastqcheck = False
         dt0 = date2num(datetime.datetime.max) - 2  # default at max
         while d0ret or d0ret is None:
-            self.broker.ib.sleep(1)
+            #self.broker.ib.sleep(1)
             # if any has live data in the buffer, no data will wait anything
             newqcheck = not any(d.haslivedata() for d in datas)
             if not newqcheck:

@@ -299,7 +299,7 @@ class Wrapper:
         acctVal = AccountValue(account, tag, val, currency, '')
         self.accountValues[key] = acctVal
         self.ib.accountValueEvent.emit(tag, val, currency, account)
-        print("UpdateAccountValue. Key:", key, "acctVal:", acctVal)
+        #print("UpdateAccountValue. Key:", key, "acctVal:", acctVal)
 
     def accountDownloadEnd(self, _account: str):
         # sent after updateAccountValue and updatePortfolio both finished

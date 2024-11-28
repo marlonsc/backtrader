@@ -70,6 +70,30 @@ class SQN(Analyzer):
             self.pnl.append(trade.pnlcomm)
             self.count += 1
 
+    def grade_dict(self, score):
+        """
+        使用字典映射进行分级
+        - 1.6 - 1.9 Below average
+        - 2.0 - 2.4 Average
+        - 2.5 - 2.9 Good
+        - 3.0 - 5.0 Excellent
+        - 5.1 - 6.9 Superb
+        - 7.0 -     Holy Grail?
+        """
+        grade_mapping = {
+            (float('-inf'), 1.5): "G0: Invalid",
+            (1.6, 1.9): "G1: Below average",
+            (2.0, 2.4): "G2: Average",
+            (2.5, 2.9): "G3: Good",
+            (3.0, 5.0): "G4: Excellent",
+            (5.1, 6.9): "G5: Superb",
+            (7.0, float('inf')): "G6: Holy Grail?"
+            }
+        
+        for range_, grade in grade_mapping.items():
+            if range_[0] <= score <= range_[1]:
+                return grade
+
     def stop(self):
         if self.count > 1:
             pnl_av = average(self.pnl)
@@ -81,5 +105,6 @@ class SQN(Analyzer):
         else:
             sqn = 0
 
-        self.rets.sqn = sqn
+        self.rets.grade = self.grade_dict(sqn)
+        self.rets.sqn = round(sqn, 2)
         self.rets.trades = self.count

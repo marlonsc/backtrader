@@ -203,7 +203,7 @@ class SharpeRatio(Analyzer):
 
             self.ratio = ratio
 
-        self.rets['sharperatio'] = self.ratio
+        self.rets['sharperatio'] = round(self.ratio, 4)
 
 
 class SharpeRatio_A(SharpeRatio):
