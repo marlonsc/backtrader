@@ -68,7 +68,11 @@ class IBCommInfo(CommInfoBase):
 
     def getsize(self, price, cash):
         '''Returns the needed size to meet a cash operation at a given price'''
-        #need to be update
+        # Just inherit from base class, need to be update
+        if not self._stocklike:
+            return int(self.p.leverage * (cash // self.get_margin(price)))
+
+        return int(self.p.leverage * (cash // price))
 
     def getoperationcost(self, size, price):
         '''Returns the needed amount of cash an operation would cost'''
@@ -77,13 +81,15 @@ class IBCommInfo(CommInfoBase):
 
     def getvaluesize(self, size, price):
         # In real life the margin approaches the price
-        return abs(size) * price
+        # size不能加abs，卖空时size为负，价值也是负的
+        return size * price
     
     def _getcommission(self, size, price, pseudoexec):
         '''Calculates the commission of an operation at a given price
 
         pseudoexec: if True the operation has not yet been executed
         '''
+
         if self._commtype == self.COMM_PERC:
             return abs(size) * self.p.commission * price
         

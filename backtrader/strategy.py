@@ -1308,6 +1308,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
         possize = self.getposition(data, self.broker).size
         if not target and possize:  # closing a position
+            print(f"strategybase close: size {size} price {price} ")
             return self.close(data=data, size=possize, price=price, **kwargs)
 
         else:

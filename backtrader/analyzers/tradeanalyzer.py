@@ -106,11 +106,11 @@ class TradeAnalyzer(Analyzer):
 
             trpnl = trades.pnl
             trpnl.gross.total += trade.pnl
-            trpnl.gross.total = round(trpnl.gross.total, 6)
-            trpnl.gross.average = round(trades.pnl.gross.total / trades.total.closed, 6)
+            trpnl.gross.total = round(trpnl.gross.total, 2)
+            trpnl.gross.average = round(trades.pnl.gross.total / trades.total.closed, 2)
             trpnl.net.total += trade.pnlcomm
-            trpnl.net.total = round(trpnl.net.total, 6)
-            trpnl.net.average = round(trades.pnl.net.total / trades.total.closed, 6)
+            trpnl.net.total = round(trpnl.net.total, 2)
+            trpnl.net.average = round(trades.pnl.net.total / trades.total.closed, 2)
 
             # Won/Lost statistics
             for wlname in ['won', 'lost']:
@@ -123,12 +123,12 @@ class TradeAnalyzer(Analyzer):
                 pnlcomm = trade.pnlcomm * wl
 
                 trwlpnl.total += pnlcomm
-                trwlpnl.total = round(trwlpnl.total, 6)
-                trwlpnl.average = round(trwlpnl.total / (trwl.total or 1.0), 6)
+                trwlpnl.total = round(trwlpnl.total, 2)
+                trwlpnl.average = round(trwlpnl.total / (trwl.total or 1.0), 2)
 
                 wm = trwlpnl.max or 0.0
                 func = max if wlname == 'won' else min
-                trwlpnl.max = round(func(wm, pnlcomm), 6)
+                trwlpnl.max = round(func(wm, pnlcomm), 2)
 
             # Long/Short statistics
             for tname in ['long', 'short']:
@@ -136,10 +136,10 @@ class TradeAnalyzer(Analyzer):
                 ls = res['t' + tname]
 
                 trls.total += ls  # long.total / short.total
-                trls.total = round(trls.total, 6)
+                trls.total = round(trls.total, 2)
                 trls.pnl.total += trade.pnlcomm * ls
-                trls.pnl.total = round(trls.pnl.total, 6)
-                trls.pnl.average = round(trls.pnl.total / (trls.total or 1.0), 6)
+                trls.pnl.total = round(trls.pnl.total, 2)
+                trls.pnl.average = round(trls.pnl.total / (trls.total or 1.0), 2)
 
                 for wlname in ['won', 'lost']:
                     wl = res[wlname]
@@ -148,13 +148,13 @@ class TradeAnalyzer(Analyzer):
                     trls[wlname] += wl * ls  # long.won / short.won
 
                     trls.pnl[wlname].total += pnlcomm
-                    trls.pnl[wlname].total = round(trls.pnl[wlname].total, 6)
+                    trls.pnl[wlname].total = round(trls.pnl[wlname].total, 2)
                     trls.pnl[wlname].average = \
-                        round(trls.pnl[wlname].total / (trls[wlname] or 1.0), 6)
+                        round(trls.pnl[wlname].total / (trls[wlname] or 1.0), 2)
 
                     wm = trls.pnl[wlname].max or 0.0
                     func = max if wlname == 'won' else min
-                    trls.pnl[wlname].max = round(func(wm, pnlcomm), 6)
+                    trls.pnl[wlname].max = round(func(wm, pnlcomm), 2)
 
             # Length
             trades.len.total += trade.barlen

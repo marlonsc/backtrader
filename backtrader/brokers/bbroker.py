@@ -782,7 +782,7 @@ class BackBroker(bt.BrokerBase):
             openedcomm = cinfocomp.getcommission(opened, price)
             cash -= openedcomm
 
-            if cash < 0.0:
+            if cash < 0.0 or cash > (2*self.cash):
                 # execution is not possible - nullify
                 opened = 0
                 openedvalue = openedcomm = 0.0

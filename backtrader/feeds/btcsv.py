@@ -252,9 +252,12 @@ class IBCSVOnlyData(feed.CSVDataBase):
         itoken = iter(linetokens)
 
         dttxt = next(itoken)  # Format is YYYY-MM-DD - skip char 4 and 7
-        format_str = '%Y-%m-%d %H:%M:%S%z'
-        dt_obj = datetime.strptime(dttxt, format_str)
-
+        try:
+            # 尝试按time解析格式
+            dt_obj = datetime.strptime(dttxt, '%Y-%m-%d %H:%M:%S-%z')  
+        except ValueError:
+            # 尝试按date解析格式
+            dt_obj = datetime.strptime(dttxt, '%Y-%m-%d')
         self.lines.datetime[0] = date2num(dt_obj)
         self.lines.open[0] = float(next(itoken))
         self.lines.high[0] = float(next(itoken))

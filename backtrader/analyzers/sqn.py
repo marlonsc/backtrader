@@ -81,13 +81,13 @@ class SQN(Analyzer):
         - 7.0 -     Holy Grail?
         """
         grade_mapping = {
-            (float('-inf'), 1.5): "G0: Invalid",
-            (1.6, 1.9): "G1: Below average",
-            (2.0, 2.4): "G2: Average",
-            (2.5, 2.9): "G3: Good",
-            (3.0, 5.0): "G4: Excellent",
-            (5.1, 6.9): "G5: Superb",
-            (7.0, float('inf')): "G6: Holy Grail?"
+            (float('-inf'), 1.5): "G0-Invalid",
+            (1.6, 1.9): "G1-Below average",
+            (2.0, 2.4): "G2-Average",
+            (2.5, 2.9): "G3-Good",
+            (3.0, 5.0): "G4-Excellent",
+            (5.1, 6.9): "G5-Superb",
+            (7.0, float('inf')): "G6-Holy Grail?"
             }
         
         for range_, grade in grade_mapping.items():
