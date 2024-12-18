@@ -66,7 +66,44 @@ class TradeAnalyzer(Analyzer):
           also reachable with dot notation dictname.total.total
     '''
     def create_analysis(self):
-        self.rets = AutoOrderedDict()
+        self.rets = AutoOrderedDict(
+        	{
+                'total': AutoOrderedDict({'total': 0, 'open': 0, 'closed': 0}),
+                'streak': AutoOrderedDict({'won': AutoOrderedDict({'current': 0, 'longest': 0}), 'lost': AutoOrderedDict({'current': 0, 'longest': 0})}),
+                'pnl': AutoOrderedDict({'gross': AutoOrderedDict({'total': 0, 'average': 0}), 'net': AutoOrderedDict({'total': 0, 'average': 0})}),
+                'won': AutoOrderedDict({'total': 0, 'pnl': AutoOrderedDict({'total': 0, 'average': 0, 'max': 0})}),
+                'lost': AutoOrderedDict({'total': 0, 'pnl': AutoOrderedDict({'total': 0, 'average': 0, 'max': 0})}),
+                'long': AutoOrderedDict({'total': 0, 
+								 'pnl': AutoOrderedDict({'total': 0, 'average': 0, 'won': AutoOrderedDict({'total': 0, 'average': 0, 'max': 0}),'lost': AutoOrderedDict({'total': 0, 'average': 0, 'max': 0})}), 
+								 'won': 0, 
+								 'lost': 0}),
+                'short': AutoOrderedDict({'total': 0, 
+								  'pnl': AutoOrderedDict({'total': 0, 'average': 0, 'won': AutoOrderedDict({'total':0 , 'average': 0, 'max': 0}), 'lost': AutoOrderedDict({'total':0 , 'average':0 , 'max': 0})}), 
+								  'won': 0, 
+								  'lost': 0}),
+                'len': AutoOrderedDict({'total': 0, 
+								'average': 0, 
+								'max': 0, 
+								'min': 0, 
+								'won': AutoOrderedDict({'total': 0, 'average': 0, 'max': 0}), 
+								'lost': AutoOrderedDict({'total': 0, 'average': 0, 'max': 0, 'min': 0}), 
+								'long': AutoOrderedDict({'total': 0, 
+														 'average': 0, 
+														 'max': 0, 
+														 'min': 0, 
+														 'won': AutoOrderedDict({'total': 0, 'average': 0, 'max': 0, 'min': 0}), 
+														 'lost': AutoOrderedDict({'total': 0, 'average': 0, 'max': 0, 'min': 0})
+														 }), 
+								'short': AutoOrderedDict({'total': 0, 
+														  'average': 0.0, 
+														  'max': 0, 
+														  'min': 0, 
+														  'won': AutoOrderedDict({'total': 0, 'average': 0.0, 'max': 0, 'min': 0}), 
+														  'lost': AutoOrderedDict({'total': 0, 'average': 0.0, 'max': 0, 'min': 0})
+														  })
+							})
+	            }
+            )
         self.rets.total.total = 0
 
     def stop(self):

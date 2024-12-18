@@ -290,8 +290,8 @@ class Wrapper:
         #self.ib.managedAccounts(accountsList)
 
     def updateAccountTime(self, timestamp: str):
+        # print(f"timeStamp: {timestamp}")
         pass
-        #print(f"timeStamp: {timestamp}")
 
     def updateAccountValue(
             self, tag: str, val: str, currency: str, account: str):
@@ -652,7 +652,7 @@ class Wrapper:
         bars = self.reqId2Subscriber.get(reqId)
         if not bars:
             return
-        bar.date = parseIBDatetime(bar.date)  # type: ignore
+        bar.date = parseIBDatetime(bar.date)
         lastDate = bars[-1].date
         if bar.date < lastDate:
             return
@@ -665,7 +665,7 @@ class Wrapper:
             return
         self.ib.barUpdateEvent.emit(bars, hasNewBar)
         bars.updateEvent.emit(bars, hasNewBar)
-        print("HistoricalDataUpdate. ReqId:", reqId, "BarData.", bar)
+        # print("HistoricalDataUpdate. ReqId:", reqId, "BarData.", bar.date, "New.", hasNewBar)
 
     def headTimestamp(self, reqId: int, headTimestamp: str):
         try:

@@ -25,6 +25,7 @@ from datetime import date, datetime, time
 
 from .. import feed
 from ..utils import date2num
+import dateutil.parser
 
 
 class BacktraderCSVData(feed.CSVDataBase):
@@ -252,12 +253,9 @@ class IBCSVOnlyData(feed.CSVDataBase):
         itoken = iter(linetokens)
 
         dttxt = next(itoken)  # Format is YYYY-MM-DD - skip char 4 and 7
-        try:
-            # 尝试按time解析格式
-            dt_obj = datetime.strptime(dttxt, '%Y-%m-%d %H:%M:%S-%z')  
-        except ValueError:
-            # 尝试按date解析格式
-            dt_obj = datetime.strptime(dttxt, '%Y-%m-%d')
+
+        dt_obj = dateutil.parser.parse(dttxt)  
+
         self.lines.datetime[0] = date2num(dt_obj)
         self.lines.open[0] = float(next(itoken))
         self.lines.high[0] = float(next(itoken))

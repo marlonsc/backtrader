@@ -70,6 +70,5 @@ class Sortino(Analyzer):
             # no returns
             ratio = None
 
-        self.ratio = ratio
-
-        self.rets['sortinoratio'] = round(self.ratio, 4)
+        self.ratio = round(ratio, 4) if ratio else ratio
+        self.rets['sortinoratio'] = self.ratio

@@ -81,9 +81,13 @@ class AnnualReturn(Analyzer):
 
         if cur_year not in self.ret:
             # finish calculating pending data
-            annualret = round(((value_end / value_start) - 1.0), 6)
+            try:
+                annualret = (value_end / value_start) - 1.0
+            except ZeroDivisionError:
+                annualret = float('-inf')
+
             self.rets.append(annualret)
-            self.ret[cur_year] = annualret
+            self.ret[cur_year] = round(annualret, 6)
 
     def get_analysis(self):
         return self.ret

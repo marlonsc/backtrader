@@ -276,14 +276,16 @@ class IBBroker(with_metaclass(MetaIBBroker, BrokerBase)):
         super(IBBroker, self).stop()
         self.ib.stop()
 
-    def getcash(self):
+    def get_cash(self):
         # This call cannot block if no answer is available from ib
         self.cash = self.ib.get_acc_cash()
         return self.cash
+    getcash = get_cash
 
-    def getvalue(self, datas=None):
+    def get_value(self, datas=None):
         self.value = self.ib.get_acc_value()
         return self.value
+    getvalue = get_value
 
     def getposition(self, data, clone=True):
         return self.ib.getposition(contract=data.tradecontract, clone=clone)

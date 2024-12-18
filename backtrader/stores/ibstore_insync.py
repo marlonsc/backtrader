@@ -312,6 +312,7 @@ class IBStoreInsync(IBStore):
         # ibpy connection object
         self._createEvents()
         self.accountValueEvent +=  self.updateAccountValue
+        self.barUpdateEvent += self.updatebar
         
         self.wrapper = Wrapper(self)
         self.client = Client(self.wrapper)
@@ -578,7 +579,7 @@ class IBStoreInsync(IBStore):
         rtprice = RTPrice(price=value, tmoffset=self.tmoffset)
         self.qs[tickerId].put(rtprice)
 
-    def realtimeBar(self, bars, hasNewBar):
+    def updatebar(self, bars, hasNewBar):
         '''Receives x seconds Real Time Bars (at the time of writing only 5
         seconds are supported)
 
@@ -587,8 +588,8 @@ class IBStoreInsync(IBStore):
         # Get a naive localtime object
         #msg.time = datetime.utcfromtimestamp(float(msg.time))
         #self.qs[msg.reqId].put(msg)
-        curtime = bars[0].time
-        print(f"tickId:{bars.reqId} size:{len(bars)}, new data {curtime}")
+        curtime = bars[0].date
+        # print(f"updatebar tickId:{bars.reqId} size:{len(bars)}, time:{curtime}, new:{hasNewBar}")
 
     def getposition(self, account=None, contract=None, clone=False):
         # Lock access to the position dicts. This is called from main thread
@@ -597,7 +598,6 @@ class IBStoreInsync(IBStore):
             account = self.managed_accounts[0]
 
         positions = self.positions[account]
-        print(f"conId: {contract.conId} positions:{positions}")
         position = positions.get(contract.conId, None)
         
         if clone and (position is not None):

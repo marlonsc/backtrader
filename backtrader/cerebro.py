@@ -1717,6 +1717,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
 
     def _check_timers(self, runstrats, dt0, cheat=False):
         timers = self._timers if not cheat else self._timerscheat
+
         for t in timers:
             if not t.check(dt0):
                 continue

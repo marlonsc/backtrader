@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/tzbin/env python
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -43,7 +43,6 @@ class MetaIBData(DataBase.__class__):
         # Register with the store
         ibstore.IBStore.DataCls = cls
         ibstore_insync.IBStoreInsync.DataCls = cls
-
 
 class IBData(with_metaclass(MetaIBData, DataBase)):
     '''Interactive Brokers Data Feed.
@@ -547,7 +546,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
             self.qlive = self.ib.reqTickByTickData(self.contract, self.p.what)
         else:
             self.qlive = self.ib.reqRealTimeBars(contract=self.contract, barSize=5, whatToShow= self.p.what, useRTH=self.p.useRTH)
-            self.qlive.updateEvent += self.ib.realtimeBar
+            self.qlive.updateEvent += self.onliveupdate
 
 
         self._subcription_valid = True
@@ -567,6 +566,33 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
 
     def haslivedata(self):
         return bool(self._storedmsg or self.qlive)
+
+    def updatelivedata(self, step=0, bars=None):
+        for bar in bars:
+            d = len(self.lines.close)
+            self.forward()
+            self._load_rtbar(bar, hist=True)
+            print(f"add live data:{bar.date} close:{bar.close} lenA:{d} lenB:{len(self.lines.close)}")
+            self.getenvironment().start_barupdate() #通知cerebor进行处理，每增加一个数据，更新处理一次
+            time.sleep(0.01) #给start_barupdate时间处理
+
+    def onliveupdate(self, bars, hasNewBar):
+        # 对于hisorical数据，bars保存reqhistoricaEnd开始的所有数据
+        # bars长度为0，表示未接收到update数据
+        # bars最后一个数据为临时数据，5秒更新一次，保存最新收到的update数据，只有当timeframe时间到了才后固定
+
+        newdatalen = len(bars)
+
+        if newdatalen < 2: #无数据或仅有一个数据，不处理。
+            return
+        
+        if hasNewBar:
+            curtime = bars[-1].date
+            print(f"onliveupdate tickId:{bars.reqId} size:{len(bars)}, new data {curtime}")  
+            
+            self.updatelivedata(newdatalen-1, bars[:-1]) #有2个以上数据,按timeframe频率更新，避免频率重复调用,一直更新到倒数第2个数据，仅保存最后一个数据:-1不包含-1，只到-2
+            bars[:] = bars[-1:]
+
 
     def _load(self):
         if self.contract is None or self._state == self._ST_OVER:
@@ -675,6 +701,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
                     whatToShow=self.p.what, useRTH=self.p.useRTH,
                     formatDate=self.p.formatDate,keepUpToDate=self.p.keepUpToDate
                     )
+                self.qhist.updateEvent += self.onliveupdate
 
                 self.p.fromdate = self.qhist[0].date
                 self.p.todate = self.qhist[-1].date
@@ -778,6 +805,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
                     whatToShow=self.p.what, useRTH=self.p.useRTH,
                     formatDate=self.p.formatDate,keepUpToDate=self.p.keepUpToDate
                     )
+                self.qhist.updateEvent += self.onliveupdate
 
             assert len(self.qhist) > 0
             self.p.fromdate = self.qhist[0].date

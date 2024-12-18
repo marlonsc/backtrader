@@ -137,7 +137,11 @@ class Returns(TimeFrameAnalyzerBase):
         self.rets['rtot'] = round(rtot, 6)
 
         # Average return
-        self.rets['ravg'] = ravg = round(rtot / self._tcount, 6)
+        try:
+            ravg = rtot / self._tcount
+        except ZeroDivisionError:
+            ravg = float('-inf')
+        self.rets['ravg'] = round(ravg, 6)
 
         # Annualized normalized return
         tann = self.p.tann or self._TANN.get(self.timeframe, None)

@@ -129,6 +129,7 @@ class CrossOver(Indicator):
 
     lines = ('crossover',)
 
+
     plotinfo = dict(plotymargin=0.05, plotyhlines=[-1.0, 1.0])
 
     def __init__(self):
