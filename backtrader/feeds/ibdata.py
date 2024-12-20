@@ -324,8 +324,6 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         return not self.p.historical
 
     def __init__(self, **kwargs):
-        #if self.p.historical:
-            #self.caldate()
         self.ib = self._store(**kwargs)
         self.precontract = self.parsecontract(self.p.dataname)
         self.pretradecontract = self.parsecontract(self.p.tradename)
@@ -698,7 +696,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
                 dtend = None
                 dtend = msg.datetime if self._usertvol else msg.time
 
-                self.qhist = self.ib.reqHistoricalDataEx(
+                self.qhist = self.ib.reqHistoricalData(
                     contract=self.contract, endDateTime=dtend, 
                     durationStr=self.p.durationStr, barSizeSetting=self.p.barSizeSetting,
                     whatToShow=self.p.what, useRTH=self.p.useRTH,
@@ -813,11 +811,15 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
                     contract=self.contract, enddate=dtend,
                     what=self.p.what, useRTH=self.p.useRTH, tz=self._tz)
             else:
-                self.qhist = self.ib.reqHistoricalDataEx(
-                    contract=self.contract, endDateTime=self.p.todate, durationStr=self.p.durationStr, 
+                self.qhist = self.ib.reqHistoricalData(
+                    contract=self.contract, 
+                    endDateTime=self.p.todate, 
+                    durationStr=self.p.durationStr, 
                     barSizeSetting=self.p.barSizeSetting,
-                    whatToShow=self.p.what, useRTH=self.p.useRTH,
-                    formatDate=self.p.formatDate,keepUpToDate=self.p.keepUpToDate
+                    whatToShow=self.p.what, 
+                    useRTH=self.p.useRTH,
+                    formatDate=self.p.formatDate,
+                    keepUpToDate=self.p.keepUpToDate
                     )
                 self.qhist.updateEvent += self.onliveupdate
 
@@ -825,9 +827,15 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
             self.p.fromdate = self.qhist[0].date
             self.p.todate = self.qhist[-1].date
             if isinstance(self.p.fromdate, datetime.date):
-                self.p.fromdate = datetime.datetime.combine(self.p.fromdate, datetime.time())
+                self.p.fromdate = datetime.datetime.combine(
+                    self.p.fromdate, 
+                    datetime.time()
+                    )
             if isinstance(self.p.todate, datetime.date):
-                self.p.todate = datetime.datetime.combine(self.p.todate, datetime.time())
+                self.p.todate = datetime.datetime.combine(
+                    self.p.todate, 
+                    datetime.time()
+                    )
             self._state = self._ST_HISTORBACK
             return True  # continue before
 

@@ -463,28 +463,6 @@ class IBStoreInsync(IBStore):
         '''Receive answer and pass it to the queue'''
         #self.qs[reqId].put(contractDetails)
 
-    def reqHistoricalDataEx(self, contract, endDateTime: str, 
-                            durationStr: str, barSizeSetting: str,
-                            whatToShow='TRADES', useRTH=False, formatDate=1, 
-                            keepUpToDate=False):
-        '''
-        Extension of the raw reqHistoricalData proxy, which takes two dates
-        rather than a duration, barsize and date
-
-        It uses the IB published valid duration/barsizes to make a mapping and
-        spread a historical request over several historical requests if needed
-        '''
-
-        return self.reqHistoricalData(
-            contract=contract,
-            endDateTime=endDateTime,												   
-            durationStr=durationStr,
-            barSizeSetting=barSizeSetting,
-            whatToShow=whatToShow,
-            useRTH=useRTH,
-            formatDate=formatDate, # dateformat 1 for string, 2 for unix time in seconds
-            keepUpToDate=keepUpToDate)	   
-
     def updatebar(self, bars, hasNewBar):
         '''Receives x seconds Real Time Bars (at the time of writing only 5
         seconds are supported)
@@ -510,51 +488,6 @@ class IBStoreInsync(IBStore):
             return copy(position)
 
         return position
-
-    def historicalData(self, reqId: int, bar):
-        '''Receives the events of a historical data request'''
-        # For multi-tiered downloads we'd need to rebind the queue to a new
-        # tickerId (in case tickerIds are not reusable) and instead of putting
-        # None, issue a new reqHistData with the new data and move formward
-        msg = HistBar(reqId, bar)
-        tickerId = msg.reqId
-        q = self.qs[tickerId]
-        if msg.date.startswith('finished-'):
-            self.histfmt.pop(tickerId, None)
-            self.histsend.pop(tickerId, None)
-            self.histtz.pop(tickerId, None)
-            kargs = self.histexreq.pop(tickerId, None)
-            if kargs is not None:
-                self.reqHistoricalDataEx(tickerId=tickerId, **kargs)
-                return
-
-            msg.date = None
-            self.cancelQueue(q)
-        else:
-            dtstr = msg.date  # Format when string req: YYYYMMDD[  HH:MM:SS]
-            if self.histfmt[tickerId]:
-                sessionend = self.histsend[tickerId]
-                dt = datetime.strptime(dtstr, '%Y%m%d')
-                dteos = datetime.combine(dt, sessionend)
-                tz = self.histtz[tickerId]
-                if tz:
-                    dteostz = tz.localize(dteos)
-                    dteosutc = dteostz.astimezone(UTC).replace(tzinfo=None)
-                    # When requesting for example daily bars, the current day
-                    # will be returned with the already happened data. If the
-                    # session end were added, the new ticks wouldn't make it
-                    # through, because they happen before the end of time
-                else:
-                    dteosutc = dteos
-
-                if dteosutc <= datetime.utcnow():
-                    dt = dteosutc
-
-                msg.date = dt
-            else:
-                msg.date = datetime.fromtimestamp(int(dtstr), tz=timezone.utc)
-
-        q.put(msg)
         
     def historicalTicks(self, reqId, tick, type):
         mytick = HistTick(tick, type)
