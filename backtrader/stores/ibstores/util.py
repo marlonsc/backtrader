@@ -230,9 +230,9 @@ def logToFile(path, level=logging.INFO):
     logger.addHandler(handler)
 
 
-def logToConsole(level=logging.INFO):
+def logToConsole(level=logging.INFO, logger=None):
     """Create a log handler that logs to the console."""
-    logger = logging.getLogger()
+    logger = logger if logger else logging.getLogger()
     stdHandlers = [
         h for h in logger.handlers
         if type(h) is logging.StreamHandler and h.stream is sys.stderr]
@@ -306,7 +306,16 @@ def run(*awaitables: Awaitable, timeout: Optional[float] = None):
     asyncio.TimeoutError if the awaitables are not ready within the
     timeout period.
     """
-    loop = getLoop()
+    #loop = getLoop()
+    loop = None
+    try:
+        loop = asyncio.get_event_loop()
+    except RuntimeError as ex:
+        if "There is no current event loop in thread" in str(ex):
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+        loop = asyncio.get_event_loop()
+    
     if not awaitables:
         if loop.is_running():
             return

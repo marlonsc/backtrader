@@ -273,6 +273,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
 
     params = (
         ('preload', True),
+        ('predata', False),
         ('runonce', True),
         ('maxcpus', None),
         ('stdstats', True),
@@ -1131,7 +1132,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
             # If no optimmization is wished ... or 1 core is to be used
             # let's skip process "spawning"
             for iterstrat in iterstrats:
-                runstrat = self.runstrategies(iterstrat)
+                runstrat = self.runstrategies(iterstrat, predata=self.p.predata)
                 self.runstrats.append(runstrat)
                 if self._dooptimize:
                     for cb in self.optcbs:
@@ -1308,6 +1309,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
             for strat in runstrats:
                 strat._stop()
 
+        print('run strategy end')
         self._broker.stop()
 
         if not predata:
@@ -1677,15 +1679,14 @@ class Cerebro(with_metaclass(MetaParams, object)):
             dt0 = min(dts)
 
             if dt0 == float('inf'):
-                print("Error: Input is infinity.")
+                print("Error: Max data else.")
                 break  # no data delivers anything
 
-            dtime = num2date(dt0)
+            #dtime = num2date(dt0)
             #print(f"process data {dtime.year}-{dtime.month}-{dtime.day}")
 
             # Timemaster if needed be
             # dmaster = datas[dts.index(dt0)]  # and timemaster
-            slen = len(runstrats[0])
             for i, dti in enumerate(dts):
                 if dti <= dt0:
                     datas[i].advance()

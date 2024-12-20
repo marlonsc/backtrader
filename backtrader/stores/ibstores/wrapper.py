@@ -27,6 +27,9 @@ from ib_insync.util import (
     UNSET_DOUBLE, UNSET_INTEGER, dataclassAsDict, dataclassUpdate,
     getLoop, globalErrorEvent, isNan, parseIBDatetime)
 
+if TYPE_CHECKING:
+    from ..ibstore_insync import IBStoreInsync
+
 OrderKeyType = Union[int, Tuple[int, int]]
 
 
@@ -52,7 +55,7 @@ class RequestError(Exception):
 class Wrapper:
     """Wrapper implementation for use with the IB class."""
 
-    ib: 'IB'
+    ib: 'IBStoreInsync'
 
     accountValues: Dict[tuple, AccountValue]
     """ (account, tag, currency, modelCode) -> AccountValue """
@@ -644,28 +647,31 @@ class Wrapper:
               "End:", endDateTime, "TimeZone:", timeZone)
 
     def historicalDataEnd(self, reqId, _start: str, _end: str):
-        #self.ib.historicalDataEnd(reqId, _start, _end)
         self._endReq(reqId)
         print("HistoricalDataEnd. ReqId:", reqId, "from", _start, "to", _end)
 
     def historicalDataUpdate(self, reqId: int, bar: BarData):
         bars = self.reqId2Subscriber.get(reqId)
-        if not bars:
-            return
         bar.date = parseIBDatetime(bar.date)
-        lastDate = bars[-1].date
-        if bar.date < lastDate:
-            return
-        hasNewBar = len(bars) == 0 or bar.date > lastDate
-        if hasNewBar:
+        hasNewBar = len(bars) == 0
+        if hasNewBar:      
             bars.append(bar)
-        elif bars[-1] != bar:
-            bars[-1] = bar
         else:
-            return
+            lastDate = bars[-1].date
+            if bar.date < lastDate:
+                return
+            hasNewBar = bar.date > lastDate
+            if hasNewBar:
+                bars.append(bar)
+            elif bars[-1] != bar:
+                bars[-1] = bar
+            else:
+                return
+        
         self.ib.barUpdateEvent.emit(bars, hasNewBar)
         bars.updateEvent.emit(bars, hasNewBar)
-        # print("HistoricalDataUpdate. ReqId:", reqId, "BarData.", bar.date, "New.", hasNewBar)
+        #print("HistoricalDataUpdate. ReqId:", reqId, "BarData.", bar.date, "New.", hasNewBar)
+
 
     def headTimestamp(self, reqId: int, headTimestamp: str):
         try:

@@ -250,17 +250,11 @@ class IBStoreInsync(IBStore):
 
     @classmethod
     def getbroker(cls, *args, **kwargs):
-        '''Returns broker with *args, **kwargs from registered ``BrokerCls``'''
+        '''Returns broker with *args, **kwargs from registered ``BrokerCls'''''
         return cls.BrokerCls(*args, **kwargs)
     
     def __init__(self):
         super(IBStore, self).__init__()
-
-        self._lock_q = threading.Lock()  # sync access to _tickerId/Queues
-        self._lock_accupd = threading.Lock()  # sync account updates
-        self._lock_pos = threading.Lock()  # sync account updates
-        self._lock_notif = threading.Lock()  # sync access to notif queue
-        self._updacclock = threading.Lock()  # sync account updates	
 
         # Account list received
         self._event_managed_accounts = threading.Event()
@@ -311,7 +305,7 @@ class IBStoreInsync(IBStore):
 
         # ibpy connection object
         self._createEvents()
-        self.accountValueEvent +=  self.updateAccountValue
+        self.accountValueEvent +=  self.onUpdateAccountValue
         self.barUpdateEvent += self.updatebar
         
         self.wrapper = Wrapper(self)
@@ -319,6 +313,8 @@ class IBStoreInsync(IBStore):
         self.errorEvent += self._onError
         self.client.apiEnd += self.disconnectedEvent
         self._logger = logging.getLogger('ib_insync.ib')
+        self.enableLog(level=logging.WARNING)
+
         self.connect(
             host=self.p.host, port=self.p.port, clientId=self.clientId)
         
@@ -469,7 +465,7 @@ class IBStoreInsync(IBStore):
 
     def reqHistoricalDataEx(self, contract, endDateTime: str, 
                             durationStr: str, barSizeSetting: str,
-                            whatToShow=None, useRTH=False, formatDate=1, 
+                            whatToShow='TRADES', useRTH=False, formatDate=1, 
                             keepUpToDate=False):
         '''
         Extension of the raw reqHistoricalData proxy, which takes two dates
@@ -478,106 +474,16 @@ class IBStoreInsync(IBStore):
         It uses the IB published valid duration/barsizes to make a mapping and
         spread a historical request over several historical requests if needed
         '''
-        tickerId, q = self.getTickerQueue()
 
-        barsize = barSizeSetting
-        self.histfmt[tickerId] = formatDate
-
-        if contract.secType in ['CASH', 'CFD']:
-            self.iscash[tickerId] = 1  # msg.field code
-        elif contract.secType in ['IND'] and self.p.indcash:
-            self.iscash[tickerId] = 4  # msg.field code
-
-        what = whatToShow or 'TRADES'
-        dtend = ''
-        if endDateTime != '':
-            dtend = endDateTime.strftime('%Y%m%d-%H:%M:%S')
-
-        df = self.reqHistoricalData(
+        return self.reqHistoricalData(
             contract=contract,
             endDateTime=endDateTime,												   
             durationStr=durationStr,
             barSizeSetting=barSizeSetting,
-            whatToShow=what,
+            whatToShow=whatToShow,
             useRTH=useRTH,
             formatDate=formatDate, # dateformat 1 for string, 2 for unix time in seconds
             keepUpToDate=keepUpToDate)	   
-
-        return df
-
-    def tickString(self, reqId, tickType, value):
-        # Receive and process a tickString message
-        tickerId = reqId						
-        if tickType == 48:  # RTVolume
-            try:
-                rtvol = RTVolume(value)
-            except ValueError:  # price not in message ...
-                pass
-            else:
-                # Don't need to adjust the time, because it is in "timestamp"
-                # form in the message
-                self.qs[tickerId].put(rtvol)
-
-
-    def tickPrice(self, reqId, tickType, price, attrib):
-        '''Cash Markets have no notion of "last_price"/"last_size" and the
-        tracking of the price is done (industry de-facto standard at least with
-        the IB API) following the BID price
-
-        A RTVolume which will only contain a price is put into the client's
-        queue to have a consistent cross-market interface
-        '''
-        # Used for "CASH" markets
-        # The price field has been seen to be missing in some instances even if
-        # "field" is 1
-        tickerId = reqId
-        fieldcode = self.iscash[tickerId]
-        if fieldcode:
-            if tickType == fieldcode:  # Expected cash field code
-                try:
-                    if price == -1.0:
-                        # seems to indicate the stream is halted for example in
-                        # between 23:00 - 23:15 CET for FOREX
-                        return
-                except AttributeError:
-                    pass
-
-                try:
-                    rtvol = RTVolume(price=price, tmoffset=self.tmoffset)
-                    # print('rtvol with datetime:', rtvol.datetime)
-                except ValueError:  # price not in message ...
-                    pass
-                else:
-                    self.qs[tickerId].put(rtvol)
-        else:
-            # Non-cash
-            try:
-                if price == -1.0:
-                    # seems to indicate the stream is halted for example in
-                    # between 23:00 - 23:15 CET for FOREX
-                    return
-            except AttributeError:
-                pass
-            rtprice = RTPrice(price=price, tmoffset=self.tmoffset)
-            self.qs[tickerId].put(rtprice)
-
-    def tickSize(self, reqId, tickType, size):
-        tickerId = reqId
-        rtsize = RTSize(size=size, tmoffset=self.tmoffset)
-        self.qs[tickerId].put(rtsize)
-
-    def tickGeneric(self, reqId, tickType, value):
-        try:
-            if value == -1.0:
-                # seems to indicate the stream is halted for example in
-                # between 23:00 - 23:15 CET for FOREX
-                return
-        except AttributeError:
-            pass
-        tickerId = reqId
-        value = value # if msg.value != 0.0 else (1.0 + random.random())
-        rtprice = RTPrice(price=value, tmoffset=self.tmoffset)
-        self.qs[tickerId].put(rtprice)
 
     def updatebar(self, bars, hasNewBar):
         '''Receives x seconds Real Time Bars (at the time of writing only 5
@@ -646,23 +552,10 @@ class IBStoreInsync(IBStore):
 
                 msg.date = dt
             else:
-                msg.date = datetime.utcfromtimestamp(long(dtstr))
+                msg.date = datetime.fromtimestamp(int(dtstr), tz=timezone.utc)
 
         q.put(msg)
         
-    def historicalDataEnd(self, reqId, start, end):
-        tickerId = reqId
-        self.histfmt.pop(tickerId, None)
-        self.histsend.pop(tickerId, None)
-        self.histtz.pop(tickerId, None)
-        kargs = self.histexreq.pop(tickerId, None)
-        if kargs is not None:
-            self.reqHistoricalDataEx(tickerId=tickerId, **kargs)
-            return
-
-        q = self.qs[tickerId]
-        self.cancelQueue(q)
-
     def historicalTicks(self, reqId, tick, type):
         mytick = HistTick(tick, type)
         tickerId = reqId
@@ -850,47 +743,6 @@ class IBStoreInsync(IBStore):
         execution.cumQty = float(execution.cumQty)
         self.broker.push_execution(execution)
 
-    def reuseQueue(self, tickerId):
-        '''Reuses queue for tickerId, returning the new tickerId and q'''
-        with self._lock_q:
-            # Invalidate tickerId in qs (where it is a key)
-            q = self.qs.pop(tickerId, None)  # invalidate old
-            iscash = self.iscash.pop(tickerId, None)
-
-            # Update ts: q -> ticker
-            tickerId = self.nextTickerId()  # get new tickerId
-            self.ts[q] = tickerId  # Update ts: q -> tickerId
-            self.qs[tickerId] = q  # Update qs: tickerId -> q
-            self.iscash[tickerId] = iscash
-
-        return tickerId, q
-
-    def getTickerQueue(self, start=False):
-        '''Creates ticker/Queue for data delivery to a data feed'''
-        q = queue.Queue()
-        if start:
-            q.put(None)
-            return q
-
-        with self._lock_q:
-            tickerId = self.nextTickerId()
-            self.qs[tickerId] = q  # can be managed from other thread
-            self.ts[q] = tickerId
-            self.iscash[tickerId] = False
-
-        return tickerId, q
-
-    def cancelQueue(self, q, sendnone=False):
-        '''Cancels a Queue for data delivery'''
-        # pop ts (tickers) and with the result qs (queues)
-        tickerId = self.ts.pop(q, None)
-        self.qs.pop(tickerId, None)
-
-        self.iscash.pop(tickerId, None)
-
-        if sendnone:
-            q.put(None)
-
     def validQueue(self, q):
         '''Returns (bool)  if a queue is still valid'''
         return q in self.ts  # queue -> ticker
@@ -905,36 +757,27 @@ class IBStoreInsync(IBStore):
             return None
 
         return cds
-    
-    def currentTime(self, time):
-        if not self.p.timeoffset:  # only if requested ... apply timeoffset
-            return
-        curtime = datetime.fromtimestamp(float(time))
-        with self._lock_tmoffset:
-            self.tmoffset = curtime - datetime.now()
-
-        threading.Timer(self.p.timerefresh, self.reqCurrentTime).start()
-    
+        
     def nextValidId(self, reqId):
         # Create a counter from the TWS notified value to apply to orders
-        self.reqId = itertools.count(reqId)
+        self.reqId = itertools.count(reqId)										
 
-    def updateAccountValue(self, key, value, currency, accountName):
+    def onUpdateAccountValue(self, key, value, currency, accountName):
         # Lock access to the dicts where values are updated. This happens in a
         # sub-thread and could kick it at anytime
-        with self._lock_accupd:
-            try:
-                value = float(value)
-            except ValueError:
-                value = value
+    
+        try:
+            value = float(value)
+        except ValueError:
+            value = value
 
-            self.acc_upds[accountName][key][currency] = value
+        self.acc_upds[accountName][key][currency] = value
 
-            if key == 'NetLiquidation':
-                # NetLiquidationByCurrency and currency == 'BASE' is the same
-                self.acc_value[accountName] = value
-            elif key == 'CashBalance' and currency == 'BASE':
-                self.acc_cash[accountName] = value
+        if key == 'NetLiquidation':
+            # NetLiquidationByCurrency and currency == 'BASE' is the same
+            self.acc_value[accountName] = value
+        elif key == 'CashBalance' and currency == 'BASE':
+            self.acc_cash[accountName] = value
 
     def get_acc_values(self, account=None):
         '''Returns all account value infos sent by TWS during regular updates
@@ -951,28 +794,28 @@ class IBStoreInsync(IBStore):
         # if self.connected():
         #     self._event_accdownload.wait()
         # Lock access to acc_cash to avoid an event intefering
-        with self._updacclock:
-            if account is None:
-                # wait for the managedAccount Messages
-                # if self.connected():
-                #     self._event_managed_accounts.wait()
+
+        if account is None:
+            # wait for the managedAccount Messages
+            # if self.connected():
+            #     self._event_managed_accounts.wait()
 
 
-                if not self.managed_accounts:
-                    return self.acc_upds.copy()
+            if not self.managed_accounts:
+                return self.acc_upds.copy()
 
-                elif len(self.managed_accounts) > 1:
-                    return self.acc_upds.copy()
+            elif len(self.managed_accounts) > 1:
+                return self.acc_upds.copy()
 
-                # Only 1 account, fall through to return only 1
-                account = self.managed_accounts[0]
+            # Only 1 account, fall through to return only 1
+            account = self.managed_accounts[0]
 
-            try:
-                return self.acc_upds[account].copy()
-            except KeyError:
-                pass
+        try:
+            return self.acc_upds[account].copy()
+        except KeyError:
+            pass
 
-            return self.acc_upds.copy()
+        return self.acc_upds.copy()
 																   
     def get_acc_value(self, account=None):
         '''Returns the net liquidation value sent by TWS during regular updates
@@ -984,27 +827,20 @@ class IBStoreInsync(IBStore):
         If account is specified or the system has only 1 account the dictionary
         corresponding to that account is returned
         '''
-        # Wait for at least 1 account update download to have been finished
-        # before the value can be returned to the calling client
-							
-										  
-        # Lock access to acc_cash to avoid an event intefering										   
+        if account is None:
+            if not self.managed_accounts:
+                return float()
 
-        with self._updacclock:
-            if account is None:
-                if not self.managed_accounts:
-                    return float()
+            elif len(self.managed_accounts) > 1:
+                return sum(self.acc_value.values())
 
-                elif len(self.managed_accounts) > 1:
-                    return sum(self.acc_value.values())
-
-                # Only 1 account, fall through to return only 1
-                account = self.managed_accounts[0]
-                
-            try:
-                return self.acc_value[account]
-            except KeyError:
-                pass
+            # Only 1 account, fall through to return only 1
+            account = self.managed_accounts[0]
+            
+        try:
+            return self.acc_value[account]
+        except KeyError:
+            pass
 
         return float()
 														  
@@ -1023,25 +859,24 @@ class IBStoreInsync(IBStore):
         #if self.connected():
         #   self._event_accdownload.wait()
         # Lock access to acc_cash to avoid an event intefering
-        with self._lock_accupd:
-            if account is None:
-                # wait for the managedAccount Messages
-                #if self.connected():
-                #   self._event_managed_accounts.wait()
+        if account is None:
+            # wait for the managedAccount Messages
+            #if self.connected():
+            #   self._event_managed_accounts.wait()
 
-                if not self.managed_accounts:
-                    return float()
+            if not self.managed_accounts:
+                return float()
 
-                elif len(self.managed_accounts) > 1:
-                    return sum(self.acc_cash.values())
+            elif len(self.managed_accounts) > 1:
+                return sum(self.acc_cash.values())
 
-                # Only 1 account, fall through to return only 1
-                account = self.managed_accounts[0]
+            # Only 1 account, fall through to return only 1
+            account = self.managed_accounts[0]
 
-            try:
-                return self.acc_cash[account]
-            except KeyError:
-                pass
+        try:
+            return self.acc_cash[account]
+        except KeyError:
+            pass														  
     '''
     ***************************************************************************
     ***************************************************************************
@@ -1143,6 +978,10 @@ class IBStoreInsync(IBStore):
         """Is there an API connection to TWS or IB gateway?"""
         return self.client.isReady()
 
+    def enableLog(self, level=logging.DEBUG, logger=None):
+        """Enables ib insync logging"""
+        util.logToConsole(level, logger)
+        
     def _onError(self, reqId, errorCode, errorString, contract):
         if errorCode == 1102:
             # "Connectivity between IB and Trader Workstation has been

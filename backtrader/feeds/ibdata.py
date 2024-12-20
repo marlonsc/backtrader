@@ -23,7 +23,6 @@ from __future__ import (absolute_import, division, print_function,
 
 import datetime
 from dateutil.relativedelta import relativedelta
-import time 
 
 import backtrader as bt
 from backtrader.feed import DataBase
@@ -325,11 +324,12 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         return not self.p.historical
 
     def __init__(self, **kwargs):
-        if self.p.historical:
-            self.caldate()
+        #if self.p.historical:
+            #self.caldate()
         self.ib = self._store(**kwargs)
         self.precontract = self.parsecontract(self.p.dataname)
         self.pretradecontract = self.parsecontract(self.p.tradename)
+        self.constractStartDate = None  # 用于保存合约开始日期，data/datetime
 
     def caldate(self):
         duranumber = int(self.p.durationStr.split()[0])
@@ -500,9 +500,12 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
             cdetails = cds[0]
             self.contract = cdetails.contract
             self.contractdetails = cdetails
-            dtime = self.ib.reqHeadTimeStamp(contract=self.contract,whatToShow="TRADES", useRTH=1, formatDate=1)
-            if isinstance(dtime, datetime.datetime) and self.p.historical:
-                assert self.p.fromdate >= dtime
+            self.constractStartDateUTC = self.ib.reqHeadTimeStamp(
+                contract=self.contract,
+                whatToShow="TRADES", 
+                useRTH=1, 
+                formatDate=1
+                ) #format=1 UTC time format=2 epoch time
         else:
             # no contract can be found (or many)
             self.put_notification(self.DISCONNECTED)
@@ -528,7 +531,6 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         if self._state == self._ST_START:
             self._start_finish()  # to finish initialization
             self._st_start()
-            self._start_updatedate()
 
     def stop(self):
         '''Stops and tells the store to stop'''
@@ -572,9 +574,9 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
             d = len(self.lines.close)
             self.forward()
             self._load_rtbar(bar, hist=True)
-            print(f"add live data:{bar.date} close:{bar.close} lenA:{d} lenB:{len(self.lines.close)}")
-            self.getenvironment().start_barupdate() #通知cerebor进行处理，每增加一个数据，更新处理一次
-            time.sleep(0.01) #给start_barupdate时间处理
+            
+        #print(f"add live data from{bars[0].date} to {bars[-1].date}, total:{len(bars)}")    
+        self.getenvironment().start_barupdate(item=f'{d}') #通知cerebor进行处理，批处理，全更新完后处理一次
 
     def onliveupdate(self, bars, hasNewBar):
         # 对于hisorical数据，bars保存reqhistoricaEnd开始的所有数据
@@ -588,8 +590,10 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         
         if hasNewBar:
             curtime = bars[-1].date
-            print(f"onliveupdate tickId:{bars.reqId} size:{len(bars)}, new data {curtime}")  
-            
+            if newdatalen==2:
+                print(f"onliveupdate size:1 bar.date:{bars[0].date}")
+            else:
+                print(f"onliveupdate size:{newdatalen-1} from {bars[0].date} to {bars[-2].date}")  
             self.updatelivedata(newdatalen-1, bars[:-1]) #有2个以上数据,按timeframe频率更新，避免频率重复调用,一直更新到倒数第2个数据，仅保存最后一个数据:-1不包含-1，只到-2
             bars[:] = bars[-1:]
 
@@ -605,8 +609,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
                            self.qlive.pop(0))
                 except Exception as e:
                     #print("_load live data Exception:", e)
-                    if True:
-                        return None
+                    return None
 
                 if msg is None:  # Conn broken during historical/backfilling
                     self._subcription_valid = False
@@ -714,18 +717,18 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
                 continue
 
             elif self._state == self._ST_HISTORBACK:
-                try:
+                if len(self.qhist) > 1:
                     msg = self.qhist.pop(0)
-                except IndexError as e:
-                    print("IndexError:", e)
-                    if True:
-                        if self.p.historical:  # only historical
-                            self.put_notification(self.DISCONNECTED)
-                            return False  # end of historical
+                    if len(self.qhist) == 1:
+                        print(f"Final historical data {msg.date}")
+                else:
+                    if self.p.historical:  # only historical
+                        self.put_notification(self.DISCONNECTED)
+                        return False  # end of historical
 
                         # Live is also wished - go for it
-                        self._state = self._ST_LIVE
-                        continue
+                    self._state = self._ST_LIVE
+                    continue
                 if msg is None:  # Conn broken during historical/backfilling
                     # Situation not managed. Simply bail out
                     self._subcription_valid = False
@@ -786,6 +789,17 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
             elif self._state == self._ST_START:
                 if not self._st_start():
                     return False
+
+    def _start_finish(self):
+        # 重载start_finish方法，ibdata额外增加数据开始日期判断
+        super()._start_finish()
+
+        if self.fromdate < date2num(self.constractStartDateUTC):
+            print(
+                f'From <{self.p.fromdate}> To <{self.constractStartDateUTC}>'
+                f'has no constract data, '
+                f'data start from {self.constractStartDateUTC}'
+                )
 
     def _st_start(self):
         if self.p.historical:
