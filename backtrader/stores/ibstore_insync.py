@@ -23,14 +23,12 @@ from __future__ import (absolute_import, division, print_function,
 import collections
 from copy import copy
 from datetime import date, datetime, timedelta, timezone
+from decimal import Decimal
 import itertools
 import random
 import threading
 import time
 
-
-
-from backtrader import TimeFrame, Position
 from backtrader.metabase import MetaParams
 from backtrader.utils.py3 import queue
 from backtrader.utils import AutoDict, UTC
@@ -53,7 +51,8 @@ from backtrader.stores.ibstores.objects import (
     TickAttribBidAsk, TickAttribLast, TickByTickAllLast, TickByTickBidAsk,
     TickByTickMidPoint, TickData, TradeLogEntry, WshEventData
     )
-from backtrader.stores.ibstores.order import BracketOrder, Order, OrderState, OrderStatus, Trade
+from backtrader.stores.ibstores.order import (
+    BracketOrder, LimitOrder, Order, OrderState, OrderStatus, StopOrder, Trade)
 from backtrader.stores.ibstores.ticker import Ticker
 from backtrader.stores.ibstores.wrapper import RequestError, Wrapper
 
@@ -82,7 +81,7 @@ class OpenOrderMsg(object):
     def __init__(self, orderId, contract, order, orderState):
         self.vars = vars()
         del self.vars['self']
-        self.OrderId = orderId
+        self.orderId = orderId
         self.contract = contract
         self.order = order
         self.orderState = orderState
@@ -96,7 +95,7 @@ class OrderStatusMsg(object):
                     parentId, lastFillPrice, clientId,
                     whyHeld, mktCapPrice):
         self.vars = vars()
-        self.OrderId = orderId
+        self.orderId = orderId
         self.status = status
         self.filled = filled
         self.remaining = remaining
@@ -224,6 +223,7 @@ class IBStoreInsync(IBStore):
         ('timeoffset', True),  # Use offset to server for timestamps if needed
         ('timerefresh', 60.0),  # How often to refresh the timeoffset
         ('indcash', True),  # Treat IND codes as CASH elements
+        ('runmode', None)
     )
 
     events = (
@@ -246,18 +246,17 @@ class IBStoreInsync(IBStore):
     @classmethod
     def getdata(cls, *args, **kwargs):
         '''Returns ``DataCls`` with args, kwargs'''
-        return cls.DataCls(*args, **kwargs)
+        return super().getdata(*args, **kwargs)
 
     @classmethod
     def getbroker(cls, *args, **kwargs):
         '''Returns broker with *args, **kwargs from registered ``BrokerCls'''''
-        return cls.BrokerCls(*args, **kwargs)
+        return super().getbroker(*args, **kwargs)
     
     def __init__(self):
         super(IBStore, self).__init__()
 
         # Account list received
-        self._event_managed_accounts = threading.Event()
         self._event_accdownload = threading.Event()
 
         self.dontreconnect = False  # for non-recoverable connect errors
@@ -266,7 +265,7 @@ class IBStoreInsync(IBStore):
         self.broker = None  # broker instance
         self.datas = list()  # datas that have registered over start
         self.ccount = 0  # requests to start (from cerebro or datas)
-
+        
         self._lock_tmoffset = threading.Lock()
         self.tmoffset = timedelta()  # to control time difference with server
 
@@ -283,13 +282,15 @@ class IBStoreInsync(IBStore):
         self.acc_cash = AutoDict()  # current total cash per account
         self.acc_value = AutoDict()  # current total value per account
         self.acc_upds = AutoDict()  # current account valueinfos per account
+        self.acc_margin = AutoDict()  # current total margin per account
+        self.acc_validcash = AutoDict()  # current total valid cash per account
 
         self.port_update = False  # indicate whether to signal to broker
 
         self.positions = collections.defaultdict(Position)  # actual positions
 
         self._tickerId = itertools.count(self.REQIDBASE)  # unique tickerIds
-        self.orderid = None  # next possible orderid (will be itertools.count)
+        self.orderId = None  # next possible orderId (will be itertools.count)
 
         self.cdetails = collections.defaultdict(list)  # hold cdetails requests
 
@@ -306,7 +307,8 @@ class IBStoreInsync(IBStore):
         # ibpy connection object
         self._createEvents()
         self.accountValueEvent +=  self.onUpdateAccountValue
-        self.barUpdateEvent += self.updatebar
+        self.positionEvent += self.onUpdatePosition
+        self.barUpdateEvent += self.onUpdatebar
         
         self.wrapper = Wrapper(self)
         self.client = Client(self.wrapper)
@@ -324,9 +326,6 @@ class IBStoreInsync(IBStore):
             time.sleep(1)
             count += 1
 
-        
-        
-        self.positions = self.wrapper.positions  # actual positions
         self._debug = self.p._debug
         # register a printall method if requested
         if self.p._debug or self.p.notifyall:
@@ -463,7 +462,7 @@ class IBStoreInsync(IBStore):
         '''Receive answer and pass it to the queue'''
         #self.qs[reqId].put(contractDetails)
 
-    def updatebar(self, bars, hasNewBar):
+    def onUpdatebar(self, bars, hasNewBar):
         '''Receives x seconds Real Time Bars (at the time of writing only 5
         seconds are supported)
 
@@ -475,19 +474,16 @@ class IBStoreInsync(IBStore):
         curtime = bars[0].date
         # print(f"updatebar tickId:{bars.reqId} size:{len(bars)}, time:{curtime}, new:{hasNewBar}")
 
-    def getposition(self, account=None, contract=None, clone=False):
+    def getposition(self, data=None, clone=False):
         # Lock access to the position dicts. This is called from main thread
         # and updates could be happening in the background
-        if account is None:
-            account = self.managed_accounts[0]
+    
+        position = self.positions.get(data.contract.symbol)
+        if position:
+            return copy(position) if clone else position
+            
+        return None
 
-        positions = self.positions[account]
-        position = positions.get(contract.conId, None)
-        
-        if clone and (position is not None):
-            return copy(position)
-
-        return position
         
     def historicalTicks(self, reqId, tick, type):
         mytick = HistTick(tick, type)
@@ -695,22 +691,25 @@ class IBStoreInsync(IBStore):
         # Create a counter from the TWS notified value to apply to orders
         self.reqId = itertools.count(reqId)										
 
+    def onUpdatePosition(self, position):
+        self.positions[position.contract.symbol] = position
+
     def onUpdateAccountValue(self, key, value, currency, accountName):
         # Lock access to the dicts where values are updated. This happens in a
         # sub-thread and could kick it at anytime
-    
-        try:
-            value = float(value)
-        except ValueError:
-            value = value
-
         self.acc_upds[accountName][key][currency] = value
 
         if key == 'NetLiquidation':
             # NetLiquidationByCurrency and currency == 'BASE' is the same
-            self.acc_value[accountName] = value
+            self.acc_value[accountName] = float(value)
         elif key == 'CashBalance' and currency == 'BASE':
-            self.acc_cash[accountName] = value
+            self.acc_cash[accountName] = float(value)
+            margin = self.acc_margin.get(accountName, 0)
+            self.acc_validcash[accountName] = float(value) - float(margin)
+        elif key == 'FullInitMarginReq':
+            self.acc_margin[accountName] = float(value)
+            cash = self.acc_cash.get(accountName, 0)
+            self.acc_validcash[accountName] = float(cash) - float(value)
 
     def get_acc_values(self, account=None):
         '''Returns all account value infos sent by TWS during regular updates
@@ -722,12 +721,6 @@ class IBStoreInsync(IBStore):
         If account is specified or the system has only 1 account the dictionary
         corresponding to that account is returned
         '''
-        # Wait for at least 1 account update download to have been finished
-        # before the account infos can be returned to the calling client
-        # if self.connected():
-        #     self._event_accdownload.wait()
-        # Lock access to acc_cash to avoid an event intefering
-
         if account is None:
             # wait for the managedAccount Messages
             # if self.connected():
@@ -793,12 +786,8 @@ class IBStoreInsync(IBStore):
         #   self._event_accdownload.wait()
         # Lock access to acc_cash to avoid an event intefering
         if account is None:
-            # wait for the managedAccount Messages
-            #if self.connected():
-            #   self._event_managed_accounts.wait()
-
             if not self.managed_accounts:
-                return float()
+                return 0
 
             elif len(self.managed_accounts) > 1:
                 return sum(self.acc_cash.values())
@@ -808,6 +797,31 @@ class IBStoreInsync(IBStore):
 
         try:
             return self.acc_cash[account]
+        except KeyError:
+            pass														  
+
+    def get_acc_validcash(self, account=None):
+        '''Returns the total cash value sent by TWS during regular updates
+        Waits for at least 1 successful download
+
+        If ``account`` is ``None`` then a dictionary with accounts as keys will
+        be returned containing all accounts
+
+        If account is specified or the system has only 1 account the dictionary
+        corresponding to that account is returned
+        '''
+        if account is None:
+            if not self.managed_accounts:
+                return 0
+
+            elif len(self.managed_accounts) > 1:
+                return sum(self.acc_validcash.values())
+
+            # Only 1 account, fall through to return only 1
+            account = self.managed_accounts[0]
+
+        try:
+            return self.acc_validcash[account]
         except KeyError:
             pass														  
     '''
@@ -999,7 +1013,6 @@ class IBStoreInsync(IBStore):
     def managedAccounts(self) -> List[str]:
         """List of account names."""
         self.managed_accounts = self.wrapper.accounts.split(',')
-        self._event_managed_accounts.set()
 
         return list(self.wrapper.accounts)
 
@@ -1187,9 +1200,9 @@ class IBStoreInsync(IBStore):
         return self._run(self.qualifyContractsAsync(*contracts))
 
     def bracketOrder(
-            self, action: str, quantity: float,
-            limitPrice: float, takeProfitPrice: float,
-            stopLossPrice: float, **kwargs) -> BracketOrder:
+            self, action: str, totalQuantity: Decimal,
+            lmtPrice: Decimal, takeProfitPrice: Decimal,
+            stopLossPrice: Decimal, **kwargs) -> BracketOrder:
         """
         Create a limit order that is bracketed by a take-profit order and
         a stop-loss order. Submit the bracket like:
@@ -1203,7 +1216,7 @@ class IBStoreInsync(IBStore):
 
         Args:
             action: 'BUY' or 'SELL'.
-            quantity: Size of order.
+            totalQuantity: Size of order.
             limitPrice: Limit price of entry order.
             takeProfitPrice: Limit price of profit order.
             stopLossPrice: Stop price of loss order.
@@ -1211,21 +1224,21 @@ class IBStoreInsync(IBStore):
         assert action in ('BUY', 'SELL')
         reverseAction = 'BUY' if action == 'SELL' else 'SELL'
         parent = LimitOrder(
-            action, quantity, limitPrice,
+            action, totalQuantity, lmtPrice,
             orderId=self.client.getReqId(),
             transmit=False,
             **kwargs)
         takeProfit = LimitOrder(
-            reverseAction, quantity, takeProfitPrice,
+            reverseAction, totalQuantity, takeProfitPrice,
             orderId=self.client.getReqId(),
             transmit=False,
-            parentId=parent.OrderId,
+            parentId=parent.orderId,
             **kwargs)
         stopLoss = StopOrder(
-            reverseAction, quantity, stopLossPrice,
+            reverseAction, totalQuantity, stopLossPrice,
             orderId=self.client.getReqId(),
             transmit=True,
-            parentId=parent.OrderId,
+            parentId=parent.orderId,
             **kwargs)
         return BracketOrder(parent, takeProfit, stopLoss)
 
@@ -1268,7 +1281,7 @@ class IBStoreInsync(IBStore):
             contract: Contract to use for order.
             order: The order to be placed.
         """
-        orderId = order.OrderId or self.client.getReqId()
+        orderId = order.orderId or self.client.getReqId()
         self.client.placeOrder(orderId, contract, order)
         now = datetime.now(timezone.utc)
         key = self.wrapper.orderKey(
@@ -1285,7 +1298,7 @@ class IBStoreInsync(IBStore):
         else:
             # this is a new order
             order.clientId = self.wrapper.clientId
-            order.OrderId = orderId
+            order.orderId = orderId
             orderStatus = OrderStatus(
                 orderId=orderId, status=OrderStatus.PendingSubmit)
             logEntry = TradeLogEntry(now, orderStatus.status)
@@ -1304,10 +1317,10 @@ class IBStoreInsync(IBStore):
             order: The order to be canceled.
             manualCancelOrderTime: For audit trail.
         """
-        self.client.cancelOrder(order.OrderId, manualCancelOrderTime)
+        self.client.cancelOrder(order.orderId, manualCancelOrderTime)
         now = datetime.now(timezone.utc)
         key = self.wrapper.orderKey(
-            order.clientId, order.OrderId, order.permId)
+            order.clientId, order.orderId, order.permId)
         trade = self.wrapper.trades.get(key)
         if trade:
             if not trade.isDone():
@@ -1328,7 +1341,7 @@ class IBStoreInsync(IBStore):
                 if newStatus == OrderStatus.Cancelled:
                     trade.cancelledEvent.emit(trade)
         else:
-            self._logger.error(f'cancelOrder: Unknown orderId {order.OrderId}')
+            self._logger.error(f'cancelOrder: Unknown orderId {order.orderId}')
         return trade
 
     def reqGlobalCancel(self):
@@ -2403,7 +2416,6 @@ class IBStoreInsync(IBStore):
 
             accounts = self.client.getAccounts()
             self.managed_accounts = accounts
-            self._event_managed_accounts.set()
             if not account and len(accounts) == 1:
                 account = accounts[0]
 

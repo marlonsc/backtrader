@@ -31,6 +31,7 @@ from backtrader.utils.py3 import (integer_types, queue, string_types,
                                   with_metaclass)
 from backtrader.metabase import MetaParams
 from backtrader.stores import ibstore, ibstore_insync
+from backtrader.commissions.ibcommission import IBCommInfo
 
 
 class MetaIBData(DataBase.__class__):
@@ -40,7 +41,7 @@ class MetaIBData(DataBase.__class__):
         super(MetaIBData, cls).__init__(name, bases, dct)
 
         # Register with the store
-        ibstore.IBStore.DataCls = cls
+        # ibstore.IBStore.DataCls = cls
         ibstore_insync.IBStoreInsync.DataCls = cls
 
 class IBData(with_metaclass(MetaIBData, DataBase)):
@@ -273,6 +274,23 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         ('ignoreSize', False),  # Omit updates that reflect only changes in size, and not price. Applicable to Bid_Ask data requests.
     )
 
+    _IBCommissionTypes = {
+        None : IBCommInfo.COMM_FIXED,  # default
+        'STK' : IBCommInfo.COMM_STOCK,
+        'FUT' : IBCommInfo.COMM_FUTURE,
+        'OPT' : IBCommInfo.COMM_OPTION,
+        'CASH' : IBCommInfo.COMM_FOREX,
+    }
+
+    _IBFUTMargin = {
+        'M6E' : {'Initial':374.049, 'Maintenance':325.26},
+        'M6B' : {'Initial':272.374, 'Maintenance':236.847},
+        'M6A' : {'Initial':261.883, 'Maintenance':227.725},
+        'MSF' : {'Initial':488.304, 'Maintenance':424.6125},
+        'MCD' : {'Initial':169.445, 'Maintenance':147.343},
+        'MJY' : {'Initial':377.996, 'Maintenance':328.692},
+    }
+
     #_store = ibstore.IBStore
     _store = ibstore_insync.IBStoreInsync
 
@@ -328,6 +346,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         self.precontract = self.parsecontract(self.p.dataname)
         self.pretradecontract = self.parsecontract(self.p.tradename)
         self.constractStartDate = None  # 用于保存合约开始日期，data/datetime
+        self.commission = None #用于保存数据对应的佣金信息,在生成对应合同时初始化
 
     def caldate(self):
         duranumber = int(self.p.durationStr.split()[0])
@@ -455,7 +474,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
 
 
         print(f'precon= {precon}')
-        return precon
+        return precon   
 
     def start(self):
         '''Starts the IB connecction and gets the real contract and
@@ -504,6 +523,11 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
                 useRTH=1, 
                 formatDate=1
                 ) #format=1 UTC time format=2 epoch time
+            
+            mult = getattr(cdetails.contract, 'multiplier', 1.0)
+            commtype = self._IBCommissionTypes.get(cdetails.contract.secType, None)
+            margin = self._IBFUTMargin.get(cdetails.contract.symbol, None).get('Initial', None)  
+            self.commission = IBCommInfo(mult=mult, commtype=commtype, margin=margin)
         else:
             # no contract can be found (or many)
             self.put_notification(self.DISCONNECTED)
@@ -529,11 +553,6 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         if self._state == self._ST_START:
             self._start_finish()  # to finish initialization
             self._st_start()
-
-    def stop(self):
-        '''Stops and tells the store to stop'''
-        super(IBData, self).stop()
-        self.ib.stop()
 
     def reqdata(self):
         '''request real-time data. checks cash vs non-cash) and param useRT'''
@@ -718,7 +737,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
                 if len(self.qhist) > 1:
                     msg = self.qhist.pop(0)
                     if len(self.qhist) == 1:
-                        print(f"Final historical data {msg.date}")
+                        print(f"Historical total:{len(self)} final historical data {msg.date}")
                 else:
                     if self.p.historical:  # only historical
                         self.put_notification(self.DISCONNECTED)

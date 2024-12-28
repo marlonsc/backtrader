@@ -22,6 +22,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 from backtrader.comminfo import CommInfoBase
+import math
 
 class IBCommInfo(CommInfoBase):
     '''
@@ -38,7 +39,8 @@ class IBCommInfo(CommInfoBase):
     left as future exercise to get it'''
 
     COMM_PERC, COMM_FIXED, COMM_STOCK, COMM_FUTURE, COMM_OPTION, COMM_FOREX = range(6)
-    def __init__(self):
+    
+    def __init__(self, data=None):
         super(IBCommInfo, self).__init__()
         if self._commtype == self.COMM_STOCK:
             self._stocklike = True
@@ -52,27 +54,40 @@ class IBCommInfo(CommInfoBase):
         elif self._commtype == self.COMM_FOREX:
             self._stocklike = False
             self.p.commission = 0.00002  
-
-
+    '''
     def get_margin(self, price):
-        '''Returns the actual margin/guarantees needed for a single item of the
-        asset at the given price. The default implementation has this policy:
+        if not self.p.automargin:
+            return self.p.margin
 
-          - Use param ``margin`` if param ``automargin`` evaluates to ``False``
+        elif self.p.automargin < 0:
+            return price * self.p.mult
 
-          - Use param ``mult`` * ``price`` if ``automargin < 0``
-
-          - Use param ``automargin`` * ``price`` if ``automargin > 0``
-        '''
-        #need to be update
-
+        return price * self.p.automargin  # int/float expected
+    '''
     def getsize(self, price, cash):
         '''Returns the needed size to meet a cash operation at a given price'''
         # Just inherit from base class, need to be update
+        # getsize 需要考虑佣金，cash需要减去佣金
+        size = 0
+        unitprice = 0
         if not self._stocklike:
-            return int(self.p.leverage * (cash // self.get_margin(price)))
+            unitprice = self.get_margin(price)
+        else:
+            unitprice = price
 
-        return int(self.p.leverage * (cash // price))
+     
+        size =  int(cash // unitprice)
+        deltasize1 =  math.ceil(self.getcommission(size, price) // unitprice)
+        size -= deltasize1
+        deltavalue = cash - self.getcommission(size, price) - unitprice*size
+        deltasize2 = int(deltavalue // unitprice)
+        size += deltasize2
+        
+        while cash - self.getcommission(size, price) - unitprice*size < 0:
+            size -= 1
+    
+        size = int(size * self.p.leverage)
+        return size 
 
     def getoperationcost(self, size, price):
         '''Returns the needed amount of cash an operation would cost'''

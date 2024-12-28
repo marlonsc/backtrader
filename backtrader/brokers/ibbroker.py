@@ -21,6 +21,8 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
+__all__ = ['IBOrder', 'IBBroker']
+
 import collections
 from copy import copy
 from datetime import date, datetime, timedelta
@@ -95,116 +97,86 @@ class IBOrder(OrderBase,  ibstore_insync.Order):
         #Get the printout from the base class and add some ib.Order specific
         #fields
         '''
-        basetxt = super(IBOrder, self).__str__()
+        basetxt = ibstore_insync.Order.__str__()
         tojoin = [basetxt]
         tojoin.append('Ref: {}'.format(self.ref))
-        tojoin.append('OrderId: {}'.format(self.OrderId))
+        tojoin.append('orderId: {}'.format(self.orderId))
         tojoin.append('Action: {}'.format(self.action))
         tojoin.append('Size (ib): {}'.format(self.totalQuantity))
         tojoin.append('Lmt Price: {}'.format(self.lmtPrice))
         tojoin.append('Aux Price: {}'.format(self.auxPrice))
-        tojoin.append('OrderType: {}'.format(self.orderType))
+        tojoin.append('orderType: {}'.format(self.orderType))
         tojoin.append('Tif (Time in Force): {}'.format(self.tif))
         tojoin.append('GoodTillDate: {}'.format(self.goodTillDate))
         return '\n'.join(tojoin)
 
     # Map backtrader order types to the ib specifics
     _IBOrdTypes = {
-        None: bytes('MKT'),  # default
-        Order.Market: bytes('MKT'),
-        Order.Limit: bytes('LMT'),
-        Order.Close: bytes('MOC'),
-        Order.Stop: bytes('STP'),
-        Order.StopLimit: bytes('STPLMT'),
-        Order.StopTrail: bytes('TRAIL'),
-        Order.StopTrailLimit: bytes('TRAIL LIMIT'),
+        None: None,  # default
+        'MKT' : Order.Market,
+        'LMT' : Order.Limit,
+        'MOC' : Order.Close,
+        'STP' : Order.Stop,
+        'STPLMT' : Order.StopLimit,
+        'TRAIL' : Order.StopTrail,
+        'TRAIL LIMIT' : Order.StopTrailLimit,
     }
+        
+    def donew(cls, *args, **kwargs):
+        '''
+        本函数完成从ib_incync的初始化参数到backtrader的order类的参数的转换
+        ibbroker使用的是ib_insync的order类，需要兼容backtrader的order类,因此将
+        ib_incync的初始化参数转化为backtrader的order类的参数,以完成后面的类初始化
+        本函数需要在对象生成前调用，不能放在对象的__init__函数中
+        ('owner', None), 
+        ('data', None),
+        ('size', None), 
+        ('price', None), 
+        ('pricelimit', None),
+        ('exectype', None), 
+        ('valid', None), 
+        ('tradeid', 0), 
+        ('oco', None),
+        ('trailamount', None), 
+        ('trailpercent', None),
+        ('parent', None), 
+        ('transmit', True),
+        ('simulated', False),
+        # To support historical order evaluation
+        ('histnotify', False),
+        ('orderId', 0),
+        '''
+        kwargs['totalQuantity'] = kwargs.get('size', 0)
+        kwargs['exectype'] = \
+                cls._IBOrdTypes.get(kwargs.get('orderType'), None)
+        kwargs['pricelimit'] = kwargs.get('lmtPrice', 0)
+        tif = kwargs.get('tif', None)
+        if tif == 'DAY':
+            kwargs['valid'] = datetime.timedelta(days=1)
+        elif tif == 'GTC':
+            kwargs['valid'] = datetime.timedelta(days=365)
 
-    def __init__(self, action, **kwargs):
+        _obj, args, kwargs =  \
+            super().donew(*args, **kwargs)
+        # Return the object and arguments to the chain
+        return _obj, args, kwargs
+
+    def __init__(self, action=None, totalQuantity=0, orderType=None,**kwargs):
 
         #下面两个参数，在init前
         self._willexpire = False
-        self.ordtype = self.Buy if action == 'BUY' else self.Sell
+        self.ordtype = self.Buy if action.upper() == 'BUY' else self.Sell
+        self.ib = ibstore_insync.IBStoreInsync()
+        self.broker = self.ib.broker
         # Marker to indicate an openOrder has been seen with
         # PendinCancel/Cancelled which is indication of an upcoming
         # cancellation
+        assert action.upper() in ('BUY', 'SELL')
+        reverseAction = 'BUY' if action.upper() == 'SELL' else 'SELL'
+
         super(IBOrder, self).__init__()
-        ibstore_insync.Order.__init__(self)  # Invoke 2nd base class
-
-        # 'B' or 'S' should be enough
-        # self.action = bytes(action)
-        self.Action = action
-
-        # Now fill in the specific IB parameters
-        self.OrderType = self._IBOrdTypes[self.exectype]
-        self.PermId = 0
-
-        # Set the prices
-        self.LmtPrice = 0.0
-        self.auxPrice = 0.0
-
-        if self.exectype == self.Market:  # is it really needed for Market?
-            pass
-        elif self.exectype == self.Close:  # is it ireally needed for Close?
-            pass
-        elif self.exectype == self.Limit:
-            self.LmtPrice = self.price
-        elif self.exectype == self.Stop:
-            self.auxPrice = self.price  # stop price / exec is market
-        elif self.exectype == self.StopLimit:
-            self.LmtPrice = self.pricelimit  # req limit execution
-            self.auxPrice = self.price  # trigger price
-        elif self.exectype == self.StopTrail:
-            if self.trailamount is not None:
-                self.auxPrice = self.trailamount
-            elif self.TrailingPercent is not None:
-                # value expected in % format ... multiply 100.0
-                self.m_TrailingPercent = self.TrailingPercent * 100.0
-        elif self.exectype == self.StopTrailLimit:
-            self.TrailStopPrice = self.LmtPrice = self.price
-            # The limit offset is set relative to the price difference in TWS
-            self.LmtPrice = self.pricelimit
-            if self.trailamount is not None:
-                self.auxPrice = self.trailamount
-            elif self.TrailingPercent is not None:
-                # value expected in % format ... multiply 100.0
-                self.TrailStopPrice = self.TrailingPercent * 100.0
-
-        self.TotalQuantity = abs(self.size)  # ib takes only positives
-
-         # self.m_transmit = self.transmit
-        if self.parent is not None:
-            self.ParentId = self.parent.OrderId
-
-        # Time In Force: DAY, GTC, IOC, GTD
-        if self.valid is None:
-            tif = 'GTC'  # Good til cancelled
-        elif isinstance(self.valid, (datetime, date)):
-            tif = 'GTD'  # Good til date
-            self.goodTillDate = bytes(self.valid.strftime('%Y%m%d %H:%M:%S'))
-        elif isinstance(self.valid, (timedelta,)):
-            if self.valid == self.DAY:
-                tif = 'DAY'
-            else:
-                tif = 'GTD'  # Good til date
-                valid = datetime.now() + self.valid  # .now, using localtime
-                self.goodTillDate = bytes(valid.strftime('%Y%m%d %H:%M:%S'))
-
-        elif self.valid == 0:
-            tif = 'DAY'
-        else:
-            tif = 'GTD'  # Good til date
-            valid = num2date(self.valid)
-            self.goodTillDate = bytes(valid.strftime('%Y%m%d %H:%M:%S'))
-
-        self.Tif = bytes(tif)
-
-        # OCA
-        self.OcaType = 1  # Cancel all remaining orders with block
-
-        # pass any custom arguments to the order
-        for key, value in kwargs.items():
-            setattr(self, key, value)
+        ibstore_insync.Order.__init__(self, **kwargs)
+        self.orderId=self.ib.nextOrderId(),
 
 class MetaIBBroker(BrokerBase.__class__):
     def __init__(cls, name, bases, dct):
@@ -241,41 +213,56 @@ class IBBroker(with_metaclass(MetaIBBroker, BrokerBase)):
     '''
     params = (
         ('cash', 10000.0),
+        ('checksubmit', True),  
     )
 
     def __init__(self, **kwargs):
         super(IBBroker, self).__init__()
 
-        #self.ib = ibstore.IBStore(**kwargs)
-        self.ib = ibstore_insync.IBStoreInsync(**kwargs)
-
-        self.startingcash = self.cash = 0.0
-        self.startingvalue = self.value = 0.0
-
-        self._lock_orders = threading.Lock()  # control access
-        self.orderbyid = dict()  # orders by order id
-        self.executions = dict()  # notified executions
-        self.ordstatus = collections.defaultdict(dict)
-        self.notifs = queue.Queue()  # holds orders which are notified
-        self.tonotify = collections.deque()  # hold oids to be notified
-
-    def start(self):
-        super(IBBroker, self).start()
         self.ib.start(broker=self)
 
         if self.ib.isConnected():
             self.startingcash = self.cash = self.ib.get_acc_cash()
             self.startingvalue = self.value = self.ib.get_acc_value()
-        else:
-            self.startingcash = self.cash = 0.0
-            self.startingvalue = self.value = 0.0
 
+        self.submitted = collections.deque()
         print(f"cash: {self.startingcash}")
 
-    def stop(self):
-        super(IBBroker, self).stop()
-        self.ib.stop()
+    def init(self):
+        '''
+        init会在super().__init__中调用,
+        因此init的执行是在__init__中的第一句被调用,__init__中初始化的代码都init()后执行
+        '''
 
+        super(IBBroker, self).init()
+
+        self.ib = ibstore_insync.IBStoreInsync()
+        self.runmode = self.ib.runmode
+
+        self.startingcash = self.cash = self.p.cash
+        self.startingvalue = self.value = 0.0
+
+        self.orders = list()  # will only be appending
+        self.pending = collections.deque()  # popleft and append(right)
+        self._toactivate = collections.deque()  # to activate in next cycle
+
+        self.positions = collections.defaultdict(Position)
+        self._lock_orders = threading.Lock()  # control access
+        self.orderbyid = dict()  # orders by order id
+        self.executions = dict()  # notified executions
+        self.ordstatus = collections.defaultdict(dict)
+        self.d_credit = collections.defaultdict(float)  # credit per data
+        self.notifs = queue.Queue()
+        self.tonotify = collections.deque()  # hold oids to be notified
+
+        self.submitted = collections.deque()
+
+        # to keep dependent orders if needed
+        self._pchildren = collections.defaultdict(collections.deque)
+
+        self._ocos = dict()
+        self._ocol = collections.defaultdict(list) 
+       
     def get_cash(self):
         # This call cannot block if no answer is available from ib
         self.cash = self.ib.get_acc_cash()
@@ -288,93 +275,141 @@ class IBBroker(with_metaclass(MetaIBBroker, BrokerBase)):
     getvalue = get_value
 
     def getposition(self, data, clone=True):
-        return self.ib.getposition(contract=data.tradecontract, clone=clone)
+        return self.ib.getposition(data=data, clone=clone)
 
     def cancel(self, order):
         try:
-            o = self.orderbyid[order.OrderId]
+            o = self.orderbyid[order.orderId]
         except (ValueError, KeyError):
             return  # not found ... not cancellable
 
         if order.status == Order.Cancelled:  # already cancelled
             return
 
-        self.ib.cancelOrder(order.OrderId)
+        self.ib.cancelOrder(order.orderId)
 
     def orderstatus(self, order):
         try:
-            o = self.orderbyid[order.OrderId]
+            o = self.orderbyid[order.orderId]
         except (ValueError, KeyError):
             o = order
 
         return o.status
 
+    def _take_children(self, order):
+        oref = order.ref
+        pref = getattr(order.parent, 'ref', oref)  # parent ref or self
+
+        if oref != pref:
+            if pref not in self._pchildren:
+                order.reject()  # parent not there - may have been rejected
+                self.notify(order)  # reject child, notify
+                return None
+
+        return pref
+    
     def submit(self, order):
+        
         order.submit(self)
 
         # ocoize if needed
         if order.oco is None:  # Generate a UniqueId
             order.OcaGroup = uuid.uuid4().bytes
         else:
-            order.OcaGroup = self.orderbyid[order.oco.OrderId].OcaGroup
+            order.OcaGroup = self.orderbyid[order.oco.orderId].OcaGroup
 
-        self.orderbyid[order.OrderId] = order
+        self.orderbyid[order.orderId] = order 
         self.ib.placeOrder(order.data.tradecontract, order)
         self.notify(order)
 
         return order
 
+    def transmit(self, order, check=True):
+        if self.runmode == 'backtest':
+            if check and self.p.checksubmit:
+                order.submit()
+                self.submitted.append(order)
+                self.orders.append(order)
+                self.notify(order)
+            else:
+                self.submit_accept(order)
+
+        return order
+
+    def check_submitted(self):
+        if self.runmode == 'backtest':
+            cash = self.cash
+            positions = dict()
+
+            while self.submitted:
+                order = self.submitted.popleft()
+
+                if self._take_children(order) is None:  # children not taken
+                    continue
+
+                comminfo = self.getcommissioninfo(order.data)
+
+                position = positions.setdefault(
+                    order.data, self.positions[order.data].clone())
+
+                # pseudo-execute the order to get the remaining cash after exec
+                cash = self._execute(order, cash=cash, position=position)
+
+                if cash >= 0.0:
+                    self.submit_accept(order)
+                    continue
+
+                order.margin()
+                self.notify(order)
+                self._ococheck(order)
+                self._bracketize(order, cancel=True)
+
+    def submit_accept(self, order):
+        order.pannotated = None
+        order.submit()
+        order.accept()
+        self.pending.append(order)
+        self.notify(order)
+
     def getcommissioninfo(self, data):
-        contract = data.tradecontract
-        try:
-            mult = float(contract.multiplier)
-        except (ValueError, TypeError):
-            mult = 1.0
+        if data.commission is None:
+            contract = data.tradecontract
+            try:
+                mult = float(contract.multiplier)
+            except (ValueError, TypeError):
+                mult = 1.0
+            stocklike = contract.secType not in ('FUT', 'OPT', 'FOP',)
+            return IBCommInfo(mult=mult, stocklike=stocklike)
+        else:
+            return data.commission
 
-        stocklike = contract.secType not in ('FUT', 'OPT', 'FOP',)
-
-        return IBCommInfo(mult=mult, stocklike=stocklike)
-
-    def _makeorder(self, action, owner, data,
-                   size, price=None, plimit=None,
-                   exectype=None, valid=None,
-                   tradeid=0, **kwargs):
-        
-        orderId=self.ib.nextOrderId()							 
-        order = IBOrder(action, owner=owner, data=data,
-                        size=size, price=price, pricelimit=plimit,
-                        exectype=exectype, valid=valid,
-                        tradeid=tradeid,
-                        clientId=self.ib.clientId,
+    def _makeorder(self, action, owner, data, **kwargs):
+        '''
+        开仓必须使用BKT bracketOrder 套利单
+        平仓必须使用LMT limitOrder 限价单
+        '''
+        orderId=self.ib.nextOrderId()
+        order = IBOrder(action=action, 
+                        owner=owner, 
+                        data=data, 
                         orderId=orderId,
                         **kwargs)
 
         order.addcomminfo(self.getcommissioninfo(data))
         return order
-
-    def buy(self, owner, data,
-            size, price=None, plimit=None,
-            exectype=None, valid=None, tradeid=0,
-            **kwargs):
-
-        order = self._makeorder(
-            'BUY',
-            owner, data, size, price, plimit, exectype, valid, tradeid,
-            **kwargs)
-
+            
+    def buy(self, owner, data, **kwargs):
+        order = self._makeorder('BUY', owner, data, **kwargs)
+        order.addinfo(**kwargs)
+        self._ocoize(order, oco)
         return self.submit(order)
 
-    def sell(self, owner, data,
-             size, price=None, plimit=None,
-             exectype=None, valid=None, tradeid=0,
-             **kwargs):
-
-        order = self._makeorder(
-            'SELL',
-            owner, data, size, price, plimit, exectype, valid, tradeid,
-            **kwargs)
-
+    def sell(self, owner, data, **kwargs):
+        order = self._makeorder('SELL', owner, data, **kwargs)
+        order.addinfo(**kwargs)
+        self._ocoize(order, oco)
         return self.submit(order)
+    
 
     def notify(self, order):
         self.notifs.put(order.clone())
@@ -388,18 +423,65 @@ class IBBroker(with_metaclass(MetaIBBroker, BrokerBase)):
         return None
 
     def next(self):
-        self.notifs.put(None)  # mark notificatino boundary
+        if self.p.checksubmit:
+            self.check_submitted()
 
-    # Order statuses in msg
-    (SUBMITTED, FILLED, CANCELLED, INACTIVE,
-     PENDINGSUBMIT, PENDINGCANCEL, PRESUBMITTED) = (
-        'Submitted', 'Filled', 'Cancelled', 'Inactive',
-         'PendingSubmit', 'PendingCancel', 'PreSubmitted',)
+        # Discount any cash for positions hold
+        credit = 0.0
+        for data, pos in self.positions.items():
+            if pos:
+                comminfo = self.getcommissioninfo(data)
+                dt0 = data.datetime.datetime()
+                dcredit = comminfo.get_credit_interest(data, pos, dt0)
+                self.d_credit[data] += dcredit
+                credit += dcredit
+                pos.datetime = dt0  # mark last credit operation
+
+        self.cash -= credit
+
+        self._process_order_history()
+
+        # Iterate once over all elements of the pending queue
+        self.pending.append(None)
+        while True:
+            order = self.pending.popleft()
+            if order is None:
+                break
+
+            if order.expire():
+                self.notify(order)
+                self._ococheck(order)
+                self._bracketize(order, cancel=True)
+
+            elif not order.active():
+                self.pending.append(order)  # cannot yet be processed
+
+            else:
+                self._try_exec(order)
+                if order.alive():
+                    self.pending.append(order)
+
+                elif order.status == Order.Completed:
+                    # a bracket parent order may have been executed
+                    self._bracketize(order)
+
+        # Operations have been executed ... adjust cash end of bar
+        for data, pos in self.positions.items():
+            # futures change cash every bar
+            if pos:
+                comminfo = self.getcommissioninfo(data)
+                self.cash += comminfo.cashadjust(pos.size,
+                                                 pos.adjbase,
+                                                 data.close[0])
+                # record the last adjustment price
+                pos.adjbase = data.close[0]
+
+        self._get_value()  # update value
 
     def push_orderstatus(self, msg):
         # Cancelled and Submitted with Filled = 0 can be pushed immediately
         try:
-            order = self.orderbyid[msg.OrderId]
+            order = self.orderbyid[msg.orderId]
         except KeyError:
             return  # not found, it was not an order
 
@@ -449,14 +531,14 @@ class IBBroker(with_metaclass(MetaIBBroker, BrokerBase)):
         elif msg.status in [self.SUBMITTED, self.FILLED]:
             # These two are kept inside the order until execdetails and
             # commission are all in place - commission is the last to come
-            self.ordstatus[msg.OrderId][msg.filled] = msg
+            self.ordstatus[msg.orderId][msg.filled] = msg
 
         elif msg.status in [self.PENDINGSUBMIT, self.PRESUBMITTED]:
             # According to the docs, these statuses can only be set by the
             # programmer but the demo account sent it back at random times with
             # "filled"
             if msg.filled:
-                self.ordstatus[msg.OrderId][msg.filled] = msg
+                self.ordstatus[msg.orderId][msg.filled] = msg
         else:  # Unknown status ...
             pass
 
@@ -467,7 +549,7 @@ class IBBroker(with_metaclass(MetaIBBroker, BrokerBase)):
         with self._lock_orders:
             try:
                 ex = self.executions.pop(cr.execId)
-                oid = ex.OrderId
+                oid = ex.orderId
                 order = self.orderbyid[oid]
                 ostatus = self.ordstatus[oid].pop(ex.cumQty)
                 
@@ -523,7 +605,7 @@ class IBBroker(with_metaclass(MetaIBBroker, BrokerBase)):
                 if oid not in self.tonotify:  # Lock needed
                     self.tonotify.append(oid)
             except Exception as e:
-                logger.exception(f"Exception: {e}")						  
+                self.ib._logger.exception(f"Exception: {e}")						  
 
     def push_portupdate(self):
         # If the IBStore receives a Portfolio update, then this method will be
@@ -561,7 +643,7 @@ class IBBroker(with_metaclass(MetaIBBroker, BrokerBase)):
     def push_orderstate(self, msg):
         with self._lock_orders:
             try:
-                order = self.orderbyid[msg.OrderId]
+                order = self.orderbyid[msg.orderId]
             except (KeyError, AttributeError):
                 return  # no order or no id in error
 

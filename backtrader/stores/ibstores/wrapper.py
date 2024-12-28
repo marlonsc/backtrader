@@ -367,7 +367,11 @@ class Wrapper:
         if results is not None:
             results.append(position)
         self.ib.positionEvent.emit(position)
-        print("Position.", "Account:", account, "Contract:", contract, "Position:", position, "Avg cost:", avgCost)
+        print(f"Position[{account}]s, "
+              f"Assert:{contract.symbol}, "
+              f"Contract:{contract.conId}, "
+              f"Position:{position}, "
+              f"Avg cost:{avgCost}")
 
     def positionEnd(self):
         self._endReq('positions')
@@ -419,9 +423,9 @@ class Wrapper:
         if order.whatIf:
             # response to whatIfOrder
             if orderState.initMarginChange != str(UNSET_DOUBLE):
-                self._endReq(order.OrderId, orderState)
+                self._endReq(order.orderId, orderState)
         else:
-            key = self.orderKey(order.clientId, order.OrderId, order.permId)
+            key = self.orderKey(order.clientId, order.orderId, order.permId)
             trade = self.trades.get(key)
             if trade:
                 trade.order.permId = order.permId
@@ -462,7 +466,7 @@ class Wrapper:
             self, contract: Contract, order: Order, orderState: OrderState):
         contract = Contract.create(**dataclassAsDict(contract))
         orderStatus = OrderStatus(
-            orderId=order.OrderId, status=orderState.status)
+            orderId=order.orderId, status=orderState.status)
         trade = Trade(contract, order, orderStatus, [], [])
         self._results['completedOrders'].append(trade)
         if order.permId not in self.permId2Trade:

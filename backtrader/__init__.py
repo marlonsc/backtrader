@@ -37,8 +37,6 @@ from .trade import *
 from .position import *
 
 from .store import Store
-
-from . import broker as broker
 from .broker import *
 
 from .lineseries import *
@@ -66,6 +64,7 @@ from .flt import *
 from . import utils as utils
 
 from . import feeds as feeds
+from . import brokers as brokers
 from . import indicators as indicators
 from . import indicators as ind
 from . import studies as studies
