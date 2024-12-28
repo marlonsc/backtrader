@@ -96,7 +96,9 @@ class IBCommInfo(CommInfoBase):
 
     def getvaluesize(self, size, price):
         # In real life the margin approaches the price
-        # size不能加abs，卖空时size为负，价值也是负的
+        if not self._stocklike:
+            return abs(size) * self.get_margin(price)
+
         return size * price
     
     def _getcommission(self, size, price, pseudoexec):
