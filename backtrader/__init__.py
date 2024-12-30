@@ -64,6 +64,7 @@ from .flt import *
 from . import utils as utils
 
 from . import feeds as feeds
+from . import orders as orders
 from . import brokers as brokers
 from . import indicators as indicators
 from . import indicators as ind

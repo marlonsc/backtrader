@@ -289,6 +289,12 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         'MSF' : {'Initial':488.304, 'Maintenance':424.6125},
         'MCD' : {'Initial':169.445, 'Maintenance':147.343},
         'MJY' : {'Initial':377.996, 'Maintenance':328.692},
+        'EUR' : {'Initial':374.049, 'Maintenance':325.26},
+        'GBP' : {'Initial':272.374, 'Maintenance':236.847},
+        'AUD' : {'Initial':261.883, 'Maintenance':227.725},
+        'CAD' : {'Initial':488.304, 'Maintenance':424.6125},
+        'CHF' : {'Initial':169.445, 'Maintenance':147.343},
+        'JPY' : {'Initial':377.996, 'Maintenance':328.692},
     }
 
     #_store = ibstore.IBStore
@@ -475,6 +481,23 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
 
         print(f'precon= {precon}')
         return precon   
+    
+    def updatecomminfo(self, contract=None):
+
+        broker = self.ib.getbroker()
+        commparams = dict()
+        commparams['commtype'] = self._IBCommissionTypes.get(contract.secType, None)
+        if contract.secType in ['FUT', 'FOP', 'OPT']:
+            commparams['margin'] = self._IBFUTMargin.get(contract.symbol, None).get('Initial', None)  
+        else:
+            commparams['margin'] = None
+        mult = getattr(contract, 'multiplier', 1.0)
+        if mult is '':
+            mult = 1.0
+        commparams['mult'] = mult
+        self.commission = IBCommInfo(**commparams)
+        broker.addcommissioninfo(self.commission, name=self._name)
+
 
     def start(self):
         '''Starts the IB connecction and gets the real contract and
@@ -523,11 +546,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
                 useRTH=1, 
                 formatDate=1
                 ) #format=1 UTC time format=2 epoch time
-            
-            mult = getattr(cdetails.contract, 'multiplier', 1.0)
-            commtype = self._IBCommissionTypes.get(cdetails.contract.secType, None)
-            margin = self._IBFUTMargin.get(cdetails.contract.symbol, None).get('Initial', None)  
-            self.commission = IBCommInfo(mult=mult, commtype=commtype, margin=margin)
+            self.updatecomminfo(self.contract)            
         else:
             # no contract can be found (or many)
             self.put_notification(self.DISCONNECTED)
@@ -811,7 +830,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         # 重载start_finish方法，ibdata额外增加数据开始日期判断
         super()._start_finish()
 
-        if self.fromdate < date2num(self.constractStartDateUTC):
+        if self.constractStartDateUTC and self.fromdate < date2num(self.constractStartDateUTC):
             print(
                 f'From <{self.p.fromdate}> To <{self.constractStartDateUTC}>'
                 f'has no constract data, '

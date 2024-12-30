@@ -173,8 +173,8 @@ class IBCommInfo(CommInfoBase):
         
         if self._commtype == self.COMM_FOREX:
             #IB Commission, Perc mode2, Minimum per order
-            total_commission = abs(size) * price * self.p.commission
-            brokercommission = max(2, brokercommission)
+            brokercommission = abs(size) * price * self.p.commission
+            total_commission = max(2, brokercommission)
 
             return total_commission
 

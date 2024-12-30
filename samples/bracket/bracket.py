@@ -124,7 +124,6 @@ class St(bt.Strategy):
 
         else:  # in the market
             if (len(self) - self.holdstart) >= self.p.hold:
-                print("in the market")
                 pass  # do nothing in this case
 
 

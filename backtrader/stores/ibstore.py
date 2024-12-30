@@ -319,10 +319,6 @@ class IBStore(with_metaclass(MetaSingleton, object)):
         except AttributeError:
             pass    # conn may have never been connected and lack "disconnect"
 
-        # Unblock any calls set on these events
-        self._event_managed_accounts.set()
-        self._event_accdownload.set()
-
     def logmsg(self, *args):
         # for logging purposes
         if self.p._debug:

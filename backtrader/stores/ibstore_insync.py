@@ -244,18 +244,18 @@ class IBStoreInsync(IBStore):
     TimezoneTWS: str = ''
 
     @classmethod
-    def getdata(cls, *args, **kwargs):
+    def adddata(cls, *args, **kwargs):
         '''Returns ``DataCls`` with args, kwargs'''
         return super().getdata(*args, **kwargs)
 
-    @classmethod
-    def getbroker(cls, *args, **kwargs):
+    def getbroker(self):
         '''Returns broker with *args, **kwargs from registered ``BrokerCls'''''
-        return super().getbroker(*args, **kwargs)
+        return super().getbroker()
     
     def __init__(self):
         super(IBStore, self).__init__()
 
+        self.runmode = self.p.runmode
         # Account list received
         self._event_accdownload = threading.Event()
 
