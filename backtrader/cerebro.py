@@ -1847,7 +1847,8 @@ class Cerebro(with_metaclass(MetaParams, object)):
                 #qlapse = datetime.datetime.utcnow() - qstart
                 qlapse = datetime.datetime.now(datetime.UTC) - qstart
                 d.do_qcheck(newqcheck, qlapse.total_seconds())
-                drets.append(d.next(ticks=False))
+                cc = d.next(ticks=False)
+                drets.append(cc)
 
             d0ret = any((dret for dret in drets))
             if not d0ret and any((dret is None for dret in drets)):

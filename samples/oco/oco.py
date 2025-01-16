@@ -38,7 +38,7 @@ class St(bt.Strategy):
         limdays2=1000,
         hold=10,
         usetarget=False,  # use order_target_size
-        switchp1p2=False,  # switch prices of order1 and order2
+        switchp1p2=True,  # switch prices of order1 and order2
         oco1oco2=False,  # False - use order1 as oco for order3, else order2
         do_oco=True,  # use oco or not
     )

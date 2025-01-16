@@ -75,18 +75,20 @@ class MetaOrder(bt.MetaParams):
         '''
         ordertype = kwargs.get('orderType')
         kwargs['totalQuantity'] = kwargs.get('size', 0)
-        kwargs['exectype'] = \
-                cls._IBOrdTypes.get(ordertype, None)
-        if ordertype in ['LMT']:
-            kwargs['price'] = kwargs.get('lmtPrice', 0)
-        elif ordertype in ['STP'] :
-            kwargs['price'] = kwargs.get('auxPrice', 0)
+        if ordertype == 'MKT':
+            kwargs.pop('price')
         tif = kwargs.get('tif', None)
         if tif == 'DAY':
             kwargs['valid'] = datetime.timedelta(days=1)
         elif tif == 'GTC':
             kwargs['valid'] = datetime.timedelta(days=365)
         transmit = kwargs.get('transmit', None)
+        if ordertype in ['TRAIL', 'TRAIL LIMIT']:
+            trailingPercent = kwargs.get('trailingPercent', 0)
+            if trailingPercent:
+                kwargs['trailpercent'] = trailingPercent/100 #precentage price
+            else:
+                kwargs['trailamount'] = kwargs.get('auxPrice')
         
         _obj, args, kwargs =  \
             super().donew(*args, **kwargs)

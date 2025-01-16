@@ -260,6 +260,7 @@ class IBStoreInsync(IBStore):
         self._event_accdownload = threading.Event()
 
         self.dontreconnect = False  # for non-recoverable connect errors
+        self._allowtrade = False
 
         self._env = None  # reference to cerebro for general notifications
         self.broker = None  # broker instance
@@ -308,7 +309,6 @@ class IBStoreInsync(IBStore):
         self._createEvents()
         self.accountValueEvent +=  self.onUpdateAccountValue
         self.positionEvent += self.onUpdatePosition
-        self.barUpdateEvent += self.onUpdatebar
         
         self.wrapper = Wrapper(self)
         self.client = Client(self.wrapper)
@@ -471,8 +471,8 @@ class IBStoreInsync(IBStore):
         # Get a naive localtime object
         #msg.time = datetime.utcfromtimestamp(float(msg.time))
         #self.qs[msg.reqId].put(msg)
-        curtime = bars[0].date
-        # print(f"updatebar tickId:{bars.reqId} size:{len(bars)}, time:{curtime}, new:{hasNewBar}")
+        #curtime = bars[0].date
+        print(f"updatebar tickId:{bars.reqId} size:{len(bars)}")
 
     def getposition(self, data=None, clone=False):
         # Lock access to the position dicts. This is called from main thread
@@ -646,6 +646,12 @@ class IBStoreInsync(IBStore):
                 q = self.qs[msg.reqId]
                 self.cancelQueue(q, True)
 
+    def set_tradestatus(self, status=False):
+        self._allowtrade = status
+    
+    def get_tradestatus(self):
+        return self._allowtrade
+    
     def makecontract(self) -> Contract:
         '''returns an empty contract from the parameters without check'''
         contract = Contract()
@@ -691,7 +697,21 @@ class IBStoreInsync(IBStore):
         # Create a counter from the TWS notified value to apply to orders
         self.reqId = itertools.count(reqId)										
 
+    def getdatabycontract(self, contract):
+        '''Returns the data object for a contract'''
+        for data in self.datas:
+            if data.contract.symbol == contract.symbol:
+                return data
+        
+        return None
+    
     def onUpdatePosition(self, position):
+        data =  self.getdatabycontract(position.contract)
+        # 连接时就会请求持仓信息，此时还没有data和broker，所以需要判断
+        if data and self.broker:
+            self.broker.positions[data]['price'] = \
+                    position.avgCost/abs(position.position)
+            self.broker.positions[data]['size'] = position.position
         self.positions[position.contract.symbol] = position
 
     def onUpdateAccountValue(self, key, value, currency, accountName):

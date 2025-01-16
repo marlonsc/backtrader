@@ -116,7 +116,7 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
         init会被重复调用,在init和broker.start()中都会被调用
         '''
         super(IBBroker, self).init()
-        self.startingcash = self.cash = self.p.cash
+        self.startingcash = self.cash = self.validcash = self.p.cash
         self.startingvalue = self.value = 0.0
 
         self._value = self.cash
@@ -151,7 +151,16 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
         self.ordstatus = collections.defaultdict(dict)
         self.tonotify = collections.deque()  # hold oids to be notified
 
-
+    def start(self):
+        super().init()
+        if not self.checkorder:
+            for data in self.ib.datas:
+                if self.positions[data] is None:
+                    position = self.ib.getposition(data=data, clone=True)
+                    self.positions[data] = Position()
+                    self.positions[data].price = \
+                        position.avgCost/abs(position.position)
+                    self.positions[data].size = position.position
 
     @property
     def checkorder(self):
@@ -240,6 +249,14 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
             self.cash = self.ib.get_acc_cash()
             return self.cash
     getcash = get_cash
+
+    def get_validcash(self):
+        # This call cannot block if no answer is available from ib
+        if self.checkorder:
+            return self.validcash
+        else:
+            self.validcash = self.ib.get_acc_validcash()
+            return self.self.validcash
 
     def set_cash(self, cash):
         '''Sets the cash parameter (alias: ``setcash``)'''
@@ -378,7 +395,7 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
         if self.checkorder:
             return self.positions[data]
         else:
-            return self.ib.getposition(data=data, clone=clone)
+            return self.positions[data]
 
 
     def orderstatus(self, order):

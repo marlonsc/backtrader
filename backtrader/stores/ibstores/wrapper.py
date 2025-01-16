@@ -178,6 +178,7 @@ class Wrapper:
 
     def connectionClosed(self):
         error = ConnectionError('Socket disconnect')
+        print('Connection closed')
         for future in self._futures.values():
             if not future.done():
                 future.set_exception(error)
@@ -367,7 +368,7 @@ class Wrapper:
         if results is not None:
             results.append(position)
         self.ib.positionEvent.emit(position)
-        print(f"Position[{account}]s, "
+        print(f"Position[{account}], "
               f"Assert:{contract.symbol}, "
               f"Contract:{contract.conId}, "
               f"Position:{position}, "
@@ -622,7 +623,8 @@ class Wrapper:
             self.ib.barUpdateEvent.emit(bars, True)
             bars.updateEvent.emit(bars, True)
         print(
-            "RealTimeBar. TickerId:", reqId,
+            "RealTimeBar. bars:", id(bars),
+            " -TickerId:", reqId,
             " - Time: ", (time) ,
             ", Open: " , (open_) ,
             ", High: " , (high) ,

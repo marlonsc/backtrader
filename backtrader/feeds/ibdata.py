@@ -22,6 +22,8 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import datetime
+import time
+import threading
 from dateutil.relativedelta import relativedelta
 
 import backtrader as bt
@@ -289,12 +291,6 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         'MSF' : {'Initial':488.304, 'Maintenance':424.6125},
         'MCD' : {'Initial':169.445, 'Maintenance':147.343},
         'MJY' : {'Initial':377.996, 'Maintenance':328.692},
-        'EUR' : {'Initial':374.049, 'Maintenance':325.26},
-        'GBP' : {'Initial':272.374, 'Maintenance':236.847},
-        'AUD' : {'Initial':261.883, 'Maintenance':227.725},
-        'CAD' : {'Initial':488.304, 'Maintenance':424.6125},
-        'CHF' : {'Initial':169.445, 'Maintenance':147.343},
-        'JPY' : {'Initial':377.996, 'Maintenance':328.692},
     }
 
     #_store = ibstore.IBStore
@@ -353,6 +349,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         self.pretradecontract = self.parsecontract(self.p.tradename)
         self.constractStartDate = None  # 用于保存合约开始日期，data/datetime
         self.commission = None #用于保存数据对应的佣金信息,在生成对应合同时初始化
+        self._lock_q = threading.Condition()  # sync access to qlive
 
     def caldate(self):
         duranumber = int(self.p.durationStr.split()[0])
@@ -492,7 +489,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         else:
             commparams['margin'] = None
         mult = getattr(contract, 'multiplier', 1.0)
-        if mult is '':
+        if mult == '':
             mult = 1.0
         commparams['mult'] = mult
         self.commission = IBCommInfo(**commparams)
@@ -605,33 +602,33 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
     def haslivedata(self):
         return bool(self._storedmsg or self.qlive)
 
-    def updatelivedata(self, step=0, bars=None):
+    def updatelivedata(self, step=0, bars=None, hist=True):
         for bar in bars:
             d = len(self.lines.close)
             self.forward()
-            self._load_rtbar(bar, hist=True)
+            self._load_rtbar(bar, hist=hist)
             
-        #print(f"add live data from{bars[0].date} to {bars[-1].date}, total:{len(bars)}")    
-        self.getenvironment().start_barupdate(item=f'{d}') #通知cerebor进行处理，批处理，全更新完后处理一次
-
     def onliveupdate(self, bars, hasNewBar):
         # 对于hisorical数据，bars保存reqhistoricaEnd开始的所有数据
         # bars长度为0，表示未接收到update数据
         # bars最后一个数据为临时数据，5秒更新一次，保存最新收到的update数据，只有当timeframe时间到了才后固定
+        if self.p.historical:
+            newdatalen = len(bars)
 
-        newdatalen = len(bars)
-
-        if newdatalen < 2: #无数据或仅有一个数据，不处理。
-            return
-        
-        if hasNewBar:
-            curtime = bars[-1].date
-            if newdatalen==2:
-                print(f"onliveupdate size:1 bar.date:{bars[0].date}")
-            else:
-                print(f"onliveupdate size:{newdatalen-1} from {bars[0].date} to {bars[-2].date}")  
-            self.updatelivedata(newdatalen-1, bars[:-1]) #有2个以上数据,按timeframe频率更新，避免频率重复调用,一直更新到倒数第2个数据，仅保存最后一个数据:-1不包含-1，只到-2
-            bars[:] = bars[-1:]
+            if newdatalen < 2: #无数据或仅有一个数据，不处理。
+                return
+            
+            if hasNewBar:
+                curtime = bars[-1].date
+                if newdatalen==2:
+                    print(f"onliveupdate size:1 bar.date:{bars[0].date}")
+                else:
+                    print(f"onliveupdate size:{newdatalen-1} from {bars[0].date} to {bars[-2].date}")  
+                self.updatelivedata(newdatalen-1, bars[:-1]) #有2个以上数据,按timeframe频率更新，避免频率重复调用,一直更新到倒数第2个数据，仅保存最后一个数据:-1不包含-1，只到-2
+                bars[:] = bars[-1:]
+        else:
+            with self._lock_q:
+                self._lock_q.notify()
 
 
     def _load(self):
@@ -640,12 +637,16 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
 
         while True:
             if self._state == self._ST_LIVE:
-                try:
-                    msg = (self._storedmsg.pop(None, None) or
-                           self.qlive.pop(0))
-                except Exception as e:
-                    #print("_load live data Exception:", e)
-                    return None
+                start_time = time.time()
+                with self._lock_q:
+                    if len(self.qlive) == 0:
+                        self.ib.sleep(1)
+                        self._lock_q.wait(timeout=self._qcheck)
+                    try:
+                        msg = self.qlive.pop(0)
+                    except Exception as e:
+                        #print("_load live data Exception:", e)
+                        return None
 
                 if msg is None:  # Conn broken during historical/backfilling
                     self._subcription_valid = False
@@ -753,9 +754,9 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
                 continue
 
             elif self._state == self._ST_HISTORBACK:
-                if len(self.qhist) > 1:
+                if len(self.qhist) > 0:
                     msg = self.qhist.pop(0)
-                    if len(self.qhist) == 1:
+                    if len(self.qhist) == 0:
                         print(f"Historical total:{len(self)} final historical data {msg.date}")
                 else:
                     if self.p.historical:  # only historical
