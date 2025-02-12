@@ -121,11 +121,12 @@ class MetaDataTrades(Observer.__class__):
         _obj.lines = linescls()
 
         # Generate plotlines info
-        markers = ['o', 'v', '^', '<', '>', '1', '2', '3', '4', '8', 's', 'p',
+        base_markers = ['o', 'v', '^', '<', '>', '1', '2', '3', '4', '8', 's', 'p',
                    '*', 'h', 'H', '+', 'x', 'D', 'd']
 
-        colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'b', 'g', 'r', 'c', 'm',
-                  'y', 'k', 'b', 'g', 'r', 'c', 'm']
+        base_colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
+        markers = base_markers * len(base_colors)
+        colors = base_colors * len(base_markers)
 
         basedict = dict(ls='', markersize=8.0, fillstyle='full')
 
