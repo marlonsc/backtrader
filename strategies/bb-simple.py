@@ -19,8 +19,12 @@
 #
 ###############################################################################
 """
-BOLLINGER BANDS TRADING STRATEGY WITH FINANCIAL MODELING PREP API
-=================================================================
+BOLLINGER BANDS TRADING STRATEGY WITH FINANCIAL MODELING PREP API - (bb-simple)
+================================================================================
+
+This strategy is fundamentally a Bollinger Bands breakout strategy that enters 
+when price breaks above the upper band and exits when it falls below the middle 
+band. The new name clearly communicates this price-action-based approach.
 
 This script implements a trading strategy that uses Bollinger Bands to generate
 buy and sell signals. The strategy is based on price breakthroughs of the bands:

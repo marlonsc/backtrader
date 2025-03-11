@@ -19,8 +19,12 @@
 #
 ###############################################################################
 """
-GAUSSIAN CHANNEL STRATEGY WITH STOCHASTIC RSI AND BOLLINGER BANDS
-=================================================================
+GAUSSIAN CHANNEL STRATEGY WITH STOCHASTIC RSI AND BOLLINGER BANDS - (bb-medium)
+================================================================================
+
+This strategy uses a more complex triple confirmation method: ascending Gaussian channel + price 
+above upper band + StochRSI extreme readings. The name should reflect this multiple-indicator 
+confirmation approach.
 
 This script implements a more advanced trading strategy that combines:
 1. Gaussian Channel indicator

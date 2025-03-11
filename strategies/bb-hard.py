@@ -19,8 +19,12 @@
 #
 ###############################################################################
 """
-GAUSSIAN CHANNEL WITH STOCHASTIC RSI TRADING STRATEGY
-=====================================================
+GAUSSIAN CHANNEL WITH STOCHASTIC RSI TRADING STRATEGY - (bb-hard)
+=================================================================
+
+This strategy focuses on early momentum shifts, looking for StochRSI crossing above 
+20 during an ascending Gaussian channel, with a trailing stop exit. The name emphasizes 
+the momentum reversal aspect of the strategy.
 
 This script implements a trading strategy that combines:
 1. Gaussian Channel - A weighted moving average with standard deviation bands
