@@ -216,6 +216,63 @@ class StochasticRSI(bt.Indicator):
         self.lines.d = bt.indicators.SMA(self.lines.k, period=self.p.dlength)
 
 
+class GaussianFilter(bt.Indicator):
+    """
+    Gaussian Filter indicator as described by John Ehlers
+    
+    This indicator calculates a filter and channel bands using Gaussian filter techniques
+    """
+    lines = ('filt', 'hband', 'lband')
+    params = (
+        ('poles', 4),         # Number of poles (1-9)
+        ('period', 144),      # Sampling period (min: 2)
+        ('mult', 1.414),      # True Range multiplier
+        ('lag_reduction', False),  # Reduced lag mode
+        ('fast_response', False),  # Fast response mode
+        ('source', None)      # Source data (default: hlc3)
+    )
+    
+    plotinfo = dict(
+        plot=True,
+        plotname='Gaussian Channel',
+        subplot=False,  # Plot on the same graph as price
+        plotlinelabels=True
+    )
+    
+    plotlines = dict(
+        filt=dict(color='green', _name='Filter', linewidth=2),
+        hband=dict(color='red', _name='Upper Band'),
+        lband=dict(color='red', _name='Lower Band')
+    )
+    
+    def __init__(self):
+        # Use the provided source or default to HLC3
+        if self.p.source is None:
+            self.src = (self.data.high + self.data.low + self.data.close) / 3.0
+        else:
+            self.src = self.p.source
+        
+        # Beta and Alpha components
+        beta = (1 - math.cos(4 * math.asin(1) / self.p.period)) / (math.pow(1.414, 2 / self.p.poles) - 1)
+        alpha = -beta + math.sqrt(math.pow(beta, 2) + 2 * beta)
+        
+        # Lag
+        lag = (self.p.period - 1) / (2 * self.p.poles)
+        
+        # Apply the filters - we'll implement a simplified version here
+        self.srcdata = self.src
+        self.trdata = bt.indicators.TrueRange(self.data)
+        
+        # Exponential filters for the main data and true range
+        self.filt_n = bt.indicators.EMA(self.srcdata, period=int(self.p.period / self.p.poles))
+        self.filt_tr = bt.indicators.EMA(self.trdata, period=int(self.p.period / self.p.poles))
+        
+        # Output lines
+        self.lines.filt = self.filt_n
+        self.lines.hband = self.filt_n + self.filt_tr * self.p.mult
+        self.lines.lband = self.filt_n - self.filt_tr * self.p.mult
+
+
 class GaussianChannel(bt.Indicator):
     """
     Gaussian Channel Indicator
@@ -270,41 +327,94 @@ class GaussianChannel(bt.Indicator):
         self.lines.lower = self.lines.mid - self.stddev * self.p.multiplier
 
 
-class GaussianChannelStrategy(bt.Strategy):
+class StochasticRSIGaussianChannelStrategy(bt.Strategy):
     """
-    Strategy that implements the Gaussian Channel with Stochastic RSI trading rules:
+    Strategy that implements the Stochastic RSI with Gaussian Channel trading rules:
     - Open long position when:
-      - Price closes above the upper Gaussian Channel line
-      - Stochastic RSI K line is above D line (stochastic is "up")
-    - Close long positions when the price closes below the upper Gaussian Channel line
+      1. The gaussian channel is ascending (filt > filt[1]) 
+      2. The stochastic RSI crosses from below 20 to above 20 (K[0] > 20 and K[-1] <= 20)
+    - Multiple exit strategies available (see below)
     - Only trades within the specified date range
+    
+    Exit Strategy Options:
+    - 'default': Exit when Stochastic RSI crosses from above 80 to below 80
+    - 'middle_band': Exit when price closes below the middle gaussian channel band
+    - 'bars': Exit after a specified number of bars
+    - 'trailing_percent': Exit using a trailing stop based on percentage (default: 3.0%)
+    - 'trailing_atr': Exit using a trailing stop based on ATR
+    - 'trailing_ma': Exit when price crosses below a moving average
+    
+    Position Sizing Options:
+    - 'percent': Use a fixed percentage of available equity (default 20%)
+    - 'auto': Size based on volatility (less volatile = larger position)
+    
+    Additional Features:
+    - Trade throttling to limit trade frequency
+    - Risk management with stop loss functionality
     """
     params = (
-        # Gaussian Channel parameters
-        ('gausslength', 20),    # Period for Gaussian Channel calculation (minimum 5)
-        ('multiplier', 2.0),    # Multiplier for standard deviation bands
-        
         # Stochastic RSI parameters
-        ('rsilength', 14),      # Period for RSI calculation
-        ('stochlength', 14),    # Period for Stochastic calculation
-        ('klength', 3),         # Smoothing K period
-        ('dlength', 3),         # Smoothing D period
+        ('rsilength', 14),        # Period for RSI calculation
+        ('stochlength', 14),      # Period for Stochastic calculation
+        ('smoothk', 3),           # Smoothing K period
+        ('smoothd', 3),           # Smoothing D period
+        
+        # Gaussian Channel parameters
+        ('poles', 4),             # Number of poles (1-9)
+        ('period', 144),          # Sampling period (min: 2)
+        ('trmult', 1.414),        # Filtered True Range multiplier
+        ('lag_reduction', False), # Reduced lag mode
+        ('fast_response', False), # Fast response mode
         
         # Date range parameters
         ('startdate', datetime.datetime(2018, 1, 1)),  # Start date for trading
-        ('enddate', datetime.datetime(2069, 1, 1)),    # End date for trading
+        ('enddate', datetime.datetime(2069, 12, 31)),  # End date for trading
         
-        ('printlog', False),    # Print log for each trade
+        ('printlog', False),      # Print log for each trade
+        
+        # Exit strategy parameters
+        ('exit_strategy', 'trailing_percent'),  # Exit strategy: 'default', 'middle_band', 'bars', 'trailing_percent', 'trailing_atr', 'trailing_ma'
+        ('exit_bars', 5),         # Number of bars to hold position when exit_strategy='bars'
+        ('trailing_percent', 3.0), # Percentage for trailing stop when exit_strategy='trailing_percent'
+        ('trailing_atr_mult', 2.0), # ATR multiplier for trailing stop when exit_strategy='trailing_atr'
+        ('trailing_atr_period', 14), # ATR period for trailing stop when exit_strategy='trailing_atr'
+        ('trailing_ma_period', 50), # MA period for trailing stop when exit_strategy='trailing_ma'
+        
+        # Position sizing parameters
+        ('position_sizing', 'percent'), # Position sizing method: 'percent', 'auto'
+        ('position_percent', 20.0),    # Percentage of equity to use per trade (when position_sizing='percent')
+        ('max_position_percent', 95.0), # Maximum percentage of equity to use per trade
+        ('risk_percent', 1.0),         # Risk percentage of equity per trade (used in volatility sizing)
+        
+        # Trade throttling
+        ('trade_throttle_hours', 0),   # Minimum hours between trades (0 = no throttling)
+        
+        # Risk management
+        ('use_stop_loss', False),      # Whether to use a stop loss
+        ('stop_loss_percent', 5.0),    # Stop loss percentage from entry
+        
+        # Extra parameters for ATR indicator
+        ('atr_period', 14),            # Period for ATR indicator
     )
     
     def __init__(self):
         # Keep track of close price
         self.dataclose = self.datas[0].close
+        self.datahigh = self.datas[0].high
+        self.datalow = self.datas[0].low
         
-        # To keep track of pending orders
+        # To keep track of pending orders and trade info
         self.order = None
         self.buyprice = None
         self.buycomm = None
+        self.bar_executed = None
+        
+        # To keep track of trade throttling
+        self.last_trade_time = None
+        
+        # For trailing stops
+        self.highest_price = 0
+        self.trailing_stop_price = 0
         
         # Parse the datetime values for trading date range filter
         if self.p.startdate:
@@ -322,16 +432,33 @@ class GaussianChannelStrategy(bt.Strategy):
             self.data,
             rsilength=self.p.rsilength,
             stochlength=self.p.stochlength,
-            klength=self.p.klength,
-            dlength=self.p.dlength
+            klength=self.p.smoothk,
+            dlength=self.p.smoothd
         )
         
         # Create Gaussian Channel indicator
-        self.gaussian = GaussianChannel(
-            self.data,
-            length=self.p.gausslength,
-            multiplier=self.p.multiplier
+        self.gaussian = GaussianFilter(
+            self.datas[0],
+            poles=self.p.poles,
+            period=self.p.period,
+            mult=self.p.trmult,
+            lag_reduction=self.p.lag_reduction,
+            fast_response=self.p.fast_response
         )
+        
+        # Additional indicators based on exit strategies
+        
+        # ATR for trailing stop
+        if self.p.exit_strategy == 'trailing_atr':
+            self.atr = bt.indicators.ATR(self.data, period=self.p.trailing_atr_period)
+        
+        # Moving Average for trailing MA stop
+        if self.p.exit_strategy == 'trailing_ma':
+            self.trailing_ma = bt.indicators.SimpleMovingAverage(self.dataclose, period=self.p.trailing_ma_period)
+        
+        # ATR for volatility-based position sizing
+        if self.p.position_sizing == 'auto':
+            self.atr = bt.indicators.ATR(self.data, period=self.p.atr_period)
 
     def log(self, txt, dt=None, doprint=False):
         """ Logging function """
@@ -348,21 +475,48 @@ class GaussianChannelStrategy(bt.Strategy):
         if order.status in [order.Completed]:
             if order.isbuy():
                 self.log(
-                    'BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm: %.2f' %
+                    'BUY EXECUTED, Price: %.2f, Size: %d, Cost: %.2f, Comm: %.2f' %
                     (order.executed.price,
+                     order.executed.size,
                      order.executed.value,
                      order.executed.comm))
 
                 self.buyprice = order.executed.price
                 self.buycomm = order.executed.comm
+                
+                # Update last trade time for throttling
+                self.last_trade_time = self.datas[0].datetime.datetime(0)
+                
+                # Initialize trailing stop values
+                self.highest_price = self.buyprice
+                
+                # Set stop loss price if enabled
+                if self.p.use_stop_loss and self.p.stop_loss_percent > 0:
+                    self.stop_loss_price = self.buyprice * (1 - self.p.stop_loss_percent / 100)
+                    self.log(f'STOP LOSS SET: {self.stop_loss_price:.2f}')
+                
+                # Initialize exit conditions
+                if self.p.exit_strategy == 'bars':
+                    # Store the current bar index for bar-based exit
+                    self.exit_bar = len(self) + self.p.exit_bars
+                
+                # Set initial trailing stop price based on strategy
+                if self.p.exit_strategy == 'trailing_percent':
+                    self.trailing_stop_price = self.buyprice * (1 - self.p.trailing_percent / 100)
+                    self.log(f'TRAILING STOP SET: {self.trailing_stop_price:.2f}')
+                elif self.p.exit_strategy == 'trailing_atr':
+                    self.trailing_stop_price = self.buyprice - self.atr[0] * self.p.trailing_atr_mult
+                    self.log(f'ATR TRAILING STOP SET: {self.trailing_stop_price:.2f}')
+                
             else:  # Sell
                 self.log(
-                    'SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm: %.2f' %
+                    'SELL EXECUTED, Price: %.2f, Size: %d, Cost: %.2f, Comm: %.2f' %
                     (order.executed.price,
+                     order.executed.size,
                      order.executed.value,
                      order.executed.comm))
 
-            # Record the size of the bar where the trade was executed
+            # Record the bar where the trade was executed
             self.bar_executed = len(self)
 
         elif order.status in [order.Canceled, order.Margin, order.Rejected]:
@@ -377,6 +531,111 @@ class GaussianChannelStrategy(bt.Strategy):
 
         self.log('OPERATION PROFIT, GROSS %.2f, NET %.2f' %
                  (trade.pnl, trade.pnlcomm))
+                 
+    def can_trade_now(self):
+        """Check if enough time has passed since the last trade for throttling"""
+        if self.p.trade_throttle_hours <= 0 or self.last_trade_time is None:
+            return True
+            
+        current_time = self.datas[0].datetime.datetime(0)
+        time_delta = current_time - self.last_trade_time
+        hours_passed = time_delta.total_seconds() / 3600
+        
+        return hours_passed >= self.p.trade_throttle_hours
+
+    def calculate_position_size(self):
+        """Calculate position size based on selected sizing method"""
+        available_cash = self.broker.get_cash()
+        current_price = self.dataclose[0]
+        
+        if self.p.position_sizing == 'percent':
+            # Fixed percentage of available equity
+            cash_to_use = available_cash * (self.p.position_percent / 100)
+            # Make sure we don't exceed maximum position percentage
+            cash_to_use = min(cash_to_use, available_cash * (self.p.max_position_percent / 100))
+            size = int(cash_to_use / current_price)
+            return size
+            
+        elif self.p.position_sizing == 'auto':
+            # Volatility-based position sizing
+            atr_value = self.atr[0]
+            if atr_value <= 0:
+                # Fallback to fixed percentage if ATR is invalid
+                return int(available_cash * (self.p.position_percent / 100) / current_price)
+                
+            # Calculate position size based on risk percentage and volatility
+            risk_amount = self.broker.getvalue() * (self.p.risk_percent / 100)
+            risk_per_share = atr_value * self.p.trailing_atr_mult
+            
+            if risk_per_share <= 0:
+                # Avoid division by zero
+                size = int(available_cash * (self.p.position_percent / 100) / current_price)
+            else:
+                size = int(risk_amount / risk_per_share)
+                
+            # Calculate the cash required for this position
+            position_value = size * current_price
+            
+            # Ensure we don't exceed maximum position percentage
+            max_position_value = available_cash * (self.p.max_position_percent / 100)
+            if position_value > max_position_value:
+                size = int(max_position_value / current_price)
+                
+            return size
+        
+        # Default fallback
+        return int(available_cash * (self.p.max_position_percent / 100) / current_price)
+
+    def should_exit_trade(self):
+        """Determine if we should exit the trade based on exit strategy"""
+        # Default strategy (original exit condition)
+        if self.p.exit_strategy == 'default':
+            # StochRSI crosses from above 80 to below 80
+            return self.stoch_rsi.k[-1] >= 80 and self.stoch_rsi.k[0] < 80
+            
+        # Middle band exit
+        elif self.p.exit_strategy == 'middle_band':
+            return self.dataclose[0] < self.gaussian.filt[0]
+            
+        # Time-based exit
+        elif self.p.exit_strategy == 'bars':
+            return len(self) >= self.exit_bar
+            
+        # Trailing stop based exits
+        elif self.p.exit_strategy == 'trailing_percent':
+            # Update the highest price seen since entry
+            if self.datahigh[0] > self.highest_price:
+                self.highest_price = self.datahigh[0]
+                # Update trailing stop
+                self.trailing_stop_price = self.highest_price * (1 - self.p.trailing_percent / 100)
+                self.log(f'TRAILING STOP UPDATED: {self.trailing_stop_price:.2f}', doprint=False)
+                
+            # Exit if price touches or goes below the trailing stop
+            return self.datalow[0] <= self.trailing_stop_price
+            
+        elif self.p.exit_strategy == 'trailing_atr':
+            # Update the highest price seen since entry
+            if self.datahigh[0] > self.highest_price:
+                self.highest_price = self.datahigh[0]
+                # Update trailing stop
+                self.trailing_stop_price = self.highest_price - (self.atr[0] * self.p.trailing_atr_mult)
+                self.log(f'ATR TRAILING STOP UPDATED: {self.trailing_stop_price:.2f}', doprint=False)
+                
+            # Exit if price touches or goes below the trailing stop
+            return self.datalow[0] <= self.trailing_stop_price
+            
+        elif self.p.exit_strategy == 'trailing_ma':
+            # Exit when price closes below the moving average
+            return self.dataclose[0] < self.trailing_ma[0]
+            
+        # Stop loss hit
+        if self.p.use_stop_loss and hasattr(self, 'stop_loss_price'):
+            if self.datalow[0] <= self.stop_loss_price:
+                self.log(f'STOP LOSS TRIGGERED: {self.stop_loss_price:.2f}')
+                return True
+                
+        # Default is to never exit (not realistic but safe)
+        return False
 
     def next(self):
         # Only operate within the specified date range
@@ -396,53 +655,81 @@ class GaussianChannelStrategy(bt.Strategy):
         # Debug info every 5 bars
         if len(self) % 5 == 0:
             self.log(f'Close: {self.dataclose[0]:.2f}, '
-                    f'GC Mid: {self.gaussian.mid[0]:.2f}, '
-                    f'GC Upper: {self.gaussian.upper[0]:.2f}, '
-                    f'GC Lower: {self.gaussian.lower[0]:.2f}, '
+                    f'GC Mid: {self.gaussian.filt[0]:.2f}, '
+                    f'GC Upper: {self.gaussian.hband[0]:.2f}, '
+                    f'GC Lower: {self.gaussian.lband[0]:.2f}, '
                     f'StochRSI K: {self.stoch_rsi.k[0]:.2f}, '
                     f'D: {self.stoch_rsi.d[0]:.2f}', doprint=True)
+                    
+            # Show trailing stop info if in a position
+            if self.position and hasattr(self, 'trailing_stop_price') and self.trailing_stop_price > 0:
+                self.log(f'Trailing Stop: {self.trailing_stop_price:.2f}', doprint=True)
 
         # Check if we are in the market
         if not self.position:
-            # LONG CONDITIONS:
-            # 1. Price closes above the upper Gaussian Channel line
-            # 2. Stochastic RSI K line is above D line (stochastic is "up")
-            price_above_upper = self.dataclose[0] > self.gaussian.upper[0]
-            stoch_rsi_up = self.stoch_rsi.k[0] > self.stoch_rsi.d[0]
+            # LONG ENTRY CONDITIONS:
+            # 1. Gaussian channel is ascending (filt > filt[1])
+            # 2. StochRSI crosses from below 20 to above 20
+            is_gaussian_ascending = self.gaussian.filt[0] > self.gaussian.filt[-1]
+            is_stoch_rsi_cross_up = self.stoch_rsi.k[0] > 20 and self.stoch_rsi.k[-1] <= 20
             
-            if price_above_upper and stoch_rsi_up:
-                self.log('BUY CREATE, %.2f' % self.dataclose[0])
-                # Use 95% of available cash to leave buffer for commissions
-                cash = self.broker.get_cash() * 0.95
-                size = int(cash / self.dataclose[0])
+            if is_gaussian_ascending and is_stoch_rsi_cross_up:
+                # Check if we can trade now based on throttling
+                if not self.can_trade_now():
+                    time_since_last = (self.datas[0].datetime.datetime(0) - self.last_trade_time).total_seconds() / 3600
+                    self.log(f'Trade throttled: {time_since_last:.1f}h of {self.p.trade_throttle_hours}h elapsed since last trade', doprint=True)
+                    return
+                
+                # Calculate position size
+                size = self.calculate_position_size()
+                
+                if size <= 0:
+                    self.log('Zero position size calculated, skipping trade', doprint=True)
+                    return
+                
+                self.log(f'BUY CREATE, Price: {self.dataclose[0]:.2f}, Size: {size}')
+                
                 # Keep track of the created order to avoid a 2nd order
                 self.order = self.buy(size=size)
-            elif price_above_upper:
-                self.log('Price above upper band but StochRSI not up', doprint=True)
-            elif stoch_rsi_up:
-                self.log('StochRSI up but price not above upper band', doprint=True)
         else:
-            # EXIT CONDITIONS:
-            # Price closes below the upper Gaussian Channel line
-            price_below_upper = self.dataclose[0] < self.gaussian.upper[0]
-            
-            if price_below_upper:
-                self.log('SELL CREATE, %.2f' % self.dataclose[0])
+            # We are in a position, check if we should exit
+            if self.should_exit_trade():
+                reason = ''
+                # Add reason for exit to log
+                if self.p.exit_strategy == 'default':
+                    reason = 'StochRSI crossed from above 80 to below 80'
+                elif self.p.exit_strategy == 'middle_band':
+                    reason = 'Price below middle band'
+                elif self.p.exit_strategy == 'bars':
+                    reason = f'Exit after {self.p.exit_bars} bars'
+                elif self.p.exit_strategy == 'trailing_percent':
+                    reason = f'Trailing stop ({self.p.trailing_percent}%) hit'
+                elif self.p.exit_strategy == 'trailing_atr':
+                    reason = f'ATR trailing stop ({self.p.trailing_atr_mult}x ATR) hit'
+                elif self.p.exit_strategy == 'trailing_ma':
+                    reason = f'Price below {self.p.trailing_ma_period} period MA'
+                elif self.p.use_stop_loss and self.datalow[0] <= self.stop_loss_price:
+                    reason = f'Stop loss ({self.p.stop_loss_percent}%) hit'
+                
+                self.log(f'SELL CREATE, {reason}, Price: {self.dataclose[0]:.2f}')
+                
                 # Close the long position
                 self.order = self.sell(size=self.position.size)
 
     def stop(self):
         # Log final results when strategy is complete
         self.log('Final Portfolio Value: %.2f' % self.broker.getvalue(), doprint=True)
-        
+
 
 def parse_args():
     """
     Parse command line arguments
     """
     parser = argparse.ArgumentParser(
-        description='Gaussian Channel with Stochastic RSI Strategy')
+        description='Enhanced Stochastic RSI with Gaussian Channel Strategy',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     
+    # Basic input parameters
     parser.add_argument('--data', '-d',
                         default='AAPL',
                         help='Ticker to download from FMP')
@@ -456,21 +743,12 @@ def parse_args():
                         help='Starting date in YYYY-MM-DD format')
     
     parser.add_argument('--todate', '-t',
-                        default='2069-01-01',
+                        default='2069-12-31',
                         help='Ending date in YYYY-MM-DD format')
     
     parser.add_argument('--cash', '-c',
                         default=100000.0, type=float,
                         help='Starting cash')
-    
-    # Gaussian Channel parameters
-    parser.add_argument('--gausslength', '-gl',
-                        default=20, type=int,
-                        help='Period for Gaussian Channel calculation (minimum: 5)')
-    
-    parser.add_argument('--multiplier', '-m',
-                        default=2.0, type=float,
-                        help='Multiplier for Gaussian standard deviation bands')
     
     # Stochastic RSI parameters
     parser.add_argument('--rsilength', '-rl',
@@ -481,14 +759,94 @@ def parse_args():
                         default=14, type=int,
                         help='Period for Stochastic calculation')
     
-    parser.add_argument('--klength', '-kl',
+    parser.add_argument('--smoothk', '-sk',
                         default=3, type=int,
                         help='Smoothing K period for Stochastic RSI')
     
-    parser.add_argument('--dlength', '-dl',
+    parser.add_argument('--smoothd', '-sd',
                         default=3, type=int,
                         help='Smoothing D period for Stochastic RSI')
     
+    # Gaussian Channel parameters
+    parser.add_argument('--poles', '-po',
+                        default=4, type=int,
+                        help='Number of poles for Gaussian Filter (1-9)')
+    
+    parser.add_argument('--period', '-pe',
+                        default=144, type=int,
+                        help='Sampling period for Gaussian Filter (min: 2)')
+    
+    parser.add_argument('--trmult', '-tm',
+                        default=1.414, type=float,
+                        help='Multiplier for Filtered True Range')
+    
+    parser.add_argument('--lag', '-lg',
+                        action='store_true',
+                        help='Enable reduced lag mode')
+    
+    parser.add_argument('--fast', '-fa',
+                        action='store_true',
+                        help='Enable fast response mode')
+    
+    # Exit strategy parameters
+    parser.add_argument('--exit_strategy', '-es',
+                        default='trailing_percent',
+                        choices=['default', 'middle_band', 'bars', 'trailing_percent', 'trailing_atr', 'trailing_ma'],
+                        help='Exit strategy to use')
+    
+    parser.add_argument('--exit_bars', '-eb',
+                        default=5, type=int,
+                        help='Number of bars to hold position when exit_strategy=bars')
+    
+    parser.add_argument('--trailing_percent', '-tp',
+                        default=3.0, type=float,
+                        help='Percentage for trailing stop when exit_strategy=trailing_percent')
+    
+    parser.add_argument('--trailing_atr_mult', '-tam',
+                        default=2.0, type=float,
+                        help='ATR multiplier for trailing stop when exit_strategy=trailing_atr')
+    
+    parser.add_argument('--trailing_atr_period', '-tap',
+                        default=14, type=int,
+                        help='ATR period for trailing stop when exit_strategy=trailing_atr')
+    
+    parser.add_argument('--trailing_ma_period', '-tmp',
+                        default=50, type=int,
+                        help='MA period for trailing stop when exit_strategy=trailing_ma')
+    
+    # Position sizing parameters
+    parser.add_argument('--position_sizing', '-ps',
+                        default='percent',
+                        choices=['percent', 'auto'],
+                        help='Position sizing method')
+    
+    parser.add_argument('--position_percent', '-pp',
+                        default=20.0, type=float,
+                        help='Percentage of equity to use per trade')
+    
+    parser.add_argument('--max_position_percent', '-mpp',
+                        default=95.0, type=float,
+                        help='Maximum percentage of equity to use per trade')
+    
+    parser.add_argument('--risk_percent', '-rp',
+                        default=1.0, type=float,
+                        help='Risk percentage of equity per trade')
+    
+    # Trade throttling
+    parser.add_argument('--trade_throttle_hours', '-tth',
+                        default=0, type=int,
+                        help='Minimum hours between trades (0 = no throttling)')
+    
+    # Risk management
+    parser.add_argument('--use_stop_loss', '-usl',
+                        action='store_true',
+                        help='Whether to use a stop loss')
+    
+    parser.add_argument('--stop_loss_percent', '-slp',
+                        default=5.0, type=float,
+                        help='Stop loss percentage from entry')
+    
+    # Plotting
     parser.add_argument('--plot', '-p', action='store_true',
                         help='Generate and show a plot of the trading activity')
     
@@ -521,18 +879,47 @@ def main():
     # Add the data feed to cerebro
     cerebro.adddata(data)
     
-    # Add strategy
+    # Add strategy with all the enhanced parameters
     cerebro.addstrategy(
-        GaussianChannelStrategy,
-        gausslength=args.gausslength,
-        multiplier=args.multiplier,
+        StochasticRSIGaussianChannelStrategy,
+        # Stochastic RSI parameters
         rsilength=args.rsilength,
         stochlength=args.stochlength,
-        klength=args.klength,
-        dlength=args.dlength,
+        smoothk=args.smoothk,
+        smoothd=args.smoothd,
+        
+        # Gaussian Channel parameters
+        poles=args.poles,
+        period=args.period,
+        trmult=args.trmult,
+        lag_reduction=args.lag,
+        fast_response=args.fast,
+        
+        # Date range
         startdate=fromdate,
         enddate=todate,
-        printlog=True
+        printlog=True,
+        
+        # Exit strategy parameters
+        exit_strategy=args.exit_strategy,
+        exit_bars=args.exit_bars,
+        trailing_percent=args.trailing_percent,
+        trailing_atr_mult=args.trailing_atr_mult,
+        trailing_atr_period=args.trailing_atr_period,
+        trailing_ma_period=args.trailing_ma_period,
+        
+        # Position sizing parameters
+        position_sizing=args.position_sizing,
+        position_percent=args.position_percent,
+        max_position_percent=args.max_position_percent,
+        risk_percent=args.risk_percent,
+        
+        # Trade throttling
+        trade_throttle_hours=args.trade_throttle_hours,
+        
+        # Risk management
+        use_stop_loss=args.use_stop_loss,
+        stop_loss_percent=args.stop_loss_percent
     )
     
     # Set our desired cash start
@@ -553,11 +940,44 @@ def main():
     # Print out the starting conditions
     print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
     
+    # Print strategy configuration
+    print('\nStrategy Configuration:')
+    print(f'- Entry: Gaussian channel is ascending AND StochRSI crosses from below 20 to above 20')
+    print(f'- Exit Strategy: {args.exit_strategy}')
+    
+    if args.exit_strategy == 'default':
+        print(f'  (Exit when StochRSI crosses from above 80 to below 80)')
+    elif args.exit_strategy == 'middle_band':
+        print(f'  (Exit when price drops below middle Gaussian Channel band)')
+    elif args.exit_strategy == 'bars':
+        print(f'  (Exit after {args.exit_bars} bars)')
+    elif args.exit_strategy == 'trailing_percent':
+        print(f'  (Using {args.trailing_percent}% trailing stop)')
+    elif args.exit_strategy == 'trailing_atr':
+        print(f'  (Using {args.trailing_atr_mult}x ATR({args.trailing_atr_period}) trailing stop)')
+    elif args.exit_strategy == 'trailing_ma':
+        print(f'  (Using {args.trailing_ma_period} period MA as trailing stop)')
+    
+    print(f'- Position Sizing: {args.position_sizing}')
+    if args.position_sizing == 'percent':
+        print(f'  (Using {args.position_percent}% of equity per trade)')
+    else:
+        print(f'  (Auto-sizing based on {args.risk_percent}% risk per trade)')
+    
+    if args.trade_throttle_hours > 0:
+        print(f'- Trade Throttling: Minimum {args.trade_throttle_hours} hours between trades')
+    
+    if args.use_stop_loss:
+        print(f'- Stop Loss: {args.stop_loss_percent}% from entry')
+    
+    print('\n--- Starting Backtest ---\n')
+    
     # Run the strategy
     results = cerebro.run()
     strat = results[0]
     
     # Print out final results
+    print('\n--- Backtest Results ---\n')
     print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
     
     # Get analyzer results
@@ -600,7 +1020,7 @@ def main():
         cerebro.plot(style='candle', barup='green', bardown='red', 
                     volup='green', voldown='red', 
                     fill_up='green', fill_down='red',
-                    plotdist=0.5)
+                    plotdist=0.5, width=16, height=9)
 
 
 if __name__ == '__main__':
