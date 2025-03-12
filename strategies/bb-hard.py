@@ -69,7 +69,9 @@ REQUIRED ARGUMENTS:
 
 OPTIONAL ARGUMENTS:
 ------------------
---apikey, -k    : Your FMP API key (default is provided but can be changed)
+--dbuser, -u    : MySQL username (default: root)
+--dbpass, -pw   : MySQL password (default: fsck)
+--dbname, -n    : MySQL database name (default: price_db)
 --cash, -c      : Initial cash for the strategy (default: $100,000)
 --gausslength, -gl  : Period for Gaussian Channel calculation (default: 20, min: 5)
 --multiplier, -m    : Multiplier for Gaussian standard deviation (default: 2.0)
@@ -90,18 +92,20 @@ from __future__ import (absolute_import, division, print_function,
 import argparse
 import datetime
 import math
+import os
+import subprocess
 import numpy as np
 import pandas as pd
-import requests
+import mysql.connector
 import matplotlib.pyplot as plt
 import backtrader as bt
 import backtrader.indicators as btind
 from backtrader.utils.py3 import range
 
 
-class FMPData(bt.feeds.PandasData):
+class StockPriceData(bt.feeds.PandasData):
     """
-    Financial Modeling Prep Data Feed
+    Stock Price Data Feed
     """
     params = (
         ('datetime', None),  # Column containing the date (index)
@@ -114,55 +118,144 @@ class FMPData(bt.feeds.PandasData):
     )
 
 
-def get_fmp_data(symbol, apikey, fromdate, todate):
+def sync_symbol_data(symbol):
     """
-    Get historical price data from Financial Modeling Prep API
+    Run the sync-trade-data.sh script to update data for a specific symbol
     """
-    # Format dates for API request
-    from_str = fromdate.strftime('%Y-%m-%d')
-    to_str = todate.strftime('%Y-%m-%d')
+    script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'utils/sync-trade-data.sh')
     
-    # Build URL
-    url = f"https://financialmodelingprep.com/api/v3/historical-price-full/{symbol}"
-    url += f"?from={from_str}&to={to_str}&apikey={apikey}"
+    # Make sure the script exists and is executable
+    if not os.path.isfile(script_path):
+        raise Exception(f"Could not find sync script at {script_path}")
     
-    print(f"Fetching data from FMP API for {symbol} from {from_str} to {to_str}")
+    if not os.access(script_path, os.X_OK):
+        os.chmod(script_path, 0o755)  # Make executable if not already
     
-    # Make request
-    response = requests.get(url)
+    print(f"Syncing data for {symbol} using {script_path}")
     
-    if response.status_code != 200:
-        raise Exception(f"API request failed with status code {response.status_code}: {response.text}")
+    try:
+        # Run the sync script with the symbol
+        process = subprocess.run([script_path, symbol], 
+                               stdout=subprocess.PIPE, 
+                               stderr=subprocess.PIPE, 
+                               universal_newlines=True,
+                               check=True)
+        
+        print(f"Sync completed for {symbol}:")
+        for line in process.stdout.splitlines():
+            if "ADDED:" in line or "SKIPPED:" in line or "Retrieved" in line:
+                print(f"  {line.strip()}")
+        
+        return True
+    except subprocess.CalledProcessError as e:
+        print(f"Error syncing data for {symbol}: {e}")
+        print(f"Error output: {e.stderr}")
+        return False
+
+
+def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate):
+    """
+    Get historical price data from MySQL database
+    """
+    # Format dates for database query
+    from_str = fromdate.strftime('%Y-%m-%d %H:%M:%S')
+    to_str = todate.strftime('%Y-%m-%d %H:%M:%S')
     
-    data = response.json()
+    print(f"Fetching data from MySQL database for {symbol} from {from_str} to {to_str}")
     
-    if 'historical' not in data:
-        raise Exception(f"No historical data returned for {symbol}")
-    
-    # Convert to pandas DataFrame
-    historical_data = data['historical']
-    df = pd.DataFrame(historical_data)
-    
-    # Rename columns to match backtrader's expected format
-    df = df.rename(columns={
-        'date': 'Date',
-        'open': 'Open',
-        'high': 'High',
-        'low': 'Low',
-        'close': 'Close',
-        'volume': 'Volume'
-    })
-    
-    # Set the date as index and sort from oldest to newest
-    df['Date'] = pd.to_datetime(df['Date'])
-    df = df.set_index('Date')
-    df = df.sort_index()
-    
-    # Select only the columns we need
-    df = df[['Open', 'High', 'Low', 'Close', 'Volume']]
-    
-    print(f"Successfully fetched data for {symbol}. Retrieved {len(df)} bars.")
-    return df
+    try:
+        # Connect to the MySQL database
+        connection = mysql.connector.connect(
+            host="localhost",
+            user=dbuser,
+            password=dbpass,
+            database=dbname
+        )
+        
+        # Create a cursor to execute queries
+        cursor = connection.cursor()
+        
+        # First, check if the symbol exists and has recent data
+        check_query = """
+        SELECT COUNT(*) as count, MAX(date) as last_update 
+        FROM stock_prices
+        WHERE symbol = %s
+        """
+        
+        # Execute the query
+        cursor.execute(check_query, (symbol,))
+        result = cursor.fetchone()
+        
+        need_sync = False
+        if not result or result[0] == 0:
+            # Symbol doesn't exist in the database
+            print(f"Symbol {symbol} not found in database, will sync data")
+            need_sync = True
+        else:
+            record_count, last_update = result
+            # Check if data is older than 1 hour
+            if last_update:
+                last_update_time = last_update
+                current_time = datetime.datetime.now()
+                time_diff = current_time - last_update_time
+                
+                if time_diff.total_seconds() > 3600:  # 3600 seconds = 1 hour
+                    print(f"Data for {symbol} is {time_diff.total_seconds() / 3600:.2f} hours old, will sync new data")
+                    need_sync = True
+                else:
+                    print(f"Data for {symbol} is up to date (last updated {time_diff.total_seconds() / 60:.1f} minutes ago)")
+            else:
+                # No timestamp found, so sync to be safe
+                need_sync = True
+        
+        # If we need to sync data, do it now
+        if need_sync:
+            sync_symbol_data(symbol)
+            # If sync failed, we'll continue with whatever data we have
+        
+        # Now proceed with the original query to get the data
+        query = """
+        SELECT date, open, high, low, close, volume
+        FROM stock_prices
+        WHERE symbol = %s AND date BETWEEN %s AND %s
+        ORDER BY date ASC
+        """
+        
+        # Execute the query
+        cursor.execute(query, (symbol, from_str, to_str))
+        
+        # Fetch all results
+        rows = cursor.fetchall()
+        
+        # Close cursor and connection
+        cursor.close()
+        connection.close()
+        
+        # Check if any data was retrieved
+        if not rows:
+            raise Exception(f"No data found for {symbol} in the specified date range")
+        
+        # Convert to pandas DataFrame
+        df = pd.DataFrame(rows, columns=['Date', 'Open', 'High', 'Low', 'Close', 'Volume'])
+        
+        # Convert 'Date' to datetime and set as index
+        df['Date'] = pd.to_datetime(df['Date'])
+        df = df.set_index('Date')
+        
+        # Ensure numeric data types
+        df['Open'] = pd.to_numeric(df['Open'])
+        df['High'] = pd.to_numeric(df['High'])
+        df['Low'] = pd.to_numeric(df['Low'])
+        df['Close'] = pd.to_numeric(df['Close'])
+        df['Volume'] = pd.to_numeric(df['Volume'])
+        
+        print(f"Successfully fetched data for {symbol}. Retrieved {len(df)} bars.")
+        return df
+        
+    except mysql.connector.Error as err:
+        raise Exception(f"Database error: {err}")
+    except Exception as e:
+        raise Exception(f"Error fetching data: {e}")
 
 
 class StochasticRSI(bt.Indicator):
@@ -337,8 +430,8 @@ class StochasticRSIGaussianChannelStrategy(bt.Strategy):
     - Open long position when:
       1. The gaussian channel is ascending (filt > filt[1]) 
       2. The stochastic RSI crosses from below 20 to above 20 (K[0] > 20 and K[-1] <= 20)
-    - Multiple exit strategies available (see below)
-    - Only trades within the specified date range
+    - Exit LONG (go flat) when price CLOSES BELOW the UPPER Gaussian Channel line
+    - No short positions are taken
     
     Exit Strategy Options:
     - 'default': Exit when Stochastic RSI crosses from above 80 to below 80
@@ -736,11 +829,19 @@ def parse_args():
     # Basic input parameters
     parser.add_argument('--data', '-d',
                         default='AAPL',
-                        help='Ticker to download from FMP')
+                        help='Stock symbol to retrieve data for')
     
-    parser.add_argument('--apikey', '-k',
-                        default='849f3a33e72d49dfe694d6eda459012d',
-                        help='Financial Modeling Prep API Key')
+    parser.add_argument('--dbuser', '-u',
+                        default='root',
+                        help='MySQL username')
+    
+    parser.add_argument('--dbpass', '-pw',
+                        default='fsck',
+                        help='MySQL password')
+    
+    parser.add_argument('--dbname', '-n',
+                        default='price_db',
+                        help='MySQL database name')
     
     parser.add_argument('--fromdate', '-f',
                         default='2018-01-01',
@@ -867,15 +968,15 @@ def main():
     fromdate = datetime.datetime.strptime(args.fromdate, '%Y-%m-%d')
     todate = datetime.datetime.strptime(args.todate, '%Y-%m-%d')
     
-    # Fetch data from FMP API
+    # Fetch data from MySQL database
     try:
-        df = get_fmp_data(args.data, args.apikey, fromdate, todate)
+        df = get_db_data(args.data, args.dbuser, args.dbpass, args.dbname, fromdate, todate)
     except Exception as e:
         print(f"Error fetching data: {e}")
         return
     
     # Create data feed
-    data = FMPData(dataname=df)
+    data = StockPriceData(dataname=df)
     
     # Create a cerebro entity
     cerebro = bt.Cerebro()
@@ -946,7 +1047,10 @@ def main():
     
     # Print strategy configuration
     print('\nStrategy Configuration:')
-    print(f'- Entry: Gaussian channel is ascending AND StochRSI crosses from below 20 to above 20')
+    print(f'- Data Source: MySQL database ({args.dbname})')
+    print(f'- Symbol: {args.data}')
+    print(f'- Date Range: {args.fromdate} to {args.todate}')
+    print(f'- Entry: StochRSI crossing from below 20 to above 20 during ascending Gaussian channel')
     print(f'- Exit Strategy: {args.exit_strategy}')
     
     if args.exit_strategy == 'default':
