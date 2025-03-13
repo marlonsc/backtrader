@@ -22,8 +22,7 @@
 GAUSSIAN CHANNEL WITH STOCHASTIC RSI TRADING STRATEGY - (bb-hard)
 =================================================================
 
-This strategy focuses on early momentum shifts, looking for StochRSI crossing above 
-20 during an ascending Gaussian channel, with a trailing stop exit. The name emphasizes 
+This strategy focuses on early momentum shifts, looking for StochRSI crossing above 20 during an ascending Gaussian channel, with a trailing stop exit. The name emphasizes 
 the momentum reversal aspect of the strategy.
 
 This script implements a trading strategy that combines:
@@ -163,6 +162,14 @@ def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate):
     
     print(f"Fetching data from MySQL database for {symbol} from {from_str} to {to_str}")
     
+    # Create a directory to store sync marker files if it doesn't exist
+    marker_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.sync_markers')
+    if not os.path.exists(marker_dir):
+        os.makedirs(marker_dir)
+    
+    # Path to the marker file for this symbol
+    marker_file = os.path.join(marker_dir, f"{symbol.lower()}_last_sync.txt")
+    
     try:
         # Connect to the MySQL database
         connection = mysql.connector.connect(
@@ -175,9 +182,9 @@ def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate):
         # Create a cursor to execute queries
         cursor = connection.cursor()
         
-        # First, check if the symbol exists and has recent data
+        # First, check if the symbol exists in the database
         check_query = """
-        SELECT COUNT(*) as count, MAX(date) as last_update 
+        SELECT COUNT(*) as count
         FROM stock_prices
         WHERE symbol = %s
         """
@@ -192,26 +199,36 @@ def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate):
             print(f"Symbol {symbol} not found in database, will sync data")
             need_sync = True
         else:
-            record_count, last_update = result
-            # Check if data is older than 1 hour
-            if last_update:
-                last_update_time = last_update
-                current_time = datetime.datetime.now()
-                time_diff = current_time - last_update_time
+            # Check when this symbol was last synced
+            last_sync_time = None
+            if os.path.exists(marker_file):
+                with open(marker_file, 'r') as f:
+                    try:
+                        last_sync_time = datetime.datetime.strptime(f.read().strip(), '%Y-%m-%d %H:%M:%S')
+                    except ValueError:
+                        # If the timestamp is invalid, consider it as not synced
+                        last_sync_time = None
+            
+            # If never synced or synced more than 1 hour ago, sync again
+            if last_sync_time is None:
+                print(f"No record of previous sync for {symbol}, will sync data")
+                need_sync = True
+            else:
+                time_diff = datetime.datetime.now() - last_sync_time
+                hours_since_sync = time_diff.total_seconds() / 3600
                 
-                if time_diff.total_seconds() > 3600:  # 3600 seconds = 1 hour
-                    print(f"Data for {symbol} is {time_diff.total_seconds() / 3600:.2f} hours old, will sync new data")
+                if hours_since_sync > 1:  # 1 hour threshold
+                    print(f"Data for {symbol} was last synced {hours_since_sync:.2f} hours ago, will sync new data")
                     need_sync = True
                 else:
-                    print(f"Data for {symbol} is up to date (last updated {time_diff.total_seconds() / 60:.1f} minutes ago)")
-            else:
-                # No timestamp found, so sync to be safe
-                need_sync = True
+                    print(f"Data for {symbol} is up to date (last synced {time_diff.total_seconds() / 60:.1f} minutes ago)")
         
         # If we need to sync data, do it now
         if need_sync:
-            sync_symbol_data(symbol)
-            # If sync failed, we'll continue with whatever data we have
+            if sync_symbol_data(symbol):
+                # Update the marker file with current timestamp
+                with open(marker_file, 'w') as f:
+                    f.write(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         
         # Now proceed with the original query to get the data
         query = """
