@@ -88,6 +88,7 @@ import mysql.connector
 import matplotlib.pyplot as plt
 import backtrader as bt
 import backtrader.indicators as btind
+import time
 
 
 class StockPriceData(bt.feeds.PandasData):
@@ -105,7 +106,7 @@ class StockPriceData(bt.feeds.PandasData):
     )
 
 
-def sync_symbol_data(symbol):
+def sync_symbol_data(symbol, from_date=None, to_date=None):
     """
     Run the sync-trade-data.sh script to update data for a specific symbol
     """
@@ -133,11 +134,57 @@ def sync_symbol_data(symbol):
             if "ADDED:" in line or "SKIPPED:" in line or "Retrieved" in line:
                 print(f"  {line.strip()}")
         
-        return True
+        # If date range is provided, verify data exists
+        if from_date and to_date:
+            # Format dates for database verification
+            from_str = from_date.strftime('%Y-%m-%d %H:%M:%S')
+            to_str = to_date.strftime('%Y-%m-%d %H:%M:%S')
+            
+            # Verify data was synced correctly
+            print(f"Verifying data sync for {symbol} between {from_str} and {to_str}...")
+            connection = mysql.connector.connect(
+                host="localhost",
+                user="root",
+                password="fsck",
+                database="price_db"
+            )
+            cursor = connection.cursor()
+            
+            # First verification attempt
+            verify_query = """
+            SELECT COUNT(*) as count
+            FROM stock_prices
+            WHERE symbol = %s AND date BETWEEN %s AND %s
+            """
+            cursor.execute(verify_query, (symbol, from_str, to_str))
+            result = cursor.fetchone()
+            
+            if not result or result[0] == 0:
+                print(f"First verification: No data found. Waiting 3 seconds for database operations to complete...")
+                time.sleep(3)  # Wait 3 seconds
+                
+                # Second verification attempt
+                cursor.execute(verify_query, (symbol, from_str, to_str))
+                result = cursor.fetchone()
+                
+                if not result or result[0] == 0:
+                    cursor.close()
+                    connection.close()
+                    raise Exception(f"Data sync failed: No data found for {symbol} after sync operation")
+                else:
+                    print(f"Verification successful after delay: Found {result[0]} records")
+            else:
+                print(f"Verification successful: Found {result[0]} records")
+                
+            # Return connection, cursor, and verification success
+            return True, connection, cursor, from_str, to_str
+        
+        return True, None, None, None, None
+        
     except subprocess.CalledProcessError as e:
         print(f"Error syncing data for {symbol}: {e}")
         print(f"Error output: {e.stderr}")
-        return False
+        return False, None, None, None, None
 
 
 def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate):
@@ -157,6 +204,10 @@ def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate):
     
     # Path to the marker file for this symbol
     marker_file = os.path.join(marker_dir, f"{symbol.lower()}_last_sync.txt")
+    
+    connection = None
+    cursor = None
+    need_to_close_connection = True
     
     try:
         # Connect to the MySQL database
@@ -211,37 +262,105 @@ def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate):
                 else:
                     print(f"Data for {symbol} is up to date (last synced {time_diff.total_seconds() / 60:.1f} minutes ago)")
         
-        # If we need to sync data, do it now
-        if need_sync:
-            if sync_symbol_data(symbol):
-                # Update the marker file with current timestamp
-                with open(marker_file, 'w') as f:
-                    f.write(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        
-        # Now proceed with the original query to get the data
-        query = """
-        SELECT date, open, high, low, close, volume
-        FROM stock_prices
-        WHERE symbol = %s AND date BETWEEN %s AND %s
-        ORDER BY date ASC
-        """
-        
-        # Execute the query
-        cursor.execute(query, (symbol, from_str, to_str))
-        
-        # Fetch all results
-        rows = cursor.fetchall()
-        
-        # Close cursor and connection
+        # Close the initial connection before syncing
         cursor.close()
         connection.close()
         
-        # Check if any data was retrieved
-        if not rows:
-            raise Exception(f"No data found for {symbol} in the specified date range")
-        
-        # Convert to pandas DataFrame
-        df = pd.DataFrame(rows, columns=['Date', 'Open', 'High', 'Low', 'Close', 'Volume'])
+        # If we need to sync data, do it now and get a new connection
+        if need_sync:
+            sync_success, sync_connection, sync_cursor, sync_from_str, sync_to_str = sync_symbol_data(symbol, fromdate, todate)
+            
+            if sync_success:
+                # Update the marker file with current timestamp
+                with open(marker_file, 'w') as f:
+                    f.write(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+                
+                # Use the connection from the sync operation if available
+                if sync_connection and sync_cursor:
+                    connection = sync_connection
+                    cursor = sync_cursor
+                    need_to_close_connection = True
+                    
+                    # Since we've already verified data exists, directly fetch it using the same connection
+                    query = """
+                    SELECT date, open, high, low, close, volume
+                    FROM stock_prices
+                    WHERE symbol = %s AND date BETWEEN %s AND %s
+                    ORDER BY date ASC
+                    """
+                    
+                    # Execute the query using the same connection that verified data exists
+                    cursor.execute(query, (symbol, sync_from_str, sync_to_str))
+                    rows = cursor.fetchall()
+                    
+                    # Check if any data was retrieved
+                    if not rows:
+                        raise Exception(f"Sync verification showed records exist, but couldn't fetch any data")
+                    
+                    # Convert to pandas DataFrame
+                    df = pd.DataFrame(rows, columns=['Date', 'Open', 'High', 'Low', 'Close', 'Volume'])
+                else:
+                    # No connection from sync, create a new one and wait to ensure data is available
+                    print("No connection from sync, creating new connection and waiting for data to be available...")
+                    time.sleep(3)  # Wait to ensure data is committed
+                    
+                    connection = mysql.connector.connect(
+                        host="localhost",
+                        user=dbuser,
+                        password=dbpass,
+                        database=dbname
+                    )
+                    cursor = connection.cursor()
+                    
+                    # Proceed with the original query to get the data
+                    query = """
+                    SELECT date, open, high, low, close, volume
+                    FROM stock_prices
+                    WHERE symbol = %s AND date BETWEEN %s AND %s
+                    ORDER BY date ASC
+                    """
+                    
+                    # Execute the query
+                    cursor.execute(query, (symbol, from_str, to_str))
+                    rows = cursor.fetchall()
+                    
+                    # Check if any data was retrieved
+                    if not rows:
+                        raise Exception(f"No data found for {symbol} in the specified date range after sync")
+                    
+                    # Convert to pandas DataFrame
+                    df = pd.DataFrame(rows, columns=['Date', 'Open', 'High', 'Low', 'Close', 'Volume'])
+            else:
+                # If sync failed, we don't have a connection
+                raise Exception(f"Failed to sync data for {symbol}")
+        else:
+            # Create a new connection since we closed the previous one
+            connection = mysql.connector.connect(
+                host="localhost",
+                user=dbuser,
+                password=dbpass,
+                database=dbname
+            )
+            cursor = connection.cursor()
+            
+            # Proceed with the original query to get the data
+            query = """
+            SELECT date, open, high, low, close, volume
+            FROM stock_prices
+            WHERE symbol = %s AND date BETWEEN %s AND %s
+            ORDER BY date ASC
+            """
+            
+            # Execute the query
+            cursor.execute(query, (symbol, from_str, to_str))
+            rows = cursor.fetchall()
+            
+            # Check if any data was retrieved
+            if not rows:
+                raise Exception(f"No data found for {symbol} in the specified date range")
+            
+            # Convert to pandas DataFrame
+            df = pd.DataFrame(rows, columns=['Date', 'Open', 'High', 'Low', 'Close', 'Volume'])
         
         # Convert 'Date' to datetime and set as index
         df['Date'] = pd.to_datetime(df['Date'])
@@ -255,11 +374,25 @@ def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate):
         df['Volume'] = pd.to_numeric(df['Volume'])
         
         print(f"Successfully fetched data for {symbol}. Retrieved {len(df)} bars.")
+        
+        # Close the connection if we need to
+        if need_to_close_connection and connection is not None and cursor is not None:
+            cursor.close()
+            connection.close()
+        
         return df
         
     except mysql.connector.Error as err:
+        # Close the connection if it's open
+        if need_to_close_connection and connection is not None and cursor is not None:
+            cursor.close()
+            connection.close()
         raise Exception(f"Database error: {err}")
     except Exception as e:
+        # Close the connection if it's open
+        if need_to_close_connection and connection is not None and cursor is not None:
+            cursor.close()
+            connection.close()
         raise Exception(f"Error fetching data: {e}")
 
 
