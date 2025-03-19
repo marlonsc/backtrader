@@ -19,11 +19,11 @@
 #
 ###############################################################################
 """
-BACKTESTING TRADING STRATEGIES WITH FINANCIAL MODELING PREP API
+BACKTESTING TRADING STRATEGIES WITH POSTGRESQL DATABASE
 ===============================================================
 
 This script allows you to backtest multiple trading strategies using historical stock data
-from the Financial Modeling Prep (FMP) API. It demonstrates the application of various
+from a PostgreSQL database. It demonstrates the application of various
 technical analysis indicators and trading strategies on any stock symbol with customizable
 date ranges.
 
@@ -39,11 +39,13 @@ REQUIRED ARGUMENTS:
 
 OPTIONAL ARGUMENTS:
 ------------------
---apikey, -k    : Your FMP API key (default is provided but can be changed)
+--dbuser, -u    : PostgreSQL username (default: jason)
+--dbpass, -pw   : PostgreSQL password (default: fsck)
+--dbname, -n    : PostgreSQL database name (default: market_data)
 --cash, -c      : Initial cash for the strategy (default: $100,000)
 --commission, -cm: Commission rate as a decimal (default: 0.001 or 0.1%)
 --single, -s    : Run only a single strategy instead of all (options below)
---plot, -p      : Plot the results (not currently implemented)
+--plot, -pl     : Plot the results (not currently implemented)
 
 AVAILABLE STRATEGIES:
 -------------------
@@ -115,8 +117,6 @@ NOTES:
 ------
 - The script currently has three fully implemented strategies (lincomb, rsi, macd).
 - Additional strategies are included in the code but are currently disabled.
-- The FMP API has rate limits. If you hit these limits, consider using a paid plan or
-  reducing the frequency of your requests.
 - Performance results are based on historical data and do not guarantee future results.
 - No transaction costs or slippage are considered beyond the simple commission rate.
 
@@ -127,15 +127,17 @@ from __future__ import (absolute_import, division, print_function,
 import argparse
 import datetime
 import pandas as pd
-import requests
-import io
+import psycopg2
+import psycopg2.extras
+import os
+import sys
 import backtrader as bt
 import backtrader.indicators as btind
 
 
-class FMPData(bt.feeds.PandasData):
+class StockPriceData(bt.feeds.PandasData):
     """
-    Financial Modeling Prep Data Feed
+    Stock Price Data Feed
     """
     params = (
         ('datetime', None),  # Column containing the date (index)
@@ -144,59 +146,84 @@ class FMPData(bt.feeds.PandasData):
         ('low', 'Low'),      # Column containing the low price
         ('close', 'Close'),  # Column containing the close price
         ('volume', 'Volume'), # Column containing the volume
+        ('rsi', 'RSI'),      # Column containing the RSI value
         ('openinterest', None)  # Column for open interest (not available)
     )
 
 
-def get_fmp_data(symbol, apikey, fromdate, todate):
+def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate):
     """
-    Get historical price data from Financial Modeling Prep API
+    Get historical price data from PostgreSQL database
     """
-    # Format dates for API request
-    from_str = fromdate.strftime('%Y-%m-%d')
-    to_str = todate.strftime('%Y-%m-%d')
+    # Format dates for database query
+    from_str = fromdate.strftime('%Y-%m-%d %H:%M:%S')
+    to_str = todate.strftime('%Y-%m-%d %H:%M:%S')
     
-    # Build URL
-    url = f"https://financialmodelingprep.com/api/v3/historical-price-full/{symbol}"
-    url += f"?from={from_str}&to={to_str}&apikey={apikey}"
+    print(f"Fetching data from PostgreSQL database for {symbol} from {from_str} to {to_str}")
     
-    print(f"Fetching data from FMP API for {symbol} from {from_str} to {to_str}")
-    
-    # Make request
-    response = requests.get(url)
-    
-    if response.status_code != 200:
-        raise Exception(f"API request failed with status code {response.status_code}: {response.text}")
-    
-    data = response.json()
-    
-    if 'historical' not in data:
-        raise Exception(f"No historical data returned for {symbol}")
-    
-    # Convert to pandas DataFrame
-    historical_data = data['historical']
-    df = pd.DataFrame(historical_data)
-    
-    # Rename columns to match backtrader's expected format
-    df = df.rename(columns={
-        'date': 'Date',
-        'open': 'Open',
-        'high': 'High',
-        'low': 'Low',
-        'close': 'Close',
-        'volume': 'Volume'
-    })
-    
-    # Set the date as index and sort from oldest to newest
-    df['Date'] = pd.to_datetime(df['Date'])
-    df = df.set_index('Date')
-    df = df.sort_index()
-    
-    # Select only the columns we need
-    df = df[['Open', 'High', 'Low', 'Close', 'Volume']]
-    
-    print(f"Successfully fetched data for {symbol}. Retrieved {len(df)} bars.")
-    return df
+    try:
+        # Connect to the PostgreSQL database
+        connection = psycopg2.connect(
+            host="localhost",
+            user=dbuser,
+            password=dbpass,
+            database=dbname
+        )
+        
+        # Create a cursor to execute queries
+        cursor = connection.cursor()
+        
+        # Query the data
+        query = """
+        SELECT date, open, high, low, close, volume, rsi
+        FROM stock_price_data
+        WHERE symbol = %s AND date BETWEEN %s AND %s
+        ORDER BY date ASC
+        """
+        
+        # Execute the query
+        cursor.execute(query, (symbol, from_str, to_str))
+        rows = cursor.fetchall()
+        
+        # Check if any data was retrieved
+        if not rows:
+            raise Exception(f"No data found for {symbol} in the specified date range")
+        
+        # Convert to pandas DataFrame
+        df = pd.DataFrame(rows, columns=['Date', 'Open', 'High', 'Low', 'Close', 'Volume', 'RSI'])
+        
+        # Convert 'Date' to datetime and set as index
+        df['Date'] = pd.to_datetime(df['Date'])
+        df = df.set_index('Date')
+        
+        # Ensure numeric data types
+        df['Open'] = pd.to_numeric(df['Open'])
+        df['High'] = pd.to_numeric(df['High'])
+        df['Low'] = pd.to_numeric(df['Low'])
+        df['Close'] = pd.to_numeric(df['Close'])
+        df['Volume'] = pd.to_numeric(df['Volume'])
+        df['RSI'] = pd.to_numeric(df['RSI'])
+        
+        print(f"Successfully fetched data for {symbol}. Retrieved {len(df)} bars.")
+        
+        # Close the database connection
+        cursor.close()
+        connection.close()
+        
+        return df
+        
+    except psycopg2.Error as err:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+        raise Exception(f"Database error: {err}")
+    except Exception as e:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+        raise Exception(f"Error fetching data: {e}")
 
 
 class LinComb_Signal(bt.Strategy):
@@ -900,16 +927,24 @@ def parse_args():
     Parse command line arguments
     """
     parser = argparse.ArgumentParser(
-        description='Backtest multiple trading strategies with data from Financial Modeling Prep API'
+        description='Backtest multiple trading strategies with data from PostgreSQL database'
     )
     
     parser.add_argument('--data', '-d',
                         default='AAPL',
-                        help='Ticker to download from FMP')
+                        help='Stock symbol to retrieve data for')
     
-    parser.add_argument('--apikey', '-k',
-                        default='849f3a33e72d49dfe694d6eda459012d',
-                        help='Financial Modeling Prep API Key')
+    parser.add_argument('--dbuser', '-u',
+                        default='jason',
+                        help='PostgreSQL username')
+    
+    parser.add_argument('--dbpass', '-pw',
+                        default='fsck',
+                        help='PostgreSQL password')
+    
+    parser.add_argument('--dbname', '-n',
+                        default='market_data',
+                        help='PostgreSQL database name')
     
     parser.add_argument('--fromdate', '-f',
                         default='2020-01-01',
@@ -927,7 +962,7 @@ def parse_args():
                         default=0.001, type=float,
                         help='Commission (percentage)')
     
-    parser.add_argument('--plot', '-p', action='store_true',
+    parser.add_argument('--plot', '-pl', action='store_true',
                         help='Plot the results')
     
     parser.add_argument('--single', '-s',
@@ -947,15 +982,15 @@ def main():
     fromdate = datetime.datetime.strptime(args.fromdate, '%Y-%m-%d')
     todate = datetime.datetime.strptime(args.todate, '%Y-%m-%d')
     
-    # Fetch data from FMP API
+    # Fetch data from PostgreSQL database
     try:
-        df = get_fmp_data(args.data, args.apikey, fromdate, todate)
+        df = get_db_data(args.data, args.dbuser, args.dbpass, args.dbname, fromdate, todate)
     except Exception as e:
         print(f"Error fetching data: {e}")
         return
     
     # Create data feed
-    data = FMPData(dataname=df)
+    data = StockPriceData(dataname=df)
     
     # Define strategies to run
     strategies = {

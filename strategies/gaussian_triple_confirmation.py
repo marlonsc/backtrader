@@ -52,9 +52,9 @@ REQUIRED ARGUMENTS:
 
 OPTIONAL ARGUMENTS:
 ------------------
---dbuser, -u    : MySQL username (default: root)
---dbpass, -pw   : MySQL password (default: fsck)
---dbname, -n    : MySQL database name (default: price_db)
+--dbuser, -u    : PostgreSQL username (default: jason)
+--dbpass, -pw   : PostgreSQL password (default: fsck)
+--dbname, -n    : PostgreSQL database name (default: market_data)
 --cash, -c      : Initial cash for the strategy (default: $100,000)
 --bblength, -bl : Period for Bollinger Bands calculation (default: 20)
 --bbmult, -bm   : Multiplier for Bollinger Bands standard deviation (default: 2.0)
@@ -72,7 +72,7 @@ OPTIONAL ARGUMENTS:
 
 EXAMPLE:
 --------
-python strategies/bb-medium.py --data AAPL --fromdate 2023-01-01 --todate 2023-12-31 --plot
+python strategies/gaussian_triple_confirmation.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --plot
 """
 
 from __future__ import (absolute_import, division, print_function,
@@ -81,14 +81,23 @@ from __future__ import (absolute_import, division, print_function,
 import argparse
 import datetime
 import math
-import os
-import subprocess
 import pandas as pd
-import mysql.connector
+import psycopg2
 import matplotlib.pyplot as plt
 import backtrader as bt
 import backtrader.indicators as btind
-import time
+from backtrader.utils.py3 import range
+import os
+import sys
+
+# Add the parent directory to the Python path to import shared modules
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if parent_dir not in sys.path:
+    sys.path.append(parent_dir)
+
+# Import utility functions
+from strategies.utils import (get_db_data, print_performance_metrics, 
+                            TradeThrottling, add_standard_analyzers)
 
 
 class StockPriceData(bt.feeds.PandasData):
@@ -106,112 +115,19 @@ class StockPriceData(bt.feeds.PandasData):
     )
 
 
-def sync_symbol_data(symbol, from_date=None, to_date=None):
-    """
-    Run the sync-trade-data.sh script to update data for a specific symbol
-    """
-    script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'utils/sync-trade-data.sh')
-    
-    # Make sure the script exists and is executable
-    if not os.path.isfile(script_path):
-        raise Exception(f"Could not find sync script at {script_path}")
-    
-    if not os.access(script_path, os.X_OK):
-        os.chmod(script_path, 0o755)  # Make executable if not already
-    
-    print(f"Syncing data for {symbol} using {script_path}")
-    
-    try:
-        # Run the sync script with the symbol
-        process = subprocess.run([script_path, symbol], 
-                               stdout=subprocess.PIPE, 
-                               stderr=subprocess.PIPE, 
-                               universal_newlines=True,
-                               check=True)
-        
-        print(f"Sync completed for {symbol}:")
-        for line in process.stdout.splitlines():
-            if "ADDED:" in line or "SKIPPED:" in line or "Retrieved" in line:
-                print(f"  {line.strip()}")
-        
-        # If date range is provided, verify data exists
-        if from_date and to_date:
-            # Format dates for database verification
-            from_str = from_date.strftime('%Y-%m-%d %H:%M:%S')
-            to_str = to_date.strftime('%Y-%m-%d %H:%M:%S')
-            
-            # Verify data was synced correctly
-            print(f"Verifying data sync for {symbol} between {from_str} and {to_str}...")
-            connection = mysql.connector.connect(
-                host="localhost",
-                user="root",
-                password="fsck",
-                database="price_db"
-            )
-            cursor = connection.cursor()
-            
-            # First verification attempt
-            verify_query = """
-            SELECT COUNT(*) as count
-            FROM stock_prices
-            WHERE symbol = %s AND date BETWEEN %s AND %s
-            """
-            cursor.execute(verify_query, (symbol, from_str, to_str))
-            result = cursor.fetchone()
-            
-            if not result or result[0] == 0:
-                print(f"First verification: No data found. Waiting 3 seconds for database operations to complete...")
-                time.sleep(3)  # Wait 3 seconds
-                
-                # Second verification attempt
-                cursor.execute(verify_query, (symbol, from_str, to_str))
-                result = cursor.fetchone()
-                
-                if not result or result[0] == 0:
-                    cursor.close()
-                    connection.close()
-                    raise Exception(f"Data sync failed: No data found for {symbol} after sync operation")
-                else:
-                    print(f"Verification successful after delay: Found {result[0]} records")
-            else:
-                print(f"Verification successful: Found {result[0]} records")
-                
-            # Return connection, cursor, and verification success
-            return True, connection, cursor, from_str, to_str
-        
-        return True, None, None, None, None
-        
-    except subprocess.CalledProcessError as e:
-        print(f"Error syncing data for {symbol}: {e}")
-        print(f"Error output: {e.stderr}")
-        return False, None, None, None, None
-
-
 def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate):
     """
-    Get historical price data from MySQL database
+    Get historical price data from PostgreSQL database
     """
     # Format dates for database query
     from_str = fromdate.strftime('%Y-%m-%d %H:%M:%S')
     to_str = todate.strftime('%Y-%m-%d %H:%M:%S')
     
-    print(f"Fetching data from MySQL database for {symbol} from {from_str} to {to_str}")
-    
-    # Create a directory to store sync marker files if it doesn't exist
-    marker_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.sync_markers')
-    if not os.path.exists(marker_dir):
-        os.makedirs(marker_dir)
-    
-    # Path to the marker file for this symbol
-    marker_file = os.path.join(marker_dir, f"{symbol.lower()}_last_sync.txt")
-    
-    connection = None
-    cursor = None
-    need_to_close_connection = True
+    print(f"Fetching data from PostgreSQL database for {symbol} from {from_str} to {to_str}")
     
     try:
-        # Connect to the MySQL database
-        connection = mysql.connector.connect(
+        # Connect to the PostgreSQL database
+        connection = psycopg2.connect(
             host="localhost",
             user=dbuser,
             password=dbpass,
@@ -221,146 +137,24 @@ def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate):
         # Create a cursor to execute queries
         cursor = connection.cursor()
         
-        # First, check if the symbol exists in the database
-        check_query = """
-        SELECT COUNT(*) as count
-        FROM stock_prices
-        WHERE symbol = %s
+        # Query to get the data including RSI
+        query = """
+        SELECT date, open, high, low, close, volume, rsi
+        FROM stock_price_data
+        WHERE symbol = %s AND date BETWEEN %s AND %s
+        ORDER BY date ASC
         """
         
         # Execute the query
-        cursor.execute(check_query, (symbol,))
-        result = cursor.fetchone()
+        cursor.execute(query, (symbol, from_str, to_str))
+        rows = cursor.fetchall()
         
-        need_sync = False
-        if not result or result[0] == 0:
-            # Symbol doesn't exist in the database
-            print(f"Symbol {symbol} not found in database, will sync data")
-            need_sync = True
-        else:
-            # Check when this symbol was last synced
-            last_sync_time = None
-            if os.path.exists(marker_file):
-                with open(marker_file, 'r') as f:
-                    try:
-                        last_sync_time = datetime.datetime.strptime(f.read().strip(), '%Y-%m-%d %H:%M:%S')
-                    except ValueError:
-                        # If the timestamp is invalid, consider it as not synced
-                        last_sync_time = None
-            
-            # If never synced or synced more than 1 hour ago, sync again
-            if last_sync_time is None:
-                print(f"No record of previous sync for {symbol}, will sync data")
-                need_sync = True
-            else:
-                time_diff = datetime.datetime.now() - last_sync_time
-                hours_since_sync = time_diff.total_seconds() / 3600
-                
-                if hours_since_sync > 1:  # 1 hour threshold
-                    print(f"Data for {symbol} was last synced {hours_since_sync:.2f} hours ago, will sync new data")
-                    need_sync = True
-                else:
-                    print(f"Data for {symbol} is up to date (last synced {time_diff.total_seconds() / 60:.1f} minutes ago)")
+        # Check if any data was retrieved
+        if not rows:
+            raise Exception(f"No data found for {symbol} in the specified date range")
         
-        # Close the initial connection before syncing
-        cursor.close()
-        connection.close()
-        
-        # If we need to sync data, do it now and get a new connection
-        if need_sync:
-            sync_success, sync_connection, sync_cursor, sync_from_str, sync_to_str = sync_symbol_data(symbol, fromdate, todate)
-            
-            if sync_success:
-                # Update the marker file with current timestamp
-                with open(marker_file, 'w') as f:
-                    f.write(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-                
-                # Use the connection from the sync operation if available
-                if sync_connection and sync_cursor:
-                    connection = sync_connection
-                    cursor = sync_cursor
-                    need_to_close_connection = True
-                    
-                    # Since we've already verified data exists, directly fetch it using the same connection
-                    query = """
-                    SELECT date, open, high, low, close, volume
-                    FROM stock_prices
-                    WHERE symbol = %s AND date BETWEEN %s AND %s
-                    ORDER BY date ASC
-                    """
-                    
-                    # Execute the query using the same connection that verified data exists
-                    cursor.execute(query, (symbol, sync_from_str, sync_to_str))
-                    rows = cursor.fetchall()
-                    
-                    # Check if any data was retrieved
-                    if not rows:
-                        raise Exception(f"Sync verification showed records exist, but couldn't fetch any data")
-                    
-                    # Convert to pandas DataFrame
-                    df = pd.DataFrame(rows, columns=['Date', 'Open', 'High', 'Low', 'Close', 'Volume'])
-                else:
-                    # No connection from sync, create a new one and wait to ensure data is available
-                    print("No connection from sync, creating new connection and waiting for data to be available...")
-                    time.sleep(3)  # Wait to ensure data is committed
-                    
-                    connection = mysql.connector.connect(
-                        host="localhost",
-                        user=dbuser,
-                        password=dbpass,
-                        database=dbname
-                    )
-                    cursor = connection.cursor()
-                    
-                    # Proceed with the original query to get the data
-                    query = """
-                    SELECT date, open, high, low, close, volume
-                    FROM stock_prices
-                    WHERE symbol = %s AND date BETWEEN %s AND %s
-                    ORDER BY date ASC
-                    """
-                    
-                    # Execute the query
-                    cursor.execute(query, (symbol, from_str, to_str))
-                    rows = cursor.fetchall()
-                    
-                    # Check if any data was retrieved
-                    if not rows:
-                        raise Exception(f"No data found for {symbol} in the specified date range after sync")
-                    
-                    # Convert to pandas DataFrame
-                    df = pd.DataFrame(rows, columns=['Date', 'Open', 'High', 'Low', 'Close', 'Volume'])
-            else:
-                # If sync failed, we don't have a connection
-                raise Exception(f"Failed to sync data for {symbol}")
-        else:
-            # Create a new connection since we closed the previous one
-            connection = mysql.connector.connect(
-                host="localhost",
-                user=dbuser,
-                password=dbpass,
-                database=dbname
-            )
-            cursor = connection.cursor()
-            
-            # Proceed with the original query to get the data
-            query = """
-            SELECT date, open, high, low, close, volume
-            FROM stock_prices
-            WHERE symbol = %s AND date BETWEEN %s AND %s
-            ORDER BY date ASC
-            """
-            
-            # Execute the query
-            cursor.execute(query, (symbol, from_str, to_str))
-            rows = cursor.fetchall()
-            
-            # Check if any data was retrieved
-            if not rows:
-                raise Exception(f"No data found for {symbol} in the specified date range")
-            
-            # Convert to pandas DataFrame
-            df = pd.DataFrame(rows, columns=['Date', 'Open', 'High', 'Low', 'Close', 'Volume'])
+        # Convert to pandas DataFrame
+        df = pd.DataFrame(rows, columns=['Date', 'Open', 'High', 'Low', 'Close', 'Volume', 'RSI'])
         
         # Convert 'Date' to datetime and set as index
         df['Date'] = pd.to_datetime(df['Date'])
@@ -372,26 +166,26 @@ def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate):
         df['Low'] = pd.to_numeric(df['Low'])
         df['Close'] = pd.to_numeric(df['Close'])
         df['Volume'] = pd.to_numeric(df['Volume'])
+        df['RSI'] = pd.to_numeric(df['RSI'])
         
         print(f"Successfully fetched data for {symbol}. Retrieved {len(df)} bars.")
         
-        # Close the connection if we need to
-        if need_to_close_connection and connection is not None and cursor is not None:
-            cursor.close()
-            connection.close()
+        # Close the database connection
+        cursor.close()
+        connection.close()
         
         return df
         
-    except mysql.connector.Error as err:
-        # Close the connection if it's open
-        if need_to_close_connection and connection is not None and cursor is not None:
+    except psycopg2.Error as err:
+        if cursor:
             cursor.close()
+        if connection:
             connection.close()
         raise Exception(f"Database error: {err}")
     except Exception as e:
-        # Close the connection if it's open
-        if need_to_close_connection and connection is not None and cursor is not None:
+        if cursor:
             cursor.close()
+        if connection:
             connection.close()
         raise Exception(f"Error fetching data: {e}")
 
@@ -506,7 +300,7 @@ class GaussianFilter(bt.Indicator):
         self.lines.lband = self.filt_n - self.filt_tr * self.p.mult
 
 
-class GaussianChannelStrategy(bt.Strategy):
+class GaussianChannelStrategy(bt.Strategy, TradeThrottling):
     """
     Strategy that implements the Gaussian Channel with Stochastic RSI trading rules:
     - Open long position when:
@@ -740,17 +534,6 @@ class GaussianChannelStrategy(bt.Strategy):
         self.log('OPERATION PROFIT, GROSS %.2f, NET %.2f' %
                  (trade.pnl, trade.pnlcomm))
                  
-    def can_trade_now(self):
-        """Check if enough time has passed since the last trade for throttling"""
-        if self.p.trade_throttle_hours <= 0 or self.last_trade_time is None:
-            return True
-            
-        current_time = self.datas[0].datetime.datetime(0)
-        time_delta = current_time - self.last_trade_time
-        hours_passed = time_delta.total_seconds() / 3600
-        
-        return hours_passed >= self.p.trade_throttle_hours
-
     def calculate_position_size(self):
         """Calculate position size based on selected sizing method"""
         available_cash = self.broker.get_cash()
@@ -945,16 +728,16 @@ def parse_args():
                         help='Stock symbol to retrieve data for')
     
     parser.add_argument('--dbuser', '-u',
-                        default='root',
-                        help='MySQL username')
+                        default='jason',
+                        help='PostgreSQL username')
     
     parser.add_argument('--dbpass', '-pw',
                         default='fsck',
-                        help='MySQL password')
+                        help='PostgreSQL password')
     
     parser.add_argument('--dbname', '-n',
-                        default='price_db',
-                        help='MySQL database name')
+                        default='market_data',
+                        help='PostgreSQL database name')
     
     parser.add_argument('--fromdate', '-f',
                         default='2018-01-01',
@@ -1086,16 +869,14 @@ def parse_args():
 
 
 def main():
-    """
-    Main function
-    """
+    """Main function to run the strategy"""
     args = parse_args()
     
     # Convert dates
     fromdate = datetime.datetime.strptime(args.fromdate, '%Y-%m-%d')
     todate = datetime.datetime.strptime(args.todate, '%Y-%m-%d')
     
-    # Fetch data from MySQL database
+    # Fetch data from PostgreSQL database
     try:
         df = get_db_data(args.data, args.dbuser, args.dbpass, args.dbname, fromdate, todate)
     except Exception as e:
@@ -1114,6 +895,13 @@ def main():
     # Add strategy with all the enhanced parameters
     cerebro.addstrategy(
         GaussianChannelStrategy,
+        # Gaussian Channel parameters
+        poles=args.poles,
+        period=args.period,
+        trmult=args.trmult,
+        lag_reduction=args.lag,
+        fast_response=args.fast,
+        
         # Bollinger Bands parameters
         bblength=args.bblength,
         bbmult=args.bbmult,
@@ -1124,13 +912,6 @@ def main():
         stochlength=args.stochlength,
         smoothk=args.smoothk,
         smoothd=args.smoothd,
-        
-        # Gaussian Channel parameters
-        poles=args.poles,
-        period=args.period,
-        trmult=args.trmult,
-        lag_reduction=args.lag,
-        fast_response=args.fast,
         
         # Date range
         startdate=fromdate,
@@ -1168,18 +949,15 @@ def main():
     # Set slippage to 0 (as required)
     cerebro.broker.set_slippage_perc(0.0)
     
-    # Add analyzers
-    cerebro.addanalyzer(bt.analyzers.SharpeRatio, _name='sharperatio')
-    cerebro.addanalyzer(bt.analyzers.Returns, _name='returns')
-    cerebro.addanalyzer(bt.analyzers.DrawDown, _name='drawdown')
-    cerebro.addanalyzer(bt.analyzers.TradeAnalyzer, _name='trades')
+    # Add standard analyzers with names expected by print_performance_metrics
+    add_standard_analyzers(cerebro)
     
     # Print out the starting conditions
-    print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
+    print(f'Starting Portfolio Value: ${cerebro.broker.getvalue():.2f}')
     
     # Print strategy configuration
     print('\nStrategy Configuration:')
-    print(f'- Data Source: MySQL database ({args.dbname})')
+    print(f'- Data Source: PostgreSQL database ({args.dbname})')
     print(f'- Symbol: {args.data}')
     print(f'- Date Range: {args.fromdate} to {args.todate}')
     print(f'- Entry: Gaussian channel is green AND price above upper band AND Stochastic RSI signal')
@@ -1214,46 +992,13 @@ def main():
     
     # Run the strategy
     results = cerebro.run()
-    strat = results[0]
     
     # Print out final results
     print('\n--- Backtest Results ---\n')
-    print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
+    print(f'Final Portfolio Value: ${cerebro.broker.getvalue():.2f}')
     
-    # Get analyzer results
-    try:
-        returns = strat.analyzers.returns.get_analysis()
-        total_return = returns.get('rtot', 0) * 100
-        print(f'Return: {total_return:.2f}%')
-    except Exception as e:
-        print('Unable to calculate return')
-    
-    try:
-        sharpe = strat.analyzers.sharperatio.get_analysis()
-        sharpe_ratio = sharpe.get('sharperatio', 0)
-        print(f'Sharpe Ratio: {sharpe_ratio:.4f}')
-    except Exception as e:
-        print('Unable to calculate Sharpe ratio')
-    
-    try:
-        drawdown = strat.analyzers.drawdown.get_analysis()
-        max_dd = drawdown.get('max', {}).get('drawdown', 0)
-        print(f'Max Drawdown: {max_dd:.2f}%')
-    except Exception as e:
-        print('Unable to calculate Max Drawdown')
-    
-    try:
-        trades = strat.analyzers.trades.get_analysis()
-        total_trades = trades.get('total', {}).get('total', 0)
-        won_trades = trades.get('won', {}).get('total', 0)
-        lost_trades = trades.get('lost', {}).get('total', 0)
-        win_rate = won_trades / total_trades * 100 if total_trades > 0 else 0
-        print(f'Total Trades: {total_trades}')
-        print(f'Won Trades: {won_trades}')
-        print(f'Lost Trades: {lost_trades}')
-        print(f'Win Rate: {win_rate:.2f}%')
-    except Exception as e:
-        print('Unable to calculate trade statistics')
+    # Use the standardized performance metrics function
+    print_performance_metrics(cerebro, results)
     
     # Plot if requested
     if args.plot:
