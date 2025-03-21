@@ -69,6 +69,7 @@ DATABASE PARAMETERS:
 --dbpass, -pw   : PostgreSQL password (default: fsck)
 --dbname, -n    : PostgreSQL database name (default: market_data)
 --cash, -c      : Initial cash for the strategy (default: $100,000)
+--commission, -cm: Commission percentage per trade (default: 0.0)
 
 BOLLINGER BANDS PARAMETERS:
 -------------------------
@@ -84,6 +85,7 @@ OTHER:
 EXAMPLE:
 --------
 python strategies/bb_upper_breakout.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --plot
+python strategies/bb_upper_breakout.py --data SPY --fromdate 2024-01-01 --todate 2024-12-31 --commission 0.1 --plot
 """
 
 from __future__ import (absolute_import, division, print_function,
@@ -205,6 +207,9 @@ class BBUpperBreakoutStrategy(bt.Strategy, TradeThrottling):
         self.entry_price = None
         self.entry_size = None
         
+        # Commission tracking
+        self.total_commission = 0.0
+        
         # Determine MA type for Bollinger Bands
         if self.p.bb_matype == 'SMA':
             ma_class = bt.indicators.SimpleMovingAverage
@@ -297,6 +302,9 @@ class BBUpperBreakoutStrategy(bt.Strategy, TradeThrottling):
 
         # Check if order was completed
         if order.status in [order.Completed]:
+            # Add commission to total
+            self.total_commission += order.executed.comm
+            
             if order.isbuy():
                 self.entry_price = order.executed.price  # Store entry price for P&L calculation
                 self.entry_size = order.executed.size    # Store position size
@@ -362,6 +370,10 @@ def parse_args():
     parser.add_argument('--cash', '-c',
                        default=100000.0, type=float,
                        help='Starting cash')
+    
+    parser.add_argument('--commission', '-cm',
+                       default=0.0, type=float,
+                       help='Commission percentage per trade (0.1 = 0.1%)')
     
     # Bollinger Bands parameters
     parser.add_argument('--bb-length', '-bl',
@@ -468,8 +480,8 @@ def main():
     # Set initial cash
     cerebro.broker.setcash(args.cash)
     
-    # Set commission - 0.1%
-    cerebro.broker.setcommission(commission=0.001)
+    # Set commission - percentage value provided as an argument (default 0.0%)
+    cerebro.broker.setcommission(commission=args.commission/100)
     
     # Set slippage to 0
     cerebro.broker.set_slippage_perc(0.0)
@@ -483,11 +495,14 @@ def main():
     # Run the strategy
     results = cerebro.run()
     
+    # Get the strategy instance
+    strat = results[0]
+    
     # Print final portfolio value
     final_value = cerebro.broker.getvalue()
     print(f'Final Portfolio Value: ${final_value:.2f}')
     
-    # Print standard performance metrics
+    # Print performance metrics with tracked commission
     print_performance_metrics(cerebro, results, fromdate=original_fromdate, todate=original_todate)
     
     # Plot if requested
