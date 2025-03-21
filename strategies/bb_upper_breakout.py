@@ -198,6 +198,13 @@ class BBUpperBreakoutStrategy(bt.Strategy, TradeThrottling):
         # Order tracking
         self.order = None
         
+        # For trade throttling
+        self.last_trade_date = None
+        
+        # For trade tracking
+        self.entry_price = None
+        self.entry_size = None
+        
         # Determine MA type for Bollinger Bands
         if self.p.bb_matype == 'SMA':
             ma_class = bt.indicators.SimpleMovingAverage
@@ -262,11 +269,16 @@ class BBUpperBreakoutStrategy(bt.Strategy, TradeThrottling):
                 size = self.calculate_position_size()
                 self.log(f'BUY CREATE: {self.dataclose[0]:.2f}, Size: {size}')
                 self.order = self.buy(size=size)
+                
+                # Update the last trade date for throttling
+                self.last_trade_date = self.datas[0].datetime.date(0)
         else:
             # SELL LOGIC: When price closes below lower band
             if self.datasrc[0] < self.bbands.bot[0]:
-                self.log(f'SELL CREATE: {self.dataclose[0]:.2f}')
-                self.order = self.sell()
+                self.log(f'SELL CREATE: {self.dataclose[0]:.2f}, Size: {self.position.size}')
+                
+                # Use close() instead of sell() to close the entire position
+                self.order = self.close()
 
     def stop(self):
         """Called when backtest is complete"""
@@ -286,11 +298,21 @@ class BBUpperBreakoutStrategy(bt.Strategy, TradeThrottling):
         # Check if order was completed
         if order.status in [order.Completed]:
             if order.isbuy():
+                self.entry_price = order.executed.price  # Store entry price for P&L calculation
+                self.entry_size = order.executed.size    # Store position size
                 self.log(f'BUY EXECUTED: Price: {order.executed.price:.2f}, Size: {order.executed.size}, '
                        f'Value: {order.executed.value:.2f}, Comm: {order.executed.comm:.2f}')
             else:  # sell
-                self.log(f'SELL EXECUTED: Price: {order.executed.price:.2f}, Size: {order.executed.size}, '
-                       f'Value: {order.executed.value:.2f}, Comm: {order.executed.comm:.2f}')
+                if hasattr(self, 'entry_price') and self.entry_price is not None:
+                    # Calculate profit if we have an entry price
+                    profit = (order.executed.price - self.entry_price) * order.executed.size
+                    profit_pct = ((order.executed.price / self.entry_price) - 1.0) * 100
+                    self.log(f'SELL EXECUTED: Price: {order.executed.price:.2f}, Size: {order.executed.size}, '
+                           f'Value: {order.executed.value:.2f}, Comm: {order.executed.comm:.2f}, '
+                           f'Profit: ${profit:.2f} ({profit_pct:.2f}%)')
+                else:
+                    self.log(f'SELL EXECUTED: Price: {order.executed.price:.2f}, Size: {order.executed.size}, '
+                           f'Value: {order.executed.value:.2f}, Comm: {order.executed.comm:.2f}')
         
         elif order.status in [order.Canceled, order.Margin, order.Rejected]:
             self.log(f'Order Canceled/Margin/Rejected: {order.status}')
@@ -401,11 +423,23 @@ def main():
     fromdate = datetime.datetime.strptime(args.fromdate, '%Y-%m-%d')
     todate = datetime.datetime.strptime(args.todate, '%Y-%m-%d')
     
-    # Get data from database
-    df = get_db_data(args.data, args.dbuser, args.dbpass, args.dbname, fromdate, todate)
+    # Store original dates for reporting
+    original_fromdate = fromdate
+    original_todate = todate
     
-    # Create a Data Feed
-    data = StockPriceData(dataname=df)
+    # Add padding to ensure we get data for the full date range specified
+    # Expand request to start of the year to ensure complete data for Buy & Hold
+    padded_fromdate = datetime.datetime(fromdate.year, 1, 1)
+    
+    # Get data from database with padded date range
+    df = get_db_data(args.data, args.dbuser, args.dbpass, args.dbname, padded_fromdate, todate)
+    
+    # Create a Data Feed with date filters
+    data = StockPriceData(
+        dataname=df,
+        fromdate=original_fromdate,
+        todate=original_todate
+    )
     
     # Create a cerebro entity
     cerebro = bt.Cerebro()
@@ -454,7 +488,7 @@ def main():
     print(f'Final Portfolio Value: ${final_value:.2f}')
     
     # Print standard performance metrics
-    print_performance_metrics(cerebro, results)
+    print_performance_metrics(cerebro, results, fromdate=original_fromdate, todate=original_todate)
     
     # Plot if requested
     if args.plot:
