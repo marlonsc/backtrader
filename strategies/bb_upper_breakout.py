@@ -29,8 +29,8 @@ potentially signaling the beginning of a new trend.
 STRATEGY LOGIC:
 --------------
 - Go LONG when price CLOSES ABOVE the UPPER Bollinger Band
-- Exit LONG when price CLOSES BELOW the MIDDLE Bollinger Band or a trailing stop is hit
-- Optional stop loss at a fixed percentage below entry
+- Exit LONG when price CLOSES BELOW the LOWER Bollinger Band
+- Uses 100% of available capital for positions
 
 MARKET CONDITIONS:
 ----------------
@@ -41,8 +41,7 @@ MARKET CONDITIONS:
 - OPTIMAL MARKET CONDITION: Markets transitioning from consolidation to trend
 
 The strategy will struggle in sideways markets as breakouts are often false and lead
-to rapid reversals. This strategy aims to capture the beginning of new trends and
-is most effective when combined with volume confirmation.
+to rapid reversals. This strategy aims to capture the beginning of new trends.
 
 BOLLINGER BANDS:
 --------------
@@ -53,13 +52,6 @@ Bollinger Bands consist of:
 
 These bands adapt to volatility - widening during volatile periods and 
 narrowing during less volatile periods.
-
-POSITION SIZING & RISK MANAGEMENT:
----------------------------------
-- Uses risk-based position sizing
-- Optional trailing stop to lock in profits
-- Fixed stop loss option to limit downside risk
-- Maximum position size limit to prevent overexposure
 
 USAGE:
 ------
@@ -82,25 +74,8 @@ BOLLINGER BANDS PARAMETERS:
 -------------------------
 --bb-length, -bl: Period for Bollinger Bands calculation (default: 20)
 --bb-mult, -bm  : Multiplier for standard deviation (default: 2.0)
---matype, -mt   : Moving average type for Bollinger Bands basis (default: SMA, options: SMA, EMA, WMA, SMMA)
---volume-mult, -vm: Volume multiplier for breakout confirmation (default: 1.5)
---check-volume, -cv: Consider volume for breakout confirmation (default: False)
-
-EXIT PARAMETERS:
----------------
---use-stop, -us : Use stop loss (default: True) 
---stop-pct, -sp : Stop loss percentage (default: 2.0)
---trailing-stop, -ts : Enable trailing stop loss (default: True)
---trail-percent, -tp : Trailing stop percentage (default: 2.0)
-
-POSITION SIZING:
----------------
---risk-percent, -rp  : Percentage of equity to risk per trade (default: 1.0)
---max-position, -mp  : Maximum position size as percentage of equity (default: 20.0)
-
-TRADE THROTTLING:
----------------
---trade-throttle-days, -ttd : Minimum days between trades (default: 1)
+--matype, -mt   : Moving average type for Bollinger Bands basis (default: SMA, options: SMA, EMA, WMA, SMMA, VWMA)
+--src, -s       : Source for Bollinger Bands calculation (default: "close", options: "open", "high", "low", "close")
 
 OTHER:
 -----
@@ -108,7 +83,7 @@ OTHER:
 
 EXAMPLE:
 --------
-python strategies/bb_upper_breakout.py --data AAPL --fromdate 2023-01-01 --todate 2023-12-31 --check-volume --volume-mult 1.8 --trailing-stop --trail-percent 3.0 --plot
+python strategies/bb_upper_breakout.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --plot
 """
 
 from __future__ import (absolute_import, division, print_function,
@@ -125,7 +100,13 @@ import backtrader as bt
 import backtrader.indicators as btind
 
 # Import utility functions
-from strategies.utils import get_db_data, print_performance_metrics, TradeThrottling, add_standard_analyzers
+try:
+    # Try direct import first (when running as a module)
+    from strategies.utils import get_db_data, print_performance_metrics, TradeThrottling, add_standard_analyzers
+except ModuleNotFoundError:
+    # If that fails, try relative import (when running script directly)
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    from strategies.utils import get_db_data, print_performance_metrics, TradeThrottling, add_standard_analyzers
 
 # Add the parent directory to the Python path to import shared modules
 parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -143,8 +124,7 @@ class StockPriceData(bt.feeds.PandasData):
         ('high', 'High'),    # Column containing the high price
         ('low', 'Low'),      # Column containing the low price
         ('close', 'Close'),  # Column containing the close price
-        ('volume', 'Volume'), # Column containing the volume
-        ('openinterest', None)  # Column for open interest (not available)
+        ('volume', 'Volume') # Column containing the volume
     )
 
 
@@ -153,18 +133,13 @@ class BBUpperBreakoutStrategy(bt.Strategy, TradeThrottling):
     Bollinger Bands Upper Breakout Strategy
 
     This strategy attempts to capture breakouts by:
-    1. Buying when price closes above the upper Bollinger Band (with optional volume confirmation)
-    2. Selling when price closes below the middle Bollinger Band
-    
-    Additional exit mechanisms include:
-    - Stop loss to limit potential losses
-    - Trailing stop loss to lock in profits
+    1. Buying when price closes above the upper Bollinger Band
+    2. Selling when price closes below the lower Bollinger Band
     
     Strategy Logic:
-    - Buy when price closes above the upper Bollinger Band with volume confirmation
-    - Exit when price closes below the middle Bollinger Band or hits a stop
-    - Uses risk-based position sizing for proper money management
-    - Implements cool down period to avoid overtrading 
+    - Go LONG when price CLOSES ABOVE the UPPER Bollinger Band
+    - Exit LONG when price CLOSES BELOW the LOWER Bollinger Band
+    - Uses 100% of available capital for positions
     
     ** IMPORTANT: This strategy is specifically designed for trending markets **
     It performs poorly in sideways/ranging markets where breakouts are often false.
@@ -181,27 +156,15 @@ class BBUpperBreakoutStrategy(bt.Strategy, TradeThrottling):
         ('bb_period', 20),               # Period for Bollinger Bands
         ('bb_dev', 2.0),                 # Standard deviations for Bollinger Bands
         ('bb_matype', 'SMA'),            # Moving average type for Bollinger Bands
+        ('bb_src', 'close'),             # Source for Bollinger Bands calculation
         
-        # Entry parameters
-        ('require_volume', True),        # Require volume confirmation for entry
-        ('vol_factor', 1.5),             # Volume must be this times the average
-        ('vol_lookback', 20),            # Period for volume average calculation
-        
-        # Exit parameters
-        ('exit_below_middle', True),     # Exit when price closes below middle band
-        
-        # Stop loss parameters
-        ('use_stop_loss', True),         # Use a stop loss
-        ('stop_pct', 5.0),               # Stop loss percentage below entry
-        ('use_trailing_stop', True),     # Use a trailing stop
-        ('trail_pct', 5.0),              # Trailing stop percentage
-        
-        # Risk management
-        ('risk_percent', 1.0),           # Percentage of equity to risk per trade
-        ('max_position', 20.0),          # Maximum position size as percentage
-        
-        # Trade throttling
-        ('trade_throttle_days', 5),      # Minimum days between trades
+        # Date range parameters
+        ('start_year', 2024),            # Start year for trading
+        ('start_month', 1),              # Start month for trading
+        ('start_day', 1),                # Start day for trading
+        ('end_year', 2024),              # End year for trading
+        ('end_month', 12),               # End month for trading
+        ('end_day', 31),                 # End day for trading
         
         # Logging
         ('loglevel', 'info'),            # Logging level: debug, info, warning, error
@@ -218,164 +181,101 @@ class BBUpperBreakoutStrategy(bt.Strategy, TradeThrottling):
     def __init__(self):
         # Store references to price data
         self.dataclose = self.datas[0].close
+        self.dataopen = self.datas[0].open
         self.datahigh = self.datas[0].high
         self.datalow = self.datas[0].low
-        self.datavolume = self.datas[0].volume
         
-        # Order and position tracking
+        # Select source data based on parameter
+        if self.p.bb_src == 'open':
+            self.datasrc = self.dataopen
+        elif self.p.bb_src == 'high':
+            self.datasrc = self.datahigh
+        elif self.p.bb_src == 'low':
+            self.datasrc = self.datalow
+        else:  # default to close
+            self.datasrc = self.dataclose
+        
+        # Order tracking
         self.order = None
-        self.buyprice = None
-        self.buycomm = None
-        self.stop_price = None
-        self.trail_price = None
-        self.highest_price = None
-        
-        # For trade throttling
-        self.last_trade_date = None
         
         # Determine MA type for Bollinger Bands
         if self.p.bb_matype == 'SMA':
             ma_class = bt.indicators.SimpleMovingAverage
         elif self.p.bb_matype == 'EMA':
             ma_class = bt.indicators.ExponentialMovingAverage
+        elif self.p.bb_matype == 'SMMA (RMA)':
+            ma_class = bt.indicators.SmoothedMovingAverage
         elif self.p.bb_matype == 'WMA':
             ma_class = bt.indicators.WeightedMovingAverage
-        elif self.p.bb_matype == 'SMMA':
-            ma_class = bt.indicators.SmoothedMovingAverage
+        elif self.p.bb_matype == 'VWMA':
+            ma_class = bt.indicators.WeightedMovingAverage  # Using WMA as proxy for VWMA
         else:
             # Default to SMA
             ma_class = bt.indicators.SimpleMovingAverage
             
         # Create Bollinger Bands
         self.bbands = bt.indicators.BollingerBands(
-            self.datas[0], 
+            self.datasrc, 
             period=self.p.bb_period,
             devfactor=self.p.bb_dev,
             movav=ma_class
         )
         
-        # Volume moving average for comparison
-        self.volume_ma = bt.indicators.SimpleMovingAverage(
-            self.datavolume, period=self.p.vol_lookback
-        )
+        # For plotting
+        self.basis = self.bbands.mid
+        self.upper = self.bbands.top
+        self.lower = self.bbands.bot
         
-        # Create crossover indicators for signal generation
-        self.price_cross_upper = bt.indicators.CrossUp(
-            self.dataclose, self.bbands.lines.top
-        )
-        
-        self.price_cross_middle = bt.indicators.CrossDown(
-            self.dataclose, self.bbands.lines.mid
-        )
-        
-        # Add ATR for stop loss calculation
-        self.atr = bt.indicators.ATR(self.datas[0], period=14)
+        # Setup date range
+        self.start_date = datetime.datetime(
+            self.p.start_year, self.p.start_month, self.p.start_day)
+        self.end_date = datetime.datetime(
+            self.p.end_year, self.p.end_month, self.p.end_day)
+
+    def is_in_date_range(self):
+        """Check if current bar is within the date range"""
+        current_date = self.datas[0].datetime.datetime(0)
+        return self.start_date <= current_date <= self.end_date
 
     def calculate_position_size(self):
-        """Calculate position size based on risk percentage"""
+        """Calculate position size to use 100% of available capital"""
         cash = self.broker.getcash()
-        value = self.broker.getvalue()
         current_price = self.dataclose[0]
         
-        # Calculate size based on risk percentage
-        risk_amount = value * (self.p.risk_percent / 100)
-        risk_per_share = current_price * (self.p.stop_pct / 100)
-        
-        if risk_per_share > 0:
-            size = int(risk_amount / risk_per_share)
-        else:
-            # Fallback calculation based on max position
-            size = int((value * self.p.max_position / 100) / current_price)
-        
-        # Make sure we don't exceed maximum position size
-        max_size = int((cash * self.p.max_position / 100) / current_price)
-        return min(size, max_size)
-
-    def check_volume_confirmation(self):
-        """Check if volume is high enough to confirm the breakout"""
-        if not self.p.require_volume:
-            return True
-            
-        current_volume = self.datavolume[0]
-        avg_volume = self.volume_ma[0]
-        
-        # Volume should be at least X times the average
-        return current_volume >= (avg_volume * self.p.vol_factor)
+        # Use 100% of available capital (minus a small buffer)
+        size = int(cash * 0.995 / current_price)
+        return max(1, size)  # At least 1 share
 
     def next(self):
+        # Check if we're in the date range
+        if not self.is_in_date_range():
+            return
+        
         # If an order is pending, we cannot send a new one
         if self.order:
             return
             
-        # Check for trailing stop if enabled
-        if self.position and self.p.use_trailing_stop and self.trail_price is not None:
-            # Update the trailing stop if price moves higher
-            if self.datahigh[0] > self.highest_price:
-                self.highest_price = self.datahigh[0]
-                self.trail_price = self.highest_price * (1.0 - self.p.trail_pct / 100.0)
-                self.log(f'Trailing stop updated to: {self.trail_price:.2f}')
-            
-            # Check if trailing stop is hit
-            if self.datalow[0] <= self.trail_price:
-                self.log(f'SELL CREATE (Trailing Stop): {self.dataclose[0]:.2f}')
-                self.order = self.sell()
-                return
-        
-        # Check for stop loss if we're in the market and stop loss is enabled
-        if self.position and self.p.use_stop_loss and self.stop_price is not None:
-            if self.datalow[0] < self.stop_price:
-                self.log(f'STOP LOSS TRIGGERED: Price: {self.datalow[0]:.2f}, Stop: {self.stop_price:.2f}')
-                self.order = self.close()
-                return
-                
-        # Check for price crossing below middle band - exit signal
-        if self.position and self.price_cross_middle[0]:
-            self.log(f'MIDDLE BAND EXIT: Price: {self.dataclose[0]:.2f}, Middle Band: {self.bbands.lines.mid[0]:.2f}')
-            self.order = self.close()
-            return
-        
-        # If we are not in the market, look for a buy signal
+        # Check if we are in the market
         if not self.position:
-            # Check if we can trade now (throttling)
-            if not self.can_trade_now():
-                return
-                
-            # Buy if price closes above upper band with volume confirmation
-            if self.dataclose[0] > self.bbands.lines.top[0] and self.check_volume_confirmation():
-                # Calculate position size
+            # BUY LOGIC: When price closes above upper band
+            if self.datasrc[0] > self.bbands.top[0]:
                 size = self.calculate_position_size()
-                
-                volume_msg = ""
-                if self.p.require_volume:
-                    volume_msg = f', Volume: {self.datavolume[0]:.0f} (Avg: {self.volume_ma[0]:.0f})'
-                
-                self.log(f'BUY SIGNAL: Price: {self.dataclose[0]:.2f}, Upper Band: {self.bbands.lines.top[0]:.2f}{volume_msg}')
-                
-                if size > 0:
-                    self.order = self.buy(size=size)
-                    
-                    # Set stop loss price if enabled
-                    if self.p.use_stop_loss:
-                        self.stop_price = self.dataclose[0] * (1.0 - self.p.stop_pct / 100.0)
-                        self.log(f'Stop loss set at {self.stop_price:.2f}')
-                    
-                    # Set trailing stop if enabled
-                    if self.p.use_trailing_stop:
-                        self.highest_price = self.dataclose[0]
-                        self.trail_price = self.dataclose[0] * (1.0 - self.p.trail_pct / 100.0)
-                        self.log(f'Initial trailing stop set at {self.trail_price:.2f}')
-                    
-                    # Update last trade date for throttling
-                    self.last_trade_date = self.datas[0].datetime.date(0)
+                self.log(f'BUY CREATE: {self.dataclose[0]:.2f}, Size: {size}')
+                self.order = self.buy(size=size)
+        else:
+            # SELL LOGIC: When price closes below lower band
+            if self.datasrc[0] < self.bbands.bot[0]:
+                self.log(f'SELL CREATE: {self.dataclose[0]:.2f}')
+                self.order = self.sell()
 
     def stop(self):
         """Called when backtest is complete"""
-        self.log('Bollinger Bands Upper Breakout Strategy completed', level='info')
+        self.log('Bollinger Bands Strategy completed', level='info')
         self.log(f'Final Portfolio Value: {self.broker.getvalue():.2f}', level='info')
         
         # Add a note about market conditions
-        self.log('NOTE: This strategy is specifically designed for TRENDING MARKETS', level='info')
-        self.log('      It performs poorly in sideways markets with frequent false breakouts', level='info')
+        self.log('NOTE: This strategy is designed for trending markets', level='info')
+        self.log('      It aims to capture breakouts above the upper band and exit on reversals', level='info')
 
     def notify_order(self, order):
         """Handle order notifications"""
@@ -387,12 +287,10 @@ class BBUpperBreakoutStrategy(bt.Strategy, TradeThrottling):
         if order.status in [order.Completed]:
             if order.isbuy():
                 self.log(f'BUY EXECUTED: Price: {order.executed.price:.2f}, Size: {order.executed.size}, '
-                       f'Cost: {order.executed.value:.2f}, Comm: {order.executed.comm:.2f}')
-                self.buyprice = order.executed.price
-                self.buycomm = order.executed.comm
+                       f'Value: {order.executed.value:.2f}, Comm: {order.executed.comm:.2f}')
             else:  # sell
                 self.log(f'SELL EXECUTED: Price: {order.executed.price:.2f}, Size: {order.executed.size}, '
-                       f'Cost: {order.executed.value:.2f}, Comm: {order.executed.comm:.2f}')
+                       f'Value: {order.executed.value:.2f}, Comm: {order.executed.comm:.2f}')
         
         elif order.status in [order.Canceled, order.Margin, order.Rejected]:
             self.log(f'Order Canceled/Margin/Rejected: {order.status}')
@@ -454,47 +352,38 @@ def parse_args():
     
     parser.add_argument('--matype', '-mt',
                        default='SMA',
-                       choices=['SMA', 'EMA', 'WMA', 'SMMA'],
+                       choices=['SMA', 'EMA', 'SMMA (RMA)', 'WMA', 'VWMA'],
                        help='Moving average type for Bollinger Bands basis')
     
-    parser.add_argument('--check-volume', '-cv',
-                       action='store_true',
-                       help='Consider volume for breakout confirmation')
+    parser.add_argument('--src', '-s',
+                       default='close',
+                       choices=['open', 'high', 'low', 'close'],
+                       help='Source for Bollinger Bands calculation')
     
-    parser.add_argument('--volume-mult', '-vm',
-                       default=1.5, type=float,
-                       help='Volume multiplier for breakout confirmation')
+    # Date range parameters
+    parser.add_argument('--start-year', '-sy',
+                       default=2024, type=int,
+                       help='Start year for trading')
     
-    # Exit parameters
-    parser.add_argument('--use-stop', '-us',
-                       action='store_true',
-                       help='Use stop loss')
-    
-    parser.add_argument('--stop-pct', '-sp',
-                       default=2.0, type=float,
-                       help='Stop loss percentage')
-    
-    parser.add_argument('--trailing-stop', '-ts',
-                       action='store_true',
-                       help='Enable trailing stop loss')
-    
-    parser.add_argument('--trail-percent', '-tp',
-                       default=2.0, type=float,
-                       help='Trailing stop percentage')
-    
-    # Position sizing parameters
-    parser.add_argument('--risk-percent', '-rp',
-                       default=1.0, type=float,
-                       help='Percentage of equity to risk per trade')
-    
-    parser.add_argument('--max-position', '-mp',
-                       default=20.0, type=float,
-                       help='Maximum position size as percentage of equity')
-    
-    # Trade throttling
-    parser.add_argument('--trade-throttle-days', '-ttd',
+    parser.add_argument('--start-month', '-sm',
                        default=1, type=int,
-                       help='Minimum days between trades')
+                       help='Start month for trading')
+    
+    parser.add_argument('--start-day', '-sd',
+                       default=1, type=int,
+                       help='Start day for trading')
+    
+    parser.add_argument('--end-year', '-ey',
+                       default=2024, type=int,
+                       help='End year for trading')
+    
+    parser.add_argument('--end-month', '-em',
+                       default=12, type=int,
+                       help='End month for trading')
+    
+    parser.add_argument('--end-day', '-ed',
+                       default=31, type=int,
+                       help='End day for trading')
     
     # Plotting
     parser.add_argument('--plot', '-pl',
@@ -531,26 +420,15 @@ def main():
         bb_period=args.bb_length,
         bb_dev=args.bb_mult,
         bb_matype=args.matype,
+        bb_src=args.src,
         
-        # Entry parameters
-        require_volume=args.check_volume,
-        vol_factor=args.volume_mult,
-        
-        # Exit parameters
-        exit_below_middle=args.use_stop,
-        
-        # Stop loss parameters
-        use_stop_loss=args.use_stop,
-        stop_pct=args.stop_pct,
-        use_trailing_stop=args.trailing_stop,
-        trail_pct=args.trail_percent,
-        
-        # Risk management parameters
-        risk_percent=args.risk_percent,
-        max_position=args.max_position,
-        
-        # Trade throttling
-        trade_throttle_days=args.trade_throttle_days,
+        # Date range parameters
+        start_year=args.start_year,
+        start_month=args.start_month,
+        start_day=args.start_day,
+        end_year=args.end_year,
+        end_month=args.end_month,
+        end_day=args.end_day,
     )
     
     # Set initial cash
@@ -558,6 +436,9 @@ def main():
     
     # Set commission - 0.1%
     cerebro.broker.setcommission(commission=0.001)
+    
+    # Set slippage to 0
+    cerebro.broker.set_slippage_perc(0.0)
     
     # Add standard analyzers
     add_standard_analyzers(cerebro)
@@ -574,69 +455,6 @@ def main():
     
     # Print standard performance metrics
     print_performance_metrics(cerebro, results)
-    
-    # Extract and display detailed performance metrics
-    print("\n==== DETAILED PERFORMANCE METRICS ====")
-    
-    # Get the first strategy instance
-    strat = results[0]
-    
-    # Return
-    ret_analyzer = strat.analyzers.returns
-    total_return = ret_analyzer.get_analysis()['rtot'] * 100
-    print(f"Return: {total_return:.2f}%")
-    
-    # Sharpe Ratio
-    sharpe = strat.analyzers.sharpe_ratio.get_analysis()['sharperatio']
-    if sharpe is None:
-        sharpe = 0.0
-    print(f"Sharpe Ratio: {sharpe:.4f}")
-    
-    # Max Drawdown
-    dd = strat.analyzers.drawdown.get_analysis()
-    max_dd = dd.get('max', {}).get('drawdown', 0.0)
-    print(f"Max Drawdown: {max_dd:.2f}%")
-    
-    # Trade statistics
-    trade_analysis = strat.analyzers.trade_analyzer.get_analysis()
-    
-    # Total Trades
-    total_trades = trade_analysis.get('total', {}).get('total', 0)
-    print(f"Total Trades: {total_trades}")
-    
-    # Won Trades
-    won_trades = trade_analysis.get('won', {}).get('total', 0)
-    print(f"Won Trades: {won_trades}")
-    
-    # Lost Trades
-    lost_trades = trade_analysis.get('lost', {}).get('total', 0)
-    print(f"Lost Trades: {lost_trades}")
-    
-    # Win Rate
-    if total_trades > 0:
-        win_rate = (won_trades / total_trades) * 100
-    else:
-        win_rate = 0.0
-    print(f"Win Rate: {win_rate:.2f}%")
-    
-    # Average Win
-    avg_win = trade_analysis.get('won', {}).get('pnl', {}).get('average', 0.0)
-    print(f"Average Win: ${avg_win:.2f}")
-    
-    # Average Loss
-    avg_loss = trade_analysis.get('lost', {}).get('pnl', {}).get('average', 0.0)
-    print(f"Average Loss: ${avg_loss:.2f}")
-    
-    # Profit Factor
-    gross_profit = trade_analysis.get('won', {}).get('pnl', {}).get('total', 0.0)
-    gross_loss = abs(trade_analysis.get('lost', {}).get('pnl', {}).get('total', 0.0))
-    
-    if gross_loss != 0:
-        profit_factor = gross_profit / gross_loss
-    else:
-        profit_factor = float('inf') if gross_profit > 0 else 0.0
-    
-    print(f"Profit Factor: {profit_factor:.2f}")
     
     # Plot if requested
     if args.plot:

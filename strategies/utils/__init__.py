@@ -145,7 +145,7 @@ def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate):
         
         # Query the data
         query = """
-        SELECT date, open, high, low, close, volume, rsi
+        SELECT date, open, high, low, close, volume
         FROM stock_price_data
         WHERE symbol = %s AND date BETWEEN %s AND %s
         ORDER BY date ASC
@@ -160,10 +160,7 @@ def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate):
             raise Exception(f"No data found for {symbol} in the specified date range")
         
         # Convert to pandas DataFrame
-        if len(rows[0]) > 6:  # Check if RSI is included
-            df = pd.DataFrame(rows, columns=['Date', 'Open', 'High', 'Low', 'Close', 'Volume', 'RSI'])
-        else:
-            df = pd.DataFrame(rows, columns=['Date', 'Open', 'High', 'Low', 'Close', 'Volume'])
+        df = pd.DataFrame(rows, columns=['Date', 'Open', 'High', 'Low', 'Close', 'Volume'])
         
         # Convert 'Date' to datetime and set as index
         df['Date'] = pd.to_datetime(df['Date'])
@@ -175,8 +172,6 @@ def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate):
         df['Low'] = pd.to_numeric(df['Low'])
         df['Close'] = pd.to_numeric(df['Close'])
         df['Volume'] = pd.to_numeric(df['Volume'])
-        if 'RSI' in df.columns:
-            df['RSI'] = pd.to_numeric(df['RSI'])
         
         print(f"Successfully fetched data for {symbol}. Retrieved {len(df)} bars.")
         
