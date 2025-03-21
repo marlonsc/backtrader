@@ -169,13 +169,42 @@ def print_performance_metrics(cerebro, results, fromdate=None, todate=None):
             full_df = data.p.dataname  # Get the original pandas DataFrame
             
             if isinstance(full_df, pd.DataFrame) and not full_df.empty:
-                first_close = full_df['Close'].iloc[0]
-                last_close = full_df['Close'].iloc[-1]
-                
-                buy_date = full_df.index[0].strftime('%Y-%m-%d')
-                buy_price = first_close
-                sell_date = full_df.index[-1].strftime('%Y-%m-%d')
-                sell_price = last_close
+                # Filter the dataframe to use only the date range specified by fromdate and todate
+                if fromdate and todate:
+                    # Convert fromdate and todate to pandas timestamp format for filtering
+                    pd_fromdate = pd.Timestamp(fromdate)
+                    pd_todate = pd.Timestamp(todate)
+                    
+                    # Filter dataframe to include only rows within the specified date range
+                    filtered_df = full_df[(full_df.index >= pd_fromdate) & (full_df.index <= pd_todate)]
+                    
+                    # Use the filtered dataframe if it's not empty, otherwise fall back to full dataframe
+                    if not filtered_df.empty:
+                        first_close = filtered_df['Close'].iloc[0]
+                        last_close = filtered_df['Close'].iloc[-1]
+                        
+                        buy_date = filtered_df.index[0].strftime('%Y-%m-%d')
+                        buy_price = first_close
+                        sell_date = filtered_df.index[-1].strftime('%Y-%m-%d')
+                        sell_price = last_close
+                    else:
+                        # Fallback to full dataframe if filtered is empty
+                        first_close = full_df['Close'].iloc[0]
+                        last_close = full_df['Close'].iloc[-1]
+                        
+                        buy_date = full_df.index[0].strftime('%Y-%m-%d')
+                        buy_price = first_close
+                        sell_date = full_df.index[-1].strftime('%Y-%m-%d')
+                        sell_price = last_close
+                else:
+                    # If no date range specified, use the full dataframe
+                    first_close = full_df['Close'].iloc[0]
+                    last_close = full_df['Close'].iloc[-1]
+                    
+                    buy_date = full_df.index[0].strftime('%Y-%m-%d')
+                    buy_price = first_close
+                    sell_date = full_df.index[-1].strftime('%Y-%m-%d')
+                    sell_price = last_close
                 
                 # Calculate Buy & Hold return
                 buy_hold_pct = ((last_close / first_close) - 1.0) * 100
