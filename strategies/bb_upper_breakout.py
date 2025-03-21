@@ -70,6 +70,7 @@ DATABASE PARAMETERS:
 --dbname, -n    : PostgreSQL database name (default: market_data)
 --cash, -c      : Initial cash for the strategy (default: $100,000)
 --commission, -cm: Commission percentage per trade (default: 0.0)
+--interval, -i  : Time interval for data ('1h', '4h', '1d') (default: '1h')
 
 BOLLINGER BANDS PARAMETERS:
 -------------------------
@@ -86,6 +87,8 @@ EXAMPLE:
 --------
 python strategies/bb_upper_breakout.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --plot
 python strategies/bb_upper_breakout.py --data SPY --fromdate 2024-01-01 --todate 2024-12-31 --commission 0.1 --plot
+python strategies/bb_upper_breakout.py --data SPY --fromdate 2024-01-01 --todate 2024-12-31 --interval 4h --plot
+python strategies/bb_upper_breakout.py --data SPY --fromdate 2024-01-01 --todate 2024-12-31 --interval 1d
 """
 
 from __future__ import (absolute_import, division, print_function,
@@ -375,6 +378,12 @@ def parse_args():
                        default=0.0, type=float,
                        help='Commission percentage per trade (0.1 = 0.1%)')
     
+    # Time interval parameter
+    parser.add_argument('--interval', '-i',
+                       default='1h',
+                       choices=['1h', '4h', '1d'],
+                       help='Time interval for data (1h=hourly, 4h=4-hour, 1d=daily)')
+    
     # Bollinger Bands parameters
     parser.add_argument('--bb-length', '-bl',
                        default=20, type=int,
@@ -443,8 +452,8 @@ def main():
     # Expand request to start of the year to ensure complete data for Buy & Hold
     padded_fromdate = datetime.datetime(fromdate.year, 1, 1)
     
-    # Get data from database with padded date range
-    df = get_db_data(args.data, args.dbuser, args.dbpass, args.dbname, padded_fromdate, todate)
+    # Get data from database with padded date range and specified interval
+    df = get_db_data(args.data, args.dbuser, args.dbpass, args.dbname, padded_fromdate, todate, args.interval)
     
     # Create a Data Feed with date filters
     data = StockPriceData(

@@ -292,7 +292,7 @@ def print_performance_metrics(cerebro, results, fromdate=None, todate=None):
         traceback.print_exc()
 
 
-def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate):
+def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate, interval='1h'):
     """
     Fetch historical price data from PostgreSQL database
     
@@ -303,6 +303,7 @@ def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate):
     - dbname: PostgreSQL database name
     - fromdate: Start date as datetime object
     - todate: End date as datetime object
+    - interval: Time interval for data ('1h', '4h', '1d') - default: '1h'
     
     Returns:
     - DataFrame with OHLCV data
@@ -325,21 +326,46 @@ def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate):
         # Create a cursor to execute queries
         cursor = connection.cursor()
         
-        # Query the data
-        query = """
+        # Select the appropriate query based on the interval
+        query1hour = """
         SELECT date, open, high, low, close, volume
         FROM stock_price_data
         WHERE symbol = %s AND date BETWEEN %s AND %s
         ORDER BY date ASC
         """
         
+        query4hour = """
+        SELECT interval_start as date, open, high, low, close, volume
+        FROM stock_price_4hour
+        WHERE symbol = %s AND interval_start BETWEEN %s AND %s
+        ORDER BY interval_start ASC
+        """
+        
+        query1day = """
+        SELECT interval_start as date, open, high, low, close, volume
+        FROM stock_price_1day
+        WHERE symbol = %s AND interval_start BETWEEN %s AND %s
+        ORDER BY interval_start ASC
+        """
+        
+        # Select the query based on the interval
+        if interval == '4h':
+            query = query4hour
+            print(f"Using 4-hour interval data from stock_price_4hour")
+        elif interval == '1d':
+            query = query1day
+            print(f"Using daily interval data from stock_price_1day")
+        else:  # Default to 1h
+            query = query1hour
+            print(f"Using 1-hour interval data from stock_price_data")
+            
         # Execute the query
         cursor.execute(query, (symbol, from_str, to_str))
         rows = cursor.fetchall()
         
         # Check if any data was retrieved
         if not rows:
-            raise Exception(f"No data found for {symbol} in the specified date range")
+            raise Exception(f"No data found for {symbol} in the specified date range with {interval} interval")
         
         # Convert to pandas DataFrame
         df = pd.DataFrame(rows, columns=['Date', 'Open', 'High', 'Low', 'Close', 'Volume'])
