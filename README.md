@@ -8,6 +8,9 @@ Aims of this project:
 - Update aged implementations
 
 For now the focus is:
+- Code clean-up: remove unncessary imports
+- Syntax update: make it more modern
+- Remove deprecated integrations (i.e. pyfolio, IbPy, comtypes) 
 - Remove interactive plotting: the backend is heavy and slow
 - Improved support for parallel processing
 
