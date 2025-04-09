@@ -30,7 +30,7 @@ except ImportError:
     raise ImportError(
         'Matplotlib seems to be missing. Needed for plotting support')
 else:
-    touse = 'TKAgg' if sys.platform != 'darwin' else 'MacOSX'
+    touse = 'Agg' if sys.platform != 'darwin' else 'MacOSX'
     try:
         matplotlib.use(touse)
     except:
