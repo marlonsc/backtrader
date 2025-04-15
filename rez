@@ -1,0 +1,76 @@
+import pandas as pd
+import numpy as np
+import yfinance as yf
+
+# دانلود داده ۵ دقیقه‌ای BTC از یاهو
+symbol = "BTC-USD"
+start_date = "2023-01-01"
+end_date = "2025-04-15"
+interval = "5m"
+
+data = yf.download(symbol, start=start_date, end=end_date, interval=interval)
+data.dropna(inplace=True)
+
+# محاسبه EMA و RSI
+data['EMA50'] = data['Close'].ewm(span=50, adjust=False).mean()
+data['EMA200'] = data['Close'].ewm(span=200, adjust=False).mean()
+
+delta = data['Close'].diff()
+gain = np.where(delta > 0, delta, 0)
+loss = np.where(delta < 0, -delta, 0)
+avg_gain = pd.Series(gain).rolling(window=14).mean()
+avg_loss = pd.Series(loss).rolling(window=14).mean()
+rs = avg_gain / avg_loss
+data['RSI'] = 100 - (100 / (1 + rs))
+
+# پارامترهای استراتژی
+risk_pct = 0.5 / 100
+reward_pct = 1.0 / 100
+
+positions = []
+in_position = False
+
+for i in range(200, len(data)):
+    row = data.iloc[i]
+    prev_rsi = data.iloc[i - 1]['RSI']
+
+    # سیگنال ورود خرید
+    if not in_position and row['EMA50'] > row['EMA200'] and prev_rsi < 35 and row['RSI'] > 35:
+        in_position = True
+        entry_price = row['Close']
+        stop_loss = entry_price * (1 - risk_pct)
+        take_profit = entry_price * (1 + reward_pct)
+        entry_time = row.name
+        position_type = 'long'
+
+    # سیگنال ورود فروش
+    elif not in_position and row['EMA50'] < row['EMA200'] and prev_rsi > 65 and row['RSI'] < 65:
+        in_position = True
+        entry_price = row['Close']
+        stop_loss = entry_price * (1 + risk_pct)
+        take_profit = entry_price * (1 - reward_pct)
+        entry_time = row.name
+        position_type = 'short'
+
+    # بررسی خروج
+    elif in_position:
+        if position_type == 'long':
+            if row['Low'] <= stop_loss:
+                positions.append(('long', entry_price, stop_loss, entry_time, row.name, -risk_pct))
+                in_position = False
+            elif row['High'] >= take_profit:
+                positions.append(('long', entry_price, take_profit, entry_time, row.name, reward_pct))
+                in_position = False
+        elif position_type == 'short':
+            if row['High'] >= stop_loss:
+                positions.append(('short', entry_price, stop_loss, entry_time, row.name, -risk_pct))
+                in_position = False
+            elif row['Low'] <= take_profit:
+                positions.append(('short', entry_price, take_profit, entry_time, row.name, reward_pct))
+                in_position = False
+
+# نمایش نتایج نهایی
+results = pd.DataFrame(positions, columns=['Type', 'Entry', 'Exit', 'EntryTime', 'ExitTime', 'Return'])
+print("تعداد معاملات:", len(results))
+print("وین ریت: {:.2f}%".format(100 * len(results[results['Return'] > 0]) / len(results)))
+print("سود نهایی: {:.2f}%".format(100 * results['Return'].sum()))
