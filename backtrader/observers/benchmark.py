@@ -103,7 +103,7 @@ class Benchmark(TimeReturn):
         super(Benchmark, self).__init__()  # treturn including data parameter
         # Create a time return object without the data
         kwargs = self.p._getkwargs()
-        kwargs.update(data=None)  # to create a return for the stratey
+        kwargs.update(data=None)  # to create a return for the strategy
         t = self._owner._addanalyzer_slave(bt.analyzers.TimeReturn, **kwargs)
 
         # swap for consistency
