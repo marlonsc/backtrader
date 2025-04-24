@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2020 Daniel Rodriguez
+# Copyright (C) 2015-2023 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -268,6 +268,7 @@ class YahooFinanceData(YahooFinanceCSVData):
 
         crumb = None
         sess = requests.Session()
+        sess.headers['User-Agent'] = 'backtrader'
         for i in range(self.p.retries + 1):  # at least once
             resp = sess.get(url, **sesskwargs)
             if resp.status_code != requests.codes.ok:
