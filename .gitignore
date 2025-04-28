@@ -69,3 +69,8 @@ samples2/
 datas/*.py
 
 .idea/
+
+backtrader_try.ipynb
+backtrader_live_test.ipynb
+live_backtrader.zip
+readme.md
