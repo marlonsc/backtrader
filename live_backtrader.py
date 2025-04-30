@@ -8,31 +8,54 @@ from xtquant.xttrader import XtQuantTrader, XtQuantTraderCallback
 from xtquant.xttype import StockAccount
 class MyXtQuantTraderCallback(XtQuantTraderCallback):
     def on_disconnected(self):
-        print("connection lost")
+        print("[连接状态] 与交易服务器连接断开")
+
     def on_stock_order(self, order):
-        print("on order callback:")
-        print(order.stock_code, order.order_status, order.order_sysid)
+        print("\n[委托单回调] 订单状态更新")
+        print(f"证券代码: {order.stock_code}")
+        print(f"订单状态: {order.order_status}")  # 需根据券商文档映射状态码含义
+        print(f"系统订单号: {order.order_sysid}")
+
     def on_stock_asset(self, asset):
-        print("on asset callback")
-        print(asset.account_id, asset.cash, asset.total_asset)
+        print("\n[账户资产] 资金变动通知")
+        print(f"账户ID: {asset.account_id}")
+        print(f"可用资金: {asset.cash}")
+        print(f"总资产估值: {asset.total_asset}")
+
     def on_stock_trade(self, trade):
-        print("on trade callback")
-        print(trade.account_id, trade.stock_code, trade.order_id)
+        print("\n[成交记录] 交易已达成")
+        print(f"账户ID: {trade.account_id}")
+        print(f"证券代码: {trade.stock_code}")
+        print(f"关联订单号: {trade.order_id}")
+
     def on_stock_position(self, position):
-        print("on position callback")
-        print(position.stock_code, position.volume)
+        print("\n[持仓变动] 头寸更新")
+        print(f"证券代码: {position.stock_code}")
+        print(f"当前持仓量: {position.volume}")
+
     def on_order_error(self, order_error):
-        print("on order_error callback")
-        print(order_error.order_id, order_error.error_id, order_error.error_msg)
+        print("\n[委托失败] 订单提交错误")
+        print(f"错误订单号: {order_error.order_id}")
+        print(f"错误代码: {order_error.error_id}")
+        print(f"错误详情: {order_error.error_msg}")  # 建议根据error_id映射具体原因
+
     def on_cancel_error(self, cancel_error):
-        print("on cancel_error callback")
-        print(cancel_error.order_id, cancel_error.error_id, cancel_error.error_msg)
+        print("\n[撤单失败] 取消订单错误")
+        print(f"目标订单号: {cancel_error.order_id}")
+        print(f"错误代码: {cancel_error.error_id}")
+        print(f"错误信息: {cancel_error.error_msg}")
+
     def on_order_stock_async_response(self, response):
-        print("on_order_stock_async_response")
-        print(response.account_id, response.order_id, response.seq)
+        print("\n[异步响应] 委托请求已受理")
+        print(f"账户ID: {response.account_id}")
+        print(f"订单号: {response.order_id}")
+        print(f"请求序列号: {response.seq}")
+
     def on_account_status(self, status):
-        print("on_account_status")
-        print(status.account_id, status.account_type, status.status)
+        print("\n[账户状态] 登录/连接状态变化")
+        print(f"账户ID: {status.account_id}")
+        print(f"账户类型: {status.account_type}")  # 如普通户/信用户
+        print(f"当前状态: {status.status}")        # 需映射状态码（如已连接/断开）
 
 class my_broker:
     def __init__(self):
@@ -138,7 +161,7 @@ class TestStrategy(bt.Strategy):
                     if self.dataclose[-1] < self.dataclose[-2]:
                         # previous close less than the previous close
                         
-                        self.mbroker.buy(stock_code= stock_code , price=1000,quantity=200)
+                        # self.mbroker.buy(stock_code= stock_code , price=1000,quantity=200)
                         # BUY, BUY, BUY!!! (with default parameters)
                         self.log('BUY CREATE, %.2f' % self.dataclose[0])
 
@@ -163,7 +186,8 @@ if __name__ == '__main__':
     code_list =['603429.SH']
 
     # 添加数据
-    datas = store.getdatas(code_list=code_list, timeframe=bt.TimeFrame.Minutes, fromdate=datetime(2025, 4, 24), live=True)
+    datas = store.getdatas(code_list=code_list, timeframe=bt.TimeFrame.Minutes, fromdate=datetime(2020, 1, 1),
+                           todate=datetime(2021, 1, 1), live=False)
 
     for d in datas:
         # print(len(d))

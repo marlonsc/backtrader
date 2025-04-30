@@ -165,9 +165,9 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
 
         self._seq = self.store._subscribe_live(symbol=self.p.dataname, period=period, start_time=start_time, callback=on_data)
         #
-        res = self.store._fetch_history(symbol=self.p.dataname, period=period, start_time=start_time, download=False)
-        result = res.to_dict('records')
-        for item in result:
-            self._data.append(item)
+        # res = self.store._fetch_history(symbol=self.p.dataname, period=period, start_time=start_time, download=False)
+        # result = res.to_dict('records')
+        # for item in result:
+        #     self._data.append(item)
 
 
