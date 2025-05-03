@@ -227,7 +227,7 @@ class CSVDataBase(six.with_metaclass(MetaCSVDataBase, DataBase)):
             self.f = open(self.p.dataname, 'rb')
 
         if self.p.headers:
-            self.f.readline()  # skip the headers
+            self.f.readline(5_000_000)  # skip the headers
 
     def stop(self):
         if self.f is not None:
