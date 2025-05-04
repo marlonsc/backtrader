@@ -7,7 +7,8 @@
     "source=/home/${localEnv:USER}/.ssh,target=/home/vscode/.ssh,type=bind"
   ],
   "containerEnv": {
-    "GEMINI_API_KEY": "${localEnv:GEMINI_API_KEY}"
+    // "GEMINI_API_KEY": "${localEnv:GEMINI_API_KEY}"
+    "OPENAI_API_KEY": "${localEnv:OPENAI_API_KEY}"
   },
   "customizations": {
     "vscode": {
@@ -25,7 +26,8 @@
         "GitHub.copilot",
         "GitHub.copilot-labs",
         "GitHub.copilot-chat",
-        "Perkovec.emoji"
+        "Perkovec.emoji",
+        "mechatroner.rainbow-csv"
       ],
       "settings": {
         "python.defaultInterpreterPath": "/usr/local/bin/python",
