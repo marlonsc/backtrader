@@ -39,6 +39,8 @@ class Order(BaseModel):
 based on what the Entry Decision spits out,
 the agent will place an order
 """
+
+
 class EntryDecision(BaseModel):
     """Decision to enter a trade"""
 
@@ -68,20 +70,18 @@ class ExitDecision(BaseModel):
     reasoning: Optional[str] = None
 
 
-class Position(BaseModel):
+class OpenPosition(BaseModel):
     symbol: str
     size: float
     direction: Literal["long", "short"]
     entry_price: float
     entry_time: datetime
-    stop_loss: float
-    take_profit: float
-    active: bool = True
 
 
 class TradeLog(BaseModel):
     symbol: str
     direction: Literal["long", "short"]
-    entry: EntryDecision
-    exit: Optional[ExitDecision] = None
-    pnl: Optional[float] = None  # populated after exit
+    entry_: EntryDecision = Field(validation_alias="entry",)
+    exit_: Optional[ExitDecision] = Field(None, validation_alias="exit")
+    open_pnl: Optional[float] = None
+    realized_pnl: Optional[float] = None
