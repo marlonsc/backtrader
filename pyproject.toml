@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "anoroa"
+version = "0.1.0"
+description = "Adaptive Network for Observing, Reasoning, and Order Allocation"
+# authors = [{ name = "Nate Neibauer", email = "nneibauer044@gmail.com" }]
+license = "MIT"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic"
+    # "backtrader",
+    # "pandas",
+    # "matplotlib",
+    # "numpy",
+    # "jupyter",
+    # "yfinance",
+    # "seaborn",
+    # "mcp",
+    # "pydantic-ai"
+]
+
+# optional-dependencies
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "black",
+    "isort",
+    "mypy",
+]
+
+

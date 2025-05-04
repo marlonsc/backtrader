@@ -39,6 +39,6 @@
       }
     }
   },
-  "postStartCommand": "sudo pip install -e .[dev]",
-  "remoteUser": "vscode"
+  "postStartCommand": "pip install -e .[dev]",
+  "remoteUser": "${localEnv:USER}"
 }
