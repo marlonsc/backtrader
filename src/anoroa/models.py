@@ -35,7 +35,6 @@ class Order(BaseModel):
     price: float  # absolute price
 
 
-
 """
 based on what the Entry Decision spits out,
 the agent will place an order

@@ -1,5 +1,5 @@
 import yfinance as yf  # type: ignore
-from typing import cast
+from typing import cast, List
 import pandas as pd
 import matplotlib.pyplot as plt
 from pydantic_ai import Agent, RunContext
@@ -35,7 +35,6 @@ finance_agent = Agent(
 # live trading tools - same as paper trading
 
 
-
 @finance_agent.tool
 def pull_historical_data(ctx: RunContext[dict], ticker: str, start: str, end: str) -> pd.DataFrame:
     """Pull historical data for a given ticker and date range and save as a CSV file."""
@@ -67,9 +66,79 @@ result = finance_agent.run_sync(
 print(result)
 
 
+# Base Agent Class
+class BaseAgent:
+    """Base class for all trading agents."""
 
-# result = roulette_agent.run_sync('Put my money on square eighteen', deps=success_number)
-# print(result.output)
-# #> True
+    def __init__(self, name: str):
+        self.name = name
 
-# result = roulette_agent.run_sync('I bet five is the winner', deps=success_number)
+    def decide(self, market_data: dict) -> dict:
+        """Make a decision based on market data."""
+        raise NotImplementedError(
+            "This method should be implemented by subclasses.")
+
+# LongAgent
+
+
+class LongAgent(BaseAgent):
+    def decide(self, market_data: dict) -> dict:
+        """Decide to buy to open or sell to close based on market data."""
+        # Example logic for long strategy
+        if market_data['price'] > market_data['moving_average']:
+            return {"action": "buy_to_open", "reason": "Price above moving average"}
+        return {"action": "sell_to_close", "reason": "Price below moving average"}
+
+# ShortAgent
+
+"""
+
+
+"""
+
+class ShortAgent(BaseAgent):
+    def decide(self, market_data: dict) -> dict:
+        """Decide to sell to open or buy to close based on market data."""
+        # Example logic for short strategy
+        if market_data['price'] < market_data['moving_average']:
+            return {"action": "sell_to_open", "reason": "Price below moving average"}
+        return {"action": "buy_to_close", "reason": "Price above moving average"}
+
+# ReportAgent
+
+
+class ReportAgent(BaseAgent):
+    def generate_report(self, positions: List[dict], pnl: float, data_usage: int) -> str:
+        """Generate a daily report."""
+        report = (
+            f"Daily Report:\n"
+            f"Profit/Loss: {pnl}\n"
+            f"Open Positions: {len(positions)}\n"
+            f"Daily Data Usage: {data_usage} MB\n"
+        )
+        return report
+
+
+# Example usage
+if __name__ == "__main__":
+    # Initialize agents
+    long_agent = LongAgent("Long Strategy Agent")
+    short_agent = ShortAgent("Short Strategy Agent")
+    report_agent = ReportAgent("Report Generator Agent")
+
+    # Example market data
+    market_data = {"price": 150, "moving_average": 145}
+
+    # Decisions
+    long_decision = long_agent.decide(market_data)
+    short_decision = short_agent.decide(market_data)
+
+    # Example report
+    positions = [{"ticker": "AAPL", "quantity": 10}]
+    pnl = 500.0
+    data_usage = 20
+    report = report_agent.generate_report(positions, pnl, data_usage)
+
+    print(long_decision)
+    print(short_decision)
+    print(report)
