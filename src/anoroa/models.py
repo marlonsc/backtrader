@@ -61,13 +61,6 @@ class Order(BaseModel):
     price: float
 
 
-o = Order(
-    symbol="AAPL",
-    kind="limit",
-    size=100,
-    duration="day",
-    price=150.0
-)
 class EntryDecision(BaseModel):
     """
     Represents a decision to enter a trade.
