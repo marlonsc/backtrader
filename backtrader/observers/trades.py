@@ -18,14 +18,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import uuid
 
 from .. import Observer
 from ..utils.py3 import with_metaclass
-
-from ..trade import Trade
 
 
 class Trades(Observer):
@@ -136,49 +139,13 @@ class MetaDataTrades(Observer.__class__):
         _obj.lines = linescls()
 
         # Generate plotlines info
-        markers = [
-            "o",
-            "v",
-            "^",
-            "<",
-            ">",
-            "1",
-            "2",
-            "3",
-            "4",
-            "8",
-            "s",
-            "p",
-            "*",
-            "h",
-            "H",
-            "+",
-            "x",
-            "D",
-            "d",
-        ]
+        base_markers = ['o', 'v', '^', '<', '>', '1', '2', '3', '4', '8', 's', 'p',
+                        '*', 'h', 'H', '+', 'x', 'D', 'd']
 
-        colors = [
-            "b",
-            "g",
-            "r",
-            "c",
-            "m",
-            "y",
-            "k",
-            "b",
-            "g",
-            "r",
-            "c",
-            "m",
-            "y",
-            "k",
-            "b",
-            "g",
-            "r",
-            "c",
-            "m",
-        ]
+        colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'b', 'g', 'r', 'c', 'm',
+                  'y', 'k', 'b', 'g', 'r', 'c', 'm']
+        markers = base_markers * len(base_colors)
+        colors = base_colors * len(base_markers)
 
         basedict = dict(ls="", markersize=8.0, fillstyle="full")
 
