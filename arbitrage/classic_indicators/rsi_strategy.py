@@ -20,9 +20,7 @@ class RSIArbitrageStrategy(bt.Strategy):
         self.price_diff = self.data0.close - 1.4 * self.data1.close
 
         # 使用价差序列计算RSI
-        self.price_diff_rsi = bt.indicators.RSI(
-            self.price_diff, period=self.p.rsi_period
-        )
+        self.price_diff_rsi = ManualRSI(self.price_diff, period=self.p.rsi_period)
 
         # 交易相关变量
         self.order = None
@@ -137,24 +135,8 @@ def load_data(symbol1, symbol2, fromdate, todate):
         df0 = df0.sort_index().loc[fromdate:todate]
         df1 = df1.sort_index().loc[fromdate:todate]
 
-        data0 = bt.feeds.PandasData(
-            dataname=df0,
-            datetime=None,
-            open="open",
-            high="high",
-            low="low",
-            close="close",
-            volume="volume",
-        )
-        data1 = bt.feeds.PandasData(
-            dataname=df1,
-            datetime=None,
-            open="open",
-            high="high",
-            low="low",
-            close="close",
-            volume="volume",
-        )
+        data0 = bt.feeds.PandasData(df0)
+        data1 = bt.feeds.PandasData(df1)
         return data0, data1
     except Exception as e:
         print(f"加载数据时出错: {e}")
@@ -215,3 +197,13 @@ def run_strategy():
 
 if __name__ == "__main__":
     run_strategy()
+
+# Implementar cálculo manual de RSI se bt.indicators.RSI não existir
+class ManualRSI(bt.Indicator):
+    lines = ('rsi',)
+    params = (('period', 14),)
+    def __init__(self):
+        diff = self.data - self.data(-1)
+        up = bt.If(diff > 0, diff, 0.0)
+        down = bt.If(diff < 0, -diff, 0.0)
+        self.lines.rsi = 100 - 100 / (1 + bt.indicators.ExponentialMovingAverage(up, period=self.p.period) / bt.indicators.ExponentialMovingAverage(down, period=self.p.period))

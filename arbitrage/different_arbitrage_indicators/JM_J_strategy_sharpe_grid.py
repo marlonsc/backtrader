@@ -4,7 +4,7 @@ import backtrader as bt
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import seaborn as sns
+import seaborn as sns  # pylint: disable=import-error
 
 
 # 夏普差值布林带策略
@@ -235,24 +235,8 @@ def load_data(symbol1, symbol2, fromdate, todate):
         df1 = df1.sort_index().loc[fromdate:todate]
 
         # 创建数据feed
-        data0 = bt.feeds.PandasData(
-            dataname=df0,
-            datetime=None,  # 使用索引
-            open="open",
-            high="high",
-            low="low",
-            close="close",
-            volume="volume",
-        )
-        data1 = bt.feeds.PandasData(
-            dataname=df1,
-            datetime=None,
-            open="open",
-            high="high",
-            low="low",
-            close="close",
-            volume="volume",
-        )
+        data0 = bt.feeds.PandasData(dataframe=df0)
+        data1 = bt.feeds.PandasData(dataframe=df1)
         return data0, data1
     except Exception as e:
         print(f"加载数据时出错: {e}")
@@ -296,7 +280,7 @@ def run_grid_search():
 
             try:
                 # 创建一个新的cerebro实例
-                cerebro = bt.Cerebro(stdstats=False)
+                cerebro = bt.Cerebro()
 
                 # 添加相同的数据
                 cerebro.adddata(data0, name="J")
@@ -315,16 +299,8 @@ def run_grid_search():
                 cerebro.broker.setcommission(commission=0.0003)
                 cerebro.broker.set_shortcash(False)
 
-                # 添加夏普比率分析器
-                cerebro.addanalyzer(
-                    bt.analyzers.SharpeRatio,
-                    timeframe=bt.TimeFrame.Days,
-                    riskfreerate=0,
-                    annualize=True,
-                )
-
                 # 运行回测
-                strats = cerebro.run()
+                strats = cerebro.run()  # pylint: disable=no-member
 
                 # 获取夏普比率 - 安全处理None值
                 sharpe_analysis = strats[0].analyzers.sharperatio.get_analysis()

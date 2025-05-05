@@ -27,8 +27,10 @@ from __future__ import (
 
 import sys
 
-import backtrader as bt
-from backtrader.utils.py3 import with_metaclass
+from .indicator import Indicator
+from .metabase import findowner
+from .cerebro import Cerebro
+from .utils.py3 import with_metaclass
 
 # The modules below should/must define __all__ with the objects wishes
 # or prepend an "_" (underscore) to private classes/variables
@@ -71,7 +73,7 @@ else:
 
     # Generate all indicators as subclasses
 
-    class _MetaTALibIndicator(bt.Indicator.__class__):
+    class _MetaTALibIndicator(Indicator.__class__):
         """ """
 
         _refname = "_taindcol"
@@ -79,6 +81,7 @@ else:
 
         _KNOWN_UNSTABLE = ["SAR"]
 
+        @classmethod
         def dopostinit(cls, _obj, *args, **kwargs):
             """
 
@@ -88,7 +91,7 @@ else:
 
             """
             # Go to parent
-            res = super(_MetaTALibIndicator, cls).dopostinit(_obj, *args, **kwargs)
+            res = Indicator.__class__.dopostinit(cls, _obj, *args, **kwargs)
             _obj, args, kwargs = res
 
             # Get the minimum period by using the abstract interface and params
@@ -101,12 +104,12 @@ else:
             elif cls.__name__ in cls._KNOWN_UNSTABLE:
                 _obj._lookback = 0
 
-            bt.metabase.findowner(_obj, bt.Cerebro)
+            findowner(_obj, Cerebro)
             tafuncinfo = _obj._tabstract.info
             _obj._tafunc = getattr(talib, tafuncinfo["name"], None)
             return _obj, args, kwargs  # return the object and args
 
-    class _TALibIndicator(with_metaclass(_MetaTALibIndicator, bt.Indicator)):
+    class _TALibIndicator(with_metaclass(_MetaTALibIndicator, Indicator)):
         """ """
 
         CANDLEOVER = 1.02  # 2% over

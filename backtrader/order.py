@@ -31,7 +31,7 @@ import itertools
 from copy import copy
 
 from .metabase import MetaParams
-from .utils import AutoOrderedDict
+from .utils.autodict import AutoOrderedDict
 from .utils.py3 import iteritems, range, with_metaclass
 
 
@@ -434,7 +434,7 @@ class OrderBase(with_metaclass(MetaParams, object)):
         # Return attr from params if not found in order
         return getattr(self.params, name)
 
-    def __setattribute__(self, name, value):
+    def __setattr__(self, name, value):
         """
 
         :param name:
@@ -444,7 +444,7 @@ class OrderBase(with_metaclass(MetaParams, object)):
         if hasattr(self.params, name):
             setattr(self.params, name, value)
         else:
-            super(Order, self).__setattribute__(name, value)
+            super(OrderBase, self).__setattr__(name, value)
 
     def __str__(self):
         """ """
@@ -471,6 +471,8 @@ class OrderBase(with_metaclass(MetaParams, object)):
 
     def __init__(self):
         """ """
+        self.exectype = None
+        self.valid = None
         self.ref = next(self.refbasis)
         self.broker = None
         self.info = AutoOrderedDict()

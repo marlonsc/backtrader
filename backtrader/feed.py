@@ -31,17 +31,13 @@ import inspect
 import io
 import os.path
 
-import backtrader as bt
-from backtrader import (
-    TimeFrame,
+from . import (
     dataseries,
-    date2num,
     metabase,
-    num2date,
-    time2num,
 )
-from backtrader.utils import tzparse
-from backtrader.utils.py3 import range, string_types, with_metaclass, zip
+from .dataseries import TimeFrame
+from .utils.date import tzparse, date2num, num2date, time2num, Localizer
+from .utils.py3 import range, string_types, with_metaclass, zip
 
 from .dataseries import SimpleFilterWrapper
 from .resamplerfilter import Replayer, Resampler
@@ -49,96 +45,50 @@ from .tradingcal import PandasMarketCalendar
 
 
 class MetaAbstractDataBase(dataseries.OHLCDateTime.__class__):
-    """ """
+    """Metaclass for registering and initializing data feed subclasses."""
 
     _indcol = dict()
 
-    def __init__(cls, name, bases, dct):
-        """Class has already been created ... register subclasses
+    def __init__(self, name, bases, dct):
+        super().__init__(name, bases, dct)
+        if not getattr(self, 'aliased', False) and name != "DataBase" and not name.startswith("_"):
+            self._indcol[name] = self
 
-        :param name:
-        :param bases:
-        :param dct:
-
-        """
-        # Initialize the class
-        super(MetaAbstractDataBase, cls).__init__(name, bases, dct)
-
-        if not cls.aliased and name != "DataBase" and not name.startswith("_"):
-            cls._indcol[name] = cls
-
-    def dopreinit(cls, _obj, *args, **kwargs):
-        """
-
-        :param _obj:
-        :param *args:
-        :param **kwargs:
-
-        """
-        _obj, args, kwargs = super(MetaAbstractDataBase, cls).dopreinit(
-            _obj, *args, **kwargs
-        )
-
-        # Find the owner and store it
+    def dopreinit(self, _obj, *args, **kwargs):
+        _obj, args, kwargs = super().dopreinit(_obj, *args, **kwargs)
         _obj._feed = metabase.findowner(_obj, FeedBase)
-
         _obj.notifs = collections.deque()  # store notifications for cerebro
-
         _obj._dataname = _obj.p.dataname
         _obj._name = ""
         return _obj, args, kwargs
 
-    def dopostinit(cls, _obj, *args, **kwargs):
-        """
-
-        :param _obj:
-        :param *args:
-        :param **kwargs:
-
-        """
-        _obj, args, kwargs = super(MetaAbstractDataBase, cls).dopostinit(
-            _obj, *args, **kwargs
-        )
-
-        # Either set by subclass or the parameter or use the dataname (ticker)
+    def dopostinit(self, _obj, *args, **kwargs):
+        _obj, args, kwargs = super().dopostinit(_obj, *args, **kwargs)
         _obj._name = _obj._name or _obj.p.name
         if not _obj._name and isinstance(_obj.p.dataname, string_types):
             _obj._name = _obj.p.dataname
         _obj._compression = _obj.p.compression
         _obj._timeframe = _obj.p.timeframe
-
         if isinstance(_obj.p.sessionstart, datetime.datetime):
             _obj.p.sessionstart = _obj.p.sessionstart.time()
-
         elif _obj.p.sessionstart is None:
             _obj.p.sessionstart = datetime.time.min
-
         if isinstance(_obj.p.sessionend, datetime.datetime):
             _obj.p.sessionend = _obj.p.sessionend.time()
-
         elif _obj.p.sessionend is None:
-            # remove 9 to avoid precision rounding errors
             _obj.p.sessionend = datetime.time(23, 59, 59, 999990)
-
         if isinstance(_obj.p.fromdate, datetime.date):
-            # push it to the end of the day, or else intraday
-            # values before the end of the day would be gone
             if not hasattr(_obj.p.fromdate, "hour"):
                 _obj.p.fromdate = datetime.datetime.combine(
                     _obj.p.fromdate, _obj.p.sessionstart
                 )
-
         if isinstance(_obj.p.todate, datetime.date):
-            # push it to the end of the day, or else intraday
-            # values before the end of the day would be gone
             if not hasattr(_obj.p.todate, "hour"):
                 _obj.p.todate = datetime.datetime.combine(
                     _obj.p.todate, _obj.p.sessionend
                 )
-
         _obj._barstack = collections.deque()  # for filter operations
         _obj._barstash = collections.deque()  # for filter operations
-
         _obj._filters = list()
         _obj._ffilters = list()
         for fp in _obj.p.filters:
@@ -146,9 +96,7 @@ class MetaAbstractDataBase(dataseries.OHLCDateTime.__class__):
                 fp = fp(_obj)
                 if hasattr(fp, "last"):
                     _obj._ffilters.append((fp, [], {}))
-
             _obj._filters.append((fp, [], {}))
-
         return _obj, args, kwargs
 
 
@@ -228,7 +176,7 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
         self.lines.datetime._settz(self._tz)
 
         # This should probably be also called from an override-able method
-        self._tzinput = bt.utils.date.Localizer(self._gettzinput())
+        self._tzinput = Localizer(self._gettzinput())
 
         # Convert user input times to the output timezone (or min/max)
         if self.p.fromdate == "":
@@ -961,7 +909,7 @@ class CSVDataBase(with_metaclass(MetaCSVDataBase, DataBase)):
 class CSVFeedBase(FeedBase):
     """ """
 
-    params = (("basepath", ""),) + CSVDataBase.params._gettuple()
+    params = (("basepath", ""),) + tuple(getattr(CSVDataBase.params, '_gettuple', lambda: CSVDataBase.params)())
 
     def _getdata(self, dataname, **kwargs):
         """
