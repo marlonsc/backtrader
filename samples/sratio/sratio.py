@@ -1,7 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import itertools
@@ -14,19 +19,39 @@ if sys.version_info.major == 2:
 
 
 def average(x):
+    """
+
+    :param x:
+
+    """
     return math.fsum(x) / len(x)
 
 
 def variance(x):
+    """
+
+    :param x:
+
+    """
     avgx = average(x)
     return list(map(lambda y: (y - avgx) ** 2, x))
 
 
 def standarddev(x):
+    """
+
+    :param x:
+
+    """
     return math.sqrt(average(variance(x)))
 
 
 def run(pargs=None):
+    """
+
+    :param pargs:  (Default value = None)
+
+    """
     args = parse_args(pargs)
 
     returns = [args.ret1, args.ret2]
@@ -46,6 +71,11 @@ def run(pargs=None):
 
 
 def parse_args(pargs=None):
+    """
+
+    :param pargs:  (Default value = None)
+
+    """
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Sample Sharpe Ratio",

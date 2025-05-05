@@ -115,28 +115,25 @@ python strategies/vol_contraction.py --data MSFT --sma-long 200 --sma-short 50 -
 
 import argparse
 import datetime
-import pandas as pd
-import backtrader as bt
-import numpy as np
 import os
 import sys
+
+import backtrader as bt
+from strategies.utils import (
+    TradeThrottling,
+    add_standard_analyzers,
+    get_db_data,
+    print_performance_metrics,
+)
 
 # Add the parent directory to the path so that 'strategies' can be found
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Import utility functions
-from strategies.utils import (
-    get_db_data,
-    print_performance_metrics,
-    TradeThrottling,
-    add_standard_analyzers,
-)
 
 
 class StockPriceData(bt.feeds.PandasData):
-    """
-    Data feed class for stock price data from a Pandas DataFrame
-    """
+    """Data feed class for stock price data from a Pandas DataFrame"""
 
     params = (
         ("datetime", None),
@@ -150,8 +147,7 @@ class StockPriceData(bt.feeds.PandasData):
 
 
 class VCPPattern(bt.Indicator):
-    """
-    Custom indicator to detect Volatility Contraction Patterns (VCP)
+    """Custom indicator to detect Volatility Contraction Patterns (VCP)
 
     The VCP indicator identifies periods of decreasing volatility and
     potential breakout opportunities.
@@ -159,12 +155,7 @@ class VCPPattern(bt.Indicator):
     Lines:
         - vcp: Value representing the volatility contraction (1 when detected, 0 otherwise)
 
-    Params:
-        - period_short: Short-term period for volatility measurement
-        - period_long: Long-term period for volatility measurement
-        - period_long_discount: Discount factor for long-term volatility
-        - highest_close: Lookback period for price high
-        - mean_vol: Period for volume average calculation
+
     """
 
     lines = ("vcp",)
@@ -177,6 +168,7 @@ class VCPPattern(bt.Indicator):
     )
 
     def __init__(self):
+        """ """
         # Add each indicator separately rather than trying to combine them
 
         # Short-range volatility
@@ -204,6 +196,7 @@ class VCPPattern(bt.Indicator):
         )
 
     def next(self):
+        """ """
         # Volatility contraction
         vol_contraction = self.short_range[0] < (
             self.long_range[0] * self.p.period_long_discount
@@ -222,8 +215,7 @@ class VCPPattern(bt.Indicator):
 
 
 class VCPStrategy(bt.Strategy, TradeThrottling):
-    """
-    Volatility Contraction Pattern (VCP) Strategy
+    """Volatility Contraction Pattern (VCP) Strategy
 
     This strategy seeks to identify and trade volatility contraction patterns,
     which often precede significant price breakouts. It combines technical indicators
@@ -243,6 +235,8 @@ class VCPStrategy(bt.Strategy, TradeThrottling):
     - Works best in bull markets or strong sectors during consolidation phases
     - Most effective when there's sector rotation driving new leadership
     - Avoid using during market corrections or highly volatile periods
+
+
     """
 
     params = (
@@ -273,14 +267,19 @@ class VCPStrategy(bt.Strategy, TradeThrottling):
     )
 
     def log(self, txt, dt=None, doprint=False):
-        """
-        Logging function for the strategy
+        """Logging function for the strategy
+
+        :param txt:
+        :param dt:  (Default value = None)
+        :param doprint:  (Default value = False)
+
         """
         if self.p.print_log or doprint:
             dt = dt or self.datas[0].datetime.date(0)
             print(f"{dt.isoformat()}: {txt}")
 
     def __init__(self):
+        """ """
         # Keep references to price and volume data
         self.dataclose = self.datas[0].close
         self.datahigh = self.datas[0].high
@@ -330,7 +329,11 @@ class VCPStrategy(bt.Strategy, TradeThrottling):
         self.last_trade_date = None
 
     def notify_order(self, order):
-        """Process order notifications"""
+        """Process order notifications
+
+        :param order:
+
+        """
         if order.status in [order.Submitted, order.Accepted]:
             return
 
@@ -378,7 +381,11 @@ class VCPStrategy(bt.Strategy, TradeThrottling):
         self.order = None
 
     def notify_trade(self, trade):
-        """Process trade notifications"""
+        """Process trade notifications
+
+        :param trade:
+
+        """
         if not trade.isclosed:
             return
 
@@ -412,9 +419,7 @@ class VCPStrategy(bt.Strategy, TradeThrottling):
         return 0
 
     def is_narrow_channel(self):
-        """
-        Determine if the price is in a narrow channel
-        """
+        """Determine if the price is in a narrow channel"""
         if len(self) <= self.p.recent_price_period:
             return False
 
@@ -464,7 +469,6 @@ class VCPStrategy(bt.Strategy, TradeThrottling):
                     and self.is_narrow_channel()
                     and self.is_sufficient_liquidity()
                 ):
-
                     # Calculate position size
                     size = self.calculate_position_size()
 
@@ -506,7 +510,10 @@ class VCPStrategy(bt.Strategy, TradeThrottling):
     def stop(self):
         """Called when backtest is complete"""
         self.log("VCP Strategy completed", doprint=True)
-        self.log(f"Final Portfolio Value: {self.broker.getvalue():.2f}", doprint=True)
+        self.log(
+            f"Final Portfolio Value: {self.broker.getvalue():.2f}",
+            doprint=True,
+        )
 
         # Add a note about market conditions
         self.log(
@@ -514,7 +521,8 @@ class VCPStrategy(bt.Strategy, TradeThrottling):
             doprint=True,
         )
         self.log(
-            "      It works best in bull markets with sector rotation", doprint=True
+            "      It works best in bull markets with sector rotation",
+            doprint=True,
         )
 
 
@@ -551,7 +559,11 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--cash", "-c", type=float, default=100000.0, help="Initial cash for backtest"
+        "--cash",
+        "-c",
+        type=float,
+        default=100000.0,
+        help="Initial cash for backtest",
     )
 
     # VCP parameters
@@ -584,7 +596,10 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--mean-vol", type=int, default=20, help="Period for volume average calculation"
+        "--mean-vol",
+        type=int,
+        default=20,
+        help="Period for volume average calculation",
     )
 
     # Moving average parameters
@@ -649,11 +664,18 @@ def parse_args():
 
     # Risk management
     parser.add_argument(
-        "--stop-loss", "-stl", type=float, default=7.0, help="Stop loss percentage"
+        "--stop-loss",
+        "-stl",
+        type=float,
+        default=7.0,
+        help="Stop loss percentage",
     )
 
     parser.add_argument(
-        "--trailing-stop", "-ts", action="store_true", help="Enable trailing stop loss"
+        "--trailing-stop",
+        "-ts",
+        action="store_true",
+        help="Enable trailing stop loss",
     )
 
     parser.add_argument(
@@ -685,9 +707,7 @@ def parse_args():
 
 
 def main():
-    """
-    Main function to run the strategy
-    """
+    """Main function to run the strategy"""
     args = parse_args()
 
     # Convert dates

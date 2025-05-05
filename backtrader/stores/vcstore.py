@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,25 +18,30 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
-
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import collections
-from datetime import date, datetime, time, timedelta
+import ctypes
 import os.path
 import threading
-import time as _timemod
+from datetime import datetime, timedelta
 
-import ctypes
-
-from backtrader import TimeFrame, Position
-from backtrader.feed import DataBase
+from backtrader import TimeFrame
 from backtrader.metabase import MetaParams
-from backtrader.utils.py3 import MAXINT, range, queue, string_types, with_metaclass
-from backtrader.utils import AutoDict
+from backtrader.utils.py3 import (
+    queue,
+    with_metaclass,
+)
 
 
 class _SymInfo(object):
+    """ """
+
     # Replica of the SymbolInfo COM object to pass it over thread boundaries
     _fields = [
         "Type",
@@ -48,6 +53,11 @@ class _SymInfo(object):
     ]
 
     def __init__(self, syminfo):
+        """
+
+        :param syminfo:
+
+        """
         for f in self._fields:
             setattr(self, f, getattr(syminfo, f))
 
@@ -64,6 +74,11 @@ def PumpEvents(timeout=-1, hevt=None, cb=None):
     on the COM appartment of the current thread.  It is possible to
     terminate the message loop by pressing CTRL+C, which will raise
     a KeyboardInterrupt.
+
+    :param timeout:  (Default value = -1)
+    :param hevt:  (Default value = None)
+    :param cb:  (Default value = None)
+
     """
     # XXX Should there be a way to pass additional event handles which
     # can terminate this function?
@@ -97,6 +112,11 @@ def PumpEvents(timeout=-1, hevt=None, cb=None):
 
     # @ctypes.WINFUNCTYPE(ctypes.c_int, ctypes.c_uint)
     def HandlerRoutine(dwCtrlType):
+        """
+
+        :param dwCtrlType:
+
+        """
         if dwCtrlType == 0:  # CTRL+C
             ctypes.windll.kernel32.SetEvent(hevt)
             return 1
@@ -149,18 +169,37 @@ def PumpEvents(timeout=-1, hevt=None, cb=None):
 
 
 class RTEventSink(object):
+    """ """
+
     def __init__(self, store):
+        """
+
+        :param store:
+
+        """
         self.store = store
         self.vcrtmod = store.vcrtmod
         self.lastconn = None
 
     def OnNewTicks(self, ArrayTicks):
-        pass
+        """
+
+        :param ArrayTicks:
+
+        """
 
     def OnServerShutDown(self):
+        """ """
         self.store._vcrt_connection(self.store._RT_SHUTDOWN)
 
     def OnInternalEvent(self, p1, p2, p3):
+        """
+
+        :param p1:
+        :param p2:
+        :param p3:
+
+        """
         if p1 != 1:  # Apparently "Connection Event"
             return
 
@@ -177,10 +216,23 @@ class MetaSingleton(MetaParams):
     """Metaclass to make a metaclassed class a singleton"""
 
     def __init__(cls, name, bases, dct):
+        """
+
+        :param name:
+        :param bases:
+        :param dct:
+
+        """
         super(MetaSingleton, cls).__init__(name, bases, dct)
         cls._singleton = None
 
     def __call__(cls, *args, **kwargs):
+        """
+
+        :param *args:
+        :param **kwargs:
+
+        """
         if cls._singleton is None:
             cls._singleton = super(MetaSingleton, cls).__call__(*args, **kwargs)
 
@@ -192,6 +244,7 @@ class VCStore(with_metaclass(MetaSingleton, object)):
 
     The parameters can also be specified in the classes which use this store,
     like ``VCData`` and ``VCBroker``
+
 
     """
 
@@ -217,12 +270,22 @@ class VCStore(with_metaclass(MetaSingleton, object)):
 
     @classmethod
     def getdata(cls, *args, **kwargs):
-        """Returns ``DataCls`` with args, kwargs"""
+        """Returns ``DataCls`` with args, kwargs
+
+        :param *args:
+        :param **kwargs:
+
+        """
         return cls.DataCls(*args, **kwargs)
 
     @classmethod
     def getbroker(cls, *args, **kwargs):
-        """Returns broker with *args, **kwargs from registered ``BrokerCls``"""
+        """Returns broker with *args, **kwargs from registered ``BrokerCls``
+
+        :param *args:
+        :param **kwargs:
+
+        """
         return cls.BrokerCls(*args, **kwargs)
 
     # DLLs to parse if found for TypeLibs
@@ -250,6 +313,7 @@ class VCStore(with_metaclass(MetaSingleton, object)):
     VC_BINPATH = "bin"
 
     def find_vchart(self):
+        """ """
         # Tries to locate VisualChart in the registry to get the installation
         # directory
         # If not found returns well-known typelibs clsid
@@ -266,13 +330,13 @@ class VCStore(with_metaclass(MetaSingleton, object)):
         ):
             try:
                 vckey = _winreg.OpenKey(rkey, self.VC_KEYNAME)
-            except WindowsError as e:
+            except WindowsError:
                 continue
 
             # Try to get the key value
             try:
                 vcdir, _ = _winreg.QueryValueEx(vckey, self.VC_KEYVAL)
-            except WindowsError as e:
+            except WindowsError:
                 continue
             else:
                 break  # found vcdir
@@ -302,6 +366,7 @@ class VCStore(with_metaclass(MetaSingleton, object)):
         return self.VC_TLIBS
 
     def _load_comtypes(self):
+        """ """
         # Keep comtypes imports local to avoid breaking testcases
         try:
             import comtypes
@@ -319,6 +384,7 @@ class VCStore(with_metaclass(MetaSingleton, object)):
         return True  # notifiy comtypes was loaded
 
     def __init__(self):
+        """ """
         self._connected = False  # modules/objects created
 
         self.notifs = collections.deque()  # hold notifications to deliver
@@ -391,14 +457,27 @@ class VCStore(with_metaclass(MetaSingleton, object)):
         }
 
     def put_notification(self, msg, *args, **kwargs):
+        """
+
+        :param msg:
+        :param *args:
+        :param **kwargs:
+
+        """
         self.notifs.append((msg, args, kwargs))
 
     def get_notifications(self):
-        """Return the pending "store" notifications"""
+        """ """
         self.notifs.append(None)  # Mark current end of notifs
         return [x for x in iter(self.notifs.popleft, None)]  # popleft til None
 
     def start(self, data=None, broker=None):
+        """
+
+        :param data:  (Default value = None)
+        :param broker:  (Default value = None)
+
+        """
         if not self._connected:
             return
 
@@ -414,21 +493,29 @@ class VCStore(with_metaclass(MetaSingleton, object)):
             t.start()
 
     def stop(self):
+        """ """
         pass  # nothing to do
 
     def connected(self):
+        """ """
         return self._connected
 
     def _start_vcrt(self):
+        """ """
         # Use VCRealTime to monitor the connection status
         self.comtypes.CoInitialize()  # running in another thread
         vcrt = self.CreateObject(self.vcrtmod.RealTime)
         sink = RTEventSink(self)
-        conn = self.GetEvents(vcrt, sink)
+        self.GetEvents(vcrt, sink)
         PumpEvents()
         self.comtypes.CoUninitialize()
 
     def _vcrt_connection(self, status):
+        """
+
+        :param status:
+
+        """
         if status == -0xFFFF:
             txt = ("VisualChart shutting down",)
         # p2: 0 -> Disconnected /  p2: 1 -> Reconnected
@@ -446,26 +533,53 @@ class VCStore(with_metaclass(MetaSingleton, object)):
             q.put(status)
 
     def _tf2ct(self, timeframe, compression):
+        """
+
+        :param timeframe:
+        :param compression:
+
+        """
         # Translates timeframes to known compression types in VisualChart
         timeframe, extracomp = self._tftable[timeframe]
         return timeframe, compression * extracomp
 
     def _ticking(self, timeframe):
+        """
+
+        :param timeframe:
+
+        """
         # Translates timeframes to known compression types in VisualChart
         vctimeframe, _ = self._tftable[timeframe]
         return vctimeframe == self.vcdsmod.CT_Ticks
 
     def _getq(self, data):
+        """
+
+        :param data:
+
+        """
         q = queue.Queue()
         self._dqs.append(q)
         self._qdatas[q] = data
         return q
 
     def _delq(self, q):
+        """
+
+        :param q:
+
+        """
         self._dqs.remove(q)
         self._qdatas.pop(q)
 
     def _rtdata(self, data, symbol):
+        """
+
+        :param data:
+        :param symbol:
+
+        """
         kwargs = dict(data=data, symbol=symbol)
         t = threading.Thread(target=self._t_rtdata, kwargs=kwargs)
         t.daemon = True
@@ -473,6 +587,12 @@ class VCStore(with_metaclass(MetaSingleton, object)):
 
     # Broker functions
     def _t_rtdata(self, data, symbol):
+        """
+
+        :param data:
+        :param symbol:
+
+        """
         self.comtypes.CoInitialize()  # running in another thread
         vcrt = self.CreateObject(self.vcrtmod.RealTime)
         conn = self.GetEvents(vcrt, data)
@@ -483,6 +603,11 @@ class VCStore(with_metaclass(MetaSingleton, object)):
         self.comtypes.CoUninitialize()
 
     def _symboldata(self, symbol):
+        """
+
+        :param symbol:
+
+        """
 
         # Assumption -> we are connected and the symbol has been found
         self.vcds.ActiveEvents = 0
@@ -497,11 +622,34 @@ class VCStore(with_metaclass(MetaSingleton, object)):
         return syminfo
 
     def _canceldirectdata(self, q):
+        """
+
+        :param q:
+
+        """
         self._delq(q)
 
     def _directdata(
-        self, data, symbol, timeframe, compression, d1, d2=None, historical=False
+        self,
+        data,
+        symbol,
+        timeframe,
+        compression,
+        d1,
+        d2=None,
+        historical=False,
     ):
+        """
+
+        :param data:
+        :param symbol:
+        :param timeframe:
+        :param compression:
+        :param d1:
+        :param d2:  (Default value = None)
+        :param historical:  (Default value = False)
+
+        """
 
         # Assume the data has checked the existence of the symbol
         timeframe, compression = self._tf2ct(timeframe, compression)
@@ -519,6 +667,18 @@ class VCStore(with_metaclass(MetaSingleton, object)):
     def _t_directdata(
         self, data, symbol, timeframe, compression, d1, d2, q, historical
     ):
+        """
+
+        :param data:
+        :param symbol:
+        :param timeframe:
+        :param compression:
+        :param d1:
+        :param d2:
+        :param q:
+        :param historical:
+
+        """
 
         self.comtypes.CoInitialize()  # start com threading
         vcds = self.CreateObject(self.vcdsmod.DataSourceManager)
@@ -544,7 +704,6 @@ class VCStore(with_metaclass(MetaSingleton, object)):
             dsconn = None
         else:
             dsconn = self.GetEvents(vcds, data)  # finally connect the events
-            pass
 
         # pump events in this thread - call ping
         PumpEvents(timeout=data._getpingtmout, cb=data.ping)
@@ -557,6 +716,11 @@ class VCStore(with_metaclass(MetaSingleton, object)):
 
     # Broker functions
     def _t_broker(self, broker):
+        """
+
+        :param broker:
+
+        """
         self.comtypes.CoInitialize()  # running in another thread
         trader = self.CreateObject(self.vcctmod.Trader)
         conn = self.GetEvents(trader, broker(trader))

@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,19 +18,32 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
+import os.path
 from datetime import datetime
 from struct import unpack
-import os.path
 
 import backtrader as bt
 from backtrader import date2num  # avoid dict lookups
 
 
 class MetaVChartFile(bt.DataBase.__class__):
+    """ """
+
     def __init__(cls, name, bases, dct):
-        """Class has already been created ... register"""
+        """Class has already been created ... register
+
+        :param name:
+        :param bases:
+        :param dct:
+
+        """
         # Initialize the class
         super(MetaVChartFile, cls).__init__(name, bases, dct)
 
@@ -39,17 +52,19 @@ class MetaVChartFile(bt.DataBase.__class__):
 
 
 class VChartFile(bt.with_metaclass(MetaVChartFile, bt.DataBase)):
-    """
-    Support for `Visual Chart <www.visualchart.com>`_ binary on-disk files for
+    """Support for `Visual Chart <www.visualchart.com>`_ binary on-disk files for
     both daily and intradaily formats.
 
     Note:
 
       - ``dataname``: Market code displayed by Visual Chart. Example: 015ES for
         EuroStoxx 50 continuous future
+
+
     """
 
     def start(self):
+        """ """
         super(VChartFile, self).start()
         if self._store is None:
             self._store = bt.stores.VChartFileStore()
@@ -88,11 +103,13 @@ class VChartFile(bt.with_metaclass(MetaVChartFile, bt.DataBase)):
             self.f = None
 
     def stop(self):
+        """ """
         if self.f is not None:
             self.f.close()
             self.f = None
 
     def _load(self):
+        """ """
         if self.f is None:
             return False  # cannot load more
 
@@ -108,7 +125,7 @@ class VChartFile(bt.with_metaclass(MetaVChartFile, bt.DataBase)):
 
         try:
             bdata = unpack(self._barfmt, bardata)
-        except:
+        except BaseException:
             self.f = None
             return False
 

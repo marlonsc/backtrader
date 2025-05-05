@@ -1,6 +1,11 @@
 """Python sync/async framework for Interactive Brokers API"""
 
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 try:
     import dataclasses
@@ -11,9 +16,9 @@ try:
     from . import util
     from .client import Client
     from .contract import (
+        CFD,
         Bag,
         Bond,
-        CFD,
         ComboLeg,
         Commodity,
         ContFuture,
@@ -41,9 +46,9 @@ try:
         BarDataList,
         CommissionReport,
         ConnectionStats,
-        DOMLevel,
         DepthMktDataDescription,
         Dividends,
+        DOMLevel,
         Execution,
         ExecutionFilter,
         FamilyCode,
@@ -84,7 +89,6 @@ try:
         TradeLogEntry,
         WshEventData,
     )
-
     from .order import (
         BracketOrder,
         ExecutionCondition,
@@ -209,7 +213,6 @@ __all__ = [
     "RequestError",
     "Wrapper",
 ]
-
 
 # compatibility with old Object
 for obj in locals().copy().values():

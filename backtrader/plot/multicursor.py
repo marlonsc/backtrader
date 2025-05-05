@@ -64,16 +64,18 @@ from ..utils.py3 import zip
 
 
 class Widget(object):
-    """
-    Abstract base class for GUI neutral widgets
-    """
+    """Abstract base class for GUI neutral widgets"""
 
     drawon = True
     eventson = True
     _active = True
 
     def set_active(self, active):
-        """Set whether the widget is active."""
+        """Set whether the widget is active.
+
+        :param active:
+
+        """
         self._active = active
 
     def get_active(self):
@@ -88,16 +90,18 @@ class Widget(object):
     )
 
     def ignore(self, event):
-        """Return True if event should be ignored.
-        This method (or a version of it) should be called at the beginning
+        """
+
+        :param event:
+        :returns: This method (or a version of it) should be called at the beginning
         of any event callback.
+
         """
         return not self.active
 
 
 class MultiCursor(Widget):
-    """
-    Provide a vertical (default) and/or horizontal line cursor shared between
+    """Provide a vertical (default) and/or horizontal line cursor shared between
     multiple axes.
 
     For the cursor to remain responsive you much keep a reference to
@@ -123,6 +127,7 @@ class MultiCursor(Widget):
                             horizOn=False, vertOn=True)
         show()
 
+
     """
 
     def __init__(
@@ -136,8 +141,22 @@ class MultiCursor(Widget):
         vertMulti=True,
         horizShared=True,
         vertShared=False,
-        **lineprops
+        **lineprops,
     ):
+        """
+
+        :param canvas:
+        :param axes:
+        :param useblit:  (Default value = True)
+        :param horizOn:  (Default value = False)
+        :param vertOn:  (Default value = True)
+        :param horizMulti:  (Default value = False)
+        :param vertMulti:  (Default value = True)
+        :param horizShared:  (Default value = True)
+        :param vertShared:  (Default value = False)
+        :param **lineprops:
+
+        """
 
         self.canvas = canvas
         self.axes = axes
@@ -193,7 +212,11 @@ class MultiCursor(Widget):
         self.canvas.mpl_disconnect(self._ciddraw)
 
     def clear(self, event):
-        """clear the cursor"""
+        """clear the cursor
+
+        :param event:
+
+        """
         if self.ignore(event):
             return
         if self.useblit:
@@ -202,6 +225,11 @@ class MultiCursor(Widget):
             line.set_visible(False)
 
     def onmove(self, event):
+        """
+
+        :param event:
+
+        """
         if self.ignore(event):
             return
         if event.inaxes is None:
@@ -231,6 +259,11 @@ class MultiCursor(Widget):
         self._update(event)
 
     def _update(self, event):
+        """
+
+        :param event:
+
+        """
         if self.useblit:
             if self.background is not None:
                 self.canvas.restore_region(self.background)
@@ -249,8 +282,7 @@ class MultiCursor(Widget):
 
 
 class MultiCursor2(Widget):
-    """
-    Provide a vertical (default) and/or horizontal line cursor shared between
+    """Provide a vertical (default) and/or horizontal line cursor shared between
     multiple axes.
     For the cursor to remain responsive you much keep a reference to
     it.
@@ -268,11 +300,29 @@ class MultiCursor2(Widget):
         multi = MultiCursor(fig.canvas, (ax1, ax2), color='r', lw=1,
                             horizOn=False, vertOn=True)
         show()
+
+
     """
 
     def __init__(
-        self, canvas, axes, useblit=True, horizOn=False, vertOn=True, **lineprops
+        self,
+        canvas,
+        axes,
+        useblit=True,
+        horizOn=False,
+        vertOn=True,
+        **lineprops,
     ):
+        """
+
+        :param canvas:
+        :param axes:
+        :param useblit:  (Default value = True)
+        :param horizOn:  (Default value = False)
+        :param vertOn:  (Default value = True)
+        :param **lineprops:
+
+        """
 
         self.canvas = canvas
         self.axes = axes
@@ -318,7 +368,11 @@ class MultiCursor2(Widget):
         self.canvas.mpl_disconnect(self._ciddraw)
 
     def clear(self, event):
-        """clear the cursor"""
+        """clear the cursor
+
+        :param event:
+
+        """
         if self.ignore(event):
             return
         if self.useblit:
@@ -327,6 +381,11 @@ class MultiCursor2(Widget):
             line.set_visible(False)
 
     def onmove(self, event):
+        """
+
+        :param event:
+
+        """
         if self.ignore(event):
             return
         if event.inaxes is None:
@@ -350,6 +409,11 @@ class MultiCursor2(Widget):
         self._update(event)
 
     def _update(self, event):
+        """
+
+        :param event:
+
+        """
         if self.useblit:
             if self.background is not None:
                 self.canvas.restore_region(self.background)

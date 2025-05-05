@@ -10,16 +10,18 @@ from tqdm import tqdm
 
 mainpath = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 mainpath = os.path.join(mainpath, "datas/stock")
-
 """
 Download stock datas
 """
 
 
 def get_stock_list(type: str):
-    """
-    Get all A or US stock name list
+    """Get all A or US stock name list
     type: zh_a | us
+
+    :param type:
+    :type type: str
+
     """
     if not os.path.exists(mainpath):
         os.makedirs(mainpath)
@@ -33,17 +35,17 @@ def get_stock_list(type: str):
 
 
 def get_a_zb_stock_list():
-    """
-    Get all A but symbol start with '60' and '00' stock name list
-    """
+    """Get all A but symbol start with '60' and '00' stock name list"""
     if not os.path.exists(mainpath):
         os.makedirs(mainpath)
     df = ak.stock_zh_a_spot_em()
     df = df[
-        df.代码.str.startswith((
-            "60",
-            "00",
-        ))
+        df.代码.str.startswith(
+            (
+                "60",
+                "00",
+            )
+        )
     ]
     path = os.path.join(mainpath, "a_zb_stock_list.csv")
     df.to_csv(path, encoding="utf-8")
@@ -56,13 +58,24 @@ def upsert_stock_detail(
     end_date: str = datetime.datetime.now().strftime("%Y%m%d"),
     period: str = "daily",
 ):
-    """
-    Update or download stock data by symbol. Today's data will be updated after closing.
+    """Update or download stock data by symbol. Today's data will be updated after closing.
     type: us | zh_a
     symbol: stock's code
     start_date: stock data's start date
     end_date: stock data's end date
     period: daily | weekly | monthly
+
+    :param type:
+    :type type: str
+    :param symbol:
+    :type symbol: str
+    :param start_date:
+    :type start_date: str
+    :param end_date:  (Default value = datetime.datetime.now().strftime("%Y%m%d"))
+    :type end_date: str
+    :param period:  (Default value = "daily")
+    :type period: str
+
     """
     dir = os.path.join(mainpath, f"{type}")
     if not os.path.exists(dir):
@@ -139,6 +152,11 @@ def upsert_stock_detail(
 
 
 def name_list(csv_name):
+    """
+
+    :param csv_name:
+
+    """
     import csv
 
     csv_f = os.path.join(mainpath, f"{csv_name}")
@@ -160,6 +178,20 @@ def get_stock_list_task(
     end_date: str = datetime.datetime.now().strftime("%Y%m%d"),
     period: str = "daily",
 ):
+    """
+
+    :param stock_list:
+    :type stock_list: List[str]
+    :param type:
+    :type type: str
+    :param start_date:
+    :type start_date: str
+    :param end_date:  (Default value = datetime.datetime.now().strftime("%Y%m%d"))
+    :type end_date: str
+    :param period:  (Default value = "daily")
+    :type period: str
+
+    """
     # group's download bar
     bar = IncrementalBar("Download", max=len(stock_list))
     failed_num = 0
@@ -176,7 +208,6 @@ def get_stock_list_task(
 
 
 if __name__ == "__main__":
-
     type = "zh_a"
     start_date = "20020101"
 
@@ -196,6 +227,11 @@ if __name__ == "__main__":
     stock_lists = [stock_list[i : i + n] for i in range(0, len(stock_list), n)]
 
     def bar_update(num):
+        """
+
+        :param num:
+
+        """
         pbar.update(num)
         print(f"{pbar.n} / {pbar.total} / {pbar.leave}")
 

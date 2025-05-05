@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,9 +18,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import backtrader as bt
+
 from .. import Observer
 
 
@@ -28,16 +34,6 @@ class DrawDown(Observer):
     """This observer keeps track of the current drawdown level (plotted) and
     the maxdrawdown (not plotted) levels
 
-    Params:
-
-      - ``fund`` (default: ``None``)
-
-        If ``None`` the actual mode of the broker (fundmode - True/False) will
-        be autodetected to decide if the returns are based on the total net
-        asset value or on the fund value. See ``set_fundmode`` in the broker
-        documentation
-
-        Set it to ``True`` or ``False`` for a specific behavior
 
     """
 
@@ -59,10 +55,12 @@ class DrawDown(Observer):
     )
 
     def __init__(self):
+        """ """
         kwargs = self.p._getkwargs()
         self._dd = self._owner._addanalyzer_slave(bt.analyzers.DrawDown, **kwargs)
 
     def next(self):
+        """ """
         self.lines.drawdown[0] = self._dd.rets.drawdown  # update drawdown
         self.lines.maxdrawdown[0] = self._dd.rets.max.drawdown  # update max
 
@@ -71,7 +69,7 @@ class DrawDownLength(Observer):
     """This observer keeps track of the current drawdown length (plotted) and
     the drawdown max length (not plotted)
 
-    Params: None
+
     """
 
     _stclock = True
@@ -90,8 +88,10 @@ class DrawDownLength(Observer):
     )
 
     def __init__(self):
+        """ """
         self._dd = self._owner._addanalyzer_slave(bt.analyzers.DrawDown)
 
     def next(self):
+        """ """
         self.lines.len[0] = self._dd.rets.len  # update drawdown length
         self.lines.maxlen[0] = self._dd.rets.max.len  # update max length

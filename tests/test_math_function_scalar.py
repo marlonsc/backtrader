@@ -16,27 +16,41 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
+import math
 import os
 import time
-import math
 
 try:
     time_clock = time.process_time
-except:
+except BaseException:
     time_clock = time.clock
 
 import backtrader as bt
 
 
 class SlipTestStrategy(bt.SignalStrategy):
+    """ """
+
     params = (
         ("printdata", False),
         ("printops", False),
     )
 
     def log(self, txt, dt=None, nodate=False):
+        """
+
+        :param txt:
+        :param dt: (Default value = None)
+        :param nodate: (Default value = False)
+
+        """
         if not nodate:
             dt = dt or self.data.datetime[0]
             dt = bt.num2date(dt)
@@ -45,6 +59,7 @@ class SlipTestStrategy(bt.SignalStrategy):
             print("---------- %s" % (txt))
 
     def __init__(self):
+        """ """
         self.ma = bt.ind.EMA(period=10)
         self.cross = bt.ind.CrossOver(self.datas[0].close, self.ma)
         # Single logic
@@ -57,6 +72,7 @@ class SlipTestStrategy(bt.SignalStrategy):
         self.mx = bt.Max(self.datas[0].close, self.datas[0].open)
 
     def start(self):
+        """ """
 
         if self.p.printdata:
             self.log("-------------------------", nodate=True)
@@ -65,6 +81,7 @@ class SlipTestStrategy(bt.SignalStrategy):
         self.tstart = time_clock()
 
     def stop(self):
+        """ """
         tused = time_clock() - self.tstart
         if self.p.printdata:
             self.log("Time used: {:.4f} seconds".format(tused))
@@ -73,6 +90,7 @@ class SlipTestStrategy(bt.SignalStrategy):
             pass
 
     def next(self):
+        """ """
         if self.p.printdata:
             self.log(
                 " open {:.2f} close {:.2f}, max {:.2f}, log {:5.3f}, ceiling {:5.3f},"
@@ -102,11 +120,15 @@ class SlipTestStrategy(bt.SignalStrategy):
 
 
 def test_run(main=False):
-    """Test addition of scalar math functions to Backtrader. See backtrader2 pr#22"""
+    """Test addition of scalar math functions to Backtrader. See backtrader2 pr#22
+
+    :param main: (Default value = False)
+
+    """
 
     cerebro = bt.Cerebro()
 
-    if main == True:
+    if main:
         strat_kwargs = dict(printdata=True, printops=True)
     else:
         strat_kwargs = dict(printdata=False, printops=False)

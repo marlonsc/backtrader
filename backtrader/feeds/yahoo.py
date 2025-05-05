@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,23 +18,26 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import collections
-from datetime import date, datetime
 import io
 import itertools
-
-from ..utils.py3 import urlopen, urlquote, ProxyHandler, build_opener, install_opener
+from datetime import date, datetime
 
 import backtrader as bt
+
 from .. import feed
 from ..utils import date2num
 
 
 class YahooFinanceCSVData(feed.CSVDataBase):
-    """
-    Parses pre-downloaded Yahoo CSV Data Feeds (or locally generated if they
+    """Parses pre-downloaded Yahoo CSV Data Feeds (or locally generated if they
     comply to the Yahoo format)
 
     Specific parameters:
@@ -75,6 +78,7 @@ class YahooFinanceCSVData(feed.CSVDataBase):
         close* is now fixed. The parameter is retained, in case the need to
         swap the columns again arose.
 
+
     """
 
     lines = ("adjclose",)
@@ -90,6 +94,7 @@ class YahooFinanceCSVData(feed.CSVDataBase):
     )
 
     def start(self):
+        """ """
         super(YahooFinanceCSVData, self).start()
 
         if not self.params.reverse:
@@ -107,6 +112,11 @@ class YahooFinanceCSVData(feed.CSVDataBase):
         self.f = f
 
     def _loadline(self, linetokens):
+        """
+
+        :param linetokens:
+
+        """
         while True:
             nullseen = False
             for tok in linetokens[1:]:
@@ -137,10 +147,11 @@ class YahooFinanceCSVData(feed.CSVDataBase):
 
         # 2018-11-16 ... Adjusted Close seems to always be delivered after
         # the close and before the volume columns
-        adjustedclose = float(linetokens[next(i)]) or 1.0  # SRL or 1.0 if empty
+        # SRL or 1.0 if empty
+        adjustedclose = float(linetokens[next(i)]) or 1.0
         try:
             v = float(linetokens[next(i)])
-        except:  # cover the case in which volume is "null"
+        except BaseException:  # cover the case in which volume is "null"
             v = 0.0
 
         if self.p.swapcloses:  # swap closing prices if requested
@@ -178,9 +189,9 @@ class YahooFinanceCSVData(feed.CSVDataBase):
 
 
 class YahooLegacyCSV(YahooFinanceCSVData):
-    """
-    This is intended to load files which were downloaded before Yahoo
+    """This is intended to load files which were downloaded before Yahoo
     discontinued the original service in May-2017
+
 
     """
 
@@ -188,12 +199,13 @@ class YahooLegacyCSV(YahooFinanceCSVData):
 
 
 class YahooFinanceCSV(feed.CSVFeedBase):
+    """ """
+
     DataCls = YahooFinanceCSVData
 
 
 class YahooFinanceData(YahooFinanceCSVData):
-    """
-    Executes a direct download of data from Yahoo servers for the given time
+    """Executes a direct download of data from Yahoo servers for the given time
     range.
 
     Specific parameters (or specific meaning):
@@ -231,6 +243,7 @@ class YahooFinanceData(YahooFinanceCSVData):
 
         Number of times (each) to try to download the data
 
+
     """
 
     params = (
@@ -242,6 +255,7 @@ class YahooFinanceData(YahooFinanceCSVData):
     )
 
     def start_v7(self):
+        """ """
         try:
             import requests
         except ImportError:
@@ -314,6 +328,7 @@ class YahooFinanceData(YahooFinanceCSVData):
         self.f = f
 
     def start(self):
+        """ """
         self.start_v7()
 
         # Prepared a "path" file -  CSV Parser can take over
@@ -321,6 +336,8 @@ class YahooFinanceData(YahooFinanceCSVData):
 
 
 class YahooFinance(feed.CSVFeedBase):
+    """ """
+
     DataCls = YahooFinanceData
 
     params = DataCls.params._gettuple()

@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
@@ -27,6 +32,8 @@ import backtrader as bt
 
 
 class NYSE_2016(bt.TradingCalendar):
+    """ """
+
     params = dict(
         holidays=[
             datetime.date(2016, 1, 1),
@@ -40,7 +47,11 @@ class NYSE_2016(bt.TradingCalendar):
             datetime.date(2016, 12, 26),
         ],
         earlydays=[
-            (datetime.date(2016, 11, 25), datetime.time(9, 30), datetime.time(13, 1))
+            (
+                datetime.date(2016, 11, 25),
+                datetime.time(9, 30),
+                datetime.time(13, 1),
+            )
         ],
         open=datetime.time(9, 30),
         close=datetime.time(16, 0),
@@ -48,15 +59,19 @@ class NYSE_2016(bt.TradingCalendar):
 
 
 class St(bt.Strategy):
+    """ """
+
     params = dict()
 
     def __init__(self):
-        pass
+        """ """
 
     def prenext(self):
+        """ """
         self.next()
 
     def next(self):
+        """ """
         print(
             "Strategy len {} datetime {}".format(len(self), self.datetime.datetime()),
             end=" ",
@@ -80,6 +95,11 @@ class St(bt.Strategy):
 
 
 def runstrat(args=None):
+    """
+
+    :param args: (Default value = None)
+
+    """
     args = parse_args(args)
 
     cerebro = bt.Cerebro()
@@ -130,13 +150,21 @@ def runstrat(args=None):
 
 
 def parse_args(pargs=None):
+    """
+
+    :param pargs: (Default value = None)
+
+    """
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Trading Calendar Sample",
     )
 
     parser.add_argument(
-        "--data0", default="yhoo-2016-11.csv", required=False, help="Data to read in"
+        "--data0",
+        default="yhoo-2016-11.csv",
+        required=False,
+        help="Data to read in",
     )
 
     # Defaults for dates

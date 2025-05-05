@@ -1,20 +1,32 @@
 #!/usr/bin/env python
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
-from collections import deque
 import datetime
+import random
+from collections import deque
+
 import backtrader as bt
 from backtrader.feed import DataBase
-import time
-import threading
-import random
 
 from .qmtstore import QMTStore
 
 
 class MetaQMTFeed(DataBase.__class__):
+    """ """
+
     def __init__(cls, name, bases, dct):
-        """Class has already been created ... register"""
+        """Class has already been created ... register
+
+        :param name:
+        :param bases:
+        :param dct:
+
+        """
         # Initialize the class
         super(MetaQMTFeed, cls).__init__(name, bases, dct)
 
@@ -23,11 +35,7 @@ class MetaQMTFeed(DataBase.__class__):
 
 
 class QMTFeed(DataBase, metaclass=MetaQMTFeed):
-    """
-    QMT eXchange Trading Library Data Feed.
-    Params:
-      - ``historical`` (default: ``False``)
-    """
+    """QMT eXchange Trading Library Data Feed."""
 
     lines = (
         "lastClose",
@@ -73,6 +81,11 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
     )
 
     def __init__(self, **kwargs):
+        """
+
+        :param **kwargs:
+
+        """
         self._timeframe = self.p.timeframe
         self._compression = 1
         self.store = kwargs["store"]
@@ -86,6 +99,7 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
     def start(
         self,
     ):
+        """ """
         DataBase.start(self)
 
         period_map = {
@@ -102,16 +116,27 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
             print(f"{self.p.dataname}实时数据装载成功！")
 
     def stop(self):
+        """ """
         DataBase.stop(self)
 
         if self.p.live:
             self.store._unsubscribe_live(self._seq)
 
     def _get_datetime(self, value):
+        """
+
+        :param value:
+
+        """
         dtime = datetime.datetime.fromtimestamp(value // 1000)
         return bt.date2num(dtime)
 
     def _load_current(self, current):
+        """
+
+        :param current:
+
+        """
         for key in current.keys():
             try:
                 value = current[key]
@@ -126,13 +151,16 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
                     attr[0] = value
             except Exception as e:
                 print(e)
-                pass
         # print(current, 'current')
         self.put_notification(int(random.randint(100000, 999999)))
 
     def _load(self, replace=False):
-        if len(self._data) > 0:
+        """
 
+        :param replace:  (Default value = False)
+
+        """
+        if len(self._data) > 0:
             current = self._data.popleft()
 
             self._load_current(current)
@@ -141,12 +169,20 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
         return None
 
     def haslivedata(self):
+        """ """
         return self.p.live and self._data
 
     def islive(self):
+        """ """
         return self.p.live
 
     def _format_datetime(self, dt, period="1d"):
+        """
+
+        :param dt:
+        :param period:  (Default value = "1d")
+
+        """
         if dt is None:
             return ""
         else:
@@ -157,9 +193,19 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
             return formatted_string
 
     def _append_data(self, item):
+        """
+
+        :param item:
+
+        """
         self._data.append(item)
 
     def _history_data(self, period):
+        """
+
+        :param period:
+
+        """
 
         start_time = self._format_datetime(self.p.fromdate, period)
         end_time = self._format_datetime(self.p.todate, period)
@@ -177,10 +223,20 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
             self._data.append(item)
 
     def _live_data(self, period):
+        """
+
+        :param period:
+
+        """
 
         start_time = self._format_datetime(self.p.fromdate, period)
 
         def on_data(datas):
+            """
+
+            :param datas:
+
+            """
             for stock_code in datas:
                 print(stock_code, datas[stock_code])
                 # 遍历该股票的所有数据条目

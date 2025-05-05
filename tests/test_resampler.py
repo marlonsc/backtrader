@@ -1,11 +1,14 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import datetime
-import time
-
-from testcommon import getdatadir
-import backtrader as bt
 import logging
+
+import backtrader as bt
 from freezegun import freeze_time
 from util_asserts import assert_data
 
@@ -28,6 +31,28 @@ def _run_resampler(
     close_hour=None,
     close_minute=None,
 ) -> bt.Strategy:
+    """
+
+    :param data_timeframe:
+    :param data_compression:
+    :param resample_timeframe:
+    :param resample_compression:
+    :param num_gen_bars:
+    :param runtime_seconds: (Default value = 27)
+    :param starting_value: (Default value = 200)
+    :param tick_interval: (Default value = datetime.timedelta(seconds=25))
+    :param live: (Default value = False)
+    :param use_tcal: (Default value = False)
+    :param open_hour: (Default value = None)
+    :param open_minute: (Default value = None)
+    :param close_hour: (Default value = None)
+    :param close_minute: (Default value = None)
+    :rtype: bt.Strategy
+    :rtype: bt.Strategy
+    :rtype: bt.Strategy
+    :rtype: bt.Strategy
+
+    """
     _logger.info("Constructing Cerebro")
     cerebro = bt.Cerebro(bar_on_exit=False)
     cerebro.addstrategy(bt.strategies.NullStrategy)
@@ -86,6 +111,7 @@ def test_ticks_to_m1_no_startedge():
 
 @freeze_time("Jan 1th, 2000", tick=True)
 def test_ticks_to_d1_no_tcal():
+    """ """
     strat = _run_resampler(
         bt.TimeFrame.Ticks,
         1,
@@ -137,6 +163,7 @@ def test_ticks_to_d1_no_tcal():
 
 @freeze_time("Jan 1th, 2015", tick=True)
 def test_ticks_to_d1_tcal_8_to_20_2015():
+    """ """
     strat = _run_resampler(
         bt.TimeFrame.Ticks,
         1,
@@ -154,10 +181,18 @@ def test_ticks_to_d1_tcal_8_to_20_2015():
     assert len(strat) == 2
 
     assert_data(
-        strat.data, -2, datetime.datetime(2015, 1, 1, 20, 0, 0), open=200, close=332
+        strat.data,
+        -2,
+        datetime.datetime(2015, 1, 1, 20, 0, 0),
+        open=200,
+        close=332,
     )
     assert_data(
-        strat.data, -1, datetime.datetime(2015, 1, 2, 20, 0, 0), open=333, close=492
+        strat.data,
+        -1,
+        datetime.datetime(2015, 1, 2, 20, 0, 0),
+        open=333,
+        close=492,
     )
 
 
@@ -182,12 +217,17 @@ def test_ticks_to_d1_tcal_8_to_20_2000():
     assert len(strat) == 1
 
     assert_data(
-        strat.data, -1, datetime.datetime(2000, 1, 3, 20, 0, 0), open=200, close=652
+        strat.data,
+        -1,
+        datetime.datetime(2000, 1, 3, 20, 0, 0),
+        open=200,
+        close=652,
     )
 
 
 @freeze_time("Jan 1th, 2015", tick=True)
 def test_ticks_to_d1_tcal_8_to_20_30_2015():
+    """ """
     strat = _run_resampler(
         bt.TimeFrame.Ticks,
         1,
@@ -206,15 +246,24 @@ def test_ticks_to_d1_tcal_8_to_20_30_2015():
     assert len(strat) == 2
 
     assert_data(
-        strat.data, -2, datetime.datetime(2015, 1, 1, 20, 30, 0), open=200, close=335
+        strat.data,
+        -2,
+        datetime.datetime(2015, 1, 1, 20, 30, 0),
+        open=200,
+        close=335,
     )
     assert_data(
-        strat.data, -1, datetime.datetime(2015, 1, 2, 20, 30, 0), open=336, close=495
+        strat.data,
+        -1,
+        datetime.datetime(2015, 1, 2, 20, 30, 0),
+        open=336,
+        close=495,
     )
 
 
 @freeze_time("Jan 1th, 2015", tick=True)
 def test_ticks_to_d1_tcal_8_to_20():
+    """ """
     strat = _run_resampler(
         bt.TimeFrame.Ticks,
         1,
@@ -233,15 +282,24 @@ def test_ticks_to_d1_tcal_8_to_20():
     assert len(strat) == 2
 
     assert_data(
-        strat.data, -2, datetime.datetime(2015, 1, 1, 20, 0, 0), open=200, close=319
+        strat.data,
+        -2,
+        datetime.datetime(2015, 1, 1, 20, 0, 0),
+        open=200,
+        close=319,
     )
     assert_data(
-        strat.data, -1, datetime.datetime(2015, 1, 2, 20, 0, 0), open=320, close=463
+        strat.data,
+        -1,
+        datetime.datetime(2015, 1, 2, 20, 0, 0),
+        open=320,
+        close=463,
     )
 
 
 @freeze_time("Jan 1th, 2015", tick=True)
 def test_h1_to_h1_tcal_9_to_18():
+    """ """
     strat = _run_resampler(
         bt.TimeFrame.Minutes,
         60,
@@ -260,10 +318,18 @@ def test_h1_to_h1_tcal_9_to_18():
     assert len(strat) == 60
 
     assert_data(
-        strat.data, -42, datetime.datetime(2015, 1, 1, 18, 0, 0), open=217, close=217
+        strat.data,
+        -42,
+        datetime.datetime(2015, 1, 1, 18, 0, 0),
+        open=217,
+        close=217,
     )
     assert_data(
-        strat.data, -32, datetime.datetime(2015, 1, 2, 4, 0, 0), open=227, close=227
+        strat.data,
+        -32,
+        datetime.datetime(2015, 1, 2, 4, 0, 0),
+        open=227,
+        close=227,
     )
 
     assert strat.data._filters[0][0]._nexteos == datetime.datetime(2015, 1, 5, 18)
@@ -271,6 +337,7 @@ def test_h1_to_h1_tcal_9_to_18():
 
 @freeze_time("Jan 1th, 2015", tick=True)
 def test_h1_to_h1_tcal_9_to_17_35():
+    """ """
     strat = _run_resampler(
         bt.TimeFrame.Minutes,
         60,
@@ -289,10 +356,18 @@ def test_h1_to_h1_tcal_9_to_17_35():
     assert len(strat) == 60
 
     assert_data(
-        strat.data, -42, datetime.datetime(2015, 1, 1, 18, 0, 0), open=217, close=217
+        strat.data,
+        -42,
+        datetime.datetime(2015, 1, 1, 18, 0, 0),
+        open=217,
+        close=217,
     )
     assert_data(
-        strat.data, -32, datetime.datetime(2015, 1, 2, 4, 0, 0), open=227, close=227
+        strat.data,
+        -32,
+        datetime.datetime(2015, 1, 2, 4, 0, 0),
+        open=227,
+        close=227,
     )
 
     assert strat.data._filters[0][0]._nexteos == datetime.datetime(2015, 1, 5, 17, 35)

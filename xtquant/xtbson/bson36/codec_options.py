@@ -11,12 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tools for specifying BSON codec options."""
 
 import abc
 import datetime
-import warnings
 from collections import namedtuple
 from collections.abc import MutableMapping as _MutableMapping
 
@@ -28,6 +26,11 @@ from .binary import (
 
 
 def _abstractproperty(func):
+    """
+
+    :param func:
+
+    """
     return property(abc.abstractmethod(func))
 
 
@@ -35,7 +38,11 @@ _RAW_BSON_DOCUMENT_MARKER = 101
 
 
 def _raw_document_class(document_class):
-    """Determine if a document_class is a RawBSONDocument class."""
+    """Determine if a document_class is a RawBSONDocument class.
+
+    :param document_class:
+
+    """
     marker = getattr(document_class, "_type_marker", None)
     return marker == _RAW_BSON_DOCUMENT_MARKER
 
@@ -48,17 +55,21 @@ class TypeEncoder(abc.ABC):
     ``transform_python`` method to support encoding.
 
     See :ref:`custom-type-type-codec` documentation for an example.
+
+
     """
 
     @_abstractproperty
     def python_type(self):
         """The Python type to be converted into something serializable."""
-        pass
 
     @abc.abstractmethod
     def transform_python(self, value):
-        """Convert the given Python object into something serializable."""
-        pass
+        """Convert the given Python object into something serializable.
+
+        :param value:
+
+        """
 
 
 class TypeDecoder(abc.ABC):
@@ -69,17 +80,21 @@ class TypeDecoder(abc.ABC):
     ``transform_bson`` method to support decoding.
 
     See :ref:`custom-type-type-codec` documentation for an example.
+
+
     """
 
     @_abstractproperty
     def bson_type(self):
         """The BSON type to be converted into our own type."""
-        pass
 
     @abc.abstractmethod
     def transform_bson(self, value):
-        """Convert the given BSON value into our own type."""
-        pass
+        """Convert the given BSON value into our own type.
+
+        :param value:
+
+        """
 
 
 class TypeCodec(TypeEncoder, TypeDecoder):
@@ -93,9 +108,9 @@ class TypeCodec(TypeEncoder, TypeDecoder):
     decoding.
 
     See :ref:`custom-type-type-codec` documentation for an example.
-    """
 
-    pass
+
+    """
 
 
 class TypeRegistry(object):
@@ -106,9 +121,6 @@ class TypeRegistry(object):
     ``TypeRegistry`` can be initialized with an iterable of type codecs, and
     a callable for the fallback encoder::
 
-      >>> from .codec_options import TypeRegistry
-      >>> type_registry = TypeRegistry([Codec1, Codec2, Codec3, ...],
-      ...                              fallback_encoder)
 
     See :ref:`custom-type-type-registry` documentation for an example.
 
@@ -123,9 +135,20 @@ class TypeRegistry(object):
         unencodable python value and transforms it into a type that
         :mod:`bson` can encode. See :ref:`fallback-encoder-callable`
         documentation for an example.
+
+
+    >>> from .codec_options import TypeRegistry
+      >>> type_registry = TypeRegistry([Codec1, Codec2, Codec3, ...],
+      ...                              fallback_encoder)
     """
 
     def __init__(self, type_codecs=None, fallback_encoder=None):
+        """
+
+        :param type_codecs:  (Default value = None)
+        :param fallback_encoder:  (Default value = None)
+
+        """
         self.__type_codecs = list(type_codecs or [])
         self._fallback_encoder = fallback_encoder
         self._encoder_map = {}
@@ -158,6 +181,11 @@ class TypeRegistry(object):
                 )
 
     def _validate_type_encoder(self, codec):
+        """
+
+        :param codec:
+
+        """
         from . import _BUILT_IN_TYPES
 
         for pytype in _BUILT_IN_TYPES:
@@ -169,6 +197,7 @@ class TypeRegistry(object):
                 raise TypeError(err_msg)
 
     def __repr__(self):
+        """ """
         return "%s(type_codecs=%r, fallback_encoder=%r)" % (
             self.__class__.__name__,
             self.__type_codecs,
@@ -176,6 +205,11 @@ class TypeRegistry(object):
         )
 
     def __eq__(self, other):
+        """
+
+        :param other:
+
+        """
         if not isinstance(other, type(self)):
             return NotImplemented
         return (
@@ -206,29 +240,10 @@ class CodecOptions(_options_base):
     a document is available using the :class:`~bson.raw_bson.RawBSONDocument`
     type::
 
-      >>> from .raw_bson import RawBSONDocument
-      >>> from .codec_options import CodecOptions
-      >>> codec_options = CodecOptions(document_class=RawBSONDocument)
-      >>> coll = db.get_collection('test', codec_options=codec_options)
-      >>> doc = coll.find_one()
-      >>> doc.raw
-      '\\x16\\x00\\x00\\x00\\x07_id\\x00[0\\x165\\x91\\x10\\xea\\x14\\xe8\\xc5\\x8b\\x93\\x00'
 
     The document class can be any type that inherits from
     :class:`~collections.abc.MutableMapping`::
 
-      >>> class AttributeDict(dict):
-      ...     # A dict that supports attribute access.
-      ...     def __getattr__(self, key):
-      ...         return self[key]
-      ...     def __setattr__(self, key, value):
-      ...         self[key] = value
-      ...
-      >>> codec_options = CodecOptions(document_class=AttributeDict)
-      >>> coll = db.get_collection('test', codec_options=codec_options)
-      >>> doc = coll.find_one()
-      >>> doc._id
-      ObjectId('5b3016359110ea14e8c58b93')
 
     See :doc:`/examples/datetimes` for examples using the `tz_aware` and
     `tzinfo` options.
@@ -273,6 +288,28 @@ class CodecOptions(_options_base):
        The 'replace' and 'ignore' modes should not be used when documents
        retrieved from the server will be modified in the client application
        and stored back to the server.
+
+
+    >>> from .raw_bson import RawBSONDocument
+      >>> from .codec_options import CodecOptions
+      >>> codec_options = CodecOptions(document_class=RawBSONDocument)
+      >>> coll = db.get_collection('test', codec_options=codec_options)
+      >>> doc = coll.find_one()
+      >>> doc.raw
+      '\\x16\\x00\\x00\\x00\\x07_id\\x00[0\\x165\\x91\\x10\\xea\\x14\\xe8\\xc5\\x8b\\x93\\x00'
+
+      >>> class AttributeDict(dict):
+      ...     # A dict that supports attribute access.
+      ...     def __getattr__(self, key):
+      ...         return self[key]
+      ...     def __setattr__(self, key, value):
+      ...         self[key] = value
+      ...
+      >>> codec_options = CodecOptions(document_class=AttributeDict)
+      >>> coll = db.get_collection('test', codec_options=codec_options)
+      >>> doc = coll.find_one()
+      >>> doc._id
+      ObjectId('5b3016359110ea14e8c58b93')
     """
 
     def __new__(
@@ -284,6 +321,16 @@ class CodecOptions(_options_base):
         tzinfo=None,
         type_registry=None,
     ):
+        """
+
+        :param document_class:  (Default value = dict)
+        :param tz_aware:  (Default value = False)
+        :param uuid_representation:  (Default value = UuidRepresentation.UNSPECIFIED)
+        :param unicode_decode_error_handler:  (Default value = "strict")
+        :param tzinfo:  (Default value = None)
+        :param type_registry:  (Default value = None)
+
+        """
         if not (
             issubclass(document_class, _MutableMapping)
             or _raw_document_class(document_class)
@@ -363,19 +410,23 @@ class CodecOptions(_options_base):
         }
 
     def __repr__(self):
+        """ """
         return "%s(%s)" % (self.__class__.__name__, self._arguments_repr())
 
     def with_options(self, **kwargs):
         """Make a copy of this CodecOptions, overriding some options::
 
-            >>> from .codec_options import DEFAULT_CODEC_OPTIONS
+
+        .. versionadded:: 3.5
+
+        :param **kwargs:
+
+        >>> from .codec_options import DEFAULT_CODEC_OPTIONS
             >>> DEFAULT_CODEC_OPTIONS.tz_aware
             False
             >>> options = DEFAULT_CODEC_OPTIONS.with_options(tz_aware=True)
             >>> options.tz_aware
             True
-
-        .. versionadded:: 3.5
         """
         opts = self._options_dict()
         opts.update(kwargs)
@@ -386,7 +437,11 @@ DEFAULT_CODEC_OPTIONS = CodecOptions()
 
 
 def _parse_codec_options(options):
-    """Parse BSON codec options."""
+    """Parse BSON codec options.
+
+    :param options:
+
+    """
     kwargs = {}
     for k in set(options) & {
         "document_class",

@@ -1,13 +1,10 @@
-import backtrader as bt
-import pandas as pd
-import numpy as np
-import sys
-import os
 import datetime
-import matplotlib.pyplot as plt
-import seaborn as sns
 
-from arbitrage.myutil import calculate_spread, check_and_align_data, cointegration_ratio
+import backtrader as bt
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
 
 
 def calculate_rolling_spread(
@@ -161,7 +158,12 @@ class DynamicSpreadZScoreStrategy(bt.Strategy):
         elif trade.justopened:
             print(
                 "TRADE %s OPENED %s  , SIZE %2d, PRICE %d "
-                % (trade.ref, bt.num2date(trade.dtopen), trade.size, trade.value)
+                % (
+                    trade.ref,
+                    bt.num2date(trade.dtopen),
+                    trade.size,
+                    trade.value,
+                )
             )
 
 
@@ -277,15 +279,22 @@ def plot_heatmap(results, output_file="zscore_heatmap.png"):
             ]
 
             # 提取win和entry_zscore
-            pivot_data = pd.DataFrame({
-                "win": sw_data["params"].apply(lambda x: x["win"]),
-                "entry_zscore": sw_data["params"].apply(lambda x: x["entry_zscore"]),
-                "sharpe": sw_data["sharpe"],
-            })
+            pivot_data = pd.DataFrame(
+                {
+                    "win": sw_data["params"].apply(lambda x: x["win"]),
+                    "entry_zscore": (
+                        sw_data["params"].apply(lambda x: x["entry_zscore"])
+                    ),
+                    "sharpe": sw_data["sharpe"],
+                }
+            )
 
             # 创建透视表
             pivot = pivot_data.pivot_table(
-                values="sharpe", index="win", columns="entry_zscore", aggfunc="mean"
+                values="sharpe",
+                index="win",
+                columns="entry_zscore",
+                aggfunc="mean",
             )
 
             # 绘制热力图
@@ -336,25 +345,35 @@ def grid_search():
 
         # 添加数据
         data0 = bt.feeds.PandasData(
-            dataname=df0, datetime="date", nocase=True, fromdate=fromdate, todate=todate
+            dataname=df0,
+            datetime="date",
+            nocase=True,
+            fromdate=fromdate,
+            todate=todate,
         )
         data1 = bt.feeds.PandasData(
-            dataname=df1, datetime="date", nocase=True, fromdate=fromdate, todate=todate
+            dataname=df1,
+            datetime="date",
+            nocase=True,
+            fromdate=fromdate,
+            todate=todate,
         )
         data2 = SpreadData(dataname=df_spread, fromdate=fromdate, todate=todate)
 
         for win in win_values:
             for entry_zscore in entry_zscore_values:
                 for exit_zscore in exit_zscore_values:
-                    param_combinations.append((
-                        data0,
-                        data1,
-                        data2,
-                        win,
-                        entry_zscore,
-                        exit_zscore,
-                        spread_window,
-                    ))
+                    param_combinations.append(
+                        (
+                            data0,
+                            data1,
+                            data2,
+                            win,
+                            entry_zscore,
+                            exit_zscore,
+                            spread_window,
+                        )
+                    )
 
     # 执行网格搜索
     results = []
@@ -372,14 +391,20 @@ def grid_search():
         spread_window,
     ) in enumerate(param_combinations):
         print(
-            f"测试参数组合 {i+1}/{total_combinations}: win={win},"
+            f"测试参数组合 {i + 1}/{total_combinations}: win={win},"
             f" entry_zscore={entry_zscore:.1f}, exit_zscore={exit_zscore:.1f},"
             f" spread_window={spread_window}"
         )
 
         try:
             result = run_strategy(
-                data0, data1, data2, win, entry_zscore, exit_zscore, spread_window
+                data0,
+                data1,
+                data2,
+                win,
+                entry_zscore,
+                exit_zscore,
+                spread_window,
             )
             results.append(result)
 
@@ -397,7 +422,7 @@ def grid_search():
         # 按夏普比率排序
         sorted_results = sorted(
             results,
-            key=lambda x: x["sharpe"] if x["sharpe"] is not None else -float("inf"),
+            key=lambda x: (x["sharpe"] if x["sharpe"] is not None else -float("inf")),
             reverse=True,
         )
         best_result = sorted_results[0]
@@ -426,7 +451,7 @@ def grid_search():
         print("\n========= 所有参数组合结果（按夏普比率排序）=========")
         for i, result in enumerate(sorted_results[:10]):  # 只显示前10个最好的结果
             print(
-                f"{i+1}. spread_window={result['params']['spread_window']}, "
+                f"{i + 1}. spread_window={result['params']['spread_window']}, "
                 f"win={result['params']['win']}, "
                 f"entry_zscore={result['params']['entry_zscore']:.2f}, "
                 f"exit_zscore={result['params']['exit_zscore']:.2f}, "

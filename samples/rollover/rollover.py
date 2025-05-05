@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,11 +18,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
-
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
-import bisect
 import calendar
 import datetime
 
@@ -30,7 +33,10 @@ import backtrader as bt
 
 
 class TheStrategy(bt.Strategy):
+    """ """
+
     def start(self):
+        """ """
         header = [
             "Len",
             "Name",
@@ -47,6 +53,7 @@ class TheStrategy(bt.Strategy):
         print(", ".join(header))
 
     def next(self):
+        """ """
         txt = list()
         txt.append("%04d" % len(self.data0))
         txt.append("{}".format(self.data0._dataname))
@@ -64,6 +71,12 @@ class TheStrategy(bt.Strategy):
 
 
 def checkdate(dt, d):
+    """
+
+    :param dt:
+    :param d:
+
+    """
     # Check if the date is in the week where the 3rd friday of Mar/Jun/Sep/Dec
 
     # EuroStoxx50 expiry codes: MY
@@ -96,10 +109,21 @@ def checkdate(dt, d):
 
 
 def checkvolume(d0, d1):
+    """
+
+    :param d0:
+    :param d1:
+
+    """
     return d0.volume[0] < d1.volume[0]  # Switch if volume from d0 < d1
 
 
 def runstrat(args=None):
+    """
+
+    :param args:  (Default value = None)
+
+    """
     args = parse_args(args)
 
     cerebro = bt.Cerebro()
@@ -137,6 +161,11 @@ def runstrat(args=None):
 
 
 def parse_args(pargs=None):
+    """
+
+    :param pargs:  (Default value = None)
+
+    """
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

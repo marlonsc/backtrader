@@ -1,13 +1,15 @@
-import backtrader as bt
-import pandas as pd
-import numpy as np
 import datetime
+
+import backtrader as bt
 import matplotlib.pyplot as plt
-import seaborn as sns
+import numpy as np
+import pandas as pd
 
 
 # 偏度差均值回归策略（基于历史统计量的版本）
 class SkewnessArbitrageStrategy(bt.Strategy):
+    """ """
+
     params = (
         ("skew_period", 10),  # 计算偏度的周期
         ("lookback_period", 60),  # 计算历史统计量的回看周期
@@ -18,6 +20,7 @@ class SkewnessArbitrageStrategy(bt.Strategy):
     )
 
     def __init__(self):
+        """ """
         # 存储偏度序列用于绘图
         self.skew_j_values = []
         self.skew_jm_values = []
@@ -44,6 +47,7 @@ class SkewnessArbitrageStrategy(bt.Strategy):
         self.entry_day = 0
 
     def next(self):
+        """ """
         if self.order:
             return
 
@@ -173,6 +177,11 @@ class SkewnessArbitrageStrategy(bt.Strategy):
                     )
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status in [order.Completed]:
             if self.p.printlog:
                 if order.isbuy():
@@ -194,15 +203,22 @@ class SkewnessArbitrageStrategy(bt.Strategy):
         self.order = None
 
     def notify_trade(self, trade):
+        """
+
+        :param trade:
+
+        """
         if self.p.printlog and trade.isclosed:
             print(f"平仓盈利: {trade.pnlcomm:.2f}")
 
     def stop(self):
+        """ """
         # 策略结束时绘制偏度图形
         if len(self.skew_j_values) > 0:
             self.plot_skewness()
 
     def plot_skewness(self):
+        """ """
         # 创建日期索引
         if len(self.dates) > len(self.skew_j_values):
             dates = self.dates[-(len(self.skew_j_values)) :]
@@ -287,6 +303,14 @@ class SkewnessArbitrageStrategy(bt.Strategy):
 
 # 关键修复：处理索引问题
 def load_data(symbol1, symbol2, fromdate, todate):
+    """
+
+    :param symbol1:
+    :param symbol2:
+    :param fromdate:
+    :param todate:
+
+    """
     output_file = "D:\\FutureData\\ricequant\\1d_2017to2024_noadjust.h5"
 
     try:
@@ -332,9 +356,17 @@ def load_data(symbol1, symbol2, fromdate, todate):
 
 # 其余代码保持不变
 def configure_cerebro(**kwargs):
+    """
+
+    :param **kwargs:
+
+    """
     cerebro = bt.Cerebro(stdstats=False)  # 启用标准统计
     data0, data1 = load_data(
-        "/J", "/JM", datetime.datetime(2017, 1, 1), datetime.datetime(2025, 1, 1)
+        "/J",
+        "/JM",
+        datetime.datetime(2017, 1, 1),
+        datetime.datetime(2025, 1, 1),
     )
 
     if data0 is None or data1 is None:
@@ -372,6 +404,11 @@ def configure_cerebro(**kwargs):
 
 
 def analyze_results(results):
+    """
+
+    :param results:
+
+    """
     if not results:
         print("没有回测结果可分析")
         return

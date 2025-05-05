@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,14 +18,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
-from . import Indicator, CmpEx
+from . import CmpEx, Indicator
 
 
 class PivotPoint(Indicator):
-    """
-    Defines a level of significance by taking into account the average of price
+    """Defines a level of significance by taking into account the average of price
     bar components of the past period of a larger timeframe. For example when
     operating with days, the values are taking from the already "past" month
     fixed prices.
@@ -60,6 +64,8 @@ class PivotPoint(Indicator):
     See:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:pivot_points
       - https://en.wikipedia.org/wiki/Pivot_point_(technical_analysis)
+
+
     """
 
     lines = (
@@ -78,12 +84,14 @@ class PivotPoint(Indicator):
     )
 
     def _plotinit(self):
+        """ """
         # Try to plot to the actual timeframe master
         if self.p._autoplot:
             if hasattr(self.data, "data"):
                 self.plotinfo.plotmaster = self.data.data
 
     def __init__(self):
+        """ """
         o = self.data.open
         h = self.data.high  # current high
         l = self.data.low  # current low
@@ -110,8 +118,7 @@ class PivotPoint(Indicator):
 
 
 class FibonacciPivotPoint(Indicator):
-    """
-    Defines a level of significance by taking into account the average of price
+    """Defines a level of significance by taking into account the average of price
     bar components of the past period of a larger timeframe. For example when
     operating with days, the values are taking from the already "past" month
     fixed prices.
@@ -149,6 +156,8 @@ class FibonacciPivotPoint(Indicator):
 
     See:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:pivot_points
+
+
     """
 
     lines = ("p", "s1", "s2", "s3", "r1", "r2", "r3")
@@ -163,12 +172,14 @@ class FibonacciPivotPoint(Indicator):
     )
 
     def _plotinit(self):
+        """ """
         # Try to plot to the actual timeframe master
         if self.p._autoplot:
             if hasattr(self.data, "data"):
                 self.plotinfo.plotmaster = self.data.data
 
     def __init__(self):
+        """ """
         o = self.data.open
         h = self.data.high  # current high
         l = self.data.low  # current high
@@ -197,8 +208,7 @@ class FibonacciPivotPoint(Indicator):
 
 
 class DemarkPivotPoint(Indicator):
-    """
-    Defines a level of significance by taking into account the average of price
+    """Defines a level of significance by taking into account the average of price
     bar components of the past period of a larger timeframe. For example when
     operating with days, the values are taking from the already "past" month
     fixed prices.
@@ -237,6 +247,8 @@ class DemarkPivotPoint(Indicator):
 
     See:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:pivot_points
+
+
     """
 
     lines = (
@@ -255,12 +267,14 @@ class DemarkPivotPoint(Indicator):
     )
 
     def _plotinit(self):
+        """ """
         # Try to plot to the actual timeframe master
         if self.p._autoplot:
             if hasattr(self.data, "data"):
                 self.plotinfo.plotmaster = self.data.data
 
     def __init__(self):
+        """ """
         x1 = self.data.high + 2.0 * self.data.low + self.data.close
         x2 = 2.0 * self.data.high + self.data.low + self.data.close
         x3 = self.data.high + self.data.low + 2.0 * self.data.close

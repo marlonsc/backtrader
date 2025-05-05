@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
@@ -27,9 +32,16 @@ import backtrader as bt
 
 
 class TheStrategy(bt.SignalStrategy):
+    """ """
+
     params = dict(rsi_per=14, rsi_upper=65.0, rsi_lower=35.0, rsi_out=50.0, warmup=35)
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         super(TheStrategy, self).notify_order(order)
         if order.status == order.Completed:
             print(
@@ -45,6 +57,7 @@ class TheStrategy(bt.SignalStrategy):
             print("Close[-1]: %f - Open[0]: %f" % (d.close[-1], d.open[0]))
 
     def __init__(self):
+        """ """
         # Original code needs artificial warmup phase - hidden sma to replic
         if self.p.warmup:
             bt.indicators.SMA(period=self.p.warmup, plot=False)
@@ -65,6 +78,11 @@ class TheStrategy(bt.SignalStrategy):
 
 
 def runstrat(pargs=None):
+    """
+
+    :param pargs:  (Default value = None)
+
+    """
     args = parse_args(pargs)
 
     cerebro = bt.Cerebro()
@@ -91,6 +109,11 @@ def runstrat(pargs=None):
 
 
 def parse_args(pargs=None):
+    """
+
+    :param pargs:  (Default value = None)
+
+    """
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

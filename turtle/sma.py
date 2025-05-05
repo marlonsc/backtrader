@@ -5,9 +5,12 @@ win_prob = 0
 
 
 class SmaCross(bt.SignalStrategy):
+    """ """
+
     params = dict(sma1=5, sma2=10, hold_days=5)  # 添加持有天数参数
 
     def __init__(self):
+        """ """
         self.sma1 = bt.ind.SMA(period=self.params.sma1)
         self.sma2 = bt.ind.SMA(period=self.params.sma2)
         self.crossover = bt.ind.CrossOver(self.sma1, self.sma2)  # 计算均线交叉
@@ -19,7 +22,12 @@ class SmaCross(bt.SignalStrategy):
         self.loss = 0
 
     def log(self, txt, dt=None):
-        """Logging function for this strategy"""
+        """Logging function for this strategy
+
+        :param txt:
+        :param dt:  (Default value = None)
+
+        """
         if debug:
             dt = dt or self.datas[0].datetime.date(0)
             print("%s, %s" % (dt.isoformat(), txt))
@@ -42,12 +50,16 @@ class SmaCross(bt.SignalStrategy):
             len(self.bar_executed) > 0
             and len(self) >= self.bar_executed[0] + self.params.hold_days
         ):
-            self.log(f"⏳ 第{len(self)-self.bar_executed[0]}个周期, 卖出.")
+            self.log(f"⏳ 第{len(self) - self.bar_executed[0]}个周期, 卖出.")
             self.bar_executed = self.bar_executed[1:]
             self.sell()
 
     def notify_order(self, order):
-        """监听订单状态变化"""
+        """监听订单状态变化
+
+        :param order:
+
+        """
         # self.log(f"🤖 订单状态变更：{bt.Order.Status[order.status]}")
         if order.status in [order.Submitted, order.Accepted]:
             return
@@ -58,7 +70,11 @@ class SmaCross(bt.SignalStrategy):
             )
 
     def notify_trade(self, trade):
-        """监听交易完成，输出盈亏"""
+        """监听交易完成，输出盈亏
+
+        :param trade:
+
+        """
         if trade.isclosed:
             self.log(
                 f"🎉 盈利: {trade.pnlcomm:.2f}"
@@ -81,12 +97,17 @@ class SmaCross(bt.SignalStrategy):
         self.log(f"💰 期初资金: {start_value:.2f}")
         self.log(f"🚀 策略净利润: {net_profit:.2f}")
         self.log("=" * 30)
-        self.log(f"👍 胜率: {self.win / (self.win+self.loss)}")
+        self.log(f"👍 胜率: {self.win / (self.win + self.loss)}")
         global win_prob
         win_prob = self.win / (self.win + self.loss)
 
 
 def parse_args(pargs=None):
+    """
+
+    :param pargs:  (Default value = None)
+
+    """
     import argparse
 
     parser = argparse.ArgumentParser(
@@ -107,6 +128,13 @@ def parse_args(pargs=None):
 
 
 def runstrat(data, plot=False, args={}):
+    """
+
+    :param data:
+    :param plot:  (Default value = False)
+    :param args:  (Default value = {})
+
+    """
     cerebro = bt.Cerebro()
     data0 = bt.feeds.PandasData(
         dataname=data,
@@ -132,8 +160,9 @@ def runstrat(data, plot=False, args={}):
 
 
 if __name__ == "__main__":
+    pass
+
     import pandas as pd
-    import sys
 
     args = parse_args()
     feed = args.feed

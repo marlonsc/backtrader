@@ -2,19 +2,21 @@
 from collections import OrderedDict
 
 from .meta_config import (
-    __TABULAR_PERIODS__,
     __META_FIELDS__,
-    __META_TABLES__,
     __META_INFO__,
+    __META_TABLES__,
+    __TABULAR_PERIODS__,
+    _check_metatable_key,
     _init_metainfos,
     _meta_type,
-    _check_metatable_key,
 )
 
 
 def parse_request_from_fields(fields):
-    """
-    根据字段解析metaid和field
+    """根据字段解析metaid和field
+
+    :param fields:
+
     """
     table_field = OrderedDict()  # {metaid: {key}}
     key2field = OrderedDict()  # {metaid: {key: field}}
@@ -36,7 +38,7 @@ def parse_request_from_fields(fields):
                     k: _meta_type(v["type"]) for k, v in meta_table_fields.items()
                 }
                 key2field[metaid] = {
-                    key: f'{table}.{field_info["modelName"]}'
+                    key: f"{table}.{field_info['modelName']}"
                     for key, field_info in meta_table_fields.items()
                 }
                 columns.extend(key2field[metaid].values())
@@ -68,8 +70,28 @@ def _get_tabular_data_single_ori(
     count: int = -1,
     **kwargs,
 ):
-    from .. import xtbson, xtdata
+    """
+
+    :param codes:
+    :type codes: list
+    :param metaid:
+    :type metaid: int
+    :param keys:
+    :type keys: list
+    :param int_period:
+    :type int_period: int
+    :param start_time:
+    :type start_time: str
+    :param end_time:
+    :type end_time: str
+    :param count:  (Default value = -1)
+    :type count: int
+    :param **kwargs:
+
+    """
     import os
+
+    from .. import xtbson, xtdata
 
     CONSTKEY_CODE = "S"
 
@@ -80,7 +102,16 @@ def _get_tabular_data_single_ori(
     client = xtdata.get_client()
 
     def read_single():
-        nonlocal codes, metaid, int_period, scan_whole, scan_whole_filters, client, keys, ret_datas
+        """ """
+        nonlocal \
+            codes, \
+            metaid, \
+            int_period, \
+            scan_whole, \
+            scan_whole_filters, \
+            client, \
+            keys, \
+            ret_datas
         if not codes:
             scan_whole = True
             return
@@ -114,7 +145,15 @@ def _get_tabular_data_single_ori(
                 ret_datas.append(ndata)
 
     def read_whole():
-        nonlocal scan_whole, scan_whole_filters, metaid, int_period, client, keys, ret_datas
+        """ """
+        nonlocal \
+            scan_whole, \
+            scan_whole_filters, \
+            metaid, \
+            int_period, \
+            client, \
+            keys, \
+            ret_datas
         if not scan_whole:
             return
 
@@ -161,6 +200,23 @@ def get_tabular_data(
     count: int = -1,
     **kwargs,
 ):
+    """
+
+    :param codes:
+    :type codes: list
+    :param fields:
+    :type fields: list
+    :param period:
+    :type period: str
+    :param start_time:
+    :type start_time: str
+    :param end_time:
+    :type end_time: str
+    :param count:  (Default value = -1)
+    :type count: int
+    :param **kwargs:
+
+    """
     import pandas as pd
 
     time_format = None
@@ -186,7 +242,13 @@ def get_tabular_data(
     # 额外查询 { metaid : [codes] }
     for metaid, keys in table_field.items():
         datas = _get_tabular_data_single_ori(
-            codes, metaid, list(keys.keys()), int_period, start_time, end_time, count
+            codes,
+            metaid,
+            list(keys.keys()),
+            int_period,
+            start_time,
+            end_time,
+            count,
         )
         df = pd.DataFrame(datas)
         if df.empty:
@@ -210,8 +272,11 @@ def get_tabular_data(
 
 
 def get_tabular_bson_head(fields: list):
-    """
-    根据字段解析表头
+    """根据字段解析表头
+
+    :param fields:
+    :type fields: list
+
     """
     ret = {"modelName": "", "tableNameCn": "", "fields": []}
 
@@ -233,13 +298,15 @@ def get_tabular_bson_head(fields: list):
                 continue
 
             for k, v in meta_table_fields.items():
-                ret["fields"].append({
-                    "key": k,
-                    "fieldNameCn": v["fieldNameCn"],
-                    "modelName": v["modelName"],
-                    "type": v["type"],
-                    "unit": v["unit"],
-                })
+                ret["fields"].append(
+                    {
+                        "key": k,
+                        "fieldNameCn": v["fieldNameCn"],
+                        "modelName": v["modelName"],
+                        "type": v["type"],
+                        "unit": v["unit"],
+                    }
+                )
 
         elif field in __META_FIELDS__:
             metaid, key = __META_FIELDS__[field]
@@ -248,13 +315,15 @@ def get_tabular_bson_head(fields: list):
             ret["modelName"] = metainfo["modelName"]
             ret["tableNameCn"] = metainfo["tableNameCn"]
             field_metainfo = metainfo["fields"][key]
-            ret["fields"].append({
-                "key": key,
-                "fieldNameCn": field_metainfo["fieldNameCn"],
-                "modelName": field_metainfo["modelName"],
-                "type": field_metainfo["type"],
-                "unit": field_metainfo["unit"],
-            })
+            ret["fields"].append(
+                {
+                    "key": key,
+                    "fieldNameCn": field_metainfo["fieldNameCn"],
+                    "modelName": field_metainfo["modelName"],
+                    "type": field_metainfo["type"],
+                    "unit": field_metainfo["unit"],
+                }
+            )
 
     return ret
 
@@ -268,6 +337,23 @@ def get_tabular_bson(
     count: int = -1,
     **kwargs,
 ):
+    """
+
+    :param codes:
+    :type codes: list
+    :param fields:
+    :type fields: list
+    :param period:
+    :type period: str
+    :param start_time:
+    :type start_time: str
+    :param end_time:
+    :type end_time: str
+    :param count:  (Default value = -1)
+    :type count: int
+    :param **kwargs:
+
+    """
     from .. import xtbson
 
     time_format = None

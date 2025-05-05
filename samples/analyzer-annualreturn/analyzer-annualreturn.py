@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 # import sys
 # sys.path.append('..\\')
@@ -32,8 +37,8 @@ import backtrader.indicators as btind
 from backtrader.analyzers import (
     SQN,
     AnnualReturn,
-    TimeReturn,
     SharpeRatio,
+    TimeReturn,
     TradeAnalyzer,
 )
 
@@ -43,6 +48,8 @@ class LongShortStrategy(bt.Strategy):
     upwards/downwards a Simple Moving Average.
 
     It can be a long-only strategy by setting the param "onlylong" to True
+
+
     """
 
     params = dict(
@@ -54,18 +61,25 @@ class LongShortStrategy(bt.Strategy):
     )
 
     def start(self):
-        pass
+        """ """
 
     def stop(self):
-        pass
+        """ """
 
     def log(self, txt, dt=None):
+        """
+
+        :param txt:
+        :param dt:  (Default value = None)
+
+        """
         if self.p.printout:
             dt = dt or self.data.datetime[0]
             dt = bt.num2date(dt)
             print("%s, %s" % (dt.isoformat(), txt))
 
     def __init__(self):
+        """ """
         # To control operation entries
         self.orderid = None
 
@@ -76,6 +90,7 @@ class LongShortStrategy(bt.Strategy):
         self.signal.csv = self.p.csvcross
 
     def next(self):
+        """ """
         if self.orderid:
             return  # if an order is active, no new orders are allowed
 
@@ -97,6 +112,11 @@ class LongShortStrategy(bt.Strategy):
                 self.sell(size=self.p.stake)
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status in [bt.Order.Submitted, bt.Order.Accepted]:
             return  # Await further notifications
 
@@ -116,6 +136,11 @@ class LongShortStrategy(bt.Strategy):
         self.orderid = None
 
     def notify_trade(self, trade):
+        """
+
+        :param trade:
+
+        """
         if trade.isclosed:
             self.log("TRADE PROFIT, GROSS %.2f, NET %.2f" % (trade.pnl, trade.pnlcomm))
 
@@ -124,6 +149,7 @@ class LongShortStrategy(bt.Strategy):
 
 
 def runstrategy():
+    """ """
     args = parse_args()
 
     # Create a cerebro
@@ -187,6 +213,7 @@ def runstrategy():
 
 
 def parse_args():
+    """ """
     parser = argparse.ArgumentParser(description="TimeReturn")
 
     parser.add_argument(
@@ -229,7 +256,9 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--csvcross", action="store_true", help="Output the CrossOver signals to CSV"
+        "--csvcross",
+        action="store_true",
+        help="Output the CrossOver signals to CSV",
     )
 
     group = parser.add_mutually_exclusive_group()
@@ -242,7 +271,9 @@ def parse_args():
     )
 
     group.add_argument(
-        "--legacyannual", action="store_true", help="Use legacy annual return analyzer"
+        "--legacyannual",
+        action="store_true",
+        help="Use legacy annual return analyzer",
     )
 
     parser.add_argument("--cash", default=100000, type=int, help="Starting Cash")

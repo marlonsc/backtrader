@@ -2,19 +2,24 @@ import backtrader as bt
 
 
 class SlippageImpactAnalyzer(bt.Analyzer):
-    """
-    Analyzer that measures the impact of slippage on trading performance metrics.
-    """
+    """Analyzer that measures the impact of slippage on trading performance metrics."""
 
     def __init__(self):
+        """ """
         self.orders = []
         # Get slippage percentage from broker
         self.slip_perc = self.strategy.broker.p.slip_perc
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status == order.Completed:
             # Calculate slippage cost for this specific order
-            # For buys, slippage increases cost; for sells, slippage decreases proceeds
+            # For buys, slippage increases cost; for sells, slippage decreases
+            # proceeds
             if order.isbuy():
                 # Price without slippage would be lower
                 price_wo_slip = order.executed.price / (1 + self.slip_perc)
@@ -29,16 +34,19 @@ class SlippageImpactAnalyzer(bt.Analyzer):
                 )
 
             # Store executed order data
-            self.orders.append({
-                "dt": bt.num2date(order.executed.dt),
-                "size": order.executed.size,
-                "price": order.executed.price,
-                "value": order.executed.value,
-                "slip_cost": slip_cost,
-                "data": order.data._name,
-            })
+            self.orders.append(
+                {
+                    "dt": bt.num2date(order.executed.dt),
+                    "size": order.executed.size,
+                    "price": order.executed.price,
+                    "value": order.executed.value,
+                    "slip_cost": slip_cost,
+                    "data": order.data._name,
+                }
+            )
 
     def stop(self):
+        """ """
         # Calculate total trading volume for reference
         self.total_traded_value = sum(abs(o["value"]) for o in self.orders)
 
@@ -70,6 +78,7 @@ class SlippageImpactAnalyzer(bt.Analyzer):
             self.hypo_cagr = self.hypo_return
 
     def get_analysis(self):
+        """ """
         return {
             "total_slip_cost": self.total_slip_cost,
             "slip_pct_initial_equity": (

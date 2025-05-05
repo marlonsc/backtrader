@@ -1,13 +1,16 @@
-import backtrader as bt
-import pandas as pd
-import numpy as np
 import datetime
+
+import backtrader as bt
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 import seaborn as sns
 
 
 # 夏普差值布林带策略
 class SharpeDiffStrategy(bt.Strategy):
+    """ """
+
     params = (
         ("return_period", 15),  # 计算收益率的周期（15日收益率）
         ("ma_period", 10),  # 计算移动平均的周期（20日移动平均线）
@@ -17,6 +20,7 @@ class SharpeDiffStrategy(bt.Strategy):
     )
 
     def __init__(self):
+        """ """
         # 存储夏普比率序列用于绘图
         self.sharpe_j_values = []
         self.sharpe_jm_values = []
@@ -43,6 +47,7 @@ class SharpeDiffStrategy(bt.Strategy):
         self.jm_prices = []
 
     def next(self):
+        """ """
         if self.order:
             return
 
@@ -175,6 +180,11 @@ class SharpeDiffStrategy(bt.Strategy):
                     )
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status in [order.Completed]:
             if self.p.printlog:
                 if order.isbuy():
@@ -198,6 +208,14 @@ class SharpeDiffStrategy(bt.Strategy):
 
 # 数据加载函数，处理索引问题
 def load_data(symbol1, symbol2, fromdate, todate):
+    """
+
+    :param symbol1:
+    :param symbol2:
+    :param fromdate:
+    :param todate:
+
+    """
     output_file = "D:\\FutureData\\ricequant\\1d_2017to2024_noadjust.h5"
 
     try:
@@ -243,6 +261,7 @@ def load_data(symbol1, symbol2, fromdate, todate):
 
 # 运行网格回测并绘制热力图
 def run_grid_search():
+    """ """
     # 定义参数网格
     ma_periods = [5, 10, 15, 20, 25, 30, 35, 40]  # 移动平均周期
     entry_multipliers = [0.1, 0.2, 0.3, 0.4, 0.5, 0.8, 1.0, 1.5]  # 标准差乘数
@@ -360,7 +379,7 @@ def run_grid_search():
         best_entry_multiplier = entry_multipliers[max_j]
         best_sharpe = results_clean[max_i, max_j]
 
-        print(f"\n最佳参数组合:")
+        print("\n最佳参数组合:")
         print(f"ma_period: {best_ma_period}")
         print(f"entry_std_multiplier: {best_entry_multiplier}")
         print(f"夏普比率: {best_sharpe:.4f}")

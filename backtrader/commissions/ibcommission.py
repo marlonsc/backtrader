@@ -18,15 +18,20 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
+
+import math
 
 from backtrader.comminfo import CommInfoBase
-import math
 
 
 class IBCommInfo(CommInfoBase):
-    """
-    Commissions are calculated by ib, but the trades calculations in the
+    """Commissions are calculated by ib, but the trades calculations in the
     ```Strategy`` rely on the order carrying a CommInfo object attached for the
     calculation of the operation cost and value.
 
@@ -36,11 +41,20 @@ class IBCommInfo(CommInfoBase):
 
     The margin calculation is not a known in advance information with IB
     (margin impact can be gotten from OrderState objects) and therefore it is
-    left as future exercise to get it"""
+    left as future exercise to get it
 
-    COMM_PERC, COMM_FIXED, COMM_STOCK, COMM_FUTURE, COMM_OPTION, COMM_FOREX = range(6)
+
+    """
+
+    COMM_PERC, COMM_FIXED, COMM_STOCK, COMM_FUTURE, COMM_OPTION, COMM_FOREX = range(
+        6)
 
     def __init__(self, data=None):
+        """
+
+        :param data:  (Default value = None)
+
+        """
         super(IBCommInfo, self).__init__()
         if self._commtype == self.COMM_STOCK:
             self._stocklike = True
@@ -57,6 +71,11 @@ class IBCommInfo(CommInfoBase):
 
     """
     def get_margin(self, price):
+        """
+
+    : param price:
+
+        """
         if not self.p.automargin:
             return self.p.margin
 
@@ -67,7 +86,12 @@ class IBCommInfo(CommInfoBase):
     """
 
     def getsize(self, price, cash):
-        """Returns the needed size to meet a cash operation at a given price"""
+        """Returns the needed size to meet a cash operation at a given price
+
+        :param price:
+        :param cash:
+
+        """
         # Just inherit from base class, need to be update
         # getsize 需要考虑佣金，cash需要减去佣金
         size = 0
@@ -91,11 +115,22 @@ class IBCommInfo(CommInfoBase):
         return size
 
     def getoperationcost(self, size, price):
-        """Returns the needed amount of cash an operation would cost"""
+        """Returns the needed amount of cash an operation would cost
+
+        :param size:
+        :param price:
+
+        """
         # Same reasoning as above
         return abs(float(size)) * float(price)
 
     def getvaluesize(self, size, price):
+        """
+
+        :param size:
+        :param price:
+
+        """
         # In real life the margin approaches the price
         if not self._stocklike:
             return abs(size) * self.get_margin(price)
@@ -106,6 +141,11 @@ class IBCommInfo(CommInfoBase):
         """Calculates the commission of an operation at a given price
 
         pseudoexec: if True the operation has not yet been executed
+
+        :param size:
+        :param price:
+        :param pseudoexec:
+
         """
 
         if self._commtype == self.COMM_PERC:
@@ -114,7 +154,8 @@ class IBCommInfo(CommInfoBase):
         if self._commtype == self.COMM_STOCK:
             # value of positions
             value = abs(size) * price
-            # IB Commission Fixed model, Minimum per order:1$ Maximum per order %1 of trade
+            # IB Commission Fixed model, Minimum per order:1$ Maximum per order
+            # %1 of trade
             brokercommission = abs(size) * self.p.commission
             brokercommission = max(1, brokercommission)
             brokercommission = min(brokercommission, value * 0.01)
@@ -130,8 +171,10 @@ class IBCommInfo(CommInfoBase):
 
             # total commission
             total_commission = (
-                brokercommission + transaction_fee + trade_activtity_fee + FINRA_fee
-            )
+                brokercommission +
+                transaction_fee +
+                trade_activtity_fee +
+                FINRA_fee)
 
             return total_commission
         # 根据不同的权利金(Premium)，合约佣金不同
@@ -146,7 +189,8 @@ class IBCommInfo(CommInfoBase):
 
             # value of positions, Premium maybe < 0
             value = max(abs(size) * price, 0)
-            # IB Commission Fixed model, Minimum per order:1$ Maximum per order %1 of trade
+            # IB Commission Fixed model, Minimum per order:1$ Maximum per order
+            # %1 of trade
             brokercommission = abs(size) * communit
             brokercommission = max(1, brokercommission)
 
@@ -157,20 +201,23 @@ class IBCommInfo(CommInfoBase):
             clearingfee = 0.02 * abs(size)
 
             # Regulatory Fees
-            regulatoryfee = (0.02815 + 0.0052) * abs(size)
+            (0.02815 + 0.0052) * abs(size)
 
             # Transaction Fees
             trade_activtity_fee = 0.0000278 * value + 0.00279 * abs(size)
 
             # total commission
             total_commission = (
-                brokercommission + exchangefee + clearingfee + trade_activtity_fee
-            )
+                brokercommission +
+                exchangefee +
+                clearingfee +
+                trade_activtity_fee)
 
             return total_commission
 
         if self._commtype == self.COMM_FUTURE:
-            # IB Commission Fixed model, Minimum per order:1$ Maximum per order %1 of trade
+            # IB Commission Fixed model, Minimum per order:1$ Maximum per order
+            # %1 of trade
             total_commission = abs(size) * self.p.commission
 
             return total_commission

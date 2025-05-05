@@ -85,21 +85,26 @@ EXAMPLE:
 python strategies/gaussian_stochrsi_momentum.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --plot
 """
 
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
+import math
 import os
 import sys
-import math
-import numpy as np
-import pandas as pd
-import psycopg2
-import psycopg2.extras
-import matplotlib.pyplot as plt
+
 import backtrader as bt
-import backtrader.indicators as btind
-from backtrader.utils.py3 import range
+from strategies.utils import (
+    TradeThrottling,
+    add_standard_analyzers,
+    get_db_data,
+    print_performance_metrics,
+)
 
 # Add the parent directory to the Python path to import shared modules
 parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -107,18 +112,10 @@ if parent_dir not in sys.path:
     sys.path.append(parent_dir)
 
 # Import utility functions
-from strategies.utils import (
-    get_db_data,
-    print_performance_metrics,
-    TradeThrottling,
-    add_standard_analyzers,
-)
 
 
 class StockPriceData(bt.feeds.PandasData):
-    """
-    Stock Price Data Feed
-    """
+    """Stock Price Data Feed"""
 
     params = (
         ("datetime", None),  # Column containing the date (index)
@@ -132,8 +129,7 @@ class StockPriceData(bt.feeds.PandasData):
 
 
 class StochasticRSI(bt.Indicator):
-    """
-    Stochastic RSI Indicator
+    """Stochastic RSI Indicator
 
     Calculation:
     1. Calculate RSI with specified length
@@ -142,11 +138,7 @@ class StochasticRSI(bt.Indicator):
     4. Smooth K line: SMA(stochastic, klength)
     5. Smooth D line: SMA(K, dlength)
 
-    Params:
-    - rsilength: Period for RSI calculation
-    - stochlength: Period for Stochastic calculation
-    - klength: Smoothing period for K line
-    - dlength: Smoothing period for D line
+
     """
 
     lines = ("k", "d")
@@ -164,6 +156,7 @@ class StochasticRSI(bt.Indicator):
     plotlines = dict(k=dict(color="blue", _name="K"), d=dict(color="orange", _name="D"))
 
     def __init__(self):
+        """ """
         # Calculate RSI on the close price
         self.rsi = bt.indicators.RSI(self.data, period=self.p.rsilength)
 
@@ -184,10 +177,11 @@ class StochasticRSI(bt.Indicator):
 
 
 class GaussianFilter(bt.Indicator):
-    """
-    Gaussian Filter indicator as described by John Ehlers
+    """Gaussian Filter indicator as described by John Ehlers
 
     This indicator calculates a filter and channel bands using Gaussian filter techniques
+
+
     """
 
     lines = ("filt", "hband", "lband")
@@ -214,6 +208,7 @@ class GaussianFilter(bt.Indicator):
     )
 
     def __init__(self):
+        """ """
         # Use the provided source or default to HLC3
         if self.p.source is None:
             self.src = (self.data.high + self.data.low + self.data.close) / 3.0
@@ -224,10 +219,10 @@ class GaussianFilter(bt.Indicator):
         beta = (1 - math.cos(4 * math.asin(1) / self.p.period)) / (
             math.pow(1.414, 2 / self.p.poles) - 1
         )
-        alpha = -beta + math.sqrt(math.pow(beta, 2) + 2 * beta)
+        -beta + math.sqrt(math.pow(beta, 2) + 2 * beta)
 
         # Lag
-        lag = (self.p.period - 1) / (2 * self.p.poles)
+        (self.p.period - 1) / (2 * self.p.poles)
 
         # Apply the filters - we'll implement a simplified version here
         self.srcdata = self.src
@@ -248,8 +243,7 @@ class GaussianFilter(bt.Indicator):
 
 
 class GaussianChannel(bt.Indicator):
-    """
-    Gaussian Channel Indicator
+    """Gaussian Channel Indicator
 
     A channel indicator that uses Gaussian weighted moving average and
     standard deviation to create adaptive bands.
@@ -257,9 +251,7 @@ class GaussianChannel(bt.Indicator):
     For simplicity, this implementation approximates the Gaussian weighting
     using standard indicators available in backtrader.
 
-    Params:
-    - length: Period for calculations (minimum 5)
-    - multiplier: Multiplier for standard deviation bands
+
     """
 
     lines = ("mid", "upper", "lower")
@@ -282,12 +274,14 @@ class GaussianChannel(bt.Indicator):
     )
 
     def __init__(self):
+        """ """
         # Ensure we have enough data length for calculations
         if self.p.length < 5:
             raise ValueError("Gaussian Channel length must be at least 5")
 
         # Use EMA for middle line as an approximation of Gaussian weighted MA
-        # EMA gives more weight to recent data which partially mimics the Gaussian curve effect
+        # EMA gives more weight to recent data which partially mimics the
+        # Gaussian curve effect
         self.lines.mid = bt.indicators.ExponentialMovingAverage(
             self.data, period=self.p.length
         )
@@ -305,8 +299,7 @@ class GaussianChannel(bt.Indicator):
 
 
 class StochasticRSIGaussianChannelStrategy(bt.Strategy, TradeThrottling):
-    """
-    Strategy that implements the Stochastic RSI with Gaussian Channel trading rules:
+    """Strategy that implements the Stochastic RSI with Gaussian Channel trading rules:
     - Open long position when:
       1. The gaussian channel is ascending (filt > filt[1])
       2. The stochastic RSI crosses from below 20 to above 20 (K[0] > 20 and K[-1] <= 20)
@@ -334,6 +327,8 @@ class StochasticRSIGaussianChannelStrategy(bt.Strategy, TradeThrottling):
     - Sectors with momentum and clear trend direction
     - Avoid using in choppy or ranging markets
     - Most effective in markets with clear directional movement
+
+
     """
 
     params = (
@@ -357,7 +352,10 @@ class StochasticRSIGaussianChannelStrategy(bt.Strategy, TradeThrottling):
             "exit_strategy",
             "trailing_percent",
         ),  # Exit strategy: 'default', 'middle_band', 'bars', 'trailing_percent', 'trailing_atr', 'trailing_ma'
-        ("exit_bars", 5),  # Number of bars to hold position when exit_strategy='bars'
+        (
+            "exit_bars",
+            5,
+        ),  # Number of bars to hold position when exit_strategy='bars'
         (
             "trailing_percent",
             3.0,
@@ -375,18 +373,23 @@ class StochasticRSIGaussianChannelStrategy(bt.Strategy, TradeThrottling):
             50,
         ),  # MA period for trailing stop when exit_strategy='trailing_ma'
         # Position sizing parameters
-        ("position_sizing", "percent"),  # Position sizing method: 'percent', 'auto'
+        # Position sizing method: 'percent', 'auto'
+        ("position_sizing", "percent"),
         (
             "position_percent",
             20.0,
-        ),  # Percentage of equity to use per trade (when position_sizing='percent')
-        ("max_position_percent", 95.0),  # Maximum percentage of equity to use per trade
+            # Percentage of equity to use per trade (when
+            # position_sizing='percent')
+        ),
+        # Maximum percentage of equity to use per trade
+        ("max_position_percent", 95.0),
         (
             "risk_percent",
             1.0,
         ),  # Risk percentage of equity per trade (used in volatility sizing)
         # Trade throttling
-        ("trade_throttle_hours", 0),  # Minimum hours between trades (0 = no throttling)
+        # Minimum hours between trades (0 = no throttling)
+        ("trade_throttle_hours", 0),
         # Risk management
         ("use_stop_loss", False),  # Whether to use a stop loss
         ("stop_loss_percent", 5.0),  # Stop loss percentage from entry
@@ -395,6 +398,7 @@ class StochasticRSIGaussianChannelStrategy(bt.Strategy, TradeThrottling):
     )
 
     def __init__(self):
+        """ """
         # Keep track of close price
         self.dataclose = self.datas[0].close
         self.datahigh = self.datas[0].high
@@ -460,12 +464,23 @@ class StochasticRSIGaussianChannelStrategy(bt.Strategy, TradeThrottling):
             self.atr = bt.indicators.ATR(self.data, period=self.p.atr_period)
 
     def log(self, txt, dt=None, doprint=False):
-        """Logging function"""
+        """Logging function
+
+        :param txt:
+        :param dt:  (Default value = None)
+        :param doprint:  (Default value = False)
+
+        """
         if self.params.printlog or doprint:
             dt = dt or self.datas[0].datetime.date(0)
             print("%s, %s" % (dt.isoformat(), txt))
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status in [order.Submitted, order.Accepted]:
             # Order submitted/accepted to/by broker - Nothing to do
             return
@@ -537,6 +552,11 @@ class StochasticRSIGaussianChannelStrategy(bt.Strategy, TradeThrottling):
         self.order = None
 
     def notify_trade(self, trade):
+        """
+
+        :param trade:
+
+        """
         if not trade.isclosed:
             return
 
@@ -563,7 +583,8 @@ class StochasticRSIGaussianChannelStrategy(bt.Strategy, TradeThrottling):
             cash_to_use = available_cash * (self.p.position_percent / 100)
             # Make sure we don't exceed maximum position percentage
             cash_to_use = min(
-                cash_to_use, available_cash * (self.p.max_position_percent / 100)
+                cash_to_use,
+                available_cash * (self.p.max_position_percent / 100),
             )
             size = int(cash_to_use / current_price)
             return size
@@ -664,6 +685,7 @@ class StochasticRSIGaussianChannelStrategy(bt.Strategy, TradeThrottling):
         return False
 
     def next(self):
+        """ """
         # Only operate within the specified date range
         current_date = self.data.datetime.date(0)
         current_dt_num = bt.date2num(current_date)
@@ -697,7 +719,10 @@ class StochasticRSIGaussianChannelStrategy(bt.Strategy, TradeThrottling):
                 and hasattr(self, "trailing_stop_price")
                 and self.trailing_stop_price > 0
             ):
-                self.log(f"Trailing Stop: {self.trailing_stop_price:.2f}", doprint=True)
+                self.log(
+                    f"Trailing Stop: {self.trailing_stop_price:.2f}",
+                    doprint=True,
+                )
 
         # Check if we are in the market
         if not self.position:
@@ -727,7 +752,8 @@ class StochasticRSIGaussianChannelStrategy(bt.Strategy, TradeThrottling):
 
                 if size <= 0:
                     self.log(
-                        "Zero position size calculated, skipping trade", doprint=True
+                        "Zero position size calculated, skipping trade",
+                        doprint=True,
                     )
                     return
 
@@ -761,14 +787,13 @@ class StochasticRSIGaussianChannelStrategy(bt.Strategy, TradeThrottling):
                 self.order = self.sell(size=self.position.size)
 
     def stop(self):
+        """ """
         # Log final results when strategy is complete
         self.log("Final Portfolio Value: %.2f" % self.broker.getvalue(), doprint=True)
 
 
 def parse_args():
-    """
-    Parse command line arguments
-    """
+    """Parse command line arguments"""
     parser = argparse.ArgumentParser(
         description="Enhanced Stochastic RSI with Gaussian Channel Strategy",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -795,7 +820,10 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--todate", "-t", default="2069-12-31", help="Ending date in YYYY-MM-DD format"
+        "--todate",
+        "-t",
+        default="2069-12-31",
+        help="Ending date in YYYY-MM-DD format",
     )
 
     parser.add_argument(
@@ -804,7 +832,11 @@ def parse_args():
 
     # Stochastic RSI parameters
     parser.add_argument(
-        "--rsilength", "-rl", default=14, type=int, help="Period for RSI calculation"
+        "--rsilength",
+        "-rl",
+        default=14,
+        type=int,
+        help="Period for RSI calculation",
     )
 
     parser.add_argument(
@@ -1061,10 +1093,10 @@ def main():
     print(f"- Date Range: {args.fromdate} to {args.todate}")
 
     if args.exit_strategy == "default":
-        print(f"- Exit Strategy: Default - StochRSI crosses from above 80 to below 80")
+        print("- Exit Strategy: Default - StochRSI crosses from above 80 to below 80")
     elif args.exit_strategy == "middle_band":
         print(
-            f"- Exit Strategy: Middle Band - Exit when price crosses below middle band"
+            "- Exit Strategy: Middle Band - Exit when price crosses below middle band"
         )
     elif args.exit_strategy == "bars":
         print(f"- Exit Strategy: Bars - Exit after {args.exit_bars} bars")

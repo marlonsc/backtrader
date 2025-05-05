@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,18 +18,20 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
-
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import backtrader as bt
-from backtrader.utils.py3 import range
 
 __all__ = ["HeikinAshi"]
 
 
 class HeikinAshi(bt.Indicator):
-    """
-    Heikin Ashi candlesticks in the forms of lines
+    """Heikin Ashi candlesticks in the forms of lines
 
     Formula:
         ha_open = (ha_open(-1) + ha_close(-1)) / 2
@@ -40,6 +42,8 @@ class HeikinAshi(bt.Indicator):
     See also:
         https://en.wikipedia.org/wiki/Candlestick_chart#Heikin_Ashi_candlesticks
         http://stockcharts.com/school/doku.php?id=chart_school:chart_analysis:heikin_ashi
+
+
     """
 
     lines = (
@@ -73,6 +77,7 @@ class HeikinAshi(bt.Indicator):
     _nextforce = True
 
     def __init__(self):
+        """ """
         o = self.data.open
         h = self.data.high
         l = self.data.low
@@ -86,5 +91,6 @@ class HeikinAshi(bt.Indicator):
         super(HeikinAshi, self).__init__()
 
     def prenext(self):
+        """ """
         # seed recursive value
         self.lines.ha_open[0] = (self.data.open[0] + self.data.close[0]) / 2.0

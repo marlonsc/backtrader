@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,12 +18,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import calendar
-from collections import OrderedDict
 import datetime
 import pprint as pp
+from collections import OrderedDict
 
 import backtrader as bt
 from backtrader import TimeFrame
@@ -31,9 +36,14 @@ from backtrader.utils.py3 import MAXINT, with_metaclass
 
 
 class MetaAnalyzer(bt.MetaParams):
+    """ """
+
     def donew(cls, *args, **kwargs):
-        """
-        Intercept the strategy parameter
+        """Intercept the strategy parameter
+
+        :param *args:
+        :param **kwargs:
+
         """
         # Create the object and set the params in place
         _obj, args, kwargs = super(MetaAnalyzer, cls).donew(*args, **kwargs)
@@ -75,6 +85,13 @@ class MetaAnalyzer(bt.MetaParams):
         return _obj, args, kwargs
 
     def dopostinit(cls, _obj, *args, **kwargs):
+        """
+
+        :param _obj:
+        :param *args:
+        :param **kwargs:
+
+        """
         _obj, args, kwargs = super(MetaAnalyzer, cls).dopostinit(_obj, *args, **kwargs)
 
         if _obj._parent is not None:
@@ -132,122 +149,188 @@ class Analyzer(with_metaclass(MetaAnalyzer, object)):
     object containing the results of the analysis (the actual format is
     implementation dependent)
 
+
     """
 
     csv = True
 
     def __len__(self):
         """Support for invoking ``len`` on analyzers by actually returning the
-        current length of the strategy the analyzer operates on"""
+        current length of the strategy the analyzer operates on
+
+
+        """
         return len(self.strategy)
 
     def _register(self, child):
+        """
+
+        :param child:
+
+        """
         self._children.append(child)
 
     def _prenext(self):
+        """ """
         for child in self._children:
             child._prenext()
 
         self.prenext()
 
     def _notify_cashvalue(self, cash, value):
+        """
+
+        :param cash:
+        :param value:
+
+        """
         for child in self._children:
             child._notify_cashvalue(cash, value)
 
         self.notify_cashvalue(cash, value)
 
     def _notify_fund(self, cash, value, fundvalue, shares):
+        """
+
+        :param cash:
+        :param value:
+        :param fundvalue:
+        :param shares:
+
+        """
         for child in self._children:
             child._notify_fund(cash, value, fundvalue, shares)
 
         self.notify_fund(cash, value, fundvalue, shares)
 
     def _notify_trade(self, trade):
+        """
+
+        :param trade:
+
+        """
         for child in self._children:
             child._notify_trade(trade)
 
         self.notify_trade(trade)
 
     def _notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         for child in self._children:
             child._notify_order(order)
 
         self.notify_order(order)
 
     def _nextstart(self):
+        """ """
         for child in self._children:
             child._nextstart()
 
         self.nextstart()
 
     def _next(self):
+        """ """
         for child in self._children:
             child._next()
 
         self.next()
 
     def _start(self):
+        """ """
         for child in self._children:
             child._start()
 
         self.start()
 
     def _stop(self):
+        """ """
         for child in self._children:
             child._stop()
 
         self.stop()
 
     def notify_cashvalue(self, cash, value):
-        """Receives the cash/value notification before each next cycle"""
-        pass
+        """Receives the cash/value notification before each next cycle
+
+        :param cash:
+        :param value:
+
+        """
 
     def notify_fund(self, cash, value, fundvalue, shares):
-        """Receives the current cash, value, fundvalue and fund shares"""
-        pass
+        """Receives the current cash, value, fundvalue and fund shares
+
+        :param cash:
+        :param value:
+        :param fundvalue:
+        :param shares:
+
+        """
 
     def notify_order(self, order):
-        """Receives order notifications before each next cycle"""
-        pass
+        """Receives order notifications before each next cycle
+
+        :param order:
+
+        """
 
     def notify_trade(self, trade):
-        """Receives trade notifications before each next cycle"""
-        pass
+        """Receives trade notifications before each next cycle
+
+        :param trade:
+
+        """
 
     def next(self):
         """Invoked for each next invocation of the strategy, once the minum
-        preiod of the strategy has been reached"""
-        pass
+        preiod of the strategy has been reached
+
+
+        """
 
     def prenext(self):
         """Invoked for each prenext invocation of the strategy, until the minimum
         period of the strategy has been reached
 
         The default behavior for an analyzer is to invoke ``next``
+
+
         """
         self.next()
 
     def nextstart(self):
         """Invoked exactly once for the nextstart invocation of the strategy,
         when the minimum period has been first reached
+
+
         """
         self.next()
 
     def start(self):
         """Invoked to indicate the start of operations, giving the analyzer
-        time to setup up needed things"""
-        pass
+        time to setup up needed things
+
+
+        """
 
     def stop(self):
         """Invoked to indicate the end of operations, giving the analyzer
-        time to shut down needed things"""
-        pass
+        time to shut down needed things
+
+
+        """
 
     def create_analysis(self):
         """Meant to be overriden by subclasses. Gives a chance to create the
         structures that hold the analysis.
 
         The default behaviour is to create a ``OrderedDict`` named ``rets``
+
+
         """
         self.rets = OrderedDict()
 
@@ -263,6 +346,7 @@ class Analyzer(with_metaclass(MetaAnalyzer, object)):
         The default implementation returns the default OrderedDict ``rets``
         created by the default ``create_analysis`` method
 
+
         """
         return self.rets
 
@@ -270,6 +354,10 @@ class Analyzer(with_metaclass(MetaAnalyzer, object)):
         """Prints the results returned by ``get_analysis`` via a standard
         ``Writerfile`` object, which defaults to writing things to standard
         output
+
+        :param *args:
+        :param **kwargs:
+
         """
         writer = bt.WriterFile(*args, **kwargs)
         writer.start()
@@ -281,6 +369,10 @@ class Analyzer(with_metaclass(MetaAnalyzer, object)):
     def pprint(self, *args, **kwargs):
         """Prints the results returned by ``get_analysis`` using the pretty
         print Python module (*pprint*)
+
+        :param *args:
+        :param **kwargs:
+
         """
         pp.pprint(self.get_analysis(), *args, **kwargs)
 
@@ -295,7 +387,17 @@ class Analyzer(with_metaclass(MetaAnalyzer, object)):
 
 
 class MetaTimeFrameAnalyzerBase(Analyzer.__class__):
+    """ """
+
     def __new__(meta, name, bases, dct):
+        """
+
+        :param meta:
+        :param name:
+        :param bases:
+        :param dct:
+
+        """
         # Hack to support original method name
         if "_on_dt_over" in dct:
             dct["on_dt_over"] = dct.pop("_on_dt_over")  # rename method
@@ -304,6 +406,8 @@ class MetaTimeFrameAnalyzerBase(Analyzer.__class__):
 
 
 class TimeFrameAnalyzerBase(with_metaclass(MetaTimeFrameAnalyzerBase, Analyzer)):
+    """ """
+
     params = (
         ("timeframe", None),
         ("compression", None),
@@ -311,6 +415,7 @@ class TimeFrameAnalyzerBase(with_metaclass(MetaTimeFrameAnalyzerBase, Analyzer))
     )
 
     def _start(self):
+        """ """
         # Override to add specific attributes
         self.timeframe = self.p.timeframe or self.data._timeframe
         self.compression = self.p.compression or self.data._compression
@@ -319,6 +424,7 @@ class TimeFrameAnalyzerBase(with_metaclass(MetaTimeFrameAnalyzerBase, Analyzer))
         super(TimeFrameAnalyzerBase, self)._start()
 
     def _prenext(self):
+        """ """
         for child in self._children:
             child._prenext()
 
@@ -329,6 +435,7 @@ class TimeFrameAnalyzerBase(with_metaclass(MetaTimeFrameAnalyzerBase, Analyzer))
             self.prenext()
 
     def _nextstart(self):
+        """ """
         for child in self._children:
             child._nextstart()
 
@@ -338,6 +445,7 @@ class TimeFrameAnalyzerBase(with_metaclass(MetaTimeFrameAnalyzerBase, Analyzer))
         self.nextstart()
 
     def _next(self):
+        """ """
         for child in self._children:
             child._next()
 
@@ -347,9 +455,10 @@ class TimeFrameAnalyzerBase(with_metaclass(MetaTimeFrameAnalyzerBase, Analyzer))
         self.next()
 
     def on_dt_over(self):
-        pass
+        """ """
 
     def _dt_over(self):
+        """ """
         if self.timeframe == TimeFrame.NoTimeFrame:
             dtcmp, dtkey = MAXINT, datetime.datetime.max
         else:
@@ -365,6 +474,11 @@ class TimeFrameAnalyzerBase(with_metaclass(MetaTimeFrameAnalyzerBase, Analyzer))
         return False
 
     def _get_dt_cmpkey(self, dt):
+        """
+
+        :param dt:
+
+        """
         if self.timeframe == TimeFrame.NoTimeFrame:
             return None, None
 
@@ -393,6 +507,11 @@ class TimeFrameAnalyzerBase(with_metaclass(MetaTimeFrameAnalyzerBase, Analyzer))
         return dtcmp, dtkey
 
     def _get_subday_cmpkey(self, dt):
+        """
+
+        :param dt:
+
+        """
         # Calculate intraday position
         point = dt.hour * 60 + dt.minute
 

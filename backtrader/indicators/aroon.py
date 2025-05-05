@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,14 +18,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
-from . import Indicator, FindFirstIndexHighest, FindFirstIndexLowest
+from . import FindFirstIndexHighest, FindFirstIndexLowest, Indicator
 
 
 class _AroonBase(Indicator):
-    """
-    Base class which does the calculation of the AroonUp/AroonDown values and
+    """Base class which does the calculation of the AroonUp/AroonDown values and
     defines the common parameters.
 
     It uses the class attributes _up and _down (boolean flags) to decide which
@@ -34,6 +38,8 @@ class _AroonBase(Indicator):
     Values are not assigned to lines but rather stored in the "up" and "down"
     instance variables, which can be used by subclasses to for assignment or
     further calculations
+
+
     """
 
     _up = False
@@ -47,13 +53,16 @@ class _AroonBase(Indicator):
     plotinfo = dict(plotymargin=0.05, plotyhlines=[0, 100])
 
     def _plotlabel(self):
+        """ """
         plabels = [self.p.period]
         return plabels
 
     def _plotinit(self):
+        """ """
         self.plotinfo.plotyhlines += [self.p.lowerband, self.p.upperband]
 
     def __init__(self):
+        """ """
         # Look backwards period + 1 for current data because the formula mus
         # produce values between 0 and 100 and can only do that if the
         # calculated hhidx/llidx go from 0 to period (hence period + 1 values)
@@ -71,8 +80,7 @@ class _AroonBase(Indicator):
 
 
 class AroonUp(_AroonBase):
-    """
-    This is the AroonUp from the indicator AroonUpDown developed by Tushar
+    """This is the AroonUp from the indicator AroonUpDown developed by Tushar
     Chande in 1995.
 
     Formula:
@@ -89,6 +97,8 @@ class AroonUp(_AroonBase):
 
     See:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:aroon
+
+
     """
 
     _up = True
@@ -96,14 +106,14 @@ class AroonUp(_AroonBase):
     lines = ("aroonup",)
 
     def __init__(self):
+        """ """
         super(AroonUp, self).__init__()
 
         self.lines.aroonup = self.up
 
 
 class AroonDown(_AroonBase):
-    """
-    This is the AroonDown from the indicator AroonUpDown developed by Tushar
+    """This is the AroonDown from the indicator AroonUpDown developed by Tushar
     Chande in 1995.
 
     Formula:
@@ -120,6 +130,8 @@ class AroonDown(_AroonBase):
 
     See:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:aroon
+
+
     """
 
     _down = True
@@ -127,14 +139,14 @@ class AroonDown(_AroonBase):
     lines = ("aroondown",)
 
     def __init__(self):
+        """ """
         super(AroonDown, self).__init__()
 
         self.lines.aroondown = self.down
 
 
 class AroonUpDown(AroonUp, AroonDown):
-    """
-    Developed by Tushar Chande in 1995.
+    """Developed by Tushar Chande in 1995.
 
     It tries to determine if a trend exists or not by calculating how far away
     within a given period the last highs/lows are (AroonUp/AroonDown)
@@ -154,14 +166,15 @@ class AroonUpDown(AroonUp, AroonDown):
 
     See:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:aroon
+
+
     """
 
     alias = ("AroonIndicator",)
 
 
 class AroonOscillator(_AroonBase):
-    """
-    It is a variation of the AroonUpDown indicator which shows the current
+    """It is a variation of the AroonUpDown indicator which shows the current
     difference between the AroonUp and AroonDown value, trying to present a
     visualization which indicates which is stronger (greater than 0 -> AroonUp
     and less than 0 -> AroonDown)
@@ -171,6 +184,8 @@ class AroonOscillator(_AroonBase):
 
     See:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:aroon
+
+
     """
 
     _up = True
@@ -181,26 +196,29 @@ class AroonOscillator(_AroonBase):
     lines = ("aroonosc",)
 
     def _plotinit(self):
+        """ """
         super(AroonOscillator, self)._plotinit()
 
         for yhline in self.plotinfo.plotyhlines[:]:
             self.plotinfo.plotyhlines.append(-yhline)
 
     def __init__(self):
+        """ """
         super(AroonOscillator, self).__init__()
 
         self.lines.aroonosc = self.up - self.down
 
 
 class AroonUpDownOscillator(AroonUpDown, AroonOscillator):
-    """
-    Presents together the indicators AroonUpDown and AroonOsc
+    """Presents together the indicators AroonUpDown and AroonOsc
 
     Formula:
       (None, uses the aforementioned indicators)
 
     See:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:aroon
+
+
     """
 
     alias = ("AroonUpDownOsc",)

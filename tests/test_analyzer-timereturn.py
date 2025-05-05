@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,23 +18,29 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import time
 
 try:
     time_clock = time.process_time
-except:
+except BaseException:
     time_clock = time.clock
-
-import testcommon
 
 import backtrader as bt
 import backtrader.indicators as btind
+import testcommon
 from backtrader.utils.py3 import PY2
 
 
 class BtTestStrategy(bt.Strategy):
+    """ """
+
     params = (
         ("period", 15),
         ("printdata", True),
@@ -43,6 +49,13 @@ class BtTestStrategy(bt.Strategy):
     )
 
     def log(self, txt, dt=None, nodate=False):
+        """
+
+        :param txt:
+        :param dt:  (Default value = None)
+        :param nodate:  (Default value = False)
+
+        """
         if not nodate:
             dt = dt or self.data.datetime[0]
             dt = bt.num2date(dt)
@@ -51,6 +64,11 @@ class BtTestStrategy(bt.Strategy):
             print("---------- %s" % (txt))
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status in [bt.Order.Submitted, bt.Order.Accepted]:
             return  # Await further notifications
 
@@ -77,6 +95,7 @@ class BtTestStrategy(bt.Strategy):
         self.orderid = None
 
     def __init__(self):
+        """ """
         # Flag to allow new orders in the system or not
         self.orderid = None
 
@@ -84,13 +103,15 @@ class BtTestStrategy(bt.Strategy):
         self.cross = btind.CrossOver(self.data.close, self.sma, plot=True)
 
     def start(self):
+        """ """
         if not self.p.stocklike:
             self.broker.setcommission(commission=2.0, mult=10.0, margin=1000.0)
 
         if self.p.printdata:
             self.log("-------------------------", nodate=True)
             self.log(
-                "Starting portfolio value: %.2f" % self.broker.getvalue(), nodate=True
+                "Starting portfolio value: %.2f" % self.broker.getvalue(),
+                nodate=True,
             )
 
         self.tstart = time_clock()
@@ -101,6 +122,7 @@ class BtTestStrategy(bt.Strategy):
         self.sellexec = list()
 
     def stop(self):
+        """ """
         tused = time_clock() - self.tstart
         if self.p.printdata:
             self.log("Time used: %s" % str(tused))
@@ -111,6 +133,7 @@ class BtTestStrategy(bt.Strategy):
             pass
 
     def next(self):
+        """ """
         if self.p.printdata:
             self.log(
                 "Open, High, Low, Close, %.2f, %.2f, %.2f, %.2f, Sma, %f"
@@ -150,6 +173,11 @@ chkdatas = 1
 
 
 def test_run(main=False):
+    """
+
+    :param main:  (Default value = False)
+
+    """
     datas = [testcommon.getdata(i) for i in range(chkdatas)]
     cerebros = testcommon.runtest(
         datas,

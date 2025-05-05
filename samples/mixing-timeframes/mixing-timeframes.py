@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 
@@ -29,9 +34,12 @@ import backtrader.utils.flushfile
 
 
 class St(bt.Strategy):
+    """ """
+
     params = dict(multi=True)
 
     def __init__(self):
+        """ """
         self.pp = pp = btind.PivotPoint(self.data1)
         pp.plotinfo.plot = False  # deactivate plotting
 
@@ -42,20 +50,24 @@ class St(bt.Strategy):
             self.sellsignal = self.data0.close < pp.s1()
 
     def next(self):
-        txt = ",".join([
-            "%04d" % len(self),
-            "%04d" % len(self.data0),
-            "%04d" % len(self.data1),
-            self.data.datetime.date(0).isoformat(),
-            "%.2f" % self.data0.close[0],
-            "%.2f" % self.pp.s1[0],
-            "%.2f" % self.sellsignal[0],
-        ])
+        """ """
+        txt = ",".join(
+            [
+                "%04d" % len(self),
+                "%04d" % len(self.data0),
+                "%04d" % len(self.data1),
+                self.data.datetime.date(0).isoformat(),
+                "%.2f" % self.data0.close[0],
+                "%.2f" % self.pp.s1[0],
+                "%.2f" % self.sellsignal[0],
+            ]
+        )
 
         print(txt)
 
 
 def runstrat():
+    """ """
     args = parse_args()
 
     cerebro = bt.Cerebro()
@@ -71,6 +83,7 @@ def runstrat():
 
 
 def parse_args():
+    """ """
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Sample for pivot point and cross plotting",

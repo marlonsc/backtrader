@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
@@ -27,9 +32,12 @@ import backtrader as bt
 
 
 class St(bt.Strategy):
+    """ """
+
     params = (("ondata", False),)
 
     def __init__(self):
+        """ """
         if not self.p.ondata:
             a = self.data.high - self.data.low
         else:
@@ -40,6 +48,11 @@ class St(bt.Strategy):
 
 
 def runstrat(pargs=None):
+    """
+
+    :param pargs: (Default value = None)
+
+    """
     args = parse_args(pargs)
 
     cerebro = bt.Cerebro()
@@ -70,6 +83,11 @@ def runstrat(pargs=None):
 
 
 def parse_args(pargs=None):
+    """
+
+    :param pargs: (Default value = None)
+
+    """
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Fake Indicator",
@@ -83,15 +101,24 @@ def parse_args(pargs=None):
     )
 
     parser.add_argument(
-        "--fromdate", "-f", default=None, help="Starting date in YYYY-MM-DD format"
+        "--fromdate",
+        "-f",
+        default=None,
+        help="Starting date in YYYY-MM-DD format",
     )
 
     parser.add_argument(
-        "--todate", "-t", default=None, help="Starting date in YYYY-MM-DD format"
+        "--todate",
+        "-t",
+        default=None,
+        help="Starting date in YYYY-MM-DD format",
     )
 
     parser.add_argument(
-        "--ondata", "-o", action="store_true", help="Plot fake indicator on the data"
+        "--ondata",
+        "-o",
+        action="store_true",
+        help="Plot fake indicator on the data",
     )
 
     parser.add_argument(

@@ -13,7 +13,6 @@
 # limitations under the License.
 
 from uuid import UUID
-from warnings import warn
 
 """Tools for representing BSON binary data.
 """
@@ -58,6 +57,8 @@ by :mod:`bson` using this subtype when using
 
 
 class UuidRepresentation:
+    """ """
+
     UNSPECIFIED = 0
     """An unspecified UUID representation.
 
@@ -208,11 +209,19 @@ class Binary(bytes):
 
     .. versionchanged:: 3.9
       Support any bytes-like type that implements the buffer protocol.
+
+
     """
 
     _type_marker = 5
 
     def __new__(cls, data, subtype=BINARY_SUBTYPE):
+        """
+
+        :param data:
+        :param subtype:  (Default value = BINARY_SUBTYPE)
+
+        """
         if not isinstance(subtype, int):
             raise TypeError("subtype must be an instance of int")
         if subtype >= 256 or subtype < 0:
@@ -242,6 +251,10 @@ class Binary(bytes):
             See :ref:`handling-uuid-data-example` for details.
 
         .. versionadded:: 3.11
+
+        :param uuid:
+        :param uuid_representation:  (Default value = UuidRepresentation.STANDARD)
+
         """
         if not isinstance(uuid, UUID):
             raise TypeError("uuid must be an instance of uuid.UUID")
@@ -292,6 +305,9 @@ class Binary(bytes):
             See :ref:`handling-uuid-data-example` for details.
 
         .. versionadded:: 3.11
+
+        :param uuid_representation:  (Default value = UuidRepresentation.STANDARD)
+
         """
         if self.subtype not in ALL_UUID_SUBTYPES:
             raise ValueError("cannot decode subtype %s as a uuid" % (self.subtype,))
@@ -329,6 +345,7 @@ class Binary(bytes):
         return self.__subtype
 
     def __getnewargs__(self):
+        """ """
         # Work around http://bugs.python.org/issue7382
         data = super(Binary, self).__getnewargs__()[0]
         if not isinstance(data, bytes):
@@ -336,18 +353,33 @@ class Binary(bytes):
         return data, self.__subtype
 
     def __eq__(self, other):
+        """
+
+        :param other:
+
+        """
         if isinstance(other, Binary):
-            return (self.__subtype, bytes(self)) == (other.subtype, bytes(other))
+            return (self.__subtype, bytes(self)) == (
+                other.subtype,
+                bytes(other),
+            )
         # We don't return NotImplemented here because if we did then
         # Binary("foo") == "foo" would return True, since Binary is a
         # subclass of str...
         return False
 
     def __hash__(self):
+        """ """
         return super(Binary, self).__hash__() ^ hash(self.__subtype)
 
     def __ne__(self, other):
+        """
+
+        :param other:
+
+        """
         return not self == other
 
     def __repr__(self):
+        """ """
         return "Binary(%s, %s)" % (bytes.__repr__(self), self.__subtype)

@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,14 +18,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import backtrader as bt
 
 
 class DataFilter(bt.AbstractDataBase):
-    """
-    This class filters out bars from a given data source. In addition to the
+    """This class filters out bars from a given data source. In addition to the
     standard parameters of a DataBase it takes a ``funcfilter`` parameter which
     can be any callable
 
@@ -37,11 +41,14 @@ class DataFilter(bt.AbstractDataBase):
 
         - Return value ``True``: current data source bar values will used
         - Return value ``False``: current data source bar values will discarded
+
+
     """
 
     params = (("funcfilter", None),)
 
     def preload(self):
+        """ """
         if len(self.p.dataname) == self.p.dataname.buflen():
             # if data is not preloaded .... do it
             self.p.dataname.start()
@@ -55,6 +62,7 @@ class DataFilter(bt.AbstractDataBase):
         super(DataFilter, self).preload()
 
     def _load(self):
+        """ """
         if not len(self.p.dataname):
             self.p.dataname.start()  # start data if not done somewhere else
 

@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,14 +18,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
-import os.path
-import time
 import sys
-
 
 import backtrader as bt
 from backtrader.utils.py3 import bytes
@@ -46,12 +48,15 @@ DATAFORMATS = dict(
 
 
 class RewriteStrategy(bt.Strategy):
+    """ """
+
     params = (
         ("separator", ","),
         ("outfile", None),
     )
 
     def start(self):
+        """ """
         if self.p.outfile is None:
             self.f = sys.stdout
         else:
@@ -66,6 +71,7 @@ class RewriteStrategy(bt.Strategy):
         self.f.write(bytes(headers))
 
     def next(self):
+        """ """
         fields = list()
         dt = self.data.datetime.date(0).strftime("%Y-%m-%d")
         fields.append(dt)
@@ -92,6 +98,11 @@ class RewriteStrategy(bt.Strategy):
 
 
 def runstrat(pargs=None):
+    """
+
+    :param pargs: (Default value = None)
+
+    """
     args = parse_args(pargs)
 
     cerebro = bt.Cerebro()
@@ -135,6 +146,11 @@ def runstrat(pargs=None):
 
 
 def parse_args(pargs=None):
+    """
+
+    :param pargs: (Default value = None)
+
+    """
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Rewrite formats to BacktraderCSVData format",
@@ -156,15 +172,25 @@ def parse_args(pargs=None):
     )
 
     parser.add_argument(
-        "--fromdate", "-f", required=False, help="Starting date in YYYY-MM-DD format"
+        "--fromdate",
+        "-f",
+        required=False,
+        help="Starting date in YYYY-MM-DD format",
     )
 
     parser.add_argument(
-        "--todate", "-t", required=False, help="Ending date in YYYY-MM-DD format"
+        "--todate",
+        "-t",
+        required=False,
+        help="Ending date in YYYY-MM-DD format",
     )
 
     parser.add_argument(
-        "--separator", "-s", required=False, default=",", help="Plot the read data"
+        "--separator",
+        "-s",
+        required=False,
+        default=",",
+        help="Plot the read data",
     )
 
     # Plot options

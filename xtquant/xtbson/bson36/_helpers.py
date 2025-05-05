@@ -11,18 +11,28 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Setstate and getstate functions for objects with __slots__, allowing
 compatibility with default pickling protocol
 """
 
 
 def _setstate_slots(self, state):
+    """
+
+    :param state:
+
+    """
     for slot, value in state.items():
         setattr(self, slot, value)
 
 
 def _mangle_name(name, prefix):
+    """
+
+    :param name:
+    :param prefix:
+
+    """
     if name.startswith("__"):
         prefix = "_" + prefix
     else:
@@ -31,6 +41,7 @@ def _mangle_name(name, prefix):
 
 
 def _getstate_slots(self):
+    """ """
     prefix = self.__class__.__name__
     ret = dict()
     for name in self.__slots__:

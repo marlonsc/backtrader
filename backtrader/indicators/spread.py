@@ -1,20 +1,25 @@
 #!/usr/bin/env python
 # -*- coding: utf-8; py-indent-offset:4 -*-
 
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 from . import Indicator
-import numpy as np
 
 
 class SpreadWithSignals(Indicator):
-    """
-    计算两个数据之间的价差并标注买卖信号点
+    """计算两个数据之间的价差并标注买卖信号点
 
     参数:
       - data2: 第二个数据源(用于计算价差)
       - buy_signal: 买入信号数组
       - sell_signal: 卖出信号数组
+
+
     """
 
     lines = ("spread",)  # 定义一个spread线
@@ -31,6 +36,7 @@ class SpreadWithSignals(Indicator):
     plotlines = dict(spread=dict(_name="Spread", color="blue", ls="-", _plotskip=False))
 
     def __init__(self):
+        """ """
         super(SpreadWithSignals, self).__init__()
 
         # 计算价差

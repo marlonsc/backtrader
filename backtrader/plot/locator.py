@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -39,16 +39,27 @@ from matplotlib.dates import (
     HOURS_PER_DAY,
     MIN_PER_HOUR,
     MONTHS_PER_YEAR,
-    MicrosecondLocator,
-    num2date,
-    rrulewrapper,
 )
 from matplotlib.dates import AutoDateFormatter as ADFormatter
 from matplotlib.dates import AutoDateLocator as ADLocator
+from matplotlib.dates import (
+    MicrosecondLocator,
+)
 from matplotlib.dates import RRuleLocator as RRLocator
+from matplotlib.dates import (
+    num2date,
+    rrulewrapper,
+)
 
 
 def _idx2dt(idx, dates, tz):
+    """
+
+    :param idx:
+    :param dates:
+    :param tz:
+
+    """
     if isinstance(idx, datetime.date):
         return idx
 
@@ -64,15 +75,21 @@ def _idx2dt(idx, dates, tz):
 
 
 class RRuleLocator(RRLocator):
+    """ """
 
     def __init__(self, dates, o, tz=None):
+        """
+
+        :param dates:
+        :param o:
+        :param tz:  (Default value = None)
+
+        """
         self._dates = dates
         super(RRuleLocator, self).__init__(o, tz)
 
     def datalim_to_dt(self):
-        """
-        Convert axis data interval to datetime objects.
-        """
+        """Convert axis data interval to datetime objects."""
         dmin, dmax = self.axis.get_data_interval()
         if dmin > dmax:
             dmin, dmax = dmax, dmin
@@ -83,9 +100,7 @@ class RRuleLocator(RRLocator):
         )
 
     def viewlim_to_dt(self):
-        """
-        Converts the view interval to datetime objects.
-        """
+        """Converts the view interval to datetime objects."""
         vmin, vmax = self.axis.get_view_interval()
         if vmin > vmax:
             vmin, vmax = vmax, vmin
@@ -96,6 +111,12 @@ class RRuleLocator(RRLocator):
         )
 
     def tick_values(self, vmin, vmax):
+        """
+
+        :param vmin:
+        :param vmax:
+
+        """
         import bisect
 
         dtnums = super(RRuleLocator, self).tick_values(vmin, vmax)
@@ -103,15 +124,21 @@ class RRuleLocator(RRLocator):
 
 
 class AutoDateLocator(ADLocator):
+    """ """
 
     def __init__(self, dates, *args, **kwargs):
+        """
+
+        :param dates:
+        :param *args:
+        :param **kwargs:
+
+        """
         self._dates = dates
         super(AutoDateLocator, self).__init__(*args, **kwargs)
 
     def datalim_to_dt(self):
-        """
-        Convert axis data interval to datetime objects.
-        """
+        """Convert axis data interval to datetime objects."""
         dmin, dmax = self.axis.get_data_interval()
         if dmin > dmax:
             dmin, dmax = dmax, dmin
@@ -122,9 +149,7 @@ class AutoDateLocator(ADLocator):
         )
 
     def viewlim_to_dt(self):
-        """
-        Converts the view interval to datetime objects.
-        """
+        """Converts the view interval to datetime objects."""
         vmin, vmax = self.axis.get_view_interval()
         if vmin > vmax:
             vmin, vmax = vmax, vmin
@@ -135,12 +160,24 @@ class AutoDateLocator(ADLocator):
         )
 
     def tick_values(self, vmin, vmax):
+        """
+
+        :param vmin:
+        :param vmax:
+
+        """
         import bisect
 
         dtnums = super(AutoDateLocator, self).tick_values(vmin, vmax)
         return [bisect.bisect_left(self._dates, x) for x in dtnums]
 
     def get_locator(self, dmin, dmax):
+        """
+
+        :param dmin:
+        :param dmax:
+
+        """
         "Pick the best locator based on a distance."
         delta = relativedelta(dmax, dmin)
         tdelta = dmax - dmin
@@ -270,12 +307,27 @@ class AutoDateLocator(ADLocator):
 
 
 class AutoDateFormatter(ADFormatter):
+    """ """
+
     def __init__(self, dates, locator, tz=None, defaultfmt="%Y-%m-%d"):
+        """
+
+        :param dates:
+        :param locator:
+        :param tz:  (Default value = None)
+        :param defaultfmt:  (Default value = "%Y-%m-%d")
+
+        """
         self._dates = dates
         super(AutoDateFormatter, self).__init__(locator, tz, defaultfmt)
 
     def __call__(self, x, pos=None):
-        """Return the label for time x at position pos"""
+        """
+
+        :param x:
+        :param pos:  (Default value = None)
+
+        """
         x = int(round(x))
         ldates = len(self._dates)
         if x >= ldates:

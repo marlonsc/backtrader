@@ -22,9 +22,10 @@ __META_TABLES__ = {}
 
 
 def download_metatable_data():
-    """
-    下载metatable信息
+    """下载metatable信息
     通常在客户端启动时自动获取，不需要手工调用
+
+
     """
     from .. import xtdata
 
@@ -35,11 +36,10 @@ def download_metatable_data():
 
 
 def _init_metainfos():
-    """
-    初始化metatable
-    """
+    """初始化metatable"""
     import traceback
-    from .. import xtdata, xtbson
+
+    from .. import xtbson, xtdata
 
     global __META_INFO__
     global __META_FIELDS__
@@ -70,13 +70,19 @@ def _init_metainfos():
             for key, info in metainfo_fields.items():
                 field_name = info["modelName"]
                 __META_FIELDS__[f"{table_name}.{field_name}"] = (metaid, key)
-        except:
+        except BaseException:
             traceback.print_exc()
             continue
     return
 
 
 def _check_metatable_key(metaid, key):
+    """
+
+    :param metaid:
+    :param key:
+
+    """
     metainfo = __META_INFO__.get(metaid, None)
     if not metainfo:
         return False
@@ -86,16 +92,16 @@ def _check_metatable_key(metaid, key):
 
 
 def get_metatable_list():
-    """
-    获取metatable列表
+    """获取metatable列表
 
-    return:
-        { table_code1: table_name1, table_code2: table_name2, ... }
+
+    :returns: { table_code1: table_name1, table_code2: table_name2, ... }
 
         table_code: str
             数据表代码
         table_name: str
             数据表名称
+
     """
     if not __META_INFO__:
         _init_metainfos()
@@ -110,8 +116,10 @@ def get_metatable_list():
 
 
 def get_metatable_config(table):
-    """
-    获取metatable列表原始配置信息
+    """获取metatable列表原始配置信息
+
+    :param table:
+
     """
     if not __META_INFO__:
         _init_metainfos()
@@ -133,20 +141,25 @@ __META_TYPECONV__ = {
 
 
 def _meta_type(t):
+    """
+
+    :param t:
+
+    """
     try:
         return __META_TYPECONV__[t]
-    except:
+    except BaseException:
         raise Exception(f"Unsupported type:{t}")
 
 
 def get_metatable_info(table):
-    """
-    获取metatable数据表信息
+    """获取metatable数据表信息
 
     table: str
         数据表代码 table_code 或 数据表名称 table_name
-    return: dict
-        {
+
+    :param table:
+    :returns: {
             'code': table_code
             , 'name': table_name
             , 'desc': desc
@@ -161,6 +174,7 @@ def get_metatable_info(table):
             描述
         fields: dict
             { 'code': field_code, 'name': field_name, 'type': field_type }
+
     """
     info = get_metatable_config(table)
 
@@ -182,25 +196,28 @@ def get_metatable_info(table):
 
 
 def get_metatable_fields(table):
-    """
-    获取metatable数据表字段信息
+    """获取metatable数据表字段信息
 
     table: str
         数据表代码 table_code 或 数据表名称 table_name
-    return: pd.DataFrame
-        columns = ['code', 'name', 'type']
+
+    :param table:
+    :returns: columns = ['code', 'name', 'type']
+
     """
     import pandas as pd
 
     info = get_metatable_config(table)
 
     fields = info.get("fields", {})
-    ret = pd.DataFrame([
-        {
-            "code": field_info.get("modelName", ""),
-            "name": field_info.get("fieldNameCn", ""),
-            "type": type(_meta_type(field_info.get("type", ""))),
-        }
-        for key, field_info in fields.items()
-    ])
+    ret = pd.DataFrame(
+        [
+            {
+                "code": field_info.get("modelName", ""),
+                "name": field_info.get("fieldNameCn", ""),
+                "type": type(_meta_type(field_info.get("type", ""))),
+            }
+            for key, field_info in fields.items()
+        ]
+    )
     return ret

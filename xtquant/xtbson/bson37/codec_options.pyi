@@ -19,22 +19,21 @@ or in Python 3.7 and 3.8 with `from __future__ import annotations`,
 you get the error: "TypeError: 'type' object is not subscriptable".
 """
 
-import datetime
 import abc
+import datetime
 import enum
 from typing import (
-    Tuple,
-    Generic,
-    Optional,
-    Mapping,
     Any,
-    TypeVar,
-    Type,
-    Dict,
-    Iterable,
-    Tuple,
-    MutableMapping,
     Callable,
+    Dict,
+    Generic,
+    Iterable,
+    Mapping,
+    MutableMapping,
+    Optional,
+    Tuple,
+    Type,
+    TypeVar,
     Union,
 )
 

@@ -1,13 +1,16 @@
-import backtrader as bt
-import pandas as pd
-import numpy as np
 import datetime
+
+import backtrader as bt
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 import seaborn as sns
 
 
 # 偏度差均值回归策略（基于历史统计量的版本）
 class SkewnessArbitrageStrategy(bt.Strategy):
+    """ """
+
     params = (
         ("skew_period", 20),  # 计算偏度的周期
         ("lookback_period", 60),  # 计算历史统计量的回看周期
@@ -18,6 +21,7 @@ class SkewnessArbitrageStrategy(bt.Strategy):
     )
 
     def __init__(self):
+        """ """
         # 存储偏度序列用于绘图
         self.skew_j_values = []
         self.skew_jm_values = []
@@ -44,6 +48,7 @@ class SkewnessArbitrageStrategy(bt.Strategy):
         self.entry_day = 0
 
     def next(self):
+        """ """
         if self.order:
             return
 
@@ -172,6 +177,11 @@ class SkewnessArbitrageStrategy(bt.Strategy):
                     )
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status in [order.Completed]:
             if self.p.printlog:
                 if order.isbuy():
@@ -202,6 +212,7 @@ class SkewnessArbitrageStrategy(bt.Strategy):
     #         self.plot_skewness()
 
     def plot_skewness(self):
+        """ """
         # 创建日期索引
         if len(self.dates) > len(self.skew_j_values):
             dates = self.dates[-(len(self.skew_j_values)) :]
@@ -286,6 +297,14 @@ class SkewnessArbitrageStrategy(bt.Strategy):
 
 # 关键修复：处理索引问题
 def load_data(symbol1, symbol2, fromdate, todate):
+    """
+
+    :param symbol1:
+    :param symbol2:
+    :param fromdate:
+    :param todate:
+
+    """
     output_file = "D:\\FutureData\\ricequant\\1d_2017to2024_noadjust.h5"
 
     try:
@@ -331,6 +350,7 @@ def load_data(symbol1, symbol2, fromdate, todate):
 
 # 运行网格回测并绘制热力图
 def run_grid_search():
+    """ """
     # 定义参数网格
     skew_periods = range(10, 41, 5)  # 10, 15, 20, 25, 30, 35, 40
     entry_multipliers = [0.5, 0.8, 1.0, 1.2, 1.5, 1.8, 2.0, 2.5, 3.0]
@@ -436,7 +456,7 @@ def run_grid_search():
     best_entry_multiplier = entry_multipliers[max_j]
     best_sharpe = results[max_i, max_j]
 
-    print(f"\n最佳参数组合:")
+    print("\n最佳参数组合:")
     print(f"skew_period: {best_skew_period}")
     print(f"entry_std_multiplier: {best_entry_multiplier}")
     print(f"sharperatio: {best_sharpe:.4f}")

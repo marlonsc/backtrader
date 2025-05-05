@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,14 +18,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
-from . import MovingAverageBase, ExponentialSmoothing
+from . import ExponentialSmoothing, MovingAverageBase
 
 
 class SmoothedMovingAverage(MovingAverageBase):
-    """
-    Smoothing Moving Average used by Wilder in his 1978 book `New Concepts in
+    """Smoothing Moving Average used by Wilder in his 1978 book `New Concepts in
     Technical Trading`
 
     Defined in his book originally as:
@@ -42,6 +46,8 @@ class SmoothedMovingAverage(MovingAverageBase):
 
     See also:
       - http://en.wikipedia.org/wiki/Moving_average#Modified_moving_average
+
+
     """
 
     alias = (
@@ -54,6 +60,7 @@ class SmoothedMovingAverage(MovingAverageBase):
     lines = ("smma",)
 
     def __init__(self):
+        """ """
         # Before super to ensure mixins (right-hand side in subclassing)
         # can see the assignment operation and operate on the line
         self.lines[0] = ExponentialSmoothing(

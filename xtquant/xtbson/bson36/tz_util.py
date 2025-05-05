@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Timezone related utilities for BSON."""
 
 from datetime import timedelta, tzinfo
@@ -25,9 +24,17 @@ class FixedOffset(tzinfo):
     Implementation based from the Python `standard library documentation
     <http://docs.python.org/library/datetime.html#tzinfo-objects>`_.
     Defining __getinitargs__ enables pickling / copying.
+
+
     """
 
     def __init__(self, offset, name):
+        """
+
+        :param offset:
+        :param name:
+
+        """
         if isinstance(offset, timedelta):
             self.__offset = offset
         else:
@@ -35,15 +42,31 @@ class FixedOffset(tzinfo):
         self.__name = name
 
     def __getinitargs__(self):
+        """ """
         return self.__offset, self.__name
 
     def utcoffset(self, dt):
+        """
+
+        :param dt:
+
+        """
         return self.__offset
 
     def tzname(self, dt):
+        """
+
+        :param dt:
+
+        """
         return self.__name
 
     def dst(self, dt):
+        """
+
+        :param dt:
+
+        """
         return ZERO
 
 

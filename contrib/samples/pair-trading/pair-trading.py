@@ -5,7 +5,12 @@
 # author: Remi Roche
 ##################################################################
 
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
@@ -17,6 +22,8 @@ import backtrader.indicators as btind
 
 
 class PairTradingStrategy(bt.Strategy):
+    """ """
+
     params = dict(
         period=10,
         stake=10,
@@ -32,12 +39,23 @@ class PairTradingStrategy(bt.Strategy):
     )
 
     def log(self, txt, dt=None):
+        """
+
+        :param txt:
+        :param dt:  (Default value = None)
+
+        """
         if self.p.printout:
             dt = dt or self.data.datetime[0]
             dt = bt.num2date(dt)
             print("%s, %s" % (dt.isoformat(), txt))
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status in [bt.Order.Submitted, bt.Order.Accepted]:
             return  # Await further notifications
 
@@ -57,6 +75,7 @@ class PairTradingStrategy(bt.Strategy):
         self.orderid = None
 
     def __init__(self):
+        """ """
         # To control operation entries
         self.orderid = None
         self.qty1 = self.p.qty1
@@ -80,6 +99,7 @@ class PairTradingStrategy(bt.Strategy):
         #                                             plot=True)
 
     def next(self):
+        """ """
 
         if self.orderid:
             return  # if an order is active, no new orders are allowed
@@ -99,11 +119,12 @@ class PairTradingStrategy(bt.Strategy):
         # Step 2: Check conditions for SHORT & place the order
         # Checking the condition for SHORT
         if (self.zscore[0] > self.upper_limit) and (self.status != 1):
-
             # Calculating the number of shares for each stock
             value = 0.5 * self.portfolio_value  # Divide the cash equally
-            x = int(value / (self.data0.close))  # Find the number of shares for Stock1
-            y = int(value / (self.data1.close))  # Find the number of shares for Stock2
+            # Find the number of shares for Stock1
+            x = int(value / (self.data0.close))
+            # Find the number of shares for Stock2
+            y = int(value / (self.data1.close))
             print("x + self.qty1 is", x + self.qty1)
             print("y + self.qty2 is", y + self.qty2)
 
@@ -132,11 +153,12 @@ class PairTradingStrategy(bt.Strategy):
             # Step 3: Check conditions for LONG & place the order
             # Checking the condition for LONG
         elif (self.zscore[0] < self.lower_limit) and (self.status != 2):
-
             # Calculating the number of shares for each stock
             value = 0.5 * self.portfolio_value  # Divide the cash equally
-            x = int(value / (self.data0.close))  # Find the number of shares for Stock1
-            y = int(value / (self.data1.close))  # Find the number of shares for Stock2
+            # Find the number of shares for Stock1
+            x = int(value / (self.data0.close))
+            # Find the number of shares for Stock2
+            y = int(value / (self.data1.close))
             print("x + self.qty1 is", x + self.qty1)
             print("y + self.qty2 is", y + self.qty2)
 
@@ -172,6 +194,7 @@ class PairTradingStrategy(bt.Strategy):
         """
 
     def stop(self):
+        """ """
         print("==================================================")
         print("Starting Value - %.2f" % self.broker.startingcash)
         print("Ending   Value - %.2f" % self.broker.getvalue())
@@ -179,6 +202,7 @@ class PairTradingStrategy(bt.Strategy):
 
 
 def runstrategy():
+    """ """
     args = parse_args()
 
     # Create a cerebro
@@ -215,7 +239,9 @@ def runstrategy():
 
     # And run it
     cerebro.run(
-        runonce=not args.runnext, preload=not args.nopreload, oldsync=args.oldsync
+        runonce=not args.runnext,
+        preload=not args.nopreload,
+        oldsync=args.oldsync,
     )
 
     # Plot if requested
@@ -224,6 +250,7 @@ def runstrategy():
 
 
 def parse_args():
+    """ """
     parser = argparse.ArgumentParser(description="MultiData Strategy")
 
     parser.add_argument(
@@ -264,7 +291,9 @@ def parse_args():
     parser.add_argument("--cash", default=100000, type=int, help="Starting Cash")
 
     parser.add_argument(
-        "--runnext", action="store_true", help="Use next by next instead of runonce"
+        "--runnext",
+        action="store_true",
+        help="Use next by next instead of runonce",
     )
 
     parser.add_argument(
@@ -272,7 +301,9 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--oldsync", action="store_true", help="Use old data synchronization method"
+        "--oldsync",
+        action="store_true",
+        help="Use old data synchronization method",
     )
 
     parser.add_argument(
@@ -287,7 +318,11 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--plot", "-p", default=True, action="store_true", help="Plot the read data"
+        "--plot",
+        "-p",
+        default=True,
+        action="store_true",
+        help="Plot the read data",
     )
 
     parser.add_argument("--numfigs", "-n", default=1, help="Plot using numfigs figures")

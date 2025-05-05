@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,23 +18,38 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
-
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 from datetime import datetime, timedelta, tzinfo
 
 import backtrader as bt
-from backtrader import TimeFrame, date2num, num2date
+from backtrader import TimeFrame, date2num
 from backtrader.feed import DataBase
-from backtrader.metabase import MetaParams
-from backtrader.utils.py3 import integer_types, queue, string_types, with_metaclass
-
 from backtrader.stores import vcstore
+from backtrader.utils.py3 import (
+    integer_types,
+    queue,
+    string_types,
+    with_metaclass,
+)
 
 
 class MetaVCData(DataBase.__class__):
+    """ """
+
     def __init__(cls, name, bases, dct):
-        """Class has already been created ... register"""
+        """Class has already been created ... register
+
+        :param name:
+        :param bases:
+        :param dct:
+
+        """
         # Initialize the class
         super(MetaVCData, cls).__init__(name, bases, dct)
 
@@ -43,54 +58,7 @@ class MetaVCData(DataBase.__class__):
 
 
 class VCData(with_metaclass(MetaVCData, DataBase)):
-    """VisualChart Data Feed.
-
-    Params:
-
-      - ``qcheck`` (default: ``0.5``)
-        Default timeout for waking up to let a resampler/replayer that the
-        current bar can be check for due delivery
-
-        The value is only used if a resampling/replaying filter has been
-        inserted in the data
-
-      - ``historical`` (default: ``False``)
-        If no ``todate`` parameter is supplied (defined in the base class),
-        this will force a historical only download if set to ``True``
-
-        If ``todate`` is supplied the same effect is achieved
-
-      - ``milliseconds`` (default: ``True``)
-        The bars constructed by *Visual Chart* have this aspect:
-        HH:MM:59.999000
-
-        If this parameter is ``True`` a millisecond will be added to this time
-        to make it look like: HH::MM + 1:00.000000
-
-      - ``tradename`` (default: ``None``)
-        Continous futures cannot be traded but are ideal for data tracking. If
-        this parameter is supplied it will be the name of the current future
-        which will be the trading asset. Example:
-
-        - 001ES -> ES-Mini continuous supplied as ``dataname``
-
-        - ESU16 -> ES-Mini 2016-09. If this is supplied in ``tradename`` it
-          will be the trading asset.
-
-      - ``usetimezones`` (default: ``True``)
-        For most markets the time offset information provided by *Visual Chart*
-        allows for datetime to be converted to market time (*backtrader* choice
-        for representation)
-
-        Some markets are special (``096``) and need special internal coverage
-        and timezone support to display in the user expected market time.
-
-        If this parameter is set to ``True`` importing ``pytz`` will be
-        attempted to use timezones (default)
-
-        Disabling it will remove timezone usage (may help if the load is
-        excesive)
-    """
+    """VisualChart Data Feed."""
 
     params = (
         ("qcheck", 0.5),  # timeout in seconds (float) to check for events
@@ -236,6 +204,9 @@ class VCData(with_metaclass(MetaVCData, DataBase)):
         """Returns the default output timezone for the data
 
         This defaults to be the timezone in which the market is traded
+
+        :param tzin:  (Default value = False)
+
         """
         # If no object has been provided by the user and a timezone can be
         # found via contractdtails, then try to get it from pytz, which may or
@@ -295,10 +266,18 @@ class VCData(with_metaclass(MetaVCData, DataBase)):
 
     def islive(self):
         """Returns ``True`` to notify ``Cerebro`` that preloading and runonce
-        should be deactivated"""
+        should be deactivated
+
+
+        """
         return True
 
     def __init__(self, **kwargs):
+        """
+
+        :param **kwargs:
+
+        """
         self.store = vcstore.VCStore(**kwargs)
 
         # Correct a copy past directly from VisualChart
@@ -318,13 +297,20 @@ class VCData(with_metaclass(MetaVCData, DataBase)):
 
     def setenvironment(self, env):
         """Receives an environment (cerebro) and passes it over to the store it
-        belongs to"""
+        belongs to
+
+        :param env:
+
+        """
         super(VCData, self).setenvironment(env)
         env.addstore(self.store)
 
     def start(self):
         """Starts the VC connecction and gets the real contract and
-        contractdetails if it exists"""
+        contractdetails if it exists
+
+
+        """
         super(VCData, self).start()
 
         self._state = self._ST_START  # mini finite state machine
@@ -427,13 +413,20 @@ class VCData(with_metaclass(MetaVCData, DataBase)):
             self.store._canceldirectdata(self.q)
 
     def _setserie(self, serie):
+        """
+
+        :param serie:
+
+        """
         # Accepts a serie (COM Object) to use in ping events
         self._serie = serie
 
     def haslivedata(self):
+        """ """
         return self._laststatus == self.LIVE and self.q
 
     def _load(self):
+        """ """
         if self._state == self._ST_NOTFOUND:
             return False  # nothing can be done
 
@@ -500,13 +493,22 @@ class VCData(with_metaclass(MetaVCData, DataBase)):
         ping, which will check if the not yet delivered bar can be
         delivered. The bar may be stalled because vc awaits a new tick and
         during low negotiation hour this can take several seconds after the
-        actual expected delivery time"""
+        actual expected delivery time
+
+
+        """
         if self._ticking:
             return -1  # no timeout
 
         return self._pingtmout
 
     def OnNewDataSerieBar(self, DataSerie, forcepush=False):
+        """
+
+        :param DataSerie:
+        :param forcepush:  (Default value = False)
+
+        """
         # Processes the COM Event (also called directly when 1st creating the
         # data serie
         ssize = DataSerie.Size
@@ -545,6 +547,7 @@ class VCData(with_metaclass(MetaVCData, DataBase)):
         self.idx = max(1, ssize)
 
     def ping(self):
+        """ """
         ssize = self._serie.Size
 
         if self.idx > ssize:
@@ -577,6 +580,13 @@ class VCData(with_metaclass(MetaVCData, DataBase)):
     if False:
 
         def OnInternalEvent(self, p1, p2, p3):
+            """
+
+            :param p1:
+            :param p2:
+            :param p3:
+
+            """
             if p1 != 1:  # Apparently "Connection Event"
                 return
 
@@ -589,6 +599,11 @@ class VCData(with_metaclass(MetaVCData, DataBase)):
             self.store._vcrt_connection(self.store._RT_BASEMSG - p2)
 
     def OnNewTicks(self, ArrayTicks):
+        """
+
+        :param ArrayTicks:
+
+        """
         # Process the COM Event for New Ticks. This is only used temporarily
         # for 2 purposes
         #
@@ -639,6 +654,11 @@ class VCData(with_metaclass(MetaVCData, DataBase)):
                 self._vcrt.CancelSymbolFeed(self._dataname, False)
 
     def debug_ticks(self, ticks):
+        """
+
+        :param ticks:
+
+        """
         print("*" * 50, "DEBUG OnNewTicks")
         for tick in ticks:
             print("-" * 40)

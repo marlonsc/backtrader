@@ -1,12 +1,9 @@
-import backtrader as bt
-import pandas as pd
-import numpy as np
-import sys
-import os
-import datetime
 import argparse
+import datetime
 
-from arbitrage.myutil import calculate_spread, check_and_align_data, cointegration_ratio
+import backtrader as bt
+import numpy as np
+import pandas as pd
 
 # https://mp.weixin.qq.com/s/na-5duJiRM1fTJF0WrcptA
 
@@ -159,16 +156,18 @@ class DynamicSpreadCUSUMStrategy(bt.Strategy):
 
         # 将数据收集到一个列表中
         self.record_dates.append(current_date)
-        self.record_data.append({
-            "date": current_date,
-            f"{self.data0._name}_close": self.data0.close[0],
-            f"{self.data1._name}_close": self.data1.close[0],
-            "spread": self.data2.close[0],
-            "beta": self.data2.beta[0],
-            f"{self.data0._name}_position": pos0,
-            f"{self.data1._name}_position": pos1,
-            "daily_return": round(daily_return, 8),
-        })
+        self.record_data.append(
+            {
+                "date": current_date,
+                f"{self.data0._name}_close": self.data0.close[0],
+                f"{self.data1._name}_close": self.data1.close[0],
+                "spread": self.data2.close[0],
+                "beta": self.data2.beta[0],
+                f"{self.data0._name}_position": pos0,
+                f"{self.data1._name}_position": pos1,
+                "daily_return": round(daily_return, 8),
+            }
+        )
 
         # 1) 确保有足够历史用于 σ 估计
         if len(self.spread_series) < self.p.win + 2:
@@ -227,7 +226,12 @@ class DynamicSpreadCUSUMStrategy(bt.Strategy):
         elif trade.justopened:
             print(
                 "TRADE %s OPENED %s  , SIZE %2d, PRICE %d "
-                % (trade.ref, bt.num2date(trade.dtopen), trade.size, trade.value)
+                % (
+                    trade.ref,
+                    bt.num2date(trade.dtopen),
+                    trade.size,
+                    trade.value,
+                )
             )
 
     def get_backtest_data(self):
@@ -260,10 +264,18 @@ def main():
 
     # 添加数据
     data0 = bt.feeds.PandasData(
-        dataname=df0, datetime="date", nocase=True, fromdate=fromdate, todate=todate
+        dataname=df0,
+        datetime="date",
+        nocase=True,
+        fromdate=fromdate,
+        todate=todate,
     )
     data1 = bt.feeds.PandasData(
-        dataname=df1, datetime="date", nocase=True, fromdate=fromdate, todate=todate
+        dataname=df1,
+        datetime="date",
+        nocase=True,
+        fromdate=fromdate,
+        todate=todate,
     )
     data2 = SpreadData(dataname=df_spread, fromdate=fromdate, todate=todate)
 
@@ -334,9 +346,9 @@ def main():
         backtest_data = strategy.get_backtest_data()
         # 生成文件名
         params_str = f"win{args.win}_k{args.k_coeff}_h{args.h_coeff}"
-        filename = (
-            f"CUSUM_backtest_{args.df0_key.replace('/', '')}{args.df1_key.replace('/', '')}_{params_str}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
-        )
+        filename = f"CUSUM_backtest_{args.df0_key.replace('/', '')}{
+            args.df1_key.replace('/', '')
+        }_{params_str}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
         # 保存CSV
         backtest_data.to_csv(filename, index=False)
         print(f"回测数据已保存至: {filename}")

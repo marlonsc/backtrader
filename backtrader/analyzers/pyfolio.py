@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,15 +18,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-
-import collections
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import backtrader as bt
-from backtrader.utils.py3 import items, iteritems
+from backtrader.utils.py3 import iteritems
 
-from . import TimeReturn, PositionsValue, Transactions, GrossLeverage
+from . import GrossLeverage, PositionsValue, TimeReturn, Transactions
 
 
 class PyFolio(bt.Analyzer):
@@ -53,34 +55,15 @@ class PyFolio(bt.Analyzer):
 
         Keeps track of the gross leverage (how much the strategy is invested)
 
-    Params:
-      These are passed transparently to the children
 
-      - timeframe (default: ``bt.TimeFrame.Days``)
+    :returns: each return as keys
 
-        If ``None`` then the timeframe of the 1st data of the system will be
-        used
-
-      - compression (default: `1``)
-
-        If ``None`` then the compression of the 1st data of the system will be
-        used
-
-    Both ``timeframe`` and ``compression`` are set following the default
-    behavior of ``pyfolio`` which is working with *daily* data and upsample it
-    to obtaine values like yearly returns.
-
-    Methods:
-
-      - get_analysis
-
-        Returns a dictionary with returns as values and the datetime points for
-        each return as keys
     """
 
     params = (("timeframe", bt.TimeFrame.Days), ("compression", 1))
 
     def __init__(self):
+        """ """
         dtfcomp = dict(timeframe=self.p.timeframe, compression=self.p.compression)
 
         self._returns = TimeReturn(**dtfcomp)
@@ -89,6 +72,7 @@ class PyFolio(bt.Analyzer):
         self._gross_lev = GrossLeverage()
 
     def stop(self):
+        """ """
         super(PyFolio, self).stop()
         self.rets["returns"] = self._returns.get_analysis()
         self.rets["positions"] = self._positions.get_analysis()
@@ -107,6 +91,8 @@ class PyFolio(bt.Analyzer):
         by, for example, ``pyfolio.create_full_tear_sheet``
 
         The method will break if ``pandas`` is not installed
+
+
         """
         # keep import local to avoid disturbing installations with no pandas
         import pandas

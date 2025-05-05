@@ -3,7 +3,7 @@
 
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 # (based on backtrader from Daniel Rodriguez)
 #
 # This program is free software: you can redistribute it and/or modify
@@ -27,9 +27,9 @@ __all__ = ["Fractal"]
 
 
 class Fractal(bt.ind.PeriodN):
-    """
-    References:
-        [Ref 1] http://www.investopedia.com/articles/trading/06/fractals.asp
+    """References:
+    [Ref 1] http://www.investopedia.com/articles/trading/06/fractals.asp
+
 
     """
 
@@ -39,10 +39,18 @@ class Fractal(bt.ind.PeriodN):
 
     plotlines = dict(
         fractal_bearish=dict(
-            marker="^", markersize=4.0, color="lightblue", fillstyle="full", ls=""
+            marker="^",
+            markersize=4.0,
+            color="lightblue",
+            fillstyle="full",
+            ls="",
         ),
         fractal_bullish=dict(
-            marker="v", markersize=4.0, color="lightblue", fillstyle="full", ls=""
+            marker="v",
+            markersize=4.0,
+            color="lightblue",
+            fillstyle="full",
+            ls="",
         ),
     )
     params = (
@@ -52,6 +60,7 @@ class Fractal(bt.ind.PeriodN):
     )
 
     def next(self):
+        """ """
         # A bearish turning point occurs when there is a pattern with the
         # highest high in the middle and two lower highs on each side. [Ref 1]
 

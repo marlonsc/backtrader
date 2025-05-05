@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import collections
@@ -26,12 +31,13 @@ import datetime
 
 import backtrader as bt
 
-MAINSIGNALS = collections.OrderedDict((
-    ("longshort", bt.SIGNAL_LONGSHORT),
-    ("longonly", bt.SIGNAL_LONG),
-    ("shortonly", bt.SIGNAL_SHORT),
-))
-
+MAINSIGNALS = collections.OrderedDict(
+    (
+        ("longshort", bt.SIGNAL_LONGSHORT),
+        ("longonly", bt.SIGNAL_LONG),
+        ("shortonly", bt.SIGNAL_SHORT),
+    )
+)
 
 EXITSIGNALS = {
     "longexit": bt.SIGNAL_LONGEXIT,
@@ -40,14 +46,19 @@ EXITSIGNALS = {
 
 
 class SMACloseSignal(bt.Indicator):
+    """ """
+
     lines = ("signal",)
     params = (("period", 30),)
 
     def __init__(self):
+        """ """
         self.lines.signal = self.data - bt.indicators.SMA(period=self.p.period)
 
 
 class SMAExitSignal(bt.Indicator):
+    """ """
+
     lines = ("signal",)
     params = (
         ("p1", 5),
@@ -55,12 +66,18 @@ class SMAExitSignal(bt.Indicator):
     )
 
     def __init__(self):
+        """ """
         sma1 = bt.indicators.SMA(period=self.p.p1)
         sma2 = bt.indicators.SMA(period=self.p.p2)
         self.lines.signal = sma1 - sma2
 
 
 def runstrat(args=None):
+    """
+
+    :param args: (Default value = None)
+
+    """
     args = parse_args(args)
 
     cerebro = bt.Cerebro()
@@ -100,6 +117,11 @@ def runstrat(args=None):
 
 
 def parse_args(pargs=None):
+    """
+
+    :param pargs: (Default value = None)
+
+    """
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

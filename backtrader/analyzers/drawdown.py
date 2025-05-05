@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import backtrader as bt
 from backtrader.utils import AutoOrderedDict
@@ -31,23 +36,8 @@ class DrawDown(bt.Analyzer):
     values in %s and in dollars, max drawdown in %s and in dollars, drawdown
     length and drawdown max length
 
-    Params:
 
-      - ``fund`` (default: ``None``)
-
-        If ``None`` the actual mode of the broker (fundmode - True/False) will
-        be autodetected to decide if the returns are based on the total net
-        asset value or on the fund value. See ``set_fundmode`` in the broker
-        documentation
-
-        Set it to ``True`` or ``False`` for a specific behavior
-
-    Methods:
-
-      - ``get_analysis``
-
-        Returns a dictionary (with . notation support and subdctionaries) with
-        drawdown stats as values, the following keys/attributes are available:
+    :returns: drawdown stats as values, the following keys/attributes are available:
 
         - ``drawdown`` - drawdown value in 0.xx %
         - ``moneydown`` - drawdown value in monetary units
@@ -56,11 +46,13 @@ class DrawDown(bt.Analyzer):
         - ``max.drawdown`` - max drawdown value in 0.xx %
         - ``max.moneydown`` - max drawdown value in monetary units
         - ``max.len`` - max drawdown length
+
     """
 
     params = (("fund", None),)
 
     def start(self):
+        """ """
         super(DrawDown, self).start()
         if self.p.fund is None:
             self._fundmode = self.strategy.broker.fundmode
@@ -68,6 +60,7 @@ class DrawDown(bt.Analyzer):
             self._fundmode = self.p.fund
 
     def create_analysis(self):
+        """ """
         self.rets = AutoOrderedDict()  # dict with . notation
 
         self.rets.len = 0
@@ -81,9 +74,18 @@ class DrawDown(bt.Analyzer):
         self._maxvalue = float("-inf")  # any value will outdo it
 
     def stop(self):
+        """ """
         self.rets._close()  # . notation cannot create more keys
 
     def notify_fund(self, cash, value, fundvalue, shares):
+        """
+
+        :param cash:
+        :param value:
+        :param fundvalue:
+        :param shares:
+
+        """
         if not self._fundmode:
             self._value = value  # record current value
             self._maxvalue = max(self._maxvalue, value)  # update peak value
@@ -92,6 +94,7 @@ class DrawDown(bt.Analyzer):
             self._maxvalue = max(self._maxvalue, fundvalue)  # update peak
 
     def next(self):
+        """ """
         r = self.rets
 
         # calculate current drawdown values
@@ -109,39 +112,9 @@ class DrawDown(bt.Analyzer):
 class TimeDrawDown(bt.TimeFrameAnalyzerBase):
     """This analyzer calculates trading system drawdowns on the chosen
     timeframe which can be different from the one used in the underlying data
-    Params:
 
-      - ``timeframe`` (default: ``None``)
-        If ``None`` the ``timeframe`` of the 1st data in the system will be
-        used
 
-        Pass ``TimeFrame.NoTimeFrame`` to consider the entire dataset with no
-        time constraints
-
-      - ``compression`` (default: ``None``)
-
-        Only used for sub-day timeframes to for example work on an hourly
-        timeframe by specifying "TimeFrame.Minutes" and 60 as compression
-
-        If ``None`` then the compression of the 1st data of the system will be
-        used
-      - *None*
-
-      - ``fund`` (default: ``None``)
-
-        If ``None`` the actual mode of the broker (fundmode - True/False) will
-        be autodetected to decide if the returns are based on the total net
-        asset value or on the fund value. See ``set_fundmode`` in the broker
-        documentation
-
-        Set it to ``True`` or ``False`` for a specific behavior
-
-    Methods:
-
-      - ``get_analysis``
-
-        Returns a dictionary (with . notation support and subdctionaries) with
-        drawdown stats as values, the following keys/attributes are available:
+    :returns: drawdown stats as values, the following keys/attributes are available:
 
         - ``drawdown`` - drawdown value in 0.xx %
         - ``maxdrawdown`` - drawdown value in monetary units
@@ -151,11 +124,13 @@ class TimeDrawDown(bt.TimeFrameAnalyzerBase):
         - ``dd``
         - ``maxdd``
         - ``maxddlen``
+
     """
 
     params = (("fund", None),)
 
     def start(self):
+        """ """
         super(TimeDrawDown, self).start()
         if self.p.fund is None:
             self._fundmode = self.strategy.broker.fundmode
@@ -168,6 +143,7 @@ class TimeDrawDown(bt.TimeFrameAnalyzerBase):
         self.ddlen = 0
 
     def on_dt_over(self):
+        """ """
         if not self._fundmode:
             value = self.strategy.broker.getvalue()
         else:
@@ -187,5 +163,6 @@ class TimeDrawDown(bt.TimeFrameAnalyzerBase):
         self.maxddlen = max(self.maxddlen, self.ddlen)
 
     def stop(self):
+        """ """
         self.rets["maxdrawdown"] = round(self.maxdd, 2)
         self.rets["maxdrawdownperiod"] = self.maxddlen

@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -39,11 +39,7 @@ class Trades(Observer):
     is then closed when it goes back to 0 (or crosses over 0 in the opposite
     direction)
 
-    Params:
-      - ``pnlcomm`` (def: ``True``)
 
-        Show net/profit and loss, i.e.: after commission. If set to ``False``
-        if will show the result of trades before commission
     """
 
     _stclock = True
@@ -80,6 +76,7 @@ class Trades(Observer):
     )
 
     def __init__(self):
+        """ """
 
         self.trades = 0
 
@@ -105,6 +102,7 @@ class Trades(Observer):
         self.trades_length_min = 0
 
     def next(self):
+        """ """
         for trade in self._owner._tradespending:
             if trade.data not in self.ddatas:
                 continue
@@ -121,7 +119,15 @@ class Trades(Observer):
 
 
 class MetaDataTrades(Observer.__class__):
+    """ """
+
     def donew(cls, *args, **kwargs):
+        """
+
+        :param *args:
+        :param **kwargs:
+
+        """
         _obj, args, kwargs = super(MetaDataTrades, cls).donew(*args, **kwargs)
 
         # Recreate the lines dynamically
@@ -139,11 +145,49 @@ class MetaDataTrades(Observer.__class__):
         _obj.lines = linescls()
 
         # Generate plotlines info
-        base_markers = ['o', 'v', '^', '<', '>', '1', '2', '3', '4', '8', 's', 'p',
-                        '*', 'h', 'H', '+', 'x', 'D', 'd']
+        base_markers = [
+            "o",
+            "v",
+            "^",
+            "<",
+            ">",
+            "1",
+            "2",
+            "3",
+            "4",
+            "8",
+            "s",
+            "p",
+            "*",
+            "h",
+            "H",
+            "+",
+            "x",
+            "D",
+            "d",
+        ]
 
-        colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'b', 'g', 'r', 'c', 'm',
-                  'y', 'k', 'b', 'g', 'r', 'c', 'm']
+        colors = [
+            "b",
+            "g",
+            "r",
+            "c",
+            "m",
+            "y",
+            "k",
+            "b",
+            "g",
+            "r",
+            "c",
+            "m",
+            "y",
+            "k",
+            "b",
+            "g",
+            "r",
+            "c",
+            "m",
+        ]
         markers = base_markers * len(base_colors)
         colors = base_colors * len(base_markers)
 
@@ -163,6 +207,8 @@ class MetaDataTrades(Observer.__class__):
 
 
 class DataTrades(with_metaclass(MetaDataTrades, Observer)):
+    """ """
+
     _stclock = True
 
     params = (("usenames", True),)
@@ -172,6 +218,7 @@ class DataTrades(with_metaclass(MetaDataTrades, Observer)):
     plotlines = dict()
 
     def next(self):
+        """ """
         for trade in self._owner._tradespending:
             if trade.data not in self.ddatas:
                 continue

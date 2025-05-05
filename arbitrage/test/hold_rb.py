@@ -1,6 +1,5 @@
-import pandas as pd
-
 import backtrader as bt
+import pandas as pd
 
 # 设置显示选项，不使用省略号
 pd.set_option("display.max_columns", None)  # 显示所有列
@@ -9,19 +8,24 @@ pd.set_option("display.max_colwidth", None)  # 显示列的完整内容
 
 # 始终持有螺纹钢策略
 class AlwaysHoldRBStrategy(bt.Strategy):
+    """ """
+
     params = (("size_rb", 1),)  # 螺纹钢交易规模
 
     def __init__(self):
+        """ """
 
         self.order = None
 
     def start(self):
+        """ """
         # Activate the fund mode and set the default value at 100
         # self.broker.set_fundmode(fundmode=True, fundstartval=100.00)
         self.cash_start = self.broker.get_cash()
         # self.val_start = 100.0
 
     def next(self):
+        """ """
 
         if not self.position:  # 如果没有持仓，则买入
             self.order = self.buy(
@@ -30,12 +34,12 @@ class AlwaysHoldRBStrategy(bt.Strategy):
         # print(self.broker.get_fundvalue(),self.broker.get_value(),self.position,self.order)
         # print(self.data.datetime[1],self.data.datetime[0],self.data.datetime[-1]   )
         if self.data.datetime[0] == 739257.0:  # 最后一天的判断
-
             self.close(exectype=self.order.Close)
 
             # print(f"下单价格: {self.data0.close[0]}, 时间: {self.data0.datetime.datetime()}, 持仓: {self.position}")
 
     def stop(self):
+        """ """
         # calculate the actual returns
         self.roi = (self.broker.get_value() - self.cash_start) - 1.0
         # self.froi = self.broker.get_fundvalue() - self.val_start
@@ -43,6 +47,11 @@ class AlwaysHoldRBStrategy(bt.Strategy):
         # print('Fund Value: {:.2f}%'.format(self.froi))
 
     def notify_trade(self, trade):
+        """
+
+        :param trade:
+
+        """
         if trade.isclosed:
             print(
                 "TRADE CLOSED %s, PROFIT: GROSS %.2f, NET %.2f"
@@ -55,6 +64,11 @@ class AlwaysHoldRBStrategy(bt.Strategy):
             )
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status in [order.Submitted, order.Accepted]:
             # 订单状态 submitted/accepted，处于未决订单状态。
             return

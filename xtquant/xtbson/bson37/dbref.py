@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tools for manipulating DBRefs (references to MongoDB documents)."""
 
 from copy import deepcopy
@@ -36,7 +35,7 @@ class DBRef(object):
         id: Any,
         database: Optional[str] = None,
         _extra: Optional[Mapping[str, Any]] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         """Initialize a new :class:`DBRef`.
 
@@ -54,6 +53,19 @@ class DBRef(object):
             create additional, custom fields
 
         .. seealso:: The MongoDB documentation on `dbrefs <https://dochub.mongodb.org/core/dbrefs>`_.
+
+        :param collection:
+        :type collection: str
+        :param id:
+        :type id: Any
+        :param database:  (Default value = None)
+        :type database: Optional[str]
+        :param _extra:  (Default value = None)
+        :type _extra: Optional[Mapping[str, Any]]
+        :param **kwargs:
+        :type **kwargs: Any
+        :rtype: None
+
         """
         if not isinstance(collection, str):
             raise TypeError("collection must be an instance of str")
@@ -68,12 +80,22 @@ class DBRef(object):
 
     @property
     def collection(self) -> str:
-        """Get the name of this DBRef's collection."""
+        """Get the name of this DBRef's collection.
+
+
+        :rtype: str
+
+        """
         return self.__collection
 
     @property
     def id(self) -> Any:
-        """Get this DBRef's _id."""
+        """Get this DBRef's _id.
+
+
+        :rtype: Any
+
+        """
         return self.__id
 
     @property
@@ -81,10 +103,21 @@ class DBRef(object):
         """Get the name of this DBRef's database.
 
         Returns None if this DBRef doesn't specify a database.
+
+
+        :rtype: Optional[str]
+
         """
         return self.__database
 
     def __getattr__(self, key: Any) -> Any:
+        """
+
+        :param key:
+        :type key: Any
+        :rtype: Any
+
+        """
         try:
             return self.__kwargs[key]
         except KeyError:
@@ -94,6 +127,10 @@ class DBRef(object):
         """Get the SON document representation of this DBRef.
 
         Generally not needed by application developers
+
+
+        :rtype: SON[str,Any]
+
         """
         doc = SON([("$ref", self.collection), ("$id", self.id)])
         if self.database is not None:
@@ -102,32 +139,70 @@ class DBRef(object):
         return doc
 
     def __repr__(self):
+        """ """
         extra = "".join([", %s=%r" % (k, v) for k, v in self.__kwargs.items()])
         if self.database is None:
             return "DBRef(%r, %r%s)" % (self.collection, self.id, extra)
-        return "DBRef(%r, %r, %r%s)" % (self.collection, self.id, self.database, extra)
+        return "DBRef(%r, %r, %r%s)" % (
+            self.collection,
+            self.id,
+            self.database,
+            extra,
+        )
 
     def __eq__(self, other: Any) -> bool:
+        """
+
+        :param other:
+        :type other: Any
+        :rtype: bool
+
+        """
         if isinstance(other, DBRef):
             us = (self.__database, self.__collection, self.__id, self.__kwargs)
-            them = (other.__database, other.__collection, other.__id, other.__kwargs)
+            them = (
+                other.__database,
+                other.__collection,
+                other.__id,
+                other.__kwargs,
+            )
             return us == them
         return NotImplemented
 
     def __ne__(self, other: Any) -> bool:
+        """
+
+        :param other:
+        :type other: Any
+        :rtype: bool
+
+        """
         return not self == other
 
     def __hash__(self) -> int:
-        """Get a hash value for this :class:`DBRef`."""
-        return hash((
-            self.__collection,
-            self.__id,
-            self.__database,
-            tuple(sorted(self.__kwargs.items())),
-        ))
+        """Get a hash value for this :class:`DBRef`.
+
+
+        :rtype: int
+
+        """
+        return hash(
+            (
+                self.__collection,
+                self.__id,
+                self.__database,
+                tuple(sorted(self.__kwargs.items())),
+            )
+        )
 
     def __deepcopy__(self, memo: Any) -> "DBRef":
-        """Support function for `copy.deepcopy()`."""
+        """Support function for `copy.deepcopy()`.
+
+        :param memo:
+        :type memo: Any
+        :rtype: "DBRef"
+
+        """
         return DBRef(
             deepcopy(self.__collection, memo),
             deepcopy(self.__id, memo),

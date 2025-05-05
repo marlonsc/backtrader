@@ -16,7 +16,7 @@ __all__ = [
     "RPCClient",
 ]
 
-### config
+# config
 
 __curdir = _OS_.path.dirname(_OS_.path.abspath(__file__))
 
@@ -35,16 +35,14 @@ __quote_token = ""
 
 init_complete = False
 
-### function
+# function
 get_local_server_port = __dc.get_local_server_port
 register_create_nparray = __dc.register_create_nparray
 RPCClient = __dc.IPythonApiClient
 
 
 def try_create_client():
-    """
-    尝试创建RPCClient，如果失败，会抛出异常
-    """
+    """尝试创建RPCClient，如果失败，会抛出异常"""
     cl = RPCClient()
     cl.init()
 
@@ -55,10 +53,12 @@ def try_create_client():
 
 
 def set_token(token=""):
-    """
-    设置用于登录行情服务的token，此接口应该先于init调用
+    """设置用于登录行情服务的token，此接口应该先于init调用
     token获取地址：https://xuntou.net/#/userInfo?product=xtquant
     迅投投研服务平台 - 用户中心 - 个人设置 - 接口TOKEN
+
+    :param token:  (Default value = "")
+
     """
     global __quote_token
     __quote_token = token
@@ -66,12 +66,14 @@ def set_token(token=""):
 
 
 def set_data_home_dir(data_home_dir):
-    """
-    设置数据存储目录，此接口应该先于init调用
+    """设置数据存储目录，此接口应该先于init调用
     datacenter启动后，会在data_home_dir目录下建立若干目录存储数据
     如果不设置存储目录，会使用默认路径
     在datacenter作为独立行情服务的场景下，data_home_dir可以任意设置
     如果想使用现有数据，data_home_dir对应QMT的f'{安装目录}'，或对应极简模式的f'{安装目录}/userdata_mini'
+
+    :param data_home_dir:
+
     """
     global __data_home_dir
     __data_home_dir = data_home_dir
@@ -79,9 +81,11 @@ def set_data_home_dir(data_home_dir):
 
 
 def set_config_dir(config_dir):
-    """
-    设置配置文件目录，此接口应该先于init调用
+    """设置配置文件目录，此接口应该先于init调用
     通常情况配置文件内置，不需要调用这个接口
+
+    :param config_dir:
+
     """
     global __config_dir
     __config_dir = config_dir
@@ -89,77 +93,91 @@ def set_config_dir(config_dir):
 
 
 def set_kline_mirror_enabled(enable):
-    """
-    设置K线全推功能是否开启，此接口应该先于init调用
+    """设置K线全推功能是否开启，此接口应该先于init调用
     此功能默认关闭，启用后，实时K线数据将优先从K线全推获取
     此功能仅vip用户可用
+
+    :param enable:
+
     """
     __dc.set_kline_mirror_enabled(["SH", "SZ"] if enable else [])
     return
 
 
 def set_kline_mirror_markets(markets):
-    """
-    设置开启指定市场的K线全推，此接口应该先于init调用
+    """设置开启指定市场的K线全推，此接口应该先于init调用
     此功能默认关闭，启用后，实时K线数据将优先从K线全推获取
     此功能仅vip用户可用
 
     markets: list, 市场列表
         例如 ['SH', 'SZ', 'BJ'] 为开启上交所、深交所、北交所的K线全推
+
+    :param markets:
+
     """
     __dc.set_kline_mirror_enabled(markets)
     return
 
 
 def set_allow_optmize_address(allow_list=[]):
-    """
-    设置连接池，行情仅从连接池内的地址中选择连接，此接口应该先于init调用
+    """设置连接池，行情仅从连接池内的地址中选择连接，此接口应该先于init调用
     地址格式为'127.0.0.1:55300'
     设置为空时，行情从全部的可用地址中选择连接
+
+    :param allow_list:  (Default value = [])
+
     """
     __dc.set_allow_optmize_address(allow_list)
     return
 
 
 def set_wholequote_market_list(market_list=[]):
-    """
-    设置启动时加载全推行情的市场，此接口应该先于init调用
+    """设置启动时加载全推行情的市场，此接口应该先于init调用
     未设置时启动时不加载全推行情
     未加载全推行情的市场，会在实际使用数据的时候加载
 
     markets: list, 市场列表
         例如 ['SH', 'SZ', 'BJ'] 为启动时加载上交所、深交所、北交所的全推行情
+
+    :param market_list:  (Default value = [])
+
     """
     __dc.set_wholequote_market_list(market_list)
     return
 
 
 def set_future_realtime_mode(enable):
-    """
-    设置期货周末夜盘是否使用实际时间，此接口应该先于init调用
+    """设置期货周末夜盘是否使用实际时间，此接口应该先于init调用
+
+    :param enable:
+
     """
     __dc.set_future_realtime_mode(enable)
     return
 
 
 def set_init_markets(markets=[]):
-    """
-    设置初始化的市场列表，仅加载列表市场的合约，此接口应该先于init调用
+    """设置初始化的市场列表，仅加载列表市场的合约，此接口应该先于init调用
 
     markets: list, 市场列表
         例如 ['SH', 'SZ', 'BJ'] 为加载上交所、深交所、北交所的合约
         传空list时，加载全部市场的合约
 
     未设置时，默认加载全部市场的合约
+
+    :param markets:  (Default value = [])
+
     """
     __dc.set_watch_market_list(markets)
     return
 
 
 def set_index_mirror_enabled(enable):
-    """
-    设置指标全推功能是否开启，此接口应该先于init调用
+    """设置指标全推功能是否开启，此接口应该先于init调用
     此功能默认关闭
+
+    :param enable:
+
     """
     __dc.set_index_mirror_enabled(
         ["SH", "SZ", "SHO", "SZO", "IF", "DF", "SF", "ZF", "GF", "INE"]
@@ -170,22 +188,26 @@ def set_index_mirror_enabled(enable):
 
 
 def set_index_mirror_markets(markets):
-    """
-    设置开启指定市场的指标全推，此接口应该先于init调用
+    """设置开启指定市场的指标全推，此接口应该先于init调用
     此功能默认关闭
 
     markets: list, 市场列表
         例如 ['SH', 'SZ', 'BJ'] 为开启上交所、深交所、北交所的指标全推
+
+    :param markets:
+
     """
     __dc.set_index_mirror_enabled(markets)
     return
 
 
 def init(start_local_service=True):
-    """
-    初始化行情模块
+    """初始化行情模块
     start_local_service: bool
         如果start_local_service为True，会额外启动一个默认本地监听，以支持datacenter作为独立行情服务时的xtdata内置连接
+
+    :param start_local_service:  (Default value = True)
+
     """
     import time
 
@@ -277,16 +299,13 @@ def init(start_local_service=True):
 
 
 def shutdown():
-    """
-    关闭行情模块，停止所有服务和监听端口
-    """
+    """关闭行情模块，停止所有服务和监听端口"""
     __dc.shutdown()
     return
 
 
 def listen(ip="0.0.0.0", port=58610):
-    """
-    独立行情服务模式，启动监听端口，支持xtdata.connect接入
+    """独立行情服务模式，启动监听端口，支持xtdata.connect接入
     ip:
         str, '0.0.0.0'
     port:
@@ -298,6 +317,10 @@ def listen(ip="0.0.0.0", port=58610):
         from xtquant import xtdatacenter as xtdc
         ip, port = xtdc.listen('0.0.0.0', 58610)
         ip, port = xtdc.listen('0.0.0.0', (58610, 58620))
+
+    :param ip:  (Default value = "0.0.0.0")
+    :param port:  (Default value = 58610)
+
     """
     global init_complete
     if not init_complete:

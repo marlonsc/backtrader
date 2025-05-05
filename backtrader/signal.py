@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import backtrader as bt
 
@@ -39,7 +44,6 @@ import backtrader as bt
     SIGNAL_SHORTEXIT_ANY,
 ) = range(14)
 
-
 SignalTypes = [
     SIGNAL_NONE,
     SIGNAL_LONGSHORT,
@@ -59,10 +63,13 @@ SignalTypes = [
 
 
 class Signal(bt.Indicator):
+    """ """
+
     SignalTypes = SignalTypes
 
     lines = ("signal",)
 
     def __init__(self):
+        """ """
         self.lines.signal = self.data0.lines[0]
         self.plotinfo.plotmaster = getattr(self.data0, "_clock", self.data0)

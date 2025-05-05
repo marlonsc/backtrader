@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import matplotlib.dates as mdates
 import matplotlib.ticker as mplticker
@@ -27,9 +32,16 @@ from ..utils import num2date
 
 
 class MyVolFormatter(mplticker.Formatter):
+    """ """
+
     Suffixes = ["", "K", "M", "G", "T", "P"]
 
     def __init__(self, volmax):
+        """
+
+        :param volmax:
+
+        """
         self.volmax = volmax
         magnitude = 0
         self.divisor = 1.0
@@ -40,7 +52,12 @@ class MyVolFormatter(mplticker.Formatter):
         self.suffix = self.Suffixes[magnitude]
 
     def __call__(self, y, pos=0):
-        """Return the label for time x at position pos"""
+        """
+
+        :param y:
+        :param pos:  (Default value = 0)
+
+        """
 
         if y > self.volmax * 1.20:
             return ""
@@ -50,13 +67,26 @@ class MyVolFormatter(mplticker.Formatter):
 
 
 class MyDateFormatter(mplticker.Formatter):
+    """ """
+
     def __init__(self, dates, fmt="%Y-%m-%d"):
+        """
+
+        :param dates:
+        :param fmt:  (Default value = "%Y-%m-%d")
+
+        """
         self.dates = dates
         self.lendates = len(dates)
         self.fmt = fmt
 
     def __call__(self, x, pos=0):
-        """Return the label for time x at position pos"""
+        """
+
+        :param x:
+        :param pos:  (Default value = 0)
+
+        """
         ind = int(round(x))
         if ind >= self.lendates:
             ind = self.lendates - 1
@@ -68,7 +98,15 @@ class MyDateFormatter(mplticker.Formatter):
 
 
 def patch_locator(locator, xdates):
+    """
+
+    :param locator:
+    :param xdates:
+
+    """
+
     def _patched_datalim_to_dt(self):
+        """ """
         dmin, dmax = self.axis.get_data_interval()
 
         # proxy access to xdates
@@ -78,6 +116,7 @@ def patch_locator(locator, xdates):
         return a, b
 
     def _patched_viewlim_to_dt(self):
+        """ """
         vmin, vmax = self.axis.get_view_interval()
 
         # proxy access to xdates
@@ -95,7 +134,20 @@ def patch_locator(locator, xdates):
 
 
 def patch_formatter(formatter, xdates):
+    """
+
+    :param formatter:
+    :param xdates:
+
+    """
+
     def newcall(self, x, pos=0):
+        """
+
+        :param x:
+        :param pos:  (Default value = 0)
+
+        """
         if False and x < 0:
             raise ValueError(
                 "DateFormatter found a value of x=0, which is "
@@ -113,6 +165,13 @@ def patch_formatter(formatter, xdates):
 
 
 def getlocator(xdates, numticks=5, tz=None):
+    """
+
+    :param xdates:
+    :param numticks:  (Default value = 5)
+    :param tz:  (Default value = None)
+
+    """
     span = xdates[-1] - xdates[0]
 
     locator, formatter = mdates.date_ticker_factory(span=span, tz=tz, numticks=numticks)

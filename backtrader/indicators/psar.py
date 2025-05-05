@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 from . import PeriodN
 
@@ -26,12 +31,15 @@ __all__ = ["ParabolicSAR", "PSAR"]
 
 
 class _SarStatus(object):
+    """ """
+
     sar = None
     tr = None
     af = 0.0
     ep = 0.0
 
     def __str__(self):
+        """ """
         txt = []
         txt.append("sar: {}".format(self.sar))
         txt.append("tr: {}".format(self.tr))
@@ -41,8 +49,7 @@ class _SarStatus(object):
 
 
 class ParabolicSAR(PeriodN):
-    """
-    Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
+    """Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"* for the RSI
 
     SAR stands for *Stop and Reverse* and the indicator was meant as a signal
@@ -54,6 +61,8 @@ class ParabolicSAR(PeriodN):
     See:
       - https://en.wikipedia.org/wiki/Parabolic_SAR
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:parabolic_sar
+
+
     """
 
     alias = ("PSAR",)
@@ -70,6 +79,7 @@ class ParabolicSAR(PeriodN):
     )
 
     def prenext(self):
+        """ """
         if len(self) == 1:
             self._status = []  # empty status
             return  # not enough data to do anything
@@ -82,6 +92,7 @@ class ParabolicSAR(PeriodN):
         self.lines.psar[0] = float("NaN")  # no return yet still prenext
 
     def nextstart(self):
+        """ """
         if self._status:  # some states have been calculated
             self.next()  # delegate
             return
@@ -114,6 +125,7 @@ class ParabolicSAR(PeriodN):
         self.next()
 
     def next(self):
+        """ """
         hi = self.data.high[0]
         lo = self.data.low[0]
 

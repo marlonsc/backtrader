@@ -1,10 +1,12 @@
+import datetime
+
 import backtrader as bt
 import pandas as pd
-import numpy as np
-import datetime
 
 
 class ATRArbitrageStrategy(bt.Strategy):
+    """ """
+
     params = (
         ("atr_period", 14),  # ATR周期
         ("atr_multiplier", 2.0),  # ATR乘数
@@ -12,6 +14,7 @@ class ATRArbitrageStrategy(bt.Strategy):
     )
 
     def __init__(self):
+        """ """
         # 计算价差
         self.price_diff = self.data0.close - 1.4 * self.data1.close
 
@@ -38,6 +41,7 @@ class ATRArbitrageStrategy(bt.Strategy):
         self.position_type = None
 
     def next(self):
+        """ """
         if self.order:
             return
 
@@ -95,6 +99,11 @@ class ATRArbitrageStrategy(bt.Strategy):
                     )
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status in [order.Completed]:
             if self.p.printlog:
                 if order.isbuy():
@@ -117,6 +126,14 @@ class ATRArbitrageStrategy(bt.Strategy):
 
 
 def load_data(symbol1, symbol2, fromdate, todate):
+    """
+
+    :param symbol1:
+    :param symbol2:
+    :param fromdate:
+    :param todate:
+
+    """
     output_file = "D:\\FutureData\\ricequant\\1d_2017to2024_noadjust.h5"
 
     try:
@@ -157,6 +174,7 @@ def load_data(symbol1, symbol2, fromdate, todate):
 
 
 def run_strategy():
+    """ """
     # 创建回测引擎
     cerebro = bt.Cerebro()
 

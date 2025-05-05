@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,14 +18,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
-
-import backtrader as bt
 from backtrader.utils.py3 import MAXINT
 
-
-from . import MovingAverageBase, MovAv
+from . import MovAv, MovingAverageBase
 
 
 class ZeroLagIndicator(MovingAverageBase):
@@ -52,6 +54,7 @@ class ZeroLagIndicator(MovingAverageBase):
     See also:
       - http://www.mesasoftware.com/papers/ZeroLag.pdf
 
+
     """
 
     alias = (
@@ -67,11 +70,13 @@ class ZeroLagIndicator(MovingAverageBase):
     )
 
     def _plotlabel(self):
+        """ """
         plabels = [self.p.period, self.p.gainlimit]
         plabels += [self.p._movav] * self.p.notdefault("_movav")
         return plabels
 
     def __init__(self):
+        """ """
         self.ema = MovAv.EMA(period=self.p.period)
         self.limits = [-self.p.gainlimit, self.p.gainlimit + 1]
 
@@ -79,6 +84,7 @@ class ZeroLagIndicator(MovingAverageBase):
         super(ZeroLagIndicator, self).__init__()
 
     def next(self):
+        """ """
         leasterror = MAXINT  # 1000000 in original code
         bestec = ema = self.ema[0]  # seed value 1st time for ec
         price = self.data[0]

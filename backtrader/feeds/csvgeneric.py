@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,55 +18,22 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 from datetime import datetime
-import itertools
 
-from .. import feed, TimeFrame
+from .. import TimeFrame, feed
 from ..utils import date2num
 from ..utils.py3 import integer_types, string_types
 
 
 class GenericCSVData(feed.CSVDataBase):
-    """Parses a CSV file according to the order and field presence defined by the
-    parameters
-
-    Specific parameters (or specific meaning):
-
-      - ``dataname``: The filename to parse or a file-like object
-
-      - The lines parameters (datetime, open, high ...) take numeric values
-
-        A value of -1 indicates absence of that field in the CSV source
-
-      - If ``time`` is present (parameter time >=0) the source contains
-        separated fields for date and time, which will be combined
-
-      - ``nullvalue``
-
-        Value that will be used if a value which should be there is missing
-        (the CSV field is empty)
-
-      - ``dtformat``: Format used to parse the datetime CSV field. See the
-        python strptime/strftime documentation for the format.
-
-        If a numeric value is specified, it will be interpreted as follows
-
-          - ``1``: The value is a Unix timestamp of type ``int`` representing
-            the number of seconds since Jan 1st, 1970
-
-          - ``2``: The value is a Unix timestamp of type ``float``
-
-        If a **callable** is passed
-
-          - it will accept a string and return a `datetime.datetime` python
-            instance
-
-      - ``tmformat``: Format used to parse the time CSV field if "present"
-        (the default for the "time" CSV field is not to be present)
-
-    """
+    """Parses a CSV file according to the order and field presence defined by the"""
 
     params = (
         ("nullvalue", float("NaN")),
@@ -83,6 +50,7 @@ class GenericCSVData(feed.CSVDataBase):
     )
 
     def start(self):
+        """ """
         super(GenericCSVData, self).start()
 
         self._dtstr = False
@@ -99,6 +67,11 @@ class GenericCSVData(feed.CSVDataBase):
             self._dtconvert = self.p.dtformat
 
     def _loadline(self, linetokens):
+        """
+
+        :param linetokens:
+
+        """
         # Datetime needs special treatment
         dtfield = linetokens[self.p.datetime]
         if self._dtstr:
@@ -157,4 +130,6 @@ class GenericCSVData(feed.CSVDataBase):
 
 
 class GenericCSV(feed.CSVFeedBase):
+    """ """
+
     DataCls = GenericCSVData

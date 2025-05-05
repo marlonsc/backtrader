@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,11 +18,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-import testcommon
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import backtrader as bt
+import testcommon
 
 chkdatas = 1
 chkvals = [["50.804206", "72.983735", "33.655941"]]
@@ -32,6 +36,11 @@ chkind = bt.ind.AO
 
 
 def test_run(main=False):
+    """
+
+    :param main: (Default value = False)
+
+    """
     datas = [testcommon.getdata(i) for i in range(chkdatas)]
     testcommon.runtest(
         datas,

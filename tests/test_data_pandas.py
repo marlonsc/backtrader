@@ -18,15 +18,20 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import datetime
 import os
-import testcommon
 
-from backtrader import feeds as btfeeds
 import backtrader.indicators as btind
 import pandas
+import testcommon
+from backtrader import feeds as btfeeds
 
 chkdatas = 1
 chkvals = [["4063.463000", "3644.444667", "3554.693333"]]
@@ -47,6 +52,7 @@ TODATE = datetime.datetime(2006, 12, 31)
 
 
 class PandasDataOptix(btfeeds.PandasData):
+    """ """
 
     lines = (
         "optix_close",
@@ -57,6 +63,12 @@ class PandasDataOptix(btfeeds.PandasData):
 
 
 def getdata(index, noheaders=True):
+    """
+
+    :param index:
+    :param noheaders: (Default value = True)
+
+    """
 
     datapath = os.path.join(modpath, dataspath, datafiles[index])
 
@@ -65,7 +77,11 @@ def getdata(index, noheaders=True):
     header = None if noheaders else 0
 
     dataframe = pandas.read_csv(
-        datapath, skiprows=skiprows, header=header, parse_dates=True, index_col=0
+        datapath,
+        skiprows=skiprows,
+        header=header,
+        parse_dates=True,
+        index_col=0,
     )
 
     # Pass it to the backtrader datafeed and add it to the cerebro
@@ -78,6 +94,11 @@ def getdata(index, noheaders=True):
 
 
 def test_run(main=False):
+    """
+
+    :param main: (Default value = False)
+
+    """
     # Create list with bool possibilitys for:
     # PandasData and PandasOptix,
     # no headers,

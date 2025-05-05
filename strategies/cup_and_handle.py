@@ -100,22 +100,26 @@ EXAMPLE:
 python strategies/cup_and_handle.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --cup-length 20 --handle-length 5 --plot
 """
 
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
 import os
 import sys
-import pandas as pd
-import matplotlib.pyplot as plt
+
 import backtrader as bt
 
 # Import utility functions
 from strategies.utils import (
-    get_db_data,
-    print_performance_metrics,
     TradeThrottling,
     add_standard_analyzers,
+    get_db_data,
+    print_performance_metrics,
 )
 
 # Add the parent directory to the Python path to import shared modules
@@ -125,9 +129,7 @@ if parent_dir not in sys.path:
 
 
 class StockPriceData(bt.feeds.PandasData):
-    """
-    Stock Price Data Feed
-    """
+    """Stock Price Data Feed"""
 
     lines = ("rsi",)  # Add RSI as a line
 
@@ -144,8 +146,7 @@ class StockPriceData(bt.feeds.PandasData):
 
 
 class CupAndHandleStrategy(bt.Strategy, TradeThrottling):
-    """
-    Cup and Handle Strategy with Volume Confirmation
+    """Cup and Handle Strategy with Volume Confirmation
 
     This strategy identifies the classic Cup and Handle pattern and trades breakouts:
     1. Identifies a U-shaped consolidation period (the "cup")
@@ -168,6 +169,8 @@ class CupAndHandleStrategy(bt.Strategy, TradeThrottling):
 
     ** IMPORTANT: This strategy is designed for stocks forming base patterns after pullbacks **
     It performs best in bullish markets and should be avoided during bear markets.
+
+
     """
 
     params = (
@@ -176,7 +179,10 @@ class CupAndHandleStrategy(bt.Strategy, TradeThrottling):
         ("handle_length", 10),  # Minimum length of the handle in bars
         ("cup_depth", 15.0),  # Minimum depth of the cup as a percentage
         ("handle_depth", 15.0),  # Maximum depth of the handle as a percentage
-        ("breakout_threshold", 3.0),  # Percentage above handle high for breakout
+        (
+            "breakout_threshold",
+            3.0,
+        ),  # Percentage above handle high for breakout
         ("volume_mult", 1.2),  # Volume multiplier for breakout confirmation
         ("target_mult", 1.0),  # Multiplier for setting the target price
         # Volume confirmation parameters
@@ -185,14 +191,16 @@ class CupAndHandleStrategy(bt.Strategy, TradeThrottling):
             15.0,
         ),  # Required volume decline during cup formation (%)
         ("handle_vol_max", 85.0),  # Maximum handle volume as % of cup average
-        ("breakout_vol_min", 150.0),  # Minimum breakout volume as % of recent average
+        # Minimum breakout volume as % of recent average
+        ("breakout_vol_min", 150.0),
         ("volume_avg_period", 20),  # Period for volume moving average
         # Pattern validation parameters
         (
             "u_shape_ratio",
             0.5,
         ),  # Minimum ratio of middle/edges for U-shape (vs V-shape)
-        ("handle_position_min", 50.0),  # Handle must form in upper half of cup (%)
+        # Handle must form in upper half of cup (%)
+        ("handle_position_min", 50.0),
         # Exit parameters
         ("use_stop", True),  # Whether to use a stop loss
         ("stop_pct", 10.0),  # Stop loss percentage from entry
@@ -209,7 +217,13 @@ class CupAndHandleStrategy(bt.Strategy, TradeThrottling):
     )
 
     def log(self, txt, dt=None, level="info"):
-        """Logging function"""
+        """Logging function
+
+        :param txt:
+        :param dt:  (Default value = None)
+        :param level:  (Default value = "info")
+
+        """
         if level == "debug" and self.p.log_level != "debug":
             return
 
@@ -217,6 +231,7 @@ class CupAndHandleStrategy(bt.Strategy, TradeThrottling):
         print(f"{dt.isoformat()}: {txt}")
 
     def __init__(self):
+        """ """
         # Keep track of price data and indicators
         self.dataclose = self.datas[0].close
         self.datahigh = self.datas[0].high
@@ -283,12 +298,16 @@ class CupAndHandleStrategy(bt.Strategy, TradeThrottling):
             size = int((value * self.p.max_position / 100) / current_price)
 
         # Make sure we don't exceed maximum position size or available cash
-        max_size = int(
-            (cash * 0.95) / current_price
-        )  # Use 95% of available cash at most
+        # Use 95% of available cash at most
+        max_size = int((cash * 0.95) / current_price)
         return min(size, max_size)
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status in [order.Submitted, order.Accepted]:
             # Order submitted/accepted to/by broker - Nothing to do
             return
@@ -326,6 +345,11 @@ class CupAndHandleStrategy(bt.Strategy, TradeThrottling):
         self.order = None
 
     def notify_trade(self, trade):
+        """
+
+        :param trade:
+
+        """
         if not trade.isclosed:
             return
 
@@ -373,7 +397,8 @@ class CupAndHandleStrategy(bt.Strategy, TradeThrottling):
         ):
             return False
 
-        # Get price at the middle of the cup (should be near the bottom for U-shape)
+        # Get price at the middle of the cup (should be near the bottom for
+        # U-shape)
         cup_middle_price = self.dataclose[-(len(self) - self.cup_bottom_idx)]
 
         # Get prices at quarter points of the cup
@@ -388,7 +413,8 @@ class CupAndHandleStrategy(bt.Strategy, TradeThrottling):
         three_quarter_price = self.dataclose[-(len(self) - three_quarter_idx)]
 
         # For a U-shape: middle should be significantly lower than quarter points
-        # This ratio should be less than 1.0 for a U-shape, closer to 1.0 for a V-shape
+        # This ratio should be less than 1.0 for a U-shape, closer to 1.0 for a
+        # V-shape
         left_ratio = (cup_middle_price - self.cup_low) / (quarter_price - self.cup_low)
         right_ratio = (cup_middle_price - self.cup_low) / (
             three_quarter_price - self.cup_low
@@ -450,7 +476,8 @@ class CupAndHandleStrategy(bt.Strategy, TradeThrottling):
         cup_avg_volume = sum(self.cup_volumes) / len(self.cup_volumes)
 
         # Check for volume decline during cup formation
-        cup_start_vol = sum(self.cup_volumes[:5]) / 5  # Average of first 5 bars
+        # Average of first 5 bars
+        cup_start_vol = sum(self.cup_volumes[:5]) / 5
         cup_end_vol = sum(self.cup_volumes[-5:]) / 5  # Average of last 5 bars
 
         vol_decline = ((cup_start_vol - cup_end_vol) / cup_start_vol) * 100
@@ -483,6 +510,7 @@ class CupAndHandleStrategy(bt.Strategy, TradeThrottling):
         return valid, breakout_vol_valid
 
     def next(self):
+        """ """
         # If an order is pending, we cannot send a new one
         if self.order:
             return
@@ -654,8 +682,8 @@ class CupAndHandleStrategy(bt.Strategy, TradeThrottling):
 
                     if not breakout_vol_valid:
                         self.log(
-                            f"Breakout without volume confirmation, waiting for higher"
-                            f" volume",
+                            "Breakout without volume confirmation, waiting for higher"
+                            " volume",
                             level="warning",
                         )
                         return
@@ -745,7 +773,10 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--todate", "-t", default="2024-12-31", help="Ending date in YYYY-MM-DD format"
+        "--todate",
+        "-t",
+        default="2024-12-31",
+        help="Ending date in YYYY-MM-DD format",
     )
 
     parser.add_argument(

@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,10 +18,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
-
-from . import MovingAverageBase, MovAv, ZeroLagIndicator
+from . import MovAv, MovingAverageBase, ZeroLagIndicator
 
 
 class DicksonMovingAverage(MovingAverageBase):
@@ -49,6 +53,8 @@ class DicksonMovingAverage(MovingAverageBase):
 
     See also:
       - https://www.reddit.com/r/algotrading/comments/4xj3vh/dickson_moving_average
+
+
     """
 
     alias = (
@@ -64,14 +70,18 @@ class DicksonMovingAverage(MovingAverageBase):
     )
 
     def _plotlabel(self):
+        """ """
         plabels = [self.p.period, self.p.gainlimit, self.p.hperiod]
         plabels += [self.p._movav] * self.p.notdefault("_movav")
         plabels += [self.p._hma] * self.p.notdefault("_hma")
         return plabels
 
     def __init__(self):
+        """ """
         ec = ZeroLagIndicator(
-            period=self.p.period, gainlimit=self.p.gainlimit, _movav=self.p._movav
+            period=self.p.period,
+            gainlimit=self.p.gainlimit,
+            _movav=self.p._movav,
         )
 
         hull = self.p._hma(period=self.p.hperiod)

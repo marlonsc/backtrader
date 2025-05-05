@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,51 +18,62 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 try:
-    from .ibcommission import IBCommInfo
+    pass
 except ImportError:
     pass  # The user may not have ibpy installed
-
 """
 from ..comminfo import CommInfoBase
 
 class CommInfo(CommInfoBase):
+    """ """
     pass  # clone of CommissionInfo but with xx% instead of 0.xx
 
 
 class CommInfo_Futures(CommInfoBase):
+    """ """
     params = (
         ('stocklike', False),
     )
 
 
 class CommInfo_Futures_Perc(CommInfo_Futures):
+    """ """
     params = (
         ('commtype', CommInfoBase.COMM_PERC),
     )
 
 
 class CommInfo_Futures_Fixed(CommInfo_Futures):
+    """ """
     params = (
         ('commtype', CommInfoBase.COMM_FIXED),
     )
 
 
 class CommInfo_Stocks(CommInfoBase):
+    """ """
     params = (
         ('stocklike', True),
     )
 
 
 class CommInfo_Stocks_Perc(CommInfo_Stocks):
+    """ """
     params = (
         ('commtype', CommInfoBase.COMM_PERC),
     )
 
 
 class CommInfo_Stocks_Fixed(CommInfo_Stocks):
+    """ """
     params = (
         ('commtype', CommInfoBase.COMM_FIXED),
     )

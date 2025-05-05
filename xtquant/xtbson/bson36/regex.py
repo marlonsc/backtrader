@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tools for representing MongoDB regular expressions."""
 
 import re
@@ -21,6 +20,11 @@ from .son import RE_TYPE
 
 
 def str_flags_to_int(str_flags):
+    """
+
+    :param str_flags:
+
+    """
     flags = 0
     if "i" in str_flags:
         flags |= re.IGNORECASE
@@ -56,10 +60,6 @@ class Regex(object):
         :class:`str` has the ``re.UNICODE`` flag set. If it is undesirable
         to store this flag in a BSON regular expression, unset it first::
 
-          >>> pattern = re.compile('.*')
-          >>> regex = Regex.from_native(pattern)
-          >>> regex.flags ^= re.UNICODE
-          >>> db.collection.insert_one({'pattern': regex})
 
         :Parameters:
           - `regex`: A regular expression object from ``re.compile()``.
@@ -72,6 +72,13 @@ class Regex(object):
            when used in a MongoDB query.
 
         .. _PCRE: http://www.pcre.org/
+
+        :param regex:
+
+        >>> pattern = re.compile('.*')
+          >>> regex = Regex.from_native(pattern)
+          >>> regex.flags ^= re.UNICODE
+          >>> db.collection.insert_one({'pattern': regex})
         """
         if not isinstance(regex, RE_TYPE):
             raise TypeError(
@@ -90,6 +97,10 @@ class Regex(object):
           - `pattern`: string
           - `flags`: (optional) an integer bitmask, or a string of flag
             characters like "im" for IGNORECASE and MULTILINE
+
+        :param pattern:
+        :param flags:  (Default value = 0)
+
         """
         if not isinstance(pattern, (str, bytes)):
             raise TypeError("pattern must be a string, not %s" % type(pattern))
@@ -103,6 +114,11 @@ class Regex(object):
             raise TypeError("flags must be a string or int, not %s" % type(flags))
 
     def __eq__(self, other):
+        """
+
+        :param other:
+
+        """
         if isinstance(other, Regex):
             return self.pattern == other.pattern and self.flags == other.flags
         else:
@@ -111,9 +127,15 @@ class Regex(object):
     __hash__ = None
 
     def __ne__(self, other):
+        """
+
+        :param other:
+
+        """
         return not self == other
 
     def __repr__(self):
+        """ """
         return "Regex(%r, %r)" % (self.pattern, self.flags)
 
     def try_compile(self):
@@ -128,5 +150,7 @@ class Regex(object):
            :exc:`re.error`.
 
         .. _PCRE: http://www.pcre.org/
+
+
         """
         return re.compile(self.pattern, self.flags)

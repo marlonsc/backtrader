@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import sys
 
@@ -26,8 +31,7 @@ from . import Indicator, MovingAverage
 
 
 class EnvelopeMixIn(object):
-    """
-    MixIn class to create a subclass with another indicator. The main line of
+    """MixIn class to create a subclass with another indicator. The main line of
     that indicator will be surrounded by an upper and lower band separated a
     given "perc"entage from the input main line
 
@@ -42,6 +46,8 @@ class EnvelopeMixIn(object):
 
     See also:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:moving_average_envelopes
+
+
     """
 
     lines = (
@@ -55,6 +61,7 @@ class EnvelopeMixIn(object):
     )
 
     def __init__(self):
+        """ """
         # Mix-in & directly from object -> does not necessarily need super
         # super(EnvelopeMixIn, self).__init__()
         perc = self.p.perc / 100.0
@@ -66,6 +73,8 @@ class EnvelopeMixIn(object):
 
 
 class _EnvelopeBase(Indicator):
+    """ """
+
     lines = ("src",)
 
     # plot the envelope lines along the passed source
@@ -75,13 +84,13 @@ class _EnvelopeBase(Indicator):
     plotlines = dict(src=dict(_plotskip=True))
 
     def __init__(self):
+        """ """
         self.lines.src = self.data
         super(_EnvelopeBase, self).__init__()
 
 
 class Envelope(_EnvelopeBase, EnvelopeMixIn):
-    """
-    It creates envelopes bands separated from the source data by a given
+    """It creates envelopes bands separated from the source data by a given
     percentage
 
     Formula:
@@ -91,6 +100,8 @@ class Envelope(_EnvelopeBase, EnvelopeMixIn):
 
     See also:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:moving_average_envelopes
+
+
     """
 
 

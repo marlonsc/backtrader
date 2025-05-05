@@ -2,8 +2,6 @@
 
 # import
 import datetime  # For datetime objects
-import os.path  # To manage paths
-import sys  # To find out the script name (in argv[0])
 from pathlib import Path
 
 # Import the backtrader platform
@@ -13,7 +11,6 @@ import backtrader as bt
 
 # functions
 # Create a Stratey
-
 
 if __name__ == "__main__":
     ticker_data = Path.cwd().parent / "datas/orcl-1995-2014.txt"

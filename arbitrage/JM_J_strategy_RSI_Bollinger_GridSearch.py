@@ -1,13 +1,7 @@
+import datetime
+
 import backtrader as bt
 import pandas as pd
-import numpy as np
-import sys
-import os
-import datetime
-import matplotlib.pyplot as plt
-import seaborn as sns
-
-from arbitrage.myutil import calculate_spread, check_and_align_data, cointegration_ratio
 
 
 def calculate_rolling_spread(
@@ -90,7 +84,9 @@ class DynamicSpreadRSIBollingerStrategy(bt.Strategy):
 
         # 计算价差的布林带
         self.bbands = bt.indicators.BollingerBands(
-            self.spread_series, period=self.p.bb_period, devfactor=self.p.bb_devfactor
+            self.spread_series,
+            period=self.p.bb_period,
+            devfactor=self.p.bb_devfactor,
         )
 
         # 布林带各轨道
@@ -100,7 +96,9 @@ class DynamicSpreadRSIBollingerStrategy(bt.Strategy):
 
         # 价格与各轨道的百分比位置 (0-100)
         self.bb_pct = bt.indicators.BollingerBandsPct(
-            self.spread_series, period=self.p.bb_period, devfactor=self.p.bb_devfactor
+            self.spread_series,
+            period=self.p.bb_period,
+            devfactor=self.p.bb_devfactor,
         )
 
     def _open_position(self, short):
@@ -179,7 +177,12 @@ class DynamicSpreadRSIBollingerStrategy(bt.Strategy):
         elif trade.justopened:
             print(
                 "TRADE %s OPENED %s  , SIZE %2d, PRICE %d "
-                % (trade.ref, bt.num2date(trade.dtopen), trade.size, trade.value)
+                % (
+                    trade.ref,
+                    bt.num2date(trade.dtopen),
+                    trade.size,
+                    trade.value,
+                )
             )
 
 
@@ -296,10 +299,18 @@ def grid_search():
 
         # 添加数据
         data0 = bt.feeds.PandasData(
-            dataname=df0, datetime="date", nocase=True, fromdate=fromdate, todate=todate
+            dataname=df0,
+            datetime="date",
+            nocase=True,
+            fromdate=fromdate,
+            todate=todate,
         )
         data1 = bt.feeds.PandasData(
-            dataname=df1, datetime="date", nocase=True, fromdate=fromdate, todate=todate
+            dataname=df1,
+            datetime="date",
+            nocase=True,
+            fromdate=fromdate,
+            todate=todate,
         )
         data2 = SpreadData(dataname=df_spread, fromdate=fromdate, todate=todate)
 
@@ -308,17 +319,19 @@ def grid_search():
                 for rsi_lower in rsi_lower_values:
                     for bb_period in bb_period_values:
                         for bb_devfactor in bb_devfactor_values:
-                            param_combinations.append((
-                                data0,
-                                data1,
-                                data2,
-                                rsi_period,
-                                rsi_upper,
-                                rsi_lower,
-                                bb_period,
-                                bb_devfactor,
-                                spread_window,
-                            ))
+                            param_combinations.append(
+                                (
+                                    data0,
+                                    data1,
+                                    data2,
+                                    rsi_period,
+                                    rsi_upper,
+                                    rsi_lower,
+                                    bb_period,
+                                    bb_devfactor,
+                                    spread_window,
+                                )
+                            )
 
     # 执行网格搜索
     results = []
@@ -338,7 +351,7 @@ def grid_search():
         spread_window,
     ) in enumerate(param_combinations):
         print(
-            f"测试参数组合 {i+1}/{total_combinations}: rsi_period={rsi_period},"
+            f"测试参数组合 {i + 1}/{total_combinations}: rsi_period={rsi_period},"
             f" rsi_upper={rsi_upper}, rsi_lower={rsi_lower}, bb_period={bb_period},"
             f" bb_devfactor={bb_devfactor}, spread_window={spread_window}"
         )
@@ -371,7 +384,7 @@ def grid_search():
         # 按夏普比率排序
         sorted_results = sorted(
             results,
-            key=lambda x: x["sharpe"] if x["sharpe"] is not None else -float("inf"),
+            key=lambda x: (x["sharpe"] if x["sharpe"] is not None else -float("inf")),
             reverse=True,
         )
         best_result = sorted_results[0]
@@ -394,7 +407,7 @@ def grid_search():
         print("\n========= 所有参数组合结果（按夏普比率排序）=========")
         for i, result in enumerate(sorted_results[:10]):  # 只显示前10个最好的结果
             print(
-                f"{i+1}. spread_window={result['params']['spread_window']}, "
+                f"{i + 1}. spread_window={result['params']['spread_window']}, "
                 f"rsi_period={result['params']['rsi_period']}, "
                 f"rsi_upper={result['params']['rsi_upper']}, "
                 f"rsi_lower={result['params']['rsi_lower']}, "

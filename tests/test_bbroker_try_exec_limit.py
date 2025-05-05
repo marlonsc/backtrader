@@ -16,27 +16,40 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
-import datetime
 import os
 import time
 
 try:
     time_clock = time.process_time
-except:
+except BaseException:
     time_clock = time.clock
 
 import backtrader as bt
 
 
 class SlipTestStrategy(bt.SignalStrategy):
+    """ """
+
     params = (
         ("printdata", False),
         ("printops", False),
     )
 
     def log(self, txt, dt=None, nodate=False):
+        """
+
+        :param txt:
+        :param dt:  (Default value = None)
+        :param nodate:  (Default value = False)
+
+        """
         if not nodate:
             dt = dt or self.data.datetime[0]
             dt = bt.num2date(dt)
@@ -45,6 +58,11 @@ class SlipTestStrategy(bt.SignalStrategy):
             print("---------- %s" % (txt))
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status in [bt.Order.Submitted, bt.Order.Accepted]:
             return  # Await further notifications
 
@@ -71,17 +89,20 @@ class SlipTestStrategy(bt.SignalStrategy):
         self.order = None
 
     def __init__(self):
+        """ """
         # Flag to allow new orders in the system or not
         self.order = None
         self.price = 1285.0
         self.counter = 0
 
     def start(self):
+        """ """
 
         if self.p.printdata:
             self.log("-------------------------", nodate=True)
             self.log(
-                "Starting portfolio value: %.2f" % self.broker.getvalue(), nodate=True
+                "Starting portfolio value: %.2f" % self.broker.getvalue(),
+                nodate=True,
             )
 
         self.tstart = time_clock()
@@ -92,6 +113,7 @@ class SlipTestStrategy(bt.SignalStrategy):
         self.sellexec = list()
 
     def stop(self):
+        """ """
         tused = time_clock() - self.tstart
         if self.p.printdata:
             self.log("Time used: %s" % str(tused))
@@ -102,6 +124,7 @@ class SlipTestStrategy(bt.SignalStrategy):
             pass
 
     def print_signal(self):
+        """ """
         if self.p.printdata:
             self.log(
                 "Open, High, Low, Close, %.2f, %.2f, %.2f, %.2f"
@@ -114,6 +137,7 @@ class SlipTestStrategy(bt.SignalStrategy):
             )
 
     def next(self):
+        """ """
         self.print_signal()
 
         if self.counter == 0:
@@ -124,11 +148,15 @@ class SlipTestStrategy(bt.SignalStrategy):
 
 
 def test_run(main=False):
-    """Test a fix in bbroker. See backtrader2 pr#22"""
+    """Test a fix in bbroker. See backtrader2 pr#22
+
+    :param main:  (Default value = False)
+
+    """
 
     cerebro = bt.Cerebro()
 
-    if main == True:
+    if main:
         strat_kwargs = dict(printdata=True, printops=True)
     else:
         strat_kwargs = dict(printdata=False, printops=False)
@@ -164,7 +192,9 @@ def test_run(main=False):
         if main:
             print(
                 "Slippage {}, Sell Executed {:.2f}, Expected price {:.2f}".format(
-                    expected_result[0], float(strat[0].sellexec[0]), expected_result[1]
+                    expected_result[0],
+                    float(strat[0].sellexec[0]),
+                    expected_result[1],
                 )
             )
 

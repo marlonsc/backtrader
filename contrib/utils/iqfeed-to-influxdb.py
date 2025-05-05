@@ -1,21 +1,25 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8; py-indent-offset:4 -*-
 
-import sys
-import os
+import argparse
+import datetime as dt
 import io
-import socket
 import logging
+import os
+import socket
+import sys
+
 import numpy as np
 import pandas as pd
-import datetime as dt
-import argparse
 from influxdb import DataFrameClient as dfclient
 from influxdb.exceptions import InfluxDBClientError
 
 
 class IQFeedTool(object):
+    """ """
+
     def __init__(self):
+        """ """
         timeout = 10.0
         self._dbhost = args.dbhost if args.dbhost else "localhost"
         self._dbport = args.dbport if args.dbport else 8086
@@ -37,7 +41,11 @@ class IQFeedTool(object):
         self._sock.settimeout(timeout)
 
         self.dfdb = dfclient(
-            self._dbhost, self._dbport, self._username, self._password, self._database
+            self._dbhost,
+            self._dbport,
+            self._username,
+            self._password,
+            self._database,
         )
 
         if not args.fromdate:
@@ -57,11 +65,21 @@ class IQFeedTool(object):
             sys.exit(-1)
 
     def _send_cmd(self, cmd: str):
-        """Encode IQFeed API messages."""
+        """Encode IQFeed API messages.
+
+        :param cmd:
+        :type cmd: str
+
+        """
         self._sock.sendall(cmd.encode(encoding="latin-1", errors="strict"))
 
     def iq_query(self, message: str):
-        """Send data query to IQFeed API."""
+        """Send data query to IQFeed API.
+
+        :param message:
+        :type message: str
+
+        """
         end_msg = "!ENDMSG!"
         recv_buffer = 4096
 
@@ -90,7 +108,12 @@ class IQFeedTool(object):
         return data
 
     def get_historical_minute_data(self, ticker: str):
-        """Request historical 5 minute data from DTN."""
+        """Request historical 5 minute data from DTN.
+
+        :param ticker:
+        :type ticker: str
+
+        """
         start = self._start
         stop = self._stop
 
@@ -116,7 +139,12 @@ class IQFeedTool(object):
             log.error("Write to database failed: %s" % err)
 
     def add_data_to_df(self, data: np.array):
-        """Build Pandas Dataframe in memory"""
+        """Build Pandas Dataframe in memory
+
+        :param data:
+        :type data: np.array
+
+        """
 
         col_names = ["high_p", "low_p", "open_p", "close_p", "volume", "oi"]
 
@@ -140,7 +168,11 @@ class IQFeedTool(object):
             self._ndf = self._ndf.append(df)
 
     def get_tickers_from_file(self, filename):
-        """Load ticker list from txt file"""
+        """Load ticker list from txt file
+
+        :param filename:
+
+        """
         if not os.path.exists(filename):
             log.error("Ticker List file does not exist: %s", filename)
 
@@ -159,7 +191,10 @@ if __name__ == "__main__":
 
     exoptgroup = parser.add_mutually_exclusive_group(required=True)
     exoptgroup.add_argument(
-        "--ticker", action="store", default="SPY", help="Ticker to request data for."
+        "--ticker",
+        action="store",
+        default="SPY",
+        help="Ticker to request data for.",
     )
     exoptgroup.add_argument(
         "--ticker-list",

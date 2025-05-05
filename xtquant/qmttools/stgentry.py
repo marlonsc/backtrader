@@ -1,10 +1,18 @@
 # coding:utf-8
 
-from .functions import *
-
 
 def run_file(user_script, param={}):
-    import os, sys, time, types
+    """
+
+    :param user_script:
+    :param param:  (Default value = {})
+
+    """
+    import os
+    import sys
+    import time
+    import types
+
     from .contextinfo import ContextInfo
     from .stgframe import StrategyLoader
 
@@ -27,7 +35,7 @@ def run_file(user_script, param={}):
             optimize=2,
         )
         exec(user_variable, globals())
-    except Exception as e:
+    except Exception:
         pass
 
     exec(user_module, globals())
@@ -37,6 +45,12 @@ def run_file(user_script, param={}):
     _C.user_script = user_script
 
     def try_set_func(C, func_name):
+        """
+
+        :param C:
+        :param func_name:
+
+        """
         func = globals().get(func_name)
         if func:
             C.__setattr__(func_name, types.MethodType(func, C))

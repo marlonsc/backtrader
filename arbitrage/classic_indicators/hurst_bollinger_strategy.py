@@ -1,14 +1,15 @@
-import backtrader as bt
-import pandas as pd
-import numpy as np
 import datetime
-import matplotlib.pyplot as plt
-from itertools import product
 import itertools
+
+import backtrader as bt
+import matplotlib.pyplot as plt
+import pandas as pd
 import seaborn as sns
 
 
 class HurstBollingerStrategy(bt.Strategy):
+    """ """
+
     params = (
         ("hurst_period", 20),  # Hurst指数计算周期
         ("bollinger_period", 7),  # 布林带周期
@@ -17,6 +18,7 @@ class HurstBollingerStrategy(bt.Strategy):
     )
 
     def __init__(self):
+        """ """
         # 计算价差
         self.price_diff = self.data0.close - 1.4 * self.data1.close
 
@@ -35,6 +37,7 @@ class HurstBollingerStrategy(bt.Strategy):
         self.position_type = None
 
     def next(self):
+        """ """
         if self.order:
             return
 
@@ -92,6 +95,11 @@ class HurstBollingerStrategy(bt.Strategy):
                     )
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status in [order.Completed]:
             if self.p.printlog:
                 if order.isbuy():
@@ -114,6 +122,14 @@ class HurstBollingerStrategy(bt.Strategy):
 
 
 def load_data(symbol1, symbol2, fromdate, todate):
+    """
+
+    :param symbol1:
+    :param symbol2:
+    :param fromdate:
+    :param todate:
+
+    """
     output_file = "D:\\FutureData\\ricequant\\1d_2017to2024_noadjust.h5"
 
     try:
@@ -154,6 +170,7 @@ def load_data(symbol1, symbol2, fromdate, todate):
 
 
 def optimize_parameters():
+    """ """
     # 定义参数范围
     hurst_periods = [10, 15, 20, 25, 30]
     bollinger_periods = [5, 7, 10, 14, 20]
@@ -195,14 +212,16 @@ def optimize_parameters():
 
         # 只记录有效的回测结果
         if sharpe is not None:
-            results.append({
-                "hurst": hurst,
-                "period": period,
-                "dev": dev,
-                "sharpe": sharpe,
-                "drawdown": drawdown,
-                "returns": returns,
-            })
+            results.append(
+                {
+                    "hurst": hurst,
+                    "period": period,
+                    "dev": dev,
+                    "sharpe": sharpe,
+                    "drawdown": drawdown,
+                    "returns": returns,
+                }
+            )
 
             # 更新最佳参数
             if sharpe > best_sharpe:
@@ -211,7 +230,7 @@ def optimize_parameters():
 
     # 打印最佳参数
     if best_params:
-        print(f"\n最佳参数组合:")
+        print("\n最佳参数组合:")
         print(f"Hurst周期: {best_params[0]}")
         print(f"布林带周期: {best_params[1]}")
         print(f"标准差倍数: {best_params[2]}")
@@ -222,6 +241,11 @@ def optimize_parameters():
 
 
 def plot_heatmap(results):
+    """
+
+    :param results:
+
+    """
     if not results:
         print("没有有效的回测结果，无法绘制热力图")
         return
@@ -248,7 +272,12 @@ def plot_heatmap(results):
 
         # 绘制热力图
         sns.heatmap(
-            heatmap_data, annot=True, fmt=".2f", cmap="RdYlGn", center=0, ax=axes[i]
+            heatmap_data,
+            annot=True,
+            fmt=".2f",
+            cmap="RdYlGn",
+            center=0,
+            ax=axes[i],
         )
 
         axes[i].set_title(f"标准差倍数 = {dev}")
@@ -263,6 +292,14 @@ def plot_heatmap(results):
 
 
 def run_strategy(hurst_period, bollinger_period, bollinger_dev, plot=False):
+    """
+
+    :param hurst_period:
+    :param bollinger_period:
+    :param bollinger_dev:
+    :param plot:  (Default value = False)
+
+    """
     cerebro = bt.Cerebro()
     cerebro.broker.setcash(150000)
     cerebro.broker.set_slippage_perc(perc=0.0005)

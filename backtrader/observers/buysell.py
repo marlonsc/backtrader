@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import math
 
@@ -26,20 +31,11 @@ from ..observer import Observer
 
 
 class BuySell(Observer):
-    """
-    This observer keeps track of the individual buy/sell orders (individual
+    """This observer keeps track of the individual buy/sell orders (individual
     executions) and will plot them on the chart along the data around the
     execution price level
 
-    Params:
-      - ``barplot`` (default: ``False``) Plot buy signals below the minimum and
-        sell signals above the maximum.
 
-        If ``False`` it will plot on the average price of executions during a
-        bar
-
-      - ``bardist`` (default: ``0.015`` 1.5%) Distance to max/min when
-        ``barplot`` is ``True``
     """
 
     lines = (
@@ -60,9 +56,16 @@ class BuySell(Observer):
 
     @staticmethod
     def _get_bar_dist(data, bardist):
+        """
+
+        :param data:
+        :param bardist:
+
+        """
         return abs(data.low[0] - data.high[0]) * (1 + bardist)
 
     def next(self):
+        """ """
         buy = list()
         sell = list()
 

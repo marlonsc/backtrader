@@ -149,9 +149,14 @@ import argparse
 import datetime
 import os
 import sys
-import numpy as np
-import pandas as pd
+
 import backtrader as bt
+from strategies.utils import (
+    TradeThrottling,
+    add_standard_analyzers,
+    get_db_data,
+    print_performance_metrics,
+)
 
 # Add the parent directory to the Python path to import shared modules
 parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -159,18 +164,10 @@ if parent_dir not in sys.path:
     sys.path.append(parent_dir)
 
 # Import utility functions
-from strategies.utils import (
-    get_db_data,
-    print_performance_metrics,
-    TradeThrottling,
-    add_standard_analyzers,
-)
 
 
 class StockPriceData(bt.feeds.PandasData):
-    """
-    Stock Price Data Feed
-    """
+    """Stock Price Data Feed"""
 
     params = (
         ("datetime", None),  # Column containing the date (index)
@@ -184,28 +181,33 @@ class StockPriceData(bt.feeds.PandasData):
 
 
 class RSIDivergenceStrategy(bt.Strategy, TradeThrottling):
-    """
-    RSI Divergence Strategy for Backtrader
+    """RSI Divergence Strategy for Backtrader
 
     This strategy identifies and trades on RSI divergences:
     - Bullish divergence: Price makes a lower low while RSI makes a higher low (oversold)
     - Bearish divergence: Price makes a higher high while RSI makes a lower high (overbought)
 
     Additional filters include RSI overbought/oversold levels and moving average trend confirmation.
+
+
     """
 
     params = (
         ("rsi_period", 14),  # RSI lookback period
         ("divergence_lookback", 20),  # Periods to look back for divergence
         ("trend_sma_period", 50),  # SMA period for trend direction
-        ("min_trend_strength", 0),  # Minimum consecutive bars in trend direction
+        (
+            "min_trend_strength",
+            0,
+        ),  # Minimum consecutive bars in trend direction
         ("rsi_oversold", 30),  # RSI oversold threshold
         ("rsi_overbought", 70),  # RSI overbought threshold
         ("min_rsi_value", 20),  # Minimum RSI value for bullish divergence
         ("max_rsi_value", 80),  # Maximum RSI value for bearish divergence
         ("use_volume", False),  # Whether to use volume confirmation for entries
         ("risk_percent", 1.0),  # Risk per trade as percentage of portfolio
-        ("max_position_size", 5.0),  # Maximum position size as percentage of portfolio
+        # Maximum position size as percentage of portfolio
+        ("max_position_size", 5.0),
         (
             "min_stop_distance",
             0.5,
@@ -285,7 +287,13 @@ class RSIDivergenceStrategy(bt.Strategy, TradeThrottling):
         self.trailing_stop = None
 
     def log(self, txt, dt=None, level="info"):
-        """Logging function for this strategy"""
+        """Logging function for this strategy
+
+        :param txt:
+        :param dt:  (Default value = None)
+        :param level:  (Default value = "info")
+
+        """
         if level == "debug" and self.p.log_level != "debug":
             return
 
@@ -293,7 +301,11 @@ class RSIDivergenceStrategy(bt.Strategy, TradeThrottling):
         print(f"{dt.isoformat()}: {txt}")
 
     def notify_order(self, order):
-        """Called when an order is placed, filled, or canceled."""
+        """Called when an order is placed, filled, or canceled.
+
+        :param order:
+
+        """
         # Skip if order is not completed
         if order.status in [order.Submitted, order.Accepted]:
             return
@@ -340,7 +352,11 @@ class RSIDivergenceStrategy(bt.Strategy, TradeThrottling):
             self.take_profit = None
 
     def notify_trade(self, trade):
-        """Called when a trade is completed."""
+        """Called when a trade is completed.
+
+        :param trade:
+
+        """
         if not trade.isclosed:
             return
 
@@ -359,7 +375,12 @@ class RSIDivergenceStrategy(bt.Strategy, TradeThrottling):
             self.current_consecutive_losses = 0
 
     def set_exit_orders(self, entry_price, is_buy=True):
-        """Set stop loss and take profit orders with improved trailing stop"""
+        """Set stop loss and take profit orders with improved trailing stop
+
+        :param entry_price:
+        :param is_buy:  (Default value = True)
+
+        """
         # Cancel existing exit orders
         self.cancel_exit_orders()
 
@@ -379,10 +400,14 @@ class RSIDivergenceStrategy(bt.Strategy, TradeThrottling):
                 profit_target = entry_price + (min_stop_distance * self.p.tp_sl_ratio)
 
             self.stop_loss = self.sell(
-                exectype=bt.Order.Stop, price=stop_price, size=self.position_size
+                exectype=bt.Order.Stop,
+                price=stop_price,
+                size=self.position_size,
             )
             self.take_profit = self.sell(
-                exectype=bt.Order.Limit, price=profit_target, size=self.position_size
+                exectype=bt.Order.Limit,
+                price=profit_target,
+                size=self.position_size,
             )
 
             self.log(
@@ -426,10 +451,14 @@ class RSIDivergenceStrategy(bt.Strategy, TradeThrottling):
                 profit_target = entry_price - (min_stop_distance * self.p.tp_sl_ratio)
 
             self.stop_loss = self.buy(
-                exectype=bt.Order.Stop, price=stop_price, size=self.position_size
+                exectype=bt.Order.Stop,
+                price=stop_price,
+                size=self.position_size,
             )
             self.take_profit = self.buy(
-                exectype=bt.Order.Limit, price=profit_target, size=self.position_size
+                exectype=bt.Order.Limit,
+                price=profit_target,
+                size=self.position_size,
             )
 
             self.log(
@@ -475,14 +504,20 @@ class RSIDivergenceStrategy(bt.Strategy, TradeThrottling):
             self.trailing_stop = None
 
     def calculate_position_size(self, entry_price, stop_price):
-        """Conservative position sizing with absolute limits to prevent excessive risk"""
+        """Conservative position sizing with absolute limits to prevent excessive risk
+
+        :param entry_price:
+        :param stop_price:
+
+        """
         # Set an absolute hard maximum number of shares (no matter what)
         absolute_max_shares = 100  # Never trade more than this many shares
 
         # Calculate risk amount in dollars (triple-check with safety cap)
         max_risk_dollars = 1000  # Never risk more than this amount per trade
         risk_amount = min(
-            self.broker.getvalue() * (self.p.risk_percent / 100), max_risk_dollars
+            self.broker.getvalue() * (self.p.risk_percent / 100),
+            max_risk_dollars,
         )
 
         # Double-check that we're not in a drawdown situation
@@ -539,7 +574,8 @@ class RSIDivergenceStrategy(bt.Strategy, TradeThrottling):
         # Make sure we're not trading zero shares
         if size < 1:
             self.log(
-                "Calculated position size too small. Skipping trade.", level="warning"
+                "Calculated position size too small. Skipping trade.",
+                level="warning",
             )
             return 0
 
@@ -547,14 +583,22 @@ class RSIDivergenceStrategy(bt.Strategy, TradeThrottling):
         return int(size)
 
     def get_safe_price_value(self, idx=0):
-        """Safely get price values without risk of index errors"""
+        """Safely get price values without risk of index errors
+
+        :param idx:  (Default value = 0)
+
+        """
         try:
             return self.data.close[idx]
         except IndexError:
             return None
 
     def get_safe_rsi_value(self, idx=0):
-        """Safely get RSI values without risk of index errors"""
+        """Safely get RSI values without risk of index errors
+
+        :param idx:  (Default value = 0)
+
+        """
         try:
             return self.rsi[idx]
         except IndexError:
@@ -687,7 +731,6 @@ class RSIDivergenceStrategy(bt.Strategy, TradeThrottling):
                     and significant_price_diff  # Price difference is significant
                     and significant_rsi_diff
                 ):  # RSI difference is significant
-
                     self.divergence_bull = True
                     self.log(
                         "Strong bullish divergence detected: Price"
@@ -703,7 +746,8 @@ class RSIDivergenceStrategy(bt.Strategy, TradeThrottling):
                 _, price_high1, rsi_high1 = self.price_highs[-1]
                 _, price_high2, rsi_high2 = self.price_highs[-2]
 
-                # Check if RSI is in overbought territory for the most recent high
+                # Check if RSI is in overbought territory for the most recent
+                # high
                 overbought_condition = rsi_high1 > self.p.rsi_overbought
 
                 # Require a more significant price difference (at least 3%)
@@ -721,7 +765,6 @@ class RSIDivergenceStrategy(bt.Strategy, TradeThrottling):
                     and significant_price_diff  # Price difference is significant
                     and significant_rsi_diff
                 ):  # RSI difference is significant
-
                     self.divergence_bear = True
                     self.log(
                         "Strong bearish divergence detected: Price"
@@ -731,8 +774,12 @@ class RSIDivergenceStrategy(bt.Strategy, TradeThrottling):
                     )
 
         except Exception as e:
-            # If there's any error in divergence detection, log it and continue without signal
-            self.log(f"Error in divergence detection: {str(e)}", level="warning")
+            # If there's any error in divergence detection, log it and continue
+            # without signal
+            self.log(
+                f"Error in divergence detection: {str(e)}",
+                level="warning",
+            )
             self.divergence_bull = False
             self.divergence_bear = False
 
@@ -825,8 +872,12 @@ class RSIDivergenceStrategy(bt.Strategy, TradeThrottling):
                         if distance > 0:  # Only update if it would tighten the stop
                             self.trailing_stop.trailamount = distance
                 except Exception as e:
-                    self.log(f"Error updating trailing stop: {str(e)}", level="warning")
-                    # If there's an error, reset the trailing stop to avoid further issues
+                    self.log(
+                        f"Error updating trailing stop: {str(e)}",
+                        level="warning",
+                    )
+                    # If there's an error, reset the trailing stop to avoid
+                    # further issues
                     if self.trailing_stop is not None:
                         self.cancel(self.trailing_stop)
                         self.trailing_stop = None
@@ -889,18 +940,16 @@ class RSIDivergenceStrategy(bt.Strategy, TradeThrottling):
             and volume_confirmed
             and current_rsi >= self.p.min_rsi_value
         ):  # Apply minimum RSI threshold
-
             # Confirm with trend (uptrend or price crossing above SMA)
             trend_up = price > self.sma[0]
-            sma_cross_up = price > self.sma[0] and prev_price < self.sma[0]
+            price > self.sma[0] and prev_price < self.sma[0]
 
             # Add confirmation bar requirement
             rsi_moving_favorably = (
                 current_rsi > rsi_low1 + 3.0
             )  # RSI moving up after bullish divergence
-            price_confirming = (
-                self.data.close[0] > self.data.close[1]
-            )  # Price moving up
+            # Price moving up
+            price_confirming = self.data.close[0] > self.data.close[1]
 
             # Only enter if we have confirmation
             if (
@@ -939,7 +988,6 @@ class RSIDivergenceStrategy(bt.Strategy, TradeThrottling):
             and volume_confirmed
             and current_rsi <= self.p.max_rsi_value
         ):  # Apply maximum RSI threshold
-
             # Confirm with trend (downtrend or price crossing below SMA)
             trend_down = price < self.sma[0]
             sma_cross_down = price < self.sma[0] and prev_price > self.sma[0]
@@ -1005,7 +1053,10 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--todate", "-t", default="2023-12-31", help="Ending date in YYYY-MM-DD format"
+        "--todate",
+        "-t",
+        default="2023-12-31",
+        help="Ending date in YYYY-MM-DD format",
     )
 
     parser.add_argument(
@@ -1014,7 +1065,11 @@ def parse_args():
 
     # RSI and Divergence parameters
     parser.add_argument(
-        "--rsi-period", "-rp", default=14, type=int, help="RSI calculation period"
+        "--rsi-period",
+        "-rp",
+        default=14,
+        type=int,
+        help="RSI calculation period",
     )
 
     parser.add_argument(
@@ -1026,7 +1081,11 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--rsi-oversold", "-ro", default=30, type=int, help="RSI oversold threshold"
+        "--rsi-oversold",
+        "-ro",
+        default=30,
+        type=int,
+        help="RSI oversold threshold",
     )
 
     parser.add_argument(
@@ -1281,7 +1340,8 @@ def main():
     cerebro.broker.set_coc(True)
 
     # Disable margin completely
-    cerebro.broker.set_checksubmit(True)  # Check margin before submitting orders
+    # Check margin before submitting orders
+    cerebro.broker.set_checksubmit(True)
 
     # Add standard analyzers
     add_standard_analyzers(cerebro)
@@ -1303,7 +1363,7 @@ def main():
     if args.min_trend_strength > 0:
         print(f"  Minimum Trend Strength: {args.min_trend_strength} bars")
     if args.use_volume:
-        print(f"  Using Volume Confirmation: Yes")
+        print("  Using Volume Confirmation: Yes")
 
     print("\nExit Parameters:")
     print(f"Long Exit RSI: Above {args.exit_rsi_thresh}")
@@ -1324,7 +1384,7 @@ def main():
 
     print("\nTrade Settings:")
     print(f"Direction: {args.trade_direction}")
-    print(f'Margin Trading: {"Enabled" if args.allow_margin else "Disabled"}')
+    print(f"Margin Trading: {'Enabled' if args.allow_margin else 'Disabled'}")
     print(f"Log Level: {args.log_level}")
     if args.trade_throttle_days > 0:
         print(f"Trade Throttling: {args.trade_throttle_days} days between trades")

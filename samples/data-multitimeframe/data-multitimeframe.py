@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,25 +18,38 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 
 import backtrader as bt
 import backtrader.feeds as btfeeds
 import backtrader.indicators as btind
-from backtrader import ResamplerDaily, ResamplerWeekly, ResamplerMonthly
-from backtrader import ReplayerDaily, ReplayerWeekly, ReplayerMonthly
-from backtrader.utils import flushfile
+from backtrader import (
+    ReplayerDaily,
+    ReplayerMonthly,
+    ReplayerWeekly,
+    ResamplerDaily,
+    ResamplerMonthly,
+    ResamplerWeekly,
+)
 
 
 class SMAStrategy(bt.Strategy):
+    """ """
+
     params = (
         ("period", 10),
         ("onlydaily", False),
     )
 
     def __init__(self):
+        """ """
         self.sma_small_tf = btind.SMA(self.data, period=self.p.period)
         bt.indicators.MACD(self.data0)
 
@@ -45,9 +58,11 @@ class SMAStrategy(bt.Strategy):
             bt.indicators.MACD(self.data1)
 
     def prenext(self):
+        """ """
         self.next()
 
     def nextstart(self):
+        """ """
         print("--------------------------------------------------")
         print("nextstart called with len", len(self))
         print("--------------------------------------------------")
@@ -55,6 +70,7 @@ class SMAStrategy(bt.Strategy):
         super(SMAStrategy, self).nextstart()
 
     def next(self):
+        """ """
         print("Strategy:", len(self))
 
         txt = list()
@@ -90,6 +106,7 @@ class SMAStrategy(bt.Strategy):
 
 
 def runstrat():
+    """ """
     args = parse_args()
 
     # Create a cerebro entity
@@ -111,7 +128,9 @@ def runstrat():
     data = btfeeds.BacktraderCSVData(dataname=datapath)
 
     tframes = dict(
-        daily=bt.TimeFrame.Days, weekly=bt.TimeFrame.Weeks, monthly=bt.TimeFrame.Months
+        daily=bt.TimeFrame.Days,
+        weekly=bt.TimeFrame.Weeks,
+        monthly=bt.TimeFrame.Months,
     )
 
     # Handy dictionary for the argument timeframe conversion
@@ -171,6 +190,7 @@ def runstrat():
 
 
 def parse_args():
+    """ """
     parser = argparse.ArgumentParser(description="Pandas test script")
 
     parser.add_argument(
@@ -178,11 +198,16 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--dataname2", default="", required=False, help="Larger timeframe file to load"
+        "--dataname2",
+        default="",
+        required=False,
+        help="Larger timeframe file to load",
     )
 
     parser.add_argument(
-        "--runnext", action="store_true", help="Use next by next instead of runonce"
+        "--runnext",
+        action="store_true",
+        help="Use next by next instead of runonce",
     )
 
     parser.add_argument(
@@ -190,7 +215,9 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--oldsync", action="store_true", help="Use old data synchronization method"
+        "--oldsync",
+        action="store_true",
+        help="Use old data synchronization method",
     )
 
     parser.add_argument("--oldrs", action="store_true", help="Use old resampler")

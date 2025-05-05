@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """BSON (Binary JSON) encoding and decoding.
 
 The mapping from Python types to BSON types is as follows:
@@ -57,7 +56,6 @@ bytes [#bytes]_                          binary         both
 import calendar
 import datetime
 import itertools
-import platform
 import re
 import struct
 import sys
@@ -68,8 +66,6 @@ from collections import abc as _abc
 
 from .binary import (
     ALL_UUID_SUBTYPES,
-    CSHARP_LEGACY,
-    JAVA_LEGACY,
     OLD_UUID_SUBTYPE,
     STANDARD,
     UUID_SUBTYPE,
@@ -77,7 +73,11 @@ from .binary import (
     UuidRepresentation,
 )
 from .code import Code
-from .codec_options import DEFAULT_CODEC_OPTIONS, CodecOptions, _raw_document_class
+from .codec_options import (
+    DEFAULT_CODEC_OPTIONS,
+    CodecOptions,
+    _raw_document_class,
+)
 from .dbref import DBRef
 from .decimal128 import Decimal128
 from .errors import InvalidBSON, InvalidDocument, InvalidStringData
@@ -97,10 +97,8 @@ try:
 except ImportError:
     _USE_C = False
 
-
 EPOCH_AWARE = datetime.datetime.fromtimestamp(0, utc)
 EPOCH_NAIVE = datetime.datetime.utcfromtimestamp(0)
-
 
 BSONNUM = b"\x01"  # Floating point
 BSONSTR = b"\x02"  # UTF-8 string
@@ -124,7 +122,6 @@ BSONDEC = b"\x13"  # Decimal128
 BSONMIN = b"\xff"  # Min key
 BSONMAX = b"\x7f"  # Max key
 
-
 _UNPACK_FLOAT_FROM = struct.Struct("<d").unpack_from
 _UNPACK_INT = struct.Struct("<i").unpack
 _UNPACK_INT_FROM = struct.Struct("<i").unpack_from
@@ -134,6 +131,11 @@ _UNPACK_TIMESTAMP_FROM = struct.Struct("<II").unpack_from
 
 
 def get_data_and_view(data):
+    """
+
+    :param data:
+
+    """
     if isinstance(data, (bytes, bytearray)):
         return data, memoryview(data)
     view = memoryview(data)
@@ -141,7 +143,12 @@ def get_data_and_view(data):
 
 
 def _raise_unknown_type(element_type, element_name):
-    """Unknown type helper."""
+    """Unknown type helper.
+
+    :param element_type:
+    :param element_name:
+
+    """
     raise InvalidBSON(
         "Detected unknown BSON type %r for fieldname '%s'. Are "
         "you using the latest driver version?"
@@ -150,12 +157,28 @@ def _raise_unknown_type(element_type, element_name):
 
 
 def _get_int(data, view, position, dummy0, dummy1, dummy2):
-    """Decode a BSON int32 to python int."""
+    """Decode a BSON int32 to python int.
+
+    :param data:
+    :param view:
+    :param position:
+    :param dummy0:
+    :param dummy1:
+    :param dummy2:
+
+    """
     return _UNPACK_INT_FROM(data, position)[0], position + 4
 
 
 def _get_c_string(data, view, position, opts):
-    """Decode a BSON 'C' string to python str."""
+    """Decode a BSON 'C' string to python str.
+
+    :param data:
+    :param view:
+    :param position:
+    :param opts:
+
+    """
     end = data.index(b"\x00", position)
     return (
         _utf_8_decode(view[position:end], opts.unicode_decode_error_handler, True)[0],
@@ -164,12 +187,30 @@ def _get_c_string(data, view, position, opts):
 
 
 def _get_float(data, view, position, dummy0, dummy1, dummy2):
-    """Decode a BSON double to python float."""
+    """Decode a BSON double to python float.
+
+    :param data:
+    :param view:
+    :param position:
+    :param dummy0:
+    :param dummy1:
+    :param dummy2:
+
+    """
     return _UNPACK_FLOAT_FROM(data, position)[0], position + 8
 
 
 def _get_string(data, view, position, obj_end, opts, dummy):
-    """Decode a BSON string to python str."""
+    """Decode a BSON string to python str.
+
+    :param data:
+    :param view:
+    :param position:
+    :param obj_end:
+    :param opts:
+    :param dummy:
+
+    """
     length = _UNPACK_INT_FROM(data, position)[0]
     position += 4
     if length < 1 or obj_end - position < length:
@@ -184,7 +225,13 @@ def _get_string(data, view, position, obj_end, opts, dummy):
 
 
 def _get_object_size(data, position, obj_end):
-    """Validate and return a BSON document's size."""
+    """Validate and return a BSON document's size.
+
+    :param data:
+    :param position:
+    :param obj_end:
+
+    """
     try:
         obj_size = _UNPACK_INT_FROM(data, position)[0]
     except struct.error as exc:
@@ -201,7 +248,16 @@ def _get_object_size(data, position, obj_end):
 
 
 def _get_object(data, view, position, obj_end, opts, dummy):
-    """Decode a BSON subdocument to opts.document_class or bson.dbref.DBRef."""
+    """Decode a BSON subdocument to opts.document_class or bson.dbref.DBRef.
+
+    :param data:
+    :param view:
+    :param position:
+    :param obj_end:
+    :param opts:
+    :param dummy:
+
+    """
     obj_size, end = _get_object_size(data, position, obj_end)
     if _raw_document_class(opts.document_class):
         return (
@@ -226,7 +282,16 @@ def _get_object(data, view, position, obj_end, opts, dummy):
 
 
 def _get_array(data, view, position, obj_end, opts, element_name):
-    """Decode a BSON array to python list."""
+    """Decode a BSON array to python list.
+
+    :param data:
+    :param view:
+    :param position:
+    :param obj_end:
+    :param opts:
+    :param element_name:
+
+    """
     size = _UNPACK_INT_FROM(data, position)[0]
     end = position + size - 1
     if data[end] != 0:
@@ -266,7 +331,16 @@ def _get_array(data, view, position, obj_end, opts, element_name):
 
 
 def _get_binary(data, view, position, obj_end, opts, dummy1):
-    """Decode a BSON binary to bson.binary.Binary or python UUID."""
+    """Decode a BSON binary to bson.binary.Binary or python UUID.
+
+    :param data:
+    :param view:
+    :param position:
+    :param obj_end:
+    :param opts:
+    :param dummy1:
+
+    """
     length, subtype = _UNPACK_LENGTH_SUBTYPE_FROM(data, position)
     position += 5
     if subtype == 2:
@@ -301,13 +375,31 @@ def _get_binary(data, view, position, obj_end, opts, dummy1):
 
 
 def _get_oid(data, view, position, dummy0, dummy1, dummy2):
-    """Decode a BSON ObjectId to bson.objectid.ObjectId."""
+    """Decode a BSON ObjectId to bson.objectid.ObjectId.
+
+    :param data:
+    :param view:
+    :param position:
+    :param dummy0:
+    :param dummy1:
+    :param dummy2:
+
+    """
     end = position + 12
     return ObjectId(data[position:end]), end
 
 
 def _get_boolean(data, view, position, dummy0, dummy1, dummy2):
-    """Decode a BSON true/false to python True/False."""
+    """Decode a BSON true/false to python True/False.
+
+    :param data:
+    :param view:
+    :param position:
+    :param dummy0:
+    :param dummy1:
+    :param dummy2:
+
+    """
     end = position + 1
     boolean_byte = data[position:end]
     if boolean_byte == b"\x00":
@@ -318,18 +410,48 @@ def _get_boolean(data, view, position, dummy0, dummy1, dummy2):
 
 
 def _get_date(data, view, position, dummy0, opts, dummy1):
-    """Decode a BSON datetime to python datetime.datetime."""
-    return _millis_to_datetime(_UNPACK_LONG_FROM(data, position)[0], opts), position + 8
+    """Decode a BSON datetime to python datetime.datetime.
+
+    :param data:
+    :param view:
+    :param position:
+    :param dummy0:
+    :param opts:
+    :param dummy1:
+
+    """
+    return (
+        _millis_to_datetime(_UNPACK_LONG_FROM(data, position)[0], opts),
+        position + 8,
+    )
 
 
 def _get_code(data, view, position, obj_end, opts, element_name):
-    """Decode a BSON code to bson.code.Code."""
+    """Decode a BSON code to bson.code.Code.
+
+    :param data:
+    :param view:
+    :param position:
+    :param obj_end:
+    :param opts:
+    :param element_name:
+
+    """
     code, position = _get_string(data, view, position, obj_end, opts, element_name)
     return Code(code), position
 
 
 def _get_code_w_scope(data, view, position, obj_end, opts, element_name):
-    """Decode a BSON code_w_scope to bson.code.Code."""
+    """Decode a BSON code_w_scope to bson.code.Code.
+
+    :param data:
+    :param view:
+    :param position:
+    :param obj_end:
+    :param opts:
+    :param element_name:
+
+    """
     code_end = position + _UNPACK_INT_FROM(data, position)[0]
     code, position = _get_string(data, view, position + 4, code_end, opts, element_name)
     scope, position = _get_object(data, view, position, code_end, opts, element_name)
@@ -339,7 +461,16 @@ def _get_code_w_scope(data, view, position, obj_end, opts, element_name):
 
 
 def _get_regex(data, view, position, dummy0, opts, dummy1):
-    """Decode a BSON regex to bson.regex.Regex or a python pattern object."""
+    """Decode a BSON regex to bson.regex.Regex or a python pattern object.
+
+    :param data:
+    :param view:
+    :param position:
+    :param dummy0:
+    :param opts:
+    :param dummy1:
+
+    """
     pattern, position = _get_c_string(data, view, position, opts)
     bson_flags, position = _get_c_string(data, view, position, opts)
     bson_re = Regex(pattern, bson_flags)
@@ -347,7 +478,16 @@ def _get_regex(data, view, position, dummy0, opts, dummy1):
 
 
 def _get_ref(data, view, position, obj_end, opts, element_name):
-    """Decode (deprecated) BSON DBPointer to bson.dbref.DBRef."""
+    """Decode (deprecated) BSON DBPointer to bson.dbref.DBRef.
+
+    :param data:
+    :param view:
+    :param position:
+    :param obj_end:
+    :param opts:
+    :param element_name:
+
+    """
     collection, position = _get_string(
         data, view, position, obj_end, opts, element_name
     )
@@ -356,18 +496,45 @@ def _get_ref(data, view, position, obj_end, opts, element_name):
 
 
 def _get_timestamp(data, view, position, dummy0, dummy1, dummy2):
-    """Decode a BSON timestamp to bson.timestamp.Timestamp."""
+    """Decode a BSON timestamp to bson.timestamp.Timestamp.
+
+    :param data:
+    :param view:
+    :param position:
+    :param dummy0:
+    :param dummy1:
+    :param dummy2:
+
+    """
     inc, timestamp = _UNPACK_TIMESTAMP_FROM(data, position)
     return Timestamp(timestamp, inc), position + 8
 
 
 def _get_int64(data, view, position, dummy0, dummy1, dummy2):
-    """Decode a BSON int64 to bson.int64.Int64."""
+    """Decode a BSON int64 to bson.int64.Int64.
+
+    :param data:
+    :param view:
+    :param position:
+    :param dummy0:
+    :param dummy1:
+    :param dummy2:
+
+    """
     return Int64(_UNPACK_LONG_FROM(data, position)[0]), position + 8
 
 
 def _get_decimal128(data, view, position, dummy0, dummy1, dummy2):
-    """Decode a BSON decimal128 to bson.decimal128.Decimal128."""
+    """Decode a BSON decimal128 to bson.decimal128.Decimal128.
+
+    :param data:
+    :param view:
+    :param position:
+    :param dummy0:
+    :param dummy1:
+    :param dummy2:
+
+    """
     end = position + 16
     return Decimal128.from_bid(data[position:end]), end
 
@@ -402,16 +569,32 @@ _ELEMENT_GETTER = {
     ord(BSONMAX): lambda u, v, w, x, y, z: (MaxKey(), w),
 }
 
-
 if _USE_C:
 
     def _element_to_dict(data, view, position, obj_end, opts):
+        """
+
+        :param data:
+        :param view:
+        :param position:
+        :param obj_end:
+        :param opts:
+
+        """
         return _cbson._element_to_dict(data, position, obj_end, opts)
 
 else:
 
     def _element_to_dict(data, view, position, obj_end, opts):
-        """Decode a single key, value pair."""
+        """Decode a single key, value pair.
+
+        :param data:
+        :param view:
+        :param position:
+        :param obj_end:
+        :param opts:
+
+        """
         element_type = data[position]
         position += 1
         element_name, position = _get_c_string(data, view, position, opts)
@@ -431,12 +614,30 @@ else:
 
 
 def _raw_to_dict(data, position, obj_end, opts, result):
+    """
+
+    :param data:
+    :param position:
+    :param obj_end:
+    :param opts:
+    :param result:
+
+    """
     data, view = get_data_and_view(data)
     return _elements_to_dict(data, view, position, obj_end, opts, result)
 
 
 def _elements_to_dict(data, view, position, obj_end, opts, result=None):
-    """Decode a BSON document into result."""
+    """Decode a BSON document into result.
+
+    :param data:
+    :param view:
+    :param position:
+    :param obj_end:
+    :param opts:
+    :param result:  (Default value = None)
+
+    """
     if result is None:
         result = opts.document_class()
     end = obj_end - 1
@@ -449,7 +650,12 @@ def _elements_to_dict(data, view, position, obj_end, opts, result=None):
 
 
 def _bson_to_dict(data, opts):
-    """Decode a BSON string to document_class."""
+    """Decode a BSON string to document_class.
+
+    :param data:
+    :param opts:
+
+    """
     data, view = get_data_and_view(data)
     try:
         if _raw_document_class(opts.document_class):
@@ -467,7 +673,6 @@ def _bson_to_dict(data, opts):
 if _USE_C:
     _bson_to_dict = _cbson._bson_to_dict
 
-
 _PACK_FLOAT = struct.Struct("<d").pack
 _PACK_INT = struct.Struct("<i").pack
 _PACK_LENGTH_SUBTYPE = struct.Struct("<iB").pack
@@ -482,6 +687,8 @@ def gen_list_name():
 
     The first 1000 keys are returned from a pre-built cache. All
     subsequent keys are generated on the fly.
+
+
     """
     for name in _LIST_NAMES:
         yield name
@@ -492,7 +699,11 @@ def gen_list_name():
 
 
 def _make_c_string_check(string):
-    """Make a 'C' string, checking for embedded NUL characters."""
+    """Make a 'C' string, checking for embedded NUL characters.
+
+    :param string:
+
+    """
     if isinstance(string, bytes):
         if b"\x00" in string:
             raise InvalidDocument(
@@ -514,7 +725,11 @@ def _make_c_string_check(string):
 
 
 def _make_c_string(string):
-    """Make a 'C' string."""
+    """Make a 'C' string.
+
+    :param string:
+
+    """
     if isinstance(string, bytes):
         try:
             _utf_8_decode(string, None, True)
@@ -528,7 +743,11 @@ def _make_c_string(string):
 
 
 def _make_name(string):
-    """Make a 'C' string suitable for a BSON key."""
+    """Make a 'C' string suitable for a BSON key.
+
+    :param string:
+
+    """
     # Keys can only be text in python 3.
     if "\x00" in string:
         raise InvalidDocument(
@@ -538,18 +757,39 @@ def _make_name(string):
 
 
 def _encode_float(name, value, dummy0, dummy1):
-    """Encode a float."""
+    """Encode a float.
+
+    :param name:
+    :param value:
+    :param dummy0:
+    :param dummy1:
+
+    """
     return b"\x01" + name + _PACK_FLOAT(value)
 
 
 def _encode_bytes(name, value, dummy0, dummy1):
-    """Encode a python bytes."""
+    """Encode a python bytes.
+
+    :param name:
+    :param value:
+    :param dummy0:
+    :param dummy1:
+
+    """
     # Python3 special case. Store 'bytes' as BSON binary subtype 0.
     return b"\x05" + name + _PACK_INT(len(value)) + b"\x00" + value
 
 
 def _encode_mapping(name, value, check_keys, opts):
-    """Encode a mapping type."""
+    """Encode a mapping type.
+
+    :param name:
+    :param value:
+    :param check_keys:
+    :param opts:
+
+    """
     if _raw_document_class(value):
         return b"\x03" + name + value.raw
     data = b"".join(
@@ -559,7 +799,14 @@ def _encode_mapping(name, value, check_keys, opts):
 
 
 def _encode_dbref(name, value, check_keys, opts):
-    """Encode bson.dbref.DBRef."""
+    """Encode bson.dbref.DBRef.
+
+    :param name:
+    :param value:
+    :param check_keys:
+    :param opts:
+
+    """
     buf = bytearray(b"\x03" + name + b"\x00\x00\x00\x00")
     begin = len(buf) - 4
 
@@ -576,7 +823,14 @@ def _encode_dbref(name, value, check_keys, opts):
 
 
 def _encode_list(name, value, check_keys, opts):
-    """Encode a list/tuple."""
+    """Encode a list/tuple.
+
+    :param name:
+    :param value:
+    :param check_keys:
+    :param opts:
+
+    """
     lname = gen_list_name()
     data = b"".join(
         [_name_value_to_bson(next(lname), item, check_keys, opts) for item in value]
@@ -585,13 +839,27 @@ def _encode_list(name, value, check_keys, opts):
 
 
 def _encode_text(name, value, dummy0, dummy1):
-    """Encode a python str."""
+    """Encode a python str.
+
+    :param name:
+    :param value:
+    :param dummy0:
+    :param dummy1:
+
+    """
     value = _utf_8_encode(value)[0]
     return b"\x02" + name + _PACK_INT(len(value) + 1) + value + b"\x00"
 
 
 def _encode_binary(name, value, dummy0, dummy1):
-    """Encode bson.binary.Binary."""
+    """Encode bson.binary.Binary.
+
+    :param name:
+    :param value:
+    :param dummy0:
+    :param dummy1:
+
+    """
     subtype = value.subtype
     if subtype == 2:
         value = _PACK_INT(len(value)) + value
@@ -599,35 +867,77 @@ def _encode_binary(name, value, dummy0, dummy1):
 
 
 def _encode_uuid(name, value, dummy, opts):
-    """Encode uuid.UUID."""
+    """Encode uuid.UUID.
+
+    :param name:
+    :param value:
+    :param dummy:
+    :param opts:
+
+    """
     uuid_representation = opts.uuid_representation
     binval = Binary.from_uuid(value, uuid_representation=uuid_representation)
     return _encode_binary(name, binval, dummy, opts)
 
 
 def _encode_objectid(name, value, dummy0, dummy1):
-    """Encode bson.objectid.ObjectId."""
+    """Encode bson.objectid.ObjectId.
+
+    :param name:
+    :param value:
+    :param dummy0:
+    :param dummy1:
+
+    """
     return b"\x07" + name + value.binary
 
 
 def _encode_bool(name, value, dummy0, dummy1):
-    """Encode a python boolean (True/False)."""
+    """Encode a python boolean (True/False).
+
+    :param name:
+    :param value:
+    :param dummy0:
+    :param dummy1:
+
+    """
     return b"\x08" + name + (value and b"\x01" or b"\x00")
 
 
 def _encode_datetime(name, value, dummy0, dummy1):
-    """Encode datetime.datetime."""
+    """Encode datetime.datetime.
+
+    :param name:
+    :param value:
+    :param dummy0:
+    :param dummy1:
+
+    """
     millis = _datetime_to_millis(value)
     return b"\x09" + name + _PACK_LONG(millis)
 
 
 def _encode_none(name, dummy0, dummy1, dummy2):
-    """Encode python None."""
+    """Encode python None.
+
+    :param name:
+    :param dummy0:
+    :param dummy1:
+    :param dummy2:
+
+    """
     return b"\x0a" + name
 
 
 def _encode_regex(name, value, dummy0, dummy1):
-    """Encode a python regex or bson.regex.Regex."""
+    """Encode a python regex or bson.regex.Regex.
+
+    :param name:
+    :param value:
+    :param dummy0:
+    :param dummy1:
+
+    """
     flags = value.flags
     # Python 3 common case
     if flags == re.UNICODE:
@@ -653,7 +963,14 @@ def _encode_regex(name, value, dummy0, dummy1):
 
 
 def _encode_code(name, value, dummy, opts):
-    """Encode bson.code.Code."""
+    """Encode bson.code.Code.
+
+    :param name:
+    :param value:
+    :param dummy:
+    :param opts:
+
+    """
     cstring = _make_c_string(value)
     cstrlen = len(cstring)
     if value.scope is None:
@@ -664,7 +981,14 @@ def _encode_code(name, value, dummy, opts):
 
 
 def _encode_int(name, value, dummy0, dummy1):
-    """Encode a python int."""
+    """Encode a python int.
+
+    :param name:
+    :param value:
+    :param dummy0:
+    :param dummy1:
+
+    """
     if -2147483648 <= value <= 2147483647:
         return b"\x10" + name + _PACK_INT(value)
     else:
@@ -675,12 +999,26 @@ def _encode_int(name, value, dummy0, dummy1):
 
 
 def _encode_timestamp(name, value, dummy0, dummy1):
-    """Encode bson.timestamp.Timestamp."""
+    """Encode bson.timestamp.Timestamp.
+
+    :param name:
+    :param value:
+    :param dummy0:
+    :param dummy1:
+
+    """
     return b"\x11" + name + _PACK_TIMESTAMP(value.inc, value.time)
 
 
 def _encode_long(name, value, dummy0, dummy1):
-    """Encode a python long (python 2.x)"""
+    """Encode a python long (python 2.x)
+
+    :param name:
+    :param value:
+    :param dummy0:
+    :param dummy1:
+
+    """
     try:
         return b"\x12" + name + _PACK_LONG(value)
     except struct.error:
@@ -688,17 +1026,38 @@ def _encode_long(name, value, dummy0, dummy1):
 
 
 def _encode_decimal128(name, value, dummy0, dummy1):
-    """Encode bson.decimal128.Decimal128."""
+    """Encode bson.decimal128.Decimal128.
+
+    :param name:
+    :param value:
+    :param dummy0:
+    :param dummy1:
+
+    """
     return b"\x13" + name + value.bid
 
 
 def _encode_minkey(name, dummy0, dummy1, dummy2):
-    """Encode bson.min_key.MinKey."""
+    """Encode bson.min_key.MinKey.
+
+    :param name:
+    :param dummy0:
+    :param dummy1:
+    :param dummy2:
+
+    """
     return b"\xff" + name
 
 
 def _encode_maxkey(name, dummy0, dummy1, dummy2):
-    """Encode bson.max_key.MaxKey."""
+    """Encode bson.max_key.MaxKey.
+
+    :param name:
+    :param dummy0:
+    :param dummy1:
+    :param dummy2:
+
+    """
     return b"\x7f" + name
 
 
@@ -735,7 +1094,6 @@ _ENCODERS = {
     _abc.Mapping: _encode_mapping,
 }
 
-
 _MARKERS = {
     5: _encode_binary,
     7: _encode_objectid,
@@ -748,14 +1106,22 @@ _MARKERS = {
     255: _encode_minkey,
 }
 
-
 _BUILT_IN_TYPES = tuple(t for t in _ENCODERS)
 
 
 def _name_value_to_bson(
     name, value, check_keys, opts, in_custom_call=False, in_fallback_call=False
 ):
-    """Encode a single name, value pair."""
+    """Encode a single name, value pair.
+
+    :param name:
+    :param value:
+    :param check_keys:
+    :param opts:
+    :param in_custom_call:  (Default value = False)
+    :param in_fallback_call:  (Default value = False)
+
+    """
     # First see if the type is already cached. KeyError will only ever
     # happen once per subtype.
     try:
@@ -779,7 +1145,11 @@ def _name_value_to_bson(
         custom_encoder = opts.type_registry._encoder_map.get(type(value))
         if custom_encoder is not None:
             return _name_value_to_bson(
-                name, custom_encoder(value), check_keys, opts, in_custom_call=True
+                name,
+                custom_encoder(value),
+                check_keys,
+                opts,
+                in_custom_call=True,
             )
 
     # Fourth, test each base type. This will only happen once for
@@ -798,7 +1168,11 @@ def _name_value_to_bson(
     fallback_encoder = opts.type_registry._fallback_encoder
     if not in_fallback_call and fallback_encoder is not None:
         return _name_value_to_bson(
-            name, fallback_encoder(value), check_keys, opts, in_fallback_call=True
+            name,
+            fallback_encoder(value),
+            check_keys,
+            opts,
+            in_fallback_call=True,
         )
 
     raise InvalidDocument(
@@ -807,7 +1181,14 @@ def _name_value_to_bson(
 
 
 def _element_to_bson(key, value, check_keys, opts):
-    """Encode a single key, value pair."""
+    """Encode a single key, value pair.
+
+    :param key:
+    :param value:
+    :param check_keys:
+    :param opts:
+
+    """
     if not isinstance(key, str):
         raise InvalidDocument(
             "documents must have only string keys, key was %r" % (key,)
@@ -823,7 +1204,14 @@ def _element_to_bson(key, value, check_keys, opts):
 
 
 def _dict_to_bson(doc, check_keys, opts, top_level=True):
-    """Encode a document to BSON."""
+    """Encode a document to BSON.
+
+    :param doc:
+    :param check_keys:
+    :param opts:
+    :param top_level:  (Default value = True)
+
+    """
     if _raw_document_class(doc):
         return doc.raw
     try:
@@ -847,7 +1235,12 @@ if _USE_C:
 
 
 def _millis_to_datetime(millis, opts):
-    """Convert milliseconds since epoch UTC to datetime."""
+    """Convert milliseconds since epoch UTC to datetime.
+
+    :param millis:
+    :param opts:
+
+    """
     diff = ((millis % 1000) + 1000) % 1000
     seconds = (millis - diff) // 1000
     micros = diff * 1000
@@ -861,7 +1254,11 @@ def _millis_to_datetime(millis, opts):
 
 
 def _datetime_to_millis(dtm):
-    """Convert datetime to milliseconds since epoch UTC."""
+    """Convert datetime to milliseconds since epoch UTC.
+
+    :param dtm:
+
+    """
     if dtm.utcoffset() is not None:
         dtm = dtm - dtm.utcoffset()
     return int(calendar.timegm(dtm.timetuple()) * 1000 + dtm.microsecond // 1000)
@@ -892,6 +1289,11 @@ def encode(document, check_keys=False, codec_options=DEFAULT_CODEC_OPTIONS):
         :class:`~bson.codec_options.CodecOptions`.
 
     .. versionadded:: 3.9
+
+    :param document:
+    :param check_keys:  (Default value = False)
+    :param codec_options:  (Default value = DEFAULT_CODEC_OPTIONS)
+
     """
     if not isinstance(codec_options, CodecOptions):
         raise _CODEC_OPTIONS_TYPE_ERROR
@@ -906,7 +1308,19 @@ def decode(data, codec_options=DEFAULT_CODEC_OPTIONS):
     :class:`dict`. To use a different :class:`MutableMapping` class,
     configure a :class:`~bson.codec_options.CodecOptions`::
 
-        >>> import collections  # From Python standard library.
+
+    :Parameters:
+      - `data`: the BSON to decode. Any bytes-like object that implements
+        the buffer protocol.
+      - `codec_options` (optional): An instance of
+        :class:`~bson.codec_options.CodecOptions`.
+
+    .. versionadded:: 3.9
+
+    :param data:
+    :param codec_options:  (Default value = DEFAULT_CODEC_OPTIONS)
+
+    >>> import collections  # From Python standard library.
         >>> import bson
         >>> from .codec_options import CodecOptions
         >>> data = bson.encode({'a': 1})
@@ -916,14 +1330,6 @@ def decode(data, codec_options=DEFAULT_CODEC_OPTIONS):
         >>> decoded_doc = bson.decode(data, codec_options=options)
         >>> type(decoded_doc)
         <class 'collections.OrderedDict'>
-
-    :Parameters:
-      - `data`: the BSON to decode. Any bytes-like object that implements
-        the buffer protocol.
-      - `codec_options` (optional): An instance of
-        :class:`~bson.codec_options.CodecOptions`.
-
-    .. versionadded:: 3.9
     """
     if not isinstance(codec_options, CodecOptions):
         raise _CODEC_OPTIONS_TYPE_ERROR
@@ -953,6 +1359,10 @@ def decode_all(data, codec_options=DEFAULT_CODEC_OPTIONS):
 
        Replaced `as_class`, `tz_aware`, and `uuid_subtype` options with
        `codec_options`.
+
+    :param data:
+    :param codec_options:  (Default value = DEFAULT_CODEC_OPTIONS)
+
     """
     data, view = get_data_and_view(data)
     if not isinstance(codec_options, CodecOptions):
@@ -996,6 +1406,13 @@ if _USE_C:
 
 
 def _decode_selective(rawdoc, fields, codec_options):
+    """
+
+    :param rawdoc:
+    :param fields:
+    :param codec_options:
+
+    """
     if _raw_document_class(codec_options.document_class):
         # If document_class is RawBSONDocument, use vanilla dictionary for
         # decoding command response.
@@ -1015,6 +1432,11 @@ def _decode_selective(rawdoc, fields, codec_options):
 
 
 def _convert_raw_document_lists_to_streams(document):
+    """
+
+    :param document:
+
+    """
     cursor = document.get("cursor")
     if cursor:
         for key in ("firstBatch", "nextBatch"):
@@ -1046,6 +1468,11 @@ def _decode_all_selective(data, codec_options, fields):
       - `document_list`: Single-member list containing the decoded document.
 
     .. versionadded:: 3.8
+
+    :param data:
+    :param codec_options:
+    :param fields:
+
     """
     if not codec_options.type_registry._decoder_map:
         return decode_all(data, codec_options)
@@ -1088,6 +1515,10 @@ def decode_iter(data, codec_options=DEFAULT_CODEC_OPTIONS):
        `codec_options`.
 
     .. versionadded:: 2.8
+
+    :param data:
+    :param codec_options:  (Default value = DEFAULT_CODEC_OPTIONS)
+
     """
     if not isinstance(codec_options, CodecOptions):
         raise _CODEC_OPTIONS_TYPE_ERROR
@@ -1118,6 +1549,10 @@ def decode_file_iter(file_obj, codec_options=DEFAULT_CODEC_OPTIONS):
        `codec_options`.
 
     .. versionadded:: 2.8
+
+    :param file_obj:
+    :param codec_options:  (Default value = DEFAULT_CODEC_OPTIONS)
+
     """
     while True:
         # Read size of next object.
@@ -1140,6 +1575,9 @@ def is_valid(bson):
 
     :Parameters:
       - `bson`: the data to be validated
+
+    :param bson:
+
     """
     if not isinstance(bson, bytes):
         raise TypeError("BSON data must be an instance of a subclass of bytes")
@@ -1157,6 +1595,8 @@ class BSON(bytes):
     .. warning:: Using this class to encode and decode BSON adds a performance
        cost. For better performance use the module level functions
        :func:`encode` and :func:`decode` instead.
+
+
     """
 
     @classmethod
@@ -1181,6 +1621,11 @@ class BSON(bytes):
 
         .. versionchanged:: 3.0
            Replaced `uuid_subtype` option with `codec_options`.
+
+        :param document:
+        :param check_keys:  (Default value = False)
+        :param codec_options:  (Default value = DEFAULT_CODEC_OPTIONS)
+
         """
         return cls(encode(document, check_keys, codec_options))
 
@@ -1191,16 +1636,6 @@ class BSON(bytes):
         :class:`dict`. To use a different :class:`MutableMapping` class,
         configure a :class:`~bson.codec_options.CodecOptions`::
 
-            >>> import collections  # From Python standard library.
-            >>> import bson
-            >>> from .codec_options import CodecOptions
-            >>> data = bson.BSON.encode({'a': 1})
-            >>> decoded_doc = bson.BSON(data).decode()
-            <type 'dict'>
-            >>> options = CodecOptions(document_class=collections.OrderedDict)
-            >>> decoded_doc = bson.BSON(data).decode(codec_options=options)
-            >>> type(decoded_doc)
-            <class 'collections.OrderedDict'>
 
         :Parameters:
           - `codec_options` (optional): An instance of
@@ -1214,6 +1649,19 @@ class BSON(bytes):
 
            Replaced `as_class`, `tz_aware`, and `uuid_subtype` options with
            `codec_options`.
+
+        :param codec_options:  (Default value = DEFAULT_CODEC_OPTIONS)
+
+        >>> import collections  # From Python standard library.
+            >>> import bson
+            >>> from .codec_options import CodecOptions
+            >>> data = bson.BSON.encode({'a': 1})
+            >>> decoded_doc = bson.BSON(data).decode()
+            <type 'dict'>
+            >>> options = CodecOptions(document_class=collections.OrderedDict)
+            >>> decoded_doc = bson.BSON(data).decode(codec_options=options)
+            >>> type(decoded_doc)
+            <class 'collections.OrderedDict'>
         """
         return decode(self, codec_options)
 

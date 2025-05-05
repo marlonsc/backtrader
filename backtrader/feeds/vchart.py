@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,20 +18,23 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import datetime
-import struct
 import os.path
+import struct
 
-from .. import feed
-from .. import TimeFrame
+from .. import TimeFrame, feed
 from ..utils import date2num
 
 
 class VChartData(feed.DataBase):
-    """
-    Support for `Visual Chart <www.visualchart.com>`_ binary on-disk files for
+    """Support for `Visual Chart <www.visualchart.com>`_ binary on-disk files for
     both daily and intradaily formats.
 
     Note:
@@ -43,9 +46,12 @@ class VChartData(feed.DataBase):
 
         Else the file extension (``.fd`` for daily and ``.min`` for intraday)
         will be used.
+
+
     """
 
     def start(self):
+        """ """
         super(VChartData, self).start()
 
         # Not yet known if a extension is needed
@@ -84,11 +90,13 @@ class VChartData(feed.DataBase):
             self.f = open(dataname, "rb")
 
     def stop(self):
+        """ """
         if self.f is not None:
             self.f.close()
             self.f = None
 
     def _load(self):
+        """ """
         if self.f is None:
             return False
 
@@ -125,11 +133,19 @@ class VChartData(feed.DataBase):
 
 
 class VChartFeed(feed.FeedBase):
+    """ """
+
     DataCls = VChartData
 
     params = (("basepath", ""),) + DataCls.params._gettuple()
 
     def _getdata(self, dataname, **kwargs):
+        """
+
+        :param dataname:
+        :param **kwargs:
+
+        """
         maincode = dataname[0:2]
         subcode = dataname[2:6]
 

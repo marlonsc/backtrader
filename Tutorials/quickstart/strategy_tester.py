@@ -5,15 +5,11 @@
 from datetime import datetime  # For datetime objects
 from pathlib import Path
 
-import pandas as pd
-
 import backtrader as bt
+import pandas as pd
 from test_strategies import (
-    DelayedIndexing,
-    TestStrategy_SMA,
-    EmptyCall,
-    TestUsingOperators,
     PlayWithIndicators,
+    TestStrategy_SMA,
 )
 
 # globals
@@ -67,7 +63,8 @@ if __name__ == "__main__":
     cerebro.addsizer(bt.sizers.FixedSize, stake=10)
 
     # add one strategy with a parameter
-    # cerebro.addstrategy(TestStrategy_SMA, ma_period = 17)   # see params in TestStrategy
+    # cerebro.addstrategy(TestStrategy_SMA, ma_period = 17)   # see params in
+    # TestStrategy
 
     # Try the strategy w multiple parameters
     if False:
@@ -86,7 +83,8 @@ if __name__ == "__main__":
     print(f"Starting Portfolio Value: {cerebro.broker.getvalue():,.2f}")
 
     # Run over everything
-    # maxcpus=1 ist wichtig, wenn mehrere Varianten über optstrategy analysiert werden
+    # maxcpus=1 ist wichtig, wenn mehrere Varianten über optstrategy
+    # analysiert werden
     cerebro.run(maxcpus=1)
 
     print("Trade Results:")

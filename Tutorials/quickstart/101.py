@@ -13,9 +13,7 @@ import backtrader as bt
 
 # functions
 
-
 if __name__ == "__main__":
-
     cerebro = bt.Cerebro()
     cerebro.broker.setcash(66_000)
 

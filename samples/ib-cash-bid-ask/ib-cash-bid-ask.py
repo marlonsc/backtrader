@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,19 +19,28 @@
 #
 ###############################################################################
 
-# When setting the parameter "what='ASK'" the quoted price for Ask will be used from the incoming messages (field 2) instead of the default Bid price (field 1).
+# When setting the parameter "what='ASK'" the quoted price for Ask will be
+# used from the incoming messages (field 2) instead of the default Bid
+# price (field 1).
 
 # BID: <tickPrice tickerId=16777217, field=1, price=1.11582, canAutoExecute=1>
 # ASK: <tickPrice tickerId=16777219, field=2, price=1.11583, canAutoExecute=1>
 
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import backtrader as bt
-import datetime
 
 
 class St(bt.Strategy):
+    """ """
+
     def logdata(self):
+        """ """
         txt = []
         txt.append("{}".format(len(self)))
         txt.append("{}".format(self.data.datetime.datetime(0).isoformat()))
@@ -49,6 +58,14 @@ class St(bt.Strategy):
     data_live = False
 
     def notify_data(self, data, status, *args, **kwargs):
+        """
+
+        :param data:
+        :param status:
+        :param *args:
+        :param **kwargs:
+
+        """
         print("*" * 5, "DATA NOTIF:", data._getstatusname(status), *args)
         if (
             self.datas[0]._laststatus == self.datas[0].LIVE
@@ -67,6 +84,7 @@ class St(bt.Strategy):
     # sold = 0
 
     def next(self):
+        """ """
         self.logdata()
         if not self.data_live:
             return
@@ -84,6 +102,11 @@ compression = 5
 
 
 def run(args=None):
+    """
+
+    :param args:  (Default value = None)
+
+    """
     cerebro = bt.Cerebro(stdstats=False)
     store = bt.stores.IBStore(
         port=7497,

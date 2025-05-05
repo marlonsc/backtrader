@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
@@ -33,14 +38,18 @@ from weekdaysfiller import WeekDaysFiller
 
 
 class St(bt.Strategy):
+    """ """
+
     params = (("sma", 0),)
 
     def __init__(self):
+        """ """
         if self.p.sma:
             btind.SMA(self.data0, period=self.p.sma)
             btind.SMA(self.data1, period=self.p.sma)
 
     def next(self):
+        """ """
         dtequal = self.data0.datetime.datetime() == self.data1.datetime.datetime()
 
         txt = ""
@@ -51,6 +60,7 @@ class St(bt.Strategy):
 
 
 def runstrat():
+    """ """
     args = parse_args()
 
     fromdate = datetime.datetime.strptime(args.fromdate, "%Y-%m-%d")
@@ -86,6 +96,7 @@ def runstrat():
 
 
 def parse_args():
+    """ """
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Sample for aligning with trade ",
@@ -102,7 +113,11 @@ def parse_args():
     parser.add_argument("--data1", required=False, help="Data 1 to be read in")
 
     parser.add_argument(
-        "--sma", required=False, default=0, type=int, help="Add a sma to the datas"
+        "--sma",
+        required=False,
+        default=0,
+        type=int,
+        help="Add a sma to the datas",
     )
 
     parser.add_argument(
@@ -120,11 +135,17 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--filler0", required=False, action="store_true", help="Add Filler to Data 0"
+        "--filler0",
+        required=False,
+        action="store_true",
+        help="Add Filler to Data 0",
     )
 
     parser.add_argument(
-        "--filler1", required=False, action="store_true", help="Add Filler to Data 1"
+        "--filler1",
+        required=False,
+        action="store_true",
+        help="Add Filler to Data 1",
     )
 
     parser.add_argument(
@@ -135,7 +156,10 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--todate", "-t", default="2012-12-31", help="Ending date in YYYY-MM-DD format"
+        "--todate",
+        "-t",
+        default="2012-12-31",
+        help="Ending date in YYYY-MM-DD format",
     )
 
     parser.add_argument("--plot", required=False, action="store_true", help="Do plot")

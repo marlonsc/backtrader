@@ -75,19 +75,28 @@ EXAMPLE:
 python strategies/gaussian_triple_confirmation.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --plot
 """
 
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
 import math
-import pandas as pd
-import psycopg2
-import matplotlib.pyplot as plt
-import backtrader as bt
-import backtrader.indicators as btind
-from backtrader.utils.py3 import range
 import os
 import sys
+
+import backtrader as bt
+import pandas as pd
+import psycopg2
+from strategies.utils import (
+    TradeThrottling,
+    add_standard_analyzers,
+    get_db_data,
+    print_performance_metrics,
+)
 
 # Add the parent directory to the Python path to import shared modules
 parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -95,18 +104,10 @@ if parent_dir not in sys.path:
     sys.path.append(parent_dir)
 
 # Import utility functions
-from strategies.utils import (
-    get_db_data,
-    print_performance_metrics,
-    TradeThrottling,
-    add_standard_analyzers,
-)
 
 
 class StockPriceData(bt.feeds.PandasData):
-    """
-    Stock Price Data Feed
-    """
+    """Stock Price Data Feed"""
 
     params = (
         ("datetime", None),  # Column containing the date (index)
@@ -120,8 +121,15 @@ class StockPriceData(bt.feeds.PandasData):
 
 
 def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate):
-    """
-    Get historical price data from PostgreSQL database
+    """Get historical price data from PostgreSQL database
+
+    :param symbol:
+    :param dbuser:
+    :param dbpass:
+    :param dbname:
+    :param fromdate:
+    :param todate:
+
     """
     # Format dates for database query
     from_str = fromdate.strftime("%Y-%m-%d %H:%M:%S")
@@ -159,7 +167,8 @@ def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate):
 
         # Convert to pandas DataFrame
         df = pd.DataFrame(
-            rows, columns=["Date", "Open", "High", "Low", "Close", "Volume", "RSI"]
+            rows,
+            columns=["Date", "Open", "High", "Low", "Close", "Volume", "RSI"],
         )
 
         # Convert 'Date' to datetime and set as index
@@ -197,19 +206,14 @@ def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate):
 
 
 class StochasticRSI(bt.Indicator):
-    """
-    Stochastic RSI Indicator
+    """Stochastic RSI Indicator
 
     Formula:
     - RSI = Relative Strength Index
     - K = SMA(Stochastic(RSI, RSI, RSI, period), smoothK)
     - D = SMA(K, smoothD)
 
-    Params:
-    - rsi_length: Period for RSI calculation
-    - stoch_length: Period for Stochastic calculation
-    - k_smooth: Smoothing period for K line
-    - d_smooth: Smoothing period for D line
+
     """
 
     lines = ("k", "d")
@@ -227,6 +231,7 @@ class StochasticRSI(bt.Indicator):
     plotlines = dict(k=dict(color="blue", _name="K"), d=dict(color="orange", _name="D"))
 
     def __init__(self):
+        """ """
         # Calculate RSI on the close price
         self.rsi = bt.indicators.RSI(self.data, period=self.p.rsi_length)
 
@@ -247,10 +252,11 @@ class StochasticRSI(bt.Indicator):
 
 
 class GaussianFilter(bt.Indicator):
-    """
-    Gaussian Filter indicator as described by John Ehlers
+    """Gaussian Filter indicator as described by John Ehlers
 
     This indicator calculates a filter and channel bands using Gaussian filter techniques
+
+
     """
 
     lines = ("filt", "hband", "lband")
@@ -277,6 +283,7 @@ class GaussianFilter(bt.Indicator):
     )
 
     def __init__(self):
+        """ """
         # Use the provided source or default to HLC3
         if self.p.source is None:
             self.src = (self.data.high + self.data.low + self.data.close) / 3.0
@@ -287,10 +294,10 @@ class GaussianFilter(bt.Indicator):
         beta = (1 - math.cos(4 * math.asin(1) / self.p.period)) / (
             math.pow(1.414, 2 / self.p.poles) - 1
         )
-        alpha = -beta + math.sqrt(math.pow(beta, 2) + 2 * beta)
+        -beta + math.sqrt(math.pow(beta, 2) + 2 * beta)
 
         # Lag
-        lag = (self.p.period - 1) / (2 * self.p.poles)
+        (self.p.period - 1) / (2 * self.p.poles)
 
         # Apply the filters - we'll implement a simplified version here
         self.srcdata = self.src
@@ -311,8 +318,7 @@ class GaussianFilter(bt.Indicator):
 
 
 class GaussianChannelStrategy(bt.Strategy, TradeThrottling):
-    """
-    Strategy that implements the Gaussian Channel with Stochastic RSI trading rules:
+    """Strategy that implements the Gaussian Channel with Stochastic RSI trading rules:
     - Open long position when:
       - The gaussian channel is green (filt > filt[1])
       - The close price is above the high gaussian channel band
@@ -335,6 +341,8 @@ class GaussianChannelStrategy(bt.Strategy, TradeThrottling):
     Additional Features:
     - Trade throttling to limit trade frequency
     - Risk management with stop loss functionality
+
+
     """
 
     params = (
@@ -362,7 +370,10 @@ class GaussianChannelStrategy(bt.Strategy, TradeThrottling):
             "exit_strategy",
             "middle_band",
         ),  # Exit strategy: 'default', 'middle_band', 'bars', 'trailing_percent', 'trailing_atr', 'trailing_ma'
-        ("exit_bars", 5),  # Number of bars to hold position when exit_strategy='bars'
+        (
+            "exit_bars",
+            5,
+        ),  # Number of bars to hold position when exit_strategy='bars'
         (
             "trailing_percent",
             2.0,
@@ -380,18 +391,23 @@ class GaussianChannelStrategy(bt.Strategy, TradeThrottling):
             50,
         ),  # MA period for trailing stop when exit_strategy='trailing_ma'
         # Position sizing parameters
-        ("position_sizing", "percent"),  # Position sizing method: 'percent', 'auto'
+        # Position sizing method: 'percent', 'auto'
+        ("position_sizing", "percent"),
         (
             "position_percent",
             20.0,
-        ),  # Percentage of equity to use per trade (when position_sizing='percent')
-        ("max_position_percent", 95.0),  # Maximum percentage of equity to use per trade
+            # Percentage of equity to use per trade (when
+            # position_sizing='percent')
+        ),
+        # Maximum percentage of equity to use per trade
+        ("max_position_percent", 95.0),
         (
             "risk_percent",
             1.0,
         ),  # Risk percentage of equity per trade (used in volatility sizing)
         # Trade throttling
-        ("trade_throttle_hours", 0),  # Minimum hours between trades (0 = no throttling)
+        # Minimum hours between trades (0 = no throttling)
+        ("trade_throttle_hours", 0),
         # Risk management
         ("use_stop_loss", False),  # Whether to use a stop loss
         ("stop_loss_percent", 5.0),  # Stop loss percentage from entry
@@ -400,6 +416,7 @@ class GaussianChannelStrategy(bt.Strategy, TradeThrottling):
     )
 
     def __init__(self):
+        """ """
         # Keep track of close price
         self.dataclose = self.datas[0].close
         self.datahigh = self.datas[0].high
@@ -488,12 +505,23 @@ class GaussianChannelStrategy(bt.Strategy, TradeThrottling):
             self.atr = bt.indicators.ATR(self.data, period=self.p.atr_period)
 
     def log(self, txt, dt=None, doprint=False):
-        """Logging function"""
+        """Logging function
+
+        :param txt:
+        :param dt:  (Default value = None)
+        :param doprint:  (Default value = False)
+
+        """
         if self.params.printlog or doprint:
             dt = dt or self.datas[0].datetime.date(0)
             print("%s, %s" % (dt.isoformat(), txt))
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status in [order.Submitted, order.Accepted]:
             # Order submitted/accepted to/by broker - Nothing to do
             return
@@ -565,6 +593,11 @@ class GaussianChannelStrategy(bt.Strategy, TradeThrottling):
         self.order = None
 
     def notify_trade(self, trade):
+        """
+
+        :param trade:
+
+        """
         if not trade.isclosed:
             return
 
@@ -580,7 +613,8 @@ class GaussianChannelStrategy(bt.Strategy, TradeThrottling):
             cash_to_use = available_cash * (self.p.position_percent / 100)
             # Make sure we don't exceed maximum position percentage
             cash_to_use = min(
-                cash_to_use, available_cash * (self.p.max_position_percent / 100)
+                cash_to_use,
+                available_cash * (self.p.max_position_percent / 100),
             )
             size = int(cash_to_use / current_price)
             return size
@@ -684,6 +718,7 @@ class GaussianChannelStrategy(bt.Strategy, TradeThrottling):
         return False
 
     def next(self):
+        """ """
         # Only operate within the specified date range
         current_date = self.data.datetime.date(0)
         current_dt_num = bt.date2num(current_date)
@@ -717,7 +752,10 @@ class GaussianChannelStrategy(bt.Strategy, TradeThrottling):
                 and hasattr(self, "trailing_stop_price")
                 and self.trailing_stop_price > 0
             ):
-                self.log(f"Trailing Stop: {self.trailing_stop_price:.2f}", doprint=True)
+                self.log(
+                    f"Trailing Stop: {self.trailing_stop_price:.2f}",
+                    doprint=True,
+                )
 
         # Check if we are in the market
         if not self.position:
@@ -747,7 +785,8 @@ class GaussianChannelStrategy(bt.Strategy, TradeThrottling):
 
                 if size <= 0:
                     self.log(
-                        "Zero position size calculated, skipping trade", doprint=True
+                        "Zero position size calculated, skipping trade",
+                        doprint=True,
                     )
                     return
 
@@ -781,14 +820,13 @@ class GaussianChannelStrategy(bt.Strategy, TradeThrottling):
                 self.order = self.sell(size=self.position.size)
 
     def stop(self):
+        """ """
         # Log final results when strategy is complete
         self.log("Final Portfolio Value: %.2f" % self.broker.getvalue(), doprint=True)
 
 
 def parse_args():
-    """
-    Parse command line arguments
-    """
+    """Parse command line arguments"""
     parser = argparse.ArgumentParser(
         description=(
             "Enhanced Gaussian Channel Strategy with Stochastic RSI and Bollinger Bands"
@@ -817,7 +855,10 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--todate", "-t", default="2069-12-31", help="Ending date in YYYY-MM-DD format"
+        "--todate",
+        "-t",
+        default="2069-12-31",
+        help="Ending date in YYYY-MM-DD format",
     )
 
     parser.add_argument(
@@ -851,7 +892,11 @@ def parse_args():
 
     # Stochastic RSI parameters
     parser.add_argument(
-        "--rsilength", "-rl", default=14, type=int, help="Period for RSI calculation"
+        "--rsilength",
+        "-rl",
+        default=14,
+        type=int,
+        help="Period for RSI calculation",
     )
 
     parser.add_argument(
@@ -1124,15 +1169,15 @@ def main():
     print(f"- Symbol: {args.data}")
     print(f"- Date Range: {args.fromdate} to {args.todate}")
     print(
-        f"- Entry: Gaussian channel is green AND price above upper band AND Stochastic"
-        f" RSI signal"
+        "- Entry: Gaussian channel is green AND price above upper band AND Stochastic"
+        " RSI signal"
     )
     print(f"- Exit Strategy: {args.exit_strategy}")
 
     if args.exit_strategy == "default":
-        print(f"  (Exit when price crosses below upper Gaussian Channel band)")
+        print("  (Exit when price crosses below upper Gaussian Channel band)")
     elif args.exit_strategy == "middle_band":
-        print(f"  (Exit when price drops below middle Gaussian Channel band)")
+        print("  (Exit when price drops below middle Gaussian Channel band)")
     elif args.exit_strategy == "bars":
         print(f"  (Exit after {args.exit_bars} bars)")
     elif args.exit_strategy == "trailing_percent":

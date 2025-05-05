@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,23 +18,31 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
-import random
 
 import backtrader as bt
 
 
 class CloseSMA(bt.Strategy):
+    """ """
+
     params = (("period", 15),)
 
     def __init__(self):
+        """ """
         sma = bt.indicators.SMA(self.data, period=self.p.period)
         self.crossover = bt.indicators.CrossOver(self.data, sma)
 
     def next(self):
+        """ """
         if self.crossover > 0:
             self.buy()
 
@@ -43,9 +51,19 @@ class CloseSMA(bt.Strategy):
 
 
 class LongOnly(bt.Sizer):
+    """ """
+
     params = (("stake", 1),)
 
     def _getsizing(self, comminfo, cash, data, isbuy):
+        """
+
+        :param comminfo:
+        :param cash:
+        :param data:
+        :param isbuy:
+
+        """
         if isbuy:
             return self.p.stake
 
@@ -58,15 +76,30 @@ class LongOnly(bt.Sizer):
 
 
 class FixedReverser(bt.Sizer):
+    """ """
+
     params = (("stake", 1),)
 
     def _getsizing(self, comminfo, cash, data, isbuy):
+        """
+
+        :param comminfo:
+        :param cash:
+        :param data:
+        :param isbuy:
+
+        """
         position = self.strategy.getposition(data)
         size = self.p.stake * (1 + (position.size != 0))
         return size
 
 
 def runstrat(args=None):
+    """
+
+    :param args:  (Default value = None)
+
+    """
     args = parse_args(args)
 
     cerebro = bt.Cerebro()
@@ -101,6 +134,11 @@ def runstrat(args=None):
 
 
 def parse_args(pargs=None):
+    """
+
+    :param pargs:  (Default value = None)
+
+    """
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

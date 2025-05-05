@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import math
 
@@ -34,50 +39,8 @@ class Returns(TimeFrameAnalyzerBase):
 
       - https://www.crystalbull.com/sharpe-ratio-better-with-log-returns/
 
-    Params:
 
-      - ``timeframe`` (default: ``None``)
-
-        If ``None`` the ``timeframe`` of the 1st data in the system will be
-        used
-
-        Pass ``TimeFrame.NoTimeFrame`` to consider the entire dataset with no
-        time constraints
-
-      - ``compression`` (default: ``None``)
-
-        Only used for sub-day timeframes to for example work on an hourly
-        timeframe by specifying "TimeFrame.Minutes" and 60 as compression
-
-        If ``None`` then the compression of the 1st data of the system will be
-        used
-
-      - ``tann`` (default: ``None``)
-
-        Number of periods to use for the annualization (normalization) of the
-
-        namely:
-
-          - ``days: 252``
-          - ``weeks: 52``
-          - ``months: 12``
-          - ``years: 1``
-
-      - ``fund`` (default: ``None``)
-
-        If ``None`` the actual mode of the broker (fundmode - True/False) will
-        be autodetected to decide if the returns are based on the total net
-        asset value or on the fund value. See ``set_fundmode`` in the broker
-        documentation
-
-        Set it to ``True`` or ``False`` for a specific behavior
-
-    Methods:
-
-      - get_analysis
-
-        Returns a dictionary with returns as values and the datetime points for
-        each return as keys
+    :returns: each return as keys
 
         The returned dict the following keys:
 
@@ -101,6 +64,7 @@ class Returns(TimeFrameAnalyzerBase):
     }
 
     def start(self):
+        """ """
         super(Returns, self).start()
         if self.p.fund is None:
             self._fundmode = self.strategy.broker.fundmode
@@ -115,6 +79,7 @@ class Returns(TimeFrameAnalyzerBase):
         self._tcount = 0
 
     def stop(self):
+        """ """
         super(Returns, self).stop()
 
         if not self._fundmode:
@@ -155,4 +120,5 @@ class Returns(TimeFrameAnalyzerBase):
         self.rets["rnorm100"] = round(rnorm * 100.0, 4)  # human readable %
 
     def _on_dt_over(self):
+        """ """
         self._tcount += 1  # count the subperiod

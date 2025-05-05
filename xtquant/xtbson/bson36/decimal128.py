@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tools for working with the BSON decimal128 type.
 
 .. versionadded:: 3.4
@@ -21,7 +20,6 @@
 
 import decimal
 import struct
-import sys
 
 _PACK_64 = struct.Struct("<Q").pack
 _UNPACK_64 = struct.Struct("<Q").unpack
@@ -61,6 +59,8 @@ _DEC128_CTX = decimal.Context(**_CTX_OPTIONS.copy())
 def create_decimal128_context():
     """Returns an instance of :class:`decimal.Context` appropriate
     for working with IEEE-754 128-bit decimal floating point values.
+
+
     """
     opts = _CTX_OPTIONS.copy()
     opts["traps"] = []
@@ -72,6 +72,9 @@ def _decimal_to_128(value):
 
     :Parameters:
       - `value`: An instance of decimal.Decimal
+
+    :param value:
+
     """
     with decimal.localcontext(_DEC128_CTX) as ctx:
         value = ctx.create_decimal(value)
@@ -119,12 +122,6 @@ def _decimal_to_128(value):
 class Decimal128(object):
     """BSON Decimal128 type::
 
-      >>> Decimal128(Decimal("0.0005"))
-      Decimal128('0.0005')
-      >>> Decimal128("0.0005")
-      Decimal128('0.0005')
-      >>> Decimal128((3474527112516337664, 5))
-      Decimal128('0.0005')
 
     :Parameters:
       - `value`: An instance of :class:`decimal.Decimal`, string, or tuple of
@@ -134,6 +131,33 @@ class Decimal128(object):
       configured for IEEE-754 Decimal128 when validating parameters.
       Signals like :class:`decimal.InvalidOperation`, :class:`decimal.Inexact`,
       and :class:`decimal.Overflow` are trapped and raised as exceptions::
+
+
+      To ensure the result of a calculation can always be stored as BSON
+      Decimal128 use the context returned by
+      :func:`create_decimal128_context`::
+
+
+      To match the behavior of MongoDB's Decimal128 implementation
+      str(Decimal(value)) may not match str(Decimal128(value)) for NaN values::
+
+
+      However, :meth:`~Decimal128.to_decimal` will return the exact value::
+
+
+      Two instances of :class:`Decimal128` compare equal if their Binary
+      Integer Decimal encodings are equal::
+
+
+      This differs from :class:`decimal.Decimal` comparisons for NaN::
+
+
+    >>> Decimal128(Decimal("0.0005"))
+      Decimal128('0.0005')
+      >>> Decimal128("0.0005")
+      Decimal128('0.0005')
+      >>> Decimal128((3474527112516337664, 5))
+      Decimal128('0.0005')
 
         >>> Decimal128(".13.1")
         Traceback (most recent call last):
@@ -153,10 +177,6 @@ class Decimal128(object):
           ...
         decimal.Overflow: [<class 'decimal.Overflow'>, <class 'decimal.Rounded'>]
 
-      To ensure the result of a calculation can always be stored as BSON
-      Decimal128 use the context returned by
-      :func:`create_decimal128_context`::
-
         >>> import decimal
         >>> decimal128_ctx = create_decimal128_context()
         >>> with decimal.localcontext(decimal128_ctx) as ctx:
@@ -174,9 +194,6 @@ class Decimal128(object):
         ...
         Decimal128('Infinity')
 
-      To match the behavior of MongoDB's Decimal128 implementation
-      str(Decimal(value)) may not match str(Decimal128(value)) for NaN values::
-
         >>> Decimal128(Decimal('NaN'))
         Decimal128('NaN')
         >>> Decimal128(Decimal('-NaN'))
@@ -185,8 +202,6 @@ class Decimal128(object):
         Decimal128('NaN')
         >>> Decimal128(Decimal('-sNaN'))
         Decimal128('NaN')
-
-      However, :meth:`~Decimal128.to_decimal` will return the exact value::
 
         >>> Decimal128(Decimal('NaN')).to_decimal()
         Decimal('NaN')
@@ -197,15 +212,10 @@ class Decimal128(object):
         >>> Decimal128(Decimal('-sNaN')).to_decimal()
         Decimal('-sNaN')
 
-      Two instances of :class:`Decimal128` compare equal if their Binary
-      Integer Decimal encodings are equal::
-
         >>> Decimal128('NaN') == Decimal128('NaN')
         True
         >>> Decimal128('NaN').bid == Decimal128('NaN').bid
         True
-
-      This differs from :class:`decimal.Decimal` comparisons for NaN::
 
         >>> Decimal('NaN') == Decimal('NaN')
         False
@@ -216,6 +226,11 @@ class Decimal128(object):
     _type_marker = 19
 
     def __init__(self, value):
+        """
+
+        :param value:
+
+        """
         if isinstance(value, (str, decimal.Decimal)):
             self.__high, self.__low = _decimal_to_128(value)
         elif isinstance(value, (list, tuple)):
@@ -232,6 +247,8 @@ class Decimal128(object):
     def to_decimal(self):
         """Returns an instance of :class:`decimal.Decimal` for this
         :class:`Decimal128`.
+
+
         """
         high = self.__high
         low = self.__low
@@ -278,6 +295,9 @@ class Decimal128(object):
         :Parameters:
           - `value`: 16 byte string (128-bit IEEE 754-2008 decimal floating
             point in Binary Integer Decimal (BID) format).
+
+        :param value:
+
         """
         if not isinstance(value, bytes):
             raise TypeError("value must be an instance of bytes")
@@ -291,6 +311,7 @@ class Decimal128(object):
         return _PACK_64(self.__low) + _PACK_64(self.__high)
 
     def __str__(self):
+        """ """
         dec = self.to_decimal()
         if dec.is_nan():
             # Required by the drivers spec to match MongoDB behavior.
@@ -298,18 +319,35 @@ class Decimal128(object):
         return str(dec)
 
     def __repr__(self):
+        """ """
         return "Decimal128('%s')" % (str(self),)
 
     def __setstate__(self, value):
+        """
+
+        :param value:
+
+        """
         self.__high, self.__low = value
 
     def __getstate__(self):
+        """ """
         return self.__high, self.__low
 
     def __eq__(self, other):
+        """
+
+        :param other:
+
+        """
         if isinstance(other, Decimal128):
             return self.bid == other.bid
         return NotImplemented
 
     def __ne__(self, other):
+        """
+
+        :param other:
+
+        """
         return not self == other

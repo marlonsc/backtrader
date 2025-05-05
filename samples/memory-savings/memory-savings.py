@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,10 +18,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
-import sys
 
 import backtrader as bt
 import backtrader.feeds as btfeeds
@@ -30,20 +34,26 @@ import backtrader.utils.flushfile
 
 
 class TestInd(bt.Indicator):
+    """ """
+
     lines = ("a", "b")
 
     def __init__(self):
+        """ """
         self.lines.a = b = self.data.close - self.data.high
         self.lines.b = btind.SMA(b, period=20)
 
 
 class St(bt.Strategy):
+    """ """
+
     params = (
         ("datalines", False),
         ("lendetails", False),
     )
 
     def __init__(self):
+        """ """
         btind.SMA()
         btind.Stochastic()
         btind.RSI()
@@ -52,20 +62,29 @@ class St(bt.Strategy):
         TestInd().plotinfo.plot = False
 
     def next(self):
+        """ """
         if self.p.datalines:
-            txt = ",".join([
-                "%04d" % len(self),
-                "%04d" % len(self.data0),
-                self.data.datetime.date(0).isoformat(),
-            ])
+            txt = ",".join(
+                [
+                    "%04d" % len(self),
+                    "%04d" % len(self.data0),
+                    self.data.datetime.date(0).isoformat(),
+                ]
+            )
 
             print(txt)
 
     def loglendetails(self, msg):
+        """
+
+        :param msg:
+
+        """
         if self.p.lendetails:
             print(msg)
 
     def stop(self):
+        """ """
         super(St, self).stop()
 
         tlen = 0
@@ -98,12 +117,17 @@ class St(bt.Strategy):
         print("Total memory cells used: {}".format(tlen))
 
     def rindicator(self, ind, i, deep):
+        """
+
+        :param ind:
+        :param i:
+        :param deep:
+
+        """
         tind = 0
         for line in ind.lines:
             tind += len(line.array)
             tline = len(line.array)
-
-        thisind = tind
 
         tsub = 0
         for j, sind in enumerate(ind.getindicators()):
@@ -120,6 +144,7 @@ class St(bt.Strategy):
 
 
 def runstrat():
+    """ """
     args = parse_args()
 
     cerebro = bt.Cerebro()
@@ -133,6 +158,7 @@ def runstrat():
 
 
 def parse_args():
+    """ """
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Check Memory Savings",
@@ -154,7 +180,10 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--datalines", required=False, action="store_true", help="Print data lines"
+        "--datalines",
+        required=False,
+        action="store_true",
+        help="Print data lines",
     )
 
     parser.add_argument(

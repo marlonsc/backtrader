@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,40 +18,46 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import bisect
 import collections
 import datetime
-import itertools
 import math
 import operator
 import sys
 
 import matplotlib
-import numpy as np  # guaranteed by matplotlib
-import matplotlib.dates as mdates
 import matplotlib.font_manager as mfontmgr
-import matplotlib.legend as mlegend
 import matplotlib.ticker as mticker
+import numpy as np  # guaranteed by matplotlib
 
-from ..analyzers import CAGRAnalyzer
-
-# from matplotlib.gridspec import GridSpec
-
-from ..utils.py3 import range, with_metaclass, string_types, integer_types
 from .. import AutoInfoClass, MetaParams, TimeFrame, date2num
-
-from .finance import plot_candlestick, plot_ohlc, plot_volume, plot_lineonclose
-from .formatters import MyVolFormatter, MyDateFormatter, getlocator
+from ..utils.py3 import integer_types, range, with_metaclass
 from . import locator as loc
+from .finance import plot_candlestick, plot_lineonclose, plot_ohlc, plot_volume
+from .formatters import MyDateFormatter, MyVolFormatter
 from .multicursor import MultiCursor
 from .scheme import PlotScheme
 from .utils import tag_box_style
 
+# from matplotlib.gridspec import GridSpec
+
 
 class PInfo(object):
+    """ """
+
     def __init__(self, sch):
+        """
+
+        :param sch:
+
+        """
         self.sch = sch
         self.nrows = 0
         self.row = 0
@@ -72,6 +78,13 @@ class PInfo(object):
         self.prop = mfontmgr.FontProperties(size=self.sch.subtxtsize)
 
     def newfig(self, figid, numfig, mpyplot):
+        """
+
+        :param figid:
+        :param numfig:
+        :param mpyplot:
+
+        """
         fig = mpyplot.figure(figid + numfig)
         self.figs.append(fig)
         self.daxis = collections.OrderedDict()
@@ -81,32 +94,60 @@ class PInfo(object):
         return fig
 
     def nextcolor(self, ax):
+        """
+
+        :param ax:
+
+        """
         self.coloridx[ax] += 1
         return self.coloridx[ax]
 
     def color(self, ax):
+        """
+
+        :param ax:
+
+        """
         return self.sch.color(self.coloridx[ax])
 
     def zordernext(self, ax):
+        """
+
+        :param ax:
+
+        """
         z = self.zorder[ax]
         if self.sch.zdown:
             return z * 0.9999
         return z * 1.0001
 
     def zordercur(self, ax):
+        """
+
+        :param ax:
+
+        """
         return self.zorder[ax]
 
 
 class Plot_OldSync(with_metaclass(MetaParams, object)):
+    """ """
+
     params = (
         ("scheme", PlotScheme()),
         ("spread", False),  # 添加spread参数
     )
 
     def __init__(self, **kwargs):
+        """
+
+        :param **kwargs:
+
+        """
 
         if "spread" in kwargs:
-            self.p.spread = kwargs.pop("spread")  # 使用self.p.spread而不是self.spread
+            # 使用self.p.spread而不是self.spread
+            self.p.spread = kwargs.pop("spread")
 
         for pname, pvalue in kwargs.items():
             setattr(self.p.scheme, pname, pvalue)
@@ -116,6 +157,17 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
             setattr(self.p.scheme, "locbgother", "white")
 
     def drawtag(self, ax, x, y, facecolor, edgecolor, alpha=0.9, **kwargs):
+        """
+
+        :param ax:
+        :param x:
+        :param y:
+        :param facecolor:
+        :param edgecolor:
+        :param alpha:  (Default value = 0.9)
+        :param **kwargs:
+
+        """
 
         txt = ax.text(
             x,
@@ -132,12 +184,30 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
             ),
             # 3.0 is the minimum default for text
             zorder=self.pinf.zorder[ax] + 3.0,
-            **kwargs
+            **kwargs,
         )
 
     def plot(
-        self, strategy, figid=0, numfigs=1, iplot=True, start=None, end=None, **kwargs
+        self,
+        strategy,
+        figid=0,
+        numfigs=1,
+        iplot=True,
+        start=None,
+        end=None,
+        **kwargs,
     ):
+        """
+
+        :param strategy:
+        :param figid:  (Default value = 0)
+        :param numfigs:  (Default value = 1)
+        :param iplot:  (Default value = True)
+        :param start:  (Default value = None)
+        :param end:  (Default value = None)
+        :param **kwargs:
+
+        """
         # pfillers={}):
         if not strategy.datas:
             return
@@ -240,7 +310,6 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
             # Create the rest on a per data basis
             dt0, dt1 = self.pinf.xreal[0], self.pinf.xreal[-1]
             for data in strategy.datas:
-
                 # spread 模式下只绘制spread
                 if self.p.spread and data._name != "spread":
                     continue
@@ -333,11 +402,16 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
         return figs
 
     def setlocators(self, ax):
+        """
+
+        :param ax:
+
+        """
         clock = sorted(
             self.pinf.clock.datas, key=lambda x: (x._timeframe, x._compression)
         )[0]
 
-        comp = getattr(clock, "_compression", 1)
+        getattr(clock, "_compression", 1)
         tframe = getattr(clock, "_timeframe", TimeFrame.Days)
 
         if self.pinf.sch.fmt_x_data is None:
@@ -374,6 +448,11 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
         ax.xaxis.set_major_formatter(autofmt)
 
     def calcrows(self, strategy):
+        """
+
+        :param strategy:
+
+        """
         # Calculate the total number of rows
         rowsmajor = self.pinf.sch.rowsmajor
         rowsminor = self.pinf.sch.rowsminor
@@ -418,6 +497,12 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
         self.pinf.nrows = nrows
 
     def newaxis(self, obj, rowspan):
+        """
+
+        :param obj:
+        :param rowspan:
+
+        """
         ax = self.mpyplot.subplot2grid(
             (self.pinf.nrows, 1),
             (self.pinf.row, 0),
@@ -444,8 +529,18 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
     def plotind(
         self, iref, ind, subinds=None, upinds=None, downinds=None, masterax=None
     ):
+        """
 
-        sch = self.p.scheme
+        :param iref:
+        :param ind:
+        :param subinds:  (Default value = None)
+        :param upinds:  (Default value = None)
+        :param downinds:  (Default value = None)
+        :param masterax:  (Default value = None)
+
+        """
+
+        self.p.scheme
 
         # check subind
         subinds = subinds or []
@@ -540,7 +635,7 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
             plottedline = pltmethod(xdata, lplotarray, **plotkwargs)
             try:
                 plottedline = plottedline[0]
-            except:
+            except BaseException:
                 # Possibly a container of artists (when plotting bars)
                 pass
 
@@ -590,7 +685,7 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
                         facecolor=fcol,
                         alpha=falpha,
                         interpolate=True,
-                        **kwargs
+                        **kwargs,
                     )
 
         # plot subindicators that were created on self
@@ -628,7 +723,6 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
                 )
 
             if self.pinf.sch.legendind and ind.plotinfo._get("plotlegend", True):
-
                 handles, labels = ax.get_legend_handles_labels()
                 # Ensure that we have something to show
                 if labels:
@@ -655,6 +749,17 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
             self.plotind(iref, downind)
 
     def plotvolume(self, data, opens, highs, lows, closes, volumes, label):
+        """
+
+        :param data:
+        :param opens:
+        :param highs:
+        :param lows:
+        :param closes:
+        :param volumes:
+        :param label:
+
+        """
         pmaster = data.plotinfo.plotmaster
         if pmaster is data:
             pmaster = None
@@ -676,7 +781,6 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
 
         maxvol = volylim = max(volumes)
         if maxvol:
-
             # Plot the volume (no matter if as overlay or standalone)
             vollabel = label
             (volplot,) = plot_volume(
@@ -705,7 +809,6 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
                 # plot a legend
                 handles, labels = ax.get_legend_handles_labels()
                 if handles:
-
                     # location can come from the user
                     loc = data.plotinfo.legendloc or self.pinf.sch.legendindloc
 
@@ -730,6 +833,12 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
         return volplot
 
     def plotdata(self, data, indicators):
+        """
+
+        :param data:
+        :param indicators:
+
+        """
         for ind in indicators:
             upinds = self.dplotsup[ind]
             for upind in upinds:
@@ -870,7 +979,6 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
                     ax.set_ylim(axbot, axtop)
 
         for ind in indicators:
-
             self.plotind(data, ind, subinds=self.dplotsover[ind], masterax=ax)
 
         handles, labels = ax.get_legend_handles_labels()
@@ -940,14 +1048,30 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
             a.set_yscale("log")
 
     def show(self):
+        """ """
         self.mpyplot.show()
 
     def savefig(self, fig, filename, width=16, height=9, dpi=300, tight=True):
+        """
+
+        :param fig:
+        :param filename:
+        :param width:  (Default value = 16)
+        :param height:  (Default value = 9)
+        :param dpi:  (Default value = 300)
+        :param tight:  (Default value = True)
+
+        """
         fig.set_size_inches(width, height)
         bbox_inches = "tight" * tight or None
         fig.savefig(filename, dpi=dpi, bbox_inches=bbox_inches)
 
     def sortdataindicators(self, strategy):
+        """
+
+        :param strategy:
+
+        """
         # These lists/dictionaries hold the subplots that go above each data
         self.dplotstop = list()
         self.dplotsup = collections.defaultdict(list)
@@ -983,7 +1107,7 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
 
             if getattr(x.plotinfo, "plotforce", False):
                 if key not in strategy.datas:
-                    datas = strategy.datas
+                    strategy.datas
                     while True:
                         if key not in strategy.datas:
                             key = key._clock
@@ -1018,7 +1142,6 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
 #             return  # 没有子图就不继续
 #         # 自定义 Gridspec, 1行2列, 比例比如[3,1]代表第一列占3份, 第二列占1份
 #         gs = GridSpec(1, 2, figure=fig, width_ratios=[3, 1])
-
 
 #         # 3) 在右侧新增一个子图，用于显示 Spread
 #         ax_spread = fig.add_subplot(1, 2, 2, sharex=axes[0])  # 1行2列，右边第2个
@@ -1093,7 +1216,6 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
 #         # 6) 同步 x 轴
 #         ax_spread.set_xlim(axes[0].get_xlim())
 #         fig.subplots_adjust(wspace=0.2)  # 调整子图之间的间距
-
 
 #         # 7) 调整布局
 #         fig.subplots_adjust(wspace=0.2)

@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,16 +28,20 @@ lines at once.
 .. moduleauthor:: Daniel Rodriguez
 
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
+
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import sys
 
-from .utils.py3 import map, range, string_types, with_metaclass
-
-from .linebuffer import LineBuffer, LineActions, LinesOperation, LineDelay, NAN
-from .lineroot import LineRoot, LineSingle, LineMultiple
+from .linebuffer import NAN, LineActions, LineBuffer, LineDelay
+from .lineroot import LineMultiple, LineRoot
 from .metabase import AutoInfoClass
-from . import metabase
+from .utils.py3 import map, range, string_types, with_metaclass
 
 
 class LineAlias(object):
@@ -52,19 +56,34 @@ class LineAlias(object):
     the *line* reference because this is a constant along the live of the
     descriptor instance, but rather to set the value of the *line* at the
     instant '0' (the current one)
+
+
     """
 
     def __init__(self, line):
+        """
+
+        :param line:
+
+        """
         self.line = line
 
     def __get__(self, obj, cls=None):
+        """
+
+        :param obj:
+
+        """
         return obj.lines[self.line]
 
     def __set__(self, obj, value):
-        """
-        A line cannot be "set" once it has been created. But the values
+        """A line cannot be "set" once it has been created. But the values
         inside the line can be "set". This is achieved by adding a binding
         to the line inside "value"
+
+        :param obj:
+        :param value:
+
         """
         if isinstance(value, LineMultiple):
             value = value.lines[0]
@@ -81,14 +100,15 @@ class LineAlias(object):
 
 
 class Lines(object):
-    """
-    Defines an "array" of lines which also has most of the interface of
+    """Defines an "array" of lines which also has most of the interface of
     a LineBuffer class (forward, rewind, advance...).
 
     This interface operations are passed to the lines held by self
 
     The class can autosubclass itself (_derive) to hold new lines keeping them
     in the defined order.
+
+
     """
 
     _getlinesbase = classmethod(lambda cls: ())
@@ -98,16 +118,37 @@ class Lines(object):
 
     @classmethod
     def _derive_inst(
-        cls, name, lines, extralines, otherbases, linesoverride=False, lalias=None
+        cls,
+        name,
+        lines,
+        extralines,
+        otherbases,
+        linesoverride=False,
+        lalias=None,
     ):
+        """
+
+        :param name:
+        :param lines:
+        :param extralines:
+        :param otherbases:
+        :param linesoverride:  (Default value = False)
+        :param lalias:  (Default value = None)
+
+        """
         return cls._derive(name, lines, extralines, otherbases, linesoverride, lalias)()
 
     @classmethod
     def _derive(
-        cls, name, lines, extralines, otherbases, linesoverride=False, lalias=None
+        cls,
+        name,
+        lines,
+        extralines,
+        otherbases,
+        linesoverride=False,
+        lalias=None,
     ):
-        """
-        Creates a subclass of this class with the lines of this class as
+        """Creates a subclass of this class with the lines of this class as
         initial input for the subclass. It will include num "extralines" and
         lines present in "otherbases"
 
@@ -116,6 +157,14 @@ class Lines(object):
         "linesoverride": if True the lines of all bases will be discarded and
         the baseclass will be the topmost class "Lines". This is intended to
         create a new hierarchy
+
+        :param name:
+        :param lines:
+        :param extralines:
+        :param otherbases:
+        :param linesoverride:  (Default value = False)
+        :param lalias:  (Default value = None)
+
         """
         obaseslines = ()
         obasesextralines = 0
@@ -149,7 +198,11 @@ class Lines(object):
         setattr(newcls, "_getlinesbase", classmethod(lambda cls: baselines))
         setattr(newcls, "_getlines", classmethod(lambda cls: clslines))
 
-        setattr(newcls, "_getlinesextrabase", classmethod(lambda cls: baseextralines))
+        setattr(
+            newcls,
+            "_getlinesextrabase",
+            classmethod(lambda cls: baseextralines),
+        )
         setattr(newcls, "_getlinesextra", classmethod(lambda cls: clsextralines))
 
         l2start = len(cls._getlines()) if not linesoverride else 0
@@ -196,7 +249,9 @@ class Lines(object):
     @classmethod
     def _getlinealias(cls, i):
         """
-        Return the alias for a line given the index
+
+        :param i:
+
         """
         lines = cls._getlines()
         if i >= len(lines):
@@ -206,15 +261,19 @@ class Lines(object):
 
     @classmethod
     def getlinealiases(cls):
+        """ """
         return cls._getlines()
 
     def itersize(self):
+        """ """
         return iter(self.lines[0 : self.size()])
 
     def __init__(self, initlines=None):
-        """
-        Create the lines recording during "_derive" or else use the
+        """Create the lines recording during "_derive" or else use the
         provided "initlines"
+
+        :param initlines:  (Default value = None)
+
         """
         self.lines = list()
         for line, linealias in enumerate(self._getlines()):
@@ -229,125 +288,152 @@ class Lines(object):
                 self.lines.append(initlines[i])
 
     def __len__(self):
-        """
-        Proxy line operation
-        """
+        """Proxy line operation"""
         return len(self.lines[0])
 
     def size(self):
+        """ """
         return len(self.lines) - self._getlinesextra()
 
     def fullsize(self):
+        """ """
         return len(self.lines)
 
     def extrasize(self):
+        """ """
         return self._getlinesextra()
 
     def __getitem__(self, line):
-        """
-        Proxy line operation
+        """Proxy line operation
+
+        :param line:
+
         """
         return self.lines[line]
 
     def get(self, ago=0, size=1, line=0):
-        """
-        Proxy line operation
+        """Proxy line operation
+
+        :param ago:  (Default value = 0)
+        :param size:  (Default value = 1)
+        :param line:  (Default value = 0)
+
         """
         return self.lines[line].get(ago, size=size)
 
     def __setitem__(self, line, value):
-        """
-        Proxy line operation
+        """Proxy line operation
+
+        :param line:
+        :param value:
+
         """
         setattr(self, self._getlinealias(line), value)
 
     def forward(self, value=NAN, size=1):
-        """
-        Proxy line operation
+        """Proxy line operation
+
+        :param value:  (Default value = NAN)
+        :param size:  (Default value = 1)
+
         """
         for line in self.lines:
             line.forward(value, size=size)
 
     def backwards(self, size=1, force=False):
-        """
-        Proxy line operation
+        """Proxy line operation
+
+        :param size:  (Default value = 1)
+        :param force:  (Default value = False)
+
         """
         for line in self.lines:
             line.backwards(size, force=force)
 
     def rewind(self, size=1):
-        """
-        Proxy line operation
+        """Proxy line operation
+
+        :param size:  (Default value = 1)
+
         """
         for line in self.lines:
             line.rewind(size)
 
     def extend(self, value=NAN, size=0):
-        """
-        Proxy line operation
+        """Proxy line operation
+
+        :param value:  (Default value = NAN)
+        :param size:  (Default value = 0)
+
         """
         for line in self.lines:
             line.extend(value, size)
 
     def reset(self):
-        """
-        Proxy line operation
-        """
+        """Proxy line operation"""
         for line in self.lines:
             line.reset()
 
     def home(self):
-        """
-        Proxy line operation
-        """
+        """Proxy line operation"""
         for line in self.lines:
             line.home()
 
     def advance(self, size=1):
-        """
-        Proxy line operation
+        """Proxy line operation
+
+        :param size:  (Default value = 1)
+
         """
         for line in self.lines:
             line.advance(size)
 
     def buflen(self, line=0):
-        """
-        Proxy line operation
+        """Proxy line operation
+
+        :param line:  (Default value = 0)
+
         """
         return self.lines[line].buflen()
 
 
 class MetaLineSeries(LineMultiple.__class__):
-    """
-    Dirty job manager for a LineSeries
+    """Dirty job manager for a LineSeries
 
-      - During __new__ (class creation), it reads "lines", "plotinfo",
-        "plotlines" class variable definitions and turns them into
-        Classes of type Lines or AutoClassInfo (plotinfo/plotlines)
+    - During __new__ (class creation), it reads "lines", "plotinfo",
+      "plotlines" class variable definitions and turns them into
+      Classes of type Lines or AutoClassInfo (plotinfo/plotlines)
 
-      - During "new" (instance creation) the lines/plotinfo/plotlines
-        classes are substituted in the instance with instances of the
-        aforementioned classes and aliases are added for the "lines" held
-        in the "lines" instance
+    - During "new" (instance creation) the lines/plotinfo/plotlines
+      classes are substituted in the instance with instances of the
+      aforementioned classes and aliases are added for the "lines" held
+      in the "lines" instance
 
-        Additionally and for remaining kwargs, these are matched against
-        args in plotinfo and if existent are set there and removed from kwargs
+      Additionally and for remaining kwargs, these are matched against
+      args in plotinfo and if existent are set there and removed from kwargs
 
-        Remember that this Metaclass has a MetaParams (from metabase)
-        as root class and therefore "params" defined for the class have been
-        removed from kwargs at an earlier state
+      Remember that this Metaclass has a MetaParams (from metabase)
+      as root class and therefore "params" defined for the class have been
+      removed from kwargs at an earlier state
+
+
     """
 
     def __new__(meta, name, bases, dct):
-        """
-        Intercept class creation, identifiy lines/plotinfo/plotlines class
+        """Intercept class creation, identifiy lines/plotinfo/plotlines class
         attributes and create corresponding classes for them which take over
         the class attributes
+
+        :param meta:
+        :param name:
+        :param bases:
+        :param dct:
+
         """
 
         # Get the aliases - don't leave it there for subclasses
         aliases = dct.setdefault("alias", ())
-        aliased = dct.setdefault("aliased", "")
+        dct.setdefault("aliased", "")
 
         # Remove the line definition (if any) from the class creation
         linesoverride = dct.pop("linesoverride", False)
@@ -420,10 +506,13 @@ class MetaLineSeries(LineMultiple.__class__):
         return cls
 
     def donew(cls, *args, **kwargs):
-        """
-        Intercept instance creation, take over lines/plotinfo/plotlines
+        """Intercept instance creation, take over lines/plotinfo/plotlines
         class attributes by creating corresponding instance variables and add
         aliases for "lines" and the "lines" held within it
+
+        :param *args:
+        :param **kwargs:
+
         """
         # _obj.plotinfo shadows the plotinfo (class) definition in the class
         plotinfo = cls.plotinfo()
@@ -458,6 +547,8 @@ class MetaLineSeries(LineMultiple.__class__):
 
 
 class LineSeries(with_metaclass(MetaLineSeries, LineMultiple)):
+    """ """
+
     plotinfo = dict(
         plot=True,
         plotmaster=None,
@@ -468,32 +559,56 @@ class LineSeries(with_metaclass(MetaLineSeries, LineMultiple)):
 
     @property
     def array(self):
+        """ """
         return self.lines[0].array
 
     def __getattr__(self, name):
+        """
+
+        :param name:
+
+        """
         # to refer to line by name directly if the attribute was not found
         # in this object if we set an attribute in this object it will be
         # found before we end up here
         return getattr(self.lines, name)
 
     def __len__(self):
+        """ """
         return len(self.lines)
 
     def __getitem__(self, key):
+        """
+
+        :param key:
+
+        """
         return self.lines[0][key]
 
     def __setitem__(self, key, value):
+        """
+
+        :param key:
+        :param value:
+
+        """
         setattr(self.lines, self.lines._getlinealias(key), value)
 
     def __init__(self, *args, **kwargs):
+        """
+
+        :param *args:
+        :param **kwargs:
+
+        """
         # if any args, kwargs make it up to here, something is broken
         # defining a __init__ guarantees the existence of im_func to findbases
         # in lineiterator later, because object.__init__ has no im_func
         # (object has slots)
         super(LineSeries, self).__init__()
-        pass
 
     def plotlabel(self):
+        """ """
         label = self.plotinfo.plotname or self.__class__.__name__
         sublabels = self._plotlabel()
         if sublabels:
@@ -502,7 +617,7 @@ class LineSeries(with_metaclass(MetaLineSeries, LineMultiple)):
                 if hasattr(sublabel, "plotinfo"):
                     try:
                         s = sublabel.plotinfo.plotname
-                    except:
+                    except BaseException:
                         s = ""
 
                     sublabels[i] = s or sublabel.__name__
@@ -511,9 +626,16 @@ class LineSeries(with_metaclass(MetaLineSeries, LineMultiple)):
         return label
 
     def _plotlabel(self):
+        """ """
         return self.params._getvalues()
 
     def _getline(self, line, minusall=False):
+        """
+
+        :param line:
+        :param minusall:  (Default value = False)
+
+        """
         if isinstance(line, string_types):
             lineobj = getattr(self.lines, line)
         else:
@@ -532,9 +654,10 @@ class LineSeries(with_metaclass(MetaLineSeries, LineMultiple)):
         Param: ago (default: None)
 
           If ago is None or an instance of LineRoot (a lines object) the
-          returned valued is a LineCoupler instance
 
-          If ago is anything else, it is assumed to be an int and a LineDelay
+        :param ago:  (Default value = None)
+        :param line:  (Default value = -1)
+        :returns: If ago is anything else, it is assumed to be an int and a LineDelay
           object will be returned
 
         Param: line (default: -1)
@@ -549,6 +672,7 @@ class LineSeries(with_metaclass(MetaLineSeries, LineMultiple)):
           form
 
           The referenced line (index or name) will be LineDelayed
+
         """
         from .lineiterator import LinesCoupler  # avoid circular import
 
@@ -567,24 +691,54 @@ class LineSeries(with_metaclass(MetaLineSeries, LineMultiple)):
     # reach them using "super" which will not call __getattr__ and
     # LineSeriesStub (see below) already uses super
     def forward(self, value=NAN, size=1):
+        """
+
+        :param value:  (Default value = NAN)
+        :param size:  (Default value = 1)
+
+        """
         self.lines.forward(value, size)
 
     def backwards(self, size=1, force=False):
+        """
+
+        :param size:  (Default value = 1)
+        :param force:  (Default value = False)
+
+        """
         self.lines.backwards(size, force=force)
 
     def rewind(self, size=1):
+        """
+
+        :param size:  (Default value = 1)
+
+        """
         self.lines.rewind(size)
 
     def extend(self, value=NAN, size=0):
+        """
+
+        :param value:  (Default value = NAN)
+        :param size:  (Default value = 0)
+
+        """
         self.lines.extend(value, size)
 
     def reset(self):
+        """ """
         self.lines.reset()
 
     def home(self):
+        """ """
         self.lines.home()
 
     def advance(self, size=1):
+        """
+
+        :param size:  (Default value = 1)
+
+        """
         self.lines.advance(size)
 
 
@@ -604,11 +758,19 @@ class LineSeriesStub(LineSeries):
       - Once under when the LineMultiple object is advanced (because it
         advances all lines it is holding
       - Again as part of the regular management of the object holding it
+
+
     """
 
     extralines = 1
 
     def __init__(self, line, slave=False):
+        """
+
+        :param line:
+        :param slave:  (Default value = False)
+
+        """
         self.lines = self.__class__.lines(initlines=[line])
         # give a change to find the line owner (for plotting at least)
         self.owner = self._owner = line._owner
@@ -617,43 +779,85 @@ class LineSeriesStub(LineSeries):
 
     # Only execute the operations below if the object is not a slave
     def forward(self, value=NAN, size=1):
+        """
+
+        :param value:  (Default value = NAN)
+        :param size:  (Default value = 1)
+
+        """
         if not self.slave:
             super(LineSeriesStub, self).forward(value, size)
 
     def backwards(self, size=1, force=False):
+        """
+
+        :param size:  (Default value = 1)
+        :param force:  (Default value = False)
+
+        """
         if not self.slave:
             super(LineSeriesStub, self).backwards(size, force=force)
 
     def rewind(self, size=1):
+        """
+
+        :param size:  (Default value = 1)
+
+        """
         if not self.slave:
             super(LineSeriesStub, self).rewind(size)
 
     def extend(self, value=NAN, size=0):
+        """
+
+        :param value:  (Default value = NAN)
+        :param size:  (Default value = 0)
+
+        """
         if not self.slave:
             super(LineSeriesStub, self).extend(value, size)
 
     def reset(self):
+        """ """
         if not self.slave:
             super(LineSeriesStub, self).reset()
 
     def home(self):
+        """ """
         if not self.slave:
             super(LineSeriesStub, self).home()
 
     def advance(self, size=1):
+        """
+
+        :param size:  (Default value = 1)
+
+        """
         if not self.slave:
             super(LineSeriesStub, self).advance(size)
 
     def qbuffer(self):
+        """ """
         if not self.slave:
             super(LineSeriesStub, self).qbuffer()
 
     def minbuffer(self, size):
+        """
+
+        :param size:
+
+        """
         if not self.slave:
             super(LineSeriesStub, self).minbuffer(size)
 
 
 def LineSeriesMaker(arg, slave=False):
+    """
+
+    :param arg:
+    :param slave:  (Default value = False)
+
+    """
     if isinstance(arg, LineSeries):
         return arg
 

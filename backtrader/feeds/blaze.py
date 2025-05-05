@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,15 +18,19 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
-from backtrader import date2num
 import backtrader.feed as feed
+from backtrader import date2num
 
 
 class BlazeData(feed.DataBase):
-    """
-    Support for `Blaze <blaze.pydata.org>`_ ``Data`` objects.
+    """Support for `Blaze <blaze.pydata.org>`_ ``Data`` objects.
 
     Only numeric indices to columns are supported.
 
@@ -37,6 +41,8 @@ class BlazeData(feed.DataBase):
       - A negative value in any of the parameters for the Data lines
         indicates it's not present in the DataFrame
         it is
+
+
     """
 
     params = (
@@ -51,15 +57,25 @@ class BlazeData(feed.DataBase):
         ("openinterest", 6),
     )
 
-    datafields = ["datetime", "open", "high", "low", "close", "volume", "openinterest"]
+    datafields = [
+        "datetime",
+        "open",
+        "high",
+        "low",
+        "close",
+        "volume",
+        "openinterest",
+    ]
 
     def start(self):
+        """ """
         super(BlazeData, self).start()
 
         # reset the iterator on each start
         self._rows = iter(self.p.dataname)
 
     def _load(self):
+        """ """
         try:
             row = next(self._rows)
         except StopIteration:

@@ -1,13 +1,7 @@
+import datetime
+
 import backtrader as bt
 import pandas as pd
-import numpy as np
-import sys
-import os
-import datetime
-import matplotlib.pyplot as plt
-import seaborn as sns
-
-from arbitrage.myutil import calculate_spread, check_and_align_data, cointegration_ratio
 
 
 def calculate_rolling_spread(
@@ -153,12 +147,24 @@ class DynamicSpreadRSIStrategy(bt.Strategy):
         elif trade.justopened:
             print(
                 "TRADE %s OPENED %s  , SIZE %2d, PRICE %d "
-                % (trade.ref, bt.num2date(trade.dtopen), trade.size, trade.value)
+                % (
+                    trade.ref,
+                    bt.num2date(trade.dtopen),
+                    trade.size,
+                    trade.value,
+                )
             )
 
 
 def run_strategy(
-    data0, data1, data2, win, overbought, oversold, exit_threshold, spread_window=60
+    data0,
+    data1,
+    data2,
+    win,
+    overbought,
+    oversold,
+    exit_threshold,
+    spread_window=60,
 ):
     """运行单次回测"""
     # 创建回测引擎
@@ -259,10 +265,18 @@ def grid_search():
 
         # 添加数据
         data0 = bt.feeds.PandasData(
-            dataname=df0, datetime="date", nocase=True, fromdate=fromdate, todate=todate
+            dataname=df0,
+            datetime="date",
+            nocase=True,
+            fromdate=fromdate,
+            todate=todate,
         )
         data1 = bt.feeds.PandasData(
-            dataname=df1, datetime="date", nocase=True, fromdate=fromdate, todate=todate
+            dataname=df1,
+            datetime="date",
+            nocase=True,
+            fromdate=fromdate,
+            todate=todate,
         )
         data2 = SpreadData(dataname=df_spread, fromdate=fromdate, todate=todate)
 
@@ -270,16 +284,18 @@ def grid_search():
             for overbought in overbought_values:
                 for oversold in oversold_values:
                     for exit_threshold in exit_threshold_values:
-                        param_combinations.append((
-                            data0,
-                            data1,
-                            data2,
-                            win,
-                            overbought,
-                            oversold,
-                            exit_threshold,
-                            spread_window,
-                        ))
+                        param_combinations.append(
+                            (
+                                data0,
+                                data1,
+                                data2,
+                                win,
+                                overbought,
+                                oversold,
+                                exit_threshold,
+                                spread_window,
+                            )
+                        )
 
     # 执行网格搜索
     results = []
@@ -298,7 +314,7 @@ def grid_search():
         spread_window,
     ) in enumerate(param_combinations):
         print(
-            f"测试参数组合 {i+1}/{total_combinations}: win={win},"
+            f"测试参数组合 {i + 1}/{total_combinations}: win={win},"
             f" overbought={overbought}, oversold={oversold},"
             f" exit_threshold={exit_threshold}, spread_window={spread_window}"
         )
@@ -330,7 +346,7 @@ def grid_search():
         # 按夏普比率排序
         sorted_results = sorted(
             results,
-            key=lambda x: x["sharpe"] if x["sharpe"] is not None else -float("inf"),
+            key=lambda x: (x["sharpe"] if x["sharpe"] is not None else -float("inf")),
             reverse=True,
         )
         best_result = sorted_results[0]
@@ -352,7 +368,7 @@ def grid_search():
         print("\n========= 所有参数组合结果（按夏普比率排序）=========")
         for i, result in enumerate(sorted_results[:10]):  # 只显示前10个最好的结果
             print(
-                f"{i+1}. spread_window={result['params']['spread_window']}, "
+                f"{i + 1}. spread_window={result['params']['spread_window']}, "
                 f"win={result['params']['win']}, "
                 f"overbought={result['params']['overbought']}, "
                 f"oversold={result['params']['oversold']}, "

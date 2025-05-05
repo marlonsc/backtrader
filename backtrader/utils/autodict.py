@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 from collections import OrderedDict, defaultdict
 
@@ -26,36 +31,60 @@ from .py3 import values as py3lvalues
 
 
 def Tree():
+    """ """
     return defaultdict(Tree)
 
 
 class AutoDictList(dict):
+    """ """
+
     def __missing__(self, key):
+        """
+
+        :param key:
+
+        """
         value = self[key] = list()
         return value
 
 
 class DotDict(dict):
+    """ """
+
     # If the attribut is not found in the usual places try the dict itself
     def __getattr__(self, key):
+        """
+
+        :param key:
+
+        """
         if key.startswith("__"):
             return super(DotDict, self).__getattr__(key)
         return self[key]
 
 
 class AutoDict(dict):
+    """ """
+
     _closed = False
 
     def _close(self):
+        """ """
         self._closed = True
         for key, val in self.items():
             if isinstance(val, (AutoDict, AutoOrderedDict)):
                 val._close()
 
     def _open(self):
+        """ """
         self._closed = False
 
     def __missing__(self, key):
+        """
+
+        :param key:
+
+        """
         if self._closed:
             raise KeyError
 
@@ -63,12 +92,23 @@ class AutoDict(dict):
         return value
 
     def __getattr__(self, key):
+        """
+
+        :param key:
+
+        """
         if False and key.startswith("_"):
             raise AttributeError
 
         return self[key]
 
     def __setattr__(self, key, value):
+        """
+
+        :param key:
+        :param value:
+
+        """
         if False and key.startswith("_"):
             self.__dict__[key] = value
             return
@@ -77,18 +117,27 @@ class AutoDict(dict):
 
 
 class AutoOrderedDict(OrderedDict):
+    """ """
+
     _closed = False
 
     def _close(self):
+        """ """
         self._closed = True
         for key, val in self.items():
             if isinstance(val, (AutoDict, AutoOrderedDict)):
                 val._close()
 
     def _open(self):
+        """ """
         self._closed = False
 
     def __missing__(self, key):
+        """
+
+        :param key:
+
+        """
         if self._closed:
             raise KeyError
 
@@ -97,12 +146,23 @@ class AutoOrderedDict(OrderedDict):
         return value
 
     def __getattr__(self, key):
+        """
+
+        :param key:
+
+        """
         if key.startswith("_"):
             raise AttributeError
 
         return self[key]
 
     def __setattr__(self, key, value):
+        """
+
+        :param key:
+        :param value:
+
+        """
         if key.startswith("_"):
             self.__dict__[key] = value
             return
@@ -111,34 +171,60 @@ class AutoOrderedDict(OrderedDict):
 
     # Define math operations
     def __iadd__(self, other):
-        if type(self) != type(other):
+        """
+
+        :param other:
+
+        """
+        if not isinstance(self, type(other)):
             return type(other)() + other
 
         return self + other
 
     def __isub__(self, other):
-        if type(self) != type(other):
+        """
+
+        :param other:
+
+        """
+        if not isinstance(self, type(other)):
             return type(other)() - other
 
         return self - other
 
     def __imul__(self, other):
-        if type(self) != type(other):
+        """
+
+        :param other:
+
+        """
+        if not isinstance(self, type(other)):
             return type(other)() * other
 
         return self + other
 
     def __idiv__(self, other):
-        if type(self) != type(other):
+        """
+
+        :param other:
+
+        """
+        if not isinstance(self, type(other)):
             return type(other)() // other
 
         return self + other
 
     def __itruediv__(self, other):
-        if type(self) != type(other):
+        """
+
+        :param other:
+
+        """
+        if not isinstance(self, type(other)):
             return type(other)() / other
 
         return self + other
 
     def lvalues(self):
+        """ """
         return py3lvalues(self)

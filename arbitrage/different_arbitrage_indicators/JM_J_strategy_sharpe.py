@@ -1,13 +1,15 @@
-import backtrader as bt
-import pandas as pd
-import numpy as np
 import datetime
+
+import backtrader as bt
 import matplotlib.pyplot as plt
-import seaborn as sns
+import numpy as np
+import pandas as pd
 
 
 # 夏普差值布林带策略
 class SharpeDiffStrategy(bt.Strategy):
+    """ """
+
     params = (
         ("return_period", 15),  # 计算收益率的周期（15日收益率）
         ("ma_period", 10),  # 计算移动平均的周期（20日移动平均线）
@@ -17,6 +19,7 @@ class SharpeDiffStrategy(bt.Strategy):
     )
 
     def __init__(self):
+        """ """
         # 存储夏普比率序列用于绘图
         self.sharpe_j_values = []
         self.sharpe_jm_values = []
@@ -43,6 +46,7 @@ class SharpeDiffStrategy(bt.Strategy):
         self.jm_prices = []
 
     def next(self):
+        """ """
         if self.order:
             return
 
@@ -175,6 +179,11 @@ class SharpeDiffStrategy(bt.Strategy):
                     )
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status in [order.Completed]:
             if self.p.printlog:
                 if order.isbuy():
@@ -196,15 +205,22 @@ class SharpeDiffStrategy(bt.Strategy):
         self.order = None
 
     def notify_trade(self, trade):
+        """
+
+        :param trade:
+
+        """
         if self.p.printlog and trade.isclosed:
             print(f"平仓盈利: {trade.pnlcomm:.2f}")
 
     def stop(self):
+        """ """
         # 策略结束时绘制夏普比率图形
         if len(self.delta_sharpe_values) > 0:
             self.plot_sharpe_ratio()
 
     def plot_sharpe_ratio(self):
+        """ """
         # 创建绘图的数据索引
         if len(self.delta_sharpe_ma) > 0:  # 确保有布林带数据
             # 使用有布林带数据的时间段
@@ -228,7 +244,10 @@ class SharpeDiffStrategy(bt.Strategy):
             # 绘制夏普差值和布林带
             plt.subplot(3, 1, 2)
             plt.plot(
-                dates, delta_values, label="Sharpe Difference (J-JM)", color="green"
+                dates,
+                delta_values,
+                label="Sharpe Difference (J-JM)",
+                color="green",
             )
             plt.plot(dates, self.delta_sharpe_ma, label="20-day MA", color="black")
             plt.plot(
@@ -276,6 +295,14 @@ class SharpeDiffStrategy(bt.Strategy):
 
 # 数据加载函数，处理索引问题
 def load_data(symbol1, symbol2, fromdate, todate):
+    """
+
+    :param symbol1:
+    :param symbol2:
+    :param fromdate:
+    :param todate:
+
+    """
     output_file = "D:\\FutureData\\ricequant\\1d_2017to2024_noadjust.h5"
 
     try:
@@ -321,9 +348,17 @@ def load_data(symbol1, symbol2, fromdate, todate):
 
 # 配置回测引擎
 def configure_cerebro(**kwargs):
+    """
+
+    :param **kwargs:
+
+    """
     cerebro = bt.Cerebro(stdstats=False)  # 启用标准统计
     data0, data1 = load_data(
-        "/J", "/JM", datetime.datetime(2017, 1, 1), datetime.datetime(2025, 1, 1)
+        "/J",
+        "/JM",
+        datetime.datetime(2017, 1, 1),
+        datetime.datetime(2025, 1, 1),
     )
 
     if data0 is None or data1 is None:
@@ -361,6 +396,11 @@ def configure_cerebro(**kwargs):
 
 
 def analyze_results(results):
+    """
+
+    :param results:
+
+    """
     if not results:
         print("没有回测结果可分析")
         return

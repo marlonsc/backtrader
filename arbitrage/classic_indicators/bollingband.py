@@ -1,14 +1,14 @@
-import backtrader as bt
-import pandas as pd
-import sys
-import os
 import datetime
 
-from arbitrage.myutil import calculate_spread, check_and_align_data
+import backtrader as bt
+import pandas as pd
+from arbitrage.myutil import calculate_spread
 
 
 # 布林带策略
 class SpreadBollingerStrategy(bt.Strategy):
+    """ """
+
     params = (
         ("period", 20),  # 布林带周期
         ("devfactor", 2),  # 布林带标准差倍数
@@ -17,6 +17,7 @@ class SpreadBollingerStrategy(bt.Strategy):
     )
 
     def __init__(self):
+        """ """
         # 布林带指标
         self.boll = bt.indicators.BollingerBands(
             self.data2.close,  # 使用外部计算的价差
@@ -32,6 +33,7 @@ class SpreadBollingerStrategy(bt.Strategy):
         self.year_values = {}
 
     def next(self):
+        """ """
         # 如果有未完成订单，跳过
         if self.order:
             return
@@ -64,8 +66,12 @@ class SpreadBollingerStrategy(bt.Strategy):
                 self.close(data=self.data1)
 
     def notify_trade(self, trade):
-        if trade.isclosed:
+        """
 
+        :param trade:
+
+        """
+        if trade.isclosed:
             print(
                 "TRADE %s CLOSED %s, PROFIT: GROSS %.2f, NET %.2f, PRICE %d"
                 % (
@@ -78,10 +84,14 @@ class SpreadBollingerStrategy(bt.Strategy):
             )
 
         elif trade.justopened:
-
             print(
                 "TRADE %s OPENED %s  , SIZE %2d, PRICE %d "
-                % (trade.ref, bt.num2date(trade.dtopen), trade.size, trade.value)
+                % (
+                    trade.ref,
+                    bt.num2date(trade.dtopen),
+                    trade.size,
+                    trade.value,
+                )
             )
 
     # def notify_order(self, order):
@@ -102,7 +112,7 @@ df_RB = pd.read_hdf(output_file, key="/RB").reset_index()
 
 # 计算价差
 # df_I, df_RB = check_and_align_data(df_I, df_RB)
-## i:rb = 5:1
+# i:rb = 5:1
 df_spread = calculate_spread(df_I, df_RB, 5, 1)
 
 print(f"价差数据形状: {df_spread.shape}")
@@ -114,13 +124,25 @@ todate = datetime.datetime(2025, 1, 5)
 
 # 添加数据
 data0 = bt.feeds.PandasData(
-    dataname=df_I, datetime="date", nocase=True, fromdate=fromdate, todate=todate
+    dataname=df_I,
+    datetime="date",
+    nocase=True,
+    fromdate=fromdate,
+    todate=todate,
 )
 data1 = bt.feeds.PandasData(
-    dataname=df_RB, datetime="date", nocase=True, fromdate=fromdate, todate=todate
+    dataname=df_RB,
+    datetime="date",
+    nocase=True,
+    fromdate=fromdate,
+    todate=todate,
 )
 data2 = bt.feeds.PandasData(
-    dataname=df_spread, datetime="date", nocase=True, fromdate=fromdate, todate=todate
+    dataname=df_spread,
+    datetime="date",
+    nocase=True,
+    fromdate=fromdate,
+    todate=todate,
 )
 
 # 创建回测引擎
@@ -131,7 +153,7 @@ cerebro.adddata(data2, name="spread")
 
 # 添加策略
 cerebro.addstrategy(SpreadBollingerStrategy)
-##########################################################################################
+##########################################################################
 # 设置初始资金
 cerebro.broker.setcash(10000.0)
 cerebro.broker.set_shortcash(False)

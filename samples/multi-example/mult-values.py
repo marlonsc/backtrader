@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,8 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
-
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
@@ -28,9 +32,19 @@ import backtrader as bt
 
 
 class TestSizer(bt.Sizer):
+    """ """
+
     params = dict(stake=1)
 
     def _getsizing(self, comminfo, cash, data, isbuy):
+        """
+
+        :param comminfo:
+        :param cash:
+        :param data:
+        :param isbuy:
+
+        """
         dt, i = self.strategy.datetime.date(), data._id
         s = self.p.stake * (1 + (not isbuy))
         print(
@@ -43,6 +57,8 @@ class TestSizer(bt.Sizer):
 
 
 class St(bt.Strategy):
+    """ """
+
     params = dict(
         enter=[1, 3, 4],  # data ids are 1 based
         hold=[7, 10, 15],  # data ids are 1 based
@@ -54,6 +70,11 @@ class St(bt.Strategy):
     )
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status == order.Submitted:
             return
 
@@ -73,10 +94,12 @@ class St(bt.Strategy):
                 dorders[:] = []  # empty list - New orders allowed
 
     def __init__(self):
+        """ """
         self.o = dict()  # orders per data (main, stop, limit, manual-close)
         self.holding = dict()  # holding periods per data
 
     def next(self):
+        """ """
         for i, d in enumerate(self.datas):
             dt, dn = self.datetime.date(), d._name
             pos = self.getposition(d).size
@@ -152,6 +175,11 @@ class St(bt.Strategy):
 
 
 def runstrat(args=None):
+    """
+
+    :param args:  (Default value = None)
+
+    """
     args = parse_args(args)
 
     cerebro = bt.Cerebro()
@@ -197,6 +225,11 @@ def runstrat(args=None):
 
 
 def parse_args(pargs=None):
+    """
+
+    :param pargs:  (Default value = None)
+
+    """
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Multiple Values and Brackets",

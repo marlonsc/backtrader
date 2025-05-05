@@ -37,7 +37,10 @@ def parse_args():
         "--base_holding_days", type=int, default=5, help="Base holding days"
     )
     parser.add_argument(
-        "--days_factor", type=float, default=5.0, help="Holding days adjustment factor"
+        "--days_factor",
+        type=float,
+        default=5.0,
+        help="Holding days adjustment factor",
     )
     parser.add_argument("--setcash", type=float, default=100000, help="Initial cash")
     parser.add_argument(
@@ -84,7 +87,8 @@ def calculate_rolling_spread(
         df["close0"].rolling(window).cov(df["close1"])
         / df["close1"].rolling(window).var()
     )
-    beta_shift = beta_raw.shift(1).round(1)  # Prevent lookahead + keep 1 decimal
+    # Prevent lookahead + keep 1 decimal
+    beta_shift = beta_raw.shift(1).round(1)
 
     # 3) Append β to main table (for later vectorized calculation)
     df = df.assign(beta=beta_shift)
@@ -224,19 +228,21 @@ class DynamicSpreadCUSUMStrategy(bt.Strategy):
         self.prev_portfolio_value = current_value
 
         self.record_dates.append(self.datetime.date())
-        self.record_data.append({
-            "date": self.datetime.date(),
-            "close": self.data2.close[0],
-            "portfolio_value": current_value,
-            "daily_return": daily_return,
-            "position": self.getposition(self.data0).size,
-            "beta": self.data2.beta[0],
-            "g_pos": self.g_pos,
-            "g_neg": self.g_neg,
-            "holding_days": self.holding_counter,
-            "target_days": self.target_holding_days if self.in_position else 0,
-            "cash": current_cash,  # Add cash record
-        })
+        self.record_data.append(
+            {
+                "date": self.datetime.date(),
+                "close": self.data2.close[0],
+                "portfolio_value": current_value,
+                "daily_return": daily_return,
+                "position": self.getposition(self.data0).size,
+                "beta": self.data2.beta[0],
+                "g_pos": self.g_pos,
+                "g_neg": self.g_neg,
+                "holding_days": self.holding_counter,
+                "target_days": (self.target_holding_days if self.in_position else 0),
+                "cash": current_cash,  # Add cash record
+            }
+        )
 
         # Take previous win spread series (excluding current bar)
         hist = self.spread_series.get(size=self.p.win, ago=0)
@@ -269,12 +275,14 @@ class DynamicSpreadCUSUMStrategy(bt.Strategy):
             self.size1 = round(beta_now * 10)
 
             if self.g_pos > h:
-                # Calculate signal strength: magnitude of cumulative sum exceeding threshold h
+                # Calculate signal strength: magnitude of cumulative sum
+                # exceeding threshold h
                 signal_strength = (self.g_pos - h) / h
                 self._open_position(short=True, signal_strength=signal_strength)
                 self.g_pos = self.g_neg = 0
             elif self.g_neg > h:
-                # Calculate signal strength: magnitude of cumulative sum exceeding threshold h
+                # Calculate signal strength: magnitude of cumulative sum
+                # exceeding threshold h
                 signal_strength = (self.g_neg - h) / h
                 self._open_position(short=False, signal_strength=signal_strength)
                 self.g_pos = self.g_neg = 0
@@ -306,7 +314,12 @@ class DynamicSpreadCUSUMStrategy(bt.Strategy):
         elif trade.justopened:
             print(
                 "TRADE %s OPENED %s  , SIZE %2d, PRICE %d "
-                % (trade.ref, bt.num2date(trade.dtopen), trade.size, trade.value)
+                % (
+                    trade.ref,
+                    bt.num2date(trade.dtopen),
+                    trade.size,
+                    trade.value,
+                )
             )
 
     def get_backtest_data(self):
@@ -318,7 +331,7 @@ class DynamicSpreadCUSUMStrategy(bt.Strategy):
         stats = {
             "total_trades": self.total_trades,
             "total_holding_days": self.total_holding_days,
-            "avg_holding_days": self.total_holding_days / max(1, self.total_trades),
+            "avg_holding_days": (self.total_holding_days / max(1, self.total_trades)),
             "max_holding_days": (
                 max(self.holding_days_list) if self.holding_days_list else 0
             ),
@@ -451,10 +464,12 @@ def main():
         # Get backtest data
         backtest_data = strategy.get_backtest_data()
         # Generate filename
-        params_str = f"win{args.win}_k{args.k_coeff}_h{args.h_coeff}_base{args.base_holding_days}_factor{args.days_factor}"
-        filename = (
-            f"outcome/CUSUM_backtest_{args.df0_key.replace('/', '')}{args.df1_key.replace('/', '')}_{params_str}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
-        )
+        params_str = f"win{args.win}_k{args.k_coeff}_h{args.h_coeff}_base{
+            args.base_holding_days
+        }_factor{args.days_factor}"
+        filename = f"outcome/CUSUM_backtest_{args.df0_key.replace('/', '')}{
+            args.df1_key.replace('/', '')
+        }_{params_str}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
         # Save CSV
         backtest_data.to_csv(filename, index=False)
         print(f"Backtest data saved to: {filename}")

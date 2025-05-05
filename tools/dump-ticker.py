@@ -1,11 +1,20 @@
-import pandas as pd
-import psycopg2
-from psycopg2.extras import RealDictCursor
 import argparse
 import os
 
+import pandas as pd
+import psycopg2
+from psycopg2.extras import RealDictCursor
+
 
 def main(symbol, fromdate, todate, output_dir=None):
+    """
+
+    :param symbol:
+    :param fromdate:
+    :param todate:
+    :param output_dir: (Default value = None)
+
+    """
     # Database connection parameters
     db_params = {
         "dbname": "market_data",
@@ -23,9 +32,9 @@ def main(symbol, fromdate, todate, output_dir=None):
 
         # Create parameterized query to prevent SQL injection
         query = """
-        SELECT * FROM stock_price_data 
-        WHERE symbol = %s 
-        AND date >= %s 
+        SELECT * FROM stock_price_data
+        WHERE symbol = %s
+        AND date >= %s
         AND date <= %s
         ORDER BY date ASC;
         """
@@ -46,7 +55,8 @@ def main(symbol, fromdate, todate, output_dir=None):
         # Determine output directory
         if output_dir is None:
             output_dir = os.path.join(
-                os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "logs"
+                os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                "logs",
             )
 
         # Create the directory if it doesn't exist
@@ -80,13 +90,21 @@ if __name__ == "__main__":
         help="Stock symbol to dump data for (e.g., TSLA)",
     )
     parser.add_argument(
-        "--fromdate", type=str, required=True, help="Start date in YYYY-MM-DD format"
+        "--fromdate",
+        type=str,
+        required=True,
+        help="Start date in YYYY-MM-DD format",
     )
     parser.add_argument(
-        "--todate", type=str, required=True, help="End date in YYYY-MM-DD format"
+        "--todate",
+        type=str,
+        required=True,
+        help="End date in YYYY-MM-DD format",
     )
     parser.add_argument(
-        "--output", type=str, help="Output directory (defaults to logs directory)"
+        "--output",
+        type=str,
+        help="Output directory (defaults to logs directory)",
     )
 
     args = parser.parse_args()

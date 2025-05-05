@@ -2,8 +2,8 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,15 +19,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
-
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 from . import GenericCSVData
 
 
 class MT4CSVData(GenericCSVData):
-    """
-    Parses a `Metatrader4 <https://www.metaquotes.net/en/metatrader4>`_ History
+    """Parses a `Metatrader4 <https://www.metaquotes.net/en/metatrader4>`_ History
     center CSV exported file.
 
     Specific parameters (or specific meaning):
@@ -35,6 +38,8 @@ class MT4CSVData(GenericCSVData):
       - ``dataname``: The filename to parse or a file-like object
 
       - Uses GenericCSVData and simply modifies the params
+
+
     """
 
     params = (

@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import datetime
 
@@ -31,6 +36,12 @@ class WeekDaysFiller(object):
     lastdt = datetime.date.max - ONEDAY
 
     def __init__(self, data, fillclose=False):
+        """
+
+        :param data:
+        :param fillclose: (Default value = False)
+
+        """
         self.fillclose = fillclose
         self.voidbar = [float("Nan")] * data.size()  # init a void bar
 
@@ -38,11 +49,8 @@ class WeekDaysFiller(object):
         """Empty bars (NaN) or with last close price are added for weekdays with no
         data
 
-        Params:
-          - data: the data source to filter/process
-
-        Returns:
-          - True (always): bars are removed (even if put back on the stack)
+        :param data: the data source to filter
+        :returns: True (always): bars are removed (even if put back on the stack)
 
         """
         dt = data.datetime.date()  # current date in int format

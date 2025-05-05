@@ -2,13 +2,20 @@
 
 from . import xtbson as _BSON_
 
-### connection
+# connection
 
 __client = None
 __client_last_spec = ("", None)
 
 
 def connect(ip="", port=None, remember_if_success=True):
+    """
+
+    :param ip:  (Default value = "")
+    :param port:  (Default value = None)
+    :param remember_if_success:  (Default value = True)
+
+    """
     global __client
 
     if __client:
@@ -30,7 +37,7 @@ def connect(ip="", port=None, remember_if_success=True):
         server_list = xtconn.scan_available_server_addr()
 
         default_addr = "localhost:58610"
-        if not default_addr in server_list:
+        if default_addr not in server_list:
             server_list.append(default_addr)
 
         __client = xtconn.connect_any(server_list)
@@ -46,6 +53,13 @@ def connect(ip="", port=None, remember_if_success=True):
 
 
 def reconnect(ip="", port=None, remember_if_success=True):
+    """
+
+    :param ip:  (Default value = "")
+    :param port:  (Default value = None)
+    :param remember_if_success:  (Default value = True)
+
+    """
     global __client
 
     if __client:
@@ -56,6 +70,7 @@ def reconnect(ip="", port=None, remember_if_success=True):
 
 
 def get_client():
+    """ """
     global __client
 
     if not __client or not __client.is_connected():
@@ -67,12 +82,23 @@ def get_client():
     return __client
 
 
-### utils
+# utils
 def try_except(func):
+    """
+
+    :param func:
+
+    """
     import sys
     import traceback
 
     def wrapper(*args, **kwargs):
+        """
+
+        :param *args:
+        :param **kwargs:
+
+        """
         try:
             return func(*args, **kwargs)
         except Exception:
@@ -89,10 +115,25 @@ def try_except(func):
 
 
 def _BSON_call_common(interface, func, param):
+    """
+
+    :param interface:
+    :param func:
+    :param param:
+
+    """
     return _BSON_.BSON.decode(interface(func, _BSON_.BSON.encode(param)))
 
 
 def create_view(viewID, view_type, title, group_id):
+    """
+
+    :param viewID:
+    :param view_type:
+    :param title:
+    :param group_id:
+
+    """
     client = get_client()
     return client.createView(viewID, view_type, title, group_id)
 
@@ -102,6 +143,11 @@ def create_view(viewID, view_type, title, group_id):
 
 
 def close_view(viewID):
+    """
+
+    :param viewID:
+
+    """
     client = get_client()
     return client.closeView(viewID)
 
@@ -116,9 +162,12 @@ def close_view(viewID):
 
 
 def push_view_data(viewID, datas):
-    """
-    推送模型结果数据
+    """推送模型结果数据
     datas: { "timetags: [t1, t2, ...], "outputs": { "output1": [value1, value2, ...], ... }, "overwrite": "full/increase" }
+
+    :param viewID:
+    :param datas:
+
     """
     client = get_client()
     bresult = client.pushViewData(viewID, "index", _BSON_.BSON.encode(datas))
@@ -126,6 +175,14 @@ def push_view_data(viewID, datas):
 
 
 def switch_graph_view(stock_code=None, period=None, dividendtype=None, graphtype=None):
+    """
+
+    :param stock_code:  (Default value = None)
+    :param period:  (Default value = None)
+    :param dividendtype:  (Default value = None)
+    :param graphtype:  (Default value = None)
+
+    """
     cl = get_client()
 
     result = _BSON_call_common(
@@ -149,23 +206,16 @@ def add_schedule(
     only_work_date=False,
     always_run=False,
 ):
-    """
-    ToDo: 向客户端添加调度任务
-    Args:
-        schedule_name(str): 调度任务的方案名
+    """ToDo: 向客户端添加调度任务
 
-        begin_time(str) : 定时下载开始的时间 格式为'%H%M%S'
-
-        interval(int) : 下载任务执行间隔，单位为秒, 例如要每24小时执行一次则填写 60*60*24
-
-        run(bool) : 是否自动运行, 默认为False
-
-        only_work_date(bool) : 是否仅工作日运行, 默认为False
-
-        always_run(bool) : 当前时间超过设定时间的情况下是否运行, 默认为False
-
-    Return:
-        None
+    :param schedule_name: str
+    :param begin_time: str (Default value = "")
+    :param finish_time:  (Default value = "")
+    :param interval: int (Default value = 60)
+    :param run: bool (Default value = False)
+    :param only_work_date: bool (Default value = False)
+    :param always_run: bool (Default value = False)
+    :returns: None
     Example::
 
         # 向客户端添加一个每日下载沪深A股市场的日K任务
@@ -207,23 +257,16 @@ def add_schedule_download_task(
     end_time="",
     incrementally=False,
 ):
-    '''
-    Args:
-        stock_code(list)  : 下载标的的code组成的list
+    """
 
-        period(str) : 下载数据的周期, 参考gmd
-
-        recentday(int) : *仅在非增量的情况下生效*
-            下载当日往前 N 个周期的数据, 当此参数不为0时,start_time不生效, 否则下载全部数据
-
-        start_time(str) : 下载数据的起始时间 格式为 '%Y%m%d' 或者 '%Y%m%d%H%M%S'
-
-        end_time(str) :  下载数据的结束时间 格式为 '%Y%m%d' 或者 '%Y%m%d%H%M%S'
-
-        incrementally(bool) : 是否增量下载, 默认为False
-
-    Return:
-        None
+    :param schedule_name:
+    :param stock_code: list (Default value = [])
+    :param period: str (Default value = "")
+    :param recentday: int (Default value = 0)
+    :param start_time: str (Default value = "")
+    :param end_time: str (Default value = "")
+    :param incrementally: bool (Default value = False)
+    :returns: None
     Example::
         # 向客户端现存的调度方案中添加一个下载任务
         xtview.add_schedule_download_task(
@@ -231,7 +274,6 @@ def add_schedule_download_task(
             stock_code = stock_list
             period = "1d" )
     """
-    '''
 
     d_stockcode = {}
     for stock in stock_code:
@@ -272,6 +314,17 @@ def modify_schedule_task(
     only_work_date=False,
     always_run=False,
 ):
+    """
+
+    :param schedule_name:
+    :param begin_time:  (Default value = "")
+    :param finish_time:  (Default value = "")
+    :param interval:  (Default value = 60)
+    :param run:  (Default value = False)
+    :param only_work_date:  (Default value = False)
+    :param always_run:  (Default value = False)
+
+    """
     cl = get_client()
 
     result = _BSON_call_common(
@@ -290,6 +343,11 @@ def modify_schedule_task(
 
 
 def remove_schedule(schedule_name):
+    """
+
+    :param schedule_name:
+
+    """
     cl = get_client()
 
     result = _BSON_call_common(
@@ -299,6 +357,12 @@ def remove_schedule(schedule_name):
 
 
 def remove_schedule_download_task(schedule_name, task_id):
+    """
+
+    :param schedule_name:
+    :param task_id:
+
+    """
     cl = get_client()
 
     result = _BSON_call_common(
@@ -310,6 +374,7 @@ def remove_schedule_download_task(schedule_name, task_id):
 
 
 def query_schedule_task():
+    """ """
     cl = get_client()
 
     inst = _BSON_call_common(cl.commonControl, "queryschedule", {})
@@ -318,18 +383,25 @@ def query_schedule_task():
 
 
 def push_xtview_data(data_type, time, datas):
+    """
+
+    :param data_type:
+    :param time:
+    :param datas:
+
+    """
     cl = get_client()
     timeData = 0
     types = []
     numericDatas = []
     stringDatas = []
-    if type(time) == int:
+    if isinstance(time, int):
         name_list = list(datas.keys())
         value_list = []
         for name in name_list:
             value_list.append([datas[name]])
         timeData = [time]
-    if type(time) == list:
+    if isinstance(time, list):
         time_list = time
         name_list = list(datas.keys())
         value_list = list(datas.values())

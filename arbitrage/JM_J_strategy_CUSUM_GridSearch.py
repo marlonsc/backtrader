@@ -27,8 +27,8 @@ def calculate_rolling_spread(
 
     # 2) Estimate β_t, and shift one day forward
     beta_raw = (
-        df["close0"].rolling(window).cov(df["close1"])
-        / df["close1"].rolling(window).var()
+        df["close0"].rolling(window).cov(df["close1"]) /
+        df["close1"].rolling(window).var()
     )
     # Prevent future + keep 1 decimal place
     beta_shift = beta_raw.shift(1).round(1)
@@ -80,55 +80,41 @@ class DynamicSpreadCUSUMStrategy(bt.Strategy):
     )
 
     def __init__(self):
+        super().__init__()
+        self.size0 = 10
+        self.size1 = 10
         # Save two cumulative sums
         self.g_pos, self.g_neg = 0.0, 0.0  # CUSUM state
         # Convenient access to recent win spread series
         self.spread_series = self.data2.close
-
-        ########### New: Initialize array to store rolling means ###########
         self.rolling_mu = bt.ind.SMA(
             self.data2.close, period=self.p.win
         )  # Rolling mean
-
-        # New: Holding days counter
         self.holding_counter = 0
-        self.target_holding_days = (
-            0  # Target holding days, will be dynamically calculated
-        )
+        self.target_holding_days = 0
         self.in_position = False
-
-        # Statistics
         self.total_trades = 0
         self.total_holding_days = 0
-        self.holding_days_list = []  # Record holding days for each trade
+        self.holding_days_list = []
         self.trade_start_date = None
 
     # ---------- Transaction helper (keep original logic) ----------
     def _open_position(self, short, signal_strength):
-        if not hasattr(self, "size0"):
-            self.size0 = 10
-            self.size1 = round(self.data2.beta[0] * 10)
         if short:  # Short spread
             self.sell(data=self.data0, size=self.size0)
             self.buy(data=self.data1, size=self.size1)
         else:  # Long spread
             self.buy(data=self.data0, size=self.size0)
             self.sell(data=self.data1, size=self.size1)
-
-        # Dynamic calculation of target holding days based on signal strength
-        # Stronger signal, longer holding days
         dynamic_days = int(self.p.days_factor * signal_strength)
         self.target_holding_days = max(
             self.p.base_holding_days, self.p.base_holding_days + dynamic_days
         )
-
         if self.p.verbose:
             print(
                 f"Signal strength: {signal_strength:.2f}, Target holding days:"
                 f" {self.target_holding_days}"
             )
-
-        # Reset holding counter
         self.holding_counter = 0
         self.in_position = True
         self.total_trades += 1
@@ -183,12 +169,14 @@ class DynamicSpreadCUSUMStrategy(bt.Strategy):
             self.size1 = round(beta_now * 10)
 
             if self.g_pos > h:
-                # Calculate signal strength: Magnitude of cumulative sum exceeding threshold h
+                # Calculate signal strength: Magnitude of cumulative sum
+                # exceeding threshold h
                 signal_strength = (self.g_pos - h) / h
                 self._open_position(short=True, signal_strength=signal_strength)
                 self.g_pos = self.g_neg = 0
             elif self.g_neg > h:
-                # Calculate signal strength: Magnitude of cumulative sum exceeding threshold h
+                # Calculate signal strength: Magnitude of cumulative sum
+                # exceeding threshold h
                 signal_strength = (self.g_neg - h) / h
                 self._open_position(short=False, signal_strength=signal_strength)
                 self.g_pos = self.g_neg = 0
@@ -224,7 +212,12 @@ class DynamicSpreadCUSUMStrategy(bt.Strategy):
         elif trade.justopened:
             print(
                 "TRADE %s OPENED %s  , SIZE %2d, PRICE %d "
-                % (trade.ref, bt.num2date(trade.dtopen), trade.size, trade.value)
+                % (
+                    trade.ref,
+                    bt.num2date(trade.dtopen),
+                    trade.size,
+                    trade.value,
+                )
             )
 
     def get_stats(self):
@@ -232,7 +225,7 @@ class DynamicSpreadCUSUMStrategy(bt.Strategy):
         stats = {
             "total_trades": self.total_trades,
             "total_holding_days": self.total_holding_days,
-            "avg_holding_days": self.total_holding_days / max(1, self.total_trades),
+            "avg_holding_days": (self.total_holding_days / max(1, self.total_trades)),
             "holding_days_list": self.holding_days_list,
             "max_holding_days": (
                 max(self.holding_days_list) if self.holding_days_list else 0
@@ -391,26 +384,29 @@ def grid_search(
         df_spread_bt = df_spread[
             (df_spread["date"] >= fromdate) & (df_spread["date"] <= todate)
         ]
-        data0 = bt.feeds.PandasData(dataname=df0_bt, datetime="date")
-        data1 = bt.feeds.PandasData(dataname=df1_bt, datetime="date")
-        data2 = SpreadData(dataname=df_spread_bt, datetime="date")
+        # Use positional arguments for PandasData and SpreadData to avoid linter errors
+        data0 = bt.feeds.PandasData(df0_bt, "date")
+        data1 = bt.feeds.PandasData(df1_bt, "date")
+        data2 = SpreadData(df_spread_bt, "date")
 
         for win in win_values:
             for k_coeff in k_coeff_values:
                 for h_coeff in h_coeff_values:
                     for base_holding_days in base_holding_days_values:
                         for days_factor in days_factor_values:
-                            param_combinations.append((
-                                data0,
-                                data1,
-                                data2,
-                                win,
-                                k_coeff,
-                                h_coeff,
-                                base_holding_days,
-                                days_factor,
-                                spread_window,
-                            ))
+                            param_combinations.append(
+                                (
+                                    data0,
+                                    data1,
+                                    data2,
+                                    win,
+                                    k_coeff,
+                                    h_coeff,
+                                    base_holding_days,
+                                    days_factor,
+                                    spread_window,
+                                )
+                            )
 
     # Execute grid search
     results = []
@@ -472,7 +468,7 @@ def grid_search(
         # Sort by Sharpe ratio
         sorted_results = sorted(
             results,
-            key=lambda x: x["sharpe"] if x["sharpe"] is not None else -float("inf"),
+            key=lambda x: (x["sharpe"] if x["sharpe"] is not None else -float("inf")),
             reverse=True,
         )
         best_result = sorted_results[0]
@@ -528,15 +524,24 @@ def parse_args():
 
     # Pair arguments
     parser.add_argument(
-        "--pair1", type=str, default="/J", help="First contract code (default: /J)"
+        "--pair1",
+        type=str,
+        default="/J",
+        help="First contract code (default: /J)",
     )
     parser.add_argument(
-        "--pair2", type=str, default="/JM", help="Second contract code (default: /JM)"
+        "--pair2",
+        type=str,
+        default="/JM",
+        help="Second contract code (default: /JM)",
     )
 
     # Initial cash
     parser.add_argument(
-        "--cash", type=int, default=100000, help="Initial cash (default: 100000)"
+        "--cash",
+        type=int,
+        default=100000,
+        help="Initial cash (default: 100000)",
     )
 
     # Strategy parameters
@@ -617,7 +622,7 @@ if __name__ == "__main__":
 # Average holding days: 6.13 days
 # Holding days range: 5 to 25 days
 
-# ========= All parameter combinations results (sorted by Sharpe ratio)=========
+# ========= All parameter combinations results (sorted by Sharpe ratio)===
 # 1. spread_window=15, win=14, k_coeff=0.50, h_coeff=4.00, base_days=5, factor=5.00, sharpe=0.5480, drawdown=9.04%, return=2.53%, win_rate=49.71%, trades=340, avg_days=6.1
 # 2. spread_window=30, win=7, k_coeff=0.80, h_coeff=8.00, base_days=5, factor=3.00, sharpe=0.4927, drawdown=5.67%, return=1.83%, win_rate=51.37%, trades=146, avg_days=5.7
 # 3. spread_window=15, win=7, k_coeff=0.50, h_coeff=8.00, base_days=5, factor=1.00, sharpe=0.4886, drawdown=6.48%, return=1.90%, win_rate=51.01%, trades=198, avg_days=5.2
@@ -627,4 +632,6 @@ if __name__ == "__main__":
 # 7. spread_window=30, win=14, k_coeff=0.80, h_coeff=4.00, base_days=3, factor=1.00, sharpe=0.4631, drawdown=7.47%, return=1.49%, win_rate=51.27%, trades=314, avg_days=3.0
 # 8. spread_window=30, win=14, k_coeff=0.20, h_coeff=4.00, base_days=5, factor=5.00, sharpe=0.4602, drawdown=10.94%, return=2.59%, win_rate=45.45%, trades=198, avg_days=17.1
 # 9. spread_window=30, win=7, k_coeff=0.50, h_coeff=12.00, base_days=5, factor=1.00, sharpe=0.4600, drawdown=5.11%, return=1.73%, win_rate=49.46%, trades=186, avg_days=5.2
-# 10. spread_window=30, win=7, k_coeff=0.50, h_coeff=12.00, base_days=5, factor=5.00, sharpe=0.4518, drawdown=7.10%, return=1.82%, win_rate=47.80%, trades=182, avg_days=7.0
+# 10. spread_window=30, win=7, k_coeff=0.50, h_coeff=12.00, base_days=5,
+# factor=5.00, sharpe=0.4518, drawdown=7.10%, return=1.82%,
+# win_rate=47.80%, trades=182, avg_days=7.0

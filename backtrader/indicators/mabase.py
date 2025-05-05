@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,10 +18,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 from ..utils.py3 import with_metaclass
-
 from . import Indicator
 
 
@@ -44,12 +48,18 @@ class MovingAverage(object):
 
       sma = MovAv.MovingAverageSimple(self.data, period)
 
+
     """
 
     _movavs = []
 
     @classmethod
     def register(cls, regcls):
+        """
+
+        :param regcls:
+
+        """
         if getattr(regcls, "_notregister", False):
             return
 
@@ -69,14 +79,26 @@ class MovingAverage(object):
 
 
 class MovAv(MovingAverage):
+    """ """
+
     pass  # alias
 
 
 class MetaMovAvBase(Indicator.__class__):
+    """ """
+
     # Register any MovingAverage with the placeholder to allow the automatic
     # creation of envelopes and oscillators
 
     def __new__(meta, name, bases, dct):
+        """
+
+        :param meta:
+        :param name:
+        :param bases:
+        :param dct:
+
+        """
         # Create the class
         cls = super(MetaMovAvBase, meta).__new__(meta, name, bases, dct)
 
@@ -87,5 +109,7 @@ class MetaMovAvBase(Indicator.__class__):
 
 
 class MovingAverageBase(with_metaclass(MetaMovAvBase, Indicator)):
+    """ """
+
     params = (("period", 30),)
     plotinfo = dict(subplot=False)

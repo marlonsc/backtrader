@@ -1,24 +1,13 @@
-from typing import Literal, Optional
-from pydantic import BaseModel, Field
 from datetime import datetime
+from typing import Literal, Optional
+
+from pydantic import BaseModel, Field
 
 Period = Literal["1m", "5m", "15m", "30m", "1h", "1d", "1w"]
 
 
 class Candle(BaseModel):
-    """
-    Represents a single candlestick in a financial chart.
-
-    Attributes:
-        period (Period): The time period of the candlestick (e.g., 1m, 5m).
-        symbol (str): The financial instrument symbol (e.g., AAPL, BTCUSD).
-        timestamp (datetime): The timestamp of the candlestick.
-        open_ (float): The opening price of the candlestick.
-        close_ (float): The closing price of the candlestick.
-        high (float): The highest price during the candlestick period.
-        low (float): The lowest price during the candlestick period.
-        volume (Optional[float]): The trading volume during the candlestick period.
-    """
+    """Represents a single candlestick in a financial chart."""
 
     period: Period
     symbol: str
@@ -31,29 +20,14 @@ class Candle(BaseModel):
 
 
 class TradeDirection(str):
-    """
-    Enum-like class for trade directions.
-
-    Attributes:
-        LONG (str): Represents a long trade direction.
-        SHORT (str): Represents a short trade direction.
-    """
+    """Enum-like class for trade directions."""
 
     LONG = "long"
     SHORT = "short"
 
 
 class Order(BaseModel):
-    """
-    Represents an order to be executed in the market.
-
-    Attributes:
-        symbol (str): The financial instrument symbol.
-        kind (Literal): The type of order (e.g., limit, stop, market).
-        size (float): The number of shares/contracts to trade.
-        duration (Literal): The duration of the order (e.g., day, good_till_cancelled).
-        price (float): The price at which the order is to be executed.
-    """
+    """Represents an order to be executed in the market."""
 
     symbol: str
     kind: Literal["limit", "stop", "market"]
@@ -63,18 +37,7 @@ class Order(BaseModel):
 
 
 class EntryDecision(BaseModel):
-    """
-    Represents a decision to enter a trade.
-
-    Attributes:
-        action (Literal): The action to take (e.g., buy_to_open, sell_to_open).
-        symbol (str): The financial instrument symbol.
-        size (float): The number of shares/contracts to trade.
-        stop_loss (float): The stop loss price.
-        take_profit (float): The take profit price.
-        timestamp (datetime): The timestamp of the decision.
-        reasoning (Optional[str]): The reasoning behind the decision.
-    """
+    """Represents a decision to enter a trade."""
 
     action: Literal["buy_to_open", "sell_to_open"]
     symbol: str
@@ -88,17 +51,7 @@ class EntryDecision(BaseModel):
 
 
 class ExitDecision(BaseModel):
-    """
-    Represents a decision to exit a trade.
-
-    Attributes:
-        action (Literal): The action to take (e.g., sell_to_close, buy_to_close).
-        symbol (str): The financial instrument symbol.
-        size (float): The number of shares/contracts to trade.
-        reason (Literal): The reason for exiting the trade.
-        timestamp (datetime): The timestamp of the decision.
-        reasoning (Optional[str]): Additional reasoning for the exit decision.
-    """
+    """Represents a decision to exit a trade."""
 
     action: Literal["sell_to_close", "buy_to_close"]
     symbol: str
@@ -109,16 +62,7 @@ class ExitDecision(BaseModel):
 
 
 class OpenPosition(BaseModel):
-    """
-    Represents an open position in the market.
-
-    Attributes:
-        symbol (str): The financial instrument symbol.
-        size (float): The number of shares/contracts in the position.
-        direction (Literal): The direction of the position (long or short).
-        entry_price (float): The price at which the position was entered.
-        entry_time (datetime): The timestamp of when the position was opened.
-    """
+    """Represents an open position in the market."""
 
     symbol: str
     size: float
@@ -128,17 +72,7 @@ class OpenPosition(BaseModel):
 
 
 class TradeLog(BaseModel):
-    """
-    Represents a log of a trade, including entry and exit details.
-
-    Attributes:
-        symbol (str): The financial instrument symbol.
-        direction (Literal): The direction of the trade (long or short).
-        entry_ (EntryDecision): The entry decision details.
-        exit_ (Optional[ExitDecision]): The exit decision details, if any.
-        open_pnl (Optional[float]): The unrealized profit and loss.
-        realized_pnl (Optional[float]): The realized profit and loss.
-    """
+    """Represents a log of a trade, including entry and exit details."""
 
     symbol: str
     direction: Literal["long", "short"]

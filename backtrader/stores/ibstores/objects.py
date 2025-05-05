@@ -1,7 +1,8 @@
 """Object hierarchy."""
 
 from dataclasses import dataclass, field
-from datetime import date as date_, datetime
+from datetime import date as date_
+from datetime import datetime
 from typing import List, NamedTuple, Optional, Union
 
 from eventkit import Event
@@ -14,6 +15,8 @@ nan = float("nan")
 
 @dataclass
 class ScannerSubscription:
+    """ """
+
     numberOfRows: int = -1
     instrument: str = ""
     locationCode: str = ""
@@ -39,16 +42,21 @@ class ScannerSubscription:
 
 @dataclass
 class SoftDollarTier:
+    """ """
+
     name: str = ""
     val: str = ""
     displayName: str = ""
 
     def __bool__(self):
+        """ """
         return bool(self.name or self.val or self.displayName)
 
 
 @dataclass
 class Execution:
+    """ """
+
     execId: str = ""
     time: datetime = field(default=EPOCH)
     acctNumber: str = ""
@@ -72,6 +80,8 @@ class Execution:
 
 @dataclass
 class CommissionReport:
+    """ """
+
     execId: str = ""
     commission: float = 0.0
     currency: str = ""
@@ -82,6 +92,8 @@ class CommissionReport:
 
 @dataclass
 class ExecutionFilter:
+    """ """
+
     clientId: int = 0
     acctCode: str = ""
     time: str = ""
@@ -93,6 +105,8 @@ class ExecutionFilter:
 
 @dataclass
 class BarData:
+    """ """
+
     date: Union[date_, datetime] = EPOCH
     open: float = 0.0
     high: float = 0.0
@@ -105,6 +119,8 @@ class BarData:
 
 @dataclass
 class RealTimeBar:
+    """ """
+
     time: datetime = EPOCH
     endTime: int = -1
     open_: float = 0.0
@@ -118,6 +134,8 @@ class RealTimeBar:
 
 @dataclass
 class TickAttrib:
+    """ """
+
     canAutoExecute: bool = False
     pastLimit: bool = False
     preOpen: bool = False
@@ -125,30 +143,40 @@ class TickAttrib:
 
 @dataclass
 class TickAttribBidAsk:
+    """ """
+
     bidPastLow: bool = False
     askPastHigh: bool = False
 
 
 @dataclass
 class TickAttribLast:
+    """ """
+
     pastLimit: bool = False
     unreported: bool = False
 
 
 @dataclass
 class HistogramData:
+    """ """
+
     price: float = 0.0
     count: int = 0
 
 
 @dataclass
 class NewsProvider:
+    """ """
+
     code: str = ""
     name: str = ""
 
 
 @dataclass
 class DepthMktDataDescription:
+    """ """
+
     exchange: str = ""
     secType: str = ""
     listingExch: str = ""
@@ -158,6 +186,8 @@ class DepthMktDataDescription:
 
 @dataclass
 class PnL:
+    """ """
+
     account: str = ""
     modelCode: str = ""
     dailyPnL: float = nan
@@ -167,6 +197,8 @@ class PnL:
 
 @dataclass
 class TradeLogEntry:
+    """ """
+
     time: datetime
     status: str = ""
     message: str = ""
@@ -175,6 +207,8 @@ class TradeLogEntry:
 
 @dataclass
 class PnLSingle:
+    """ """
+
     account: str = ""
     modelCode: str = ""
     conId: int = 0
@@ -187,6 +221,8 @@ class PnLSingle:
 
 @dataclass
 class HistoricalSession:
+    """ """
+
     startDateTime: str = ""
     endDateTime: str = ""
     refDate: str = ""
@@ -194,6 +230,8 @@ class HistoricalSession:
 
 @dataclass
 class HistoricalSchedule:
+    """ """
+
     startDateTime: str = ""
     endDateTime: str = ""
     timeZone: str = ""
@@ -202,6 +240,8 @@ class HistoricalSchedule:
 
 @dataclass
 class WshEventData:
+    """ """
+
     conId: int = UNSET_INTEGER
     filter: str = ""
     fillWatchlist: bool = False
@@ -213,6 +253,8 @@ class WshEventData:
 
 
 class AccountValue(NamedTuple):
+    """ """
+
     account: str
     tag: str
     value: str
@@ -221,6 +263,8 @@ class AccountValue(NamedTuple):
 
 
 class TickData(NamedTuple):
+    """ """
+
     time: datetime
     tickType: int
     price: float
@@ -228,12 +272,16 @@ class TickData(NamedTuple):
 
 
 class HistoricalTick(NamedTuple):
+    """ """
+
     time: datetime
     price: float
     size: float
 
 
 class HistoricalTickBidAsk(NamedTuple):
+    """ """
+
     time: datetime
     tickAttribBidAsk: TickAttribBidAsk
     priceBid: float
@@ -243,6 +291,8 @@ class HistoricalTickBidAsk(NamedTuple):
 
 
 class HistoricalTickLast(NamedTuple):
+    """ """
+
     time: datetime
     tickAttribLast: TickAttribLast
     price: float
@@ -252,6 +302,8 @@ class HistoricalTickLast(NamedTuple):
 
 
 class TickByTickAllLast(NamedTuple):
+    """ """
+
     tickType: int
     time: datetime
     price: float
@@ -262,6 +314,8 @@ class TickByTickAllLast(NamedTuple):
 
 
 class TickByTickBidAsk(NamedTuple):
+    """ """
+
     time: datetime
     bidPrice: float
     askPrice: float
@@ -271,11 +325,15 @@ class TickByTickBidAsk(NamedTuple):
 
 
 class TickByTickMidPoint(NamedTuple):
+    """ """
+
     time: datetime
     midPoint: float
 
 
 class MktDepthData(NamedTuple):
+    """ """
+
     time: datetime
     position: int
     marketMaker: str
@@ -286,17 +344,23 @@ class MktDepthData(NamedTuple):
 
 
 class DOMLevel(NamedTuple):
+    """ """
+
     price: float
     size: float
     marketMaker: str
 
 
 class PriceIncrement(NamedTuple):
+    """ """
+
     lowEdge: float
     increment: float
 
 
 class PortfolioItem(NamedTuple):
+    """ """
+
     contract: Contract
     position: float
     marketPrice: float
@@ -308,6 +372,8 @@ class PortfolioItem(NamedTuple):
 
 
 class Position(NamedTuple):
+    """ """
+
     account: str
     contract: Contract
     position: float
@@ -315,6 +381,8 @@ class Position(NamedTuple):
 
 
 class Fill(NamedTuple):
+    """ """
+
     contract: Contract
     execution: Execution
     commissionReport: CommissionReport
@@ -322,6 +390,8 @@ class Fill(NamedTuple):
 
 
 class OptionComputation(NamedTuple):
+    """ """
+
     tickAttrib: int
     impliedVol: Optional[float]
     delta: Optional[float]
@@ -334,6 +404,8 @@ class OptionComputation(NamedTuple):
 
 
 class OptionChain(NamedTuple):
+    """ """
+
     exchange: str
     underlyingConId: int
     tradingClass: str
@@ -343,6 +415,8 @@ class OptionChain(NamedTuple):
 
 
 class Dividends(NamedTuple):
+    """ """
+
     past12Months: Optional[float]
     next12Months: Optional[float]
     nextDate: Optional[date_]
@@ -350,11 +424,15 @@ class Dividends(NamedTuple):
 
 
 class NewsArticle(NamedTuple):
+    """ """
+
     articleType: int
     articleText: str
 
 
 class HistoricalNews(NamedTuple):
+    """ """
+
     time: datetime
     providerCode: str
     articleId: str
@@ -362,6 +440,8 @@ class HistoricalNews(NamedTuple):
 
 
 class NewsTick(NamedTuple):
+    """ """
+
     timeStamp: int
     providerCode: str
     articleId: str
@@ -370,6 +450,8 @@ class NewsTick(NamedTuple):
 
 
 class NewsBulletin(NamedTuple):
+    """ """
+
     msgId: int
     msgType: int
     message: str
@@ -377,17 +459,23 @@ class NewsBulletin(NamedTuple):
 
 
 class FamilyCode(NamedTuple):
+    """ """
+
     accountID: str
     familyCodeStr: str
 
 
 class SmartComponent(NamedTuple):
+    """ """
+
     bitNumber: int
     exchange: str
     exchangeLetter: str
 
 
 class ConnectionStats(NamedTuple):
+    """ """
+
     startTime: float
     duration: float
     numBytesRecv: int
@@ -397,13 +485,14 @@ class ConnectionStats(NamedTuple):
 
 
 class BarDataList(List[BarData]):
-    """
-    List of :class:`.BarData` that also stores all request parameters.
+    """List of :class:`.BarData` that also stores all request parameters.
 
     Events:
 
         * ``updateEvent``
           (bars: :class:`.BarDataList`, hasNewBar: bool)
+
+
     """
 
     reqId: int
@@ -418,24 +507,36 @@ class BarDataList(List[BarData]):
     chartOptions: List[TagValue]
 
     def __init__(self, *args):
+        """
+
+        :param *args:
+
+        """
         super().__init__(*args)
         self.updateEvent = Event("updateEvent")
 
     def __eq__(self, other):
+        """
+
+        :param other:
+
+        """
         return self is other
 
     def __hash__(self):
+        """ """
         return id(self)
 
 
 class RealTimeBarList(List[RealTimeBar]):
-    """
-    List of :class:`.RealTimeBar` that also stores all request parameters.
+    """List of :class:`.RealTimeBar` that also stores all request parameters.
 
     Events:
 
         * ``updateEvent``
           (bars: :class:`.RealTimeBarList`, hasNewBar: bool)
+
+
     """
 
     reqId: int
@@ -446,22 +547,34 @@ class RealTimeBarList(List[RealTimeBar]):
     realTimeBarsOptions: List[TagValue]
 
     def __init__(self, *args):
+        """
+
+        :param *args:
+
+        """
         super().__init__(*args)
         self.updateEvent = Event("updateEvent")
 
     def __eq__(self, other):
+        """
+
+        :param other:
+
+        """
         return self is other
 
     def __hash__(self):
+        """ """
         return id(self)
 
 
 class ScanDataList(List[ScanData]):
-    """
-    List of :class:`.ScanData` that also stores all request parameters.
+    """List of :class:`.ScanData` that also stores all request parameters.
 
     Events:
         * ``updateEvent`` (:class:`.ScanDataList`)
+
+
     """
 
     reqId: int
@@ -470,31 +583,48 @@ class ScanDataList(List[ScanData]):
     scannerSubscriptionFilterOptions: List[TagValue]
 
     def __init__(self, *args):
+        """
+
+        :param *args:
+
+        """
         super().__init__(*args)
         self.updateEvent = Event("updateEvent")
 
     def __eq__(self, other):
+        """
+
+        :param other:
+
+        """
         return self is other
 
     def __hash__(self):
+        """ """
         return id(self)
 
 
 class DynamicObject:
+    """ """
 
     def __init__(self, **kwargs):
+        """
+
+        :param **kwargs:
+
+        """
         self.__dict__.update(kwargs)
 
     def __repr__(self):
+        """ """
         clsName = self.__class__.__name__
         kwargs = ", ".join(f"{k}={v!r}" for k, v in self.__dict__.items())
         return f"{clsName}({kwargs})"
 
 
 class FundamentalRatios(DynamicObject):
-    """
-    See:
+    """See:
     https://web.archive.org/web/20200725010343/https://interactivebrokers.github.io/tws-api/fundamental_ratios_tags.html
-    """
 
-    pass
+
+    """

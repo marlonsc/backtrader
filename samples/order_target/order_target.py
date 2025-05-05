@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 from datetime import datetime
@@ -27,8 +32,7 @@ import backtrader as bt
 
 
 class TheStrategy(bt.Strategy):
-    """
-    This strategy is loosely based on some of the examples from the Van
+    """This strategy is loosely based on some of the examples from the Van
     K. Tharp book: *Trade Your Way To Financial Freedom*. The logic:
 
       - Enter the market if:
@@ -44,6 +48,8 @@ class TheStrategy(bt.Strategy):
          exit.
        - If not, update the stop price if the new stop price would be higher
          than the current
+
+
     """
 
     params = (
@@ -53,6 +59,11 @@ class TheStrategy(bt.Strategy):
     )
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status == order.Completed:
             pass
 
@@ -60,9 +71,11 @@ class TheStrategy(bt.Strategy):
             self.order = None  # indicate no order is pending
 
     def start(self):
+        """ """
         self.order = None  # sentinel to avoid operrations on pending order
 
     def next(self):
+        """ """
         dt = self.data.datetime.date()
 
         portfolio_value = self.broker.get_value()
@@ -92,7 +105,6 @@ class TheStrategy(bt.Strategy):
             size = 31 - size
 
         if self.p.use_target_size:
-            target = size
             print(
                 "%04d - %s - Order Target Size: %02d"
                 % (len(self), dt.isoformat(), size)
@@ -122,6 +134,11 @@ class TheStrategy(bt.Strategy):
 
 
 def runstrat(args=None):
+    """
+
+    :param args:  (Default value = None)
+
+    """
     args = parse_args(args)
 
     cerebro = bt.Cerebro()
@@ -157,6 +174,11 @@ def runstrat(args=None):
 
 
 def parse_args(pargs=None):
+    """
+
+    :param pargs:  (Default value = None)
+
+    """
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

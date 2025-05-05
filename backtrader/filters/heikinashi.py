@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,26 +18,40 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 __all__ = ["HeikinAshi"]
 
 
 class HeikinAshi(object):
-    """
-    The filter remodels the open, high, low, close to make HeikinAshi
+    """The filter remodels the open, high, low, close to make HeikinAshi
     candlesticks
 
     See:
       - https://en.wikipedia.org/wiki/Candlestick_chart#Heikin_Ashi_candlesticks
       - http://stockcharts.com/school/doku.php?id=chart_school:chart_analysis:heikin_ashi
 
+
     """
 
     def __init__(self, data):
-        pass
+        """
+
+        :param data:
+
+        """
 
     def __call__(self, data):
+        """
+
+        :param data:
+
+        """
         o, h, l, c = data.open[0], data.high[0], data.low[0], data.close[0]
 
         data.close[0] = ha_close0 = (o + h + l + c) / 4.0

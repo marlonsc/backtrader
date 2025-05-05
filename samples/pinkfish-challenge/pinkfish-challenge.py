@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
@@ -28,29 +33,40 @@ import backtrader.indicators as btind
 
 
 class DayStepsCloseFilter(bt.with_metaclass(bt.MetaParams, object)):
-    """
-    Replays a bar in 2 steps:
+    """Replays a bar in 2 steps:
 
-      - In the 1st step the "Open-High-Low" could be evaluated to decide if to
-        act on the close (the close is still there ... should not be evaluated)
+    - In the 1st step the "Open-High-Low" could be evaluated to decide if to
+      act on the close (the close is still there ... should not be evaluated)
 
-      - If a "Close" order has been executed
+    - If a "Close" order has been executed
 
-        In this 1st fragment the "Close" is replaced through the "open" althoug
-        other alternatives would be possible like high - low average, or an
-        algorithm based on where the "close" ac
+      In this 1st fragment the "Close" is replaced through the "open" althoug
+      other alternatives would be possible like high - low average, or an
+      algorithm based on where the "close" ac
 
-      and
+    and
 
-      - Open-High-Low-Close
+    - Open-High-Low-Close
+
+
     """
 
     params = (("cvol", 0.5),)  # 0 -> 1 amount of volume to keep for close
 
     def __init__(self, data):
+        """
+
+        :param data:
+
+        """
         self.pendingbar = None
 
     def __call__(self, data):
+        """
+
+        :param data:
+
+        """
         # Make a copy of the new bar and remove it from stream
         closebar = [data.lines[i][0] for i in range(data.size())]
         datadt = data.datetime.date()  # keep the date
@@ -80,7 +96,11 @@ class DayStepsCloseFilter(bt.with_metaclass(bt.MetaParams, object)):
     def last(self, data):
         """Called when the data is no longer producing bars
         Can be called multiple times. It has the chance to (for example)
-        produce extra bars"""
+        produce extra bars
+
+        :param data:
+
+        """
         if self.pendingbar is not None:
             data.backwards()  # remove delivered open bar
             data._add2stack(self.pendingbar)  # add remaining
@@ -91,21 +111,22 @@ class DayStepsCloseFilter(bt.with_metaclass(bt.MetaParams, object)):
 
 
 class DayStepsReplayFilter(bt.with_metaclass(bt.MetaParams, object)):
-    """
-    Replays a bar in 2 steps:
+    """Replays a bar in 2 steps:
 
-      - In the 1st step the "Open-High-Low" could be evaluated to decide if to
-        act on the close (the close is still there ... should not be evaluated)
+    - In the 1st step the "Open-High-Low" could be evaluated to decide if to
+      act on the close (the close is still there ... should not be evaluated)
 
-      - If a "Close" order has been executed
+    - If a "Close" order has been executed
 
-        In this 1st fragment the "Close" is replaced through the "open" althoug
-        other alternatives would be possible like high - low average, or an
-        algorithm based on where the "close" ac
+      In this 1st fragment the "Close" is replaced through the "open" althoug
+      other alternatives would be possible like high - low average, or an
+      algorithm based on where the "close" ac
 
-      and
+    and
 
-      - Open-High-Low-Close
+    - Open-High-Low-Close
+
+
     """
 
     params = (("closevol", 0.5),)  # 0 -> 1 amount of volume to keep for close
@@ -113,10 +134,19 @@ class DayStepsReplayFilter(bt.with_metaclass(bt.MetaParams, object)):
     # replaying = True
 
     def __init__(self, data):
+        """
+
+        :param data:
+
+        """
         self.lastdt = None
-        pass
 
     def __call__(self, data):
+        """
+
+        :param data:
+
+        """
         # Make a copy of the new bar and remove it from stream
         datadt = data.datetime.date()  # keep the date
 
@@ -164,6 +194,8 @@ class DayStepsReplayFilter(bt.with_metaclass(bt.MetaParams, object)):
 
 
 class St(bt.Strategy):
+    """ """
+
     params = (
         ("highperiod", 20),
         ("sellafter", 2),
@@ -171,9 +203,10 @@ class St(bt.Strategy):
     )
 
     def __init__(self):
-        pass
+        """ """
 
     def start(self):
+        """ """
         self.callcounter = 0
         txtfields = list()
         txtfields.append("Calls")
@@ -197,6 +230,11 @@ class St(bt.Strategy):
         )
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.isbuy() and order.status == order.Completed:
             print(
                 "-- BUY Completed on:",
@@ -205,6 +243,7 @@ class St(bt.Strategy):
             print("-- BUY Price:", order.executed.price)
 
     def next(self):
+        """ """
         self.callcounter += 1
 
         txtfields = list()
@@ -244,6 +283,7 @@ class St(bt.Strategy):
 
 
 def runstrat():
+    """ """
     args = parse_args()
 
     cerebro = bt.Cerebro()
@@ -261,19 +301,28 @@ def runstrat():
 
     if args.no_replay:
         data = bt.feeds.YahooFinanceCSVData(
-            dataname=args.data, timeframe=bt.TimeFrame.Days, compression=1, **dkwargs
+            dataname=args.data,
+            timeframe=bt.TimeFrame.Days,
+            compression=1,
+            **dkwargs,
         )
         data.addfilter(DayStepsCloseFilter)
         cerebro.adddata(data)
     else:
         data = bt.feeds.YahooFinanceCSVData(
-            dataname=args.data, timeframe=bt.TimeFrame.Minutes, compression=1, **dkwargs
+            dataname=args.data,
+            timeframe=bt.TimeFrame.Minutes,
+            compression=1,
+            **dkwargs,
         )
         data.addfilter(DayStepsReplayFilter)
         cerebro.replaydata(data, timeframe=bt.TimeFrame.Days, compression=1)
 
     cerebro.addstrategy(
-        St, sellafter=args.sellafter, highperiod=args.highperiod, market=args.market
+        St,
+        sellafter=args.sellafter,
+        highperiod=args.highperiod,
+        market=args.market,
     )
 
     cerebro.run(runonce=False, preload=False, oldbuysell=args.oldbuysell)
@@ -287,6 +336,11 @@ def runstrat():
 
 
 def parse_args(pargs=None):
+    """
+
+    :param pargs:  (Default value = None)
+
+    """
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

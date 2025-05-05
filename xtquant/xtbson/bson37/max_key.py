@@ -11,8 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Representation for the MongoDB internal MaxKey type."""
+
 from typing import Any
 
 
@@ -24,31 +24,92 @@ class MaxKey(object):
     _type_marker = 127
 
     def __getstate__(self) -> Any:
+        """
+
+
+        :rtype: Any
+
+        """
         return {}
 
     def __setstate__(self, state: Any) -> None:
-        pass
+        """
+
+        :param state:
+        :type state: Any
+        :rtype: None
+
+        """
 
     def __eq__(self, other: Any) -> bool:
+        """
+
+        :param other:
+        :type other: Any
+        :rtype: bool
+
+        """
         return isinstance(other, MaxKey)
 
     def __hash__(self) -> int:
+        """
+
+
+        :rtype: int
+
+        """
         return hash(self._type_marker)
 
     def __ne__(self, other: Any) -> bool:
+        """
+
+        :param other:
+        :type other: Any
+        :rtype: bool
+
+        """
         return not self == other
 
     def __le__(self, other: Any) -> bool:
+        """
+
+        :param other:
+        :type other: Any
+        :rtype: bool
+
+        """
         return isinstance(other, MaxKey)
 
     def __lt__(self, dummy: Any) -> bool:
+        """
+
+        :param dummy:
+        :type dummy: Any
+        :rtype: bool
+
+        """
         return False
 
     def __ge__(self, dummy: Any) -> bool:
+        """
+
+        :param dummy:
+        :type dummy: Any
+        :rtype: bool
+
+        """
         return True
 
     def __gt__(self, other: Any) -> bool:
+        """
+
+        :param other:
+        :type other: Any
+        :rtype: bool
+
+        """
         return not isinstance(other, MaxKey)
 
     def __repr__(self):
+        """ """
         return "MaxKey()"

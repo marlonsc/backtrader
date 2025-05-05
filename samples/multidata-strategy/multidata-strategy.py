@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
@@ -30,8 +35,7 @@ import backtrader.indicators as btind
 
 
 class MultiDataStrategy(bt.Strategy):
-    """
-    This strategy operates on 2 datas. The expectation is that the 2 datas are
+    """This strategy operates on 2 datas. The expectation is that the 2 datas are
     correlated and the 2nd data is used to generate signals on the 1st
 
       - Buy/Sell Operationss will be executed on the 1st data
@@ -39,6 +43,8 @@ class MultiDataStrategy(bt.Strategy):
         when the close price crosses upwwards/downwards
 
     The strategy is a long-only strategy
+
+
     """
 
     params = dict(
@@ -48,12 +54,23 @@ class MultiDataStrategy(bt.Strategy):
     )
 
     def log(self, txt, dt=None):
+        """
+
+        :param txt:
+        :param dt:  (Default value = None)
+
+        """
         if self.p.printout:
             dt = dt or self.data.datetime[0]
             dt = bt.num2date(dt)
             print("%s, %s" % (dt.isoformat(), txt))
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status in [bt.Order.Submitted, bt.Order.Accepted]:
             return  # Await further notifications
 
@@ -73,6 +90,7 @@ class MultiDataStrategy(bt.Strategy):
         self.orderid = None
 
     def __init__(self):
+        """ """
         # To control operation entries
         self.orderid = None
 
@@ -82,6 +100,7 @@ class MultiDataStrategy(bt.Strategy):
         self.signal = btind.CrossOver(self.data1.close, sma)
 
     def next(self):
+        """ """
         if self.orderid:
             return  # if an order is active, no new orders are allowed
 
@@ -107,6 +126,7 @@ class MultiDataStrategy(bt.Strategy):
                 self.sell(data=self.data1, size=self.p.stake)
 
     def stop(self):
+        """ """
         print("==================================================")
         print("Starting Value - %.2f" % self.broker.startingcash)
         print("Ending   Value - %.2f" % self.broker.getvalue())
@@ -114,6 +134,7 @@ class MultiDataStrategy(bt.Strategy):
 
 
 def runstrategy():
+    """ """
     args = parse_args()
 
     # Create a cerebro
@@ -150,7 +171,9 @@ def runstrategy():
 
     # And run it
     cerebro.run(
-        runonce=not args.runnext, preload=not args.nopreload, oldsync=args.oldsync
+        runonce=not args.runnext,
+        preload=not args.nopreload,
+        oldsync=args.oldsync,
     )
 
     # Plot if requested
@@ -159,6 +182,7 @@ def runstrategy():
 
 
 def parse_args():
+    """ """
     parser = argparse.ArgumentParser(description="MultiData Strategy")
 
     parser.add_argument(
@@ -199,7 +223,9 @@ def parse_args():
     parser.add_argument("--cash", default=100000, type=int, help="Starting Cash")
 
     parser.add_argument(
-        "--runnext", action="store_true", help="Use next by next instead of runonce"
+        "--runnext",
+        action="store_true",
+        help="Use next by next instead of runonce",
     )
 
     parser.add_argument(
@@ -207,7 +233,9 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--oldsync", action="store_true", help="Use old data synchronization method"
+        "--oldsync",
+        action="store_true",
+        help="Use old data synchronization method",
     )
 
     parser.add_argument(

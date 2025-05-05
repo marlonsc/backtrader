@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,15 +18,20 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import backtrader as bt
+
 from . import Highest, Lowest
 
 
 class Ichimoku(bt.Indicator):
-    """
-    Developed and published in his book in 1969 by journalist Goichi Hosoda
+    """Developed and published in his book in 1969 by journalist Goichi Hosoda
 
     Formula:
       - tenkan_sen = (Highest(High, tenkan) + Lowest(Low, tenkan)) / 2.0
@@ -45,6 +50,7 @@ class Ichimoku(bt.Indicator):
 
     See:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:ichimoku_cloud
+
 
     """
 
@@ -71,6 +77,7 @@ class Ichimoku(bt.Indicator):
     )
 
     def __init__(self):
+        """ """
         hi_tenkan = Highest(self.data.high, period=self.p.tenkan)
         lo_tenkan = Lowest(self.data.low, period=self.p.tenkan)
         self.l.tenkan_sen = (hi_tenkan + lo_tenkan) / 2.0

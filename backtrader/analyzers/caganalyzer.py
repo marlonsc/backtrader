@@ -1,21 +1,11 @@
-import math
-import pandas as pd
-import numpy as np
 import backtrader as bt
 import matplotlib.pyplot as plt
-from collections import OrderedDict
+import numpy as np
 from backtrader import TimeFrameAnalyzerBase
-import matplotlib.pyplot as mpyplot
 
 
 class CAGRAnalyzer(TimeFrameAnalyzerBase):
-    """Calculates the Compound Annual Growth Rate (CAGR) and plots cumulative returns.
-
-    Params:
-      - ``period`` (default: ``daily``): Annualization period (daily/weekly/monthly/yearly)
-      - ``fund`` (default: ``None``): Fund mode (True/False), None for auto-detect
-      - ``plot`` (default: ``True``): Whether to auto-generate cumulative return plot
-    """
+    """Calculates the Compound Annual Growth Rate (CAGR) and plots cumulative returns."""
 
     params = (
         ("period", None),
@@ -31,6 +21,7 @@ class CAGRAnalyzer(TimeFrameAnalyzerBase):
     }
 
     def __init__(self):
+        """ """
         # 初始化数据容器
         self.dates = []  # 记录每个bar的日期
         self.cum_returns = []  # 记录每日累计收益率
@@ -38,6 +29,7 @@ class CAGRAnalyzer(TimeFrameAnalyzerBase):
         super(CAGRAnalyzer, self).__init__()
 
     def start(self):
+        """ """
         super(CAGRAnalyzer, self).start()
 
         # 获取初始值（可以是策略的资产值或者基金值）
@@ -51,6 +43,7 @@ class CAGRAnalyzer(TimeFrameAnalyzerBase):
         self._returns = []
 
     def stop(self):
+        """ """
         # 计算CAGR和夏普比率
         annual_factor = self._TANN.get(self.p.period, 252.0)
 

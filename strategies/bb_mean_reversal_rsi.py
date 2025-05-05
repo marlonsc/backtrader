@@ -147,35 +147,34 @@ EXAMPLE:
 python strategies/bb_mean_reversal_rsi.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --exit-middle --use-stop --stop-pct 2.5 --plot
 """
 
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
 import os
 import sys
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
+
 import backtrader as bt
-import backtrader.indicators as btind
-import psycopg2
+from strategies.utils import (
+    TradeThrottling,
+    add_standard_analyzers,
+    get_db_data,
+    print_performance_metrics,
+)
 
 # Add the parent directory to the path so that 'strategies' can be found
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Now import from strategies.utils
-from strategies.utils import (
-    get_db_data,
-    print_performance_metrics,
-    TradeThrottling,
-    add_standard_analyzers,
-)
 
 
 class StockPriceData(bt.feeds.PandasData):
-    """
-    Stock Price Data Feed
-    """
+    """Stock Price Data Feed"""
 
     params = (
         ("datetime", None),  # Column containing the date (index)
@@ -189,8 +188,7 @@ class StockPriceData(bt.feeds.PandasData):
 
 
 class BollingerMeanReversionStrategy(bt.Strategy, TradeThrottling):
-    """
-    Bollinger Bands Mean Reversion Strategy with RSI Filter
+    """Bollinger Bands Mean Reversion Strategy with RSI Filter
 
     This strategy attempts to capture mean reversion moves by:
     1. Buying when price touches or crosses below the lower Bollinger Band AND RSI < 30
@@ -204,6 +202,8 @@ class BollingerMeanReversionStrategy(bt.Strategy, TradeThrottling):
     ** IMPORTANT: This strategy is specifically designed for sideways/ranging markets **
     It performs poorly in trending markets where prices can remain overbought or oversold
     for extended periods.
+
+
     """
 
     params = (
@@ -216,7 +216,10 @@ class BollingerMeanReversionStrategy(bt.Strategy, TradeThrottling):
         ("rsi_oversold", 30),  # RSI oversold threshold
         ("rsi_overbought", 70),  # RSI overbought threshold
         # Exit parameters
-        ("exit_middle", False),  # Whether to exit when price crosses middle band
+        (
+            "exit_middle",
+            False,
+        ),  # Whether to exit when price crosses middle band
         ("use_stop", False),  # Whether to use fixed stop loss
         ("stop_pct", 2.0),  # Stop loss percentage
         ("use_trail", False),  # Use trailing stop loss
@@ -231,7 +234,13 @@ class BollingerMeanReversionStrategy(bt.Strategy, TradeThrottling):
     )
 
     def log(self, txt, dt=None, level="info"):
-        """Logging function"""
+        """Logging function
+
+        :param txt:
+        :param dt:  (Default value = None)
+        :param level:  (Default value = "info")
+
+        """
         if level == "debug" and self.p.log_level != "debug":
             return
 
@@ -239,6 +248,7 @@ class BollingerMeanReversionStrategy(bt.Strategy, TradeThrottling):
         print(f"{dt.isoformat()}: {txt}")
 
     def __init__(self):
+        """ """
         # Store references to price data
         self.dataclose = self.datas[0].close
         self.datahigh = self.datas[0].high
@@ -316,6 +326,7 @@ class BollingerMeanReversionStrategy(bt.Strategy, TradeThrottling):
         return min(size, max_size)
 
     def next(self):
+        """ """
         # If an order is pending, we cannot send a new one
         if self.order:
             return
@@ -327,7 +338,8 @@ class BollingerMeanReversionStrategy(bt.Strategy, TradeThrottling):
                 self.highest_price = self.datahigh[0]
                 self.trail_price = self.highest_price * (1.0 - self.p.trail_pct / 100.0)
                 self.log(
-                    f"Trailing stop updated to: {self.trail_price:.2f}", level="debug"
+                    f"Trailing stop updated to: {self.trail_price:.2f}",
+                    level="debug",
                 )
 
             # Check if trailing stop is hit
@@ -424,7 +436,11 @@ class BollingerMeanReversionStrategy(bt.Strategy, TradeThrottling):
         )
 
     def notify_order(self, order):
-        """Handle order notifications"""
+        """Handle order notifications
+
+        :param order:
+
+        """
         if order.status in [order.Submitted, order.Accepted]:
             # Order pending, do nothing
             return
@@ -453,7 +469,11 @@ class BollingerMeanReversionStrategy(bt.Strategy, TradeThrottling):
         self.order = None
 
     def notify_trade(self, trade):
-        """Track completed trades"""
+        """Track completed trades
+
+        :param trade:
+
+        """
         if not trade.isclosed:
             return
 
@@ -490,7 +510,10 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--todate", "-t", default="2024-12-31", help="Ending date in YYYY-MM-DD format"
+        "--todate",
+        "-t",
+        default="2024-12-31",
+        help="Ending date in YYYY-MM-DD format",
     )
 
     parser.add_argument(
@@ -524,11 +547,19 @@ def parse_args():
 
     # RSI parameters
     parser.add_argument(
-        "--rsi-period", "-rp", default=14, type=int, help="Period for RSI calculation"
+        "--rsi-period",
+        "-rp",
+        default=14,
+        type=int,
+        help="Period for RSI calculation",
     )
 
     parser.add_argument(
-        "--rsi-oversold", "-ro", default=30, type=int, help="RSI oversold threshold"
+        "--rsi-oversold",
+        "-ro",
+        default=30,
+        type=int,
+        help="RSI oversold threshold",
     )
 
     parser.add_argument(
@@ -550,15 +581,26 @@ def parse_args():
     parser.add_argument("--use-stop", "-us", action="store_true", help="Use stop loss")
 
     parser.add_argument(
-        "--stop-pct", "-sp", default=2.0, type=float, help="Stop loss percentage"
+        "--stop-pct",
+        "-sp",
+        default=2.0,
+        type=float,
+        help="Stop loss percentage",
     )
 
     parser.add_argument(
-        "--use-trail", "-ut", action="store_true", help="Enable trailing stop loss"
+        "--use-trail",
+        "-ut",
+        action="store_true",
+        help="Enable trailing stop loss",
     )
 
     parser.add_argument(
-        "--trail-pct", "-tp", default=2.0, type=float, help="Trailing stop percentage"
+        "--trail-pct",
+        "-tp",
+        default=2.0,
+        type=float,
+        help="Trailing stop percentage",
     )
 
     # Position sizing parameters

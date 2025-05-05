@@ -1,11 +1,10 @@
 import polars as pl
-from polars import Series as plSeries
 from icecream import ic
+from polars import Series as plSeries
 
 
 def calculate_true_range(high: plSeries, low: plSeries, close: plSeries) -> plSeries:
-    """
-    The calculate_true_range function calculates the True Range (TR) for a given
+    """The calculate_true_range function calculates the True Range (TR) for a given
     set of high, low, and close prices.
     The True Range is a measure of market volatility and is used in the
     calculation of the Average True Range (ATR).
@@ -15,6 +14,15 @@ def calculate_true_range(high: plSeries, low: plSeries, close: plSeries) -> plSe
     previous close.
     3. The absolute value of the difference between the current low and the
     previous close.
+
+    :param high:
+    :type high: plSeries
+    :param low:
+    :type low: plSeries
+    :param close:
+    :type close: plSeries
+    :rtype: plSeries
+
     """
     # Maximum difference between high and low prices
     tr1 = high - low
@@ -41,9 +49,19 @@ def calculate_true_range(high: plSeries, low: plSeries, close: plSeries) -> plSe
 def calculate_atr(
     high: plSeries, low: plSeries, close: plSeries, period: int = 5
 ) -> plSeries:
-    """
-    Calculate the Average True Range (ATR) for a given set of high, low, and
+    """Calculate the Average True Range (ATR) for a given set of high, low, and
     close prices over a specified period.
+
+    :param high:
+    :type high: plSeries
+    :param low:
+    :type low: plSeries
+    :param close:
+    :type close: plSeries
+    :param period:  (Default value = 5)
+    :type period: int
+    :rtype: plSeries
+
     """
     true_range: plSeries = calculate_true_range(high, low, close)
     atr = true_range.select(
@@ -53,11 +71,13 @@ def calculate_atr(
 
 
 # Example usage with a DataFrame containing 'High', 'Low', and 'Close' columns
-data = pl.DataFrame({
-    "High": [127.01, 127.62, 126.59, 127.35, 128.17],
-    "Low": [125.36, 126.56, 125.07, 126.32, 126.80],
-    "Close": [126.00, 127.29, 126.00, 127.04, 127.88],
-})
+data = pl.DataFrame(
+    {
+        "High": [127.01, 127.62, 126.59, 127.35, 128.17],
+        "Low": [125.36, 126.56, 125.07, 126.32, 126.80],
+        "Close": [126.00, 127.29, 126.00, 127.04, 127.88],
+    }
+)
 
 atr = calculate_atr(data["High"], data["Low"], data["Close"], period=3)
 print(atr)

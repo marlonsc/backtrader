@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,35 +18,28 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 from collections import OrderedDict
 
-from backtrader.utils.py3 import range
 from backtrader import Analyzer
+from backtrader.utils.py3 import range
 
 
 class AnnualReturn(Analyzer):
-    """
-    This analyzer calculates the AnnualReturns by looking at the beginning
+    """This analyzer calculates the AnnualReturns by looking at the beginning
     and end of the year
 
-    Params:
 
-      - (None)
-
-    Member Attributes:
-
-      - ``rets``: list of calculated annual returns
-
-      - ``ret``: dictionary (key: year) of annual returns
-
-    **get_analysis**:
-
-      - Returns a dictionary of annual returns (key: year)
     """
 
     def stop(self):
+        """ """
         # Must have stats.broker
         cur_year = -1
 
@@ -89,4 +82,5 @@ class AnnualReturn(Analyzer):
             self.ret[cur_year] = round(annualret, 6)
 
     def get_analysis(self):
+        """ """
         return self.ret

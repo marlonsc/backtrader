@@ -1,12 +1,8 @@
-import backtrader as bt
-import pandas as pd
-import numpy as np
-import sys
-import os
 import datetime
-import itertools
 
-from arbitrage.myutil import calculate_spread, check_and_align_data, cointegration_ratio
+import backtrader as bt
+import numpy as np
+import pandas as pd
 
 
 def calculate_rolling_spread(
@@ -266,7 +262,12 @@ class DynamicSpreadQuantileStrategy(bt.Strategy):
         elif trade.justopened:
             print(
                 "TRADE %s OPENED %s  , SIZE %2d, PRICE %d "
-                % (trade.ref, bt.num2date(trade.dtopen), trade.size, trade.value)
+                % (
+                    trade.ref,
+                    bt.num2date(trade.dtopen),
+                    trade.size,
+                    trade.value,
+                )
             )
 
 
@@ -365,10 +366,18 @@ def grid_search():
 
         # 添加数据
         data0 = bt.feeds.PandasData(
-            dataname=df0, datetime="date", nocase=True, fromdate=fromdate, todate=todate
+            dataname=df0,
+            datetime="date",
+            nocase=True,
+            fromdate=fromdate,
+            todate=todate,
         )
         data1 = bt.feeds.PandasData(
-            dataname=df1, datetime="date", nocase=True, fromdate=fromdate, todate=todate
+            dataname=df1,
+            datetime="date",
+            nocase=True,
+            fromdate=fromdate,
+            todate=todate,
         )
         data2 = SpreadData(dataname=df_spread, fromdate=fromdate, todate=todate)
 
@@ -376,7 +385,15 @@ def grid_search():
             for upper_q in upper_quantiles:
                 lower_q = 1 - upper_q  # 对称设置
                 param_combinations.append(
-                    (data0, data1, data2, period, upper_q, lower_q, spread_window)
+                    (
+                        data0,
+                        data1,
+                        data2,
+                        period,
+                        upper_q,
+                        lower_q,
+                        spread_window,
+                    )
                 )
 
     # 执行网格搜索
@@ -385,11 +402,17 @@ def grid_search():
 
     print(f"开始网格搜索，共{total_combinations}种参数组合...")
 
-    for i, (data0, data1, data2, period, upper_q, lower_q, spread_window) in enumerate(
-        param_combinations
-    ):
+    for i, (
+        data0,
+        data1,
+        data2,
+        period,
+        upper_q,
+        lower_q,
+        spread_window,
+    ) in enumerate(param_combinations):
         print(
-            f"测试参数组合 {i+1}/{total_combinations}: period={period},"
+            f"测试参数组合 {i + 1}/{total_combinations}: period={period},"
             f" upper_q={upper_q:.2f}, lower_q={lower_q:.2f},"
             f" spread_window={spread_window}"
         )
@@ -414,7 +437,7 @@ def grid_search():
         # 按夏普比率排序
         sorted_results = sorted(
             results,
-            key=lambda x: x["sharpe"] if x["sharpe"] is not None else -float("inf"),
+            key=lambda x: (x["sharpe"] if x["sharpe"] is not None else -float("inf")),
             reverse=True,
         )
         best_result = sorted_results[0]
@@ -433,7 +456,7 @@ def grid_search():
         print("\n========= 所有参数组合结果（按夏普比率排序）=========")
         for i, result in enumerate(sorted_results[:10]):  # 只显示前10个最好的结果
             print(
-                f"{i+1}. spread_window={result['params']['spread_window']}, "
+                f"{i + 1}. spread_window={result['params']['spread_window']}, "
                 f"period={result['params']['period']}, "
                 f"upper_q={result['params']['upper_quantile']:.2f}, "
                 f"lower_q={result['params']['lower_quantile']:.2f}, "

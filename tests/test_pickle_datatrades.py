@@ -1,14 +1,14 @@
-from io import BytesIO
 import datetime
+import pickle
+from io import BytesIO
 
 import backtrader as bt
-
-import pickle
-
 from testcommon import getdatadir
 
 
 class BtTestStrategy(bt.Strategy):
+    """ """
+
     params = (
         ("period", 15),
         ("printdata", True),
@@ -17,6 +17,7 @@ class BtTestStrategy(bt.Strategy):
 
 
 def test_pickle_datatrades():
+    """ """
     cerebro = bt.Cerebro(optreturn=False)
 
     cerebro.addobserver(bt.observers.DataTrades)

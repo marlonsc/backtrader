@@ -6,6 +6,8 @@ from backtrader.feeds import GenericCSVData
 
 
 class StockCsvData(GenericCSVData):
+    """ """
+
     params = (
         ("nullvalue", 0.0),
         ("dtformat", "%Y-%m-%d"),

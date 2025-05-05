@@ -1,13 +1,13 @@
 from collections import OrderedDict
 
+from .get_bson import get_tabular_bson_head
 from .meta_config import (
-    __TABULAR_PERIODS__,
     __META_FIELDS__,
-    __META_TABLES__,
     __META_INFO__,
+    __META_TABLES__,
+    __TABULAR_PERIODS__,
     _init_metainfos,
 )
-from .get_bson import get_tabular_bson_head
 
 
 def _get_tabular_feather_single_ori(
@@ -19,9 +19,28 @@ def _get_tabular_feather_single_ori(
     count: int = -1,
     **kwargs,
 ):
-    from .. import xtdata
-    from pyarrow import feather as fe
+    """
+
+    :param codes:
+    :type codes: list
+    :param table:
+    :type table: str
+    :param int_period:
+    :type int_period: int
+    :param start_timetag:
+    :type start_timetag: int
+    :param end_timetag:
+    :type end_timetag: int
+    :param count:  (Default value = -1)
+    :type count: int
+    :param **kwargs:
+
+    """
     import os
+
+    from pyarrow import feather as fe
+
+    from .. import xtdata
 
     CONSTFIELD_TIME = "_time"
     CONSTFIELD_CODE = "_stock"
@@ -36,6 +55,7 @@ def _get_tabular_feather_single_ori(
     fe_fields = [f.name for f in schema]
 
     def _old_arrow_filter():
+        """ """
         from pyarrow import dataset as ds
 
         nonlocal fe_table, fe_fields
@@ -60,6 +80,7 @@ def _get_tabular_feather_single_ori(
             return fe_table
 
     def _new_arrow_filter():
+        """ """
         from pyarrow import compute as pc
 
         nonlocal fe_table, fe_fields
@@ -83,8 +104,10 @@ def _get_tabular_feather_single_ori(
             return fe_table
 
     def do_filter():
-        import pyarrow as pa
+        """ """
         from distutils import version
+
+        import pyarrow as pa
 
         nonlocal count
         # python3.6 pyarrow-6.0.1
@@ -106,10 +129,16 @@ def _get_tabular_feather_single_ori(
 
 
 def _parse_fields(fields):
+    """
+
+    :param fields:
+
+    """
     if not __META_FIELDS__:
         _init_metainfos()
 
-    tmp = OrderedDict()  # { table: { show_fields: list(), fe_fields: list() } }
+    # { table: { show_fields: list(), fe_fields: list() } }
+    tmp = OrderedDict()
     for field in fields:
         if field.find(".") == -1:
             table = field
@@ -156,6 +185,11 @@ def _parse_fields(fields):
 
 
 def _parse_keys(fields):
+    """
+
+    :param fields:
+
+    """
     if not __META_FIELDS__:
         _init_metainfos()
 
@@ -214,6 +248,23 @@ def get_tabular_fe_data(
     count: int = -1,
     **kwargs,
 ):
+    """
+
+    :param codes:
+    :type codes: list
+    :param fields:
+    :type fields: list
+    :param period:
+    :type period: str
+    :param start_time:
+    :type start_time: str
+    :param end_time:
+    :type end_time: str
+    :param count:  (Default value = -1)
+    :type count: int
+    :param **kwargs:
+
+    """
     import pandas as pd
 
     time_format = None
@@ -235,10 +286,12 @@ def get_tabular_fe_data(
     table_fields = _parse_fields(fields)
 
     def datetime_to_timetag(timelabel, format=""):
-        """
-        timelabel: str '20221231' '20221231235959'
+        """timelabel: str '20221231' '20221231235959'
         format: str '%Y%m%d' '%Y%m%d%H%M%S'
-        return: int 1672502399000
+
+        :param timelabel:
+        :param format:  (Default value = "")
+
         """
         import datetime as dt
 
@@ -246,7 +299,7 @@ def get_tabular_fe_data(
             format = "%Y%m%d" if len(timelabel) == 8 else "%Y%m%d%H%M%S"
         try:
             return dt.datetime.strptime(timelabel, format).timestamp() * 1000
-        except:
+        except BaseException:
             return 0
 
     start_timetag = datetime_to_timetag(start_time)
@@ -298,6 +351,23 @@ def get_tabular_fe_bson(
     count: int = -1,
     **kwargs,
 ):
+    """
+
+    :param codes:
+    :type codes: list
+    :param fields:
+    :type fields: list
+    :param period:
+    :type period: str
+    :param start_time:
+    :type start_time: str
+    :param end_time:
+    :type end_time: str
+    :param count:  (Default value = -1)
+    :type count: int
+    :param **kwargs:
+
+    """
     from .. import xtbson
 
     time_format = None
@@ -319,10 +389,12 @@ def get_tabular_fe_bson(
     table_fields = _parse_keys(fields)
 
     def datetime_to_timetag(timelabel, format=""):
-        """
-        timelabel: str '20221231' '20221231235959'
+        """timelabel: str '20221231' '20221231235959'
         format: str '%Y%m%d' '%Y%m%d%H%M%S'
-        return: int 1672502399000
+
+        :param timelabel:
+        :param format:  (Default value = "")
+
         """
         import datetime as dt
 
@@ -330,23 +402,35 @@ def get_tabular_fe_bson(
             format = "%Y%m%d" if len(timelabel) == 8 else "%Y%m%d%H%M%S"
         try:
             return dt.datetime.strptime(timelabel, format).timestamp() * 1000
-        except:
+        except BaseException:
             return 0
 
     start_timetag = datetime_to_timetag(start_time)
     end_timetag = datetime_to_timetag(end_time)
 
     def _get_convert():
-        import pyarrow as pa
+        """ """
         from distutils import version
+
+        import pyarrow as pa
 
         # python3.6 pyarrow-6.0.1
         # python3.7 pyarrow-12.0.1
         # python3.8~12 pyarrow-17.0.0
         def _old_arrow_convert(table):
+            """
+
+            :param table:
+
+            """
             return table.to_pandas().to_dict(orient="records")
 
         def _new_arrow_convert(table):
+            """
+
+            :param table:
+
+            """
             return table.to_pylist()
 
         paver = version.LooseVersion(pa.__version__)

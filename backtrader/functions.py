@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import functools
 import math
@@ -29,12 +34,26 @@ from .utils.py3 import cmp, range
 
 # Generate a List equivalent which uses "is" for contains
 class List(list):
+    """ """
+
     def __contains__(self, other):
+        """
+
+        :param other:
+
+        """
         return any(x.__hash__() == other.__hash__() for x in self)
 
 
 class Logic(LineActions):
+    """ """
+
     def __init__(self, *args):
+        """
+
+        :param *args:
+
+        """
         super(Logic, self).__init__()
         self.args = [self.arrayize(arg) for arg in args]
 
@@ -44,24 +63,34 @@ class DivByZero(Logic):
     division on the numerator / denominator arguments and avoiding a division
     by zero exception by checking the denominator
 
-    Params:
-      - a: numerator (numeric or iterable object ... mostly a Lines object)
-      - b: denominator (numeric or iterable object ... mostly a Lines object)
-      - zero (def: 0.0): value to apply if division by zero would be raised
 
     """
 
     def __init__(self, a, b, zero=0.0):
+        """
+
+        :param a:
+        :param b:
+        :param zero:  (Default value = 0.0)
+
+        """
         super(DivByZero, self).__init__(a, b)
         self.a = a
         self.b = b
         self.zero = zero
 
     def next(self):
+        """ """
         b = self.b[0]
         self[0] = self.a[0] / b if b else self.zero
 
     def once(self, start, end):
+        """
+
+        :param start:
+        :param end:
+
+        """
         # cache python dictionary lookups
         dst = self.array
         srca = self.a.array
@@ -79,14 +108,18 @@ class DivZeroByZero(Logic):
     by zero exception or an indetermination by checking the
     denominator/numerator pair
 
-    Params:
-      - a: numerator (numeric or iterable object ... mostly a Lines object)
-      - b: denominator (numeric or iterable object ... mostly a Lines object)
-      - single (def: +inf): value to apply if division is x / 0
-      - dual (def: 0.0): value to apply if division is 0 / 0
+
     """
 
     def __init__(self, a, b, single=float("inf"), dual=0.0):
+        """
+
+        :param a:
+        :param b:
+        :param single:  (Default value = float("inf"))
+        :param dual:  (Default value = 0.0)
+
+        """
         super(DivZeroByZero, self).__init__(a, b)
         self.a = a
         self.b = b
@@ -94,6 +127,7 @@ class DivZeroByZero(Logic):
         self.dual = dual
 
     def next(self):
+        """ """
         b = self.b[0]
         a = self.a[0]
         if b == 0.0:
@@ -102,6 +136,12 @@ class DivZeroByZero(Logic):
             self[0] = self.a[0] / b
 
     def once(self, start, end):
+        """
+
+        :param start:
+        :param end:
+
+        """
         # cache python dictionary lookups
         dst = self.array
         srca = self.a.array
@@ -119,15 +159,30 @@ class DivZeroByZero(Logic):
 
 
 class Cmp(Logic):
+    """ """
+
     def __init__(self, a, b):
+        """
+
+        :param a:
+        :param b:
+
+        """
         super(Cmp, self).__init__(a, b)
         self.a = self.args[0]
         self.b = self.args[1]
 
     def next(self):
+        """ """
         self[0] = cmp(self.a[0], self.b[0])
 
     def once(self, start, end):
+        """
+
+        :param start:
+        :param end:
+
+        """
         # cache python dictionary lookups
         dst = self.array
         srca = self.a.array
@@ -138,7 +193,18 @@ class Cmp(Logic):
 
 
 class CmpEx(Logic):
+    """ """
+
     def __init__(self, a, b, r1, r2, r3):
+        """
+
+        :param a:
+        :param b:
+        :param r1:
+        :param r2:
+        :param r3:
+
+        """
         super(CmpEx, self).__init__(a, b, r1, r2, r3)
         self.a = self.args[0]
         self.b = self.args[1]
@@ -147,9 +213,16 @@ class CmpEx(Logic):
         self.r3 = self.args[4]
 
     def next(self):
+        """ """
         self[0] = cmp(self.a[0], self.b[0])
 
     def once(self, start, end):
+        """
+
+        :param start:
+        :param end:
+
+        """
         # cache python dictionary lookups
         dst = self.array
         srca = self.a.array
@@ -171,16 +244,32 @@ class CmpEx(Logic):
 
 
 class If(Logic):
+    """ """
+
     def __init__(self, cond, a, b):
+        """
+
+        :param cond:
+        :param a:
+        :param b:
+
+        """
         super(If, self).__init__(a, b)
         self.a = self.args[0]
         self.b = self.args[1]
         self.cond = self.arrayize(cond)
 
     def next(self):
+        """ """
         self[0] = self.a[0] if self.cond[0] else self.b[0]
 
     def once(self, start, end):
+        """
+
+        :param start:
+        :param end:
+
+        """
         # cache python dictionary lookups
         dst = self.array
         srca = self.a.array
@@ -192,10 +281,19 @@ class If(Logic):
 
 
 class MultiLogic(Logic):
+    """ """
+
     def next(self):
+        """ """
         self[0] = self.flogic([arg[0] for arg in self.args])
 
     def once(self, start, end):
+        """
+
+        :param start:
+        :param end:
+
+        """
         # cache python dictionary lookups
         dst = self.array
         arrays = [arg.array for arg in self.args]
@@ -206,10 +304,19 @@ class MultiLogic(Logic):
 
 
 class SingleLogic(Logic):
+    """ """
+
     def next(self):
+        """ """
         self[0] = self.flogic(self.args[0])
 
     def once(self, start, end):
+        """
+
+        :param start:
+        :param end:
+
+        """
         # cache python dictionary lookups
         dst = self.array
         flogic = self.flogic
@@ -219,7 +326,15 @@ class SingleLogic(Logic):
 
 
 class MultiLogicReduce(MultiLogic):
+    """ """
+
     def __init__(self, *args, **kwargs):
+        """
+
+        :param *args:
+        :param **kwargs:
+
+        """
         super(MultiLogicReduce, self).__init__(*args)
         if "initializer" not in kwargs:
             self.flogic = functools.partial(functools.reduce, self.flogic)
@@ -230,7 +345,16 @@ class MultiLogicReduce(MultiLogic):
 
 
 class Reduce(MultiLogicReduce):
+    """ """
+
     def __init__(self, flogic, *args, **kwargs):
+        """
+
+        :param flogic:
+        :param *args:
+        :param **kwargs:
+
+        """
         self.flogic = flogic
         super(Reduce, self).__init__(*args, **kwargs)
 
@@ -238,52 +362,86 @@ class Reduce(MultiLogicReduce):
 # The _xxxlogic functions are defined at module scope to make them
 # pickable and therefore compatible with multiprocessing
 def _andlogic(x, y):
+    """
+
+    :param x:
+    :param y:
+
+    """
     return bool(x and y)
 
 
 class And(MultiLogicReduce):
+    """ """
+
     flogic = staticmethod(_andlogic)
 
 
 def _orlogic(x, y):
+    """
+
+    :param x:
+    :param y:
+
+    """
     return bool(x or y)
 
 
 class Or(MultiLogicReduce):
+    """ """
+
     flogic = staticmethod(_orlogic)
 
 
 class Max(MultiLogic):
+    """ """
+
     flogic = max
 
 
 class Min(MultiLogic):
+    """ """
+
     flogic = min
 
 
 class Sum(MultiLogic):
+    """ """
+
     flogic = math.fsum
 
 
 class Any(MultiLogic):
+    """ """
+
     flogic = any
 
 
 class All(MultiLogic):
+    """ """
+
     flogic = all
 
 
 class Log(SingleLogic):
+    """ """
+
     flogic = math.log10
 
 
 class Ceiling(SingleLogic):
+    """ """
+
     flogic = math.ceil
 
 
 class Floor(SingleLogic):
+    """ """
+
     flogic = math.floor
 
 
 class Abs(SingleLogic):
+    """ """
+
     flogic = math.fabs

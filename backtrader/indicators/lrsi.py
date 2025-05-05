@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 from . import PeriodN
 
@@ -26,8 +31,7 @@ __all__ = ["LaguerreRSI", "LRSI", "LaguerreFilter", "LAGF"]
 
 
 class LaguerreRSI(PeriodN):
-    """
-    Defined by John F. Ehlers in `Cybernetic Analysis for Stock and Futures`,
+    """Defined by John F. Ehlers in `Cybernetic Analysis for Stock and Futures`,
     2004, published by Wiley. `ISBN: 978-0-471-46307-8`
 
     The Laguerre RSI tries to implements a better RSI by providing a sort of
@@ -36,6 +40,8 @@ class LaguerreRSI(PeriodN):
 
     ``gamma`` is meant to have values between ``0.2`` and ``0.8``, with the
     best balance found theoretically at the default of ``0.5``
+
+
     """
 
     alias = ("LRSI",)
@@ -50,6 +56,7 @@ class LaguerreRSI(PeriodN):
     l0, l1, l2, l3 = 0.0, 0.0, 0.0, 0.0
 
     def next(self):
+        """ """
         l0_1 = self.l0  # cache previous intermediate values
         l1_1 = self.l1
         l2_1 = self.l2
@@ -82,12 +89,13 @@ class LaguerreRSI(PeriodN):
 
 
 class LaguerreFilter(PeriodN):
-    """
-    Defined by John F. Ehlers in `Cybernetic Analysis for Stock and Futures`,
+    """Defined by John F. Ehlers in `Cybernetic Analysis for Stock and Futures`,
     2004, published by Wiley. `ISBN: 978-0-471-46307-8`
 
     ``gamma`` is meant to have values between ``0.2`` and ``0.8``, with the
     best balance found theoretically at the default of ``0.5``
+
+
     """
 
     alias = ("LAGF",)
@@ -98,6 +106,7 @@ class LaguerreFilter(PeriodN):
     l0, l1, l2, l3 = 0.0, 0.0, 0.0, 0.0
 
     def next(self):
+        """ """
         l0_1 = self.l0  # cache previous intermediate values
         l1_1 = self.l1
         l2_1 = self.l2

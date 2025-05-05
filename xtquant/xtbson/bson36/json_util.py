@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tools for using Python's :mod:`json` module with BSON documents.
 
 This module provides two helper methods `dumps` and `loads` that wrap the
@@ -94,6 +93,7 @@ import re
 import uuid
 
 import bson
+
 from . import EPOCH_AWARE, RE_TYPE, SON
 from .binary import ALL_UUID_SUBTYPES, UUID_SUBTYPE, Binary, UuidRepresentation
 from .code import Code
@@ -119,6 +119,8 @@ _RE_OPT_TABLE = {
 
 
 class DatetimeRepresentation:
+    """ """
+
     LEGACY = 0
     """Legacy MongoDB Extended JSON datetime representation.
 
@@ -155,6 +157,8 @@ class DatetimeRepresentation:
 
 
 class JSONMode:
+    """ """
+
     LEGACY = 0
     """Legacy Extended JSON representation.
 
@@ -243,6 +247,8 @@ class JSONOptions(CodecOptions):
 
     .. versionchanged:: 4.0
        Changed default value of `tz_aware` to False.
+
+
     """
 
     def __new__(
@@ -252,8 +258,18 @@ class JSONOptions(CodecOptions):
         strict_uuid=None,
         json_mode=JSONMode.RELAXED,
         *args,
-        **kwargs
+        **kwargs,
     ):
+        """
+
+        :param strict_number_long:  (Default value = None)
+        :param datetime_representation:  (Default value = None)
+        :param strict_uuid:  (Default value = None)
+        :param json_mode:  (Default value = JSONMode.RELAXED)
+        :param *args:
+        :param **kwargs:
+
+        """
         kwargs["tz_aware"] = kwargs.get("tz_aware", False)
         if kwargs["tz_aware"]:
             kwargs["tzinfo"] = kwargs.get("tzinfo", utc)
@@ -268,7 +284,11 @@ class JSONOptions(CodecOptions):
                 "NUMBERLONG, or ISO8601 from DatetimeRepresentation."
             )
         self = super(JSONOptions, cls).__new__(cls, *args, **kwargs)
-        if json_mode not in (JSONMode.LEGACY, JSONMode.RELAXED, JSONMode.CANONICAL):
+        if json_mode not in (
+            JSONMode.LEGACY,
+            JSONMode.RELAXED,
+            JSONMode.CANONICAL,
+        ):
             raise ValueError(
                 "JSONOptions.json_mode must be one of LEGACY, RELAXED, "
                 "or CANONICAL from JSONMode."
@@ -279,7 +299,10 @@ class JSONOptions(CodecOptions):
                 raise ValueError(
                     "Cannot specify strict_number_long=True with JSONMode.RELAXED"
                 )
-            if datetime_representation not in (None, DatetimeRepresentation.ISO8601):
+            if datetime_representation not in (
+                None,
+                DatetimeRepresentation.ISO8601,
+            ):
                 raise ValueError(
                     "datetime_representation must be DatetimeRepresentation."
                     "ISO8601 or omitted with JSONMode.RELAXED"
@@ -296,7 +319,10 @@ class JSONOptions(CodecOptions):
                 raise ValueError(
                     "Cannot specify strict_number_long=False with JSONMode.RELAXED"
                 )
-            if datetime_representation not in (None, DatetimeRepresentation.NUMBERLONG):
+            if datetime_representation not in (
+                None,
+                DatetimeRepresentation.NUMBERLONG,
+            ):
                 raise ValueError(
                     "datetime_representation must be DatetimeRepresentation."
                     "NUMBERLONG or omitted with JSONMode.RELAXED"
@@ -321,6 +347,7 @@ class JSONOptions(CodecOptions):
         return self
 
     def _arguments_repr(self):
+        """ """
         return (
             "strict_number_long=%r, "
             "datetime_representation=%r, "
@@ -335,28 +362,33 @@ class JSONOptions(CodecOptions):
         )
 
     def _options_dict(self):
+        """ """
         # TODO: PYTHON-2442 use _asdict() instead
         options_dict = super(JSONOptions, self)._options_dict()
-        options_dict.update({
-            "strict_number_long": self.strict_number_long,
-            "datetime_representation": self.datetime_representation,
-            "strict_uuid": self.strict_uuid,
-            "json_mode": self.json_mode,
-        })
+        options_dict.update(
+            {
+                "strict_number_long": self.strict_number_long,
+                "datetime_representation": self.datetime_representation,
+                "strict_uuid": self.strict_uuid,
+                "json_mode": self.json_mode,
+            }
+        )
         return options_dict
 
     def with_options(self, **kwargs):
-        """
-        Make a copy of this JSONOptions, overriding some options::
+        """Make a copy of this JSONOptions, overriding some options::
 
-            >>> from .json_util import CANONICAL_JSON_OPTIONS
+
+        .. versionadded:: 3.12
+
+        :param **kwargs:
+
+        >>> from .json_util import CANONICAL_JSON_OPTIONS
             >>> CANONICAL_JSON_OPTIONS.tz_aware
             True
             >>> json_options = CANONICAL_JSON_OPTIONS.with_options(tz_aware=False, tzinfo=None)
             >>> json_options.tz_aware
             False
-
-        .. versionadded:: 3.12
         """
         opts = self._options_dict()
         for opt in (
@@ -424,6 +456,11 @@ def dumps(obj, *args, **kwargs):
 
     .. versionchanged:: 3.4
        Accepts optional parameter `json_options`. See :class:`JSONOptions`.
+
+    :param obj:
+    :param *args:
+    :param **kwargs:
+
     """
     json_options = kwargs.pop("json_options", DEFAULT_JSON_OPTIONS)
     return json.dumps(_json_convert(obj, json_options), *args, **kwargs)
@@ -449,6 +486,11 @@ def loads(s, *args, **kwargs):
 
     .. versionchanged:: 3.4
        Accepts optional parameter `json_options`. See :class:`JSONOptions`.
+
+    :param s:
+    :param *args:
+    :param **kwargs:
+
     """
     json_options = kwargs.pop("json_options", DEFAULT_JSON_OPTIONS)
     kwargs["object_pairs_hook"] = lambda pairs: object_pairs_hook(pairs, json_options)
@@ -458,6 +500,10 @@ def loads(s, *args, **kwargs):
 def _json_convert(obj, json_options=DEFAULT_JSON_OPTIONS):
     """Recursive helper method that converts BSON types so they can be
     converted into json.
+
+    :param obj:
+    :param json_options:  (Default value = DEFAULT_JSON_OPTIONS)
+
     """
     if hasattr(obj, "items"):
         return SON(((k, _json_convert(v, json_options)) for k, v in obj.items()))
@@ -470,10 +516,22 @@ def _json_convert(obj, json_options=DEFAULT_JSON_OPTIONS):
 
 
 def object_pairs_hook(pairs, json_options=DEFAULT_JSON_OPTIONS):
+    """
+
+    :param pairs:
+    :param json_options:  (Default value = DEFAULT_JSON_OPTIONS)
+
+    """
     return object_hook(json_options.document_class(pairs), json_options)
 
 
 def object_hook(dct, json_options=DEFAULT_JSON_OPTIONS):
+    """
+
+    :param dct:
+    :param json_options:  (Default value = DEFAULT_JSON_OPTIONS)
+
+    """
     if "$oid" in dct:
         return _parse_canonical_oid(dct)
     if (
@@ -522,6 +580,11 @@ def object_hook(dct, json_options=DEFAULT_JSON_OPTIONS):
 
 
 def _parse_legacy_regex(doc):
+    """
+
+    :param doc:
+
+    """
     pattern = doc["$regex"]
     # Check if this is the $regex query operator.
     if not isinstance(pattern, (str, bytes)):
@@ -534,7 +597,12 @@ def _parse_legacy_regex(doc):
 
 
 def _parse_legacy_uuid(doc, json_options):
-    """Decode a JSON legacy $uuid to Python UUID."""
+    """Decode a JSON legacy $uuid to Python UUID.
+
+    :param doc:
+    :param json_options:
+
+    """
     if len(doc) != 1:
         raise TypeError("Bad $uuid, extra field(s): %s" % (doc,))
     if not isinstance(doc["$uuid"], str):
@@ -546,6 +614,13 @@ def _parse_legacy_uuid(doc, json_options):
 
 
 def _binary_or_uuid(data, subtype, json_options):
+    """
+
+    :param data:
+    :param subtype:
+    :param json_options:
+
+    """
     # special handling for UUID
     if subtype in ALL_UUID_SUBTYPES:
         uuid_representation = json_options.uuid_representation
@@ -567,6 +642,12 @@ def _binary_or_uuid(data, subtype, json_options):
 
 
 def _parse_legacy_binary(doc, json_options):
+    """
+
+    :param doc:
+    :param json_options:
+
+    """
     if isinstance(doc["$type"], int):
         doc["$type"] = "%02x" % doc["$type"]
     subtype = int(doc["$type"], 16)
@@ -577,6 +658,12 @@ def _parse_legacy_binary(doc, json_options):
 
 
 def _parse_canonical_binary(doc, json_options):
+    """
+
+    :param doc:
+    :param json_options:
+
+    """
     binary = doc["$binary"]
     b64 = binary["base64"]
     subtype = binary["subType"]
@@ -596,7 +683,12 @@ def _parse_canonical_binary(doc, json_options):
 
 
 def _parse_canonical_datetime(doc, json_options):
-    """Decode a JSON datetime to python datetime.datetime."""
+    """Decode a JSON datetime to python datetime.datetime.
+
+    :param doc:
+    :param json_options:
+
+    """
     dtm = doc["$date"]
     if len(doc) != 1:
         raise TypeError("Bad $date, extra field(s): %s" % (doc,))
@@ -655,14 +747,22 @@ def _parse_canonical_datetime(doc, json_options):
 
 
 def _parse_canonical_oid(doc):
-    """Decode a JSON ObjectId to bson.objectid.ObjectId."""
+    """Decode a JSON ObjectId to bson.objectid.ObjectId.
+
+    :param doc:
+
+    """
     if len(doc) != 1:
         raise TypeError("Bad $oid, extra field(s): %s" % (doc,))
     return ObjectId(doc["$oid"])
 
 
 def _parse_canonical_symbol(doc):
-    """Decode a JSON symbol to Python string."""
+    """Decode a JSON symbol to Python string.
+
+    :param doc:
+
+    """
     symbol = doc["$symbol"]
     if len(doc) != 1:
         raise TypeError("Bad $symbol, extra field(s): %s" % (doc,))
@@ -670,7 +770,11 @@ def _parse_canonical_symbol(doc):
 
 
 def _parse_canonical_code(doc):
-    """Decode a JSON code to bson.code.Code."""
+    """Decode a JSON code to bson.code.Code.
+
+    :param doc:
+
+    """
     for key in doc:
         if key not in ("$code", "$scope"):
             raise TypeError("Bad $code, extra field(s): %s" % (doc,))
@@ -678,7 +782,11 @@ def _parse_canonical_code(doc):
 
 
 def _parse_canonical_regex(doc):
-    """Decode a JSON regex to bson.regex.Regex."""
+    """Decode a JSON regex to bson.regex.Regex.
+
+    :param doc:
+
+    """
     regex = doc["$regularExpression"]
     if len(doc) != 1:
         raise TypeError("Bad $regularExpression, extra field(s): %s" % (doc,))
@@ -697,12 +805,20 @@ def _parse_canonical_regex(doc):
 
 
 def _parse_canonical_dbref(doc):
-    """Decode a JSON DBRef to bson.dbref.DBRef."""
+    """Decode a JSON DBRef to bson.dbref.DBRef.
+
+    :param doc:
+
+    """
     return DBRef(doc.pop("$ref"), doc.pop("$id"), database=doc.pop("$db", None), **doc)
 
 
 def _parse_canonical_dbpointer(doc):
-    """Decode a JSON (deprecated) DBPointer to bson.dbref.DBRef."""
+    """Decode a JSON (deprecated) DBPointer to bson.dbref.DBRef.
+
+    :param doc:
+
+    """
     dbref = doc["$dbPointer"]
     if len(doc) != 1:
         raise TypeError("Bad $dbPointer, extra field(s): %s" % (doc,))
@@ -725,7 +841,11 @@ def _parse_canonical_dbpointer(doc):
 
 
 def _parse_canonical_int32(doc):
-    """Decode a JSON int32 to python int."""
+    """Decode a JSON int32 to python int.
+
+    :param doc:
+
+    """
     i_str = doc["$numberInt"]
     if len(doc) != 1:
         raise TypeError("Bad $numberInt, extra field(s): %s" % (doc,))
@@ -735,7 +855,11 @@ def _parse_canonical_int32(doc):
 
 
 def _parse_canonical_int64(doc):
-    """Decode a JSON int64 to bson.int64.Int64."""
+    """Decode a JSON int64 to bson.int64.Int64.
+
+    :param doc:
+
+    """
     l_str = doc["$numberLong"]
     if len(doc) != 1:
         raise TypeError("Bad $numberLong, extra field(s): %s" % (doc,))
@@ -743,7 +867,11 @@ def _parse_canonical_int64(doc):
 
 
 def _parse_canonical_double(doc):
-    """Decode a JSON double to python float."""
+    """Decode a JSON double to python float.
+
+    :param doc:
+
+    """
     d_str = doc["$numberDouble"]
     if len(doc) != 1:
         raise TypeError("Bad $numberDouble, extra field(s): %s" % (doc,))
@@ -753,7 +881,11 @@ def _parse_canonical_double(doc):
 
 
 def _parse_canonical_decimal128(doc):
-    """Decode a JSON decimal128 to bson.decimal128.Decimal128."""
+    """Decode a JSON decimal128 to bson.decimal128.Decimal128.
+
+    :param doc:
+
+    """
     d_str = doc["$numberDecimal"]
     if len(doc) != 1:
         raise TypeError("Bad $numberDecimal, extra field(s): %s" % (doc,))
@@ -763,7 +895,11 @@ def _parse_canonical_decimal128(doc):
 
 
 def _parse_canonical_minkey(doc):
-    """Decode a JSON MinKey to bson.min_key.MinKey."""
+    """Decode a JSON MinKey to bson.min_key.MinKey.
+
+    :param doc:
+
+    """
     if type(doc["$minKey"]) is not int or doc["$minKey"] != 1:
         raise TypeError("$minKey value must be 1: %s" % (doc,))
     if len(doc) != 1:
@@ -772,7 +908,11 @@ def _parse_canonical_minkey(doc):
 
 
 def _parse_canonical_maxkey(doc):
-    """Decode a JSON MaxKey to bson.max_key.MaxKey."""
+    """Decode a JSON MaxKey to bson.max_key.MaxKey.
+
+    :param doc:
+
+    """
     if type(doc["$maxKey"]) is not int or doc["$maxKey"] != 1:
         raise TypeError("$maxKey value must be 1: %s", (doc,))
     if len(doc) != 1:
@@ -781,18 +921,37 @@ def _parse_canonical_maxkey(doc):
 
 
 def _encode_binary(data, subtype, json_options):
+    """
+
+    :param data:
+    :param subtype:
+    :param json_options:
+
+    """
     if json_options.json_mode == JSONMode.LEGACY:
         return SON(
-            [("$binary", base64.b64encode(data).decode()), ("$type", "%02x" % subtype)]
+            [
+                ("$binary", base64.b64encode(data).decode()),
+                ("$type", "%02x" % subtype),
+            ]
         )
     return {
         "$binary": SON(
-            [("base64", base64.b64encode(data).decode()), ("subType", "%02x" % subtype)]
+            [
+                ("base64", base64.b64encode(data).decode()),
+                ("subType", "%02x" % subtype),
+            ]
         )
     }
 
 
 def default(obj, json_options=DEFAULT_JSON_OPTIONS):
+    """
+
+    :param obj:
+    :param json_options:  (Default value = DEFAULT_JSON_OPTIONS)
+
+    """
     # We preserve key order when rendering SON, DBRef, etc. as JSON by
     # returning a SON for those types instead of a dict.
     if isinstance(obj, ObjectId):
@@ -814,7 +973,11 @@ def default(obj, json_options=DEFAULT_JSON_OPTIONS):
                 return {
                     "$date": (
                         "%s%s%s"
-                        % (obj.strftime("%Y-%m-%dT%H:%M:%S"), fracsecs, tz_string)
+                        % (
+                            obj.strftime("%Y-%m-%dT%H:%M:%S"),
+                            fracsecs,
+                            tz_string,
+                        )
                     )
                 }
 
@@ -855,7 +1018,10 @@ def default(obj, json_options=DEFAULT_JSON_OPTIONS):
         if obj.scope is None:
             return {"$code": str(obj)}
         return SON(
-            [("$code", str(obj)), ("$scope", _json_convert(obj.scope, json_options))]
+            [
+                ("$code", str(obj)),
+                ("$scope", _json_convert(obj.scope, json_options)),
+            ]
         )
     if isinstance(obj, Binary):
         return _encode_binary(obj, obj.subtype, json_options)

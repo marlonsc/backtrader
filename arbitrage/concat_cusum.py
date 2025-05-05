@@ -6,7 +6,12 @@
     python run_pairs_cusum.py
 """
 
-import subprocess, datetime, pathlib, pandas as pd, shutil, sys
+import datetime
+import pathlib
+import subprocess
+import sys
+
+import pandas as pd
 
 # ---------- 固定参数 ----------
 BASE_CMD = [

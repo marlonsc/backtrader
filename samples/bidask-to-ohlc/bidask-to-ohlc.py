@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,17 +24,19 @@ from __future__ import (
     print_function,
 )
 
-#                        unicode_literals)
-
 import argparse
-import datetime
 
 import backtrader as bt
 import backtrader.feeds as btfeeds
 
+#                        unicode_literals)
+
 
 class St(bt.Strategy):
+    """ """
+
     def next(self):
+        """ """
         print(
             ",".join(
                 str(x)
@@ -51,6 +53,7 @@ class St(bt.Strategy):
 
 
 def runstrat():
+    """ """
     args = parse_args()
 
     cerebro = bt.Cerebro()
@@ -82,6 +85,7 @@ def runstrat():
 
 
 def parse_args():
+    """ """
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="BidAsk to OHLC",

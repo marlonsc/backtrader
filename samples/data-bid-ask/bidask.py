@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 
@@ -28,6 +33,8 @@ import backtrader.indicators as btind
 
 
 class BidAskCSV(btfeeds.GenericCSVData):
+    """ """
+
     linesoverride = True  # discard usual OHLC structure
     # datetime must be present and last
     lines = ("bid", "ask", "datetime")
@@ -40,13 +47,17 @@ class BidAskCSV(btfeeds.GenericCSVData):
 
 
 class St(bt.Strategy):
+    """ """
+
     params = (("sma", False), ("period", 3))
 
     def __init__(self):
+        """ """
         if self.p.sma:
             self.sma = btind.SMA(self.data, period=self.p.period)
 
     def next(self):
+        """ """
         dtstr = self.data.datetime.datetime().isoformat()
         txt = "%4d: %s - Bid %.4f - %.4f Ask" % (
             (len(self), dtstr, self.data.bid[0], self.data.ask[0])
@@ -58,6 +69,7 @@ class St(bt.Strategy):
 
 
 def parse_args():
+    """ """
     parser = argparse.ArgumentParser(
         description="Bid/Ask Line Hierarchy",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -81,7 +93,11 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--sma", "-s", action="store_true", required=False, help="Add an SMA to the mix"
+        "--sma",
+        "-s",
+        action="store_true",
+        required=False,
+        help="Add an SMA to the mix",
     )
 
     parser.add_argument(
@@ -98,6 +114,7 @@ def parse_args():
 
 
 def runstrategy():
+    """ """
     args = parse_args()
 
     cerebro = bt.Cerebro()  # Create a cerebro

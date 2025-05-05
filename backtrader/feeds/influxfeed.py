@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,24 +18,35 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
+
+import datetime as dt
 
 import backtrader as bt
 import backtrader.feed as feed
-from ..utils import date2num
-import datetime as dt
 
-TIMEFRAMES = dict((
-    (bt.TimeFrame.Seconds, "s"),
-    (bt.TimeFrame.Minutes, "m"),
-    (bt.TimeFrame.Days, "d"),
-    (bt.TimeFrame.Weeks, "w"),
-    (bt.TimeFrame.Months, "m"),
-    (bt.TimeFrame.Years, "y"),
-))
+from ..utils import date2num
+
+TIMEFRAMES = dict(
+    (
+        (bt.TimeFrame.Seconds, "s"),
+        (bt.TimeFrame.Minutes, "m"),
+        (bt.TimeFrame.Days, "d"),
+        (bt.TimeFrame.Weeks, "w"),
+        (bt.TimeFrame.Months, "m"),
+        (bt.TimeFrame.Years, "y"),
+    )
+)
 
 
 class InfluxDB(feed.DataBase):
+    """ """
+
     frompackages = (
         ("influxdb", [("InfluxDBClient", "idbclient")]),
         ("influxdb.exceptions", "InfluxDBClientError"),
@@ -58,6 +69,7 @@ class InfluxDB(feed.DataBase):
     )
 
     def start(self):
+        """ """
         super(InfluxDB, self).start()
         try:
             self.ndb = idbclient(
@@ -109,6 +121,7 @@ class InfluxDB(feed.DataBase):
         self.biter = iter(dbars)
 
     def _load(self):
+        """ """
         try:
             bar = next(self.biter)
         except StopIteration:

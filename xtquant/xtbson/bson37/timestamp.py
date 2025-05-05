@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tools for representing MongoDB internal Timestamps."""
 
 import calendar
@@ -51,6 +50,13 @@ class Timestamp(object):
             :class:`~datetime.datetime`, or an aware
             :class:`~datetime.datetime`
           - `inc`: the incrementing counter
+
+        :param time:
+        :type time: Union[datetime.datetime, int]
+        :param inc:
+        :type inc: int
+        :rtype: None
+
         """
         if isinstance(time, datetime.datetime):
             offset = time.utcoffset()
@@ -71,53 +77,117 @@ class Timestamp(object):
 
     @property
     def time(self) -> int:
-        """Get the time portion of this :class:`Timestamp`."""
+        """Get the time portion of this :class:`Timestamp`.
+
+
+        :rtype: int
+
+        """
         return self.__time
 
     @property
     def inc(self) -> int:
-        """Get the inc portion of this :class:`Timestamp`."""
+        """Get the inc portion of this :class:`Timestamp`.
+
+
+        :rtype: int
+
+        """
         return self.__inc
 
     def __eq__(self, other: Any) -> bool:
+        """
+
+        :param other:
+        :type other: Any
+        :rtype: bool
+
+        """
         if isinstance(other, Timestamp):
             return self.__time == other.time and self.__inc == other.inc
         else:
             return NotImplemented
 
     def __hash__(self) -> int:
+        """
+
+
+        :rtype: int
+
+        """
         return hash(self.time) ^ hash(self.inc)
 
     def __ne__(self, other: Any) -> bool:
+        """
+
+        :param other:
+        :type other: Any
+        :rtype: bool
+
+        """
         return not self == other
 
     def __lt__(self, other: Any) -> bool:
+        """
+
+        :param other:
+        :type other: Any
+        :rtype: bool
+
+        """
         if isinstance(other, Timestamp):
             return (self.time, self.inc) < (other.time, other.inc)
         return NotImplemented
 
     def __le__(self, other: Any) -> bool:
+        """
+
+        :param other:
+        :type other: Any
+        :rtype: bool
+
+        """
         if isinstance(other, Timestamp):
             return (self.time, self.inc) <= (other.time, other.inc)
         return NotImplemented
 
     def __gt__(self, other: Any) -> bool:
+        """
+
+        :param other:
+        :type other: Any
+        :rtype: bool
+
+        """
         if isinstance(other, Timestamp):
             return (self.time, self.inc) > (other.time, other.inc)
         return NotImplemented
 
     def __ge__(self, other: Any) -> bool:
+        """
+
+        :param other:
+        :type other: Any
+        :rtype: bool
+
+        """
         if isinstance(other, Timestamp):
             return (self.time, self.inc) >= (other.time, other.inc)
         return NotImplemented
 
     def __repr__(self):
+        """ """
         return "Timestamp(%s, %s)" % (self.__time, self.__inc)
 
     def as_datetime(self) -> datetime.datetime:
-        """Return a :class:`~datetime.datetime` instance corresponding
-        to the time portion of this :class:`Timestamp`.
+        """
+
+
+        :returns: to the time portion of this :class:`Timestamp`.
 
         The returned datetime's timezone is UTC.
+
+        :rtype: datetime.datetime
+
         """
         return datetime.datetime.fromtimestamp(self.__time, utc)

@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import datetime
 import math
@@ -44,6 +49,11 @@ TIME_MIN = datetime.time.min
 
 
 def tzparse(tz):
+    """
+
+    :param tz:
+
+    """
     # If no object has been provided by the user and a timezone can be
     # found via contractdtails, then try to get it from pytz, which may or
     # may not be available.
@@ -69,9 +79,19 @@ def tzparse(tz):
 
 
 def Localizer(tz):
+    """
+
+    :param tz:
+
+    """
     import types
 
     def localize(self, dt):
+        """
+
+        :param dt:
+
+        """
         return dt.replace(tzinfo=self)
 
     if tz is not None and not hasattr(tz, "localize"):
@@ -86,36 +106,77 @@ class _UTC(datetime.tzinfo):
     """UTC"""
 
     def utcoffset(self, dt):
+        """
+
+        :param dt:
+
+        """
         return ZERO
 
     def tzname(self, dt):
+        """
+
+        :param dt:
+
+        """
         return "UTC"
 
     def dst(self, dt):
+        """
+
+        :param dt:
+
+        """
         return ZERO
 
     def localize(self, dt):
+        """
+
+        :param dt:
+
+        """
         return dt.replace(tzinfo=self)
 
 
 class _LocalTimezone(datetime.tzinfo):
+    """ """
 
     def utcoffset(self, dt):
+        """
+
+        :param dt:
+
+        """
         if self._isdst(dt):
             return DSTOFFSET
         else:
             return STDOFFSET
 
     def dst(self, dt):
+        """
+
+        :param dt:
+
+        """
         if self._isdst(dt):
             return DSTDIFF
         else:
             return ZERO
 
     def tzname(self, dt):
+        """
+
+        :param dt:
+
+        """
         return _time.tzname[self._isdst(dt)]
 
     def _isdst(self, dt):
+        """
+
+        :param dt:
+
+        """
         tt = (
             dt.year,
             dt.month,
@@ -136,12 +197,16 @@ class _LocalTimezone(datetime.tzinfo):
         return tt.tm_isdst > 0
 
     def localize(self, dt):
+        """
+
+        :param dt:
+
+        """
         return dt.replace(tzinfo=self)
 
 
 UTC = _UTC()
 TZLocal = _LocalTimezone()
-
 
 HOURS_PER_DAY = 24.0
 MINUTES_PER_HOUR = 60.0
@@ -153,6 +218,13 @@ MUSECONDS_PER_DAY = MUSECONDS_PER_SECOND * SECONDS_PER_DAY
 
 
 def num2date(x, tz=None, naive=True):
+    """
+
+    :param x:
+    :param tz:  (Default value = None)
+    :param naive:  (Default value = True)
+
+    """
     # Same as matplotlib except if tz is None a naive datetime object
     # will be returned.
     """
@@ -195,7 +267,13 @@ def num2date(x, tz=None, naive=True):
     else:
         # If not tz has been passed return a non-timezoned dt
         dt = datetime.datetime(
-            dt.year, dt.month, dt.day, int(hour), int(minute), int(second), microsecond
+            dt.year,
+            dt.month,
+            dt.day,
+            int(hour),
+            int(minute),
+            int(second),
+            microsecond,
         )
 
     if microsecond > 999990:  # compensate for rounding errors
@@ -205,18 +283,35 @@ def num2date(x, tz=None, naive=True):
 
 
 def num2dt(num, tz=None, naive=True):
+    """
+
+    :param num:
+    :param tz:  (Default value = None)
+    :param naive:  (Default value = True)
+
+    """
     return num2date(num, tz=tz, naive=naive).date()
 
 
 def num2time(num, tz=None, naive=True):
+    """
+
+    :param num:
+    :param tz:  (Default value = None)
+    :param naive:  (Default value = True)
+
+    """
     return num2date(num, tz=tz, naive=naive).time()
 
 
 def date2num(dt, tz=None):
-    """
-    Convert :mod:`datetime` to the Gregorian date as UTC float days,
+    """Convert :mod:`datetime` to the Gregorian date as UTC float days,
     preserving hours, minutes, seconds and microseconds.  Return value
     is a :func:`float`.
+
+    :param dt:
+    :param tz:  (Default value = None)
+
     """
     if tz is not None:
         dt = tz.localize(dt)
@@ -233,21 +328,25 @@ def date2num(dt, tz=None):
         #          dt.second / SECONDS_PER_DAY +
         #          dt.microsecond / MUSECONDS_PER_DAY
         #         )
-        base = math.fsum((
-            base,
-            dt.hour / HOURS_PER_DAY,
-            dt.minute / MINUTES_PER_DAY,
-            dt.second / SECONDS_PER_DAY,
-            dt.microsecond / MUSECONDS_PER_DAY,
-        ))
+        base = math.fsum(
+            (
+                base,
+                dt.hour / HOURS_PER_DAY,
+                dt.minute / MINUTES_PER_DAY,
+                dt.second / SECONDS_PER_DAY,
+                dt.microsecond / MUSECONDS_PER_DAY,
+            )
+        )
 
     return base
 
 
 def time2num(tm):
-    """
-    Converts the hour/minute/second/microsecond part of tm (datetime.datetime
+    """Converts the hour/minute/second/microsecond part of tm (datetime.datetime
     or time) to a num
+
+    :param tm:
+
     """
     num = (
         tm.hour / HOURS_PER_DAY

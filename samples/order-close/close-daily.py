@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,23 +24,30 @@ from __future__ import (
     print_function,
 )
 
-#                        unicode_literals)
-
 import argparse
 import datetime
 import random
 
 import backtrader as bt
 import backtrader.feeds as btfeeds
-
 from backtrader.utils.py3 import with_metaclass
+
+#                        unicode_literals)
 
 
 class St(bt.Strategy):
+    """ """
+
     def __init__(self):
+        """ """
         self.order = None
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         curdtstr = self.data.datetime.datetime().strftime("%a %Y-%m-%d")
         if order.status in [order.Completed]:
             dtstr = bt.num2date(order.executed.dt).strftime("%a %Y-%m-%d")
@@ -52,6 +59,7 @@ class St(bt.Strategy):
             self.order = None
 
     def next(self):
+        """ """
         dtstr = self.data.datetime.datetime().strftime("%a %Y-%m-%d %H:%M:%S")
         # print('%s: data' % dtstr)
         if self.order:
@@ -75,18 +83,19 @@ class SessionEndFiller(with_metaclass(bt.metabase.MetaParams, object)):
     session
 
     The default value for ``endtime`` is 1 second before midnight 23:59:59
+
+
     """
 
     params = (("endtime", datetime.time(23, 59, 59)),)
 
     def __call__(self, data):
         """
-        Params:
-          - data: the data source to filter/process
 
-        Returns:
-          - False (always) because this filter does not remove bars from the
+        :param data: the data source to filter
+        :returns: - False (always) because this filter does not remove bars from the
             stream
+
         """
         # Get time of current (from data source) bar
         dtime = datetime.combine(data.datetime.date(), self.p.endtime)
@@ -95,6 +104,7 @@ class SessionEndFiller(with_metaclass(bt.metabase.MetaParams, object)):
 
 
 def runstrat():
+    """ """
     args = parse_args()
 
     cerebro = bt.Cerebro()
@@ -107,6 +117,11 @@ def runstrat():
 
 
 def getdata(args):
+    """
+
+    :param args:
+
+    """
 
     dataformat = dict(
         bt=btfeeds.BacktraderCSVData,
@@ -145,6 +160,7 @@ def getdata(args):
 
 
 def parse_args():
+    """ """
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Sample for Close Orders with daily data",
@@ -163,7 +179,13 @@ def parse_args():
         "-c",
         required=False,
         default="bt",
-        choices=["bt", "visualchart", "sierrachart", "yahoo", "yahoo_unreversed"],
+        choices=[
+            "bt",
+            "visualchart",
+            "sierrachart",
+            "yahoo",
+            "yahoo_unreversed",
+        ],
         help="CSV Format",
     )
 

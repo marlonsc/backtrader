@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
@@ -27,6 +32,8 @@ import backtrader as bt
 
 
 class St(bt.Strategy):
+    """ """
+
     params = dict(
         ma=bt.ind.SMA,
         p1=10,
@@ -38,14 +45,16 @@ class St(bt.Strategy):
     )
 
     def __init__(self):
+        """ """
         ma1, ma2 = self.p.ma(period=self.p.p1), self.p.ma(period=self.p.p2)
         self.crup = bt.ind.CrossUp(ma1, ma2)
         self.order = None
 
     def next(self):
+        """ """
         if not self.position:
             if self.crup:
-                o = self.buy()
+                self.buy()
                 self.order = None
                 print("*" * 50)
 
@@ -104,6 +113,11 @@ class St(bt.Strategy):
 
 
 def runstrat(args=None):
+    """
+
+    :param args: (Default value = None)
+
+    """
     args = parse_args(args)
 
     cerebro = bt.Cerebro()
@@ -139,6 +153,11 @@ def runstrat(args=None):
 
 
 def parse_args(pargs=None):
+    """
+
+    :param pargs: (Default value = None)
+
+    """
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="StopTrail Sample",

@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,14 +18,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
-from . import Indicator, Max, MovAv, MeanDev
+from . import Indicator, MeanDev, MovAv
 
 
 class CommodityChannelIndex(Indicator):
-    """
-    Introduced by Donald Lambert in 1980 to measure variations of the
+    """Introduced by Donald Lambert in 1980 to measure variations of the
     "typical price" (see below) from its mean to identify extremes and
     reversals
 
@@ -38,6 +42,8 @@ class CommodityChannelIndex(Indicator):
 
     See:
       - https://en.wikipedia.org/wiki/Commodity_channel_index
+
+
     """
 
     alias = ("CCI",)
@@ -53,14 +59,17 @@ class CommodityChannelIndex(Indicator):
     )
 
     def _plotlabel(self):
+        """ """
         plabels = [self.p.period, self.p.factor]
         plabels += [self.p.movav] * self.p.notdefault("movav")
         return plabels
 
     def _plotinit(self):
+        """ """
         self.plotinfo.plotyhlines = [0.0, self.p.upperband, self.p.lowerband]
 
     def __init__(self):
+        """ """
         tp = (self.data.high + self.data.low + self.data.close) / 3.0
         tpmean = self.p.movav(tp, period=self.p.period)
 

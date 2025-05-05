@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,14 +18,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
-import os.path
-import time
-import sys
-
 
 import backtrader as bt
 import backtrader.feeds as btfeeds
@@ -33,6 +34,8 @@ import backtrader.indicators as btind
 
 
 class OrderExecutionStrategy(bt.Strategy):
+    """ """
+
     params = (
         ("smaperiod", 15),
         ("exectype", "Market"),
@@ -42,13 +45,23 @@ class OrderExecutionStrategy(bt.Strategy):
     )
 
     def log(self, txt, dt=None):
-        """Logging function fot this strategy"""
+        """Logging function fot this strategy
+
+        :param txt:
+        :param dt:  (Default value = None)
+
+        """
         dt = dt or self.data.datetime[0]
         if isinstance(dt, float):
             dt = bt.num2date(dt)
         print("%s, %s" % (dt.isoformat(), txt))
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status in [order.Submitted, order.Accepted]:
             # Buy/Sell order submitted/accepted to/by broker - Nothing to do
             self.log("ORDER ACCEPTED/SUBMITTED", dt=order.created.dt)
@@ -62,19 +75,28 @@ class OrderExecutionStrategy(bt.Strategy):
             if order.isbuy():
                 self.log(
                     "BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f"
-                    % (order.executed.price, order.executed.value, order.executed.comm)
+                    % (
+                        order.executed.price,
+                        order.executed.value,
+                        order.executed.comm,
+                    )
                 )
 
             else:  # Sell
                 self.log(
                     "SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f"
-                    % (order.executed.price, order.executed.value, order.executed.comm)
+                    % (
+                        order.executed.price,
+                        order.executed.value,
+                        order.executed.comm,
+                    )
                 )
 
         # Sentinel to None: new orders allowed
         self.order = None
 
     def __init__(self):
+        """ """
         # SimpleMovingAverage on main data
         # Equivalent to -> sma = btind.SMA(self.data, period=self.p.smaperiod)
         sma = btind.SMA(period=self.p.smaperiod)
@@ -86,6 +108,7 @@ class OrderExecutionStrategy(bt.Strategy):
         self.order = None
 
     def next(self):
+        """ """
         if self.order:
             # An order is pending ... nothing can be done
             return
@@ -146,7 +169,10 @@ class OrderExecutionStrategy(bt.Strategy):
                 plimit = self.data.close * (1.0 + self.p.perc2 / 100.0)
 
                 self.buy(
-                    exectype=bt.Order.StopLimit, price=price, valid=valid, plimit=plimit
+                    exectype=bt.Order.StopLimit,
+                    price=price,
+                    valid=valid,
+                    plimit=plimit,
                 )
 
                 if self.p.valid:
@@ -161,6 +187,7 @@ class OrderExecutionStrategy(bt.Strategy):
 
 
 def runstrat():
+    """ """
     args = parse_args()
 
     cerebro = bt.Cerebro()
@@ -183,6 +210,11 @@ def runstrat():
 
 
 def getdata(args):
+    """
+
+    :param args:
+
+    """
 
     dataformat = dict(
         bt=btfeeds.BacktraderCSVData,
@@ -212,6 +244,7 @@ def getdata(args):
 
 
 def parse_args():
+    """ """
     parser = argparse.ArgumentParser(description="Showcase for Order Execution Types")
 
     parser.add_argument(
@@ -227,7 +260,13 @@ def parse_args():
         "-c",
         required=False,
         default="bt",
-        choices=["bt", "visualchart", "sierrachart", "yahoo", "yahoo_unreversed"],
+        choices=[
+            "bt",
+            "visualchart",
+            "sierrachart",
+            "yahoo",
+            "yahoo_unreversed",
+        ],
         help="CSV Format",
     )
 
@@ -248,7 +287,11 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--plot", "-p", action="store_true", required=False, help="Plot the read data"
+        "--plot",
+        "-p",
+        action="store_true",
+        required=False,
+        help="Plot the read data",
     )
 
     parser.add_argument(
@@ -261,7 +304,11 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--numfigs", "-n", required=False, default=1, help="Plot using n figures"
+        "--numfigs",
+        "-n",
+        required=False,
+        default=1,
+        help="Plot using n figures",
     )
 
     parser.add_argument(

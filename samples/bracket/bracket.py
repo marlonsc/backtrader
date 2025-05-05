@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,8 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
-
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
@@ -28,6 +32,8 @@ import backtrader as bt
 
 
 class St(bt.Strategy):
+    """ """
+
     params = dict(
         ma=bt.ind.SMA,
         p1=5,
@@ -41,6 +47,11 @@ class St(bt.Strategy):
     )
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         print(
             "{}: Order ref: {} / Type {} / Status {}".format(
                 self.data.datetime.date(0),
@@ -65,6 +76,7 @@ class St(bt.Strategy):
             self.orefs.remove(order.ref)
 
     def __init__(self):
+        """ """
         ma1, ma2 = self.p.ma(period=self.p.p1), self.p.ma(period=self.p.p2)
         self.cross = bt.ind.CrossOver(ma1, ma2)
 
@@ -74,12 +86,12 @@ class St(bt.Strategy):
             print("-" * 5, "Using buy_bracket")
 
     def next(self):
+        """ """
         if self.orefs:
             return  # pending orders do nothing
 
         if not self.position:
             if self.cross > 0.0:  # crossing up
-
                 close = self.data.close[0]
                 p1 = close * (1.0 - self.p.limit)
                 p2 = p1 - 0.02 * close
@@ -94,7 +106,10 @@ class St(bt.Strategy):
 
                 if not self.p.usebracket:
                     o1 = self.buy(
-                        exectype=bt.Order.Limit, price=p1, valid=valid1, transmit=False
+                        exectype=bt.Order.Limit,
+                        price=p1,
+                        valid=valid1,
+                        transmit=False,
                     )
 
                     print(
@@ -151,6 +166,11 @@ class St(bt.Strategy):
 
 
 def runstrat(args=None):
+    """
+
+    :param args:  (Default value = None)
+
+    """
     args = parse_args(args)
 
     cerebro = bt.Cerebro()
@@ -187,6 +207,11 @@ def runstrat(args=None):
 
 
 def parse_args(pargs=None):
+    """
+
+    :param pargs:  (Default value = None)
+
+    """
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Sample Skeleton",

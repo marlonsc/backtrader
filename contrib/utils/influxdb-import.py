@@ -1,18 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: utf-8; py-indent-offset:4 -*-
 
-import sys
-import os
+import argparse
 import io
 import logging
-import argparse
+import os
+import sys
+
 import pandas as pd
 from influxdb import DataFrameClient as dfclient
 from influxdb.exceptions import InfluxDBClientError
 
 
 class InfluxDBTool(object):
+    """ """
+
     def __init__(self):
+        """ """
         self._host = args.host if args.host else "localhost"
         self._port = args.port if args.port else 8086
         self._username = args.username if args.username else None
@@ -22,11 +26,19 @@ class InfluxDBTool(object):
         self._cache = os.path.expanduser(args.sourcepath)
 
         self.dfdb = dfclient(
-            self._host, self._port, self._username, self._password, self._database
+            self._host,
+            self._port,
+            self._username,
+            self._password,
+            self._database,
         )
 
     def write_dataframe_to_idb(self, ticker):
-        """Write Pandas Dataframe to InfluxDB database"""
+        """Write Pandas Dataframe to InfluxDB database
+
+        :param ticker:
+
+        """
         cachepath = self._cache
         cachefile = "%s/%s-1M.csv.gz" % (cachepath, ticker)
 
@@ -48,7 +60,11 @@ class InfluxDBTool(object):
             log.error("Write to database failed: %s" % err)
 
     def get_tickers_from_file(self, filename):
-        """Load ticker list from txt file"""
+        """Load ticker list from txt file
+
+        :param filename:
+
+        """
         if not os.path.exists(filename):
             log.error("Ticker List file does not exist: %s", filename)
 
@@ -67,7 +83,10 @@ if __name__ == "__main__":
 
     exoptgroup = parser.add_mutually_exclusive_group(required=False)
     exoptgroup.add_argument(
-        "--ticker", action="store", default="SPY", help="Ticker to request data for."
+        "--ticker",
+        action="store",
+        default="SPY",
+        help="Ticker to request data for.",
     )
     exoptgroup.add_argument(
         "--ticker-list",
@@ -119,7 +138,10 @@ if __name__ == "__main__":
         help="Path to CSV source folder.",
     )
     parser.add_argument(
-        "--testrun", required=False, action="store_true", help="Don't write to InfluxDB"
+        "--testrun",
+        required=False,
+        action="store_true",
+        help="Don't write to InfluxDB",
     )
     parser.add_argument(
         "--debug",

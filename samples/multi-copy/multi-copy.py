@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,26 +18,30 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
-
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
-import random
 
 import backtrader as bt
 
 
 class TheStrategy(bt.Strategy):
-    """
-    This strategy is capable of:
+    """This strategy is capable of:
 
-      - Going Long with a Moving Average upwards CrossOver
+    - Going Long with a Moving Average upwards CrossOver
 
-      - Going Long again with a MACD upwards CrossOver
+    - Going Long again with a MACD upwards CrossOver
 
-      - Closing the aforementioned longs with the corresponding downwards
-        crossovers
+    - Closing the aforementioned longs with the corresponding downwards
+      crossovers
+
+
     """
 
     params = (
@@ -52,6 +56,11 @@ class TheStrategy(bt.Strategy):
     )
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if not order.alive():
             if not order.isbuy():  # going flat
                 self.order = 0
@@ -70,6 +79,7 @@ class TheStrategy(bt.Strategy):
                 print(",".join(str(x) for x in tfields))
 
     def __init__(self):
+        """ """
         # Choose data to buy from
         self.dtarget = self.getdatabyname(self.p.dtarget)
 
@@ -89,6 +99,7 @@ class TheStrategy(bt.Strategy):
         self.macdsig = bt.ind.CrossOver(macd.macd, macd.signal)
 
     def start(self):
+        """ """
         self.order = 0  # sentinel to avoid operrations on pending order
 
         tfields = [
@@ -102,6 +113,7 @@ class TheStrategy(bt.Strategy):
         print(",".join(str(x) for x in tfields))
 
     def next(self):
+        """ """
         tfields = [
             self.p.myname,
             len(self),
@@ -134,10 +146,7 @@ class TheStrategy(bt.Strategy):
 
 
 class TheStrategy2(TheStrategy):
-    """
-    Subclass of TheStrategy to simply change the parameters
-
-    """
+    """Subclass of TheStrategy to simply change the parameters"""
 
     params = (
         ("stake", 200),
@@ -150,6 +159,11 @@ class TheStrategy2(TheStrategy):
 
 
 def runstrat(args=None):
+    """
+
+    :param args:  (Default value = None)
+
+    """
     args = parse_args(args)
 
     cerebro = bt.Cerebro()
@@ -190,7 +204,7 @@ def runstrat(args=None):
 
     cerebro.addstrategy(TheStrategy2, myname="St2", dtarget=dtarget, **st1kwargs)
 
-    results = cerebro.run()
+    cerebro.run()
 
     if args.plot:
         pkwargs = dict(style="bar")
@@ -202,6 +216,11 @@ def runstrat(args=None):
 
 
 def parse_args(pargs=None):
+    """
+
+    :param pargs:  (Default value = None)
+
+    """
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

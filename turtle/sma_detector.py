@@ -1,16 +1,27 @@
 import os
 import time
-import pandas as pd
 
 # import matplotlib.pyplot as plt
 import baostock_wrapper as bsw
+import pandas as pd
 
 
 def calculate_sma(df, window):
+    """
+
+    :param df:
+    :param window:
+
+    """
     return df["close"].rolling(window=window).mean()
 
 
 def detect_golden_cross(df):
+    """
+
+    :param df:
+
+    """
     df["SMA5"] = calculate_sma(df, 5)
     df["SMA10"] = calculate_sma(df, 10)
     df["Crossover"] = (df["SMA5"] > df["SMA10"]) & (
@@ -20,13 +31,21 @@ def detect_golden_cross(df):
 
 
 def run(start_date, end_date, stock_file, detect_days=7):
+    """
+
+    :param start_date:
+    :param end_date:
+    :param stock_file:
+    :param detect_days:  (Default value = 7)
+
+    """
     df = pd.read_csv(stock_file, parse_dates=["updateDate"], encoding="utf-8")
 
     golden_cross = {"Code": [], "Name": [], "Last Cross Date": []}
 
     with bsw.BaoStockWrapper() as w:
         for _, row in df.iterrows():
-            local_file = f'data/{row["code"]}.csv'
+            local_file = f"data/{row['code']}.csv"
             if (
                 not os.path.exists(local_file)
                 or os.stat(local_file).st_mtime < time.time() - 0
@@ -36,9 +55,9 @@ def run(start_date, end_date, stock_file, detect_days=7):
                 )
                 if data is None:
                     break
-                data.to_csv(f'data/{row["code"]}.csv', index=False)
+                data.to_csv(f"data/{row['code']}.csv", index=False)
             else:
-                data = pd.read_csv(f'data/{row["code"]}.csv', parse_dates=["date"])
+                data = pd.read_csv(f"data/{row['code']}.csv", parse_dates=["date"])
             cross = detect_golden_cross(data)
             if not cross["Crossover"].any():
                 continue
@@ -54,6 +73,7 @@ def run(start_date, end_date, stock_file, detect_days=7):
 
 
 def test_sma():
+    """ """
     file = "data/sh.601318.csv"
     file = "data/sh.600989.csv"
     df = pd.read_csv(file, parse_dates=["date"], encoding="utf-8")

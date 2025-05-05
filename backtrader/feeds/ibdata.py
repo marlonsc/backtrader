@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,25 +18,41 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import datetime
-import time
 import threading
-from dateutil.relativedelta import relativedelta
+import time
 
 import backtrader as bt
-from backtrader.feed import DataBase
 from backtrader import TimeFrame, date2num, num2date
-from backtrader.utils.py3 import integer_types, queue, string_types, with_metaclass
-from backtrader.metabase import MetaParams
-from backtrader.stores import ibstore, ibstore_insync
 from backtrader.commissions.ibcommission import IBCommInfo
+from backtrader.feed import DataBase
+from backtrader.stores import ibstore_insync
+from backtrader.utils.py3 import (
+    integer_types,
+    string_types,
+    with_metaclass,
+)
+from dateutil.relativedelta import relativedelta
 
 
 class MetaIBData(DataBase.__class__):
+    """ """
+
     def __init__(cls, name, bases, dct):
-        """Class has already been created ... register"""
+        """Class has already been created ... register
+
+        :param name:
+        :param bases:
+        :param dct:
+
+        """
         # Initialize the class
         super(MetaIBData, cls).__init__(name, bases, dct)
 
@@ -88,164 +104,6 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
             WAR-GOOG-EUR-FWB-20201117-'001'-15000-C
 
 
-
-    Params:
-
-      - ``sectype`` (default: ``STK``)
-
-        Default value to apply as *security type* if not provided in the
-        ``dataname`` specification
-
-      - ``exchange`` (default: ``SMART``)
-
-        Default value to apply as *exchange* if not provided in the
-        ``dataname`` specification
-
-      - ``primaryExchange`` (default: ``None``)
-
-        For certain smart-routed stock contracts that have the same symbol,
-        currency and exchange, you would also need to specify the primary
-        exchange attribute to uniquely define the contract. This should be
-        defined as the native exchange of a contract
-
-      - ``right`` (default: ``None``)
-
-        Warrants, like options, require an expiration date, a right,
-        a strike and an optional multiplier.
-
-      - ``strike`` (default: ``None``)
-
-        Warrants, like options, require an expiration date, a right,
-        a strike and an optional multiplier.
-
-      - ``expiry`` (default: ``None``)
-
-        Warrants, like options, require an expiration date, a right,
-        a strike and an optional multiplier.
-        In this case expiry is 'lastTradeDateOrContractMonth'
-      - ``currency`` (default: ``''``)
-
-        Default value to apply as *currency* if not provided in the
-        ``dataname`` specification
-
-      - ``multiplier`` (default: ``None``)
-
-        Occasionally, you can expect to have more than a single future
-        contract for the same underlying with the same expiry. To rule
-        out the ambiguity, the contract's multiplier can be given
-
-      - ``tradingClass`` (default: ``None``)
-
-        It is not unusual to find many option contracts with an almost identical
-        description (i.e. underlying symbol, strike, last trading date,
-        multiplier, etc.). Adding more details such as the trading class will help
-
-      - ``localSymbol`` (default: ``None``)
-
-        Warrants, like options, require an expiration date, a right, a strike and
-        a multiplier. For some warrants it will be necessary to define a
-        localSymbol or conId to uniquely identify the contract
-      - ``historical`` (default: ``False``)
-
-        If set to ``True`` the data feed will stop after doing the first
-        download of data.
-
-        The standard data feed parameters ``fromdate`` and ``todate`` will be
-        used as reference.
-
-        The data feed will make multiple requests if the requested duration is
-        larger than the one allowed by IB given the timeframe/compression
-        chosen for the data.
-
-      - ``what`` (default: ``None``)
-
-        If ``None`` the default for different assets types will be used for
-        historical data requests:
-
-          - 'BID' for CASH assets
-          - 'TRADES' for any other
-
-        Use 'ASK' for the Ask quote of cash assets
-
-        Check the IB API docs if another value is wished
-        (TRADES,MIDPOINT,BID,ASK,BID_ASK,ADJUSTED_LAST,HISTORICAL_VOLATILITY,
-         OPTION_IMPLIED_VOLATILITY, REBATE_RATE, FEE_RATE,
-         YIELD_BID, YIELD_ASK, YIELD_BID_ASK, YIELD_LAST)
-
-      - ``rtbar`` (default: ``False``)
-
-        If ``True`` the ``5 Seconds Realtime bars`` provided by Interactive
-        Brokers will be used as the smalles tick. According to the
-        documentation they correspond to real-time values (once collated and
-        curated by IB)
-
-        If ``False`` then the ``RTVolume`` prices will be used, which are based
-        on receiving ticks. In the case of ``CASH`` assets (like for example
-        EUR.JPY) ``RTVolume`` will always be used and from it the ``bid`` price
-        (industry de-facto standard with IB according to the literature
-        scattered over the Internet)
-
-        Even if set to ``True``, if the data is resampled/kept to a
-        timeframe/compression below Seconds/5, no real time bars will be used,
-        because IB doesn't serve them below that level
-
-      - ``qcheck`` (default: ``0.5``)
-
-        Time in seconds to wake up if no data is received to give a chance to
-        resample/replay packets properly and pass notifications up the chain
-
-      - ``backfill_start`` (default: ``True``)
-
-        Perform backfilling at the start. The maximum possible historical data
-        will be fetched in a single request.
-
-      - ``backfill`` (default: ``True``)
-
-        Perform backfilling after a disconnection/reconnection cycle. The gap
-        duration will be used to download the smallest possible amount of data
-
-      - ``backfill_from`` (default: ``None``)
-
-        An additional data source can be passed to do an initial layer of
-        backfilling. Once the data source is depleted and if requested,
-        backfilling from IB will take place. This is ideally meant to backfill
-        from already stored sources like a file on disk, but not limited to.
-
-      - ``latethrough`` (default: ``False``)
-
-        If the data source is resampled/replayed, some ticks may come in too
-        late for the already delivered resampled/replayed bar. If this is
-        ``True`` those ticks will bet let through in any case.
-
-        Check the Resampler documentation to see who to take those ticks into
-        account.
-
-        This can happen especially if ``timeoffset`` is set to ``False``  in
-        the ``IBStore`` instance and the TWS server time is not in sync with
-        that of the local computer
-
-      - ``tradename`` (default: ``None``)
-        Useful for some specific cases like ``CFD`` in which prices are offered
-        by one asset and trading happens in a different onel
-
-        - SPY-STK-SMART-USD -> SP500 ETF (will be specified as ``dataname``)
-
-        - SPY-CFD-SMART-USD -> which is the corresponding CFD which offers not
-          price tracking but in this case will be the trading asset (specified
-          as ``tradename``)
-
-    The default values in the params are the to allow things like ```TICKER``,
-    to which the parameter ``secType`` (default: ``STK``) and ``exchange``
-    (default: ``SMART``) are applied.
-
-    Some assets like ``AAPL`` need full specification including ``currency``
-    (default: '') whereas others like ``TWTR`` can be simply passed as it is.
-
-      - ``AAPL-STK-SMART-USD`` would be the full specification for dataname
-
-        Or else: ``IBData`` as ``IBData(dataname='AAPL', currency='USD')``
-        which uses the default values (``STK`` and ``SMART``) and overrides
-        the currency to be ``USD``
     """
 
     params = (
@@ -255,7 +113,10 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         ("right", None),  # Option or Warrant Call('C') or Put('P')
         ("strike", None),  # Future, Option or Warrant strike price
         ("multiplier", None),  # Future, Option or Warrant multiplier
-        ("expiry", None),  # Future, Option or Warrant lastTradeDateOrContractMonth date
+        (
+            "expiry",
+            None,
+        ),  # Future, Option or Warrant lastTradeDateOrContractMonth date
         ("currency", ""),  # currency for the contract
         ("localSymbol", None),  # Warrant localSymbol override
         ("rtbar", False),  # use RealTime 5 seconds bars
@@ -263,7 +124,9 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         (
             "durationStr",
             "1 W",
-        ),  # historical - The amount of time to go back from the request’s given enddatetime.
+            # historical - The amount of time to go back from the request’s
+            # given enddatetime.
+        ),
         (
             "barSizeSetting",
             "4 hours",
@@ -273,7 +136,9 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         (
             "formatDate",
             1,
-        ),  # historical -  The format in which the incoming bars’ date should be presented.
+            # historical -  The format in which the incoming bars’ date should
+            # be presented.
+        ),
         (
             "keepUpToDate",
             False,
@@ -291,7 +156,9 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         (
             "ignoreSize",
             False,
-        ),  # Omit updates that reflect only changes in size, and not price. Applicable to Bid_Ask data requests.
+            # Omit updates that reflect only changes in size, and not price.
+            # Applicable to Bid_Ask data requests.
+        ),
     )
 
     _IBCommissionTypes = {
@@ -321,9 +188,11 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
     _ST_FROM, _ST_START, _ST_LIVE, _ST_HISTORBACK, _ST_OVER = range(5)
 
     def _timeoffset(self):
+        """ """
         return self.ib.timeoffset()
 
     def _gettz(self):
+        """ """
         # If no object has been provided by the user and a timezone can be
         # found via contractdtails, then try to get it from pytz, which may or
         # may not be available.
@@ -358,10 +227,18 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
 
     def islive(self):
         """Returns ``True`` to notify ``Cerebro`` that preloading and runonce
-        should be deactivated"""
+        should be deactivated
+
+
+        """
         return not self.p.historical
 
     def __init__(self, **kwargs):
+        """
+
+        :param **kwargs:
+
+        """
         self.ib = self._store(**kwargs)
         self.precontract = self.parsecontract(self.p.dataname)
         self.pretradecontract = self.parsecontract(self.p.tradename)
@@ -370,6 +247,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         self._lock_q = threading.Condition()  # sync access to qlive
 
     def caldate(self):
+        """ """
         duranumber = int(self.p.durationStr.split()[0])
         duraunit = self.p.durationStr.split()[1]
 
@@ -398,7 +276,11 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
 
     def setenvironment(self, env):
         """Receives an environment (cerebro) and passes it over to the store it
-        belongs to"""
+        belongs to
+
+        :param env:
+
+        """
         super(IBData, self).setenvironment(env)
         env.addstore(self.ib)
 
@@ -423,8 +305,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
     ]
 
     def parsecontract(self, dataname):
-        """
-        Parses dataname generates a default contract
+        """Parses dataname generates a default contract
 
         Pattern: secType-others
 
@@ -460,6 +341,9 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
             FOP-GBL-EUR-EUREX-'20230224'-'1000'-138-C
             OPT-GOOG-USD-SMART-20241220-100-180-C #EndData=datetime(2024, 10, 16) / '' 1M 1hour
             WAR-GOOG-EUR-FWB-20201117-001-15000-C
+
+        :param dataname:
+
         """
 
         # Set defaults for optional tokens in the ticker string
@@ -516,6 +400,11 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         return precon
 
     def updatecomminfo(self, contract=None):
+        """
+
+        :param contract:  (Default value = None)
+
+        """
 
         broker = self.ib.getbroker()
         commparams = dict()
@@ -535,7 +424,10 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
 
     def start(self):
         """Starts the IB connecction and gets the real contract and
-        contractdetails if it exists"""
+        contractdetails if it exists
+
+
+        """
         super(IBData, self).start()
         # Kickstart store and get queue to wait on
         self.qlive = self.ib.start(data=self)
@@ -575,7 +467,10 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
             self.contract = cdetails.contract
             self.contractdetails = cdetails
             self.constractStartDateUTC = self.ib.reqHeadTimeStamp(
-                contract=self.contract, whatToShow="TRADES", useRTH=1, formatDate=1
+                contract=self.contract,
+                whatToShow="TRADES",
+                useRTH=1,
+                formatDate=1,
             )  # format=1 UTC time format=2 epoch time
             self.updatecomminfo(self.contract)
         else:
@@ -638,15 +533,29 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
             self.ib.cancelRealTimeBars(self.qlive)
 
     def haslivedata(self):
+        """ """
         return bool(self._storedmsg or self.qlive)
 
     def updatelivedata(self, step=0, bars=None, hist=True):
+        """
+
+        :param step:  (Default value = 0)
+        :param bars:  (Default value = None)
+        :param hist:  (Default value = True)
+
+        """
         for bar in bars:
-            d = len(self.lines.close)
+            len(self.lines.close)
             self.forward()
             self._load_rtbar(bar, hist=hist)
 
     def onliveupdate(self, bars, hasNewBar):
+        """
+
+        :param bars:
+        :param hasNewBar:
+
+        """
         # 对于hisorical数据，bars保存reqhistoricaEnd开始的所有数据
         # bars长度为0，表示未接收到update数据
         # bars最后一个数据为临时数据，5秒更新一次，保存最新收到的update数据，只有当timeframe时间到了才后固定
@@ -657,36 +566,36 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
                 return
 
             if hasNewBar:
-                curtime = bars[-1].date
+                bars[-1].date
                 if newdatalen == 2:
                     print(f"onliveupdate size:1 bar.date:{bars[0].date}")
                 else:
                     print(
-                        f"onliveupdate size:{newdatalen-1} from {bars[0].date} to"
+                        f"onliveupdate size:{newdatalen - 1} from {bars[0].date} to"
                         f" {bars[-2].date}"
                     )
-                self.updatelivedata(
-                    newdatalen - 1, bars[:-1]
-                )  # 有2个以上数据,按timeframe频率更新，避免频率重复调用,一直更新到倒数第2个数据，仅保存最后一个数据:-1不包含-1，只到-2
+                # 有2个以上数据,按timeframe频率更新，避免频率重复调用,一直更新到倒数第2个数据，仅保存最后一个数据:-1不包含-1，只到-2
+                self.updatelivedata(newdatalen - 1, bars[:-1])
                 bars[:] = bars[-1:]
         else:
             with self._lock_q:
                 self._lock_q.notify()
 
     def _load(self):
+        """ """
         if self.contract is None or self._state == self._ST_OVER:
             return False  # nothing can be done
 
         while True:
             if self._state == self._ST_LIVE:
-                start_time = time.time()
+                time.time()
                 with self._lock_q:
                     if len(self.qlive) == 0:
                         self.ib.sleep(1)
                         self._lock_q.wait(timeout=self._qcheck)
                     try:
                         msg = self.qlive.pop(0)
-                    except Exception as e:
+                    except Exception:
                         # print("_load live data Exception:", e)
                         return None
 
@@ -883,6 +792,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
                     return False
 
     def _start_finish(self):
+        """ """
         # 重载start_finish方法，ibdata额外增加数据开始日期判断
         super()._start_finish()
 
@@ -896,6 +806,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
             )
 
     def _st_start(self):
+        """ """
         if self.p.historical:
             self.put_notification(self.DELAYED)
             dtend = ""
@@ -951,6 +862,12 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         return True  # no return before - implicit continue
 
     def _load_rtbar(self, rtbar, hist=False):
+        """
+
+        :param rtbar:
+        :param hist:  (Default value = False)
+
+        """
         # A complete 5 second bar made of real-time ticks is delivered and
         # contains open/high/low/close/volume prices
         # The historical data has the same data but with 'date' instead of
@@ -975,6 +892,11 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         return True
 
     def _load_rtvolume(self, rtvol):
+        """
+
+        :param rtvol:
+
+        """
         # A single tick is delivered and is therefore used for the entire set
         # of prices. Ideally the
         # contains open/high/low/close/volume prices
@@ -997,6 +919,12 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         return True
 
     def _load_rtticks(self, tick, hist=False):
+        """
+
+        :param tick:
+        :param hist:  (Default value = False)
+
+        """
 
         dt = date2num(tick.datetime if not hist else tick.date)
         if dt < self.lines.datetime[-1] and not self.p.latethrough:

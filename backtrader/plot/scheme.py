@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 tableau20 = [
     "steelblue",  # 0
@@ -73,7 +78,10 @@ tab10_index = [3, 0, 2, 1, 2, 4, 5, 6, 7, 8, 9]
 
 
 class PlotScheme(object):
+    """ """
+
     def __init__(self):
+        """ """
         # to have a tight packing on the chart wether only the x axis or also
         # the y axis have (see matplotlib)
         self.ytight = False
@@ -128,7 +136,7 @@ class PlotScheme(object):
 
         # Wether to plot volume or not. Note: if the data in question has no
         # volume values, volume plotting will be skipped even if this is True
-        self.volume = True
+        self.volume = False
 
         # Wether to overlay the volume on the data or use a separate subchart
         self.voloverlay = True
@@ -183,5 +191,10 @@ class PlotScheme(object):
         self.fmt_x_data = None
 
     def color(self, idx):
+        """
+
+        :param idx:
+
+        """
         colidx = tab10_index[idx % len(tab10_index)]
         return self.lcolors[colidx]

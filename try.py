@@ -1,16 +1,10 @@
-from sko.GA import GA
+from datetime import datetime
 
 import backtrader as bt
-from qmtbt import QMTStore
-from datetime import datetime
-from xtquant import xtdata, xtconstant
-import math
-import backtrader as bt
-from strategies import TestStrategy, AnotherStrategy, my_broker
-from xtquant.xttrader import XtQuantTrader, XtQuantTraderCallback
-from xtquant.xttype import StockAccount
 import optuna
-from strategies import *
+from qmtbt import QMTStore
+from sko.GA import GA
+from strategies import TestStrategy
 
 
 def finetune(
@@ -22,7 +16,17 @@ def finetune(
     todate=datetime(2020, 4, 1),
     count=1,
 ):
-    """为每个股票优化独立参数"""
+    """为每个股票优化独立参数
+
+    :param Strategy:
+    :param method:  (Default value = "Sko")
+    :param stocks:  (Default value = ["000001.SZ"])
+    :param timeframe:  (Default value = bt.TimeFrame.Days)
+    :param fromdate:  (Default value = datetime(2020, 1, 1))
+    :param todate:  (Default value = datetime(2020, 4, 1))
+    :param count:  (Default value = 1)
+
+    """
     store = QMTStore()
     optimized_params = {}
 
@@ -36,6 +40,11 @@ def finetune(
 
     # 单股票优化函数
     def optimize_single_stock(stock):
+        """
+
+        :param stock:
+
+        """
         # 加载单股票数据
         data = store.getdata(
             dataname=stock,
@@ -52,6 +61,11 @@ def finetune(
             ub = [50] * n_dim
 
             def backtest(p):
+                """
+
+                :param p:
+
+                """
                 param_dict = {
                     name: int(round(value)) for name, value in zip(param_names, p)
                 }
@@ -79,6 +93,11 @@ def finetune(
         elif method == "Optuna":
 
             def objective(trial):
+                """
+
+                :param trial:
+
+                """
                 params = {name: trial.suggest_int(name, 1, 50) for name in param_names}
                 cerebro = bt.Cerebro()
                 cerebro.adddata(data)
@@ -110,7 +129,17 @@ def back_test(
     fromdate=datetime(2020, 1, 1),
     todate=datetime(2020, 4, 1),
 ):
-    """多股票独立参数回测"""
+    """多股票独立参数回测
+
+    :param selected_strategy:
+    :param optimized_params:
+    :param use_real_trading:  (Default value = False)
+    :param live:  (Default value = False)
+    :param stocks:  (Default value = ["000001.SZ"])
+    :param fromdate:  (Default value = datetime(2020, 1, 1))
+    :param todate:  (Default value = datetime(2020, 4, 1))
+
+    """
 
     store = QMTStore()
 
@@ -188,7 +217,6 @@ if __name__ == "__main__":
     #     use_real_trading=True,
     #     stocks=['600519.SH']  # 使用与优化时相同的标的
     # )
-
 
 # 实时交易，但不能多只股票同时
 # back_test(

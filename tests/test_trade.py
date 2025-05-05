@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,45 +18,76 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-import testcommon
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import backtrader as bt
 from backtrader import trade
 
 
 class FakeCommInfo(object):
+    """ """
+
     def getvaluesize(self, size, price):
+        """
+
+        :param size:
+        :param price:
+
+        """
         return 0
 
     def profitandloss(self, size, price, newprice):
+        """
+
+        :param size:
+        :param price:
+        :param newprice:
+
+        """
         return 0
 
 
 class FakeData(object):
-    """
-    Minimal interface to avoid errors when trade tries to get information from
+    """Minimal interface to avoid errors when trade tries to get information from
     the data during the test
+
+
     """
 
     def __len__(self):
+        """ """
         return 0
 
     @property
     def datetime(self):
+        """ """
         return [0.0]
 
     @property
     def close(self):
+        """ """
         return [0.0]
 
 
 def test_run(main=False):
+    """
+
+    :param main:  (Default value = False)
+
+    """
     tr = trade.Trade(data=FakeData())
 
     order = bt.BuyOrder(
-        data=FakeData(), size=0, price=1.0, exectype=bt.Order.Market, simulated=True
+        data=FakeData(),
+        size=0,
+        price=1.0,
+        exectype=bt.Order.Market,
+        simulated=True,
     )
 
     commrate = 0.025

@@ -169,19 +169,26 @@ Channel customization:
 python strategies/channel_trading.py --data AMZN --period 40 --channel-pct 0.2 --smooth-period 5
 """
 
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
 import os
 import sys
+
+import backtrader as bt
 import pandas as pd
-import numpy as np
 import psycopg2
 import psycopg2.extras
-import matplotlib.pyplot as plt
-import backtrader as bt
-import backtrader.indicators as btind
+from strategies.utils import (
+    add_standard_analyzers,
+    get_db_data,
+)
 
 # Add the parent directory to the Python path to import shared modules
 parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -189,18 +196,10 @@ if parent_dir not in sys.path:
     sys.path.append(parent_dir)
 
 # Import utility functions
-from strategies.utils import (
-    get_db_data,
-    print_performance_metrics,
-    TradeThrottling,
-    add_standard_analyzers,
-)
 
 
 class StockPriceData(bt.feeds.PandasData):
-    """
-    Stock Price Data Feed
-    """
+    """Stock Price Data Feed"""
 
     params = (
         ("datetime", None),  # Column containing the date (index)
@@ -214,8 +213,15 @@ class StockPriceData(bt.feeds.PandasData):
 
 
 def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate):
-    """
-    Get historical price data from PostgreSQL database
+    """Get historical price data from PostgreSQL database
+
+    :param symbol:
+    :param dbuser:
+    :param dbpass:
+    :param dbname:
+    :param fromdate:
+    :param todate:
+
     """
     # Format dates for database query
     from_str = fromdate.strftime("%Y-%m-%d %H:%M:%S")
@@ -290,13 +296,14 @@ def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate):
 
 
 class ChannelStrategy(bt.Strategy):
-    """
-    Price Channel Trading Strategy
+    """Price Channel Trading Strategy
 
     This strategy identifies price channels and trades on breakouts and rebounds:
     - Buy when price rebounds from the lower channel line
     - Sell when price rebounds from the upper channel line
     - Uses ATR for dynamic stop-loss and take-profit levels
+
+
     """
 
     params = (
@@ -313,16 +320,22 @@ class ChannelStrategy(bt.Strategy):
         ("atr_multiplier", 2.0),  # ATR multiplier for stop-loss distance
         # Risk management
         ("risk_percent", 2.0),  # Risk per trade as percentage of portfolio
-        ("trail_percent", 50.0),  # Percentage of profit at which to start trailing stop
-        ("trail_atr_mult", 1.5),  # ATR multiplier for trailing stop after activation
+        # Percentage of profit at which to start trailing stop
+        ("trail_percent", 50.0),
+        # ATR multiplier for trailing stop after activation
+        ("trail_atr_mult", 1.5),
         ("tp_ratio", 2.0),  # Target profit to risk ratio
         # Logging parameters
         ("log_level", "info"),  # Logging level: 'debug', 'info'
     )
 
     def log(self, txt, dt=None, level="info"):
-        """
-        Logging function for the strategy
+        """Logging function for the strategy
+
+        :param txt:
+        :param dt:  (Default value = None)
+        :param level:  (Default value = "info")
+
         """
         if level == "debug" and self.p.log_level != "debug":
             return
@@ -331,6 +344,7 @@ class ChannelStrategy(bt.Strategy):
         print(f"{dt.isoformat()}: {txt}")
 
     def __init__(self):
+        """ """
         # Store price references
         self.dataclose = self.datas[0].close
         self.datahigh = self.datas[0].high
@@ -376,7 +390,11 @@ class ChannelStrategy(bt.Strategy):
         self.losing_trades = 0
 
     def notify_order(self, order):
-        """Handle order notifications"""
+        """Handle order notifications
+
+        :param order:
+
+        """
         if order.status in [order.Submitted, order.Accepted]:
             # Order pending, do nothing
             return
@@ -417,7 +435,11 @@ class ChannelStrategy(bt.Strategy):
             self.take_profit = None
 
     def notify_trade(self, trade):
-        """Track completed trades"""
+        """Track completed trades
+
+        :param trade:
+
+        """
         if not trade.isclosed:
             return
 
@@ -434,7 +456,12 @@ class ChannelStrategy(bt.Strategy):
         )
 
     def set_exit_orders(self, entry_price, is_buy=True):
-        """Set stop loss and take profit orders"""
+        """Set stop loss and take profit orders
+
+        :param entry_price:
+        :param is_buy:  (Default value = True)
+
+        """
         # Cancel existing exit orders
         self.cancel_exit_orders()
 
@@ -445,7 +472,8 @@ class ChannelStrategy(bt.Strategy):
             stop_price = entry_price - (atr_val * self.p.atr_multiplier)
             risk_amount = entry_price - stop_price
 
-            # Take profit at either channel top or risk*reward ratio, whichever is closer
+            # Take profit at either channel top or risk*reward ratio, whichever
+            # is closer
             target_distance = risk_amount * self.p.tp_ratio
             channel_target = self.channel_top
             # Choose the closer of the two targets
@@ -455,10 +483,14 @@ class ChannelStrategy(bt.Strategy):
                 profit_target = entry_price + target_distance
 
             self.stop_loss = self.sell(
-                exectype=bt.Order.Stop, price=stop_price, size=self.position_size
+                exectype=bt.Order.Stop,
+                price=stop_price,
+                size=self.position_size,
             )
             self.take_profit = self.sell(
-                exectype=bt.Order.Limit, price=profit_target, size=self.position_size
+                exectype=bt.Order.Limit,
+                price=profit_target,
+                size=self.position_size,
             )
 
             self.log(
@@ -475,7 +507,8 @@ class ChannelStrategy(bt.Strategy):
             stop_price = entry_price + (atr_val * self.p.atr_multiplier)
             risk_amount = stop_price - entry_price
 
-            # Take profit at either channel bottom or risk*reward ratio, whichever is closer
+            # Take profit at either channel bottom or risk*reward ratio,
+            # whichever is closer
             target_distance = risk_amount * self.p.tp_ratio
             channel_target = self.channel_bottom
             # Choose the closer of the two targets
@@ -485,10 +518,14 @@ class ChannelStrategy(bt.Strategy):
                 profit_target = entry_price - target_distance
 
             self.stop_loss = self.buy(
-                exectype=bt.Order.Stop, price=stop_price, size=self.position_size
+                exectype=bt.Order.Stop,
+                price=stop_price,
+                size=self.position_size,
             )
             self.take_profit = self.buy(
-                exectype=bt.Order.Limit, price=profit_target, size=self.position_size
+                exectype=bt.Order.Limit,
+                price=profit_target,
+                size=self.position_size,
             )
 
             self.log(
@@ -512,7 +549,11 @@ class ChannelStrategy(bt.Strategy):
             self.take_profit = None
 
     def calculate_position_size(self, stop_price):
-        """Calculate position size based on risk percentage"""
+        """Calculate position size based on risk percentage
+
+        :param stop_price:
+
+        """
         risk_amount = self.broker.getvalue() * (self.p.risk_percent / 100)
         price = self.dataclose[0]
         risk_per_share = abs(price - stop_price)
@@ -566,7 +607,8 @@ class ChannelStrategy(bt.Strategy):
         # If we have no position
         if not self.position:
             # Buy signal: price rebounds from lower channel
-            # Criteria: Previous close was at/below lower threshold AND current close > open (bullish candle)
+            # Criteria: Previous close was at/below lower threshold AND current
+            # close > open (bullish candle)
             if self.dataclose[-1] <= lower_threshold and price > self.dataopen[0]:
                 # Calculate position size based on risk
                 stop_price = self.channel_bottom - self.atr[0]
@@ -584,7 +626,8 @@ class ChannelStrategy(bt.Strategy):
                 self.buy_order = self.buy(size=size)
 
             # Sell signal: price rebounds from upper channel
-            # Criteria: Previous close was at/above upper threshold AND current close < open (bearish candle)
+            # Criteria: Previous close was at/above upper threshold AND current
+            # close < open (bearish candle)
             elif self.dataclose[-1] >= upper_threshold and price < self.dataopen[0]:
                 # Calculate position size based on risk
                 stop_price = self.channel_top + self.atr[0]
@@ -616,7 +659,9 @@ class ChannelStrategy(bt.Strategy):
                 if self.stop_loss is not None and new_stop > self.stop_loss.price:
                     self.cancel(self.stop_loss)
                     self.stop_loss = self.sell(
-                        exectype=bt.Order.Stop, price=new_stop, size=self.position.size
+                        exectype=bt.Order.Stop,
+                        price=new_stop,
+                        size=self.position.size,
                     )
                     self.log(
                         f"Updated trailing stop to {new_stop:.2f} (Profit:"
@@ -668,9 +713,7 @@ class ChannelStrategy(bt.Strategy):
 
 
 def parse_args():
-    """
-    Parse command line arguments
-    """
+    """Parse command line arguments"""
     parser = argparse.ArgumentParser(
         description="Price Channel Trading Strategy",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -697,7 +740,10 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--todate", "-t", default="2024-12-31", help="Ending date in YYYY-MM-DD format"
+        "--todate",
+        "-t",
+        default="2024-12-31",
+        help="Ending date in YYYY-MM-DD format",
     )
 
     parser.add_argument(
@@ -706,7 +752,11 @@ def parse_args():
 
     # Channel parameters
     parser.add_argument(
-        "--period", "-p", default=20, type=int, help="Period for channel calculation"
+        "--period",
+        "-p",
+        default=20,
+        type=int,
+        help="Period for channel calculation",
     )
 
     parser.add_argument(
@@ -735,7 +785,11 @@ def parse_args():
 
     # ATR parameters
     parser.add_argument(
-        "--atr-period", "-ap", default=14, type=int, help="ATR calculation period"
+        "--atr-period",
+        "-ap",
+        default=14,
+        type=int,
+        help="ATR calculation period",
     )
 
     parser.add_argument(
@@ -798,9 +852,7 @@ def parse_args():
 
 
 def main():
-    """
-    Main function to run the strategy
-    """
+    """Main function to run the strategy"""
     args = parse_args()
 
     # Convert dates
@@ -869,7 +921,7 @@ def main():
     print(f"- Symbol: {args.data}")
     print(f"- Date Range: {args.fromdate} to {args.todate}")
     print(
-        f"- Channel Parameters: Period={args.period}, Zone={args.channel_pct*100:.0f}%"
+        f"- Channel Parameters: Period={args.period}, Zone={args.channel_pct * 100:.0f}%"
         " from boundary"
     )
     print(

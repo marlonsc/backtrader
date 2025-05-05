@@ -4,42 +4,38 @@ import akshare as ak
 
 mainpath = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 mainpath = os.path.join(mainpath, "datas/fund")
-
 """
 Get funds datas
 """
 
 
 def get_all_fund_list():
-    """
-    Get all fund name list
-    """
+    """Get all fund name list"""
     fund_em_fund_name_df = ak.fund_em_fund_name()
     path = os.path.join(mainpath, "all_fund.csv")
     fund_em_fund_name_df.to_csv(path)
 
 
 def get_etf_list():
-    """
-    Get all ETF fund name list
-    """
+    """Get all ETF fund name list"""
     fund_list = ak.fund_etf_category_sina(symbol="ETF基金")
     path = os.path.join(mainpath, "etf_list.csv")
     fund_list.to_csv(path, encoding="utf-8")
 
 
 def get_lof_list():
-    """
-    Get all LOF fund name list
-    """
+    """Get all LOF fund name list"""
     fund_list = ak.fund_etf_category_sina(symbol="LOF基金")
     path = os.path.join(mainpath, "lof_list.csv")
     fund_list.to_csv(path, encoding="utf-8")
 
 
 def get_fund_detail(etf_fund_code, down_path=""):
-    """
-    Get fund data
+    """Get fund data
+
+    :param etf_fund_code:
+    :param down_path:  (Default value = "")
+
     """
     fund_detail = ak.fund_etf_hist_sina(symbol=etf_fund_code)
     path = ""
@@ -55,8 +51,10 @@ def get_fund_detail(etf_fund_code, down_path=""):
 
 
 def get_open_fund_info(fund_code):
-    """
-    Get open fund info
+    """Get open fund info
+
+    :param fund_code:
+
     """
     fund_data = ak.fund_em_open_fund_info(fund=fund_code, indicator="单位净值走势")
     fund_data_new = fund_data.rename(
@@ -72,10 +70,11 @@ def get_open_fund_info(fund_code):
 
 
 def download_open_fund():
-    """
-    广发多因子混合 002943
+    """广发多因子混合 002943
     广发价值领先混合 008099
     富国中证 500 指数 161017
+
+
     """
     fund_list = ["161017", "002943", "008099"]
     for fund in fund_list:
@@ -83,8 +82,7 @@ def download_open_fund():
 
 
 def download_etf_fund():
-    """
-    sh513050 中概互联
+    """sh513050 中概互联
     sz159992 创新药
 
     sz159952 创业etf
@@ -95,6 +93,8 @@ def download_etf_fund():
     sz159915 创业板
     sh518880 黄金ETF
     sh513100 纳指ETF
+
+
     """
     funds = [
         "sh513050",
@@ -112,6 +112,11 @@ def download_etf_fund():
 
 
 def name_list(csv_name):
+    """
+
+    :param csv_name:
+
+    """
     import csv
 
     csv_f = os.path.join(mainpath, f"{csv_name}")
@@ -127,6 +132,12 @@ def name_list(csv_name):
 
 
 def download_all_fund(csv_name, down_path=""):
+    """
+
+    :param csv_name:
+    :param down_path:  (Default value = "")
+
+    """
 
     from progress.bar import IncrementalBar
 

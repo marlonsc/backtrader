@@ -106,19 +106,25 @@ EXAMPLE:
 python strategies/support_resistance_bounce.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --exit-middle --use-stop --stop-pct 2.5 --plot
 """
 
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
 import os
 import sys
-import pandas as pd
-import numpy as np
-import psycopg2
-import psycopg2.extras
-import matplotlib.pyplot as plt
+
 import backtrader as bt
-import backtrader.indicators as btind
+from strategies.utils import (
+    TradeThrottling,
+    add_standard_analyzers,
+    get_db_data,
+    print_performance_metrics,
+)
 
 # Add the parent directory to the Python path to import shared modules
 parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -126,18 +132,10 @@ if parent_dir not in sys.path:
     sys.path.append(parent_dir)
 
 # Import utility functions
-from strategies.utils import (
-    get_db_data,
-    print_performance_metrics,
-    TradeThrottling,
-    add_standard_analyzers,
-)
 
 
 class StockPriceData(bt.feeds.PandasData):
-    """
-    Stock Price Data Feed
-    """
+    """Stock Price Data Feed"""
 
     params = (
         ("datetime", None),  # Column containing the date (index)
@@ -152,8 +150,7 @@ class StockPriceData(bt.feeds.PandasData):
 
 
 class BollingerMeanReversionStrategy(bt.Strategy, TradeThrottling):
-    """
-    Bollinger Bands Mean Reversion Strategy
+    """Bollinger Bands Mean Reversion Strategy
 
     This strategy attempts to capture mean reversion moves by:
     1. Buying when price touches or crosses below the lower Bollinger Band and RSI < 30
@@ -178,6 +175,8 @@ class BollingerMeanReversionStrategy(bt.Strategy, TradeThrottling):
     - Markets with regular mean reversion tendencies
     - Low ADX readings (below 25) indicating absence of strong trends
     - Avoid using in strong trending markets
+
+
     """
 
     params = (
@@ -189,7 +188,10 @@ class BollingerMeanReversionStrategy(bt.Strategy, TradeThrottling):
         ("rsi_sell_threshold", 70),  # RSI threshold for sell signals
         ("stop_loss_pct", 2.0),  # Stop loss percentage
         ("use_stop_loss", True),  # Whether to use stop loss
-        ("exit_middle", False),  # Whether to exit when price crosses middle band
+        (
+            "exit_middle",
+            False,
+        ),  # Whether to exit when price crosses middle band
         # Risk management parameters
         ("risk_percent", 1.0),  # Percentage of equity to risk per trade
         ("max_position", 20.0),  # Maximum position size as percentage
@@ -200,8 +202,12 @@ class BollingerMeanReversionStrategy(bt.Strategy, TradeThrottling):
     )
 
     def log(self, txt, dt=None, level="info"):
-        """
-        Logging function for the strategy
+        """Logging function for the strategy
+
+        :param txt:
+        :param dt:  (Default value = None)
+        :param level:  (Default value = "info")
+
         """
         if level == "debug" and self.p.log_level != "debug":
             return
@@ -210,6 +216,7 @@ class BollingerMeanReversionStrategy(bt.Strategy, TradeThrottling):
         print(f"{dt.isoformat()}: {txt}")
 
     def __init__(self):
+        """ """
         # Store the close price reference
         self.dataclose = self.datas[0].close
 
@@ -230,7 +237,9 @@ class BollingerMeanReversionStrategy(bt.Strategy, TradeThrottling):
         # Calculate indicators
         # Bollinger Bands
         self.bbands = bt.indicators.BollingerBands(
-            self.datas[0], period=self.p.bbands_period, devfactor=self.p.bbands_dev
+            self.datas[0],
+            period=self.p.bbands_period,
+            devfactor=self.p.bbands_dev,
         )
 
         # Extract individual Bollinger Band components
@@ -251,12 +260,17 @@ class BollingerMeanReversionStrategy(bt.Strategy, TradeThrottling):
         )
 
     def calculate_position_size(self, price):
-        """Calculate how many shares to buy based on risk-based position sizing"""
+        """Calculate how many shares to buy based on risk-based position sizing
+
+        :param price:
+
+        """
         available_cash = self.broker.get_cash()
         value = self.broker.getvalue()
         current_price = price
 
-        # Calculate position size based on risk percentage if stop loss is enabled
+        # Calculate position size based on risk percentage if stop loss is
+        # enabled
         if self.p.use_stop_loss:
             # Calculate the risk amount in dollars
             risk_amount = value * (self.p.risk_percent / 100.0)
@@ -277,10 +291,12 @@ class BollingerMeanReversionStrategy(bt.Strategy, TradeThrottling):
                 # Use the smaller of the two sizes
                 size = min(risk_based_size, equity_based_size)
             else:
-                # If risk per share is zero or negative, use equity-based sizing
+                # If risk per share is zero or negative, use equity-based
+                # sizing
                 size = int((value * self.p.position_size) / current_price)
         else:
-            # Fixed percentage of available equity without risk-based calculation
+            # Fixed percentage of available equity without risk-based
+            # calculation
             cash_to_use = value * self.p.position_size
 
             # Make sure we don't exceed maximum available cash
@@ -293,6 +309,7 @@ class BollingerMeanReversionStrategy(bt.Strategy, TradeThrottling):
         return size
 
     def next(self):
+        """ """
         # If an order is pending, we cannot send a new one
         if self.order:
             return
@@ -364,7 +381,8 @@ class BollingerMeanReversionStrategy(bt.Strategy, TradeThrottling):
 
         # If we are in a position, check for exit conditions
         if self.position:
-            # For long positions, exit when price touches or crosses upper band and RSI > threshold
+            # For long positions, exit when price touches or crosses upper band
+            # and RSI > threshold
             if (
                 self.buysell == "buy"
                 and bb_pct >= 0.8
@@ -383,7 +401,8 @@ class BollingerMeanReversionStrategy(bt.Strategy, TradeThrottling):
             if not self.can_trade_now():
                 return
 
-            # For long entries, check if price is below lower band and RSI < threshold
+            # For long entries, check if price is below lower band and RSI <
+            # threshold
             if bb_pct <= 0.2 and self.rsi[0] < self.p.rsi_buy_threshold:
                 # Calculate position size based on current portfolio value
                 price = self.dataclose[0]
@@ -423,7 +442,11 @@ class BollingerMeanReversionStrategy(bt.Strategy, TradeThrottling):
             self.log("No trades executed during the backtest period")
 
     def notify_order(self, order):
-        """Handle order notifications"""
+        """Handle order notifications
+
+        :param order:
+
+        """
         if order.status in [order.Submitted, order.Accepted]:
             # Order pending, do nothing
             return
@@ -450,7 +473,11 @@ class BollingerMeanReversionStrategy(bt.Strategy, TradeThrottling):
         self.order = None
 
     def notify_trade(self, trade):
-        """Track completed trades"""
+        """Track completed trades
+
+        :param trade:
+
+        """
         if not trade.isclosed:
             return
 
@@ -468,9 +495,7 @@ class BollingerMeanReversionStrategy(bt.Strategy, TradeThrottling):
 
 
 def parse_args():
-    """
-    Parse command line arguments
-    """
+    """Parse command line arguments"""
     parser = argparse.ArgumentParser(
         description=(
             "Bollinger Bands Mean Reversion Strategy with RSI (for Sideways Markets)"
@@ -499,7 +524,10 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--todate", "-t", default="2024-12-31", help="Ending date in YYYY-MM-DD format"
+        "--todate",
+        "-t",
+        default="2024-12-31",
+        help="Ending date in YYYY-MM-DD format",
     )
 
     parser.add_argument(
@@ -533,7 +561,11 @@ def parse_args():
 
     # RSI parameters
     parser.add_argument(
-        "--rsi-period", "-rp", default=14, type=int, help="Period for RSI calculation"
+        "--rsi-period",
+        "-rp",
+        default=14,
+        type=int,
+        help="Period for RSI calculation",
     )
 
     parser.add_argument(
@@ -616,9 +648,7 @@ def parse_args():
 
 
 def main():
-    """
-    Main function to run the strategy
-    """
+    """Main function to run the strategy"""
     args = parse_args()
 
     # Convert dates
@@ -658,9 +688,11 @@ def main():
         # Position sizing parameters
         position_size=args.position_percent / 100.0,  # Convert percentage to decimal
         risk_percent=args.risk_percent,  # Use the specified risk percentage
-        max_position=args.max_position_percent,  # Use the specified maximum position size
+        max_position=args.max_position_percent,
+        # Use the specified maximum position size
         # Trade throttling parameters
-        trade_throttle_days=args.trade_throttle_days,  # Use the specified trade throttle days
+        # Use the specified trade throttle days
+        trade_throttle_days=args.trade_throttle_days,
     )
 
     # Set our desired cash start
@@ -687,7 +719,7 @@ def main():
     print(f"- Exit: Price above upper BB AND RSI > {args.rsi_overbought}")
 
     if args.exit_middle:
-        print(f"- Additional Exit: Price crosses above middle band")
+        print("- Additional Exit: Price crosses above middle band")
 
     if args.use_stop:
         print(f"- Stop Loss: {args.stop_pct}% below entry price")

@@ -13,8 +13,12 @@ with warnings.catch_warnings():
 
 
 def check_and_align_data(df1, df2, date_column="date"):
-    """
-    Check and align data from two DataFrames
+    """Check and align data from two DataFrames
+
+    :param df1:
+    :param df2:
+    :param date_column:  (Default value = "date")
+
     """
     # Ensure date column is used as index
     if date_column in df1.columns:
@@ -45,8 +49,12 @@ def check_and_align_data(df1, df2, date_column="date"):
 
 
 def calculate_spread(df_I, df_RB, columns=["open", "high", "low", "close", "volume"]):
-    """
-    Calculate spread between two DataFrames
+    """Calculate spread between two DataFrames
+
+    :param df_I:
+    :param df_RB:
+    :param columns:  (Default value = ["open","high","low","close","volume"])
+
     """
     # Align data
     df_I_aligned, df_RB_aligned = check_and_align_data(df_I, df_RB)
@@ -66,6 +74,8 @@ def calculate_spread(df_I, df_RB, columns=["open", "high", "low", "close", "volu
 
 
 class SpreadBollingerStrategy(bt.Strategy):
+    """ """
+
     params = (
         ("period", 20),  # Bollinger Band period
         ("devfactor", 2),  # Bollinger Band standard deviation multiplier
@@ -74,6 +84,7 @@ class SpreadBollingerStrategy(bt.Strategy):
     )
 
     def __init__(self):
+        """ """
         # Bollinger Band indicator
         self.boll = bt.indicators.BollingerBands(
             self.data2.close, period=self.p.period, devfactor=self.p.devfactor
@@ -90,6 +101,7 @@ class SpreadBollingerStrategy(bt.Strategy):
         self.year_values = {}
 
     def next(self):
+        """ """
         # Skip if there is an outstanding order
         if self.order:
             return
@@ -139,11 +151,17 @@ class SpreadBollingerStrategy(bt.Strategy):
                     self.current_trade = None
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         # Order status notification
         if order.status in [order.Completed, order.Canceled, order.Margin]:
             self.order = None
 
     def stop(self):
+        """ """
         # Calculate annual maximum drawdown and Sharpe ratio
         self.calculate_annual_metrics()
 
@@ -154,6 +172,7 @@ class SpreadBollingerStrategy(bt.Strategy):
         self.print_annual_metrics()
 
     def calculate_annual_metrics(self):
+        """ """
         # Calculate net value by year
         for trade in self.trades:
             year = trade["entry_date"].year
@@ -175,11 +194,17 @@ class SpreadBollingerStrategy(bt.Strategy):
             }
 
     def print_trade_details(self):
+        """ """
         print("\nTrade Details:")
         print("=" * 80)
         print(
             "{:<12} {:<12} {:<12} {:<12} {:<12} {:<12}".format(
-                "Type", "Entry Date", "Entry Price", "Exit Date", "Exit Price", "PnL"
+                "Type",
+                "Entry Date",
+                "Entry Price",
+                "Exit Date",
+                "Exit Price",
+                "PnL",
             )
         )
         for trade in self.trades:
@@ -195,6 +220,7 @@ class SpreadBollingerStrategy(bt.Strategy):
             )
 
     def print_annual_metrics(self):
+        """ """
         print("\nAnnual Metrics:")
         print("=" * 80)
         print("{:<8} {:<12} {:<12}".format("Year", "Maximum Drawdown", "Sharpe Ratio"))

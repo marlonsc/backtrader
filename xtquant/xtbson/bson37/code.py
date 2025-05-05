@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tools for representing JavaScript code in BSON."""
 
 from collections.abc import Mapping as _Mapping
@@ -44,6 +43,7 @@ class Code(str):
     .. versionchanged:: 3.4
       The default value for :attr:`scope` is ``None`` instead of ``{}``.
 
+
     """
 
     _type_marker = 13
@@ -53,8 +53,19 @@ class Code(str):
         cls: Type["Code"],
         code: Union[str, "Code"],
         scope: Optional[Mapping[str, Any]] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> "Code":
+        """
+
+        :param code:
+        :type code: Union[str, "Code"]
+        :param scope:  (Default value = None)
+        :type scope: Optional[Mapping[str, Any]]
+        :param **kwargs:
+        :type **kwargs: Any
+        :rtype: "Code"
+
+        """
         if not isinstance(code, str):
             raise TypeError("code must be an instance of str")
 
@@ -83,13 +94,26 @@ class Code(str):
 
     @property
     def scope(self) -> Optional[Mapping[str, Any]]:
-        """Scope dictionary for this instance or ``None``."""
+        """Scope dictionary for this instance or ``None``.
+
+
+        :rtype: Optional[Mapping[str,Any]]
+
+        """
         return self.__scope
 
     def __repr__(self):
+        """ """
         return "Code(%s, %r)" % (str.__repr__(self), self.__scope)
 
     def __eq__(self, other: Any) -> bool:
+        """
+
+        :param other:
+        :type other: Any
+        :rtype: bool
+
+        """
         if isinstance(other, Code):
             return (self.__scope, str(self)) == (other.__scope, str(other))
         return False
@@ -97,4 +121,11 @@ class Code(str):
     __hash__: Any = None
 
     def __ne__(self, other: Any) -> bool:
+        """
+
+        :param other:
+        :type other: Any
+        :rtype: bool
+
+        """
         return not self == other

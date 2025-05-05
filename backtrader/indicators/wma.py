@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,16 +18,19 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 from ..utils.py3 import range
-
-from . import MovingAverageBase, AverageWeighted
+from . import AverageWeighted, MovingAverageBase
 
 
 class WeightedMovingAverage(MovingAverageBase):
-    """
-    A Moving Average which gives an arithmetic weighting to values with the
+    """A Moving Average which gives an arithmetic weighting to values with the
     newest having the more weight
 
     Formula:
@@ -37,6 +40,8 @@ class WeightedMovingAverage(MovingAverageBase):
 
     See also:
       - http://en.wikipedia.org/wiki/Moving_average#Weighted_moving_average
+
+
     """
 
     alias = (
@@ -46,6 +51,7 @@ class WeightedMovingAverage(MovingAverageBase):
     lines = ("wma",)
 
     def __init__(self):
+        """ """
         coef = 2.0 / (self.p.period * (self.p.period + 1.0))
         weights = tuple(float(x) for x in range(1, self.p.period + 1))
 

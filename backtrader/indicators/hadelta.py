@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,10 +18,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
-
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import backtrader as bt
+
 from . import MovAv
 
 __all__ = ["haDelta", "haD"]
@@ -43,6 +48,7 @@ class haDelta(bt.Indicator):
       - haDelta = Heikin Ashi close - Heikin Ashi open
       - smoothed = movav(haDelta, period)
 
+
     """
 
     alias = ("haD",)
@@ -63,6 +69,7 @@ class haDelta(bt.Indicator):
     )
 
     def __init__(self):
+        """ """
         d = bt.ind.HeikinAshi(self.data) if self.p.autoheikin else self.data
 
         self.lines.haDelta = hd = d.close - d.open

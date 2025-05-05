@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,48 +18,62 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import collections
-from copy import copy
-from datetime import date, datetime, timedelta
-import threading
 
-from backtrader.feed import DataBase
 from backtrader import (
-    TimeFrame,
-    num2date,
-    date2num,
     BrokerBase,
-    Order,
     BuyOrder,
+    Order,
     SellOrder,
-    OrderBase,
-    OrderData,
 )
-from backtrader.utils.py3 import bytes, with_metaclass, MAXFLOAT
-from backtrader.metabase import MetaParams
 from backtrader.comminfo import CommInfoBase
 from backtrader.position import Position
 from backtrader.stores import oandastore
-from backtrader.utils import AutoDict, AutoOrderedDict
-from backtrader.comminfo import CommInfoBase
+from backtrader.utils.py3 import with_metaclass
 
 
 class OandaCommInfo(CommInfoBase):
+    """ """
+
     def getvaluesize(self, size, price):
+        """
+
+        :param size:
+        :param price:
+
+        """
         # In real life the margin approaches the price
         return abs(size) * price
 
     def getoperationcost(self, size, price):
-        """Returns the needed amount of cash an operation would cost"""
+        """Returns the needed amount of cash an operation would cost
+
+        :param size:
+        :param price:
+
+        """
         # Same reasoning as above
         return abs(size) * price
 
 
 class MetaOandaBroker(BrokerBase.__class__):
+    """ """
+
     def __init__(cls, name, bases, dct):
-        """Class has already been created ... register"""
+        """Class has already been created ... register
+
+        :param name:
+        :param bases:
+        :param dct:
+
+        """
         # Initialize the class
         super(MetaOandaBroker, cls).__init__(name, bases, dct)
         oandastore.OandaStore.BrokerCls = cls
@@ -71,13 +85,7 @@ class OandaBroker(with_metaclass(MetaOandaBroker, BrokerBase)):
     This class maps the orders/positions from Oanda to the
     internal API of ``backtrader``.
 
-    Params:
 
-      - ``use_positions`` (default:``True``): When connecting to the broker
-        provider use the existing positions to kickstart the broker.
-
-        Set to ``False`` during instantiation to disregard any existing
-        position
     """
 
     params = (
@@ -86,6 +94,11 @@ class OandaBroker(with_metaclass(MetaOandaBroker, BrokerBase)):
     )
 
     def __init__(self, **kwargs):
+        """
+
+        :param **kwargs:
+
+        """
         super(OandaBroker, self).__init__()
 
         self.o = oandastore.OandaStore(**kwargs)
@@ -101,6 +114,7 @@ class OandaBroker(with_metaclass(MetaOandaBroker, BrokerBase)):
         self.positions = collections.defaultdict(Position)
 
     def start(self):
+        """ """
         super(OandaBroker, self).start()
         self.o.start(broker=self)
         self.startingcash = self.cash = cash = self.o.get_cash()
@@ -117,6 +131,11 @@ class OandaBroker(with_metaclass(MetaOandaBroker, BrokerBase)):
                 self.positions[p["instrument"]] = Position(size, price)
 
     def data_started(self, data):
+        """
+
+        :param data:
+
+        """
         pos = self.getposition(data)
 
         if pos.size < 0:
@@ -178,19 +197,32 @@ class OandaBroker(with_metaclass(MetaOandaBroker, BrokerBase)):
             self.notify(order)
 
     def stop(self):
+        """ """
         super(OandaBroker, self).stop()
         self.o.stop()
 
     def getcash(self):
+        """ """
         # This call cannot block if no answer is available from oanda
         self.cash = cash = self.o.get_cash()
         return cash
 
     def getvalue(self, datas=None):
+        """
+
+        :param datas:  (Default value = None)
+
+        """
         self.value = self.o.get_value()
         return self.value
 
     def getposition(self, data, clone=True):
+        """
+
+        :param data:
+        :param clone:  (Default value = True)
+
+        """
         # return self.o.getposition(data._dataname, clone=clone)
         pos = self.positions[data._dataname]
         if clone:
@@ -199,10 +231,20 @@ class OandaBroker(with_metaclass(MetaOandaBroker, BrokerBase)):
         return pos
 
     def orderstatus(self, order):
+        """
+
+        :param order:
+
+        """
         o = self.orders[order.ref]
         return o.status
 
     def _submit(self, oref):
+        """
+
+        :param oref:
+
+        """
         order = self.orders[oref]
         order.submit(self)
         self.notify(order)
@@ -211,12 +253,22 @@ class OandaBroker(with_metaclass(MetaOandaBroker, BrokerBase)):
             self.notify(o)
 
     def _reject(self, oref):
+        """
+
+        :param oref:
+
+        """
         order = self.orders[oref]
         order.reject(self)
         self.notify(order)
         self._bracketize(order, cancel=True)
 
     def _accept(self, oref):
+        """
+
+        :param oref:
+
+        """
         order = self.orders[oref]
         order.accept()
         self.notify(order)
@@ -225,23 +277,44 @@ class OandaBroker(with_metaclass(MetaOandaBroker, BrokerBase)):
             self.notify(o)
 
     def _cancel(self, oref):
+        """
+
+        :param oref:
+
+        """
         order = self.orders[oref]
         order.cancel()
         self.notify(order)
         self._bracketize(order, cancel=True)
 
     def _expire(self, oref):
+        """
+
+        :param oref:
+
+        """
         order = self.orders[oref]
         order.expire()
         self.notify(order)
         self._bracketize(order, cancel=True)
 
     def _bracketnotif(self, order):
+        """
+
+        :param order:
+
+        """
         pref = getattr(order.parent, "ref", order.ref)  # parent ref or self
         br = self.brackets.get(pref, None)  # to avoid recursion
         return br[-2:] if br is not None else []
 
     def _bracketize(self, order, cancel=False):
+        """
+
+        :param order:
+        :param cancel:  (Default value = False)
+
+        """
         pref = getattr(order.parent, "ref", order.ref)  # parent ref or self
         br = self.brackets.pop(pref, None)  # to avoid recursion
         if br is None:
@@ -264,6 +337,15 @@ class OandaBroker(with_metaclass(MetaOandaBroker, BrokerBase)):
                     self._cancel(o.ref)
 
     def _fill(self, oref, size, price, ttype, **kwargs):
+        """
+
+        :param oref:
+        :param size:
+        :param price:
+        :param ttype:
+        :param **kwargs:
+
+        """
         order = self.orders[oref]
 
         if not order.alive():  # can be a bracket
@@ -297,7 +379,7 @@ class OandaBroker(with_metaclass(MetaOandaBroker, BrokerBase)):
         pos = self.getposition(data, clone=False)
         psize, pprice, opened, closed = pos.update(size, price)
 
-        comminfo = self.getcommissioninfo(data)
+        self.getcommissioninfo(data)
 
         closedvalue = closedcomm = 0.0
         openedvalue = openedcomm = 0.0
@@ -328,6 +410,11 @@ class OandaBroker(with_metaclass(MetaOandaBroker, BrokerBase)):
             self._bracketize(order)
 
     def _transmit(self, order):
+        """
+
+        :param order:
+
+        """
         oref = order.ref
         pref = getattr(order.parent, "ref", oref)  # parent ref or self
 
@@ -367,8 +454,26 @@ class OandaBroker(with_metaclass(MetaOandaBroker, BrokerBase)):
         trailpercent=None,
         parent=None,
         transmit=True,
-        **kwargs
+        **kwargs,
     ):
+        """
+
+        :param owner:
+        :param data:
+        :param size:
+        :param price:  (Default value = None)
+        :param plimit:  (Default value = None)
+        :param exectype:  (Default value = None)
+        :param valid:  (Default value = None)
+        :param tradeid:  (Default value = 0)
+        :param oco:  (Default value = None)
+        :param trailamount:  (Default value = None)
+        :param trailpercent:  (Default value = None)
+        :param parent:  (Default value = None)
+        :param transmit:  (Default value = True)
+        :param **kwargs:
+
+        """
 
         order = BuyOrder(
             owner=owner,
@@ -404,8 +509,26 @@ class OandaBroker(with_metaclass(MetaOandaBroker, BrokerBase)):
         trailpercent=None,
         parent=None,
         transmit=True,
-        **kwargs
+        **kwargs,
     ):
+        """
+
+        :param owner:
+        :param data:
+        :param size:
+        :param price:  (Default value = None)
+        :param plimit:  (Default value = None)
+        :param exectype:  (Default value = None)
+        :param valid:  (Default value = None)
+        :param tradeid:  (Default value = 0)
+        :param oco:  (Default value = None)
+        :param trailamount:  (Default value = None)
+        :param trailpercent:  (Default value = None)
+        :param parent:  (Default value = None)
+        :param transmit:  (Default value = True)
+        :param **kwargs:
+
+        """
 
         order = SellOrder(
             owner=owner,
@@ -427,20 +550,32 @@ class OandaBroker(with_metaclass(MetaOandaBroker, BrokerBase)):
         return self._transmit(order)
 
     def cancel(self, order):
-        o = self.orders[order.ref]
+        """
+
+        :param order:
+
+        """
+        self.orders[order.ref]
         if order.status == Order.Cancelled:  # already cancelled
             return
 
         return self.o.order_cancel(order)
 
     def notify(self, order):
+        """
+
+        :param order:
+
+        """
         self.notifs.append(order.clone())
 
     def get_notification(self):
+        """ """
         if not self.notifs:
             return None
 
         return self.notifs.popleft()
 
     def next(self):
+        """ """
         self.notifs.append(None)  # mark notification boundary

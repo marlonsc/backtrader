@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,25 +18,33 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
-import os.path
-import time
-import sys
-
 
 import backtrader as bt
 
 
 class St(bt.Strategy):
+    """ """
+
     params = (
         ("stakeperc", 10.0),
         ("opbreak", 10),
     )
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         print("-- NOTIFY ORDER BEGIN")
         print(order)
         print("-- NOTIFY ORDER END")
@@ -47,9 +55,10 @@ class St(bt.Strategy):
             self.doop = -self.p.opbreak
 
     def __init__(self):
-        pass
+        """ """
 
     def start(self):
+        """ """
         self.callcounter = 0
         txtfields = list()
         txtfields.append("Len")
@@ -65,6 +74,7 @@ class St(bt.Strategy):
         self.doop = 0
 
     def next(self):
+        """ """
         txtfields = list()
         txtfields.append("%04d" % len(self))
         txtfields.append(self.data0.datetime.date(0).isoformat())
@@ -97,6 +107,7 @@ FILLERS = {
 
 
 def runstrat():
+    """ """
     args = parse_args()
 
     datakwargs = dict()
@@ -130,6 +141,7 @@ def runstrat():
 
 
 def parse_args():
+    """ """
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Volume Filling Sample",

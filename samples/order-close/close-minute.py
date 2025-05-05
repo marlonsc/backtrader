@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,22 +24,30 @@ from __future__ import (
     print_function,
 )
 
-#                        unicode_literals)
-
 import argparse
 import datetime
 
 import backtrader as bt
 import backtrader.feeds as btfeeds
 
+#                        unicode_literals)
+
 
 class St(bt.Strategy):
+    """ """
+
     def __init__(self):
+        """ """
         self.curdate = datetime.date.min
         self.elapsed = 0
         self.order = None
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         curdtstr = self.data.datetime.datetime().strftime("%a %Y-%m-%d %H:%M:%S")
         if order.status in [order.Completed]:
             dtstr = bt.num2date(order.executed.dt).strftime("%a %Y-%m-%d %H:%M:%S")
@@ -50,6 +58,7 @@ class St(bt.Strategy):
                 print("%s: SELL EXECUTED, on:" % curdtstr, dtstr)
 
     def next(self):
+        """ """
         curdate = self.data.datetime.date()
         if curdate > self.curdate:
             self.elapsed += 1
@@ -67,6 +76,7 @@ class St(bt.Strategy):
 
 
 def runstrat():
+    """ """
     args = parse_args()
 
     cerebro = bt.Cerebro()
@@ -79,6 +89,11 @@ def runstrat():
 
 
 def getdata(args):
+    """
+
+    :param args:
+
+    """
 
     dataformat = dict(
         bt=btfeeds.BacktraderCSVData,
@@ -113,6 +128,7 @@ def getdata(args):
 
 
 def parse_args():
+    """ """
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Sample for Close Orders with daily data",
@@ -131,7 +147,13 @@ def parse_args():
         "-c",
         required=False,
         default="bt",
-        choices=["bt", "visualchart", "sierrachart", "yahoo", "yahoo_unreversed"],
+        choices=[
+            "bt",
+            "visualchart",
+            "sierrachart",
+            "yahoo",
+            "yahoo_unreversed",
+        ],
         help="CSV Format",
     )
 

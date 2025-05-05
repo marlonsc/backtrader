@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,24 +18,33 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import collections
-from datetime import date, datetime
 import io
 import itertools
-
-from ..utils.py3 import urlopen, urlquote, ProxyHandler, build_opener, install_opener
+from datetime import date, datetime
 
 from .. import feed
 from ..utils import date2num
+from ..utils.py3 import (
+    ProxyHandler,
+    build_opener,
+    install_opener,
+    urlopen,
+    urlquote,
+)
 
 __all__ = ["QuandlCSV", "Quandl"]
 
 
 class QuandlCSV(feed.CSVDataBase):
-    """
-    Parses pre-downloaded Quandl CSV Data Feeds (or locally generated if they
+    """Parses pre-downloaded Quandl CSV Data Feeds (or locally generated if they
     comply to the Quandl format)
 
     Specific parameters:
@@ -60,6 +69,8 @@ class QuandlCSV(feed.CSVDataBase):
       - ``decimals`` (default: ``2``)
 
         Number of decimals to round to
+
+
     """
 
     _online = False  # flag to avoid double reversal
@@ -72,6 +83,7 @@ class QuandlCSV(feed.CSVDataBase):
     )
 
     def start(self):
+        """ """
         super(QuandlCSV, self).start()
 
         if not self.params.reverse:
@@ -91,6 +103,11 @@ class QuandlCSV(feed.CSVDataBase):
         self.f = f
 
     def _loadline(self, linetokens):
+        """
+
+        :param linetokens:
+
+        """
         i = itertools.count(0)
 
         dttxt = linetokens[next(i)]  # YYYY-MM-DD
@@ -127,8 +144,7 @@ class QuandlCSV(feed.CSVDataBase):
 
 
 class Quandl(QuandlCSV):
-    """
-    Executes a direct download of data from Quandl servers for the given time
+    """Executes a direct download of data from Quandl servers for the given time
     range.
 
     Specific parameters (or specific meaning):
@@ -171,6 +187,7 @@ class Quandl(QuandlCSV):
 
         string identifying the dataset to query. Defaults to ``WIKI``
 
+
     """
 
     _online = True  # flag to avoid double reversal
@@ -185,6 +202,7 @@ class Quandl(QuandlCSV):
     )
 
     def start(self):
+        """ """
         self.error = None
 
         url = "{}/{}/{}.csv".format(

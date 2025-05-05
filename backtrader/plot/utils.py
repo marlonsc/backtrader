@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,22 +18,35 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
-from colorsys import rgb_to_hls as rgb2hls, hls_to_rgb as hls2rgb
+from colorsys import hls_to_rgb as hls2rgb
+from colorsys import rgb_to_hls as rgb2hls
 
 import matplotlib.colors as mplcolors
 import matplotlib.path as mplpath
 
 
 def tag_box_style(x0, y0, width, height, mutation_size, mutation_aspect=1):
-    """
-    Given the location and size of the box, return the path of
+    """Given the location and size of the box, return the path of
     the box around it.
 
      - *x0*, *y0*, *width*, *height* : location and size of the box
      - *mutation_size* : a reference scale for the mutation.
      - *aspect_ratio* : aspect-ration for the mutation.
+
+    :param x0:
+    :param y0:
+    :param width:
+    :param height:
+    :param mutation_size:
+    :param mutation_aspect: (Default value = 1)
+
     """
 
     # note that we are ignoring mutation_aspect. This is okay in general.
@@ -82,16 +95,14 @@ def shade_color(color, percent):
     """Shade Color
     This color utility function allows the user to easily darken or
     lighten a color for plotting purposes.
-    Parameters
-    ----------
-    color : string, list, hexvalue
-        Any acceptable Matplotlib color value, such as
+
+    :param color: Any acceptable Matplotlib color value, such as
         'red', 'slategrey', '#FFEE11', (1,0,0)
-    percent :  the amount by which to brighten or darken the color.
-    Returns
-    -------
-    color : tuple of floats
-        tuple representing converted rgb values
+    :type color: string, list, hexvalue
+    :param percent:
+    :returns: color->     tuple representing converted rgb values
+    :rtype: tuple of floats
+
     """
 
     rgb = mplcolors.colorConverter.to_rgb(color)

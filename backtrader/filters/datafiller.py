@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import collections
 from datetime import datetime, timedelta
@@ -40,15 +45,7 @@ class DataFiller(AbstractDataBase):
 
     Bars can be missinga amongst other things because
 
-    Params:
-      - ``fill_price`` (def: None): if None (or evaluates to False),the
-        closing price will be used, else the passed value (which can be
-        for example 'NaN' to have a missing bar in terms of evaluation but
-        present in terms of time
 
-      - ``fill_vol`` (def: NaN): used to fill the volume of missing bars
-
-      - ``fill_oi`` (def: NaN): used to fill the openinterest of missing bars
     """
 
     params = (
@@ -58,11 +55,13 @@ class DataFiller(AbstractDataBase):
     )
 
     def start(self):
+        """ """
         super(DataFiller, self).start()
         self._fillbars = collections.deque()
         self._dbar = False
 
     def preload(self):
+        """ """
         if len(self.p.dataname) == self.p.dataname.buflen():
             # if data is not preloaded .... do it
             self.p.dataname.start()
@@ -76,6 +75,7 @@ class DataFiller(AbstractDataBase):
         super(DataFiller, self).preload()
 
     def _copyfromdata(self):
+        """ """
         # Data is allowed - Copy size which is "number of lines"
         for i in range(self.p.dataname.size()):
             self.lines[i][0] = self.p.dataname.lines[i][0]
@@ -85,6 +85,7 @@ class DataFiller(AbstractDataBase):
         return True
 
     def _frombars(self):
+        """ """
         dtime, price = self._fillbars.popleft()
 
         price = self.p.fill_price or price
@@ -107,6 +108,7 @@ class DataFiller(AbstractDataBase):
     }
 
     def _load(self):
+        """ """
         if not len(self.p.dataname):
             self.p.dataname.start()  # start data if not done somewhere else
 

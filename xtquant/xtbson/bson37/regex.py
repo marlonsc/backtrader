@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tools for representing MongoDB regular expressions."""
 
 import re
@@ -22,6 +21,13 @@ from .son import RE_TYPE
 
 
 def str_flags_to_int(str_flags: str) -> int:
+    """
+
+    :param str_flags:
+    :type str_flags: str
+    :rtype: int
+
+    """
     flags = 0
     if "i" in str_flags:
         flags |= re.IGNORECASE
@@ -60,10 +66,6 @@ class Regex(Generic[_T]):
         :class:`str` has the ``re.UNICODE`` flag set. If it is undesirable
         to store this flag in a BSON regular expression, unset it first::
 
-          >>> pattern = re.compile('.*')
-          >>> regex = Regex.from_native(pattern)
-          >>> regex.flags ^= re.UNICODE
-          >>> db.collection.insert_one({'pattern': regex})
 
         :Parameters:
           - `regex`: A regular expression object from ``re.compile()``.
@@ -76,6 +78,15 @@ class Regex(Generic[_T]):
            when used in a MongoDB query.
 
         .. _PCRE: http://www.pcre.org/
+
+        :param regex:
+        :type regex: "Pattern[_T]"
+        :rtype: "Regex[_T]"
+
+        >>> pattern = re.compile('.*')
+          >>> regex = Regex.from_native(pattern)
+          >>> regex.flags ^= re.UNICODE
+          >>> db.collection.insert_one({'pattern': regex})
         """
         if not isinstance(regex, RE_TYPE):
             raise TypeError(
@@ -94,6 +105,13 @@ class Regex(Generic[_T]):
           - `pattern`: string
           - `flags`: (optional) an integer bitmask, or a string of flag
             characters like "im" for IGNORECASE and MULTILINE
+
+        :param pattern:
+        :type pattern: _T
+        :param flags:  (Default value = 0)
+        :type flags: Union[str, int]
+        :rtype: None
+
         """
         if not isinstance(pattern, (str, bytes)):
             raise TypeError("pattern must be a string, not %s" % type(pattern))
@@ -107,6 +125,13 @@ class Regex(Generic[_T]):
             raise TypeError("flags must be a string or int, not %s" % type(flags))
 
     def __eq__(self, other: Any) -> bool:
+        """
+
+        :param other:
+        :type other: Any
+        :rtype: bool
+
+        """
         if isinstance(other, Regex):
             return self.pattern == other.pattern and self.flags == other.flags
         else:
@@ -115,9 +140,17 @@ class Regex(Generic[_T]):
     __hash__ = None  # type: ignore
 
     def __ne__(self, other: Any) -> bool:
+        """
+
+        :param other:
+        :type other: Any
+        :rtype: bool
+
+        """
         return not self == other
 
     def __repr__(self):
+        """ """
         return "Regex(%r, %r)" % (self.pattern, self.flags)
 
     def try_compile(self) -> "Pattern[_T]":
@@ -132,5 +165,9 @@ class Regex(Generic[_T]):
            :exc:`re.error`.
 
         .. _PCRE: http://www.pcre.org/
+
+
+        :rtype: "Pattern[_T]"
+
         """
         return re.compile(self.pattern, self.flags)

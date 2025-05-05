@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,21 +18,25 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import itertools
 import time
 
 try:
     time_clock = time.process_time
-except:
+except BaseException:
     time_clock = time.clock
 
-import testcommon
-
-from backtrader.utils.py3 import range
 import backtrader as bt
 import backtrader.indicators as btind
+import testcommon
+from backtrader.utils.py3 import range
 
 CHKVALUES = [
     "14525.80",
@@ -125,6 +129,8 @@ _chkcash = []
 
 
 class BtTestStrategy(bt.Strategy):
+    """ """
+
     params = (
         ("period", 15),
         ("printdata", True),
@@ -132,11 +138,18 @@ class BtTestStrategy(bt.Strategy):
     )
 
     def log(self, txt, dt=None):
+        """
+
+        :param txt:
+        :param dt: (Default value = None)
+
+        """
         dt = dt or self.data.datetime[0]
         dt = bt.num2date(dt)
         print("%s, %s" % (dt.isoformat(), txt))
 
     def __init__(self):
+        """ """
         # Flag to allow new orders in the system or not
         self.orderid = None
 
@@ -144,11 +157,13 @@ class BtTestStrategy(bt.Strategy):
         self.cross = btind.CrossOver(self.data.close, self.sma, plot=True)
 
     def start(self):
+        """ """
         self.broker.setcommission(commission=2.0, mult=10.0, margin=1000.0)
         self.tstart = time_clock()
         self.buy_create_idx = itertools.count()
 
     def stop(self):
+        """ """
         global _chkvalues
         global _chkcash
 
@@ -171,6 +186,7 @@ class BtTestStrategy(bt.Strategy):
         _chkcash.append(cash)
 
     def next(self):
+        """ """
         # print('self.data.close.array:', self.data.close.array)
         if self.orderid:
             # if an order is active, no new orders are allowed
@@ -188,6 +204,11 @@ chkdatas = 1
 
 
 def test_run(main=False):
+    """
+
+    :param main: (Default value = False)
+
+    """
     global _chkvalues
     global _chkcash
 

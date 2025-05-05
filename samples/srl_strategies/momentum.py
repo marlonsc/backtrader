@@ -1,9 +1,10 @@
 # -*- coding: UTF-8 -*-
-# From: https://medium.com/modern-ai/the-coolest-python-library-for-quants-in-2024-3c2f954752d1
+# From:
+# https://medium.com/modern-ai/the-coolest-python-library-for-quants-in-2024-3c2f954752d1
+
 
 # import
 import backtrader as bt
-import datetime
 import yfinance as yf
 
 # globals
@@ -11,16 +12,20 @@ import yfinance as yf
 
 # functions
 class MomentumStrategy(bt.Strategy):
+    """ """
+
     params = (
         ("threshold", 0.001),  # Threshold for generating buy/sell signals
         ("size", 10),  # Number of shares to trade
     )
 
     def __init__(self):
+        """ """
         self.data_close = self.data.close  # We will operate based on close prices
         self.portfolio_values = []  # List to store portfolio values
 
     def next(self):
+        """ """
         # Append current portfolio value to the list
         self.portfolio_values.append(self.broker.getvalue())
 
@@ -34,7 +39,6 @@ class MomentumStrategy(bt.Strategy):
 
 
 if __name__ == "__main__":
-
     # Download the data
     data = yf.download("NVDA", start="2022-01-01", end="2023-12-31")
     # Create a data feed
@@ -57,7 +61,7 @@ if __name__ == "__main__":
     # Run the backtest
     results = cerebro.run()
 
-    ## Plot the results
+    # Plot the results
     cerebro.plot()
 
     # Get the portfolio values from the strategy

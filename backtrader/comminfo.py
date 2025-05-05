@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,12 +18,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
-import datetime
-
-from .utils.py3 import with_metaclass
 from .metabase import MetaParams
+from .utils.py3 import with_metaclass
 
 
 class CommInfoBase(with_metaclass(MetaParams)):
@@ -105,14 +108,6 @@ class CommInfoBase(with_metaclass(MetaParams)):
 
         Amount of leverage for the asset with regards to the needed cash
 
-    Attributes:
-
-      - ``_stocklike``: Final value to use for Stock-like/Futures-like behavior
-      - ``_commtype``: Final value to use for PERC vs FIXED commissions
-
-      This two are used internally instead of the declared params to enable the
-      compatibility check described above for the legacy ``CommissionInfo``
-      object
 
     """
 
@@ -132,6 +127,7 @@ class CommInfoBase(with_metaclass(MetaParams)):
     )
 
     def __init__(self):
+        """ """
         super(CommInfoBase, self).__init__()
 
         self._stocklike = self.p.stocklike
@@ -161,10 +157,12 @@ class CommInfoBase(with_metaclass(MetaParams)):
 
     @property
     def margin(self):
+        """ """
         return self.p.margin
 
     @property
     def stocklike(self):
+        """ """
         return self._stocklike
 
     def get_margin(self, price):
@@ -176,6 +174,9 @@ class CommInfoBase(with_metaclass(MetaParams)):
           - Use param ``mult`` * ``price`` if ``automargin < 0``
 
           - Use param ``automargin`` * ``price`` if ``automargin > 0``
+
+        :param price:
+
         """
         if not self.p.automargin:
             return self.p.margin
@@ -190,14 +191,24 @@ class CommInfoBase(with_metaclass(MetaParams)):
         return self.p.leverage
 
     def getsize(self, price, cash):
-        """Returns the needed size to meet a cash operation at a given price"""
+        """Returns the needed size to meet a cash operation at a given price
+
+        :param price:
+        :param cash:
+
+        """
         if not self._stocklike:
             return int(self.p.leverage * (cash // self.get_margin(price)))
 
         return int(self.p.leverage * (cash // price))
 
     def getoperationcost(self, size, price):
-        """Returns the needed amount of cash an operation would cost"""
+        """Returns the needed amount of cash an operation would cost
+
+        :param size:
+        :param price:
+
+        """
         if not self._stocklike:
             return abs(size) * self.get_margin(price)
 
@@ -205,7 +216,12 @@ class CommInfoBase(with_metaclass(MetaParams)):
 
     def getvaluesize(self, size, price):
         """Returns the value of size for given a price. For future-like
-        objects it is fixed at size * margin"""
+        objects it is fixed at size * margin
+
+        :param size:
+        :param price:
+
+        """
         if not self._stocklike:
             return abs(size) * self.get_margin(price)
 
@@ -213,7 +229,12 @@ class CommInfoBase(with_metaclass(MetaParams)):
 
     def getvalue(self, position, price):
         """Returns the value of a position given a price. For future-like
-        objects it is fixed at size * margin"""
+        objects it is fixed at size * margin
+
+        :param position:
+        :param price:
+
+        """
         if not self._stocklike:
             return abs(position.size) * self.get_margin(price)
 
@@ -230,6 +251,11 @@ class CommInfoBase(with_metaclass(MetaParams)):
         """Calculates the commission of an operation at a given price
 
         pseudoexec: if True the operation has not yet been executed
+
+        :param size:
+        :param price:
+        :param pseudoexec:
+
         """
         if self._commtype == self.COMM_PERC:
             return abs(size) * self.p.commission * price
@@ -237,25 +263,54 @@ class CommInfoBase(with_metaclass(MetaParams)):
         return abs(size) * self.p.commission
 
     def getcommission(self, size, price):
-        """Calculates the commission of an operation at a given price"""
+        """Calculates the commission of an operation at a given price
+
+        :param size:
+        :param price:
+
+        """
         return self._getcommission(size, price, pseudoexec=True)
 
     def confirmexec(self, size, price):
+        """
+
+        :param size:
+        :param price:
+
+        """
         return self._getcommission(size, price, pseudoexec=False)
 
     def profitandloss(self, size, price, newprice):
-        """Return actual profit and loss a position has"""
+        """
+
+        :param size:
+        :param price:
+        :param newprice:
+
+        """
         return size * (newprice - price) * self.p.mult
 
     def cashadjust(self, size, price, newprice):
-        """Calculates cash adjustment for a given price difference"""
+        """Calculates cash adjustment for a given price difference
+
+        :param size:
+        :param price:
+        :param newprice:
+
+        """
         if not self._stocklike:
             return size * (newprice - price) * self.p.mult
 
         return 0.0
 
     def get_credit_interest(self, data, pos, dt):
-        """Calculates the credit due for short selling or product specific"""
+        """Calculates the credit due for short selling or product specific
+
+        :param data:
+        :param pos:
+        :param dt:
+
+        """
         size, price = pos.size, pos.price
 
         if size > 0 and not self.p.interest_long:
@@ -270,8 +325,7 @@ class CommInfoBase(with_metaclass(MetaParams)):
         return self._get_credit_interest(data, size, price, (dt0 - dt1).days, dt0, dt1)
 
     def _get_credit_interest(self, data, size, price, days, dt0, dt1):
-        """
-        This method returns  the cost in terms of credit interest charged by
+        """This method returns  the cost in terms of credit interest charged by
         the broker.
 
         In the case of ``size > 0`` this method will only be called if the
@@ -281,24 +335,13 @@ class CommInfoBase(with_metaclass(MetaParams)):
 
           The formula: ``days * price * abs(size) * (interest / 365)``
 
+        :param data: data feed for which interest is charged
+        :param size: current position size
+        :param price: current position price
+        :param days: number of days elapsed since last credit calculation
+        :param dt0: and
+        :param dt1: datetime
 
-        Params:
-          - ``data``: data feed for which interest is charged
-
-          - ``size``: current position size. > 0 for long positions and < 0 for
-            short positions (this parameter will not be ``0``)
-
-          - ``price``: current position price
-
-          - ``days``: number of days elapsed since last credit calculation
-            (this is (dt0 - dt1).days)
-
-          - ``dt0``: (datetime.datetime) current datetime
-
-          - ``dt1``: (datetime.datetime) datetime of previous calculation
-
-        ``dt0`` and ``dt1`` are not used in the default implementation and are
-        provided as extra input for overridden methods
         """
         return days * self._creditrate * abs(size) * price
 
@@ -312,14 +355,8 @@ class CommissionInfo(CommInfoBase):
 
     The default value of ``percabs`` is also changed to ``True``
 
-    Params:
-
-      - ``percabs`` (def: True): when ``commtype`` is set to COMM_PERC, whether
-        the parameter ``commission`` has to be understood as XX% or 0.XX
-
-        If this param is True: 0.XX
-        If this param is False: XX%
 
     """
 
-    params = (("percabs", True),)  # Original CommissionInfo took 0.xx for percentages
+    # Original CommissionInfo took 0.xx for percentages
+    params = (("percabs", True),)

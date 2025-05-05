@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,15 +18,19 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import math
 
-from backtrader.utils.py3 import itervalues
-
 from backtrader import Analyzer, TimeFrame
+from backtrader.analyzers import AnnualReturn, TimeReturn
 from backtrader.mathsupport import average, standarddev
-from backtrader.analyzers import TimeReturn, AnnualReturn
+from backtrader.utils.py3 import itervalues
 
 
 class SharpeRatio(Analyzer):
@@ -37,75 +41,6 @@ class SharpeRatio(Analyzer):
 
       - https://en.wikipedia.org/wiki/Sharpe_ratio
 
-    Params:
-
-      - ``timeframe``: (default: ``TimeFrame.Years``)
-
-      - ``compression`` (default: ``1``)
-
-        Only used for sub-day timeframes to for example work on an hourly
-        timeframe by specifying "TimeFrame.Minutes" and 60 as compression
-
-      - ``riskfreerate`` (default: 0.01 -> 1%)
-
-        Expressed in annual terms (see ``convertrate`` below)
-
-      - ``convertrate`` (default: ``True``)
-
-        Convert the ``riskfreerate`` from annual to monthly, weekly or daily
-        rate. Sub-day conversions are not supported
-
-      - ``factor`` (default: ``None``)
-
-        If ``None``, the conversion factor for the riskfree rate from *annual*
-        to the chosen timeframe will be chosen from a predefined table
-
-          Days: 252, Weeks: 52, Months: 12, Years: 1
-
-        Else the specified value will be used
-
-      - ``annualize`` (default: ``False``)
-
-        If ``convertrate`` is ``True``, the *SharpeRatio* will be delivered in
-        the ``timeframe`` of choice.
-
-        In most occasions the SharpeRatio is delivered in annualized form.
-        Convert the ``riskfreerate`` from annual to monthly, weekly or daily
-        rate. Sub-day conversions are not supported
-
-      - ``stddev_sample`` (default: ``False``)
-
-        If this is set to ``True`` the *standard deviation* will be calculated
-        decreasing the denominator in the mean by ``1``. This is used when
-        calculating the *standard deviation* if it's considered that not all
-        samples are used for the calculation. This is known as the *Bessels'
-        correction*
-
-      - ``daysfactor`` (default: ``None``)
-
-        Old naming for ``factor``. If set to anything else than ``None`` and
-        the ``timeframe`` is ``TimeFrame.Days`` it will be assumed this is old
-        code and the value will be used
-
-      - ``legacyannual`` (default: ``False``)
-
-        Use the ``AnnualReturn`` return analyzer, which as the name implies
-        only works on years
-
-      - ``fund`` (default: ``None``)
-
-        If ``None`` the actual mode of the broker (fundmode - True/False) will
-        be autodetected to decide if the returns are based on the total net
-        asset value or on the fund value. See ``set_fundmode`` in the broker
-        documentation
-
-        Set it to ``True`` or ``False`` for a specific behavior
-
-    Methods:
-
-      - get_analysis
-
-        Returns a dictionary with key "sharperatio" holding the ratio
 
     """
 
@@ -131,6 +66,7 @@ class SharpeRatio(Analyzer):
     }
 
     def __init__(self):
+        """ """
         if self.p.legacyannual:
             self.anret = AnnualReturn()
         else:
@@ -141,7 +77,11 @@ class SharpeRatio(Analyzer):
             )
 
     def stop(self):
+        """ """
         super(SharpeRatio, self).stop()
+        ret_free_avg = None
+        retdev = None
+
         if self.p.legacyannual:
             rate = self.p.riskfreerate
             retavg = average([r - rate for r in self.anret.rets])
@@ -158,7 +98,6 @@ class SharpeRatio(Analyzer):
 
             # Hack to identify old code
             if self.p.timeframe == TimeFrame.Days and self.p.daysfactor is not None:
-
                 factor = self.p.daysfactor
 
             else:
@@ -192,7 +131,6 @@ class SharpeRatio(Analyzer):
                     ratio = ret_free_avg / retdev
 
                     if factor is not None and self.p.convertrate and self.p.annualize:
-
                         ratio = math.sqrt(factor) * ratio
                 except (ValueError, TypeError, ZeroDivisionError):
                     ratio = None
@@ -205,6 +143,8 @@ class SharpeRatio(Analyzer):
             self.rets["sharperatio"] = (
                 round(self.ratio, 4) if self.ratio else self.ratio
             )
+        self.rets["ret_free_avg"] = ret_free_avg
+        self.rets["retdev"] = retdev
 
     def optimize(self):
         """Optimizies the object if optreturn is in effect"""
@@ -220,6 +160,7 @@ class SharpeRatio_A(SharpeRatio):
     The following param has been changed from ``SharpeRatio``
 
       - ``annualize`` (default: ``True``)
+
 
     """
 

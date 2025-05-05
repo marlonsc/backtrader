@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Representation for the MongoDB internal MinKey type."""
 
 
@@ -23,31 +22,68 @@ class MinKey(object):
     _type_marker = 255
 
     def __getstate__(self):
+        """ """
         return {}
 
     def __setstate__(self, state):
-        pass
+        """
+
+        :param state:
+
+        """
 
     def __eq__(self, other):
+        """
+
+        :param other:
+
+        """
         return isinstance(other, MinKey)
 
     def __hash__(self):
+        """ """
         return hash(self._type_marker)
 
     def __ne__(self, other):
+        """
+
+        :param other:
+
+        """
         return not self == other
 
     def __le__(self, dummy):
+        """
+
+        :param dummy:
+
+        """
         return True
 
     def __lt__(self, other):
+        """
+
+        :param other:
+
+        """
         return not isinstance(other, MinKey)
 
     def __ge__(self, other):
+        """
+
+        :param other:
+
+        """
         return isinstance(other, MinKey)
 
     def __gt__(self, dummy):
+        """
+
+        :param dummy:
+
+        """
         return False
 
     def __repr__(self):
+        """ """
         return "MinKey()"

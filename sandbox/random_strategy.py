@@ -1,4 +1,5 @@
 import random
+
 import matplotlib.pyplot as plt
 
 # Initialize parameters

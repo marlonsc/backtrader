@@ -1,14 +1,16 @@
-import pandas as pd
 import numpy as np
-
+import pandas as pd
 import statsmodels.api as sm
-from statsmodels.tsa.stattools import adfuller
 
 
 # 1. 首先确认两个DataFrame的index是否相同
 def check_and_align_data(df1, df2, date_column="date"):
-    """
-    检查并对齐两个DataFrame的数据
+    """检查并对齐两个DataFrame的数据
+
+    :param df1:
+    :param df2:
+    :param date_column:  (Default value = "date")
+
     """
     # 确保date列作为index
     if date_column in df1.columns:
@@ -37,15 +39,21 @@ def check_and_align_data(df1, df2, date_column="date"):
 
 # 2. 计算价差
 def calculate_spread(
-    df1, df2, factor1=5, factor2=1, columns=["open", "high", "low", "close", "volume"]
+    df1,
+    df2,
+    factor1=5,
+    factor2=1,
+    columns=["open", "high", "low", "close", "volume"],
 ):
-    """
-    计算两个DataFrame之间的价差
+    """计算两个DataFrame之间的价差
+
     :param df1: 第一个DataFrame
     :param df2: 第二个DataFrame
-    :param columns: 需要计算价差的列
-    :param factor: 价差计算时的乘数因子
-    :return: 包含价差的DataFrame
+    :param factor1:  (Default value = 5)
+    :param factor2:  (Default value = 1)
+    :param columns: 需要计算价差的列 (Default value = ["open","high","low","close","volume"])
+    :returns: 包含价差的DataFrame
+
     """
     # 对齐数据
     df1_aligned, df2_aligned = check_and_align_data(df1, df2)
@@ -64,13 +72,14 @@ def calculate_spread(
 
 
 def calculate_volatility_ratio(price_c, price_d, mc, md):
-    """
-    波动率匹配持仓比例（整数版）
+    """波动率匹配持仓比例（整数版）
+
     :param price_c: 品种C价格序列（pd.Series）
     :param price_d: 品种D价格序列（pd.Series）
     :param mc: 品种C合约乘数
     :param md: 品种D合约乘数
-    :return: 整数配比 (Nc, Nd)
+    :returns: 整数配比 (Nc, Nd)
+
     """
     # 对齐数据
     merged = pd.concat([price_c, price_d], axis=1).dropna()
@@ -91,11 +100,12 @@ def calculate_volatility_ratio(price_c, price_d, mc, md):
 
 
 def simplify_ratio(ratio, max_denominator=10):
-    """
-    将浮点比例转换为最简整数比
+    """将浮点比例转换为最简整数比
+
     :param ratio: 浮点比例值
-    :param max_denominator: 最大允许的分母值
-    :return: (分子, 分母) 的元组
+    :param max_denominator: 最大允许的分母值 (Default value = 10)
+    :returns: 分子, 分母) 的元组
+
     """
     from fractions import Fraction
 
@@ -104,13 +114,21 @@ def simplify_ratio(ratio, max_denominator=10):
 
 
 class KalmanFilter:
+    """ """
+
     def __init__(self):
+        """ """
         self.x = np.array([1.0])  # 初始系数（假设1:1配比）
         self.P = np.eye(1)  # 状态协方差
         self.Q = 0.01  # 过程噪声
         self.R = 0.1  # 观测噪声
 
     def update(self, z):
+        """
+
+        :param z:
+
+        """
         # 预测步骤
         x_pred = self.x
         P_pred = self.P + self.Q
@@ -123,6 +141,12 @@ class KalmanFilter:
 
 
 def kalman_ratio(df1, df2):
+    """
+
+    :param df1:
+    :param df2:
+
+    """
     kf = KalmanFilter()
     spreads = []
     for p1, p2 in zip(df1, df2):
@@ -137,6 +161,12 @@ def kalman_ratio(df1, df2):
 
 
 def cointegration_ratio(df1, df2):
+    """
+
+    :param df1:
+    :param df2:
+
+    """
 
     # 协整回归
     X = sm.add_constant(df2)

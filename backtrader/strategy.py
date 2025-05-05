@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,40 +18,53 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import collections
 import copy
 import datetime
-import inspect
 import itertools
 import operator
 
-from .utils.py3 import (
-    filter,
-    keys,
-    integer_types,
-    iteritems,
-    itervalues,
-    map,
-    MAXINT,
-    string_types,
-    with_metaclass,
-)
-
 import backtrader as bt
+
 from .lineiterator import LineIterator, StrategyBase
 from .lineroot import LineSingle
 from .lineseries import LineSeriesStub
 from .metabase import ItemCollection, findowner
 from .trade import Trade
-from .utils import OrderedDict, AutoOrderedDict, AutoDictList
+from .utils import AutoDictList, AutoOrderedDict
+from .utils.py3 import (
+    MAXINT,
+    filter,
+    integer_types,
+    iteritems,
+    keys,
+    map,
+    string_types,
+    with_metaclass,
+)
 
 
 class MetaStrategy(StrategyBase.__class__):
+    """ """
+
     _indcol = dict()
 
     def __new__(meta, name, bases, dct):
+        """
+
+        :param meta:
+        :param name:
+        :param bases:
+        :param dct:
+
+        """
         # Hack to support original method name for notify_order
         if "notify" in dct:
             # rename 'notify' to 'notify_order'
@@ -63,8 +76,12 @@ class MetaStrategy(StrategyBase.__class__):
         return super(MetaStrategy, meta).__new__(meta, name, bases, dct)
 
     def __init__(cls, name, bases, dct):
-        """
-        Class has already been created ... register subclasses
+        """Class has already been created ... register subclasses
+
+        :param name:
+        :param bases:
+        :param dct:
+
         """
         # Initialize the class
         super(MetaStrategy, cls).__init__(name, bases, dct)
@@ -73,6 +90,12 @@ class MetaStrategy(StrategyBase.__class__):
             cls._indcol[name] = cls
 
     def donew(cls, *args, **kwargs):
+        """
+
+        :param *args:
+        :param **kwargs:
+
+        """
         _obj, args, kwargs = super(MetaStrategy, cls).donew(*args, **kwargs)
 
         # Find the owner and store it
@@ -82,6 +105,13 @@ class MetaStrategy(StrategyBase.__class__):
         return _obj, args, kwargs
 
     def dopreinit(cls, _obj, *args, **kwargs):
+        """
+
+        :param _obj:
+        :param *args:
+        :param **kwargs:
+
+        """
         _obj, args, kwargs = super(MetaStrategy, cls).dopreinit(_obj, *args, **kwargs)
         _obj.broker = _obj.env.broker
         _obj._sizer = bt.sizers.FixedSize()
@@ -102,6 +132,13 @@ class MetaStrategy(StrategyBase.__class__):
         return _obj, args, kwargs
 
     def dopostinit(cls, _obj, *args, **kwargs):
+        """
+
+        :param _obj:
+        :param *args:
+        :param **kwargs:
+
+        """
         _obj, args, kwargs = super(MetaStrategy, cls).dopostinit(_obj, *args, **kwargs)
 
         _obj._sizer.set(_obj, _obj.broker)
@@ -110,9 +147,7 @@ class MetaStrategy(StrategyBase.__class__):
 
 
 class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
-    """
-    Base class to be subclassed for user defined strategies.
-    """
+    """Base class to be subclassed for user defined strategies."""
 
     _ltype = LineIterator.StratType
 
@@ -136,6 +171,10 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
           -2: Same as -1 plus activation of memory saving for any indicators
               which has declared *plotinfo.plot* as False (will not be plotted)
+
+        :param savemem:  (Default value = 0)
+        :param replaying:  (Default value = False)
+
         """
         if savemem < 0:
             # Get any attribute which labels itself as Indicator
@@ -158,6 +197,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
                     it.qbuffer(savemem=1)
 
     def _periodset(self):
+        """ """
         dataids = [id(data) for data in self.datas]
 
         _dminperiods = collections.defaultdict(list)
@@ -196,7 +236,6 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
         self._minperiods = list()
         for data in self.datas:
-
             # Do not only consider the data as clock but also its lines which
             # may have been individually passed as clock references and
             # discovered as clocks above
@@ -219,14 +258,23 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         self._minperiod = max(minperiods or [self._minperiod])
 
     def _addwriter(self, writer):
-        """
-        Unlike the other _addxxx functions this one receives an instance
+        """Unlike the other _addxxx functions this one receives an instance
         because the writer works at cerebro level and is only passed to the
         strategy to simplify the logic
+
+        :param writer:
+
         """
         self.writers.append(writer)
 
     def _addindicator(self, indcls, *indargs, **indkwargs):
+        """
+
+        :param indcls:
+        :param *indargs:
+        :param **indkwargs:
+
+        """
         indcls(*indargs, **indkwargs)
 
     def _addanalyzer_slave(self, ancls, *anargs, **ankwargs):
@@ -236,15 +284,32 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         analyzers
 
         Returns the created analyzer
+
+        :param ancls:
+        :param *anargs:
+        :param **ankwargs:
+
         """
         analyzer = ancls(*anargs, **ankwargs)
         self._slave_analyzers.append(analyzer)
         return analyzer
 
     def _getanalyzer_slave(self, idx):
+        """
+
+        :param idx:
+
+        """
         return self._slave_analyzers.append[idx]
 
     def _addanalyzer(self, ancls, *anargs, **ankwargs):
+        """
+
+        :param ancls:
+        :param *anargs:
+        :param **ankwargs:
+
+        """
         anname = ankwargs.pop("_name", "") or ancls.__name__.lower()
         nsuffix = next(self._alnames[anname])
         anname += str(nsuffix or "")  # 0 (first instance) gets no suffix
@@ -252,6 +317,14 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         self.analyzers.append(analyzer, anname)
 
     def _addobserver(self, multi, obscls, *obsargs, **obskwargs):
+        """
+
+        :param multi:
+        :param obscls:
+        :param *obsargs:
+        :param **obskwargs:
+
+        """
         obsname = obskwargs.pop("obsname", "")
         if not obsname:
             obsname = obscls.__name__.lower()
@@ -270,21 +343,24 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             l.append(obs)
 
     def _getminperstatus(self):
+        """ """
         # check the min period status connected to datas
         dlens = map(operator.sub, self._minperiods, map(len, self.datas))
         self._minperstatus = minperstatus = max(dlens)
         return minperstatus
 
     def prenext_open(self):
-        pass
+        """ """
 
     def nextstart_open(self):
+        """ """
         self.next_open()
 
     def next_open(self):
-        pass
+        """ """
 
     def _oncepost_open(self):
+        """ """
         minperstatus = self._minperstatus
         if minperstatus < 0:
             self.next_open()
@@ -294,6 +370,11 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             self.prenext_open()
 
     def _oncepost(self, dt):
+        """
+
+        :param dt:
+
+        """
         for indicator in self._lineiterators[LineIterator.IndType]:
             if len(indicator._clock) > len(indicator):
                 indicator.advance()
@@ -322,6 +403,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         self.clear()
 
     def _clk_update(self):
+        """ """
         if self._oldsync:
             clk_len = super(Strategy, self)._clk_update()
             self.lines.datetime[0] = max(d.datetime[0] for d in self.datas if len(d))
@@ -337,6 +419,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         return len(self)
 
     def _next_open(self):
+        """ """
         minperstatus = self._minperstatus
         if minperstatus < 0:
             self.next_open()
@@ -346,6 +429,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             self.prenext_open()
 
     def _next(self):
+        """ """
         super(Strategy, self)._next()
 
         minperstatus = self._getminperstatus()
@@ -355,6 +439,12 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         self.clear()
 
     def _next_observers(self, minperstatus, once=False):
+        """
+
+        :param minperstatus:
+        :param once:  (Default value = False)
+
+        """
         for observer in self._lineiterators[LineIterator.ObsType]:
             for analyzer in observer._analyzers:
                 if minperstatus < 0:
@@ -381,6 +471,12 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
                 observer._next()
 
     def _next_analyzers(self, minperstatus, once=False):
+        """
+
+        :param minperstatus:
+        :param once:  (Default value = False)
+
+        """
         for analyzer in self.analyzers:
             if minperstatus < 0:
                 analyzer._next()
@@ -390,9 +486,15 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
                 analyzer._prenext()
 
     def _settz(self, tz):
+        """
+
+        :param tz:
+
+        """
         self.lines.datetime._settz(tz)
 
     def _start(self):
+        """ """
         self._periodset()
 
         for analyzer in itertools.chain(self.analyzers, self._slave_analyzers):
@@ -416,9 +518,9 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
     def start(self):
         """Called right before the backtesting is about to be started."""
-        pass
 
     def getwriterheaders(self):
+        """ """
         self.indobscsv = [self]
 
         indobs = itertools.chain(self.getindicators_lines(), self.getobservers())
@@ -436,6 +538,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         return headers
 
     def getwritervalues(self):
+        """ """
         values = list()
 
         for iocsv in self.indobscsv:
@@ -451,6 +554,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         return values
 
     def getwriterinfo(self):
+        """ """
         wrinfo = AutoOrderedDict()
 
         wrinfo["Params"] = self.p._getkwargs()
@@ -481,6 +585,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         return wrinfo
 
     def _stop(self):
+        """ """
         self.stop()
 
         for analyzer in itertools.chain(self.analyzers, self._slave_analyzers):
@@ -491,17 +596,28 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
     def stop(self):
         """Called right before the backtesting is about to be stopped"""
-        pass
 
     def set_tradehistory(self, onoff=True):
+        """
+
+        :param onoff:  (Default value = True)
+
+        """
         self._tradehistoryon = onoff
 
     def clear(self):
+        """ """
         self._orders.extend(self._orderspending)
         self._orderspending = list()
         self._tradespending = list()
 
     def _addnotification(self, order, quicknotify=False):
+        """
+
+        :param order:
+        :param quicknotify:  (Default value = False)
+
+        """
         if not order.p.simulated:
             self._orderspending.append(order)
 
@@ -521,7 +637,9 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         datatrades = self._trades[tradedata][order.tradeid]
         if not datatrades:
             trade = Trade(
-                data=tradedata, tradeid=order.tradeid, historyon=self._tradehistoryon
+                data=tradedata,
+                tradeid=order.tradeid,
+                historyon=self._tradehistoryon,
             )
             datatrades.append(trade)
         else:
@@ -584,6 +702,12 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             self._notify(qorders=qorders, qtrades=qtrades)
 
     def _notify(self, qorders=[], qtrades=[]):
+        """
+
+        :param qorders:  (Default value = [])
+        :param qtrades:  (Default value = [])
+
+        """
         if self.cerebro.p.quicknotify:
             # need to know if quicknotify is on, to not reprocess pendingorders
             # and pendingtrades, which have to exist for things like observers
@@ -632,91 +756,26 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         tzdata=None,
         cheat=False,
         *args,
-        **kwargs
+        **kwargs,
     ):
-        """
-        **Note**: can be called during ``__init__`` or ``start``
+        """**Note**: can be called during ``__init__`` or ``start``
 
         Schedules a timer to invoke either a specified callback or the
         ``notify_timer`` of one or more strategies.
 
-        Arguments:
-
-          - ``when``: can be
-
-            - ``datetime.time`` instance (see below ``tzdata``)
-            - ``bt.timer.SESSION_START`` to reference a session start
-            - ``bt.timer.SESSION_END`` to reference a session end
-
-         - ``offset`` which must be a ``datetime.timedelta`` instance
-
-           Used to offset the value ``when``. It has a meaningful use in
-           combination with ``SESSION_START`` and ``SESSION_END``, to indicated
-           things like a timer being called ``15 minutes`` after the session
-           start.
-
-          - ``repeat`` which must be a ``datetime.timedelta`` instance
-
-            Indicates if after a 1st call, further calls will be scheduled
-            within the same session at the scheduled ``repeat`` delta
-
-            Once the timer goes over the end of the session it is reset to the
-            original value for ``when``
-
-          - ``weekdays``: a **sorted** iterable with integers indicating on
-            which days (iso codes, Monday is 1, Sunday is 7) the timers can
-            be actually invoked
-
-            If not specified, the timer will be active on all days
-
-          - ``weekcarry`` (default: ``False``). If ``True`` and the weekday was
-            not seen (ex: trading holiday), the timer will be executed on the
-            next day (even if in a new week)
-
-          - ``monthdays``: a **sorted** iterable with integers indicating on
-            which days of the month a timer has to be executed. For example
-            always on day *15* of the month
-
-            If not specified, the timer will be active on all days
-
-          - ``monthcarry`` (default: ``True``). If the day was not seen
-            (weekend, trading holiday), the timer will be executed on the next
-            available day.
-
-          - ``allow`` (default: ``None``). A callback which receives a
-            `datetime.date`` instance and returns ``True`` if the date is
-            allowed for timers or else returns ``False``
-
-          - ``tzdata`` which can be either ``None`` (default), a ``pytz``
-            instance or a ``data feed`` instance.
-
-            ``None``: ``when`` is interpreted at face value (which translates
-            to handling it as if it where UTC even if it's not)
-
-            ``pytz`` instance: ``when`` will be interpreted as being specified
-            in the local time specified by the timezone instance.
-
-            ``data feed`` instance: ``when`` will be interpreted as being
-            specified in the local time specified by the ``tz`` parameter of
-            the data feed instance.
-
-            **Note**: If ``when`` is either ``SESSION_START`` or
-              ``SESSION_END`` and ``tzdata`` is ``None``, the 1st *data feed*
-              in the system (aka ``self.data0``) will be used as the reference
-              to find out the session times.
-
-          - ``cheat`` (default ``False``) if ``True`` the timer will be called
-            before the broker has a chance to evaluate the orders. This opens
-            the chance to issue orders based on opening price for example right
-            before the session starts
-
-          - ``*args``: any extra args will be passed to ``notify_timer``
-
-          - ``**kwargs``: any extra kwargs will be passed to ``notify_timer``
-
-        Return Value:
-
-          - The created timer
+        :param when: can be
+        :param offset: which must be a (Default value = datetime.timedelta())
+        :param repeat: which must be a (Default value = datetime.timedelta())
+        :param weekdays: a (Default value = [])
+        :param weekcarry: default
+        :param monthdays: a (Default value = [])
+        :param monthcarry: default
+        :param allow: default
+        :param tzdata: which can be either (Default value = None)
+        :param cheat: default
+        :param *args:
+        :param **kwargs:
+        :returns: - The created timer
 
         """
         return self.cerebro._add_timer(
@@ -733,66 +792,93 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             strats=False,
             cheat=cheat,
             *args,
-            **kwargs
+            **kwargs,
         )
 
     def notify_timer(self, timer, when, *args, **kwargs):
         """Receives a timer notification where ``timer`` is the timer which was
-        returned by ``add_timer``, and ``when`` is the calling time. ``args``
-        and ``kwargs`` are any additional arguments passed to ``add_timer``
+
+        :param timer:
+        :param when:
+        :param *args:
+        :param **kwargs:
+        :returns: and ``kwargs`` are any additional arguments passed to ``add_timer``
 
         The actual ``when`` time can be later, but the system may have not be
         able to call the timer before. This value is the timer value and no the
         system time.
+
         """
-        pass
 
     def notify_cashvalue(self, cash, value):
+        """Receives the current fund value, value status of the strategy's broker
+
+        :param cash:
+        :param value:
+
         """
-        Receives the current fund value, value status of the strategy's broker
-        """
-        pass
 
     def notify_fund(self, cash, value, fundvalue, shares):
+        """Receives the current cash, value, fundvalue and fund shares
+
+        :param cash:
+        :param value:
+        :param fundvalue:
+        :param shares:
+
         """
-        Receives the current cash, value, fundvalue and fund shares
-        """
-        pass
 
     def notify_order(self, order):
+        """Receives an order whenever there has been a change in one
+
+        :param order:
+
         """
-        Receives an order whenever there has been a change in one
-        """
-        pass
 
     def notify_trade(self, trade):
+        """Receives a trade whenever there has been a change in one
+
+        :param trade:
+
         """
-        Receives a trade whenever there has been a change in one
-        """
-        pass
 
     def notify_store(self, msg, *args, **kwargs):
-        """Receives a notification from a store provider"""
-        pass
+        """Receives a notification from a store provider
+
+        :param msg:
+        :param *args:
+        :param **kwargs:
+
+        """
 
     def notify_data(self, data, status, *args, **kwargs):
-        """Receives a notification from data"""
-        pass
+        """Receives a notification from data
+
+        :param data:
+        :param status:
+        :param *args:
+        :param **kwargs:
+
+        """
 
     def getdatanames(self):
-        """
-        Returns a list of the existing data names
-        """
+        """Returns a list of the existing data names"""
         return keys(self.env.datasbyname)
 
     def getdatabyname(self, name):
-        """
-        Returns a given data by name using the environment (cerebro)
+        """Returns a given data by name using the environment (cerebro)
+
+        :param name:
+
         """
         return self.env.datasbyname[name]
 
     def cancel(self, order):
-        """Cancels the order in the broker"""
+        """Cancels the order in the broker
+
+        :param order:
+
+        """
         self.broker.cancel(order)
 
     def buy(
@@ -809,7 +895,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         trailpercent=None,
         parent=None,
         transmit=True,
-        **kwargs
+        **kwargs,
     ):
         """Create a buy (long) order and send it to the broker
 
@@ -940,21 +1026,21 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             children, which triggers the full placement of all bracket orders.
 
           - ``**kwargs``: additional broker implementations may support extra
-            parameters. ``backtrader`` will pass the *kwargs* down to the
-            created order objects
 
-            Example: if the 4 order execution types directly supported by
-            ``backtrader`` are not enough, in the case of for example
-            *Interactive Brokers* the following could be passed as *kwargs*::
-
-              orderType='LIT', lmtPrice=10.0, auxPrice=9.8
-
-            This would override the settings created by ``backtrader`` and
-            generate a ``LIMIT IF TOUCHED`` order with a *touched* price of 9.8
-            and a *limit* price of 10.0.
-
-        Returns:
-          - the submitted order
+        :param data:  (Default value = None)
+        :param size:  (Default value = None)
+        :param price:  (Default value = None)
+        :param plimit:  (Default value = None)
+        :param exectype:  (Default value = None)
+        :param valid:  (Default value = None)
+        :param tradeid:  (Default value = 0)
+        :param oco:  (Default value = None)
+        :param trailamount:  (Default value = None)
+        :param trailpercent:  (Default value = None)
+        :param parent:  (Default value = None)
+        :param transmit:  (Default value = True)
+        :param **kwargs:
+        :returns: - the submitted order
 
         """
         if isinstance(data, string_types):
@@ -978,7 +1064,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
                 trailpercent=trailpercent,
                 parent=parent,
                 transmit=transmit,
-                **kwargs
+                **kwargs,
             )
 
         return None
@@ -997,14 +1083,28 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         trailpercent=None,
         parent=None,
         transmit=True,
-        **kwargs
+        **kwargs,
     ):
-        """
-        To create a selll (short) order and send it to the broker
+        """To create a selll (short) order and send it to the broker
 
         See the documentation for ``buy`` for an explanation of the parameters
 
         Returns: the submitted order
+
+        :param data:  (Default value = None)
+        :param size:  (Default value = None)
+        :param price:  (Default value = None)
+        :param plimit:  (Default value = None)
+        :param exectype:  (Default value = None)
+        :param valid:  (Default value = None)
+        :param tradeid:  (Default value = 0)
+        :param oco:  (Default value = None)
+        :param trailamount:  (Default value = None)
+        :param trailpercent:  (Default value = None)
+        :param parent:  (Default value = None)
+        :param transmit:  (Default value = True)
+        :param **kwargs:
+
         """
         if isinstance(data, string_types):
             data = self.getdatabyname(data)
@@ -1027,14 +1127,13 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
                 trailpercent=trailpercent,
                 parent=parent,
                 transmit=transmit,
-                **kwargs
+                **kwargs,
             )
 
         return None
 
     def close(self, data=None, size=None, **kwargs):
-        """
-        Counters a long/short position closing it
+        """Counters a long/short position closing it
 
         See the documentation for ``buy`` for an explanation of the parameters
 
@@ -1044,6 +1143,11 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             not provided (default: ``None``) by the caller
 
         Returns: the submitted order
+
+        :param data:  (Default value = None)
+        :param size:  (Default value = None)
+        :param **kwargs:
+
         """
         if isinstance(data, string_types):
             data = self.getdatabyname(data)
@@ -1078,10 +1182,9 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         limitprice=None,
         limitexec=bt.Order.Limit,
         limitargs={},
-        **kwargs
+        **kwargs,
     ):
-        """
-        Create a bracket order group (low side - buy order - high side). The
+        """Create a bracket order group (low side - buy order - high side). The
         default behavior is as follows:
 
           - Issue a **buy** order with execution ``Limit``
@@ -1159,56 +1262,30 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             top of this.
 
           - ``**kwargs``: additional broker implementations may support extra
-            parameters. ``backtrader`` will pass the *kwargs* down to the
-            created order objects
 
-            Possible values: (see the documentation for the method ``buy``
-
-            **Note**: this ``kwargs`` will be applied to the 3 orders of a
-            bracket. See below for specific keyword arguments for the low and
-            high side orders
-
-          - ``stopprice`` (default: ``None``)
-
-            Specific price for the *low side* stop order
-
-          - ``stopexec`` (default: ``bt.Order.Stop``)
-
-            Specific execution type for the *low side* order
-
-          - ``stopargs`` (default: ``{}``)
-
-            Specific keyword arguments (in a ``dict``) to pass to the low side
-            order. Arguments from the default ``**kwargs`` will be applied on
-            top of this.
-
-          - ``limitprice`` (default: ``None``)
-
-            Specific price for the *high side* stop order
-
-          - ``stopexec`` (default: ``bt.Order.Limit``)
-
-            Specific execution type for the *high side* order
-
-          - ``limitargs`` (default: ``{}``)
-
-            Specific keyword arguments (in a ``dict``) to pass to the high side
-            order. Arguments from the default ``**kwargs`` will be applied on
-            top of this.
-
-        High/Low Side orders can be suppressed by using:
-
-          - ``limitexec=None`` to suppress the *high side*
-
-          - ``stopexec=None`` to suppress the *low side*
-
-        Returns:
-
-          - A list containing the 3 orders [order, stop side, limit side]
+        :param data:  (Default value = None)
+        :param size:  (Default value = None)
+        :param price:  (Default value = None)
+        :param plimit:  (Default value = None)
+        :param exectype:  (Default value = bt.Order.Limit)
+        :param valid:  (Default value = None)
+        :param tradeid:  (Default value = 0)
+        :param trailamount:  (Default value = None)
+        :param trailpercent:  (Default value = None)
+        :param oargs:  (Default value = {})
+        :param stopprice: default
+        :param stopexec: None (Default value = bt.Order.Stop)
+        :param stopargs: default
+        :param limitprice: default
+        :param limitexec: None (Default value = bt.Order.Limit)
+        :param limitargs: default
+        :param **kwargs:
+        :returns: - A list containing the 3 orders [order, stop side, limit side]
 
           - If high/low orders have been suppressed the return value will still
             contain 3 orders, but those suppressed will have a value of
             ``None``
+
         """
 
         kargs = dict(
@@ -1283,10 +1360,9 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         limitprice=None,
         limitexec=bt.Order.Limit,
         limitargs={},
-        **kwargs
+        **kwargs,
     ):
-        """
-        Create a bracket order group (low side - buy order - high side). The
+        """Create a bracket order group (low side - buy order - high side). The
         default behavior is as follows:
 
           - Issue a **sell** order with execution ``Limit``
@@ -1303,13 +1379,28 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
           - ``limitexec=None`` to suppress the *low side*
 
-        Returns:
-
-          - A list containing the 3 orders [order, stop side, limit side]
-
+        :param data:  (Default value = None)
+        :param size:  (Default value = None)
+        :param price:  (Default value = None)
+        :param plimit:  (Default value = None)
+        :param exectype:  (Default value = bt.Order.Limit)
+        :param valid:  (Default value = None)
+        :param tradeid:  (Default value = 0)
+        :param trailamount:  (Default value = None)
+        :param trailpercent:  (Default value = None)
+        :param oargs:  (Default value = {})
+        :param stopprice:  (Default value = None)
+        :param stopexec:  (Default value = bt.Order.Stop)
+        :param stopargs:  (Default value = {})
+        :param limitprice:  (Default value = None)
+        :param limitexec:  (Default value = bt.Order.Limit)
+        :param limitargs:  (Default value = {})
+        :param **kwargs:
+        :returns: - A list containing the 3 orders [order, stop side, limit side]
           - If high/low orders have been suppressed the return value will still
             contain 3 orders, but those suppressed will have a value of
             ``None``
+
         """
 
         kargs = dict(
@@ -1367,8 +1458,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         return [o, ostop, olimit]
 
     def order_target_size(self, data=None, target=0, **kwargs):
-        """
-        Place an order to rebalance a position to have final size of ``target``
+        """Place an order to rebalance a position to have final size of ``target``
 
         The current ``position`` size is taken into account as the start point
         to achieve ``target``
@@ -1384,6 +1474,11 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
           or
 
           - ``None`` if no order has been issued (``target == position.size``)
+
+        :param data:  (Default value = None)
+        :param target:  (Default value = 0)
+        :param **kwargs:
+
         """
         if isinstance(data, string_types):
             data = self.getdatabyname(data)
@@ -1403,8 +1498,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         return None  # no execution target == possize
 
     def order_target_value(self, data=None, target=0.0, price=None, **kwargs):
-        """
-        Place an order to rebalance a position to have final value of
+        """Place an order to rebalance a position to have final value of
         ``target``
 
         The current ``value`` is taken into account as the start point to
@@ -1421,6 +1515,12 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
           or
 
           - ``None`` if no order has been issued
+
+        :param data:  (Default value = None)
+        :param target:  (Default value = 0.0)
+        :param price:  (Default value = None)
+        :param **kwargs:
+
         """
 
         if isinstance(data, string_types):
@@ -1450,8 +1550,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         return None  # no execution size == possize
 
     def order_target_percent(self, data=None, target=0.0, **kwargs):
-        """
-        Place an order to rebalance a position to have final value of
+        """Place an order to rebalance a position to have final value of
         ``target`` percentage of current portfolio ``value``
 
         ``target`` is expressed in decimal: ``0.05`` -> ``5%``
@@ -1486,24 +1585,32 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
           or
 
           - ``None`` if no order has been issued (``target == position.size``)
+
+        :param data:  (Default value = None)
+        :param target:  (Default value = 0.0)
+        :param **kwargs:
+
         """
         if isinstance(data, string_types):
             data = self.getdatabyname(data)
         elif data is None:
             data = self.data
 
-        possize = self.getposition(data, self.broker).size
+        self.getposition(data, self.broker).size
         target *= self.broker.getvalue()
 
         return self.order_target_value(data=data, target=target, **kwargs)
 
     def getposition(self, data=None, broker=None):
-        """
-        Returns the current position for a given data in a given broker.
+        """Returns the current position for a given data in a given broker.
 
         If both are None, the main data and the default broker will be used
 
         A property ``position`` is also available
+
+        :param data:  (Default value = None)
+        :param broker:  (Default value = None)
+
         """
         data = data if data is not None else self.datas[0]
         broker = broker or self.broker
@@ -1512,12 +1619,15 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
     position = property(getposition)
 
     def getpositionbyname(self, name=None, broker=None):
-        """
-        Returns the current position for a given name in a given broker.
+        """Returns the current position for a given name in a given broker.
 
         If both are None, the main data and the default broker will be used
 
         A property ``positionbyname`` is also available
+
+        :param name:  (Default value = None)
+        :param broker:  (Default value = None)
+
         """
         data = self.datas[0] if not name else self.getdatabyname(name)
         broker = broker or self.broker
@@ -1526,12 +1636,14 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
     positionbyname = property(getpositionbyname)
 
     def getpositions(self, broker=None):
-        """
-        Returns the current by data positions directly from the broker
+        """Returns the current by data positions directly from the broker
 
         If the given ``broker`` is None, the default broker will be used
 
         A property ``positions`` is also available
+
+        :param broker:  (Default value = None)
+
         """
         broker = broker or self.broker
         return broker.positions
@@ -1539,12 +1651,14 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
     positions = property(getpositions)
 
     def getpositionsbyname(self, broker=None):
-        """
-        Returns the current by name positions directly from the broker
+        """Returns the current by name positions directly from the broker
 
         If the given ``broker`` is None, the default broker will be used
 
         A property ``positionsbyname`` is also available
+
+        :param broker:  (Default value = None)
+
         """
         broker = broker or self.broker
         positions = broker.positions
@@ -1558,25 +1672,35 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
     positionsbyname = property(getpositionsbyname)
 
     def _addsizer(self, sizer, *args, **kwargs):
+        """
+
+        :param sizer:
+        :param *args:
+        :param **kwargs:
+
+        """
         if sizer is None:
             self.setsizer(bt.sizers.FixedSize())
         else:
             self.setsizer(sizer(*args, **kwargs))
 
     def setsizer(self, sizer):
-        """
-        Replace the default (fixed stake) sizer
+        """Replace the default (fixed stake) sizer
+
+        :param sizer:
+
         """
         self._sizer = sizer
         sizer.set(self, self.broker)
         return sizer
 
     def getsizer(self):
-        """
-        Returns the sizer which is in used if automatic statke calculation is
+        """Returns the sizer which is in used if automatic statke calculation is
         used
 
         Also available as ``sizer``
+
+
         """
         return self._sizer
 
@@ -1584,16 +1708,28 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
     def getsizing(self, data=None, isbuy=True):
         """
-        Return the stake calculated by the sizer instance for the current
-        situation
+
+        :param data:  (Default value = None)
+        :param isbuy:  (Default value = True)
+        :returns: situation
+
         """
         data = data if data is not None else self.datas[0]
         return self._sizer.getsizing(data, isbuy=isbuy)
 
 
 class MetaSigStrategy(Strategy.__class__):
+    """ """
 
     def __new__(meta, name, bases, dct):
+        """
+
+        :param meta:
+        :param name:
+        :param bases:
+        :param dct:
+
+        """
         # map user defined next to custom to be able to call own method before
         if "next" in dct:
             dct["_next_custom"] = dct.pop("next")
@@ -1605,6 +1741,13 @@ class MetaSigStrategy(Strategy.__class__):
         return cls
 
     def dopreinit(cls, _obj, *args, **kwargs):
+        """
+
+        :param _obj:
+        :param *args:
+        :param **kwargs:
+
+        """
         _obj, args, kwargs = super(MetaSigStrategy, cls).dopreinit(
             _obj, *args, **kwargs
         )
@@ -1626,6 +1769,13 @@ class MetaSigStrategy(Strategy.__class__):
         return _obj, args, kwargs
 
     def dopostinit(cls, _obj, *args, **kwargs):
+        """
+
+        :param _obj:
+        :param *args:
+        :param **kwargs:
+
+        """
         _obj, args, kwargs = super(MetaSigStrategy, cls).dopostinit(
             _obj, *args, **kwargs
         )
@@ -1698,31 +1848,6 @@ class SignalStrategy(with_metaclass(MetaSigStrategy, Strategy)):
       Orders execution type is ``Market`` and validity is ``None`` (*Good until
       Canceled*)
 
-    Params:
-
-      - ``signals`` (default: ``[]``): a list/tuple of lists/tuples that allows
-        the instantiation of the signals and allocation to the right type
-
-        This parameter is expected to be managed through ``cerebro.add_signal``
-
-      - ``_accumulate`` (default: ``False``): allow to enter the market
-        (long/short) even if already in the market
-
-      - ``_concurrent`` (default: ``False``): allow orders to be issued even if
-        orders are already pending execution
-
-      - ``_data`` (default: ``None``): if multiple datas are present in the
-        system which is the target for orders. This can be
-
-        - ``None``: The first data in the system will be used
-
-        - An ``int``: indicating the data that was inserted at that position
-
-        - An ``str``: name given to the data when creating it (parameter
-          ``name``) or when adding it cerebro with ``cerebro.adddata(...,
-          name=)``
-
-        - A ``data`` instance
 
     """
 
@@ -1734,13 +1859,26 @@ class SignalStrategy(with_metaclass(MetaSigStrategy, Strategy)):
     )
 
     def _start(self):
+        """ """
         self._sentinel = None  # sentinel for order concurrency
         super(SignalStrategy, self)._start()
 
     def signal_add(self, sigtype, signal):
+        """
+
+        :param sigtype:
+        :param signal:
+
+        """
         self._signals[sigtype].append(signal)
 
     def _notify(self, qorders=[], qtrades=[]):
+        """
+
+        :param qorders:  (Default value = [])
+        :param qtrades:  (Default value = [])
+
+        """
         # Nullify the sentinel if done
         procorders = qorders or self._orderspending
         if self._sentinel is not None:
@@ -1752,11 +1890,13 @@ class SignalStrategy(with_metaclass(MetaSigStrategy, Strategy)):
         super(SignalStrategy, self)._notify(qorders=qorders, qtrades=qtrades)
 
     def _next_catch(self):
+        """ """
         self._next_signal()
         if hasattr(self, "_next_custom"):
             self._next_custom()
 
     def _next_signal(self):
+        """ """
         if self._sentinel is not None and not self.p._concurrent:
             return  # order active and more than 1 not allowed
 

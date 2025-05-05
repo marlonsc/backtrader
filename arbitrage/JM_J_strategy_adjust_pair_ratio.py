@@ -7,7 +7,14 @@ import pandas as pd
 
 
 def calculate_rolling_spread(df0, df1, window: int = 90):
-    """Calculate rolling β and spread"""
+    """Calculate rolling β and spread
+
+    :param df0:
+    :param df1:
+    :param window:  (Default value = 90)
+    :type window: int
+
+    """
     # 1. Align and merge prices
     df = (
         df0.set_index("date")["close"]
@@ -58,6 +65,8 @@ todate = datetime.datetime(2025, 1, 1)
 
 
 class SpreadData(bt.feeds.PandasData):
+    """ """
+
     lines = ("beta",)  # Add beta line
 
     params = (
@@ -80,12 +89,15 @@ data2 = SpreadData(dataname=df_spread_bt, datetime="date")
 
 
 class DynamicSpreadStrategy(bt.Strategy):
+    """ """
+
     params = (
         ("period", 30),
         ("devfactor", 2),
     )
 
     def __init__(self):
+        """ """
         # Bollinger Bands indicator - using passed spread data
         self.boll = bt.indicators.BollingerBands(
             self.data2.close,
@@ -99,6 +111,7 @@ class DynamicSpreadStrategy(bt.Strategy):
         self.entry_price = 0
 
     def next(self):
+        """ """
         if self.order:
             return
 
@@ -136,7 +149,11 @@ class DynamicSpreadStrategy(bt.Strategy):
                 self._close_positions()
 
     def _open_position(self, short):
-        """Place order with dynamic ratio"""
+        """Place order with dynamic ratio
+
+        :param short:
+
+        """
         # Confirm trade size is valid
         if not hasattr(self, "size0") or not hasattr(self, "size1"):
             self.size0 = 10  # Default value
@@ -157,10 +174,16 @@ class DynamicSpreadStrategy(bt.Strategy):
         self.entry_price = self.data2.close[0]
 
     def _close_positions(self):
+        """ """
         self.close(data=self.data0)
         self.close(data=self.data1)
 
     def notify_trade(self, trade):
+        """
+
+        :param trade:
+
+        """
         if trade.isclosed:
             print(
                 "TRADE %s CLOSED %s, PROFIT: GROSS %.2f, NET %.2f, PRICE %d"
@@ -175,7 +198,12 @@ class DynamicSpreadStrategy(bt.Strategy):
         elif trade.justopened:
             print(
                 "TRADE %s OPENED %s  , SIZE %2d, PRICE %d "
-                % (trade.ref, bt.num2date(trade.dtopen), trade.size, trade.value)
+                % (
+                    trade.ref,
+                    bt.num2date(trade.dtopen),
+                    trade.size,
+                    trade.value,
+                )
             )
 
     # def notify_order(self, order):
@@ -209,15 +237,15 @@ cerebro.adddata(data2, name="spread")
 #     slip_out=True      # Allows slippage out of price range
 # )
 
-
 # Add strategy
 cerebro.addstrategy(DynamicSpreadStrategy)
-##########################################################################################
+##########################################################################
 # Set initial capital
 cerebro.broker.setcash(100000)
 cerebro.broker.set_shortcash(False)
 cerebro.addanalyzer(bt.analyzers.DrawDown)  # Drawdown analyzer
-# ROIAnalyzer and CAGRAnalyzer are not standard Backtrader analyzers; removed for compatibility
+# ROIAnalyzer and CAGRAnalyzer are not standard Backtrader analyzers;
+# removed for compatibility
 cerebro.addanalyzer(
     bt.analyzers.SharpeRatio,
     timeframe=bt.TimeFrame.Days,  # Calculate based on daily data
@@ -243,8 +271,10 @@ results = cerebro.run()
 # Get analysis results
 drawdown = results[0].analyzers.drawdown.get_analysis()
 sharpe = results[0].analyzers.sharperatio.get_analysis()
-total_returns = results[0].analyzers.returns.get_analysis()  # Get total return rate
-# trade_analysis = results[0].analyzers.tradeanalyzer.get_analysis()  # Get analysis results by name
+# Get total return rate
+total_returns = results[0].analyzers.returns.get_analysis()
+# trade_analysis = results[0].analyzers.tradeanalyzer.get_analysis()  #
+# Get analysis results by name
 
 # # Print analysis results
 print("=============Backtest Results================")

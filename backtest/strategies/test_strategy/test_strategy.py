@@ -6,39 +6,30 @@ import backtrader as bt  # Import Backtrader
 from backtest.feeds.datafeeds import StockCsvData
 
 # from backtrader_plotting import Bokeh  # Commented out: not installed
-# from backtrader_plotting.schemes import Tradimo  # Commented out: not installed
+# from backtrader_plotting.schemes import Tradimo  # Commented out: not
+# installed
 
 
 # Create strategy
 class TestStrategy(bt.Strategy):
-    """
-    Example Backtrader strategy for demonstration and testing purposes.
+    """Example Backtrader strategy for demonstration and testing purposes."""
 
-    Attributes:
-        params (tuple): Strategy parameters, e.g., moving average period.
-        dataclose: Reference to the close price line of the data series.
-        order: Tracks pending orders.
-        buyprice: Last buy price.
-        buycomm: Last buy commission.
-        sma: Simple Moving Average indicator.
-    """
-    params = (('maperiod', 15),)
+    params = (("maperiod", 15),)
 
     def log(self, txt, dt=None):
-        """
-        Print strategy logs (order/trade records, etc.).
+        """Print strategy logs (order/trade records, etc.).
 
-        Args:
-            txt (str): Log message.
-            dt (datetime.date, optional): Date for the log. Defaults to None.
+        :param txt: Log message.
+        :type txt: str
+        :param dt: Date for the log. Defaults to None.
+        :type dt: datetime.date
+
         """
         dt = dt or self.datas[0].datetime.date(0)
         print(f"{dt.isoformat()}, {txt}")
 
     def __init__(self):
-        """
-        Initialize attributes and calculate indicators.
-        """
+        """Initialize attributes and calculate indicators."""
         super().__init__()
         self.dataclose = self.datas[0].close
         self.order = None
@@ -51,11 +42,10 @@ class TestStrategy(bt.Strategy):
         bt.indicators.ATR(self.datas[0])
 
     def notify_order(self, order):
-        """
-        Print order information.
+        """Print order information.
 
-        Args:
-            order: Order object.
+        :param order: Order object.
+
         """
         if order.status in [order.Submitted, order.Accepted]:
             return
@@ -78,20 +68,17 @@ class TestStrategy(bt.Strategy):
         self.order = None
 
     def notify_trade(self, trade):
-        """
-        Print trade information.
+        """Print trade information.
 
-        Args:
-            trade: Trade object.
+        :param trade: Trade object.
+
         """
         if not trade.isclosed:
             return
         self.log(f"OPERATION PROFIT, GROSS {trade.pnl:.2f}, NET {trade.pnlcomm:.2f}")
 
     def next(self):
-        """
-        Trading strategy logic for each new bar.
-        """
+        """Trading strategy logic for each new bar."""
         self.log(f"Close, {self.dataclose[0]:.2f}")
         if self.order:
             return

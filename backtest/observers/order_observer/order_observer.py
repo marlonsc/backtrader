@@ -2,6 +2,8 @@ import backtrader as bt
 
 
 class OrderObserver(bt.observer.Observer):
+    """ """
+
     lines = (
         "created",
         "expired",
@@ -15,6 +17,7 @@ class OrderObserver(bt.observer.Observer):
     )
 
     def next(self):
+        """ """
         for order in self._owner._orderspending:
             if order.data is not self.data:
                 continue

@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
@@ -28,7 +33,6 @@ import itertools
 import backtrader as bt
 import backtrader.feeds as btfeeds
 import backtrader.indicators as btind
-
 import mtradeobserver
 
 
@@ -37,6 +41,8 @@ class MultiTradeStrategy(bt.Strategy):
     upwards/downwards a Simple Moving Average.
 
     It can be a long-only strategy by setting the param "onlylong" to True
+
+
     """
 
     params = dict(
@@ -48,12 +54,19 @@ class MultiTradeStrategy(bt.Strategy):
     )
 
     def log(self, txt, dt=None):
+        """
+
+        :param txt:
+        :param dt:  (Default value = None)
+
+        """
         if self.p.printout:
             dt = dt or self.data.datetime[0]
             dt = bt.num2date(dt)
             print("%s, %s" % (dt.isoformat(), txt))
 
     def __init__(self):
+        """ """
         # To control operation entries
         self.order = None
 
@@ -69,6 +82,7 @@ class MultiTradeStrategy(bt.Strategy):
             self.tradeid = itertools.cycle([0])
 
     def next(self):
+        """ """
         if self.order:
             return  # if an order is active, no new orders are allowed
 
@@ -92,6 +106,11 @@ class MultiTradeStrategy(bt.Strategy):
                 self.sell(size=self.p.stake, tradeid=self.curtradeid)
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status in [bt.Order.Submitted, bt.Order.Accepted]:
             return  # Await further notifications
 
@@ -111,6 +130,11 @@ class MultiTradeStrategy(bt.Strategy):
         self.order = None
 
     def notify_trade(self, trade):
+        """
+
+        :param trade:
+
+        """
         if trade.isclosed:
             self.log("TRADE PROFIT, GROSS %.2f, NET %.2f" % (trade.pnl, trade.pnlcomm))
 
@@ -119,6 +143,7 @@ class MultiTradeStrategy(bt.Strategy):
 
 
 def runstrategy():
+    """ """
     args = parse_args()
 
     # Create a cerebro
@@ -166,6 +191,7 @@ def runstrategy():
 
 
 def parse_args():
+    """ """
     parser = argparse.ArgumentParser(description="MultiTrades")
 
     parser.add_argument(
@@ -203,7 +229,9 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--printout", action="store_true", help="Print operation log from strategy"
+        "--printout",
+        action="store_true",
+        help="Print operation log from strategy",
     )
 
     parser.add_argument("--cash", default=100000, type=int, help="Starting Cash")

@@ -1,21 +1,9 @@
-import math
-import pandas as pd
 import backtrader as bt
-from collections import OrderedDict
 from backtrader import TimeFrameAnalyzerBase
 
 
 class ROIAnalyzer(TimeFrameAnalyzerBase):
-    """Calculates the Compound Annual Growth Rate (roi) for a strategy.
-
-    Params:
-
-      - ``period`` (default: ``daily``):
-        The time period to consider for annualization, options: `daily`, `weekly`, `monthly`, `yearly`
-
-      - ``fund`` (default: ``None``):
-        If ``None`` the actual mode of the broker (fundmode - True/False) will be autodetected to decide if the returns are based on the total net asset value or on the fund value.
-    """
+    """Calculates the Compound Annual Growth Rate (roi) for a strategy."""
 
     params = (
         ("period", None),  # Default is daily
@@ -81,7 +69,6 @@ class ROIAnalyzer(TimeFrameAnalyzerBase):
         """Calculate returns on each time step"""
         # 计算每个时间步骤的收益率
         if self._value_start != 0.0:
-
             current_value = (
                 self.strategy.broker.getvalue()
                 if not self._fundmode

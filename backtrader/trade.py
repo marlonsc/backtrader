@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import itertools
 
@@ -32,32 +37,36 @@ class TradeHistory(AutoOrderedDict):
 
     This object is a dictionary which allows '.' notation
 
-    Attributes:
-      - ``status`` (``dict`` with '.' notation): Holds the resulting status of
-        an update event and has the following sub-attributes
 
-        - ``status`` (``int``): Trade status
-        - ``dt`` (``float``): float coded datetime
-        - ``barlen`` (``int``): number of bars the trade has been active
-        - ``size`` (``int``): current size of the Trade
-        - ``price`` (``float``): current price of the Trade
-        - ``value`` (``float``): current monetary value of the Trade
-        - ``pnl`` (``float``): current profit and loss of the Trade
-        - ``pnlcomm`` (``float``): current profit and loss minus commission
-
-      - ``event`` (``dict`` with '.' notation): Holds the event update
-        - parameters
-
-        - ``order`` (``object``): the order which initiated the``update``
-        - ``size`` (``int``): size of the update
-        - ``price`` (``float``):price of the update
-        - ``commission`` (``float``): price of the update
     """
 
     def __init__(
-        self, status, dt, barlen, size, price, value, pnl, pnlcomm, tz, event=None
+        self,
+        status,
+        dt,
+        barlen,
+        size,
+        price,
+        value,
+        pnl,
+        pnlcomm,
+        tz,
+        event=None,
     ):
-        """Initializes the object to the current status of the Trade"""
+        """Initializes the object to the current status of the Trade
+
+        :param status:
+        :param dt:
+        :param barlen:
+        :param size:
+        :param price:
+        :param value:
+        :param pnl:
+        :param pnlcomm:
+        :param tz:
+        :param event:  (Default value = None)
+
+        """
         super(TradeHistory, self).__init__()
         self.status.status = status
         self.status.dt = dt
@@ -72,6 +81,7 @@ class TradeHistory(AutoOrderedDict):
             self.event = event
 
     def __reduce__(self):
+        """ """
         return (
             self.__class__,
             (
@@ -89,7 +99,14 @@ class TradeHistory(AutoOrderedDict):
         )
 
     def doupdate(self, order, size, price, commission):
-        """Used to fill the ``update`` part of the history entry"""
+        """Used to fill the ``update`` part of the history entry
+
+        :param order:
+        :param size:
+        :param price:
+        :param commission:
+
+        """
         self.event.order = order
         self.event.size = size
         self.event.price = price
@@ -99,7 +116,12 @@ class TradeHistory(AutoOrderedDict):
         self._close()
 
     def datetime(self, tz=None, naive=True):
-        """Returns a datetime for the time the update event happened"""
+        """Returns a datetime for the time the update event happened
+
+        :param tz:  (Default value = None)
+        :param naive:  (Default value = True)
+
+        """
         return num2date(self.status.dt, tz or self.status.tz, naive)
 
 
@@ -155,6 +177,7 @@ class Trade(object):
         The first entry in the history is the Opening Event
         The last entry in the history is the Closing Event
 
+
     """
 
     refbasis = itertools.count(1)
@@ -163,6 +186,7 @@ class Trade(object):
     Created, Open, Closed = range(3)
 
     def __str__(self):
+        """ """
         toprint = (
             "ref",
             "data",
@@ -198,6 +222,17 @@ class Trade(object):
         value=0.0,
         commission=0.0,
     ):
+        """
+
+        :param data:  (Default value = None)
+        :param tradeid:  (Default value = 0)
+        :param historyon:  (Default value = False)
+        :param size:  (Default value = 0)
+        :param price:  (Default value = 0.0)
+        :param value:  (Default value = 0.0)
+        :param commission:  (Default value = 0.0)
+
+        """
 
         self.ref = next(self.refbasis)
         self.data = data
@@ -244,18 +279,25 @@ class Trade(object):
     def open_datetime(self, tz=None, naive=True):
         """Returns a datetime.datetime object with the datetime in which
         the trade was opened
+
+        :param tz:  (Default value = None)
+        :param naive:  (Default value = True)
+
         """
         return self.data.num2date(self.dtopen, tz=tz, naive=naive)
 
     def close_datetime(self, tz=None, naive=True):
         """Returns a datetime.datetime object with the datetime in which
         the trade was closed
+
+        :param tz:  (Default value = None)
+        :param naive:  (Default value = True)
+
         """
         return self.data.num2date(self.dtclose, tz=tz, naive=naive)
 
     def update(self, order, size, price, value, commission, pnl, comminfo):
-        """
-        Updates the current trade. The logic does not check if the
+        """Updates the current trade. The logic does not check if the
         trade is reversed, which is not conceptually supported by the
         object.
 
@@ -266,22 +308,27 @@ class Trade(object):
         size which has been closed (sell undoing a buy) and a second time for
         the the opening part (sell reversing a buy)
 
-        Args:
-            order: the order object which has (completely or partially)
+        :param order: the order object which has (completely or partially)
                 generated this update
-            size (int): amount to update the order
+        :param size: amount to update the order
                 if size has the same sign as the current trade a
                 position increase will happen
                 if size has the opposite sign as current op size a
                 reduction/close will happen
-
-            price (float): always be positive to ensure consistency
-            value (float): (unused) cost incurred in new size/price op
+        :type size: int
+        :param price: always be positive to ensure consistency
+        :type price: float
+        :param value: (unused) cost incurred in new size/price op
                            Not used because the value is calculated for the
                            trade
-            commission (float): incurred commission in the new size/price op
-            pnl (float): (unused) generated by the executed part
+        :type value: float
+        :param commission: incurred commission in the new size/price op
+        :type commission: float
+        :param pnl: (unused) generated by the executed part
                          Not used because the trade has an independent pnl
+        :type pnl: float
+        :param comminfo:
+
         """
         if not size:
             return  # empty update, skip all other calculations

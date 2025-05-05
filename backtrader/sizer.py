@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,11 +18,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-from .utils.py3 import with_metaclass
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 from .metabase import MetaParams
+from .utils.py3 import with_metaclass
 
 
 class Sizer(with_metaclass(MetaParams, object)):
@@ -42,12 +46,20 @@ class Sizer(with_metaclass(MetaParams, object)):
 
         Gives access to information some complex sizers may need like portfolio
         value, ..
+
+
     """
 
     strategy = None
     broker = None
 
     def getsizing(self, data, isbuy):
+        """
+
+        :param data:
+        :param isbuy:
+
+        """
         comminfo = self.broker.getcommissioninfo(data)
         return self._getsizing(comminfo, self.broker.getcash(), data, isbuy)
 
@@ -55,28 +67,21 @@ class Sizer(with_metaclass(MetaParams, object)):
         """This method has to be overriden by subclasses of Sizer to provide
         the sizing functionality
 
-        Params:
-          - ``comminfo``: The CommissionInfo instance that contains
-            information about the commission for the data and allows
-            calculation of position value, operation cost, commision for the
-            operation
-
-          - ``cash``: current available cash in the *broker*
-
-          - ``data``: target of the operation
-
-          - ``isbuy``: will be ``True`` for *buy* operations and ``False``
-            for *sell* operations
-
-        The method has to return the actual size (an int) to be executed. If
-        ``0`` is returned nothing will be executed.
-
-        The absolute value of the returned value will be used
+        :param comminfo: The CommissionInfo instance that contains
+        :param cash: current available cash in the
+        :param data: target of the operation
+        :param isbuy: will be
 
         """
         raise NotImplementedError
 
     def set(self, strategy, broker):
+        """
+
+        :param strategy:
+        :param broker:
+
+        """
         self.strategy = strategy
         self.broker = broker
 

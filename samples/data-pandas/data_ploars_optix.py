@@ -25,17 +25,22 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 
 import backtrader as bt
 import backtrader.feeds as btfeeds
-
 import polars as pl
 
 
 class PolarsDataOptix(btfeeds.PandasData):
+    """ """
 
     lines = (
         "optix_close",
@@ -52,8 +57,10 @@ class PolarsDataOptix(btfeeds.PandasData):
 
 
 class StrategyOptix(bt.Strategy):
+    """ """
 
     def next(self):
+        """ """
         print(
             "%03d %f %f, %f"
             % (
@@ -66,6 +73,7 @@ class StrategyOptix(bt.Strategy):
 
 
 def runstrat():
+    """ """
     args = parse_args()
 
     # Create a cerebro entity
@@ -79,10 +87,13 @@ def runstrat():
 
     # Simulate the header row isn't there if noheaders requested
     skiprows = 1 if args.noheaders else 0
-    header = None if args.noheaders else 0
+    None if args.noheaders else 0
 
     dataframe = pl.read_csv(
-        datapath, skip_rows=skiprows, has_header=not args.noheaders, parse_dates=True
+        datapath,
+        skip_rows=skiprows,
+        has_header=not args.noheaders,
+        parse_dates=True,
     )
 
     if not args.noprint:
@@ -104,6 +115,7 @@ def runstrat():
 
 
 def parse_args():
+    """ """
     parser = argparse.ArgumentParser(description="Polars test script")
 
     parser.add_argument(
@@ -115,11 +127,17 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--noprint", action="store_true", default=False, help="Print the dataframe"
+        "--noprint",
+        action="store_true",
+        default=False,
+        help="Print the dataframe",
     )
 
     parser.add_argument(
-        "--noplot", action="store_true", default=False, help="Do not plot the chart"
+        "--noplot",
+        action="store_true",
+        default=False,
+        help="Do not plot the chart",
     )
 
     return parser.parse_args()

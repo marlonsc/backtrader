@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,14 +18,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
-from . import Indicator, And, If, MovAv, ATR, DivByZero
+from . import ATR, And, DivByZero, If, Indicator, MovAv
 
 
 class UpMove(Indicator):
-    """
-    Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
+    """Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"* as part of the Directional Move System to
     calculate Directional Indicators.
 
@@ -36,18 +40,20 @@ class UpMove(Indicator):
 
     See:
       - https://en.wikipedia.org/wiki/Average_directional_movement_index
+
+
     """
 
     lines = ("upmove",)
 
     def __init__(self):
+        """ """
         self.lines.upmove = self.data - self.data(-1)
         super(UpMove, self).__init__()
 
 
 class DownMove(Indicator):
-    """
-    Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
+    """Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"* as part of the Directional Move System to
     calculate Directional Indicators.
 
@@ -58,24 +64,28 @@ class DownMove(Indicator):
 
     See:
       - https://en.wikipedia.org/wiki/Average_directional_movement_index
+
+
     """
 
     lines = ("downmove",)
 
     def __init__(self):
+        """ """
         self.lines.downmove = self.data(-1) - self.data
         super(DownMove, self).__init__()
 
 
 class _DirectionalIndicator(Indicator):
-    """
-    This class serves as the root base class for all "Directional Movement
+    """This class serves as the root base class for all "Directional Movement
     System" related indicators, given that the calculations are first common
     and then derived from the common calculations.
 
     It can calculate the +DI and -DI values (using kwargs as the hint as to
     what to calculate) but doesn't assign them to lines. This is left for
     sublcases of this class.
+
+
     """
 
     params = (
@@ -88,11 +98,18 @@ class _DirectionalIndicator(Indicator):
     plotlines = dict(plusDI=dict(_name="+DI"), minusDI=dict(_name="-DI"))
 
     def _plotlabel(self):
+        """ """
         plabels = [self.p.period]
         plabels += [self.p.movav] * self.p.notdefault("movav")
         return plabels
 
     def __init__(self, _plus=True, _minus=True):
+        """
+
+        :param _plus: (Default value = True)
+        :param _minus: (Default value = True)
+
+        """
         atr = ATR(self.data, period=self.p.period, movav=self.p.movav)
 
         upmove = self.data.high - self.data.high(-1)
@@ -122,8 +139,7 @@ class _DirectionalIndicator(Indicator):
 
 
 class DirectionalIndicator(_DirectionalIndicator):
-    """
-    Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
+    """Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"*.
 
     Intended to measure trend strength
@@ -149,6 +165,8 @@ class DirectionalIndicator(_DirectionalIndicator):
 
     See:
       - https://en.wikipedia.org/wiki/Average_directional_movement_index
+
+
     """
 
     alias = ("DI",)
@@ -158,6 +176,7 @@ class DirectionalIndicator(_DirectionalIndicator):
     )
 
     def __init__(self):
+        """ """
         super(DirectionalIndicator, self).__init__()
 
         self.lines.plusDI = self.DIplus
@@ -165,8 +184,7 @@ class DirectionalIndicator(_DirectionalIndicator):
 
 
 class PlusDirectionalIndicator(_DirectionalIndicator):
-    """
-    Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
+    """Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"*.
 
     Intended to measure trend strength
@@ -190,6 +208,8 @@ class PlusDirectionalIndicator(_DirectionalIndicator):
 
     See:
       - https://en.wikipedia.org/wiki/Average_directional_movement_index
+
+
     """
 
     alias = (("PlusDI", "+DI"),)
@@ -198,14 +218,14 @@ class PlusDirectionalIndicator(_DirectionalIndicator):
     plotinfo = dict(plotname="+DirectionalIndicator")
 
     def __init__(self):
+        """ """
         super(PlusDirectionalIndicator, self).__init__(_minus=False)
 
         self.lines.plusDI = self.DIplus
 
 
 class MinusDirectionalIndicator(_DirectionalIndicator):
-    """
-    Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
+    """Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"*.
 
     Intended to measure trend strength
@@ -229,6 +249,8 @@ class MinusDirectionalIndicator(_DirectionalIndicator):
 
     See:
       - https://en.wikipedia.org/wiki/Average_directional_movement_index
+
+
     """
 
     alias = (("MinusDI", "-DI"),)
@@ -237,14 +259,14 @@ class MinusDirectionalIndicator(_DirectionalIndicator):
     plotinfo = dict(plotname="-DirectionalIndicator")
 
     def __init__(self):
+        """ """
         super(MinusDirectionalIndicator, self).__init__(_plus=False)
 
         self.lines.minusDI = self.DIminus
 
 
 class AverageDirectionalMovementIndex(_DirectionalIndicator):
-    """
-    Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
+    """Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"*.
 
     Intended to measure trend strength
@@ -272,6 +294,8 @@ class AverageDirectionalMovementIndex(_DirectionalIndicator):
 
     See:
       - https://en.wikipedia.org/wiki/Average_directional_movement_index
+
+
     """
 
     alias = ("ADX",)
@@ -281,6 +305,7 @@ class AverageDirectionalMovementIndex(_DirectionalIndicator):
     plotlines = dict(adx=dict(_name="ADX"))
 
     def __init__(self):
+        """ """
         super(AverageDirectionalMovementIndex, self).__init__()
 
         if self.p.safediv:
@@ -295,8 +320,7 @@ class AverageDirectionalMovementIndex(_DirectionalIndicator):
 
 
 class AverageDirectionalMovementIndexRating(AverageDirectionalMovementIndex):
-    """
-    Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
+    """Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"*.
 
     Intended to measure trend strength.
@@ -327,6 +351,8 @@ class AverageDirectionalMovementIndexRating(AverageDirectionalMovementIndex):
 
     See:
       - https://en.wikipedia.org/wiki/Average_directional_movement_index
+
+
     """
 
     alias = ("ADXR",)
@@ -335,14 +361,14 @@ class AverageDirectionalMovementIndexRating(AverageDirectionalMovementIndex):
     plotlines = dict(adxr=dict(_name="ADXR"))
 
     def __init__(self):
+        """ """
         super(AverageDirectionalMovementIndexRating, self).__init__()
 
         self.lines.adxr = (self.l.adx + self.l.adx(-self.p.period)) / 2.0
 
 
 class DirectionalMovementIndex(AverageDirectionalMovementIndex, DirectionalIndicator):
-    """
-    Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
+    """Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"*.
 
     Intended to measure trend strength
@@ -370,14 +396,15 @@ class DirectionalMovementIndex(AverageDirectionalMovementIndex, DirectionalIndic
 
     See:
       - https://en.wikipedia.org/wiki/Average_directional_movement_index
+
+
     """
 
     alias = ("DMI",)
 
 
 class DirectionalMovement(AverageDirectionalMovementIndexRating, DirectionalIndicator):
-    """
-    Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
+    """Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"*.
 
     Intended to measure trend strength
@@ -406,6 +433,8 @@ class DirectionalMovement(AverageDirectionalMovementIndexRating, DirectionalIndi
 
     See:
       - https://en.wikipedia.org/wiki/Average_directional_movement_index
+
+
     """
 
     alias = ("DM",)

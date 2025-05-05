@@ -11,7 +11,6 @@ import backtrader as bt
 
 # functions
 
-
 if __name__ == "__main__":
     # Datas are in a subfolder of the samples.
     datapath = Path.cwd().parent / "datas/orcl-1995-2014.txt"

@@ -1,4 +1,12 @@
+import datetime
+
+import backtrader as bt
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
+from pykalman import KalmanFilter
+from statsmodels.regression.linear_model import OLS
+from statsmodels.tsa.stattools import adfuller
 
 output_file = "D:\\FutureData\\ricequant\\1d_2017to2024_noadjust.h5"
 df0 = pd.read_hdf(output_file, key="/J").reset_index()
@@ -11,16 +19,16 @@ datetime: str, YYYY-MM-DD
 open: float, open price
 close: float, close price
 """
-import numpy as np
-import backtrader as bt
-import datetime
-from pykalman import KalmanFilter
-from statsmodels.regression.linear_model import OLS
-from statsmodels.tsa.stattools import adfuller
 
 
 # Function to calculate hedge ratio using Kalman Filter
 def calculate_dynamic_hedge_ratio(y, x):
+    """
+
+    :param y:
+    :param x:
+
+    """
     delta = 1e-5
     trans_cov = delta / (1 - delta) * np.eye(2)
 
@@ -45,6 +53,11 @@ def calculate_dynamic_hedge_ratio(y, x):
 
 # Calculate half-life of mean reversion
 def calculate_half_life(spread):
+    """
+
+    :param spread:
+
+    """
     spread_lag = spread.shift(1).dropna()
     spread = spread.iloc[1:]
 
@@ -57,6 +70,12 @@ def calculate_half_life(spread):
 
 # Check cointegration using ADF test
 def check_cointegration(series_y, series_x):
+    """
+
+    :param series_y:
+    :param series_x:
+
+    """
     model = OLS(series_y, series_x).fit()
     hedge_ratio = model.params[0]
     spread = series_y - hedge_ratio * series_x
@@ -69,6 +88,8 @@ def check_cointegration(series_y, series_x):
 
 # Custom data feed for spread
 class SpreadData(bt.feeds.PandasData):
+    """ """
+
     lines = ("hedge_ratio", "spread")
     params = (
         ("hedge_ratio", -1),
@@ -78,6 +99,8 @@ class SpreadData(bt.feeds.PandasData):
 
 # Kalman Pairs Trading Strategy
 class KalmanPairTradingStrategy(bt.Strategy):
+    """ """
+
     params = (
         ("z_entry", 1),  # Z-score threshold for entry
         ("z_exit", 0.0),  # Z-score threshold for exit
@@ -87,6 +110,7 @@ class KalmanPairTradingStrategy(bt.Strategy):
     )
 
     def __init__(self):
+        """ """
         self.data0 = self.datas[0]  # J futures
         self.data1 = self.datas[1]  # JM futures
         self.spread_data = self.datas[2]  # Spread data
@@ -103,6 +127,7 @@ class KalmanPairTradingStrategy(bt.Strategy):
         self.position_type = None
 
     def next(self):
+        """ """
         if len(self) < self.p.lookback:
             return
 
@@ -137,6 +162,11 @@ class KalmanPairTradingStrategy(bt.Strategy):
                 self.position_type = None
 
     def notify_trade(self, trade):
+        """
+
+        :param trade:
+
+        """
         if trade.isclosed:
             print(
                 f"TRADE {trade.ref} CLOSED, PROFIT: GROSS {trade.pnl:.2f}, NET"
@@ -258,7 +288,6 @@ print(f"年化收益: {cagr['cagr']:.2f}")
 print(f"夏普比率: {cagr['sharpe']:.2f}")
 
 # Plot results
-import matplotlib.pyplot as plt
 
 plt.rcParams["figure.figsize"] = [12, 8]  # Set a larger figure size
 plt.rcParams["image.cmap"] = "viridis"  # Set a specific colormap

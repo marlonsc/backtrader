@@ -2,23 +2,36 @@ import copy
 import logging
 from typing import Optional
 
-from backtrader.listener import ListenerBase
-
 import backtrader as bt
+from backtrader.listener import ListenerBase
 
 _logger = logging.getLogger(__name__)
 
 
 class RecorderListener(ListenerBase):
+    """ """
+
     def __init__(self):
+        """ """
         self._cerebro: Optional[bt.cerebro.Cerebro] = None
         self.nexts = []
 
     def start(self, cerebro):
+        """
+
+        :param cerebro:
+
+        """
         self._cerebro = cerebro
 
     @staticmethod
     def print_line_snapshot(name, snapshot):
+        """
+
+        :param name:
+        :param snapshot:
+
+        """
         line = snapshot["array"]
         if name == "datetime":
             line = [bt.num2date(x) for x in line]
@@ -29,7 +42,13 @@ class RecorderListener(ListenerBase):
 
     @staticmethod
     def print_next(idx, next):
-        _logger.debug(f'--- Next: {next["prenext"]} - #{idx}')
+        """
+
+        :param idx:
+        :param next:
+
+        """
+        _logger.debug(f"--- Next: {next['prenext']} - #{idx}")
         RecorderListener.print_line_snapshot("datetime", next["strategy"]["datetime"])
 
         for di, data in enumerate(next["datas"]):
@@ -49,11 +68,21 @@ class RecorderListener(ListenerBase):
 
     @staticmethod
     def print_nexts(nexts):
+        """
+
+        :param nexts:
+
+        """
         for i, n in enumerate(nexts):
             RecorderListener.print_next(i, n)
 
     @staticmethod
     def _copy_lines(data):
+        """
+
+        :param data:
+
+        """
         lines = {}
 
         for lineidx in range(data.lines.size()):
@@ -68,6 +97,12 @@ class RecorderListener(ListenerBase):
         return lines
 
     def _record_data(self, strat, is_prenext=False):
+        """
+
+        :param strat:
+        :param is_prenext:  (Default value = False)
+
+        """
         curbars = []
         for i, d in enumerate(strat.datas):
             curbars.append((d._name, self._copy_lines(d)))
@@ -80,19 +115,22 @@ class RecorderListener(ListenerBase):
         for ind in strat.getindicators():
             indlines.append((ind.__class__, self._copy_lines(ind)))
 
-        self.nexts.append({
-            "prenext": is_prenext,
-            "strategy": self._copy_lines(strat),
-            "datas": curbars,
-            "observers": oblines,
-            "indicators": indlines,
-        })
+        self.nexts.append(
+            {
+                "prenext": is_prenext,
+                "strategy": self._copy_lines(strat),
+                "datas": curbars,
+                "observers": oblines,
+                "indicators": indlines,
+            }
+        )
 
-        _logger.info(f"------------------- next")
+        _logger.info("------------------- next")
         self.print_next(len(strat), self.nexts[-1])
-        _logger.info(f"------------------- next-end")
+        _logger.info("------------------- next-end")
 
     def next(self):
+        """ """
         for s in self._cerebro.runningstrats:
             # minper = s._getminperstatus()
             # if minper > 0:

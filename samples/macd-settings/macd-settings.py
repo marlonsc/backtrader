@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,12 +18,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
-
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
-import random
 
 import backtrader as bt
 
@@ -31,15 +34,19 @@ BTVERSION = tuple(int(x) for x in bt.__version__.split("."))
 
 
 class FixedPerc(bt.Sizer):
-    """This sizer simply returns a fixed size for any operation
-
-    Params:
-      - ``perc`` (default: ``0.20``) Perc of cash to allocate for operation
-    """
+    """This sizer simply returns a fixed size for any operation"""
 
     params = (("perc", 0.20),)  # perc of cash to use for operation
 
     def _getsizing(self, comminfo, cash, data, isbuy):
+        """
+
+        :param comminfo:
+        :param cash:
+        :param data:
+        :param isbuy:
+
+        """
         cashtouse = self.p.perc * cash
         if BTVERSION > (1, 7, 1, 93):
             size = comminfo.getsize(data.close[0], cashtouse)
@@ -49,8 +56,7 @@ class FixedPerc(bt.Sizer):
 
 
 class TheStrategy(bt.Strategy):
-    """
-    This strategy is loosely based on some of the examples from the Van
+    """This strategy is loosely based on some of the examples from the Van
     K. Tharp book: *Trade Your Way To Financial Freedom*. The logic:
 
       - Enter the market if:
@@ -66,6 +72,8 @@ class TheStrategy(bt.Strategy):
          exit.
        - If not, update the stop price if the new stop price would be higher
          than the current
+
+
     """
 
     params = (
@@ -80,6 +88,11 @@ class TheStrategy(bt.Strategy):
     )
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status == order.Completed:
             pass
 
@@ -87,6 +100,7 @@ class TheStrategy(bt.Strategy):
             self.order = None  # indicate no order is pending
 
     def __init__(self):
+        """ """
         self.macd = bt.indicators.MACD(
             self.data,
             period_me1=self.p.macd1,
@@ -105,9 +119,11 @@ class TheStrategy(bt.Strategy):
         self.smadir = self.sma - self.sma(-self.p.dirperiod)
 
     def start(self):
+        """ """
         self.order = None  # sentinel to avoid operrations on pending order
 
     def next(self):
+        """ """
         if self.order:
             return  # pending order execution
 
@@ -137,6 +153,11 @@ DATASETS = {
 
 
 def runstrat(args=None):
+    """
+
+    :param args:  (Default value = None)
+
+    """
     args = parse_args(args)
 
     cerebro = bt.Cerebro()
@@ -176,7 +197,9 @@ def runstrat(args=None):
 
     # Add TimeReturn Analyzers for self and the benchmark data
     cerebro.addanalyzer(
-        bt.analyzers.TimeReturn, _name="alltime_roi", timeframe=bt.TimeFrame.NoTimeFrame
+        bt.analyzers.TimeReturn,
+        _name="alltime_roi",
+        timeframe=bt.TimeFrame.NoTimeFrame,
     )
 
     cerebro.addanalyzer(
@@ -215,6 +238,11 @@ def runstrat(args=None):
 
 
 def parse_args(pargs=None):
+    """
+
+    :param pargs:  (Default value = None)
+
+    """
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -223,7 +251,10 @@ def parse_args(pargs=None):
 
     group1 = parser.add_mutually_exclusive_group(required=True)
     group1.add_argument(
-        "--data", required=False, default=None, help="Specific data to be read in"
+        "--data",
+        required=False,
+        default=None,
+        help="Specific data to be read in",
     )
 
     group1.add_argument(

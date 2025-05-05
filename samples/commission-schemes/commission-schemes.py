@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
@@ -29,17 +34,29 @@ import backtrader.indicators as btind
 
 
 class SMACrossOver(bt.Strategy):
+    """ """
+
     params = (
         ("stake", 1),
         ("period", 30),
     )
 
     def log(self, txt, dt=None):
-        """Logging function fot this strategy"""
+        """Logging function fot this strategy
+
+        :param txt:
+        :param dt:  (Default value = None)
+
+        """
         dt = dt or self.datas[0].datetime.date(0)
         print("%s, %s" % (dt.isoformat(), txt))
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status in [order.Submitted, order.Accepted]:
             # Buy/Sell order submitted/accepted to/by broker - Nothing to do
             return
@@ -50,24 +67,39 @@ class SMACrossOver(bt.Strategy):
             if order.isbuy():
                 self.log(
                     "BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f"
-                    % (order.executed.price, order.executed.value, order.executed.comm)
+                    % (
+                        order.executed.price,
+                        order.executed.value,
+                        order.executed.comm,
+                    )
                 )
             else:  # Sell
                 self.log(
                     "SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f"
-                    % (order.executed.price, order.executed.value, order.executed.comm)
+                    % (
+                        order.executed.price,
+                        order.executed.value,
+                        order.executed.comm,
+                    )
                 )
 
     def notify_trade(self, trade):
+        """
+
+        :param trade:
+
+        """
         if trade.isclosed:
             self.log("TRADE PROFIT, GROSS %.2f, NET %.2f" % (trade.pnl, trade.pnlcomm))
 
     def __init__(self):
+        """ """
         sma = btind.SMA(self.data, period=self.p.period)
         # > 0 crossing up / < 0 crossing down
         self.buysell_sig = btind.CrossOver(self.data, sma)
 
     def next(self):
+        """ """
         if self.buysell_sig > 0:
             self.log("BUY CREATE, %.2f" % self.data.close[0])
             self.buy(size=self.p.stake)  # keep order ref to avoid 2nd orders
@@ -78,6 +110,7 @@ class SMACrossOver(bt.Strategy):
 
 
 def runstrategy():
+    """ """
     args = parse_args()
 
     # Create a cerebro
@@ -102,7 +135,9 @@ def runstrategy():
     cerebro.broker.setcash(args.cash)
 
     commtypes = dict(
-        none=None, perc=bt.CommInfoBase.COMM_PERC, fixed=bt.CommInfoBase.COMM_FIXED
+        none=None,
+        perc=bt.CommInfoBase.COMM_PERC,
+        fixed=bt.CommInfoBase.COMM_FIXED,
     )
 
     # Add the commission - only stocks like a for each operation
@@ -124,6 +159,7 @@ def runstrategy():
 
 
 def parse_args():
+    """ """
     parser = argparse.ArgumentParser(
         description="Commission schemes",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -174,7 +210,10 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--mult", default=10, type=int, help="Multiplier for operations calculation"
+        "--mult",
+        default=10,
+        type=int,
+        help="Multiplier for operations calculation",
     )
 
     parser.add_argument(

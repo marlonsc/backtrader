@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,14 +18,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 from . import Indicator, MovAv
 
 
 class StandardDeviation(Indicator):
-    """
-    Calculates the standard deviation of the passed data for a given period
+    """Calculates the standard deviation of the passed data for a given period
 
     Note:
       - If 2 datas are provided as parameters, the 2nd is considered to be the
@@ -43,6 +47,8 @@ class StandardDeviation(Indicator):
 
     See:
       - http://en.wikipedia.org/wiki/Standard_deviation
+
+
     """
 
     alias = ("StdDev",)
@@ -55,11 +61,13 @@ class StandardDeviation(Indicator):
     )
 
     def _plotlabel(self):
+        """ """
         plabels = [self.p.period]
         plabels += [self.p.movav] * self.p.notdefault("movav")
         return plabels
 
     def __init__(self):
+        """ """
         if len(self.datas) > 1:
             mean = self.data1
         else:
@@ -90,6 +98,8 @@ class MeanDeviation(Indicator):
 
     See:
       - https://en.wikipedia.org/wiki/Average_absolute_deviation
+
+
     """
 
     alias = ("MeanDev",)
@@ -101,11 +111,13 @@ class MeanDeviation(Indicator):
     )
 
     def _plotlabel(self):
+        """ """
         plabels = [self.p.period]
         plabels += [self.p.movav] * self.p.notdefault("movav")
         return plabels
 
     def __init__(self):
+        """ """
         if len(self.datas) > 1:
             mean = self.data1
         else:

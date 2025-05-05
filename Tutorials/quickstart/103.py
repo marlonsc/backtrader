@@ -13,19 +13,25 @@ import backtrader as bt
 # functions
 # Create a Strategy
 class TestStrategy(bt.Strategy):
+    """ """
 
     def log(self, txt, dt=None):
-        """
-        Logging function for this strategy
+        """Logging function for this strategy
+
+        :param txt:
+        :param dt: (Default value = None)
+
         """
         dt = dt or self.datas[0].datetime.date(0)
         print(f"{dt.isoformat()} {txt}")
 
     def __init__(self):
+        """ """
         # Keep a reference to the "close" line in the data[0] data series
         self.dataclose = self.datas[0].close
 
     def next(self):
+        """ """
         # Log the closing price of the series from the reference
         self.log(f"Close {self.dataclose[0]:,.2f}")
 
@@ -36,6 +42,7 @@ class TestStrategy(bt.Strategy):
             self.buy()
 
     def next_simple(self):
+        """ """
         # Simply log the closing price of the series from the reference
         # Index [0] is the most recent price
         # Index [-1] is the previous price

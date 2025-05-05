@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """A BSON wrapper for long (int in python3)"""
 
 
@@ -24,6 +23,8 @@ class Int64(int):
 
     :Parameters:
       - `value`: the numeric value to represent
+
+
     """
 
     __slots__ = ()
@@ -31,7 +32,12 @@ class Int64(int):
     _type_marker = 18
 
     def __getstate__(self):
+        """ """
         return {}
 
     def __setstate__(self, state):
-        pass
+        """
+
+        :param state:
+
+        """

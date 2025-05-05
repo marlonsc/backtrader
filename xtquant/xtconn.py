@@ -1,17 +1,19 @@
-﻿# coding:utf-8
+# coding:utf-8
 
 from .xtdatacenter import try_create_client
 
-### config
+# config
 localhost = "127.0.0.1"
 
-### function
+# function
 status_callback = None
 
 
 def try_create_connection(addr):
-    """
-    addr: 'localhost:58610'
+    """addr: 'localhost:58610'
+
+    :param addr:
+
     """
     ip, port = addr.split(":")
     if not ip:
@@ -33,18 +35,22 @@ def try_create_connection(addr):
 
 
 def create_connection(addr):
+    """
+
+    :param addr:
+
+    """
     try:
         return try_create_connection(addr)
-    except Exception as e:
+    except Exception:
         return None
 
 
 def scan_all_server_instance():
-    """
-    扫描当前环境下所有XTQuant服务实例
+    """扫描当前环境下所有XTQuant服务实例
 
-    return: list
-        [ config1, config2,... ]
+
+    :returns: [ config1, config2,... ]
 
         config: dict
             {
@@ -53,10 +59,11 @@ def scan_all_server_instance():
                 'client_type': 'research',
                 'data_dir': 'xtquant_server/datadir',
             }
+
     """
 
-    import os, sys
     import json
+    import os
 
     result = []
 
@@ -83,7 +90,7 @@ def scan_all_server_instance():
                 if not port:
                     continue
 
-            except Exception as e:
+            except Exception:
                 continue
 
             is_running = False
@@ -94,25 +101,25 @@ def scan_all_server_instance():
                     os.remove(f_running_status)
                 except PermissionError:
                     is_running = True
-                except Exception as e:
+                except Exception:
                     pass
 
             config["is_running"] = is_running
 
             result.append(config)
 
-    except Exception as e:
+    except Exception:
         pass
 
     return result
 
 
 def get_internal_server_addr():
-    """
-    获取内部XTQuant服务地址
+    """获取内部XTQuant服务地址
 
-    return: str
-        '127.0.0.1:58610'
+
+    :returns: '127.0.0.1:58610'
+
     """
     try:
         from .xtdatacenter import get_local_server_port
@@ -120,21 +127,21 @@ def get_internal_server_addr():
         local_server_port = get_local_server_port()
         if local_server_port:
             return f"127.0.0.1:{local_server_port}"
-    except:
+    except BaseException:
         pass
     return None
 
 
 def scan_available_server_addr():
-    """
-    扫描当前环境下可用的XTQuant服务实例
+    """扫描当前环境下可用的XTQuant服务实例
 
-    return: list
-        [ '0.0.0.0:58610', '0.0.0.0:58611', ... ]
+
+    :returns: [ '0.0.0.0:58610', '0.0.0.0:58611', ... ]
+
     """
 
-    import os, sys
-    import json
+    import os
+    import sys
 
     result = []
 
@@ -165,10 +172,10 @@ def scan_available_server_addr():
                 else:
                     result_scan.append(addr)
 
-            except Exception as e:
+            except Exception:
                 continue
 
-    except Exception as e:
+    except Exception:
         pass
 
     result += result_scan
@@ -179,9 +186,13 @@ def scan_available_server_addr():
 
 
 def connect_any(addr_list, start_port, end_port):
-    """
-    addr_list: [ addr, ... ]
+    """addr_list: [ addr, ... ]
         addr: 'localhost:58610'
+
+    :param addr_list:
+    :param start_port:
+    :param end_port:
+
     """
     for addr in addr_list:
         try:
@@ -192,7 +203,7 @@ def connect_any(addr_list, start_port, end_port):
             cl = create_connection(addr)
             if cl:
                 return cl
-        except Exception as e:
+        except Exception:
             continue
 
     return None

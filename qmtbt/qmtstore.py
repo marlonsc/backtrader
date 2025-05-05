@@ -1,18 +1,31 @@
 import random
-from xtquant import xtdata, xttrader, xttype
-from backtrader.metabase import MetaParams
-import backtrader as bt
+
 import pandas as pd
+from backtrader.metabase import MetaParams
+from xtquant import xtdata, xttrader, xttype
 
 
 class MetaSingleton(MetaParams):
     """Metaclass to make a metaclassed class a singleton"""
 
     def __init__(cls, name, bases, dct):
+        """
+
+        :param name:
+        :param bases:
+        :param dct:
+
+        """
         super(MetaSingleton, cls).__init__(name, bases, dct)
         cls._singleton = None
 
     def __call__(cls, *args, **kwargs):
+        """
+
+        :param *args:
+        :param **kwargs:
+
+        """
         if cls._singleton is None:
             cls._singleton = super(MetaSingleton, cls).__call__(*args, **kwargs)
 
@@ -20,30 +33,52 @@ class MetaSingleton(MetaParams):
 
 
 class QMTStore(object, metaclass=MetaSingleton):
+    """ """
 
     def getdata(self, *args, **kwargs):
-        """Returns ``DataCls`` with args, kwargs"""
+        """Returns ``DataCls`` with args, kwargs
+
+        :param *args:
+        :param **kwargs:
+
+        """
         kwargs["store"] = self
         qmtFeed = self.__class__.DataCls(*args, **kwargs)
         return qmtFeed
 
     def getdatas(self, *args, **kwargs):
-        """Returns ``DataCls`` with *args, **kwargs (multiple entries)"""
+        """Returns ``DataCls`` with *args, **kwargs (multiple entries)
+
+        :param *args:
+        :param **kwargs:
+
+        """
         return [
             self.getdata(*args, **{**kwargs, "dataname": stock})
             for stock in kwargs.pop("code_list", 1)
         ]
 
     def setdatas(self, cerebro, datas):
-        """Set the datas"""
+        """Set the datas
+
+        :param cerebro:
+        :param datas:
+
+        """
         for data in datas:
             cerebro.adddata(data)
 
     def getbroker(self, *args, **kwargs):
-        """Returns broker with *args, **kwargs from registered ``BrokerCls``"""
+        """Returns broker with *args, **kwargs from registered ``BrokerCls``
+
+        :param *args:
+        :param **kwargs:
+
+        """
         return self.__class__.BrokerCls(*args, **kwargs)
 
     def __init__(self):
+        """ """
 
         self.mini_qmt_path = "E:\\software\\QMT\\userdata_mini"
         self.code_list = []
@@ -51,6 +86,7 @@ class QMTStore(object, metaclass=MetaSingleton):
         self.token = None
 
     def _get_benchmark(self):
+        """ """
         xtdata.download_history_data(
             stock_code="000300.SH",
             period="1d",
@@ -58,13 +94,18 @@ class QMTStore(object, metaclass=MetaSingleton):
             end_time="2023-01-01",
             dividend_type="none",
         )
-        pass
 
     def connect(self, mini_qmt_path, account):
+        """
+
+        :param mini_qmt_path:
+        :param account:
+
+        """
 
         try:
             xtdata.connect()
-        except:
+        except BaseException:
             return -1
 
         session_id = int(random.randint(100000, 999999))
@@ -86,13 +127,15 @@ class QMTStore(object, metaclass=MetaSingleton):
         return connect_result
 
     def _auto_expand_array_columns(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Write by ChatGPT4
+        """Write by ChatGPT4
 
         Automatically identify and expand DataFrame columns containing array values.
 
-        Returns:
-        - A new DataFrame with the expanded columns.
+        :param df:
+        :type df: pd.DataFrame
+        :returns: - A new DataFrame with the expanded columns.
+        :rtype: pd.DataFrame
+
         """
         for col in df.columns:
             if df[col].apply(lambda x: isinstance(x, (list, tuple))).all():
@@ -100,7 +143,7 @@ class QMTStore(object, metaclass=MetaSingleton):
                 expanded_df = df[col].apply(pd.Series)
                 # Generate new column names
                 expanded_df.columns = [
-                    f"{col}{i+1}" for i in range(expanded_df.shape[1])
+                    f"{col}{i + 1}" for i in range(expanded_df.shape[1])
                 ]
                 # Drop the original column and join the expanded columns
                 df = df.drop(col, axis=1).join(expanded_df)
@@ -116,14 +159,21 @@ class QMTStore(object, metaclass=MetaSingleton):
         dividend_type="front",
         download=True,
     ):
-        """
-        获取历史数据
+        """获取历史数据
 
         参数：
             symbol: 标的代码
             period: 周期
             start_time: 起始日期
             end_time: 终止日期
+
+        :param symbol:
+        :param period:
+        :param start_time:  (Default value = "")
+        :param end_time:  (Default value = "")
+        :param count:  (Default value = -1)
+        :param dividend_type:  (Default value = "front")
+        :param download:  (Default value = True)
 
         """
         print("下载数据" + symbol)
@@ -149,6 +199,15 @@ class QMTStore(object, metaclass=MetaSingleton):
         return res
 
     def _subscribe_live(self, symbol, period, callback, start_time="", end_time=""):
+        """
+
+        :param symbol:
+        :param period:
+        :param callback:
+        :param start_time:  (Default value = "")
+        :param end_time:  (Default value = "")
+
+        """
 
         seq = xtdata.subscribe_quote(
             stock_code=symbol,
@@ -161,4 +220,9 @@ class QMTStore(object, metaclass=MetaSingleton):
         return seq
 
     def _unsubscribe_live(self, seq):
+        """
+
+        :param seq:
+
+        """
         xtdata.unsubscribe_quote(seq)

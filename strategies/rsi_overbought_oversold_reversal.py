@@ -134,21 +134,26 @@ EXAMPLE:
 python strategies/rsi_overbought_oversold_reversal.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --rsi-period 14 --oversold 30 --overbought 70 --plot
 """
 
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
 import os
 import sys
-import pandas as pd
+
 import backtrader as bt
 
 # Import utility functions
 from strategies.utils import (
-    get_db_data,
-    print_performance_metrics,
     TradeThrottling,
     add_standard_analyzers,
+    get_db_data,
+    print_performance_metrics,
 )
 
 # Add the parent directory to the Python path to import shared modules
@@ -158,9 +163,7 @@ if parent_dir not in sys.path:
 
 
 class StockPriceData(bt.feeds.PandasData):
-    """
-    Stock Price Data Feed
-    """
+    """Stock Price Data Feed"""
 
     params = (
         ("datetime", None),
@@ -174,8 +177,7 @@ class StockPriceData(bt.feeds.PandasData):
 
 
 class RSIOverboughtOversoldStrategy(bt.Strategy, TradeThrottling):
-    """
-    RSI Overbought/Oversold Reversal Strategy
+    """RSI Overbought/Oversold Reversal Strategy
 
     This strategy looks for extreme RSI values to identify potential reversals:
     - Buy when RSI moves below oversold level and starts to turn up
@@ -202,6 +204,8 @@ class RSIOverboughtOversoldStrategy(bt.Strategy, TradeThrottling):
 
     Using this strategy in trending markets will result in numerous false signals,
     premature exits, and poor overall performance.
+
+
     """
 
     params = (
@@ -228,7 +232,13 @@ class RSIOverboughtOversoldStrategy(bt.Strategy, TradeThrottling):
     )
 
     def log(self, txt, dt=None, level="info"):
-        """Logging function"""
+        """Logging function
+
+        :param txt:
+        :param dt:  (Default value = None)
+        :param level:  (Default value = "info")
+
+        """
         if level == "debug" and self.p.logging_level != "debug":
             return
 
@@ -236,6 +246,7 @@ class RSIOverboughtOversoldStrategy(bt.Strategy, TradeThrottling):
         print(f"{dt.isoformat()}: {txt}")
 
     def __init__(self):
+        """ """
         # Keep track of price data
         self.dataclose = self.datas[0].close
         self.datahigh = self.datas[0].high
@@ -273,7 +284,11 @@ class RSIOverboughtOversoldStrategy(bt.Strategy, TradeThrottling):
         self.last_trade_date = None
 
     def notify_order(self, order):
-        """Handle order notifications"""
+        """Handle order notifications
+
+        :param order:
+
+        """
         if order.status in [order.Submitted, order.Accepted]:
             return
 
@@ -329,7 +344,11 @@ class RSIOverboughtOversoldStrategy(bt.Strategy, TradeThrottling):
         self.order = None
 
     def notify_trade(self, trade):
-        """Track completed trades"""
+        """Track completed trades
+
+        :param trade:
+
+        """
         if not trade.isclosed:
             return
 
@@ -379,7 +398,8 @@ class RSIOverboughtOversoldStrategy(bt.Strategy, TradeThrottling):
             return False
 
         # Check if market is in a strong trend (avoid if it is)
-        # This helps ensure we're in a ranging market which is optimal for this strategy
+        # This helps ensure we're in a ranging market which is optimal for this
+        # strategy
         adx = bt.indicators.AverageDirectionalMovementIndex(self.data, period=14)
         if adx > 25:  # ADX > 25 indicates a trending market
             self.log("Market appears to be trending, avoiding entry", level="warning")
@@ -401,7 +421,10 @@ class RSIOverboughtOversoldStrategy(bt.Strategy, TradeThrottling):
             and oversold_bars >= self.p.confirmation
         ):
             # Basic RSI signal is valid
-            self.log(f"RSI oversold signal detected: {self.rsi[0]:.2f}", level="debug")
+            self.log(
+                f"RSI oversold signal detected: {self.rsi[0]:.2f}",
+                level="debug",
+            )
 
             # Check additional stochastic confirmation if enabled
             if self.p.use_stoch and not self.is_stoch_valid():
@@ -460,7 +483,10 @@ class RSIOverboughtOversoldStrategy(bt.Strategy, TradeThrottling):
         ):
             self.highest_price = self.datahigh[0]
             self.trail_price = self.highest_price * (1 - self.p.trail_pct / 100)
-            self.log(f"Updated trailing stop to {self.trail_price:.2f}", level="debug")
+            self.log(
+                f"Updated trailing stop to {self.trail_price:.2f}",
+                level="debug",
+            )
 
         # Check trailing stop
         if (
@@ -507,6 +533,7 @@ class RSIOverboughtOversoldStrategy(bt.Strategy, TradeThrottling):
         return False
 
     def next(self):
+        """ """
         # If an order is pending, we cannot send a new one
         if self.order:
             return
@@ -522,7 +549,10 @@ class RSIOverboughtOversoldStrategy(bt.Strategy, TradeThrottling):
                 if self.is_rsi_valid()
                 else "RSI: Initializing"
             )
-            self.log(f"Close: {self.dataclose[0]:.2f}, {rsi_msg}", level="debug")
+            self.log(
+                f"Close: {self.dataclose[0]:.2f}, {rsi_msg}",
+                level="debug",
+            )
             if self.p.use_stoch and self.is_stoch_valid():
                 self.log(
                     f"Stochastic K: {self.stoch.lines.percK[0]:.2f}, "
@@ -604,7 +634,10 @@ def parse_args():
         help="Starting date in YYYY-MM-DD format",
     )
     parser.add_argument(
-        "--todate", "-t", default="2024-12-31", help="Ending date in YYYY-MM-DD format"
+        "--todate",
+        "-t",
+        default="2024-12-31",
+        help="Ending date in YYYY-MM-DD format",
     )
     parser.add_argument(
         "--cash", "-c", type=float, default=100000.0, help="Starting cash"
@@ -612,10 +645,18 @@ def parse_args():
 
     # RSI parameters
     parser.add_argument(
-        "--rsi-period", "-rp", type=int, default=14, help="Period for RSI calculation"
+        "--rsi-period",
+        "-rp",
+        type=int,
+        default=14,
+        help="Period for RSI calculation",
     )
     parser.add_argument(
-        "--oversold", "-os", type=float, default=30, help="Oversold threshold for RSI"
+        "--oversold",
+        "-os",
+        type=float,
+        default=30,
+        help="Oversold threshold for RSI",
     )
     parser.add_argument(
         "--overbought",
@@ -657,16 +698,31 @@ def parse_args():
     # Exit parameters
     parser.add_argument("--use-stop", "-st", action="store_true", help="Use stop loss")
     parser.add_argument(
-        "--stop-pct", "-sp", type=float, default=2.0, help="Stop loss percentage"
+        "--stop-pct",
+        "-sp",
+        type=float,
+        default=2.0,
+        help="Stop loss percentage",
     )
     parser.add_argument(
-        "--use-trail", "-ut", action="store_true", help="Enable trailing stop loss"
+        "--use-trail",
+        "-ut",
+        action="store_true",
+        help="Enable trailing stop loss",
     )
     parser.add_argument(
-        "--trail-pct", "-tp", type=float, default=1.0, help="Trailing stop percentage"
+        "--trail-pct",
+        "-tp",
+        type=float,
+        default=1.0,
+        help="Trailing stop percentage",
     )
     parser.add_argument(
-        "--take-profit", "-tkp", type=float, default=4.0, help="Take profit percentage"
+        "--take-profit",
+        "-tkp",
+        type=float,
+        default=4.0,
+        help="Take profit percentage",
     )
 
     # Position sizing parameters

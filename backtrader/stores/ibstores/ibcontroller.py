@@ -7,78 +7,18 @@ from contextlib import suppress
 from dataclasses import dataclass
 from typing import ClassVar
 
-from eventkit import Event
-
 import ib_insync.util as util
+from eventkit import Event
 from ib_insync.contract import Contract, Forex
 from ib_insync.ib import IB
 
 
 @dataclass
 class IBC:
-    r"""
-    Programmatic control over starting and stopping TWS/Gateway
+    r"""Programmatic control over starting and stopping TWS/Gateway
     using IBC (https://github.com/IbcAlpha/IBC).
 
-    Args:
-        twsVersion (int): (required) The major version number for
-            TWS or gateway.
-        gateway (bool):
-            * True = gateway
-            * False = TWS
-        tradingMode (str): 'live' or 'paper'.
-        userid (str): IB account username. It is recommended to set the real
-            username/password in a secured IBC config file.
-        password (str): IB account password.
-        twsPath (str): Path to the TWS installation folder.
-            Defaults:
 
-            * Linux:    ~/Jts
-            * OS X:     ~/Applications
-            * Windows:  C:\\Jts
-        twsSettingsPath (str): Path to the TWS settings folder.
-            Defaults:
-
-            * Linux:     ~/Jts
-            * OS X:      ~/Jts
-            * Windows:   Not available
-        ibcPath (str): Path to the IBC installation folder.
-            Defaults:
-
-            * Linux:     /opt/ibc
-            * OS X:      /opt/ibc
-            * Windows:   C:\\IBC
-        ibcIni (str): Path to the IBC configuration file.
-            Defaults:
-
-            * Linux:     ~/ibc/config.ini
-            * OS X:      ~/ibc/config.ini
-            * Windows:   %%HOMEPATH%%\\Documents\IBC\\config.ini
-        javaPath (str): Path to Java executable.
-            Default is to use the Java VM included with TWS/gateway.
-        fixuserid (str): FIX account user id (gateway only).
-        fixpassword (str): FIX account password (gateway only).
-        on2fatimeout (str): What to do if 2-factor authentication times
-            out; Can be 'restart' or 'exit'.
-
-    This is not intended to be run in a notebook.
-
-    To use IBC on Windows, the proactor (or quamash) event loop
-    must have been set:
-
-    .. code-block:: python
-
-        import asyncio
-        asyncio.set_event_loop(asyncio.ProactorEventLoop())
-
-    Example usage:
-
-    .. code-block:: python
-
-        ibc = IBC(976, gateway=True, tradingMode='live',
-            userid='edemo', password='demouser')
-        ibc.start()
-        IB.run()
     """
 
     IbcLogLevel: ClassVar = logging.DEBUG
@@ -98,6 +38,7 @@ class IBC:
     on2fatimeout: str = ""
 
     def __post_init__(self):
+        """ """
         self._isWindows = sys.platform == "win32"
         if not self.ibcPath:
             self.ibcPath = "/opt/ibc" if not self._isWindows else "C:\\IBC"
@@ -106,21 +47,28 @@ class IBC:
         self._logger = logging.getLogger("ib_insync.IBC")
 
     def __enter__(self):
+        """ """
         self.start()
         return self
 
     def __exit__(self, *_exc):
+        """
+
+        :param *_exc:
+
+        """
         self.terminate()
 
     def start(self):
-        """Launch TWS/IBG."""
+        r"""Launch TWS/IBG."""
         util.run(self.startAsync())
 
     def terminate(self):
-        """Terminate TWS/IBG."""
+        r"""Terminate TWS/IBG."""
         util.run(self.terminateAsync())
 
     async def startAsync(self):
+        """ """
         if self._proc:
             return
         self._logger.info("Starting")
@@ -144,9 +92,11 @@ class IBC:
 
         # create shell command
         cmd = [
-            f"{self.ibcPath}\\scripts\\StartIBC.bat"
-            if self._isWindows
-            else f"{self.ibcPath}/scripts/ibcstart.sh"
+            (
+                f"{self.ibcPath}\\scripts\\StartIBC.bat"
+                if self._isWindows
+                else f"{self.ibcPath}/scripts/ibcstart.sh"
+            )
         ]
         for k, v in util.dataclassAsDict(self).items():
             arg = args[k][self._isWindows]
@@ -165,6 +115,7 @@ class IBC:
         self._monitor = asyncio.ensure_future(self.monitorAsync())
 
     async def terminateAsync(self):
+        """ """
         if not self._proc:
             return
         self._logger.info("Terminating")
@@ -182,6 +133,7 @@ class IBC:
         self._proc = None
 
     async def monitorAsync(self):
+        """ """
         while self._proc:
             line = await self._proc.stdout.readline()
             if not line:
@@ -191,8 +143,7 @@ class IBC:
 
 @dataclass
 class Watchdog:
-    """
-    Start, connect and watch over the TWS or gateway app and try to keep it
+    r"""Start, connect and watch over the TWS or gateway app and try to keep it
     up and running. It is intended to be used in an event-driven
     application that properly initializes itself upon (re-)connect.
 
@@ -200,51 +151,7 @@ class Watchdog:
     Do not expect Watchdog to magically shield you from reality. Do not use
     Watchdog unless you understand what it does and doesn't do.
 
-    Args:
-        controller (IBC): (required) IBC instance.
-        ib (IB): (required) IB instance to be used. Do not connect this
-            instance as Watchdog takes care of that.
-        host (str): Used for connecting IB instance.
-        port (int):  Used for connecting IB instance.
-        clientId (int):  Used for connecting IB instance.
-        connectTimeout (float):  Used for connecting IB instance.
-        readonly (bool): Used for connecting IB instance.
-        appStartupTime (float): Time (in seconds) that the app is given
-            to start up. Make sure that it is given ample time.
-        appTimeout (float): Timeout (in seconds) for network traffic idle time.
-        retryDelay (float): Time (in seconds) to restart app after a
-            previous failure.
-        probeContract (Contract): Contract to use for historical data
-            probe requests (default is EURUSD).
-        probeTimeout (float); Timeout (in seconds) for the probe request.
 
-    The idea is to wait until there is no traffic coming from the app for
-    a certain amount of time (the ``appTimeout`` parameter). This triggers
-    a historical request to be placed just to see if the app is still alive
-    and well. If yes, then continue, if no then restart the whole app
-    and reconnect. Restarting will also occur directly on errors 1100 and 100.
-
-    Example usage:
-
-    .. code-block:: python
-
-        def onConnected():
-            print(ib.accountValues())
-
-        ibc = IBC(974, gateway=True, tradingMode='paper')
-        ib = IB()
-        ib.connectedEvent += onConnected
-        watchdog = Watchdog(ibc, ib, port=4002)
-        watchdog.start()
-        ib.run()
-
-    Events:
-        * ``startingEvent`` (watchdog: :class:`.Watchdog`)
-        * ``startedEvent`` (watchdog: :class:`.Watchdog`)
-        * ``stoppingEvent`` (watchdog: :class:`.Watchdog`)
-        * ``stoppedEvent`` (watchdog: :class:`.Watchdog`)
-        * ``softTimeoutEvent`` (watchdog: :class:`.Watchdog`)
-        * ``hardTimeoutEvent`` (watchdog: :class:`.Watchdog`)
     """
 
     events = [
@@ -272,6 +179,7 @@ class Watchdog:
     probeTimeout: float = 4
 
     def __post_init__(self):
+        """ """
         self.startingEvent = Event("startingEvent")
         self.startedEvent = Event("startedEvent")
         self.stoppingEvent = Event("stoppingEvent")
@@ -288,28 +196,45 @@ class Watchdog:
         self._logger = logging.getLogger("ib_insync.Watchdog")
 
     def start(self):
+        """ """
         self._logger.info("Starting")
         self.startingEvent.emit(self)
         self._runner = asyncio.ensure_future(self.runAsync())
         return self._runner
 
     def stop(self):
+        """ """
         self._logger.info("Stopping")
         self.stoppingEvent.emit(self)
         self.ib.disconnect()
         self._runner = None
 
     async def runAsync(self):
+        """ """
 
         def onTimeout(idlePeriod):
+            """
+
+            :param idlePeriod:
+
+            """
             if not waiter.done():
                 waiter.set_result(None)
 
         def onError(reqId, errorCode, errorString, contract):
+            """
+
+            :param reqId:
+            :param errorCode:
+            :param errorString:
+            :param contract:
+
+            """
             if errorCode in {100, 1100} and not waiter.done():
                 waiter.set_exception(Warning(f"Error {errorCode}"))
 
         def onDisconnected():
+            """ """
             if not waiter.done():
                 waiter.set_exception(Warning("Disconnected"))
 
@@ -339,7 +264,12 @@ class Watchdog:
                     self._logger.debug("Soft timeout")
                     self.softTimeoutEvent.emit(self)
                     probe = self.ib.reqHistoricalDataAsync(
-                        self.probeContract, "", "30 S", "5 secs", "MIDPOINT", False
+                        self.probeContract,
+                        "",
+                        "30 S",
+                        "5 secs",
+                        "MIDPOINT",
+                        False,
                     )
                     bars = None
                     with suppress(asyncio.TimeoutError):

@@ -2,32 +2,19 @@
 Utility functions for Backtrader strategies
 """
 
-import datetime
-import psycopg2
-import pandas as pd
 import backtrader as bt
+import pandas as pd
+import psycopg2
 
 
 def print_performance_metrics(cerebro, results, fromdate=None, todate=None):
-    """
-    Print standardized performance metrics from Backtrader's analyzers
+    """Print standardized performance metrics from Backtrader's analyzers
 
-    Parameters:
-    - cerebro: The Cerebro instance
-    - results: The results returned from cerebro.run()
-    - fromdate: Start date for the backtest (optional)
-    - todate: End date for the backtest (optional)
+    :param cerebro: The Cerebro instance
+    :param results: The results returned from cerebro
+    :param fromdate: Start date for the backtest (Default value = None)
+    :param todate: End date for the backtest (Default value = None)
 
-    Prints:
-    - Final Portfolio Value
-    - Return
-    - Sharpe Ratio
-    - Max Drawdown
-    - Trade metrics (total, won, lost, win rate)
-    - Average Win/Loss
-    - Profit Factor
-    - Buy & Hold Comparison
-    - Commission paid
     """
     strat = results[0]
 
@@ -91,7 +78,8 @@ def print_performance_metrics(cerebro, results, fromdate=None, todate=None):
                 and cerebro.broker.commission > 0
             ):
                 try:
-                    # Alternative calculation: difference between gross-net profits and actual net result
+                    # Alternative calculation: difference between gross-net
+                    # profits and actual net result
                     pnl_total = 0
                     pnlcomm_total = 0
                     for trade_type in ["won", "lost"]:
@@ -121,7 +109,8 @@ def print_performance_metrics(cerebro, results, fromdate=None, todate=None):
         gross_profit_pct = (gross_profit / initial_value) * 100 if initial_value else 0
         gross_loss_pct = (gross_loss / initial_value) * 100 if initial_value else 0
 
-        # Define open_pnl as the same as net_profit since we aren't tracking open positions differently
+        # Define open_pnl as the same as net_profit since we aren't tracking
+        # open positions differently
         open_pnl = 0  # Set to 0 as per example output
         open_pnl_pct = 0
 
@@ -156,7 +145,8 @@ def print_performance_metrics(cerebro, results, fromdate=None, todate=None):
             max_drawdown_pct / 100
         )  # Keep as decimal for reporting
 
-        # Get maximum run-up (this is approximated as the maximum of net profit)
+        # Get maximum run-up (this is approximated as the maximum of net
+        # profit)
         max_equity_runup = net_profit
         max_equity_runup_pct = net_profit_pct / 100  # Convert to decimal
 
@@ -189,18 +179,22 @@ def print_performance_metrics(cerebro, results, fromdate=None, todate=None):
             full_df = data.p.dataname  # Get the original pandas DataFrame
 
             if isinstance(full_df, pd.DataFrame) and not full_df.empty:
-                # Filter the dataframe to use only the date range specified by fromdate and todate
+                # Filter the dataframe to use only the date range specified by
+                # fromdate and todate
                 if fromdate and todate:
-                    # Convert fromdate and todate to pandas timestamp format for filtering
+                    # Convert fromdate and todate to pandas timestamp format
+                    # for filtering
                     pd_fromdate = pd.Timestamp(fromdate)
                     pd_todate = pd.Timestamp(todate)
 
-                    # Filter dataframe to include only rows within the specified date range
+                    # Filter dataframe to include only rows within the
+                    # specified date range
                     filtered_df = full_df[
                         (full_df.index >= pd_fromdate) & (full_df.index <= pd_todate)
                     ]
 
-                    # Use the filtered dataframe if it's not empty, otherwise fall back to full dataframe
+                    # Use the filtered dataframe if it's not empty, otherwise
+                    # fall back to full dataframe
                     if not filtered_df.empty:
                         first_close = filtered_df["Close"].iloc[0]
                         last_close = filtered_df["Close"].iloc[-1]
@@ -242,7 +236,7 @@ def print_performance_metrics(cerebro, results, fromdate=None, todate=None):
                 buy_hold_pct = 0
                 buy_hold_profit = 0
                 buy_hold_final_value = initial_value
-        except Exception as e:
+        except Exception:
             buy_hold_pct = 0
             buy_hold_profit = 0
             buy_hold_final_value = initial_value
@@ -269,11 +263,11 @@ def print_performance_metrics(cerebro, results, fromdate=None, todate=None):
 
         print(
             f"Max equity run-up: {max_equity_runup:.2f} USD"
-            f" ({max_equity_runup_pct*100:.2f}%)"
+            f" ({max_equity_runup_pct * 100:.2f}%)"
         )
         print(
             f"Max equity drawdown: {max_equity_drawdown:.2f} USD"
-            f" ({max_equity_drawdown_pct*100:.2f}%)"
+            f" ({max_equity_drawdown_pct * 100:.2f}%)"
         )
         print(f"Max contracts held: {max_contracts_held}")
 
@@ -288,10 +282,10 @@ def print_performance_metrics(cerebro, results, fromdate=None, todate=None):
         try:
             sharpe = strat.analyzers.sharperatio.get_analysis()
             if sharpe and "sharperatio" in sharpe and sharpe["sharperatio"]:
-                print(f'Sharpe Ratio: {sharpe["sharperatio"]:.2f}')
+                print(f"Sharpe Ratio: {sharpe['sharperatio']:.2f}")
             else:
                 print("Sharpe Ratio: N/A (insufficient data)")
-        except:
+        except BaseException:
             print("Sharpe Ratio: N/A (insufficient data)")
 
         print(f"Total Trades: {total_trades}")
@@ -331,20 +325,17 @@ def print_performance_metrics(cerebro, results, fromdate=None, todate=None):
 
 
 def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate, interval="1h"):
-    """
-    Fetch historical price data from PostgreSQL database
+    """Fetch historical price data from PostgreSQL database
 
-    Parameters:
-    - symbol: The symbol to fetch data for
-    - dbuser: PostgreSQL username
-    - dbpass: PostgreSQL password
-    - dbname: PostgreSQL database name
-    - fromdate: Start date as datetime object
-    - todate: End date as datetime object
-    - interval: Time interval for data ('1h', '4h', '1d') - default: '1h'
+    :param symbol: The symbol to fetch data for
+    :param dbuser: PostgreSQL username
+    :param dbpass: PostgreSQL password
+    :param dbname: PostgreSQL database name
+    :param fromdate: Start date as datetime object
+    :param todate: End date as datetime object
+    :param interval: Time interval for data (Default value = "1h")
+    :returns: DataFrame with OHLCV data
 
-    Returns:
-    - DataFrame with OHLCV data
     """
     # Format dates for database query
     from_str = fromdate.strftime("%Y-%m-%d %H:%M:%S")
@@ -389,13 +380,13 @@ def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate, interval="1h")
         # Select the query based on the interval
         if interval == "4h":
             query = query4hour
-            print(f"Using 4-hour interval data from stock_price_4hour")
+            print("Using 4-hour interval data from stock_price_4hour")
         elif interval == "1d":
             query = query1day
-            print(f"Using daily interval data from stock_price_1day")
+            print("Using daily interval data from stock_price_1day")
         else:  # Default to 1h
             query = query1hour
-            print(f"Using 1-hour interval data from stock_price_data")
+            print("Using 1-hour interval data from stock_price_data")
 
         # Execute the query
         cursor.execute(query, (symbol, from_str, to_str))
@@ -451,8 +442,7 @@ def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate, interval="1h")
 
 
 class TradeThrottling:
-    """
-    Trade throttling functionality that can be added to any strategy
+    """Trade throttling functionality that can be added to any strategy
 
     This mixin allows setting a minimum number of days between trades to avoid
     overtrading and to let positions develop. It can be configured through the
@@ -463,15 +453,18 @@ class TradeThrottling:
 
     Usage in next method:
         if not self.can_trade_now():
-            return
+
+
     """
 
     def can_trade_now(self):
-        """
-        Check if enough days have passed since the last trade for throttling
+        """Check if enough days have passed since the last trade for throttling
 
-        Returns:
-            bool: True if a new trade can be entered, False otherwise
+
+        :returns: True if a new trade can be entered, False otherwise
+
+        :rtype: bool
+
         """
         # If throttling is disabled or no previous trade, allow trading
         if (
@@ -493,11 +486,10 @@ class TradeThrottling:
 
 # Standard Backtrader analyzer setup
 def add_standard_analyzers(cerebro):
-    """
-    Add the standard set of analyzers to a Cerebro instance
+    """Add the standard set of analyzers to a Cerebro instance
 
-    Parameters:
-    - cerebro: The Cerebro instance to add analyzers to
+    :param cerebro: The Cerebro instance to add analyzers to
+
     """
     cerebro.addanalyzer(bt.analyzers.SharpeRatio, _name="sharperatio")
     cerebro.addanalyzer(bt.analyzers.Returns, _name="returns")

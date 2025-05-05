@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,34 +18,44 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-# Reference
-# https://estrategiastrading.com/oro-bolsa-estadistica-con-python/
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
 
+import backtrader as bt
 import scipy.stats
 
-import backtrader as bt
+# Reference
+# https://estrategiastrading.com/oro-bolsa-estadistica-con-python/
 
 
 class PearsonR(bt.ind.PeriodN):
+    """ """
+
     _mindatas = 2  # hint to the platform
 
     lines = ("correlation",)
     params = (("period", 20),)
 
     def next(self):
+        """ """
         c, p = scipy.stats.pearsonr(
-            self.data0.get(size=self.p.period), self.data1.get(size=self.p.period)
+            self.data0.get(size=self.p.period),
+            self.data1.get(size=self.p.period),
         )
 
         self.lines.correlation[0] = c
 
 
 class MACrossOver(bt.Strategy):
+    """ """
+
     params = (
         ("ma", bt.ind.MovAv.SMA),
         ("pd1", 20),
@@ -53,12 +63,18 @@ class MACrossOver(bt.Strategy):
     )
 
     def __init__(self):
+        """ """
         ma1 = self.p.ma(self.data0, period=self.p.pd1, subplot=True)
         self.p.ma(self.data1, period=self.p.pd2, plotmaster=ma1)
         PearsonR(self.data0, self.data1)
 
 
 def runstrat(args=None):
+    """
+
+    :param args: (Default value = None)
+
+    """
     args = parse_args(args)
 
     cerebro = bt.Cerebro()
@@ -113,6 +129,11 @@ def runstrat(args=None):
 
 
 def parse_args(pargs=None):
+    """
+
+    :param pargs: (Default value = None)
+
+    """
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -139,7 +160,10 @@ def parse_args(pargs=None):
     )
 
     parser.add_argument(
-        "--offline", required=False, action="store_true", help="Use the offline files"
+        "--offline",
+        required=False,
+        action="store_true",
+        help="Use the offline files",
     )
 
     # Defaults for dates

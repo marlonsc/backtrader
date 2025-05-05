@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tools for creating and manipulating SON, the Serialized Ocument Notation.
 
 Regular dictionaries can be used instead of SON objects, but not when the order
@@ -60,7 +59,7 @@ class SON(Dict[_Key, _Value]):
         data: Optional[
             Union[Mapping[_Key, _Value], Iterable[Tuple[_Key, _Value]]]
         ] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         self.__keys = []
         dict.__init__(self)
@@ -119,7 +118,8 @@ class SON(Dict[_Key, _Value]):
         self.__keys = []
         super(SON, self).clear()
 
-    def setdefault(self, key: _Key, default: _Value) -> _Value:  # type: ignore[override]
+    # type: ignore[override]
+    def setdefault(self, key: _Key, default: _Value) -> _Value:
         try:
             return self[key]
         except KeyError:
@@ -148,7 +148,8 @@ class SON(Dict[_Key, _Value]):
         del self[k]
         return (k, v)
 
-    def update(self, other: Optional[Any] = None, **kwargs: _Value) -> None:  # type: ignore[override]
+    # type: ignore[override]
+    def update(self, other: Optional[Any] = None, **kwargs: _Value) -> None:
         # Make progressively weaker assumptions about "other"
         if other is None:
             pass
@@ -164,7 +165,10 @@ class SON(Dict[_Key, _Value]):
         if kwargs:
             self.update(kwargs)
 
-    def get(self, key: _Key, default: Optional[Union[_Value, _T]] = None) -> Union[_Value, _T, None]:  # type: ignore[override]
+    # type: ignore[override]
+    def get(
+        self, key: _Key, default: Optional[Union[_Value, _T]] = None
+    ) -> Union[_Value, _T, None]:
         try:
             return self[key]
         except KeyError:

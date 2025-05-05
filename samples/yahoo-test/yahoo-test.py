@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,19 +18,23 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
 
 import backtrader as bt
 import backtrader.indicators as btind
-import backtrader.feeds as btfeeds
-import backtrader.filters as btfilters
 import yfinance as yf
 
 
 def runstrat():
+    """ """
     args = parse_args()
 
     # Create a cerebro entity
@@ -40,8 +44,8 @@ def runstrat():
     cerebro.addstrategy(bt.Strategy)
 
     # Get the dates from the args
-    fromdate = datetime.datetime.strptime(args.fromdate, "%Y-%m-%d")
-    todate = datetime.datetime.strptime(args.todate, "%Y-%m-%d")
+    datetime.datetime.strptime(args.fromdate, "%Y-%m-%d")
+    datetime.datetime.strptime(args.todate, "%Y-%m-%d")
 
     # data = btfeeds.YahooFinanceData(
     #     dataname=args.data,
@@ -71,6 +75,7 @@ def runstrat():
 
 
 def parse_args():
+    """ """
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Calendar Days Filter Sample",
@@ -106,13 +111,20 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--wrcsv", "-wc", action="store_true", help="Enable CSV Output in the writer"
+        "--wrcsv",
+        "-wc",
+        action="store_true",
+        help="Enable CSV Output in the writer",
     )
 
     parser.add_argument("--plot", "-p", action="store_true", help="Plot the read data")
 
     parser.add_argument(
-        "--numfigs", "-n", default=1, type=int, help="Plot using numfigs figures"
+        "--numfigs",
+        "-n",
+        default=1,
+        type=int,
+        help="Plot using numfigs figures",
     )
 
     return parser.parse_args()

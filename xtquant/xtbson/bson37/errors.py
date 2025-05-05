@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Exceptions raised by the BSON package."""
 
 
@@ -20,16 +19,16 @@ class BSONError(Exception):
 
 
 class InvalidBSON(BSONError):
-    """Raised when trying to create a BSON object from invalid data."""
+    """ """
 
 
 class InvalidStringData(BSONError):
-    """Raised when trying to encode a string containing non-UTF8 data."""
+    """ """
 
 
 class InvalidDocument(BSONError):
-    """Raised when trying to create a BSON object from an invalid document."""
+    """ """
 
 
 class InvalidId(BSONError):
-    """Raised when trying to create an ObjectId from invalid data."""
+    """ """

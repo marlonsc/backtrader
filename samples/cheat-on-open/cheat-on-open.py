@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
@@ -27,18 +32,26 @@ import backtrader as bt
 
 
 class St(bt.Strategy):
+    """ """
+
     params = dict(
         periods=[10, 30],
         matype=bt.ind.SMA,
     )
 
     def __init__(self):
+        """ """
         self.cheating = self.cerebro.p.cheat_on_open
         mas = [self.p.matype(period=x) for x in self.p.periods]
         self.signal = bt.ind.CrossOver(*mas)
         self.order = None
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status != order.Completed:
             return
 
@@ -52,6 +65,11 @@ class St(bt.Strategy):
         )
 
     def operate(self, fromopen):
+        """
+
+        :param fromopen:
+
+        """
         if self.order is not None:
             return
         if self.position:
@@ -66,6 +84,7 @@ class St(bt.Strategy):
             self.order = self.buy()
 
     def next(self):
+        """ """
         print(
             "{} next, open {} close {}".format(
                 self.data.datetime.date(), self.data.open[0], self.data.close[0]
@@ -77,12 +96,18 @@ class St(bt.Strategy):
         self.operate(fromopen=False)
 
     def next_open(self):
+        """ """
         if not self.cheating:
             return
         self.operate(fromopen=True)
 
 
 def runstrat(args=None):
+    """
+
+    :param args:  (Default value = None)
+
+    """
     args = parse_args(args)
 
     cerebro = bt.Cerebro()
@@ -118,6 +143,11 @@ def runstrat(args=None):
 
 
 def parse_args(pargs=None):
+    """
+
+    :param pargs:  (Default value = None)
+
+    """
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Cheat-On-Open Sample",

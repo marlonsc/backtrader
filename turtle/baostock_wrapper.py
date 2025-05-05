@@ -3,15 +3,32 @@ import pandas as pd
 
 
 class BaoStockWrapper:
+    """ """
+
     def __enter__(self):
-        lg = bs.login()
+        """ """
+        bs.login()
         # print("bs login status: ", lg.error_code, lg.error_msg)
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
+        """
+
+        :param exc_type:
+        :param exc_value:
+        :param traceback:
+
+        """
         bs.logout()
 
     def get_stock_data(self, code, start_date, end_date):
+        """
+
+        :param code:
+        :param start_date:
+        :param end_date:
+
+        """
         rs = bs.query_history_k_data_plus(
             code,
             "date,code,open,high,low,close,volume,amount,adjustflag",

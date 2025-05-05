@@ -8,7 +8,15 @@ import signal
 import sys
 import time
 from dataclasses import fields, is_dataclass
-from typing import AsyncIterator, Awaitable, Callable, Iterator, List, Optional, Union
+from typing import (
+    AsyncIterator,
+    Awaitable,
+    Callable,
+    Iterator,
+    List,
+    Optional,
+    Union,
+)
 
 import eventkit as ev
 
@@ -16,7 +24,6 @@ try:
     from zoneinfo import ZoneInfo
 except ImportError:
     from backports.zoneinfo import ZoneInfo  # type: ignore
-
 
 globalErrorEvent = ev.Event()
 """
@@ -31,13 +38,15 @@ Time_t = Union[dt.time, dt.datetime]
 
 
 def df(objs, labels: Optional[List[str]] = None):
-    """
-    Create pandas DataFrame from the sequence of same-type objects.
+    """Create pandas DataFrame from the sequence of same-type objects.
 
-    Args:
-      labels: If supplied, retain only the given labels and drop the rest.
+    :param objs:
+    :param labels: If supplied, retain only the given labels and drop the rest. (Default value = None)
+    :type labels: Optional[List[str]]
+
     """
     import pandas as pd
+
     from .objects import DynamicObject
 
     if objs:
@@ -65,8 +74,11 @@ def df(objs, labels: Optional[List[str]] = None):
 
 def dataclassAsDict(obj) -> dict:
     """
-    Return dataclass values as ``dict``.
-    This is a non-recursive variant of ``dataclasses.asdict``.
+
+    :param obj:
+    :returns: This is a non-recursive variant of ``dataclasses.asdict``.
+    :rtype: dict
+
     """
     if not is_dataclass(obj):
         raise TypeError(f"Object {obj} is not a dataclass")
@@ -75,8 +87,11 @@ def dataclassAsDict(obj) -> dict:
 
 def dataclassAsTuple(obj) -> tuple:
     """
-    Return dataclass values as ``tuple``.
-    This is a non-recursive variant of ``dataclasses.astuple``.
+
+    :param obj:
+    :returns: This is a non-recursive variant of ``dataclasses.astuple``.
+    :rtype: tuple
+
     """
     if not is_dataclass(obj):
         raise TypeError(f"Object {obj} is not a dataclass")
@@ -84,9 +99,12 @@ def dataclassAsTuple(obj) -> tuple:
 
 
 def dataclassNonDefaults(obj) -> dict:
-    """
-    For a ``dataclass`` instance get the fields that are different from the
+    """For a ``dataclass`` instance get the fields that are different from the
     default values and return as ``dict``.
+
+    :param obj:
+    :rtype: dict
+
     """
     if not is_dataclass(obj):
         raise TypeError(f"Object {obj} is not a dataclass")
@@ -101,9 +119,14 @@ def dataclassNonDefaults(obj) -> dict:
 
 
 def dataclassUpdate(obj, *srcObjs, **kwargs) -> object:
-    """
-    Update fields of the given ``dataclass`` object from zero or more
+    """Update fields of the given ``dataclass`` object from zero or more
     ``dataclass`` source objects and/or from keyword arguments.
+
+    :param obj:
+    :param *srcObjs:
+    :param **kwargs:
+    :rtype: object
+
     """
     if not is_dataclass(obj):
         raise TypeError(f"Object {obj} is not a dataclass")
@@ -114,9 +137,12 @@ def dataclassUpdate(obj, *srcObjs, **kwargs) -> object:
 
 
 def dataclassRepr(obj) -> str:
-    """
-    Provide a culled representation of the given ``dataclass`` instance,
+    """Provide a culled representation of the given ``dataclass`` instance,
     showing only the fields with a non-default value.
+
+    :param obj:
+    :rtype: str
+
     """
     attrs = dataclassNonDefaults(obj)
     clsName = obj.__class__.__qualname__
@@ -125,7 +151,11 @@ def dataclassRepr(obj) -> str:
 
 
 def isnamedtupleinstance(x):
-    """From https://stackoverflow.com/a/2166841/6067848"""
+    """From https://stackoverflow.com/a/2166841/6067848
+
+    :param x:
+
+    """
     t = type(x)
     b = t.__bases__
     if len(b) != 1 or b[0] != tuple:
@@ -137,9 +167,11 @@ def isnamedtupleinstance(x):
 
 
 def tree(obj):
-    """
-    Convert object to a tree of lists, dicts and simple values.
+    """Convert object to a tree of lists, dicts and simple values.
     The result can be serialized to JSON.
+
+    :param obj:
+
     """
     if isinstance(obj, (bool, int, float, str, bytes)):
         return obj
@@ -158,12 +190,17 @@ def tree(obj):
 
 
 def barplot(bars, title="", upColor="blue", downColor="red"):
-    """
-    Create candlestick plot for the given bars. The bars can be given as
+    """Create candlestick plot for the given bars. The bars can be given as
     a DataFrame or as a list of bar objects.
+
+    :param bars:
+    :param title:  (Default value = "")
+    :param upColor:  (Default value = "blue")
+    :param downColor:  (Default value = "red")
+
     """
-    import pandas as pd
     import matplotlib.pyplot as plt
+    import pandas as pd
     from matplotlib.lines import Line2D
     from matplotlib.patches import Rectangle
 
@@ -210,7 +247,12 @@ def allowCtrlC():
 
 
 def logToFile(path, level=logging.INFO):
-    """Create a log handler that logs to the given file."""
+    """Create a log handler that logs to the given file.
+
+    :param path:
+    :param level:  (Default value = logging.INFO)
+
+    """
     logger = logging.getLogger()
     if logger.handlers:
         logging.getLogger("ib_insync").setLevel(level)
@@ -223,7 +265,12 @@ def logToFile(path, level=logging.INFO):
 
 
 def logToConsole(level=logging.INFO, logger=None):
-    """Create a log handler that logs to the console."""
+    """Create a log handler that logs to the console.
+
+    :param level:  (Default value = logging.INFO)
+    :param logger:  (Default value = None)
+
+    """
     logger = logger if logger else logging.getLogger()
     stdHandlers = [
         h
@@ -244,12 +291,24 @@ def logToConsole(level=logging.INFO, logger=None):
 
 
 def isNan(x: float) -> bool:
-    """Not a number test."""
+    """Not a number test.
+
+    :param x:
+    :type x: float
+    :rtype: bool
+
+    """
     return x != x
 
 
 def formatSI(n: float) -> str:
-    """Format the integer or float n to 3 significant digits + SI prefix."""
+    """Format the integer or float n to 3 significant digits + SI prefix.
+
+    :param n:
+    :type n: float
+    :rtype: str
+
+    """
     s = ""
     if n < 0:
         n = -n
@@ -279,18 +338,28 @@ class timeit:
     """Context manager for timing."""
 
     def __init__(self, title="Run"):
+        """
+
+        :param title:  (Default value = "Run")
+
+        """
         self.title = title
 
     def __enter__(self):
+        """ """
         self.t0 = time.time()
 
     def __exit__(self, *_args):
+        """
+
+        :param *_args:
+
+        """
         print(self.title + " took " + formatSI(time.time() - self.t0) + "s")
 
 
 def run(*awaitables: Awaitable, timeout: Optional[float] = None):
-    """
-    By default run the event loop forever.
+    """By default run the event loop forever.
 
     When awaitables (like Tasks, Futures or coroutines) are given then
     run the event loop until each has completed and return their results.
@@ -298,6 +367,12 @@ def run(*awaitables: Awaitable, timeout: Optional[float] = None):
     An optional timeout (in seconds) can be given that will raise
     asyncio.TimeoutError if the awaitables are not ready within the
     timeout period.
+
+    :param *awaitables:
+    :type *awaitables: Awaitable
+    :param timeout:  (Default value = None)
+    :type timeout: Optional[float]
+
     """
     # loop = getLoop()
     loop = None
@@ -336,6 +411,11 @@ def run(*awaitables: Awaitable, timeout: Optional[float] = None):
         task = asyncio.ensure_future(future)
 
         def onError(_):
+            """
+
+            :param _:
+
+            """
             task.cancel()
 
         globalErrorEvent.connect(onError)
@@ -350,6 +430,13 @@ def run(*awaitables: Awaitable, timeout: Optional[float] = None):
 
 
 def _fillDate(time: Time_t) -> dt.datetime:
+    """
+
+    :param time:
+    :type time: Time_t
+    :rtype: dt.datetime
+
+    """
     # use today if date is absent
     if isinstance(time, dt.time):
         t = dt.datetime.combine(dt.date.today(), time)
@@ -359,16 +446,17 @@ def _fillDate(time: Time_t) -> dt.datetime:
 
 
 def schedule(time: Time_t, callback: Callable, *args):
-    """
-    Schedule the callback to be run at the given time with
+    """Schedule the callback to be run at the given time with
     the given arguments.
     This will return the Event Handle.
 
-    Args:
-        time: Time to run callback. If given as :py:class:`datetime.time`
+    :param time: Time to run callback. If given as :py:class:`datetime.time`
             then use today as date.
-        callback: Callable scheduled to run.
-        args: Arguments for to call callback with.
+    :type time: Time_t
+    :param callback: Callable scheduled to run.
+    :type callback: Callable
+    :param *args:
+
     """
     t = _fillDate(time)
     now = dt.datetime.now(t.tzinfo)
@@ -378,28 +466,32 @@ def schedule(time: Time_t, callback: Callable, *args):
 
 
 def sleep(secs: float = 0.02) -> bool:
-    """
-    Wait for the given amount of seconds while everything still keeps
+    """Wait for the given amount of seconds while everything still keeps
     processing in the background. Never use time.sleep().
 
-    Args:
-        secs (float): Time in seconds to wait.
+    :param secs: Time in seconds to wait. (Default value = 0.02)
+    :type secs: float
+    :rtype: bool
+
     """
     run(asyncio.sleep(secs))
     return True
 
 
 def timeRange(start: Time_t, end: Time_t, step: float) -> Iterator[dt.datetime]:
-    """
-    Iterator that waits periodically until certain time points are
+    """Iterator that waits periodically until certain time points are
     reached while yielding those time points.
 
-    Args:
-        start: Start time, can be specified as datetime.datetime,
+    :param start: Start time, can be specified as datetime.datetime,
             or as datetime.time in which case today is used as the date
-        end: End time, can be specified as datetime.datetime,
+    :type start: Time_t
+    :param end: End time, can be specified as datetime.datetime,
             or as datetime.time in which case today is used as the date
-        step (float): The number of seconds of each period
+    :type end: Time_t
+    :param step: The number of seconds of each period
+    :type step: float
+    :rtype: Iterator[dt.datetime]
+
     """
     assert step > 0
     delta = dt.timedelta(seconds=step)
@@ -415,12 +507,13 @@ def timeRange(start: Time_t, end: Time_t, step: float) -> Iterator[dt.datetime]:
 
 
 def waitUntil(t: Time_t) -> bool:
-    """
-    Wait until the given time t is reached.
+    """Wait until the given time t is reached.
 
-    Args:
-        t: The time t can be specified as datetime.datetime,
+    :param t: The time t can be specified as datetime.datetime,
             or as datetime.time in which case today is used as the date.
+    :type t: Time_t
+    :rtype: bool
+
     """
     now = dt.datetime.now(t.tzinfo)
     secs = (_fillDate(t) - now).total_seconds()
@@ -431,7 +524,17 @@ def waitUntil(t: Time_t) -> bool:
 async def timeRangeAsync(
     start: Time_t, end: Time_t, step: float
 ) -> AsyncIterator[dt.datetime]:
-    """Async version of :meth:`timeRange`."""
+    """Async version of :meth:`timeRange`.
+
+    :param start:
+    :type start: Time_t
+    :param end:
+    :type end: Time_t
+    :param step:
+    :type step: float
+    :rtype: AsyncIterator[dt.datetime]
+
+    """
     assert step > 0
     delta = dt.timedelta(seconds=step)
     t = _fillDate(start)
@@ -446,7 +549,13 @@ async def timeRangeAsync(
 
 
 async def waitUntilAsync(t: Time_t) -> bool:
-    """Async version of :meth:`waitUntil`."""
+    """Async version of :meth:`waitUntil`.
+
+    :param t:
+    :type t: Time_t
+    :rtype: bool
+
+    """
     now = dt.datetime.now(t.tzinfo)
     secs = (_fillDate(t) - now).total_seconds()
     await asyncio.sleep(secs)
@@ -471,20 +580,21 @@ def startLoop():
 
 
 def useQt(qtLib: str = "PyQt5", period: float = 0.01):
-    """
-    Run combined Qt5/asyncio event loop.
+    """Run combined Qt5/asyncio event loop.
 
-    Args:
-        qtLib: Name of Qt library to use:
-
+    :param qtLib: Name of Qt library to use:
           * PyQt5
           * PyQt6
           * PySide2
-          * PySide6
-        period: Period in seconds to poll Qt.
+          * PySide6 (Default value = "PyQt5")
+    :type qtLib: str
+    :param period: Period in seconds to poll Qt. (Default value = 0.01)
+    :type period: float
+
     """
 
     def qt_step():
+        """ """
         loop.call_later(period, qt_step)
         if not stack:
             qloop = qc.QEventLoop()
@@ -514,7 +624,13 @@ def useQt(qtLib: str = "PyQt5", period: float = 0.01):
 
 
 def formatIBDatetime(t: Union[dt.date, dt.datetime, str, None]) -> str:
-    """Format date or datetime to string that IB uses."""
+    """Format date or datetime to string that IB uses.
+
+    :param t:
+    :type t: Union[dt.date, dt.datetime, str, None]
+    :rtype: str
+
+    """
     if not t:
         s = ""
     elif isinstance(t, dt.datetime):
@@ -532,7 +648,13 @@ def formatIBDatetime(t: Union[dt.date, dt.datetime, str, None]) -> str:
 
 
 def parseIBDatetime(s: str) -> Union[dt.date, dt.datetime]:
-    """Parse string in IB date or datetime format to datetime."""
+    """Parse string in IB date or datetime format to datetime.
+
+    :param s:
+    :type s: str
+    :rtype: Union[dt.date,dt.datetime]
+
+    """
     if len(s) == 8:
         # YYYYmmdd
         y = int(s[0:4])

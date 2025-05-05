@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,15 +18,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
-
-from . import Indicator, MovingAverageBase, MovAv
+from . import MovAv, MovingAverageBase
 
 
 class DoubleExponentialMovingAverage(MovingAverageBase):
-    """
-    DEMA was first time introduced in 1994, in the article "Smoothing Data with
+    """DEMA was first time introduced in 1994, in the article "Smoothing Data with
     Faster Moving Averages" by Patrick G. Mulloy in "Technical Analysis of
     Stocks & Commodities" magazine.
 
@@ -37,6 +40,8 @@ class DoubleExponentialMovingAverage(MovingAverageBase):
 
     See:
       (None)
+
+
     """
 
     alias = (
@@ -48,6 +53,7 @@ class DoubleExponentialMovingAverage(MovingAverageBase):
     params = (("_movav", MovAv.EMA),)
 
     def __init__(self):
+        """ """
         ema = self.p._movav(self.data, period=self.p.period)
         ema2 = self.p._movav(ema, period=self.p.period)
         self.lines.dema = 2.0 * ema - ema2
@@ -56,8 +62,7 @@ class DoubleExponentialMovingAverage(MovingAverageBase):
 
 
 class TripleExponentialMovingAverage(MovingAverageBase):
-    """
-    TEMA was first time introduced in 1994, in the article "Smoothing Data with
+    """TEMA was first time introduced in 1994, in the article "Smoothing Data with
     Faster Moving Averages" by Patrick G. Mulloy in "Technical Analysis of
     Stocks & Commodities" magazine.
 
@@ -71,6 +76,8 @@ class TripleExponentialMovingAverage(MovingAverageBase):
 
     See:
       (None)
+
+
     """
 
     alias = (
@@ -82,6 +89,7 @@ class TripleExponentialMovingAverage(MovingAverageBase):
     params = (("_movav", MovAv.EMA),)
 
     def __init__(self):
+        """ """
         ema1 = self.p._movav(self.data, period=self.p.period)
         ema2 = self.p._movav(ema1, period=self.p.period)
         ema3 = self.p._movav(ema2, period=self.p.period)

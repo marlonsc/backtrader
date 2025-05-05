@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,19 +18,24 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import datetime
 import os
 import os.path
 import sys
 
-# append module root directory to sys.path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 import backtrader as bt
 import backtrader.utils.flushfile
 from backtrader.metabase import ParamsBase
+
+# append module root directory to sys.path
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 modpath = os.path.dirname(os.path.abspath(__file__))
 dataspath = "../datas"
@@ -46,10 +51,22 @@ TODATE = datetime.datetime(2006, 12, 31)
 
 
 def getdatadir(filename):
+    """
+
+    :param filename:
+
+    """
     return os.path.join(modpath, dataspath, filename)
 
 
 def getdata(index, fromdate=FROMDATE, todate=TODATE):
+    """
+
+    :param index:
+    :param fromdate:  (Default value = FROMDATE)
+    :param todate:  (Default value = TODATE)
+
+    """
 
     datapath = getdatadir(datafiles[index])
     data = DATAFEED(dataname=datapath, fromdate=fromdate, todate=todate)
@@ -68,8 +85,23 @@ def runtest(
     maxcpus=1,
     writer=None,
     analyzer=None,
-    **kwargs
+    **kwargs,
 ):
+    """
+
+    :param datas:
+    :param strategy:
+    :param runonce:  (Default value = None)
+    :param preload:  (Default value = None)
+    :param exbar:  (Default value = None)
+    :param plot:  (Default value = False)
+    :param optimize:  (Default value = False)
+    :param maxcpus:  (Default value = 1)
+    :param writer:  (Default value = None)
+    :param analyzer:  (Default value = None)
+    :param **kwargs:
+
+    """
 
     runonces = [True, False] if runonce is None else [runonce]
     preloads = [True, False] if preload is None else [preload]
@@ -80,7 +112,10 @@ def runtest(
         for ronce in runonces:
             for exbar in exbars:
                 cerebro = bt.Cerebro(
-                    runonce=ronce, preload=prload, maxcpus=maxcpus, exactbars=exbar
+                    runonce=ronce,
+                    preload=prload,
+                    maxcpus=maxcpus,
+                    exactbars=exbar,
                 )
 
                 if kwargs.get("main", False):
@@ -117,6 +152,8 @@ def runtest(
 
 
 class TestStrategy(bt.Strategy):
+    """ """
+
     params = dict(
         main=False,
         chkind=[],
@@ -128,6 +165,7 @@ class TestStrategy(bt.Strategy):
     )
 
     def __init__(self):
+        """ """
         try:
             ind = self.p.chkind[0]
         except TypeError:
@@ -150,13 +188,15 @@ class TestStrategy(bt.Strategy):
                 ind(data)
 
     def prenext(self):
-        pass
+        """ """
 
     def nextstart(self):
+        """ """
         self.chkmin = len(self)
         super(TestStrategy, self).nextstart()
 
     def next(self):
+        """ """
         self.nextcalls += 1
 
         if self.p.main:
@@ -174,9 +214,11 @@ class TestStrategy(bt.Strategy):
             print("%s - %d, %s" % (dtstr, len(self), pstr))
 
     def start(self):
+        """ """
         self.nextcalls = 0
 
     def stop(self):
+        """ """
         l = len(self.ind)
         mp = self.chkmin
         chkpts = [0, -l + mp, (-l + mp) // 2]
@@ -230,13 +272,15 @@ class TestStrategy(bt.Strategy):
 
 
 class SampleParamsHolder(ParamsBase):
-    """
-    This class is used as base for tests that check the proper
+    """This class is used as base for tests that check the proper
     handling of meta parameters like `frompackages`, `packages`, `params`, `lines`
     in inherited classes
+
+
     """
 
     frompackages = (("math", "factorial"),)
 
     def __init__(self):
+        """ """
         self.range = factorial(10)

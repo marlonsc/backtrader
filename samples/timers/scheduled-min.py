@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
@@ -27,6 +32,8 @@ import backtrader as bt
 
 
 class St(bt.Strategy):
+    """ """
+
     params = dict(
         when=bt.timer.SESSION_START,
         timer=True,
@@ -40,6 +47,7 @@ class St(bt.Strategy):
     )
 
     def __init__(self):
+        """ """
         bt.ind.SMA()
         if self.p.timer:
             self.add_timer(
@@ -68,9 +76,11 @@ class St(bt.Strategy):
         self.order = None
 
     def prenext(self):
+        """ """
         self.next()
 
     def next(self):
+        """ """
         _, isowk, isowkday = self.datetime.date().isocalendar()
         txt = "{}, {}, Week {}, Day {}, O {}, H {}, L {}, C {}".format(
             len(self),
@@ -86,6 +96,14 @@ class St(bt.Strategy):
         print(txt)
 
     def notify_timer(self, timer, when, *args, **kwargs):
+        """
+
+        :param timer:
+        :param when:
+        :param *args:
+        :param **kwargs:
+
+        """
         print(
             "strategy notify_timer with tid {}, when {} cheat {}".format(
                 timer.p.tid, when, timer.p.cheat
@@ -97,6 +115,11 @@ class St(bt.Strategy):
             self.order = self.buy()
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status == order.Completed:
             print(
                 "-- {} Buy Exec @ {}".format(
@@ -106,6 +129,11 @@ class St(bt.Strategy):
 
 
 def runstrat(args=None):
+    """
+
+    :param args:  (Default value = None)
+
+    """
     args = parse_args(args)
     cerebro = bt.Cerebro()
 
@@ -145,6 +173,11 @@ def runstrat(args=None):
 
 
 def parse_args(pargs=None):
+    """
+
+    :param pargs:  (Default value = None)
+
+    """
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Timer Test Intraday",

@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,12 +18,19 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
-from . import Indicator, Max, MovAv
+from . import Indicator, MovAv
 
 
 class _PriceOscBase(Indicator):
+    """ """
+
     params = (
         ("period1", 12),
         ("period2", 26),
@@ -33,6 +40,7 @@ class _PriceOscBase(Indicator):
     plotinfo = dict(plothlines=[0.0])
 
     def __init__(self):
+        """ """
         self.ma1 = self.p._movav(self.data, period=self.p.period1)
         self.ma2 = self.p._movav(self.data, period=self.p.period2)
         self.lines[0] = self.ma1 - self.ma2
@@ -41,8 +49,7 @@ class _PriceOscBase(Indicator):
 
 
 class PriceOscillator(_PriceOscBase):
-    """
-    Shows the difference between a short and long exponential moving
+    """Shows the difference between a short and long exponential moving
     averages expressed in points.
 
     Formula:
@@ -50,6 +57,8 @@ class PriceOscillator(_PriceOscBase):
 
     See:
       - http://www.metastock.com/Customer/Resources/TAAZ/?c=3&p=94
+
+
     """
 
     alias = (
@@ -62,8 +71,7 @@ class PriceOscillator(_PriceOscBase):
 
 
 class PercentagePriceOscillator(_PriceOscBase):
-    """
-    Shows the difference between a short and long exponential moving
+    """Shows the difference between a short and long exponential moving
     averages expressed in percentage. The MACD does the same but expressed in
     absolute points.
 
@@ -76,6 +84,8 @@ class PercentagePriceOscillator(_PriceOscBase):
 
     See:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:price_oscillators_ppo
+
+
     """
 
     _long = True
@@ -91,6 +101,7 @@ class PercentagePriceOscillator(_PriceOscBase):
     plotlines = dict(histo=dict(_method="bar", alpha=0.50, width=1.0))
 
     def __init__(self):
+        """ """
         super(PercentagePriceOscillator, self).__init__()
 
         den = self.ma2 if self._long else self.ma1
@@ -101,8 +112,7 @@ class PercentagePriceOscillator(_PriceOscBase):
 
 
 class PercentagePriceOscillatorShort(PercentagePriceOscillator):
-    """
-    Shows the difference between a short and long exponential moving
+    """Shows the difference between a short and long exponential moving
     averages expressed in percentage. The MACD does the same but expressed in
     absolute points.
 
@@ -119,6 +129,8 @@ class PercentagePriceOscillatorShort(PercentagePriceOscillator):
 
     See:
       - http://www.metastock.com/Customer/Resources/TAAZ/?c=3&p=94
+
+
     """
 
     _long = False

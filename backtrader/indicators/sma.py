@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,20 +18,26 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
-from . import MovingAverageBase, Average
+from . import Average, MovingAverageBase
 
 
 class MovingAverageSimple(MovingAverageBase):
-    """
-    Non-weighted average of the last n periods
+    """Non-weighted average of the last n periods
 
     Formula:
       - movav = Sum(data, period) / period
 
     See also:
       - http://en.wikipedia.org/wiki/Moving_average#Simple_moving_average
+
+
     """
 
     alias = (
@@ -41,6 +47,7 @@ class MovingAverageSimple(MovingAverageBase):
     lines = ("sma",)
 
     def __init__(self):
+        """ """
         # Before super to ensure mixins (right-hand side in subclassing)
         # can see the assignment operation and operate on the line
         self.lines[0] = Average(self.data, period=self.p.period)

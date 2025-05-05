@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,20 +18,35 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 from datetime import datetime, timedelta
 
+from backtrader import date2num, num2date
 from backtrader.feed import DataBase
-from backtrader import TimeFrame, date2num, num2date
-from backtrader.utils.py3 import integer_types, queue, string_types, with_metaclass
-from backtrader.metabase import MetaParams
 from backtrader.stores import oandastore
+from backtrader.utils.py3 import (
+    queue,
+    with_metaclass,
+)
 
 
 class MetaOandaData(DataBase.__class__):
+    """ """
+
     def __init__(cls, name, bases, dct):
-        """Class has already been created ... register"""
+        """Class has already been created ... register
+
+        :param name:
+        :param bases:
+        :param dct:
+
+        """
         # Initialize the class
         super(MetaOandaData, cls).__init__(name, bases, dct)
 
@@ -40,101 +55,7 @@ class MetaOandaData(DataBase.__class__):
 
 
 class OandaData(with_metaclass(MetaOandaData, DataBase)):
-    """Oanda Data Feed.
-
-    Params:
-
-      - ``qcheck`` (default: ``0.5``)
-
-        Time in seconds to wake up if no data is received to give a chance to
-        resample/replay packets properly and pass notifications up the chain
-
-      - ``historical`` (default: ``False``)
-
-        If set to ``True`` the data feed will stop after doing the first
-        download of data.
-
-        The standard data feed parameters ``fromdate`` and ``todate`` will be
-        used as reference.
-
-        The data feed will make multiple requests if the requested duration is
-        larger than the one allowed by IB given the timeframe/compression
-        chosen for the data.
-
-      - ``backfill_start`` (default: ``True``)
-
-        Perform backfilling at the start. The maximum possible historical data
-        will be fetched in a single request.
-
-      - ``backfill`` (default: ``True``)
-
-        Perform backfilling after a disconnection/reconnection cycle. The gap
-        duration will be used to download the smallest possible amount of data
-
-      - ``backfill_from`` (default: ``None``)
-
-        An additional data source can be passed to do an initial layer of
-        backfilling. Once the data source is depleted and if requested,
-        backfilling from IB will take place. This is ideally meant to backfill
-        from already stored sources like a file on disk, but not limited to.
-
-      - ``bidask`` (default: ``True``)
-
-        If ``True``, then the historical/backfilling requests will request
-        bid/ask prices from the server
-
-        If ``False``, then *midpoint* will be requested
-
-      - ``useask`` (default: ``False``)
-
-        If ``True`` the *ask* part of the *bidask* prices will be used instead
-        of the default use of *bid*
-
-      - ``includeFirst`` (default: ``True``)
-
-        Influence the delivery of the 1st bar of a historical/backfilling
-        request by setting the parameter directly to the Oanda API calls
-
-      - ``reconnect`` (default: ``True``)
-
-        Reconnect when network connection is down
-
-      - ``reconnections`` (default: ``-1``)
-
-        Number of times to attempt reconnections: ``-1`` means forever
-
-      - ``reconntimeout`` (default: ``5.0``)
-
-        Time in seconds to wait in between reconnection attemps
-
-    This data feed supports only this mapping of ``timeframe`` and
-    ``compression``, which comply with the definitions in the OANDA API
-    Developer's Guid::
-
-        (TimeFrame.Seconds, 5): 'S5',
-        (TimeFrame.Seconds, 10): 'S10',
-        (TimeFrame.Seconds, 15): 'S15',
-        (TimeFrame.Seconds, 30): 'S30',
-        (TimeFrame.Minutes, 1): 'M1',
-        (TimeFrame.Minutes, 2): 'M3',
-        (TimeFrame.Minutes, 3): 'M3',
-        (TimeFrame.Minutes, 4): 'M4',
-        (TimeFrame.Minutes, 5): 'M5',
-        (TimeFrame.Minutes, 10): 'M10',
-        (TimeFrame.Minutes, 15): 'M15',
-        (TimeFrame.Minutes, 30): 'M30',
-        (TimeFrame.Minutes, 60): 'H1',
-        (TimeFrame.Minutes, 120): 'H2',
-        (TimeFrame.Minutes, 180): 'H3',
-        (TimeFrame.Minutes, 240): 'H4',
-        (TimeFrame.Minutes, 360): 'H6',
-        (TimeFrame.Minutes, 480): 'H8',
-        (TimeFrame.Days, 1): 'D',
-        (TimeFrame.Weeks, 1): 'W',
-        (TimeFrame.Months, 1): 'M',
-
-    Any other combination will be rejected
-    """
+    """Oanda Data Feed."""
 
     params = (
         ("qcheck", 0.5),
@@ -158,27 +79,43 @@ class OandaData(with_metaclass(MetaOandaData, DataBase)):
     _TOFFSET = timedelta()
 
     def _timeoffset(self):
+        """ """
         # Effective way to overcome the non-notification?
         return self._TOFFSET
 
     def islive(self):
         """Returns ``True`` to notify ``Cerebro`` that preloading and runonce
-        should be deactivated"""
+        should be deactivated
+
+
+        """
         return True
 
     def __init__(self, **kwargs):
+        """
+
+        :param **kwargs:
+
+        """
         self.o = self._store(**kwargs)
         self._candleFormat = "bidask" if self.p.bidask else "midpoint"
 
     def setenvironment(self, env):
         """Receives an environment (cerebro) and passes it over to the store it
-        belongs to"""
+        belongs to
+
+        :param env:
+
+        """
         super(OandaData, self).setenvironment(env)
         env.addstore(self.o)
 
     def start(self):
         """Starts the Oanda connecction and gets the real contract and
-        contractdetails if it exists"""
+        contractdetails if it exists
+
+
+        """
         super(OandaData, self).start()
 
         # Create attributes as soon as possible
@@ -214,6 +151,12 @@ class OandaData(with_metaclass(MetaOandaData, DataBase)):
         self._reconns = 0
 
     def _st_start(self, instart=True, tmout=None):
+        """
+
+        :param instart:  (Default value = True)
+        :param tmout:  (Default value = None)
+
+        """
         if self.p.historical:
             self.put_notification(self.DELAYED)
             dtend = None
@@ -258,9 +201,11 @@ class OandaData(with_metaclass(MetaOandaData, DataBase)):
         self.o.stop()
 
     def haslivedata(self):
+        """ """
         return bool(self._storedmsg or self.qlive)  # do not return the objs
 
     def _load(self):
+        """ """
         if self._state == self._ST_OVER:
             return False
 
@@ -404,6 +349,11 @@ class OandaData(with_metaclass(MetaOandaData, DataBase)):
                     return False
 
     def _load_tick(self, msg):
+        """
+
+        :param msg:
+
+        """
         dtobj = datetime.utcfromtimestamp(int(msg["time"]) / 10**6)
         dt = date2num(dtobj)
         if dt <= self.lines.datetime[-1]:
@@ -426,6 +376,11 @@ class OandaData(with_metaclass(MetaOandaData, DataBase)):
         return True
 
     def _load_history(self, msg):
+        """
+
+        :param msg:
+
+        """
         dtobj = datetime.utcfromtimestamp(int(msg["time"]) / 10**6)
         dt = date2num(dtobj)
         if dt <= self.lines.datetime[-1]:

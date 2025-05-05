@@ -135,27 +135,29 @@ EXAMPLE:
 python strategies/fibonacci_retracement_pullback.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --trend-period 20 --rsi-period 14 --plot
 """
 
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
-import numpy as np
-import pandas as pd
+
 import backtrader as bt
 
 # Import utility functions
 from strategies.utils import (
-    get_db_data,
-    print_performance_metrics,
     TradeThrottling,
     add_standard_analyzers,
+    get_db_data,
+    print_performance_metrics,
 )
 
 
 class StockPriceData(bt.feeds.PandasData):
-    """
-    Stock Price Data Feed
-    """
+    """Stock Price Data Feed"""
 
     params = (
         ("datetime", None),
@@ -170,19 +172,19 @@ class StockPriceData(bt.feeds.PandasData):
 
 
 class FibonacciLevels(bt.Indicator):
-    """
-    Custom indicator to calculate Fibonacci retracement levels
-    """
+    """Custom indicator to calculate Fibonacci retracement levels"""
 
     lines = ("fib382", "fib500", "fib618")
     params = (("period", 50),)
 
     def __init__(self):
+        """ """
         super(FibonacciLevels, self).__init__()
         # Set minimum period
         self.addminperiod(self.p.period)
 
     def next(self):
+        """ """
         # Get available bars
         high_array = self.data.high.get(size=self.p.period)
         low_array = self.data.low.get(size=self.p.period)
@@ -205,8 +207,7 @@ class FibonacciLevels(bt.Indicator):
 
 
 class FibonacciPullbackStrategy(bt.Strategy, TradeThrottling):
-    """
-    Fibonacci Retracement Pullback Strategy
+    """Fibonacci Retracement Pullback Strategy
 
     This strategy identifies strong uptrends and enters long positions when price
     pulls back to key Fibonacci retracement levels. It uses RSI to confirm trend
@@ -214,6 +215,8 @@ class FibonacciPullbackStrategy(bt.Strategy, TradeThrottling):
 
     The strategy is specifically designed for catching pullbacks in established uptrends.
     It will struggle in bear markets or during major corrections.
+
+
     """
 
     params = (
@@ -228,7 +231,10 @@ class FibonacciPullbackStrategy(bt.Strategy, TradeThrottling):
         ("fib_levels", [0.382, 0.5, 0.618]),
         ("bounce_threshold", 0.5),  # Minimum bounce %
         ("volume_mult", 1.5),  # Volume increase factor
-        ("price_tolerance", 0.5),  # How close price needs to be to fib level (%)
+        (
+            "price_tolerance",
+            0.5,
+        ),  # How close price needs to be to fib level (%)
         # Exit Parameters
         ("use_stop", True),  # Use stop loss
         ("stop_pct", 2.0),  # Stop loss %
@@ -245,6 +251,7 @@ class FibonacciPullbackStrategy(bt.Strategy, TradeThrottling):
     )
 
     def __init__(self):
+        """ """
         self.dataclose = self.datas[0].close
         self.datahigh = self.datas[0].high
         self.datalow = self.datas[0].low
@@ -271,7 +278,13 @@ class FibonacciPullbackStrategy(bt.Strategy, TradeThrottling):
         self.last_trade_date = None
 
     def log(self, txt, dt=None, level="info"):
-        """Logging function"""
+        """Logging function
+
+        :param txt:
+        :param dt:  (Default value = None)
+        :param level:  (Default value = "info")
+
+        """
         if level == "debug" and self.p.log_level != "debug":
             return
 
@@ -279,6 +292,11 @@ class FibonacciPullbackStrategy(bt.Strategy, TradeThrottling):
         print(f"{dt.isoformat()}: {txt}")
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status in [order.Submitted, order.Accepted]:
             return
 
@@ -310,6 +328,11 @@ class FibonacciPullbackStrategy(bt.Strategy, TradeThrottling):
         self.order = None
 
     def notify_trade(self, trade):
+        """
+
+        :param trade:
+
+        """
         if not trade.isclosed:
             return
 
@@ -422,6 +445,7 @@ class FibonacciPullbackStrategy(bt.Strategy, TradeThrottling):
         return False
 
     def next(self):
+        """ """
         # Check if an order is pending
         if self.order:
             return
@@ -498,7 +522,10 @@ def parse_args():
         help="Starting date in YYYY-MM-DD format",
     )
     parser.add_argument(
-        "--todate", "-t", default="2024-12-31", help="Ending date in YYYY-MM-DD format"
+        "--todate",
+        "-t",
+        default="2024-12-31",
+        help="Ending date in YYYY-MM-DD format",
     )
     parser.add_argument(
         "--cash", "-c", type=float, default=100000.0, help="Starting cash"
@@ -565,13 +592,25 @@ def parse_args():
 
     # Exit parameters
     parser.add_argument(
-        "--use-stop", "-us", action="store_true", default=True, help="Use stop loss"
+        "--use-stop",
+        "-us",
+        action="store_true",
+        default=True,
+        help="Use stop loss",
     )
     parser.add_argument(
-        "--stop-pct", "-sp", type=float, default=2.0, help="Stop loss % below entry"
+        "--stop-pct",
+        "-sp",
+        type=float,
+        default=2.0,
+        help="Stop loss % below entry",
     )
     parser.add_argument(
-        "--target-pct", "-tp", type=float, default=5.0, help="Take profit % above entry"
+        "--target-pct",
+        "-tp",
+        type=float,
+        default=5.0,
+        help="Take profit % above entry",
     )
     parser.add_argument(
         "--use-trail", "-ut", action="store_true", help="Use trailing stop"

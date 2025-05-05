@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tools for creating and manipulating SON, the Serialized Ocument Notation.
 
 Regular dictionaries can be used instead of SON objects, but not when the order
@@ -33,35 +32,62 @@ class SON(dict):
     A subclass of dict that maintains ordering of keys and provides a
     few extra niceties for dealing with SON. SON provides an API
     similar to collections.OrderedDict.
+
+
     """
 
     def __init__(self, data=None, **kwargs):
+        """
+
+        :param data:  (Default value = None)
+        :param **kwargs:
+
+        """
         self.__keys = []
         dict.__init__(self)
         self.update(data)
         self.update(kwargs)
 
     def __new__(cls, *args, **kwargs):
+        """
+
+        :param *args:
+        :param **kwargs:
+
+        """
         instance = super(SON, cls).__new__(cls, *args, **kwargs)
         instance.__keys = []
         return instance
 
     def __repr__(self):
+        """ """
         result = []
         for key in self.__keys:
             result.append("(%r, %r)" % (key, self[key]))
         return "SON([%s])" % ", ".join(result)
 
     def __setitem__(self, key, value):
+        """
+
+        :param key:
+        :param value:
+
+        """
         if key not in self.__keys:
             self.__keys.append(key)
         dict.__setitem__(self, key, value)
 
     def __delitem__(self, key):
+        """
+
+        :param key:
+
+        """
         self.__keys.remove(key)
         dict.__delitem__(self, key)
 
     def copy(self):
+        """ """
         other = SON()
         other.update(self)
         return other
@@ -70,28 +96,44 @@ class SON(dict):
     # efficient.
     # second level definitions support higher levels
     def __iter__(self):
+        """ """
         for k in self.__keys:
             yield k
 
     def has_key(self, key):
+        """
+
+        :param key:
+
+        """
         return key in self.__keys
 
     def iterkeys(self):
+        """ """
         return self.__iter__()
 
     # fourth level uses definitions from lower levels
     def itervalues(self):
+        """ """
         for _, v in self.items():
             yield v
 
     def values(self):
+        """ """
         return [v for _, v in self.items()]
 
     def clear(self):
+        """ """
         self.__keys = []
         super(SON, self).clear()
 
     def setdefault(self, key, default=None):
+        """
+
+        :param key:
+        :param default:  (Default value = None)
+
+        """
         try:
             return self[key]
         except KeyError:
@@ -99,6 +141,12 @@ class SON(dict):
         return default
 
     def pop(self, key, *args):
+        """
+
+        :param key:
+        :param *args:
+
+        """
         if len(args) > 1:
             raise TypeError(
                 "pop expected at most 2 arguments, got " + repr(1 + len(args))
@@ -113,6 +161,7 @@ class SON(dict):
         return value
 
     def popitem(self):
+        """ """
         try:
             k, v = next(iter(self.items()))
         except StopIteration:
@@ -121,6 +170,12 @@ class SON(dict):
         return (k, v)
 
     def update(self, other=None, **kwargs):
+        """
+
+        :param other:  (Default value = None)
+        :param **kwargs:
+
+        """
         # Make progressively weaker assumptions about "other"
         if other is None:
             pass
@@ -137,6 +192,12 @@ class SON(dict):
             self.update(kwargs)
 
     def get(self, key, default=None):
+        """
+
+        :param key:
+        :param default:  (Default value = None)
+
+        """
         try:
             return self[key]
         except KeyError:
@@ -145,15 +206,24 @@ class SON(dict):
     def __eq__(self, other):
         """Comparison to another SON is order-sensitive while comparison to a
         regular dictionary is order-insensitive.
+
+        :param other:
+
         """
         if isinstance(other, SON):
             return len(self) == len(other) and list(self.items()) == list(other.items())
         return self.to_dict() == other
 
     def __ne__(self, other):
+        """
+
+        :param other:
+
+        """
         return not self == other
 
     def __len__(self):
+        """ """
         return len(self.__keys)
 
     def to_dict(self):
@@ -161,9 +231,16 @@ class SON(dict):
 
         This is trickier than just *dict(...)* because it needs to be
         recursive.
+
+
         """
 
         def transform_value(value):
+            """
+
+            :param value:
+
+            """
             if isinstance(value, list):
                 return [transform_value(v) for v in value]
             elif isinstance(value, _Mapping):
@@ -174,6 +251,11 @@ class SON(dict):
         return transform_value(dict(self))
 
     def __deepcopy__(self, memo):
+        """
+
+        :param memo:
+
+        """
         out = SON()
         val_id = id(self)
         if val_id in memo:

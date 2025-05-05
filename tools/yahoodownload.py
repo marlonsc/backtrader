@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,11 +18,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
-
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
-import collections
 import datetime
 import io
 import logging
@@ -30,22 +33,31 @@ import sys
 
 PY2 = sys.version_info.major == 2
 if PY2:
-    from urllib2 import urlopen
-    from urllib import quote as urlquote
-else:
-    from urllib.request import urlopen
-    from urllib.parse import quote as urlquote
+    pass
 
+else:
+    pass
 
 logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
 
 
 class YahooDownload(object):
+    """ """
+
     urlhist = "https://finance.yahoo.com/quote/{}/history"
     urldown = "https://query1.finance.yahoo.com/v7/finance/download"
     retries = 3
 
     def __init__(self, ticker, fromdate, todate, period="d", reverse=False):
+        """
+
+        :param ticker:
+        :param fromdate:
+        :param todate:
+        :param period:  (Default value = "d")
+        :param reverse:  (Default value = False)
+
+        """
         try:
             import requests
         except ImportError:
@@ -142,6 +154,11 @@ class YahooDownload(object):
         self.datafile = f
 
     def writetofile(self, filename):
+        """
+
+        :param filename:
+
+        """
         if not self.datafile:
             return
 
@@ -159,6 +176,7 @@ class YahooDownload(object):
 
 
 def parse_args():
+    """ """
     parser = argparse.ArgumentParser(description="Download Yahoo CSV Finance Data")
 
     parser.add_argument("--ticker", required=True, help="Ticker to be downloaded")
@@ -171,7 +189,9 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--timeframe", default="d", help="Timeframe: d -> day, w -> week, m -> month"
+        "--timeframe",
+        default="d",
+        help="Timeframe: d -> day, w -> week, m -> month",
     )
 
     parser.add_argument(
@@ -188,7 +208,6 @@ def parse_args():
 
 
 if __name__ == "__main__":
-
     args = parse_args()
 
     logging.info("Processing input parameters")

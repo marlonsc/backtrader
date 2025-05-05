@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 
@@ -27,6 +32,7 @@ import backtrader.feeds as btfeeds
 
 
 def runstrat():
+    """ """
     args = parse_args()
 
     # Create a cerebro entity
@@ -41,7 +47,9 @@ def runstrat():
 
     # Handy dictionary for the argument timeframe conversion
     tframes = dict(
-        daily=bt.TimeFrame.Days, weekly=bt.TimeFrame.Weeks, monthly=bt.TimeFrame.Months
+        daily=bt.TimeFrame.Days,
+        weekly=bt.TimeFrame.Weeks,
+        monthly=bt.TimeFrame.Months,
     )
 
     # Resample the data
@@ -58,7 +66,9 @@ def runstrat():
     else:
         # New resampler
         cerebro.resampledata(
-            data, timeframe=tframes[args.timeframe], compression=args.compression
+            data,
+            timeframe=tframes[args.timeframe],
+            compression=args.compression,
         )
 
     # Run over everything
@@ -69,6 +79,7 @@ def runstrat():
 
 
 def parse_args():
+    """ """
     parser = argparse.ArgumentParser(description="Resample down to minutes")
 
     parser.add_argument(

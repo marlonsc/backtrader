@@ -7,10 +7,14 @@ import backtrader as bt
 
 
 class BuyAndHold(bt.Strategy):
+    """ """
+
     def __init__(self):
+        """ """
         self.order = None
 
     def next(self):
+        """ """
         if self.order is None:
             self.order = self.buy()
 

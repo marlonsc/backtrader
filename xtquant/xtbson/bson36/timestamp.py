@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tools for representing MongoDB internal Timestamps."""
 
 import calendar
@@ -50,6 +49,10 @@ class Timestamp(object):
             :class:`~datetime.datetime`, or an aware
             :class:`~datetime.datetime`
           - `inc`: the incrementing counter
+
+        :param time:
+        :param inc:
+
         """
         if isinstance(time, datetime.datetime):
             if time.utcoffset() is not None:
@@ -78,44 +81,79 @@ class Timestamp(object):
         return self.__inc
 
     def __eq__(self, other):
+        """
+
+        :param other:
+
+        """
         if isinstance(other, Timestamp):
             return self.__time == other.time and self.__inc == other.inc
         else:
             return NotImplemented
 
     def __hash__(self):
+        """ """
         return hash(self.time) ^ hash(self.inc)
 
     def __ne__(self, other):
+        """
+
+        :param other:
+
+        """
         return not self == other
 
     def __lt__(self, other):
+        """
+
+        :param other:
+
+        """
         if isinstance(other, Timestamp):
             return (self.time, self.inc) < (other.time, other.inc)
         return NotImplemented
 
     def __le__(self, other):
+        """
+
+        :param other:
+
+        """
         if isinstance(other, Timestamp):
             return (self.time, self.inc) <= (other.time, other.inc)
         return NotImplemented
 
     def __gt__(self, other):
+        """
+
+        :param other:
+
+        """
         if isinstance(other, Timestamp):
             return (self.time, self.inc) > (other.time, other.inc)
         return NotImplemented
 
     def __ge__(self, other):
+        """
+
+        :param other:
+
+        """
         if isinstance(other, Timestamp):
             return (self.time, self.inc) >= (other.time, other.inc)
         return NotImplemented
 
     def __repr__(self):
+        """ """
         return "Timestamp(%s, %s)" % (self.__time, self.__inc)
 
     def as_datetime(self):
-        """Return a :class:`~datetime.datetime` instance corresponding
-        to the time portion of this :class:`Timestamp`.
+        """
+
+
+        :returns: to the time portion of this :class:`Timestamp`.
 
         The returned datetime's timezone is UTC.
+
         """
         return datetime.datetime.fromtimestamp(self.__time, utc)

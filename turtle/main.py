@@ -1,13 +1,14 @@
-from datetime import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta
+
 import pandas as pd
-import sma_detector as sdet
 import sma
+import sma_detector as sdet
 
 stocks = {"HS300": "data/hs300_stocks.csv", "ZZ500": "data/zz500_stocks.csv"}
 
 
 def main():
+    """ """
     print("Starting SMA Detector")
     end_date = datetime.today()
     start_date = end_date - timedelta(days=365 * 2)
@@ -21,7 +22,9 @@ def main():
         print("Do SMA Backtrade analysis...")
 
         df = pd.read_csv(
-            "data/golden_cross.csv", encoding="utf-8", parse_dates=["Last Cross Date"]
+            "data/golden_cross.csv",
+            encoding="utf-8",
+            parse_dates=["Last Cross Date"],
         )
         for _, row in df.iterrows():
             code = row["Code"]

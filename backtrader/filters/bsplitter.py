@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import datetime
 
@@ -26,8 +31,7 @@ import backtrader as bt
 
 
 class DaySplitter_Close(bt.with_metaclass(bt.MetaParams, object)):
-    """
-    Splits a daily bar in two parts simulating 2 ticks which will be used to
+    """Splits a daily bar in two parts simulating 2 ticks which will be used to
     replay the data:
 
       - First tick: ``OHLX``
@@ -53,6 +57,7 @@ class DaySplitter_Close(bt.with_metaclass(bt.MetaParams, object)):
 
     **This filter is meant to be used together with** ``cerebro.replaydata``
 
+
     """
 
     params = (("closevol", 0.5),)  # 0 -> 1 amount of volume to keep for close
@@ -60,9 +65,19 @@ class DaySplitter_Close(bt.with_metaclass(bt.MetaParams, object)):
     # replaying = True
 
     def __init__(self, data):
+        """
+
+        :param data:
+
+        """
         self.lastdt = None
 
     def __call__(self, data):
+        """
+
+        :param data:
+
+        """
         # Make a copy of the new bar and remove it from stream
         datadt = data.datetime.date()  # keep the date
 

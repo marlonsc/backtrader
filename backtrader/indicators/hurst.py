@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 from . import PeriodN
 
@@ -26,8 +31,7 @@ __all__ = ["HurstExponent", "Hurst"]
 
 
 class HurstExponent(PeriodN):
-    """
-     References:
+    """References:
 
        - https://www.quantopian.com/posts/hurst-exponent
        - https://www.quantopian.com/posts/some-code-from-ernie-chans-new-book-implemented-in-python
@@ -53,6 +57,7 @@ class HurstExponent(PeriodN):
      The original values (40, 2, self.p.period / 2) are kept for backwards
      compatibility
 
+
     """
 
     frompackages = (
@@ -68,12 +73,14 @@ class HurstExponent(PeriodN):
     )
 
     def _plotlabel(self):
+        """ """
         plabels = [self.p.period]
         plabels += [self._lag_start]
         plabels += [self._lag_end]
         return plabels
 
     def __init__(self):
+        """ """
         super(HurstExponent, self).__init__()
         # Prepare the lags array
         self._lag_start = lag_start = self.p.lag_start or 2
@@ -82,6 +89,7 @@ class HurstExponent(PeriodN):
         self.log10lags = log10(self.lags)
 
     def next(self):
+        """ """
         # Fetch the data
         ts = asarray(self.data.get(size=self.p.period))
 

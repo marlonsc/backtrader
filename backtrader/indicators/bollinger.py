@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,14 +18,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 from . import Indicator, MovAv, StdDev
 
 
 class BollingerBands(Indicator):
-    """
-    Defined by John Bollinger in the 80s. It measures volatility by defining
+    """Defined by John Bollinger in the 80s. It measures volatility by defining
     upper and lower bands at distance x standard deviations
 
     Formula:
@@ -35,6 +39,8 @@ class BollingerBands(Indicator):
 
     See:
       - http://en.wikipedia.org/wiki/Bollinger_Bands
+
+
     """
 
     alias = ("BBands",)
@@ -58,11 +64,13 @@ class BollingerBands(Indicator):
     )
 
     def _plotlabel(self):
+        """ """
         plabels = [self.p.period, self.p.devfactor]
         plabels += [self.p.movav] * self.p.notdefault("movav")
         return plabels
 
     def __init__(self):
+        """ """
         self.lines.mid = ma = self.p.movav(self.data, period=self.p.period)
         stddev = self.p.devfactor * StdDev(
             self.data, ma, period=self.p.period, movav=self.p.movav
@@ -74,13 +82,12 @@ class BollingerBands(Indicator):
 
 
 class BollingerBandsPct(BollingerBands):
-    """
-    Extends the Bollinger Bands with a Percentage line
-    """
+    """Extends the Bollinger Bands with a Percentage line"""
 
     lines = ("pctb",)
     plotlines = dict(pctb=dict(_name="%B"))  # display the line as %B on chart
 
     def __init__(self):
+        """ """
         super(BollingerBandsPct, self).__init__()
         self.l.pctb = (self.data - self.l.bot) / (self.l.top - self.l.bot)

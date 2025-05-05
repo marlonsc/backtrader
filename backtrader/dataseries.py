@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,21 +18,35 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import datetime as _datetime
-from datetime import datetime
 import inspect
 
-from .utils.py3 import range, with_metaclass
 from .lineseries import LineSeries
 from .utils import AutoOrderedDict, OrderedDict, date2num
+from .utils.py3 import range
 
 
 class TimeFrame(object):
-    (Ticks, MicroSeconds, Seconds, Minutes, Days, Weeks, Months, Years, NoTimeFrame) = (
-        range(1, 10)
-    )
+    """ """
+
+    (
+        Ticks,
+        MicroSeconds,
+        Seconds,
+        Minutes,
+        Days,
+        Weeks,
+        Months,
+        Years,
+        NoTimeFrame,
+    ) = range(1, 10)
 
     Names = [
         "",
@@ -51,6 +65,12 @@ class TimeFrame(object):
 
     @classmethod
     def getname(cls, tframe, compression=None):
+        """
+
+        :param tframe:
+        :param compression:  (Default value = None)
+
+        """
         tname = cls.Names[tframe]
         if compression > 1 or tname == cls.Names[-1]:
             return tname  # for plural or 'NoTimeFrame' return plain entry
@@ -60,14 +80,26 @@ class TimeFrame(object):
 
     @classmethod
     def TFrame(cls, name):
+        """
+
+        :param name:
+
+        """
         return getattr(cls, name)
 
     @classmethod
     def TName(cls, tframe):
+        """
+
+        :param tframe:
+
+        """
         return cls.Names[tframe]
 
 
 class DataSeries(LineSeries):
+    """ """
+
     plotinfo = dict(
         plot=True,
         plotind=True,
@@ -86,6 +118,7 @@ class DataSeries(LineSeries):
     LineOrder = [DateTime, Open, High, Low, Close, Volume, OpenInterest]
 
     def getwriterheaders(self):
+        """ """
         headers = [self._name, "len"]
 
         for lo in self.LineOrder:
@@ -97,6 +130,7 @@ class DataSeries(LineSeries):
         return headers
 
     def getwritervalues(self):
+        """ """
         l = len(self)
         values = [self._name, l]
 
@@ -112,6 +146,7 @@ class DataSeries(LineSeries):
         return values
 
     def getwriterinfo(self):
+        """ """
         # returns dictionary with information
         info = OrderedDict()
         info["Name"] = self._name
@@ -122,6 +157,8 @@ class DataSeries(LineSeries):
 
 
 class OHLC(DataSeries):
+    """ """
+
     lines = (
         "close",
         "low",
@@ -133,6 +170,8 @@ class OHLC(DataSeries):
 
 
 class OHLCDateTime(OHLC):
+    """ """
+
     lines = ("datetime",)
 
 
@@ -148,9 +187,19 @@ class SimpleFilterWrapper(object):
 
     The wrapper takes the return value and executes the bar removal
     if needed be
+
+
     """
 
     def __init__(self, data, ffilter, *args, **kwargs):
+        """
+
+        :param data:
+        :param ffilter:
+        :param *args:
+        :param **kwargs:
+
+        """
         if inspect.isclass(ffilter):
             ffilter = ffilter(data, *args, **kwargs)
             args = []
@@ -161,6 +210,11 @@ class SimpleFilterWrapper(object):
         self.kwargs = kwargs
 
     def __call__(self, data):
+        """
+
+        :param data:
+
+        """
         if self.ffilter(data, *self.args, **self.kwargs):
             data.backwards()
             return True
@@ -169,8 +223,7 @@ class SimpleFilterWrapper(object):
 
 
 class _Bar(AutoOrderedDict):
-    """
-    This class is a placeholder for the values of the standard lines of a
+    """This class is a placeholder for the values of the standard lines of a
     DataBase class (from OHLCDateTime)
 
     It inherits from AutoOrderedDict to be able to easily return the values as
@@ -178,6 +231,8 @@ class _Bar(AutoOrderedDict):
 
     Order of definition is important and must match that of the lines
     definition in DataBase (which directly inherits from OHLCDateTime)
+
+
     """
 
     replaying = False
@@ -187,11 +242,20 @@ class _Bar(AutoOrderedDict):
     MAXDATE = date2num(_datetime.datetime.max) - 2
 
     def __init__(self, maxdate=False):
+        """
+
+        :param maxdate:  (Default value = False)
+
+        """
         super(_Bar, self).__init__()
         self.bstart(maxdate=maxdate)
 
     def bstart(self, maxdate=False):
-        """Initializes a bar to the default not-updated vaues"""
+        """Initializes a bar to the default not-updated vaues
+
+        :param maxdate:  (Default value = False)
+
+        """
         # Order is important: defined in DataSeries/OHLC/OHLCDateTime
         self.close = float("NaN")
         self.low = float("inf")
@@ -206,6 +270,8 @@ class _Bar(AutoOrderedDict):
 
         Uses the fact that NaN is the value which is not equal to itself
         and ``open`` is initialized to NaN
+
+
         """
         o = self.open
         return o == o  # False if NaN, True in other cases
@@ -216,6 +282,10 @@ class _Bar(AutoOrderedDict):
         Returns True if the update was the 1st on a bar (just opened)
 
         Returns False otherwise
+
+        :param data:
+        :param reopen:  (Default value = False)
+
         """
         if reopen:
             self.bstart()

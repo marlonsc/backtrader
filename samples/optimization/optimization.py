@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,20 +18,26 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
 import time
 
-from backtrader.utils.py3 import range
-
 import backtrader as bt
-import backtrader.indicators as btind
 import backtrader.feeds as btfeeds
+import backtrader.indicators as btind
+from backtrader.utils.py3 import range
 
 
 class OptimizeStrategy(bt.Strategy):
+    """ """
+
     params = (
         ("smaperiod", 15),
         ("macdperiod1", 12),
@@ -40,6 +46,7 @@ class OptimizeStrategy(bt.Strategy):
     )
 
     def __init__(self):
+        """ """
         # Add indicators to add load
 
         btind.SMA(period=self.p.smaperiod)
@@ -51,6 +58,7 @@ class OptimizeStrategy(bt.Strategy):
 
 
 def runstrat():
+    """ """
     args = parse_args()
 
     # Create a cerebro entity
@@ -105,6 +113,7 @@ def runstrat():
 
 
 def parse_args():
+    """ """
     parser = argparse.ArgumentParser(
         description="Optimization",
         formatter_class=argparse.RawTextHelpFormatter,
@@ -146,7 +155,10 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--no-runonce", action="store_true", required=False, help="Run in next mode"
+        "--no-runonce",
+        action="store_true",
+        required=False,
+        help="Run in next mode",
     )
 
     parser.add_argument(

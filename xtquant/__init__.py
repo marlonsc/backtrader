@@ -4,6 +4,11 @@ __version__ = "xtquant"
 
 
 def check_for_update(package_name):
+    """
+
+    :param package_name:
+
+    """
     import requests
     from pkg_resources import get_distribution
 
@@ -29,5 +34,5 @@ def check_for_update(package_name):
 
 try:
     check_for_update("xtquant")
-except:
+except BaseException:
     pass

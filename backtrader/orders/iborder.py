@@ -18,14 +18,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import datetime
+
 import backtrader as bt
-import sys
-import traceback
-from backtrader.stores import ibstore_insync
 from backtrader import Order
+from backtrader.stores import ibstore_insync
 from backtrader.utils.py3 import with_metaclass
 
 """
@@ -49,9 +53,10 @@ PercentChangeCondition = ibstore_insync.PercentChangeCondition
 
 
 class MetaOrder(bt.MetaParams):
+    """ """
+
     def donew(cls, *args, **kwargs):
-        """
-        本函数完成从ib_incync的初始化参数到backtrader的order类的参数的转换
+        """本函数完成从ib_incync的初始化参数到backtrader的order类的参数的转换
         ibbroker使用的是ib_insync的order类，需要兼容backtrader的order类,因此将
         ib_incync的初始化参数转化为backtrader的order类的参数,以完成后面的类初始化
         本函数需要在对象生成前调用，不能放在对象的__init__函数中
@@ -72,6 +77,10 @@ class MetaOrder(bt.MetaParams):
         # To support historical order evaluation
         ('histnotify', False),
         ('orderId', 0),
+
+        :param *args:
+        :param **kwargs:
+
         """
         ordertype = kwargs.get("orderType")
         kwargs["totalQuantity"] = kwargs.get("size", 0)
@@ -86,7 +95,8 @@ class MetaOrder(bt.MetaParams):
         if ordertype in ["TRAIL", "TRAIL LIMIT"]:
             trailingPercent = kwargs.get("trailingPercent", 0)
             if trailingPercent:
-                kwargs["trailpercent"] = trailingPercent / 100  # precentage price
+                kwargs["trailpercent"] = trailingPercent / \
+                    100  # precentage price
             else:
                 kwargs["trailamount"] = kwargs.get("auxPrice")
 
@@ -103,18 +113,25 @@ class MetaOrder(bt.MetaParams):
 bytes = bstr  # py2/3 need for ibpy
 
 class IBOrderState(object):
+    """ """
     # wraps OrderState object and can print it
     _fields = ['status', 'initMargin', 'maintMargin', 'equityWithLoan',
                'commission', 'minCommission', 'maxCommission',
                'commissionCurrency', 'warningText']
 
     def __init__(self, orderstate):
+        """
+
+: param orderstate:
+
+    """
         for f in self._fields:
              # fname = 'm_' + f
             fname =  f
             setattr(self, fname, getattr(orderstate, fname))
 
     def __str__(self):
+        """ """
         txt = list()
         txt.append('--- ORDERSTATE BEGIN')
         for f in self._fields:
@@ -127,8 +144,7 @@ class IBOrderState(object):
 
 
 class IBOrder(with_metaclass(MetaOrder, Order, ibstore_insync.Order)):
-    """
-    Subclasses the IBPy order to provide the minimum extra functionality
+    """Subclasses the IBPy order to provide the minimum extra functionality
     needed to be compatible with the internally defined orders
 
     Once ``OrderBase`` has processed the parameters, the __init__ method takes
@@ -150,12 +166,15 @@ class IBOrder(with_metaclass(MetaOrder, Order, ibstore_insync.Order)):
 
     This would be done almost always from the ``Buy`` and ``Sell`` methods of
     the ``Strategy`` subclass being used in ``Cerebro``
+
+
     """
 
     def __str__(self):
-        """
-        #Get the printout from the base class and add some ib.Order specific
+        """#Get the printout from the base class and add some ib.Order specific
         #fields
+
+
         """
         basetxt = ibstore_insync.Order.__str__()
         tojoin = [basetxt]
@@ -183,6 +202,11 @@ class IBOrder(with_metaclass(MetaOrder, Order, ibstore_insync.Order)):
     }
 
     def __init__(self, **kwargs):
+        """
+
+        :param **kwargs:
+
+        """
 
         # 下面两个参数，在init前
         self._willexpire = False

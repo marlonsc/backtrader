@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
@@ -27,12 +32,15 @@ import backtrader as bt
 
 
 class BaseStrategy(bt.Strategy):
+    """ """
+
     params = dict(
         fast_ma=10,
         slow_ma=20,
     )
 
     def __init__(self):
+        """ """
         # omitting a data implies self.datas[0] (aka self.data and self.data0)
         fast_ma = bt.ind.EMA(period=self.p.fast_ma)
         slow_ma = bt.ind.EMA(period=self.p.slow_ma)
@@ -41,12 +49,19 @@ class BaseStrategy(bt.Strategy):
 
 
 class ManualStopOrStopTrail(BaseStrategy):
+    """ """
+
     params = dict(
         stop_loss=0.02,  # price is 2% less than the entry point
         trail=False,
     )
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if not order.status == order.Completed:
             return  # discard any other notification
 
@@ -64,22 +79,31 @@ class ManualStopOrStopTrail(BaseStrategy):
             self.sell(exectype=bt.Order.StopTrail, trailamount=self.p.trail)
 
     def next(self):
+        """ """
         if not self.position and self.crossup > 0:
             # not in the market and signal triggered
             self.buy()
 
 
 class ManualStopOrStopTrailCheat(BaseStrategy):
+    """ """
+
     params = dict(
         stop_loss=0.02,  # price is 2% less than the entry point
         trail=False,
     )
 
     def __init__(self):
+        """ """
         super().__init__()
         self.broker.set_coc(True)
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if not order.status == order.Completed:
             return  # discard any other notification
 
@@ -91,6 +115,7 @@ class ManualStopOrStopTrailCheat(BaseStrategy):
         print("BUY @price: {:.2f}".format(order.executed.price))
 
     def next(self):
+        """ """
         if not self.position and self.crossup > 0:
             # not in the market and signal triggered
             self.buy()
@@ -103,6 +128,8 @@ class ManualStopOrStopTrailCheat(BaseStrategy):
 
 
 class AutoStopOrStopTrail(BaseStrategy):
+    """ """
+
     params = dict(
         stop_loss=0.02,  # price is 2% less than the entry point
         trail=False,
@@ -112,6 +139,11 @@ class AutoStopOrStopTrail(BaseStrategy):
     buy_order = None  # default value for a potential buy_order
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status == order.Cancelled:
             print(
                 "CANCEL@price: {:.2f} {}".format(
@@ -131,6 +163,7 @@ class AutoStopOrStopTrail(BaseStrategy):
         print("BUY @price: {:.2f}".format(order.executed.price))
 
     def next(self):
+        """ """
         if not self.position and self.crossup > 0:
             if self.buy_order:  # something was pending
                 self.cancel(self.buy_order)
@@ -150,7 +183,9 @@ class AutoStopOrStopTrail(BaseStrategy):
             if not self.p.trail:
                 stop_price = self.data.close[0] * (1.0 - self.p.stop_loss)
                 self.sell(
-                    exectype=bt.Order.Stop, price=stop_price, parent=self.buy_order
+                    exectype=bt.Order.Stop,
+                    price=stop_price,
+                    parent=self.buy_order,
                 )
             else:
                 self.sell(
@@ -168,6 +203,11 @@ APPROACHES = dict(
 
 
 def runstrat(args=None):
+    """
+
+    :param args:  (Default value = None)
+
+    """
     args = parse_args(args)
 
     cerebro = bt.Cerebro()
@@ -203,6 +243,11 @@ def runstrat(args=None):
 
 
 def parse_args(pargs=None):
+    """
+
+    :param pargs:  (Default value = None)
+
+    """
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Stop-Loss Approaches",

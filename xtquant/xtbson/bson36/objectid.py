@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tools for working with MongoDB `ObjectIds
 <http://dochub.mongodb.org/core/objectids>`_.
 """
@@ -32,6 +31,11 @@ _MAX_COUNTER_VALUE = 0xFFFFFF
 
 
 def _raise_invalid_id(oid):
+    """
+
+    :param oid:
+
+    """
     raise InvalidId(
         "%r is not a valid ObjectId, it must be a 12-byte input"
         " or a 24-character hex string" % oid
@@ -73,13 +77,9 @@ class ObjectId(object):
         For example, the 12 bytes b'foo-bar-quux' do not follow the ObjectId
         specification but they are acceptable input::
 
-          >>> ObjectId(b'foo-bar-quux')
-          ObjectId('666f6f2d6261722d71757578')
 
         `oid` can also be a :class:`str` of 24 hex digits::
 
-          >>> ObjectId('0123456789ab0123456789ab')
-          ObjectId('0123456789ab0123456789ab')
 
         Raises :class:`~bson.errors.InvalidId` if `oid` is not 12 bytes nor
         24 hex digits, or :class:`TypeError` if `oid` is not an accepted type.
@@ -94,6 +94,14 @@ class ObjectId(object):
            specification version 0.2
            <https://github.com/mongodb/specifications/blob/master/source/
            objectid.rst>`_.
+
+        :param oid:  (Default value = None)
+
+        >>> ObjectId(b'foo-bar-quux')
+          ObjectId('666f6f2d6261722d71757578')
+
+          >>> ObjectId('0123456789ab0123456789ab')
+          ObjectId('0123456789ab0123456789ab')
         """
         if oid is None:
             self.__generate()
@@ -122,13 +130,16 @@ class ObjectId(object):
         An example using this helper to get documents where ``"_id"``
         was generated before January 1, 2010 would be:
 
-        >>> gen_time = datetime.datetime(2010, 1, 1)
-        >>> dummy_id = ObjectId.from_datetime(gen_time)
-        >>> result = collection.find({"_id": {"$lt": dummy_id}})
 
         :Parameters:
           - `generation_time`: :class:`~datetime.datetime` to be used
             as the generation time for the resulting ObjectId.
+
+        :param generation_time:
+
+        >>> gen_time = datetime.datetime(2010, 1, 1)
+        >>> dummy_id = ObjectId.from_datetime(gen_time)
+        >>> result = collection.find({"_id": {"$lt": dummy_id}})
         """
         if generation_time.utcoffset() is not None:
             generation_time = generation_time - generation_time.utcoffset()
@@ -144,6 +155,9 @@ class ObjectId(object):
           - `oid`: the object id to validate
 
         .. versionadded:: 2.3
+
+        :param oid:
+
         """
         if not oid:
             return False
@@ -189,6 +203,9 @@ class ObjectId(object):
 
         :Parameters:
           - `oid`: a valid ObjectId
+
+        :param oid:
+
         """
         if isinstance(oid, ObjectId):
             self.__id = oid.binary
@@ -219,18 +236,27 @@ class ObjectId(object):
         The :class:`datetime.datetime` is timezone aware, and
         represents the generation time in UTC. It is precise to the
         second.
+
+
         """
         timestamp = struct.unpack(">I", self.__id[0:4])[0]
         return datetime.datetime.fromtimestamp(timestamp, utc)
 
     def __getstate__(self):
-        """return value of object for pickling.
-        needed explicitly because __slots__() defined.
+        """
+
+
+        :returns: needed explicitly because __slots__() defined.
+
         """
         return self.__id
 
     def __setstate__(self, value):
-        """explicit state set from pickling"""
+        """explicit state set from pickling
+
+        :param value:
+
+        """
         # Provide backwards compatability with OIDs
         # pickled with pymongo-1.9 or older.
         if isinstance(value, dict):
@@ -246,37 +272,69 @@ class ObjectId(object):
             self.__id = oid
 
     def __str__(self):
+        """ """
         return binascii.hexlify(self.__id).decode()
 
     def __repr__(self):
+        """ """
         return "ObjectId('%s')" % (str(self),)
 
     def __eq__(self, other):
+        """
+
+        :param other:
+
+        """
         if isinstance(other, ObjectId):
             return self.__id == other.binary
         return NotImplemented
 
     def __ne__(self, other):
+        """
+
+        :param other:
+
+        """
         if isinstance(other, ObjectId):
             return self.__id != other.binary
         return NotImplemented
 
     def __lt__(self, other):
+        """
+
+        :param other:
+
+        """
         if isinstance(other, ObjectId):
             return self.__id < other.binary
         return NotImplemented
 
     def __le__(self, other):
+        """
+
+        :param other:
+
+        """
         if isinstance(other, ObjectId):
             return self.__id <= other.binary
         return NotImplemented
 
     def __gt__(self, other):
+        """
+
+        :param other:
+
+        """
         if isinstance(other, ObjectId):
             return self.__id > other.binary
         return NotImplemented
 
     def __ge__(self, other):
+        """
+
+        :param other:
+
+        """
         if isinstance(other, ObjectId):
             return self.__id >= other.binary
         return NotImplemented

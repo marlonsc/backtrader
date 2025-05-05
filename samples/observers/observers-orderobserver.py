@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,18 +18,23 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import datetime
 
 import backtrader as bt
-import backtrader.feeds as btfeeds
 import backtrader.indicators as btind
-
 from orderobserver import OrderObserver
 
 
 class MyStrategy(bt.Strategy):
+    """ """
+
     params = (
         ("smaperiod", 15),
         ("limitperc", 1.0),
@@ -37,13 +42,23 @@ class MyStrategy(bt.Strategy):
     )
 
     def log(self, txt, dt=None):
-        """Logging function fot this strategy"""
+        """Logging function fot this strategy
+
+        :param txt:
+        :param dt:  (Default value = None)
+
+        """
         dt = dt or self.data.datetime[0]
         if isinstance(dt, float):
             dt = bt.num2date(dt)
         print("%s, %s" % (dt.isoformat(), txt))
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status in [order.Submitted, order.Accepted]:
             # Buy/Sell order submitted/accepted to/by broker - Nothing to do
             self.log("ORDER ACCEPTED/SUBMITTED", dt=order.created.dt)
@@ -57,19 +72,28 @@ class MyStrategy(bt.Strategy):
             if order.isbuy():
                 self.log(
                     "BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f"
-                    % (order.executed.price, order.executed.value, order.executed.comm)
+                    % (
+                        order.executed.price,
+                        order.executed.value,
+                        order.executed.comm,
+                    )
                 )
 
             else:  # Sell
                 self.log(
                     "SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f"
-                    % (order.executed.price, order.executed.value, order.executed.comm)
+                    % (
+                        order.executed.price,
+                        order.executed.value,
+                        order.executed.comm,
+                    )
                 )
 
         # Sentinel to None: new orders allowed
         self.order = None
 
     def __init__(self):
+        """ """
         # SimpleMovingAverage on main data
         # Equivalent to -> sma = btind.SMA(self.data, period=self.p.smaperiod)
         sma = btind.SMA(period=self.p.smaperiod)
@@ -81,6 +105,7 @@ class MyStrategy(bt.Strategy):
         self.order = None
 
     def next(self):
+        """ """
         if self.order:
             # pending order ... do nothing
             return
@@ -99,6 +124,7 @@ class MyStrategy(bt.Strategy):
 
 
 def runstrat():
+    """ """
     cerebro = bt.Cerebro()
 
     data = bt.feeds.BacktraderCSVData(dataname="../../datas/2006-day-001.txt")

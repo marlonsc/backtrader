@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,17 +18,22 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
-
-from .utils.py3 import range, with_metaclass
-
-from .lineiterator import LineIterator, IndicatorBase
-from .lineseries import LineSeriesMaker, Lines
+from .lineiterator import IndicatorBase, LineIterator
+from .lineseries import Lines
 from .metabase import AutoInfoClass
+from .utils.py3 import range, with_metaclass
 
 
 class MetaIndicator(IndicatorBase.__class__):
+    """ """
+
     _refname = "_indcol"
     _indcol = dict()
 
@@ -37,10 +42,16 @@ class MetaIndicator(IndicatorBase.__class__):
 
     @classmethod
     def cleancache(cls):
+        """ """
         cls._icache = dict()
 
     @classmethod
     def usecache(cls, onoff):
+        """
+
+        :param onoff:
+
+        """
         cls._icacheuse = onoff
 
     # Object cache deactivated on 2016-08-17. If the object is being used
@@ -48,6 +59,12 @@ class MetaIndicator(IndicatorBase.__class__):
     # influences the first usage when being modified during the 2nd usage
 
     def __call__(cls, *args, **kwargs):
+        """
+
+        :param *args:
+        :param **kwargs:
+
+        """
         if not cls._icacheuse:
             return super(MetaIndicator, cls).__call__(*args, **kwargs)
 
@@ -64,8 +81,12 @@ class MetaIndicator(IndicatorBase.__class__):
         return cls._icache.setdefault(ckey, _obj)
 
     def __init__(cls, name, bases, dct):
-        """
-        Class has already been created ... register subclasses
+        """Class has already been created ... register subclasses
+
+        :param name:
+        :param bases:
+        :param dct:
+
         """
         # Initialize the class
         super(MetaIndicator, cls).__init__(name, bases, dct)
@@ -86,17 +107,30 @@ class MetaIndicator(IndicatorBase.__class__):
 
 
 class Indicator(with_metaclass(MetaIndicator, IndicatorBase)):
+    """ """
+
     _ltype = LineIterator.IndType
 
     csv = False
 
     def advance(self, size=1):
+        """
+
+        :param size:  (Default value = 1)
+
+        """
         # Need intercepting this call to support datas with
         # different lengths (timeframes)
         if len(self) < len(self._clock):
             self.lines.advance(size=size)
 
     def preonce_via_prenext(self, start, end):
+        """
+
+        :param start:
+        :param end:
+
+        """
         # generic implementation if prenext is overridden but preonce is not
         for i in range(start, end):
             for data in self.datas:
@@ -109,6 +143,12 @@ class Indicator(with_metaclass(MetaIndicator, IndicatorBase)):
             self.prenext()
 
     def oncestart_via_nextstart(self, start, end):
+        """
+
+        :param start:
+        :param end:
+
+        """
         # nextstart has been overriden, but oncestart has not and the code is
         # here. call the overriden nextstart
         for i in range(start, end):
@@ -122,6 +162,12 @@ class Indicator(with_metaclass(MetaIndicator, IndicatorBase)):
             self.nextstart()
 
     def once_via_next(self, start, end):
+        """
+
+        :param start:
+        :param end:
+
+        """
         # Not overridden, next must be there ...
         for i in range(start, end):
             for data in self.datas:
@@ -135,7 +181,15 @@ class Indicator(with_metaclass(MetaIndicator, IndicatorBase)):
 
 
 class MtLinePlotterIndicator(Indicator.__class__):
+    """ """
+
     def donew(cls, *args, **kwargs):
+        """
+
+        :param *args:
+        :param **kwargs:
+
+        """
         lname = kwargs.pop("name")
         name = cls.__name__
 
@@ -157,4 +211,4 @@ class MtLinePlotterIndicator(Indicator.__class__):
 
 
 class LinePlotterIndicator(with_metaclass(MtLinePlotterIndicator, Indicator)):
-    pass
+    """ """

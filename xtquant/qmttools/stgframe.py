@@ -1,17 +1,31 @@
 # coding:utf-8
 
-from xtquant import xtdata
 from xtquant import xtbson as _BSON_
+from xtquant import xtdata
 
 
 class StrategyLoader:
+    """ """
+
     def __init__(this):
+        """
+
+        :param this:
+
+        """
         this.C = None
         this.main_quote_subid = 0
         return
 
     def init(this):
-        import os, uuid
+        """
+
+        :param this:
+
+        """
+        import os
+        import uuid
+
         from xtquant import xtdata_config
 
         C = this.C
@@ -20,10 +34,10 @@ class StrategyLoader:
         C.request_id = C._param.get("requestid", "") + "_" + C.guid
         C.quote_mode = C._param.get(
             "quote_mode", "history"
-        )  #'realtime' 'history' 'all'
+        )  # 'realtime' 'history' 'all'
         C.trade_mode = C._param.get(
             "trade_mode", "backtest"
-        )  #'simulation' 'trading' 'backtest'
+        )  # 'simulation' 'trading' 'backtest'
         C.do_back_test = 1 if C.trade_mode == "backtest" else 0
 
         C.title = C._param.get("title", "")
@@ -38,7 +52,7 @@ class StrategyLoader:
         C.end_time = C._param.get("end_time", "")
         C.start_time_str = ""
         C.end_time_str = ""
-        if type(C.period) == int:
+        if isinstance(C.period, int):
             C.period = {
                 0: "tick",
                 60000: "1m",
@@ -175,9 +189,19 @@ class StrategyLoader:
         return
 
     def shutdown(this):
+        """
+
+        :param this:
+
+        """
         return
 
     def start(this):
+        """
+
+        :param this:
+
+        """
         import time
 
         C = this.C
@@ -197,6 +221,11 @@ class StrategyLoader:
         return
 
     def stop(this):
+        """
+
+        :param this:
+
+        """
         if this.main_quote_subid:
             xtdata.unsubscribe_quote(this.main_quote_subid)
 
@@ -204,6 +233,11 @@ class StrategyLoader:
         return
 
     def run(this):
+        """
+
+        :param this:
+
+        """
         C = this.C
 
         if C.quote_mode in ["realtime", "all"]:
@@ -211,6 +245,11 @@ class StrategyLoader:
         return
 
     def load_main_history(this):
+        """
+
+        :param this:
+
+        """
         C = this.C
 
         data = xtdata.get_market_data_ex(
@@ -227,9 +266,19 @@ class StrategyLoader:
         return
 
     def load_main_realtime(this):
+        """
+
+        :param this:
+
+        """
         C = this.C
 
         def on_data(data):
+            """
+
+            :param data:
+
+            """
             data = data.get(C.stock_code, [])
             if data:
                 tt = data[-1]["time"]
@@ -247,12 +296,23 @@ class StrategyLoader:
         return
 
     def on_main_quote(this, timetag):
+        """
+
+        :param this:
+        :param timetag:
+
+        """
         if not this.C.timelist or this.C.timelist[-1] < timetag:
             this.C.timelist.append(timetag)
         this.run_bar()
         return
 
     def run_bar(this):
+        """
+
+        :param this:
+
+        """
         C = this.C
 
         push_timelist = []
@@ -288,6 +348,12 @@ class StrategyLoader:
         return
 
     def create_formula(this, callback=None):
+        """
+
+        :param this:
+        :param callback:  (Default value = None)
+
+        """
         C = this.C
         client = xtdata.get_client()
 
@@ -309,12 +375,25 @@ class StrategyLoader:
         client.subscribeFormula(C.request_id, _BSON_.BSON.encode(data), callback)
 
     def call_formula(this, func, data):
+        """
+
+        :param this:
+        :param func:
+        :param data:
+
+        """
         C = this.C
         client = xtdata.get_client()
         bresult = client.callFormula(C.request_id, func, _BSON_.BSON.encode(data))
         return _BSON_.BSON.decode(bresult)
 
     def create_view(this, title):
+        """
+
+        :param this:
+        :param title:
+
+        """
         C = this.C
         client = xtdata.get_client()
         data = {
@@ -330,14 +409,26 @@ class StrategyLoader:
 
 
 class BackTestResult:
+    """ """
+
     def __init__(self, request_id):
+        """
+
+        :param request_id:
+
+        """
         self.request_id = request_id
 
     def get_backtest_index(self):
-        import os, pandas as pd, uuid
+        """ """
+        import os
+        import uuid
+
+        import pandas as pd
+
         from .functions import get_backtest_index
 
-        path = f'{os.getenv("TEMP")}/backtest_{uuid.uuid4()}'
+        path = f"{os.getenv('TEMP')}/backtest_{uuid.uuid4()}"
         get_backtest_index(self.request_id, path)
 
         ret = pd.read_csv(f"{path}/backtestindex.csv", encoding="utf-8")
@@ -347,10 +438,19 @@ class BackTestResult:
         return ret
 
     def get_group_result(self, fields=[]):
-        import os, pandas as pd, uuid
+        """
+
+        :param fields:  (Default value = [])
+
+        """
+        import os
+        import uuid
+
+        import pandas as pd
+
         from .functions import get_group_result
 
-        path = f'{os.getenv("TEMP")}/backtest_{uuid.uuid4()}'
+        path = f"{os.getenv('TEMP')}/backtest_{uuid.uuid4()}"
         get_group_result(self.request_id, path, fields)
         if not fields:
             fields = ["order", "deal", "position"]
@@ -364,5 +464,12 @@ class BackTestResult:
 
 
 class RealTimeResult:
+    """ """
+
     def __init__(self, request_id):
+        """
+
+        :param request_id:
+
+        """
         self.request_id = request_id

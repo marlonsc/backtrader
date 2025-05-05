@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,22 +18,25 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import collections
-from copy import copy
 import datetime
 import itertools
-
-from .utils.py3 import range, with_metaclass, iteritems
+from copy import copy
 
 from .metabase import MetaParams
 from .utils import AutoOrderedDict
+from .utils.py3 import iteritems, range, with_metaclass
 
 
 class OrderExecutionBit(object):
-    """
-    Intended to hold information about order execution. A "bit" does not
+    """Intended to hold information about order execution. A "bit" does not
     determine if the order has been fully/partially executed, it just holds
     information.
 
@@ -56,6 +59,7 @@ class OrderExecutionBit(object):
       - psize: current open position size
       - pprice: current open position price
 
+
     """
 
     def __init__(
@@ -73,6 +77,22 @@ class OrderExecutionBit(object):
         psize=0,
         pprice=0.0,
     ):
+        """
+
+        :param dt:  (Default value = None)
+        :param size:  (Default value = 0)
+        :param price:  (Default value = 0.0)
+        :param closed:  (Default value = 0)
+        :param closedvalue:  (Default value = 0.0)
+        :param closedcomm:  (Default value = 0.0)
+        :param opened:  (Default value = 0)
+        :param openedvalue:  (Default value = 0.0)
+        :param openedcomm:  (Default value = 0.0)
+        :param pnl:  (Default value = 0.0)
+        :param psize:  (Default value = 0)
+        :param pprice:  (Default value = 0.0)
+
+        """
 
         self.dt = dt
         self.size = size
@@ -94,8 +114,7 @@ class OrderExecutionBit(object):
 
 
 class OrderData(object):
-    """
-    Holds actual order data for Creation and Execution.
+    """Holds actual order data for Creation and Execution.
 
     In the case of Creation the request made and in the case of Execution the
     actual outcome.
@@ -120,6 +139,7 @@ class OrderData(object):
 
       - psize: current open position size
       - pprice: current open position price
+
 
     """
 
@@ -147,6 +167,18 @@ class OrderData(object):
         trailamount=0.0,
         trailpercent=0.0,
     ):
+        """
+
+        :param dt:  (Default value = None)
+        :param size:  (Default value = 0)
+        :param price:  (Default value = 0.0)
+        :param pricelimit:  (Default value = 0.0)
+        :param remsize:  (Default value = 0)
+        :param pclose:  (Default value = 0.0)
+        :param trailamount:  (Default value = 0.0)
+        :param trailpercent:  (Default value = 0.0)
+
+        """
 
         self.pclose = pclose
         self.exbits = collections.deque()  # for historical purposes
@@ -179,17 +211,29 @@ class OrderData(object):
         self.pprice = 0
 
     def _getplimit(self):
+        """ """
         return self._plimit
 
     def _setplimit(self, val):
+        """
+
+        :param val:
+
+        """
         self._plimit = val
 
     plimit = property(_getplimit, _setplimit)
 
     def __len__(self):
+        """ """
         return len(self.exbits)
 
     def __getitem__(self, key):
+        """
+
+        :param key:
+
+        """
         return self.exbits[key]
 
     def add(
@@ -207,6 +251,22 @@ class OrderData(object):
         psize=0,
         pprice=0.0,
     ):
+        """
+
+        :param dt:
+        :param size:
+        :param price:
+        :param closed:  (Default value = 0)
+        :param closedvalue:  (Default value = 0.0)
+        :param closedcomm:  (Default value = 0.0)
+        :param opened:  (Default value = 0)
+        :param openedvalue:  (Default value = 0.0)
+        :param openedcomm:  (Default value = 0.0)
+        :param pnl:  (Default value = 0.0)
+        :param psize:  (Default value = 0)
+        :param pprice:  (Default value = 0.0)
+
+        """
 
         self.addbit(
             OrderExecutionBit(
@@ -226,6 +286,11 @@ class OrderData(object):
         )
 
     def addbit(self, exbit):
+        """
+
+        :param exbit:
+
+        """
         # Stores an ExecutionBit and recalculates own values from ExBit
         self.exbits.append(exbit)
 
@@ -243,22 +308,28 @@ class OrderData(object):
         self.pprice = exbit.pprice
 
     def getpending(self):
+        """ """
         return list(self.iterpending())
 
     def iterpending(self):
+        """ """
         return itertools.islice(self.exbits, self.p1, self.p2)
 
     def markpending(self):
+        """ """
         # rebuild the indices to mark which exbits are pending in clone
         self.p1, self.p2 = self.p2, len(self.exbits)
 
     def clone(self):
+        """ """
         self.markpending()
         obj = copy(self)
         return obj
 
 
 class OrderBase(with_metaclass(MetaParams, object)):
+    """ """
+
     params = (
         ("owner", None),
         ("data", None),
@@ -288,9 +359,16 @@ class OrderBase(with_metaclass(MetaParams, object)):
     # Volume Restrictions for orders
     V_None = range(1)
 
-    (Market, Close, Limit, Stop, StopLimit, StopTrail, StopTrailLimit, Historical) = (
-        range(8)
-    )
+    (
+        Market,
+        Close,
+        Limit,
+        Stop,
+        StopLimit,
+        StopTrail,
+        StopTrailLimit,
+        Historical,
+    ) = range(8)
     ExecTypes = [
         "Market",
         "Close",
@@ -334,24 +412,42 @@ class OrderBase(with_metaclass(MetaParams, object)):
     refbasis = itertools.count(1)  # for a unique identifier per order
 
     def _getplimit(self):
+        """ """
         return self._plimit
 
     def _setplimit(self, val):
+        """
+
+        :param val:
+
+        """
         self._plimit = val
 
     plimit = property(_getplimit, _setplimit)
 
     def __getattr__(self, name):
+        """
+
+        :param name:
+
+        """
         # Return attr from params if not found in order
         return getattr(self.params, name)
 
     def __setattribute__(self, name, value):
+        """
+
+        :param name:
+        :param value:
+
+        """
         if hasattr(self.params, name):
             setattr(self.params, name, value)
         else:
             super(Order, self).__setattribute__(name, value)
 
     def __str__(self):
+        """ """
         tojoin = list()
         tojoin.append("Ref: {}".format(self.ref))
         tojoin.append("OrdType: {}".format(self.ordtype))
@@ -374,6 +470,7 @@ class OrderBase(with_metaclass(MetaParams, object)):
         return "\n".join(tojoin)
 
     def __init__(self):
+        """ """
         self.ref = next(self.refbasis)
         self.broker = None
         self.info = AutoOrderedDict()
@@ -463,6 +560,7 @@ class OrderBase(with_metaclass(MetaParams, object)):
             self.dteos = 0.0
 
     def clone(self):
+        """ """
         # status, triggered and executed are the only moving parts in order
         # status and triggered are covered by copy
         # executed has to be replaced with an intelligent clone of itself
@@ -471,30 +569,51 @@ class OrderBase(with_metaclass(MetaParams, object)):
         return obj  # status could change in next to completed
 
     def getstatusname(self, status=None):
-        """Returns the name for a given status or the one of the order"""
+        """Returns the name for a given status or the one of the order
+
+        :param status:  (Default value = None)
+
+        """
         return self.Status[self.status if status is None else status]
 
     def getordername(self, exectype=None):
-        """Returns the name for a given exectype or the one of the order"""
+        """Returns the name for a given exectype or the one of the order
+
+        :param exectype:  (Default value = None)
+
+        """
         return self.ExecTypes[self.exectype if exectype is None else exectype]
 
     @classmethod
     def ExecType(cls, exectype):
+        """
+
+        :param exectype:
+
+        """
         return getattr(cls, exectype)
 
     def ordtypename(self, ordtype=None):
-        """Returns the name for a given ordtype or the one of the order"""
+        """Returns the name for a given ordtype or the one of the order
+
+        :param ordtype:  (Default value = None)
+
+        """
         return self.OrdTypes[self.ordtype if ordtype is None else ordtype]
 
     def active(self):
+        """ """
         return self._active
 
     def activate(self):
+        """ """
         self._active = True
 
     def alive(self):
         """Returns True if the order is in a status in which it can still be
         executed
+
+
         """
         return self.status in [
             Order.Created,
@@ -504,20 +623,37 @@ class OrderBase(with_metaclass(MetaParams, object)):
         ]
 
     def addcomminfo(self, comminfo):
-        """Stores a CommInfo scheme associated with the asset"""
+        """Stores a CommInfo scheme associated with the asset
+
+        :param comminfo:
+
+        """
         self.comminfo = comminfo
 
     def addinfo(self, **kwargs):
         """Add the keys, values of kwargs to the internal info dictionary to
         hold custom information in the order
+
+        :param **kwargs:
+
         """
         for key, val in iteritems(kwargs):
             self.info[key] = val
 
     def __eq__(self, other):
+        """
+
+        :param other:
+
+        """
         return other is not None and self.ref == other.ref
 
     def __ne__(self, other):
+        """
+
+        :param other:
+
+        """
         return self.ref != other.ref
 
     def isbuy(self):
@@ -529,32 +665,51 @@ class OrderBase(with_metaclass(MetaParams, object)):
         return self.ordtype == self.Sell
 
     def setposition(self, position):
-        """Receives the current position for the asset and stotres it"""
+        """Receives the current position for the asset and stotres it
+
+        :param position:
+
+        """
         self.position = position
 
     def submit(self, broker=None):
         """Marks an order as submitted and stores the broker to which it was
-        submitted"""
+        submitted
+
+        :param broker:  (Default value = None)
+
+        """
         self.status = Order.Submitted
         self.broker = broker
         self.plen = len(self.data)
 
     def accept(self, broker=None):
-        """Marks an order as accepted"""
+        """Marks an order as accepted
+
+        :param broker:  (Default value = None)
+
+        """
         self.status = Order.Accepted
         self.broker = broker
 
     def brokerstatus(self):
         """Tries to retrieve the status from the broker in which the order is.
 
-        Defaults to last known status if no broker is associated"""
+        Defaults to last known status if no broker is associated
+
+
+        """
         if self.broker:
             return self.broker.orderstatus(self)
 
         return self.status
 
     def reject(self, broker=None):
-        """Marks an order as rejected"""
+        """Marks an order as rejected
+
+        :param broker:  (Default value = None)
+
+        """
         if self.status == Order.Rejected:
             return False
 
@@ -600,7 +755,23 @@ class OrderBase(with_metaclass(MetaParams, object)):
         psize,
         pprice,
     ):
-        """Receives data execution input and stores it"""
+        """Receives data execution input and stores it
+
+        :param dt:
+        :param size:
+        :param price:
+        :param closed:
+        :param closedvalue:
+        :param closedcomm:
+        :param opened:
+        :param openedvalue:
+        :param openedcomm:
+        :param margin:
+        :param pnl:
+        :param psize:
+        :param pprice:
+
+        """
         if not size:
             return
 
@@ -627,12 +798,16 @@ class OrderBase(with_metaclass(MetaParams, object)):
         return True
 
     def trailadjust(self, price):
+        """
+
+        :param price:
+
+        """
         pass  # generic interface
 
 
 class Order(OrderBase):
-    """
-    Class which holds creation/execution data and type of oder.
+    """Class which holds creation/execution data and type of oder.
 
     The order may have the following status:
 
@@ -666,6 +841,8 @@ class Order(OrderBase):
       - isbuy(): returns bool indicating if the order buys
       - issell(): returns bool indicating if the order sells
       - alive(): returns bool if order is in status Partial or Accepted
+
+
     """
 
     def execute(
@@ -684,6 +861,23 @@ class Order(OrderBase):
         psize,
         pprice,
     ):
+        """
+
+        :param dt:
+        :param size:
+        :param price:
+        :param closed:
+        :param closedvalue:
+        :param closedcomm:
+        :param opened:
+        :param openedvalue:
+        :param openedcomm:
+        :param margin:
+        :param pnl:
+        :param psize:
+        :param pprice:
+
+        """
 
         super(Order, self).execute(
             dt,
@@ -709,6 +903,7 @@ class Order(OrderBase):
         # self.comminfo = None
 
     def expire(self):
+        """ """
         if self.exectype == Order.Market:
             return False  # will be executed yes or yes
 
@@ -720,6 +915,11 @@ class Order(OrderBase):
         return False
 
     def trailadjust(self, price):
+        """
+
+        :param price:
+
+        """
         if self.trailamount:
             pamount = self.trailamount
         elif self.trailpercent:
@@ -745,24 +945,28 @@ class Order(OrderBase):
 
 
 class BuyOrder(Order):
+    """ """
+
     ordtype = Order.Buy
 
 
 class StopBuyOrder(BuyOrder):
-    pass
+    """ """
 
 
 class StopLimitBuyOrder(BuyOrder):
-    pass
+    """ """
 
 
 class SellOrder(Order):
+    """ """
+
     ordtype = Order.Sell
 
 
 class StopSellOrder(SellOrder):
-    pass
+    """ """
 
 
 class StopLimitSellOrder(SellOrder):
-    pass
+    """ """

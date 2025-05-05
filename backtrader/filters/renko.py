@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,8 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
-
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 from . import Filter
 
@@ -27,39 +31,7 @@ __all__ = ["Renko"]
 
 
 class Renko(Filter):
-    """Modify the data stream to draw Renko bars (or bricks)
-
-    Params:
-
-      - ``hilo`` (default: *False*) Use high and low instead of close to decide
-        if a new brick is needed
-
-      - ``size`` (default: *None*) The size to consider for each brick
-
-      - ``autosize`` (default: *20.0*) If *size* is *None*, this will be used
-        to autocalculate the size of the bricks (simply dividing the current
-        price by the given value)
-
-      - ``dynamic`` (default: *False*) If *True* and using *autosize*, the size
-        of the bricks will be recalculated when moving to a new brick. This
-        will of course eliminate the perfect alignment of Renko bricks.
-
-      - ``align`` (default: *1.0*) Factor use to align the price boundaries of
-        the bricks. If the price is for example *3563.25* and *align* is
-        *10.0*, the resulting aligned price will be *3560*. The calculation:
-
-          - 3563.25 / 10.0 = 356.325
-          - round it and remove the decimals -> 356
-          - 356 * 10.0 -> 3560
-
-      - ``roundstart`` (default: *True*)  If *True*, round the initial start
-        value to int. Else keep the original value, which should aid when
-        backtesting penny stocks
-
-    See:
-      - http://stockcharts.com/school/doku.php?id=chart_school:chart_analysis:renko
-
-    """
+    """Modify the data stream to draw Renko bars (or bricks)"""
 
     params = (
         ("hilo", False),
@@ -71,6 +43,11 @@ class Renko(Filter):
     )
 
     def nextstart(self, data):
+        """
+
+        :param data:
+
+        """
         o = data.open[0]
         o = round(o / self.p.align, 0) * self.p.align  # aligned
         self._size = self.p.size or float(o // self.p.autosize)
@@ -81,6 +58,11 @@ class Renko(Filter):
         self._bot = o - self._size
 
     def next(self, data):
+        """
+
+        :param data:
+
+        """
         c = data.close[0]
         h = data.high[0]
         l = data.low[0]

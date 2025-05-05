@@ -1,10 +1,7 @@
 # coding=utf-8
-
-
 """
 常量定义模块
 """
-
 
 """
 账号类型
@@ -60,8 +57,6 @@ ACCOUNT_TYPE_DICT = {
     AT_BANK: "BANK",
     AT_OTC: "OTC",
 }
-
-
 """
 委托类型
 """
@@ -179,7 +174,6 @@ ORDER_TYPE_SET = {
     CREDIT_SELL_SECU_REPAY_SPECIAL,
     CREDIT_DIRECT_CASH_REPAY_SPECIAL,
 }
-
 """
 报价类型
 """
@@ -215,8 +209,6 @@ MARKET_SZ_INSTBUSI_RESTCANCEL = 46
 MARKET_SZ_CONVERT_5_CANCEL = 47
 # 全额成交或撤销委托[深交所][股票][期权]
 MARKET_SZ_FULL_OR_CANCEL = 48
-
-
 """
 市场类型
 """
@@ -242,7 +234,6 @@ MARKET_ENUM_GUANGZHOU_FUTURE = 75
 MARKET_ENUM_SHANGHAI_STOCK_OPTION = 7
 # 深圳期权
 MARKET_ENUM_SHENZHEN_STOCK_OPTION = 67
-
 """
 市场类型-字符串
 """
@@ -282,8 +273,6 @@ MARKET_STR_TO_ENUM_MAPPING = {
     MARKET_SHANGHAI_STOCK_OPTION: MARKET_ENUM_SHANGHAI_STOCK_OPTION,
     MARKET_SHENZHEN_STOCK_OPTION: MARKET_ENUM_SHENZHEN_STOCK_OPTION,
 }
-
-
 """
 委托状态
 """
@@ -309,8 +298,6 @@ ORDER_SUCCEEDED = 56
 ORDER_JUNK = 57
 # 未知
 ORDER_UNKNOWN = 255
-
-
 """
 账号状态
 """
@@ -336,7 +323,6 @@ ACCOUNT_STATUS_ASSIS_FAIL = 7
 ACCOUNT_STATUS_DISABLEBYSYS = 8
 # 用户停用（总线使用）
 ACCOUNT_STATUS_DISABLEBYUSER = 9
-
 """
 指令交易类型
 """
@@ -421,8 +407,6 @@ TDT_TRADE = 0x7FF4FFFF
 TDT_ALL = 0x3FF3FFFF
 # 综合交易界面
 TDT_INTEGRATED = 0x000C5DFF
-
-
 """
 指令状态
 """
@@ -520,7 +504,6 @@ OCS_CHANGE_COMMAND_NORMAL = 1406
 OCS_RISKCONTROLER_APPROVING = 1407
 # 无效值
 OCS_CMD_INVALID = -2
-
 """
 指令操作类型
 """
@@ -1051,12 +1034,16 @@ OPT_FICC_TRADECANCEL_CONFIRM_SELL_CONFIRM = 1171
 # 卖出交易解除拒绝
 OPT_FICC_TRADECANCEL_CONFIRM_SELL_REJECT = 1172
 
-
 DIRECTION_FLAG_BUY = 48  # 买入
 DIRECTION_FLAG_SELL = 49  # 卖出
 
 
 def getDirectionByOpType(opt):
+    """
+
+    :param opt:
+
+    """
     if opt in (
         OPT_BUY,
         OPT_OPEN_LONG,
@@ -1157,7 +1144,6 @@ EESO_ActiveFirst = 0
 EESO_ConcurrentlyOrder = 1
 # 主动腿完全优先
 EESO_ActiveFirstFull = 2
-
 """比较标志"""
 # 无效
 EFHST_INVALID = -1
@@ -1171,7 +1157,6 @@ EFHST_LESS = 2
 EFHST_LESS_EQUAL = 3
 # 无
 EFHST_NONE_SYMBOL = 4
-
 """报价类型"""
 PRTP_INVALID = -1
 # 卖5
@@ -1204,7 +1189,6 @@ PRTP_MARKET = 12
 PRTP_HANG = 13
 # 对手价
 PRTP_COMPETE = 14
-
 """
 划拨方向
 """
@@ -1216,7 +1200,6 @@ NODE_FUNDS_TRANSFER_SZ_TO_SH = 513  # 节点资金划拨-深圳节点到上海�
 # / *股份划拨* /
 SECU_TRANSFER_NORMAL_TO_SPEED = 520  # 股份划拨-普通柜台划到极速柜台
 SECU_TRANSFER_SPEED_TO_NORMAL = 521  # 股份划拨-极速柜台划到普通柜台
-
 """
 股份划拨类型
 """
@@ -1226,7 +1209,6 @@ TRANS_TRANSFER_SHARE = 0
 TRANS_TRANSFER_SPECIAL_POSITIONS = 1
 # 融资融券账户客户划拨
 TRANS_TRANSFER_CREDIT_SHARE = 2
-
 """
 多空方向，股票不需要
 """
@@ -1234,7 +1216,6 @@ TRANS_TRANSFER_CREDIT_SHARE = 2
 DIRECTION_FLAG_LONG = 48
 # 空
 DIRECTION_FLAG_SHORT = 49
-
 """
 交易操作，用此字段区分股票买卖，期货开、平仓，期权买卖等
 """

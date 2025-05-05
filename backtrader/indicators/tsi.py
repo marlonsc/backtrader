@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,16 +18,20 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
-
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import backtrader as bt
+
 from . import EMA
 
 
 class TrueStrengthIndicator(bt.Indicator):
-    """
-    The True Strength Indicators was first introduced in Stocks & Commodities
+    """The True Strength Indicators was first introduced in Stocks & Commodities
     Magazine by its author William Blau. It measures momentum with a double
     exponential (default) of the prices.
 
@@ -45,12 +49,7 @@ class TrueStrengthIndicator(bt.Indicator):
     See:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:true_strength_index
 
-    Params
 
-      - ``period1``: the period for the 1st smoothing
-      - ``period2``: the period for the 2nd smoothing
-      - ``pchange``: the lookback period for the price change
-      - ``_movav``: the moving average to apply for the smoothing
     """
 
     alias = ("TSI",)
@@ -63,6 +62,7 @@ class TrueStrengthIndicator(bt.Indicator):
     lines = ("tsi",)
 
     def __init__(self):
+        """ """
         pc = self.data - self.data(-self.p.pchange)
 
         sm1 = self.p._movav(pc, period=self.p.period1)

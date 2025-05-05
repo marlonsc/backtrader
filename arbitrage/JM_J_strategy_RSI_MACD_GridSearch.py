@@ -1,13 +1,7 @@
+import datetime
+
 import backtrader as bt
 import pandas as pd
-import numpy as np
-import sys
-import os
-import datetime
-import matplotlib.pyplot as plt
-import seaborn as sns
-
-from arbitrage.myutil import calculate_spread, check_and_align_data, cointegration_ratio
 
 
 def calculate_rolling_spread(
@@ -74,7 +68,10 @@ class SpreadData(bt.feeds.PandasData):
 class DynamicSpreadRSI_MACD_Strategy(bt.Strategy):
     params = (
         ("rsi_period", 14),  # RSI计算窗口
-        ("rsi_threshold", 20),  # RSI阈值偏移量(超买=50+threshold,超卖=50-threshold)
+        (
+            "rsi_threshold",
+            20,
+        ),  # RSI阈值偏移量(超买=50+threshold,超卖=50-threshold)
         ("macd_fast", 12),  # MACD快线周期
         ("macd_slow", 26),  # MACD慢线周期
         ("macd_signal", 9),  # MACD信号线周期
@@ -172,7 +169,12 @@ class DynamicSpreadRSI_MACD_Strategy(bt.Strategy):
         elif trade.justopened:
             print(
                 "TRADE %s OPENED %s  , SIZE %2d, PRICE %d "
-                % (trade.ref, bt.num2date(trade.dtopen), trade.size, trade.value)
+                % (
+                    trade.ref,
+                    bt.num2date(trade.dtopen),
+                    trade.size,
+                    trade.value,
+                )
             )
 
 
@@ -289,10 +291,18 @@ def grid_search():
 
         # 添加数据
         data0 = bt.feeds.PandasData(
-            dataname=df0, datetime="date", nocase=True, fromdate=fromdate, todate=todate
+            dataname=df0,
+            datetime="date",
+            nocase=True,
+            fromdate=fromdate,
+            todate=todate,
         )
         data1 = bt.feeds.PandasData(
-            dataname=df1, datetime="date", nocase=True, fromdate=fromdate, todate=todate
+            dataname=df1,
+            datetime="date",
+            nocase=True,
+            fromdate=fromdate,
+            todate=todate,
         )
         data2 = SpreadData(dataname=df_spread, fromdate=fromdate, todate=todate)
 
@@ -301,17 +311,19 @@ def grid_search():
                 for macd_fast in macd_fast_values:
                     for macd_slow in macd_slow_values:
                         for macd_signal in macd_signal_values:
-                            param_combinations.append((
-                                data0,
-                                data1,
-                                data2,
-                                rsi_period,
-                                rsi_threshold,
-                                macd_fast,
-                                macd_slow,
-                                macd_signal,
-                                spread_window,
-                            ))
+                            param_combinations.append(
+                                (
+                                    data0,
+                                    data1,
+                                    data2,
+                                    rsi_period,
+                                    rsi_threshold,
+                                    macd_fast,
+                                    macd_slow,
+                                    macd_signal,
+                                    spread_window,
+                                )
+                            )
 
     # 执行网格搜索
     results = []
@@ -331,7 +343,7 @@ def grid_search():
         spread_window,
     ) in enumerate(param_combinations):
         print(
-            f"测试参数组合 {i+1}/{total_combinations}: rsi_period={rsi_period},"
+            f"测试参数组合 {i + 1}/{total_combinations}: rsi_period={rsi_period},"
             f" rsi_threshold={rsi_threshold},"
             f" MACD={macd_fast}/{macd_slow}/{macd_signal},"
             f" spread_window={spread_window}"
@@ -365,7 +377,7 @@ def grid_search():
         # 按夏普比率排序
         sorted_results = sorted(
             results,
-            key=lambda x: x["sharpe"] if x["sharpe"] is not None else -float("inf"),
+            key=lambda x: (x["sharpe"] if x["sharpe"] is not None else -float("inf")),
             reverse=True,
         )
         best_result = sorted_results[0]
@@ -375,8 +387,10 @@ def grid_search():
         print(f"RSI周期: {best_result['params']['rsi_period']}")
         print(
             "RSI阈值偏移:"
-            f" {best_result['params']['rsi_threshold']} (超买={50+best_result['params']['rsi_threshold']},"
-            f" 超卖={50-best_result['params']['rsi_threshold']})"
+            f" {best_result['params']['rsi_threshold']} (超买={
+                50 + best_result['params']['rsi_threshold']
+            },"
+            f" 超卖={50 - best_result['params']['rsi_threshold']})"
         )
         print(
             f"MACD参数: 快线={best_result['params']['macd_fast']},"
@@ -394,7 +408,7 @@ def grid_search():
         print("\n========= 所有参数组合结果（按夏普比率排序）=========")
         for i, result in enumerate(sorted_results[:10]):  # 只显示前10个最好的结果
             print(
-                f"{i+1}. spread_window={result['params']['spread_window']},"
+                f"{i + 1}. spread_window={result['params']['spread_window']},"
                 f" rsi_period={result['params']['rsi_period']},"
                 f" rsi_threshold={result['params']['rsi_threshold']},"
                 f" MACD={result['params']['macd_fast']}/{result['params']['macd_slow']}/{result['params']['macd_signal']},"

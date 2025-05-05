@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,260 +18,66 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
-import time
-import datetime
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
+
 import collections
+import datetime
 import itertools
 import multiprocessing
 
 try:  # For new Python versions
-    collectionsAbc = collections.abc  # collections.Iterable -> collections.abc.Iterable
+    # collections.Iterable -> collections.abc.Iterable
+    collectionsAbc = collections.abc
 except AttributeError:  # For old Python versions
     collectionsAbc = collections  # Используем collections.Iterable
 
 import backtrader as bt
-from .utils.py3 import map, range, zip, with_metaclass, string_types, integer_types
 
-from . import linebuffer
-from . import indicator
+from . import indicator, linebuffer, observers
 from .brokers import BackBroker
 from .metabase import MetaParams
-from . import observers
-from .writer import WriterFile
-from .utils import OrderedDict, tzparse, num2date, date2num
-from .strategy import Strategy, SignalStrategy
-from .tradingcal import TradingCalendarBase, TradingCalendar, PandasMarketCalendar
+from .strategy import SignalStrategy, Strategy
 from .timer import Timer
+from .tradingcal import (
+    PandasMarketCalendar,
+    TradingCalendarBase,
+)
+from .utils import OrderedDict, date2num, num2date, tzparse
+from .utils.py3 import (
+    integer_types,
+    map,
+    range,
+    string_types,
+    with_metaclass,
+    zip,
+)
+from .writer import WriterFile
 
 # Defined here to make it pickable. Ideally it could be defined inside Cerebro
 
 
 class OptReturn(object):
+    """ """
+
     def __init__(self, params, **kwargs):
+        """
+
+        :param params:
+        :param **kwargs:
+
+        """
         self.p = self.params = params
         for k, v in kwargs.items():
             setattr(self, k, v)
 
 
 class Cerebro(with_metaclass(MetaParams, object)):
-    """Params:
-
-    - ``preload`` (default: ``True``)
-
-      Whether to preload the different ``data feeds`` passed to cerebro for
-      the Strategies
-
-    - ``runonce`` (default: ``True``)
-
-      Run ``Indicators`` in vectorized mode to speed up the entire system.
-      Strategies and Observers will always be run on an event based basis
-
-    - ``live`` (default: ``False``)
-
-      If no data has reported itself as *live* (via the data's ``islive``
-      method but the end user still want to run in ``live`` mode, this
-      parameter can be set to true
-
-      This will simultaneously deactivate ``preload`` and ``runonce``. It
-      will have no effect on memory saving schemes.
-
-      Run ``Indicators`` in vectorized mode to speed up the entire system.
-      Strategies and Observers will always be run on an event based basis
-
-    - ``maxcpus`` (default: None -> all available cores)
-
-       How many cores to use simultaneously for optimization
-
-    - ``stdstats`` (default: ``True``)
-
-      If True default Observers will be added: Broker (Cash and Value),
-      Trades and BuySell
-
-    - ``oldbuysell`` (default: ``False``)
-
-      If ``stdstats`` is ``True`` and observers are getting automatically
-      added, this switch controls the main behavior of the ``BuySell``
-      observer
-
-      - ``False``: use the modern behavior in which the buy / sell signals
-        are plotted below / above the low / high prices respectively to avoid
-        cluttering the plot
-
-      - ``True``: use the deprecated behavior in which the buy / sell signals
-        are plotted where the average price of the order executions for the
-        given moment in time is. This will of course be on top of an OHLC bar
-        or on a Line on Cloe bar, difficulting the recognition of the plot.
-
-    - ``oldtrades`` (default: ``False``)
-
-      If ``stdstats`` is ``True`` and observers are getting automatically
-      added, this switch controls the main behavior of the ``Trades``
-      observer
-
-      - ``False``: use the modern behavior in which trades for all datas are
-        plotted with different markers
-
-      - ``True``: use the old Trades observer which plots the trades with the
-        same markers, differentiating only if they are positive or negative
-
-    - ``exactbars`` (default: ``False``)
-
-      With the default value each and every value stored in a line is kept in
-      memory
-
-      Possible values:
-        - ``True`` or ``1``: all "lines" objects reduce memory usage to the
-          automatically calculated minimum period.
-
-          If a Simple Moving Average has a period of 30, the underlying data
-          will have always a running buffer of 30 bars to allow the
-          calculation of the Simple Moving Average
-
-          - This setting will deactivate ``preload`` and ``runonce``
-          - Using this setting also deactivates **plotting**
-
-        - ``-1``: datafreeds and indicators/operations at strategy level will
-          keep all data in memory.
-
-          For example: a ``RSI`` internally uses the indicator ``UpDay`` to
-          make calculations. This subindicator will not keep all data in
-          memory
-
-          - This allows to keep ``plotting`` and ``preloading`` active.
-
-          - ``runonce`` will be deactivated
-
-        - ``-2``: data feeds and indicators kept as attributes of the
-          strategy will keep all points in memory.
-
-          For example: a ``RSI`` internally uses the indicator ``UpDay`` to
-          make calculations. This subindicator will not keep all data in
-          memory
-
-          If in the ``__init__`` something like
-          ``a = self.data.close - self.data.high`` is defined, then ``a``
-          will not keep all data in memory
-
-          - This allows to keep ``plotting`` and ``preloading`` active.
-
-          - ``runonce`` will be deactivated
-
-    - ``objcache`` (default: ``False``)
-
-      Experimental option to implement a cache of lines objects and reduce
-      the amount of them. Example from UltimateOscillator::
-
-        bp = self.data.close - TrueLow(self.data)
-        tr = TrueRange(self.data)  # -> creates another TrueLow(self.data)
-
-      If this is ``True`` the 2nd ``TrueLow(self.data)`` inside ``TrueRange``
-      matches the signature of the one in the ``bp`` calculation. It will be
-      reused.
-
-      Corner cases may happen in which this drives a line object off its
-      minimum period and breaks things and it is therefore disabled.
-
-    - ``writer`` (default: ``False``)
-
-      If set to ``True`` a default WriterFile will be created which will
-      print to stdout. It will be added to the strategy (in addition to any
-      other writers added by the user code)
-
-    - ``tradehistory`` (default: ``False``)
-
-      If set to ``True``, it will activate update event logging in each trade
-      for all strategies. This can also be accomplished on a per strategy
-      basis with the strategy method ``set_tradehistory``
-
-    - ``optdatas`` (default: ``True``)
-
-      If ``True`` and optimizing (and the system can ``preload`` and use
-      ``runonce``, data preloading will be done only once in the main process
-      to save time and resources.
-
-      The tests show an approximate ``20%`` speed-up moving from a sample
-      execution in ``83`` seconds to ``66``
-
-    - ``optreturn`` (default: ``True``)
-
-      If ``True`` the optimization results will not be full ``Strategy``
-      objects (and all *datas*, *indicators*, *observers* ...) but and object
-      with the following attributes (same as in ``Strategy``):
-
-        - ``params`` (or ``p``) the strategy had for the execution
-        - ``analyzers`` the strategy has executed
-
-      In most occassions, only the *analyzers* and with which *params* are
-      the things needed to evaluate a the performance of a strategy. If
-      detailed analysis of the generated values for (for example)
-      *indicators* is needed, turn this off
-
-      The tests show a ``13% - 15%`` improvement in execution time. Combined
-      with ``optdatas`` the total gain increases to a total speed-up of
-      ``32%`` in an optimization run.
-
-    - ``oldsync`` (default: ``False``)
-
-      Starting with release 1.9.0.99 the synchronization of multiple datas
-      (same or different timeframes) has been changed to allow datas of
-      different lengths.
-
-      If the old behavior with data0 as the master of the system is wished,
-      set this parameter to true
-
-    - ``tz`` (default: ``None``)
-
-      Adds a global timezone for strategies. The argument ``tz`` can be
-
-        - ``None``: in this case the datetime displayed by strategies will be
-          in UTC, which has been always the standard behavior
-
-        - ``pytz`` instance. It will be used as such to convert UTC times to
-          the chosen timezone
-
-        - ``string``. Instantiating a ``pytz`` instance will be attempted.
-
-        - ``integer``. Use, for the strategy, the same timezone as the
-          corresponding ``data`` in the ``self.datas`` iterable (``0`` would
-          use the timezone from ``data0``)
-
-    - ``cheat_on_open`` (default: ``False``)
-
-      The ``next_open`` method of strategies will be called. This happens
-      before ``next`` and before the broker has had a chance to evaluate
-      orders. The indicators have not yet been recalculated. This allows
-      issuing an orde which takes into account the indicators of the previous
-      day but uses the ``open`` price for stake calculations
-
-      For cheat_on_open order execution, it is also necessary to make the
-      call ``cerebro.broker.set_coo(True)`` or instantite a broker with
-      ``BackBroker(coo=True)`` (where *coo* stands for cheat-on-open) or set
-      the ``broker_coo`` parameter to ``True``. Cerebro will do it
-      automatically unless disabled below.
-
-    - ``broker_coo`` (default: ``True``)
-
-      This will automatically invoke the ``set_coo`` method of the broker
-      with ``True`` to activate ``cheat_on_open`` execution. Will only do it
-      if ``cheat_on_open`` is also ``True``
-
-    - ``quicknotify`` (default: ``False``)
-
-      Broker notifications are delivered right before the delivery of the
-      *next* prices. For backtesting this has no implications, but with live
-      brokers a notification can take place long before the bar is
-      delivered. When set to ``True`` notifications will be delivered as soon
-      as possible (see ``qcheck`` in live feeds)
-
-      Set to ``False`` for compatibility. May be changed to ``True``
-
-
-    - ``bar_on_exit`` (default: ``True``)
-
-      When data is reaching its end then the currently in progress bar is still
-      delivered. The bar may be incomplete.
-    """
+    """ """
 
     params = (
         ("preload", True),
@@ -298,6 +104,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
     )
 
     def __init__(self):
+        """ """
         self._dolive = False
         self._doreplay = False
         self._dooptimize = False
@@ -337,6 +144,9 @@ class Cerebro(with_metaclass(MetaParams, object)):
     def iterize(iterable):
         """Handy function which turns things into things that can be iterated upon
         including iterables
+
+        :param iterable:
+
         """
         niterable = list()
         for elem in iterable:
@@ -352,8 +162,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
         return niterable
 
     def set_fund_history(self, fund):
-        """
-        Add a history of orders to be directly executed in the broker for
+        """Add a history of orders to be directly executed in the broker for
         performance evaluation
 
           - ``fund``: is an iterable (ex: list, tuple, iterator, generator)
@@ -372,12 +181,14 @@ class Cerebro(with_metaclass(MetaParams, object)):
                 brackets are optional
               - ``share_value`` is an float/integer
               - ``net_asset_value`` is a float/integer
+
+        :param fund:
+
         """
         self._fhistory = fund
 
     def add_order_history(self, orders, notify=True):
-        """
-        Add a history of orders to be directly executed in the broker for
+        """Add a history of orders to be directly executed in the broker for
         performance evaluation
 
           - ``orders``: is an iterable (ex: list, tuple, iterator, generator)
@@ -413,19 +224,27 @@ class Cerebro(with_metaclass(MetaParams, object)):
         **Note**: Implicit in the description is the need to add a data feed
           which is the target of the orders. This is for example needed by
           analyzers which track for example the returns
+
+        :param orders:
+        :param notify:  (Default value = True)
+
         """
         self._ohistory.append((orders, notify))
 
     def notify_timer(self, timer, when, *args, **kwargs):
         """Receives a timer notification where ``timer`` is the timer which was
-        returned by ``add_timer``, and ``when`` is the calling time. ``args``
-        and ``kwargs`` are any additional arguments passed to ``add_timer``
+
+        :param timer:
+        :param when:
+        :param *args:
+        :param **kwargs:
+        :returns: and ``kwargs`` are any additional arguments passed to ``add_timer``
 
         The actual ``when`` time can be later, but the system may have not be
         able to call the timer before. This value is the timer value and no the
         system time.
+
         """
-        pass
 
     def _add_timer(
         self,
@@ -442,11 +261,28 @@ class Cerebro(with_metaclass(MetaParams, object)):
         strats=False,
         cheat=False,
         *args,
-        **kwargs
+        **kwargs,
     ):
         """Internal method to really create the timer (not started yet) which
         can be called by cerebro instances or other objects which can access
-        cerebro"""
+        cerebro
+
+        :param owner:
+        :param when:
+        :param offset:  (Default value = datetime.timedelta())
+        :param repeat:  (Default value = datetime.timedelta())
+        :param weekdays:  (Default value = [])
+        :param weekcarry:  (Default value = False)
+        :param monthdays:  (Default value = [])
+        :param monthcarry:  (Default value = True)
+        :param allow:  (Default value = None)
+        :param tzdata:  (Default value = None)
+        :param strats:  (Default value = False)
+        :param cheat:  (Default value = False)
+        :param *args:
+        :param **kwargs:
+
+        """
 
         timer = Timer(
             tid=len(self._pretimers),
@@ -463,7 +299,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
             tzdata=tzdata,
             cheat=cheat,
             *args,
-            **kwargs
+            **kwargs,
         )
 
         self._pretimers.append(timer)
@@ -483,90 +319,24 @@ class Cerebro(with_metaclass(MetaParams, object)):
         strats=False,
         cheat=False,
         *args,
-        **kwargs
+        **kwargs,
     ):
-        """
-        Schedules a timer to invoke ``notify_timer``
+        """Schedules a timer to invoke ``notify_timer``
 
-        Arguments:
-
-          - ``when``: can be
-
-            - ``datetime.time`` instance (see below ``tzdata``)
-            - ``bt.timer.SESSION_START`` to reference a session start
-            - ``bt.timer.SESSION_END`` to reference a session end
-
-         - ``offset`` which must be a ``datetime.timedelta`` instance
-
-           Used to offset the value ``when``. It has a meaningful use in
-           combination with ``SESSION_START`` and ``SESSION_END``, to indicated
-           things like a timer being called ``15 minutes`` after the session
-           start.
-
-          - ``repeat`` which must be a ``datetime.timedelta`` instance
-
-            Indicates if after a 1st call, further calls will be scheduled
-            within the same session at the scheduled ``repeat`` delta
-
-            Once the timer goes over the end of the session it is reset to the
-            original value for ``when``
-
-          - ``weekdays``: a **sorted** iterable with integers indicating on
-            which days (iso codes, Monday is 1, Sunday is 7) the timers can
-            be actually invoked
-
-            If not specified, the timer will be active on all days
-
-          - ``weekcarry`` (default: ``False``). If ``True`` and the weekday was
-            not seen (ex: trading holiday), the timer will be executed on the
-            next day (even if in a new week)
-
-          - ``monthdays``: a **sorted** iterable with integers indicating on
-            which days of the month a timer has to be executed. For example
-            always on day *15* of the month
-
-            If not specified, the timer will be active on all days
-
-          - ``monthcarry`` (default: ``True``). If the day was not seen
-            (weekend, trading holiday), the timer will be executed on the next
-            available day.
-
-          - ``allow`` (default: ``None``). A callback which receives a
-            `datetime.date`` instance and returns ``True`` if the date is
-            allowed for timers or else returns ``False``
-
-          - ``tzdata`` which can be either ``None`` (default), a ``pytz``
-            instance or a ``data feed`` instance.
-
-            ``None``: ``when`` is interpreted at face value (which translates
-            to handling it as if it where UTC even if it's not)
-
-            ``pytz`` instance: ``when`` will be interpreted as being specified
-            in the local time specified by the timezone instance.
-
-            ``data feed`` instance: ``when`` will be interpreted as being
-            specified in the local time specified by the ``tz`` parameter of
-            the data feed instance.
-
-            **Note**: If ``when`` is either ``SESSION_START`` or
-              ``SESSION_END`` and ``tzdata`` is ``None``, the 1st *data feed*
-              in the system (aka ``self.data0``) will be used as the reference
-              to find out the session times.
-
-          - ``strats`` (default: ``False``) call also the ``notify_timer`` of
-            strategies
-
-          - ``cheat`` (default ``False``) if ``True`` the timer will be called
-            before the broker has a chance to evaluate the orders. This opens
-            the chance to issue orders based on opening price for example right
-            before the session starts
-          - ``*args``: any extra args will be passed to ``notify_timer``
-
-          - ``**kwargs``: any extra kwargs will be passed to ``notify_timer``
-
-        Return Value:
-
-          - The created timer
+        :param when: can be
+        :param offset: which must be a (Default value = datetime.timedelta())
+        :param repeat: which must be a (Default value = datetime.timedelta())
+        :param weekdays: a (Default value = [])
+        :param weekcarry: default
+        :param monthdays: a (Default value = [])
+        :param monthcarry: default
+        :param allow: default
+        :param tzdata: which can be either (Default value = None)
+        :param strats: default
+        :param cheat: default
+        :param *args:
+        :param **kwargs:
+        :returns: - The created timer
 
         """
         return self._add_timer(
@@ -583,12 +353,11 @@ class Cerebro(with_metaclass(MetaParams, object)):
             strats=strats,
             cheat=cheat,
             *args,
-            **kwargs
+            **kwargs,
         )
 
     def addtz(self, tz):
-        """
-        This can also be done with the parameter ``tz``
+        """This can also be done with the parameter ``tz``
 
         Adds a global timezone for strategies. The argument ``tz`` can be
 
@@ -604,6 +373,8 @@ class Cerebro(with_metaclass(MetaParams, object)):
             corresponding ``data`` in the ``self.datas`` iterable (``0`` would
             use the timezone from ``data0``)
 
+        :param tz:
+
         """
         self.p.tz = tz
 
@@ -618,6 +389,9 @@ class Cerebro(with_metaclass(MetaParams, object)):
 
         If a subclass of `TradingCalendarBase` is passed (not an instance) it
         will be instantiated
+
+        :param cal:
+
         """
         if isinstance(cal, string_types):
             cal = PandasMarketCalendar(calendar=cal)
@@ -635,41 +409,83 @@ class Cerebro(with_metaclass(MetaParams, object)):
 
     def add_signal(self, sigtype, sigcls, *sigargs, **sigkwargs):
         """Adds a signal to the system which will be later added to a
-        ``SignalStrategy``"""
+        ``SignalStrategy``
+
+        :param sigtype:
+        :param sigcls:
+        :param *sigargs:
+        :param **sigkwargs:
+
+        """
         self.signals.append((sigtype, sigcls, sigargs, sigkwargs))
 
     def signal_strategy(self, stratcls, *args, **kwargs):
-        """Adds a SignalStrategy subclass which can accept signals"""
+        """Adds a SignalStrategy subclass which can accept signals
+
+        :param stratcls:
+        :param *args:
+        :param **kwargs:
+
+        """
         self._signal_strat = (stratcls, args, kwargs)
 
     def signal_concurrent(self, onoff):
         """If signals are added to the system and the ``concurrent`` value is
-        set to True, concurrent orders will be allowed"""
+        set to True, concurrent orders will be allowed
+
+        :param onoff:
+
+        """
         self._signal_concurrent = onoff
 
     def signal_accumulate(self, onoff):
         """If signals are added to the system and the ``accumulate`` value is
         set to True, entering the market when already in the market, will be
-        allowed to increase a position"""
+        allowed to increase a position
+
+        :param onoff:
+
+        """
         self._signal_accumulate = onoff
 
     def addstore(self, store):
-        """Adds an ``Store`` instance to the if not already present"""
+        """Adds an ``Store`` instance to the if not already present
+
+        :param store:
+
+        """
         if store not in self.stores:
             self.stores.append(store)
 
     def addwriter(self, wrtcls, *args, **kwargs):
         """Adds an ``Writer`` class to the mix. Instantiation will be done at
         ``run`` time in cerebro
+
+        :param wrtcls:
+        :param *args:
+        :param **kwargs:
+
         """
         self.writers.append((wrtcls, args, kwargs))
 
     def addlistener(self, lstcls, *args, **kwargs):
+        """
+
+        :param lstcls:
+        :param *args:
+        :param **kwargs:
+
+        """
         self.listeners.append((lstcls, args, kwargs))
 
     def addsizer(self, sizercls, *args, **kwargs):
         """Adds a ``Sizer`` class (and args) which is the default sizer for any
         strategy added to cerebro
+
+        :param sizercls:
+        :param *args:
+        :param **kwargs:
+
         """
         self.sizers[None] = (sizercls, args, kwargs)
 
@@ -677,45 +493,66 @@ class Cerebro(with_metaclass(MetaParams, object)):
         """Adds a ``Sizer`` class by idx. This idx is a reference compatible to
         the one returned by ``addstrategy``. Only the strategy referenced by
         ``idx`` will receive this size
+
+        :param idx:
+        :param sizercls:
+        :param *args:
+        :param **kwargs:
+
         """
         self.sizers[idx] = (sizercls, args, kwargs)
 
     def addindicator(self, indcls, *args, **kwargs):
-        """
-        Adds an ``Indicator`` class to the mix. Instantiation will be done at
+        """Adds an ``Indicator`` class to the mix. Instantiation will be done at
         ``run`` time in the passed strategies
+
+        :param indcls:
+        :param *args:
+        :param **kwargs:
+
         """
         self.indicators.append((indcls, args, kwargs))
 
     def addanalyzer(self, ancls, *args, **kwargs):
-        """
-        Adds an ``Analyzer`` class to the mix. Instantiation will be done at
+        """Adds an ``Analyzer`` class to the mix. Instantiation will be done at
         ``run`` time
+
+        :param ancls:
+        :param *args:
+        :param **kwargs:
+
         """
         self.analyzers.append((ancls, args, kwargs))
 
     def addobserver(self, obscls, *args, **kwargs):
-        """
-        Adds an ``Observer`` class to the mix. Instantiation will be done at
+        """Adds an ``Observer`` class to the mix. Instantiation will be done at
         ``run`` time
+
+        :param obscls:
+        :param *args:
+        :param **kwargs:
+
         """
         self.observers.append((False, obscls, args, kwargs))
 
     def addobservermulti(self, obscls, *args, **kwargs):
-        """
-        Adds an ``Observer`` class to the mix. Instantiation will be done at
+        """Adds an ``Observer`` class to the mix. Instantiation will be done at
         ``run`` time
 
         It will be added once per "data" in the system. A use case is a
         buy/sell observer which observes individual datas.
 
         A counter-example is the CashValue, which observes system-wide values
+
+        :param obscls:
+        :param *args:
+        :param **kwargs:
+
         """
         self.observers.append((True, obscls, args, kwargs))
 
     def addstorecb(self, callback):
-        """
-        Adds a callback to get messages which would be handled by the
+        """Adds a callback to get messages which would be handled by the
         notify_store method
 
         The signature of the callback must support the following:
@@ -726,18 +563,27 @@ class Cerebro(with_metaclass(MetaParams, object)):
         implementation defined (depend entirely on the *data/broker/store*) but
         in general one should expect them to be *printable* to allow for
         reception and experimentation.
+
+        :param callback:
+
         """
         self.storecbs.append(callback)
 
     def _notify_store(self, msg, *args, **kwargs):
+        """
+
+        :param msg:
+        :param *args:
+        :param **kwargs:
+
+        """
         for callback in self.storecbs:
             callback(msg, *args, **kwargs)
 
         self.notify_store(msg, *args, **kwargs)
 
     def notify_store(self, msg, *args, **kwargs):
-        """
-        Receive store notifications in cerebro
+        """Receive store notifications in cerebro
 
         This method can be overridden in ``Cerebro`` subclasses
 
@@ -745,10 +591,15 @@ class Cerebro(with_metaclass(MetaParams, object)):
         implementation defined (depend entirely on the *data/broker/store*) but
         in general one should expect them to be *printable* to allow for
         reception and experimentation.
+
+        :param msg:
+        :param *args:
+        :param **kwargs:
+
         """
-        pass
 
     def _storenotify(self):
+        """ """
         for store in self.stores:
             for notif in store.get_notifications():
                 msg, args, kwargs = notif
@@ -758,8 +609,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
                     strat.notify_store(msg, *args, **kwargs)
 
     def adddatacb(self, callback):
-        """
-        Adds a callback to get messages which would be handled by the
+        """Adds a callback to get messages which would be handled by the
         notify_data method
 
         The signature of the callback must support the following:
@@ -770,10 +620,14 @@ class Cerebro(with_metaclass(MetaParams, object)):
         defined (depend entirely on the *data/broker/store*) but in general one
         should expect them to be *printable* to allow for reception and
         experimentation.
+
+        :param callback:
+
         """
         self.datacbs.append(callback)
 
     def _datanotify(self):
+        """ """
         for data in self.datas:
             for notif in data.get_notifications():
                 status, args, kwargs = notif
@@ -782,6 +636,14 @@ class Cerebro(with_metaclass(MetaParams, object)):
                     strat.notify_data(data, status, *args, **kwargs)
 
     def _notify_data(self, data, status, *args, **kwargs):
+        """
+
+        :param data:
+        :param status:
+        :param *args:
+        :param **kwargs:
+
+        """
         for callback in self.datacbs:
             callback(data, status, *args, **kwargs)
 
@@ -796,15 +658,23 @@ class Cerebro(with_metaclass(MetaParams, object)):
         implementation defined (depend entirely on the *data/broker/store*) but
         in general one should expect them to be *printable* to allow for
         reception and experimentation.
+
+        :param data:
+        :param status:
+        :param *args:
+        :param **kwargs:
+
         """
-        pass
 
     def adddata(self, data, name=None):
-        """
-        Adds a ``Data Feed`` instance to the mix.
+        """Adds a ``Data Feed`` instance to the mix.
 
         If ``name`` is not None it will be put into ``data._name`` which is
         meant for decoration/plotting purposes.
+
+        :param data:
+        :param name:  (Default value = None)
+
         """
         if name is not None:
             data._name = name
@@ -824,13 +694,16 @@ class Cerebro(with_metaclass(MetaParams, object)):
         return data
 
     def chaindata(self, *args, **kwargs):
-        """
-        Chains several data feeds into one
+        """Chains several data feeds into one
 
         If ``name`` is passed as named argument and is not None it will be put
         into ``data._name`` which is meant for decoration/plotting purposes.
 
         If ``None``, then the name of the 1st data will be used
+
+        :param *args:
+        :param **kwargs:
+
         """
         dname = kwargs.pop("name", None)
         if dname is None:
@@ -850,6 +723,9 @@ class Cerebro(with_metaclass(MetaParams, object)):
 
         Any other kwargs will be passed to the RollOver class
 
+        :param *args:
+        :param **kwargs:
+
         """
         dname = kwargs.pop("name", None)
         if dname is None:
@@ -860,14 +736,18 @@ class Cerebro(with_metaclass(MetaParams, object)):
         return d
 
     def replaydata(self, dataname, name=None, **kwargs):
-        """
-        Adds a ``Data Feed`` to be replayed by the system
+        """Adds a ``Data Feed`` to be replayed by the system
 
         If ``name`` is not None it will be put into ``data._name`` which is
         meant for decoration/plotting purposes.
 
         Any other kwargs like ``timeframe``, ``compression``, ``todate`` which
         are supported by the replay filter will be passed transparently
+
+        :param dataname:
+        :param name:  (Default value = None)
+        :param **kwargs:
+
         """
         if any(dataname is x for x in self.datas):
             dataname = dataname.clone()
@@ -879,14 +759,18 @@ class Cerebro(with_metaclass(MetaParams, object)):
         return dataname
 
     def resampledata(self, dataname, name=None, **kwargs):
-        """
-        Adds a ``Data Feed`` to be resample by the system
+        """Adds a ``Data Feed`` to be resample by the system
 
         If ``name`` is not None it will be put into ``data._name`` which is
         meant for decoration/plotting purposes.
 
         Any other kwargs like ``timeframe``, ``compression``, ``todate`` which
         are supported by the resample filter will be passed transparently
+
+        :param dataname:
+        :param name:  (Default value = None)
+        :param **kwargs:
+
         """
         if any(dataname is x for x in self.datas):
             dataname = dataname.clone()
@@ -898,17 +782,18 @@ class Cerebro(with_metaclass(MetaParams, object)):
         return dataname
 
     def optcallback(self, cb):
-        """
-        Adds a *callback* to the list of callbacks that will be called with the
+        """Adds a *callback* to the list of callbacks that will be called with the
         optimizations when each of the strategies has been run
 
         The signature: cb(strategy)
+
+        :param cb:
+
         """
         self.optcbs.append(cb)
 
     def optstrategy(self, strategy, *args, **kwargs):
-        """
-        Adds a ``Strategy`` class to the mix for optimization. Instantiation
+        """Adds a ``Strategy`` class to the mix for optimization. Instantiation
         will happen during ``run`` time.
 
         args and kwargs MUST BE iterables which hold the values to check.
@@ -938,11 +823,22 @@ class Cerebro(with_metaclass(MetaParams, object)):
           - cerebro.optstrategy(MyStrategy, period=15)
 
         and will create an internal pseudo-iterable if possible
+
+        :param strategy:
+        :param *args:
+        :param **kwargs:
+
         """
 
         def add_optcount(params):
+            """
+
+            :param params:
+
+            """
             for p in params if isinstance(params, list) else params.values():
-                # not everything here might be iterable and count towards optcount (like e.g. bools)
+                # not everything here might be iterable and count towards
+                # optcount (like e.g. bools)
                 if not isinstance(p, collections.abc.Iterable):
                     continue
                 self._optcount *= len(p)
@@ -966,8 +862,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
         self.strats.append(it)
 
     def addstrategy(self, strategy, *args, **kwargs):
-        """
-        Adds a ``Strategy`` class to the mix for a single pass run.
+        """Adds a ``Strategy`` class to the mix for a single pass run.
         Instantiation will happen during ``run`` time.
 
         args and kwargs will be passed to the strategy as they are during
@@ -975,24 +870,32 @@ class Cerebro(with_metaclass(MetaParams, object)):
 
         Returns the index with which addition of other objects (like sizers)
         can be referenced
+
+        :param strategy:
+        :param *args:
+        :param **kwargs:
+
         """
         self.strats.append([(strategy, args, kwargs)])
         return len(self.strats) - 1
 
     def setbroker(self, broker):
-        """
-        Sets a specific ``broker`` instance for this strategy, replacing the
+        """Sets a specific ``broker`` instance for this strategy, replacing the
         one inherited from cerebro.
+
+        :param broker:
+
         """
         self._broker = broker
         broker.cerebro = self
         return broker
 
     def getbroker(self):
-        """
-        Returns the broker instance.
+        """Returns the broker instance.
 
         This is also available as a ``property`` by the name ``broker``
+
+
         """
         return self._broker
 
@@ -1010,10 +913,9 @@ class Cerebro(with_metaclass(MetaParams, object)):
         dpi=300,
         tight=True,
         use=None,
-        **kwargs
+        **kwargs,
     ):
-        """
-        Plots the strategies inside cerebro
+        """Plots the strategies inside cerebro
 
         If ``plotter`` is None a default ``Plot`` instance is created and
         ``kwargs`` are passed to it during instantiation.
@@ -1042,6 +944,19 @@ class Cerebro(with_metaclass(MetaParams, object)):
         ``dpi``: quality in dots per inches of the saved figure
 
         ``tight``: only save actual content and not the frame of the figure
+
+        :param plotter:  (Default value = None)
+        :param numfigs:  (Default value = 1)
+        :param iplot:  (Default value = True)
+        :param start:  (Default value = None)
+        :param end:  (Default value = None)
+        :param width:  (Default value = 16)
+        :param height:  (Default value = 9)
+        :param dpi:  (Default value = 300)
+        :param tight:  (Default value = True)
+        :param use:  (Default value = None)
+        :param **kwargs:
+
         """
         if self._exactbars > 0:
             return
@@ -1083,19 +998,22 @@ class Cerebro(with_metaclass(MetaParams, object)):
         return figs
 
     def __call__(self, iterstrat):
-        """
-        Used during optimization to pass the cerebro over the multiprocesing
+        """Used during optimization to pass the cerebro over the multiprocesing
         module without complains
+
+        :param iterstrat:
+
         """
 
         predata = self.p.optdatas and self._dopreload and self._dorunonce
         return self.runstrategies(iterstrat, predata=predata)
 
     def __getstate__(self):
-        """
-        Used during optimization to prevent optimization result `runstrats`
+        """Used during optimization to prevent optimization result `runstrats`
         from being pickled to subprocesses
         Also optcbs don't need to be transfered to subprocesses. They might fail to pickle due to use of e.g. tqdm
+
+
         """
 
         rv = vars(self).copy()
@@ -1106,10 +1024,18 @@ class Cerebro(with_metaclass(MetaParams, object)):
 
     def runstop(self):
         """If invoked from inside a strategy or anywhere else, including other
-        threads the execution will stop as soon as possible."""
+        threads the execution will stop as soon as possible.
+
+
+        """
         self._event_stop = True  # signal a stop has been requested
 
     def prerun(self, **kwargs):
+        """
+
+        :param **kwargs:
+
+        """
         self._event_stop = False  # Stop is requested
 
         if not self.datas:
@@ -1188,13 +1114,14 @@ class Cerebro(with_metaclass(MetaParams, object)):
                 _concurrent=self._signal_concurrent,
                 signals=self.signals,
                 *sargs,
-                **skwargs
+                **skwargs,
             )
 
         if not self.strats:  # Datas are present, add a strategy
             self.addstrategy(Strategy)
 
     def startrun(self):
+        """ """
         iterstrats = itertools.product(*self.strats)
         if not self._dooptimize or self.p.maxcpus == 1:
             # If no optimmization is wished ... or 1 core is to be used
@@ -1228,6 +1155,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
                     data.stop()
 
     def finishrun(self):
+        """ """
         if not self._dooptimize:
             # avoid a list of list for regular cases
             return self.runstrats[0]
@@ -1248,6 +1176,9 @@ class Cerebro(with_metaclass(MetaParams, object)):
 
           - For Optimization: a list of lists which contain instances of the
             Strategy classes added with ``addstrategy``
+
+        :param **kwargs:
+
         """
         self._event_stop = False  # Stop is requested
 
@@ -1332,7 +1263,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
                 _concurrent=self._signal_concurrent,
                 signals=self.signals,
                 *sargs,
-                **skwargs
+                **skwargs,
             )
 
         if not self.strats:  # Datas are present, add a strategy
@@ -1377,12 +1308,20 @@ class Cerebro(with_metaclass(MetaParams, object)):
         return self.runstrats
 
     def _init_stcount(self):
+        """ """
         self.stcount = itertools.count(0)
 
     def _next_stid(self):
+        """ """
         return next(self.stcount)
 
     def prerunstrategies(self, iterstrat, predata=False):
+        """
+
+        :param iterstrat:
+        :param predata:  (Default value = False)
+
+        """
         self._init_stcount()
 
         self.runningstrats = runstrats = list()
@@ -1502,6 +1441,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
                     self._timers.append(timer)
 
     def runstrategieskenel(self):
+        """ """
         if self._dopreload and self._dorunonce:
             if self.p.oldsync:
                 self._runonce_old(self.runningstrats)
@@ -1514,6 +1454,11 @@ class Cerebro(with_metaclass(MetaParams, object)):
                 self._runnext(self.runningstrats)
 
     def finishrunstrategies(self, predata=False):
+        """
+
+        :param predata:  (Default value = False)
+
+        """
         runstrats = self.runningstrats
 
         for strat in runstrats:
@@ -1545,7 +1490,9 @@ class Cerebro(with_metaclass(MetaParams, object)):
                             setattr(a, attrname, None)
 
                 oreturn = OptReturn(
-                    strat.params, analyzers=strat.analyzers, strategycls=type(strat)
+                    strat.params,
+                    analyzers=strat.analyzers,
+                    strategycls=type(strat),
                 )
                 results.append(oreturn)
 
@@ -1554,8 +1501,11 @@ class Cerebro(with_metaclass(MetaParams, object)):
         return runstrats
 
     def runstrategies(self, iterstrat, predata=False):
-        """
-        Internal method invoked by ``run``` to run a set of strategies
+        """Internal method invoked by ``run``` to run a set of strategies
+
+        :param iterstrat:
+        :param predata:  (Default value = False)
+
         """
         self._init_stcount()
 
@@ -1725,6 +1675,11 @@ class Cerebro(with_metaclass(MetaParams, object)):
         return runstrats
 
     def stop_writers(self, runstrats):
+        """
+
+        :param runstrats:
+
+        """
         cerebroinfo = OrderedDict()
         datainfos = OrderedDict()
 
@@ -1748,9 +1703,10 @@ class Cerebro(with_metaclass(MetaParams, object)):
             listener.stop()
 
     def _brokernotify(self):
-        """
-        Internal method which kicks the broker and delivers any broker
+        """Internal method which kicks the broker and delivers any broker
         notification to the strategy
+
+
         """
         self._broker.next()
         while True:
@@ -1765,9 +1721,11 @@ class Cerebro(with_metaclass(MetaParams, object)):
             owner._addnotification(order, quicknotify=self.p.quicknotify)
 
     def _runnext_old(self, runstrats):
-        """
-        Actual implementation of run in full next mode. All objects have its
+        """Actual implementation of run in full next mode. All objects have its
         ``next`` method invoke on each data arrival
+
+        :param runstrats:
+
         """
         data0 = self.datas[0]
         d0ret = True
@@ -1831,10 +1789,12 @@ class Cerebro(with_metaclass(MetaParams, object)):
             return
 
     def _runonce_old(self, runstrats):
-        """
-        Actual implementation of run in vector mode.
+        """Actual implementation of run in vector mode.
         Strategies are still invoked on a pseudo-event mode in which ``next``
         is called for each data arrival
+
+        :param runstrats:
+
         """
         for strat in runstrats:
             strat._once()
@@ -1863,6 +1823,11 @@ class Cerebro(with_metaclass(MetaParams, object)):
                 self._next_writers(runstrats)
 
     def _next_writers(self, runstrats):
+        """
+
+        :param runstrats:
+
+        """
         if not self.runwriters:
             return
 
@@ -1882,6 +1847,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
                     writer.next()
 
     def _next_listeners(self):
+        """ """
         if not self.runlisteners:
             return
 
@@ -1893,17 +1859,19 @@ class Cerebro(with_metaclass(MetaParams, object)):
         self._dorunonce = False
 
     def _runnext(self, runstrats):
-        """
-        Actual implementation of run in full next mode. All objects have its
+        """Actual implementation of run in full next mode. All objects have its
         ``next`` method invoke on each data arrival
+
+        :param runstrats:
+
         """
         datas = sorted(self.datas, key=lambda x: (x._timeframe, x._compression))
         datas1 = datas[1:]
         data0 = datas[0]
         d0ret = True
 
-        rs = [i for i, x in enumerate(datas) if x.resampling]
-        rp = [i for i, x in enumerate(datas) if x.replaying]
+        [i for i, x in enumerate(datas) if x.resampling]
+        [i for i, x in enumerate(datas) if x.replaying]
         rsonly = [i for i, x in enumerate(datas) if x.resampling and not x.replaying]
         onlyresample = len(datas) == len(rsonly)
         noresample = not rsonly
@@ -1911,7 +1879,6 @@ class Cerebro(with_metaclass(MetaParams, object)):
         clonecount = sum(d._clone for d in datas)
         ldatas = len(datas)
         ldatas_noclones = ldatas - clonecount
-        lastqcheck = False
         dt0 = date2num(datetime.datetime.max) - 2  # default at max
         while d0ret or d0ret is None:
             # self.broker.ib.sleep(1)
@@ -1958,11 +1925,13 @@ class Cerebro(with_metaclass(MetaParams, object)):
                 if onlyresample or noresample:
                     dt0 = min((d for d in dts if d is not None))
                 else:
-                    dt0 = min((
-                        d
-                        for i, d in enumerate(dts)
-                        if d is not None and i not in rsonly
-                    ))
+                    dt0 = min(
+                        (
+                            d
+                            for i, d in enumerate(dts)
+                            if d is not None and i not in rsonly
+                        )
+                    )
 
                 dmaster = datas[dts.index(dt0)]  # and timemaster
                 self._dtmaster = dmaster.num2date(dt0)
@@ -2054,11 +2023,13 @@ class Cerebro(with_metaclass(MetaParams, object)):
             return
 
     def _runonce(self, runstrats):
-        """
-        Actual implementation of run in vector mode.
+        """Actual implementation of run in vector mode.
 
         Strategies are still invoked on a pseudo-event mode in which ``next``
         is called for each data arrival
+
+        :param runstrats:
+
         """
         for strat in runstrats:
             strat._once()
@@ -2114,6 +2085,13 @@ class Cerebro(with_metaclass(MetaParams, object)):
             self._brokernotify()
 
     def _check_timers(self, runstrats, dt0, cheat=False):
+        """
+
+        :param runstrats:
+        :param dt0:
+        :param cheat:  (Default value = False)
+
+        """
         timers = self._timers if not cheat else self._timerscheat
 
         for t in timers:
@@ -2127,4 +2105,5 @@ class Cerebro(with_metaclass(MetaParams, object)):
                     strat.notify_timer(t, t.lastwhen, *t.args, **t.kwargs)
 
     def get_opt_runcount(self):
+        """ """
         return self._optcount

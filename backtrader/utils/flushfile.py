@@ -18,21 +18,38 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import sys
 
 
 class flushfile(object):
+    """ """
 
     def __init__(self, f):
+        """
+
+        :param f:
+
+        """
         self.f = f
 
     def write(self, x):
+        """
+
+        :param x:
+
+        """
         self.f.write(x)
         self.f.flush()
 
     def flush(self):
+        """ """
         self.f.flush()
 
 
@@ -42,16 +59,23 @@ if sys.platform == "win32":
 
 
 class StdOutDevNull(object):
+    """ """
 
     def __init__(self):
+        """ """
         self.stdout = sys.stdout
         sys.stdout = self
 
     def write(self, x):
-        pass
+        """
+
+        :param x:
+
+        """
 
     def flush(self):
-        pass
+        """ """
 
     def stop(self):
+        """ """
         sys.stdout = self.stdout

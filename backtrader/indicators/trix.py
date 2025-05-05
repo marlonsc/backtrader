@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,14 +18,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 from . import Indicator, MovAv
 
 
 class Trix(Indicator):
-    """
-    Defined by Jack Hutson in the 80s and shows the Rate of Change (%) or slope
+    """Defined by Jack Hutson in the 80s and shows the Rate of Change (%) or slope
     of a triple exponentially smoothed moving average
 
     Formula:
@@ -42,6 +46,8 @@ class Trix(Indicator):
     See:
       - https://en.wikipedia.org/wiki/Trix_(technical_analysis)
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:trix
+
+
     """
 
     alias = ("TRIX",)
@@ -55,12 +61,14 @@ class Trix(Indicator):
     plotinfo = dict(plothlines=[0.0])
 
     def _plotlabel(self):
+        """ """
         plabels = [self.p.period]
         plabels += [self.p._rocperiod] * self.p.notdefault("_rocperiod")
         plabels += [self.p._movav] * self.p.notdefault("_movav")
         return plabels
 
     def __init__(self):
+        """ """
 
         ema1 = self.p._movav(self.data, period=self.p.period)
         ema2 = self.p._movav(ema1, period=self.p.period)
@@ -73,8 +81,7 @@ class Trix(Indicator):
 
 
 class TrixSignal(Trix):
-    """
-    Extension of Trix with a signal line (ala MACD)
+    """Extension of Trix with a signal line (ala MACD)
 
     Formula:
       - trix = Trix(data, period)
@@ -82,12 +89,15 @@ class TrixSignal(Trix):
 
     See:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:trix
+
+
     """
 
     lines = ("signal",)
     params = (("sigperiod", 9),)
 
     def __init__(self):
+        """ """
         super(TrixSignal, self).__init__()
 
         self.l.signal = self.p._movav(self.lines[0], period=self.p.sigperiod)

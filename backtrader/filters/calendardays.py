@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,35 +18,22 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 from datetime import date, datetime, timedelta
 
-from backtrader import TimeFrame
 from backtrader.utils.py3 import with_metaclass
+
 from .. import metabase
 
 
 class CalendarDays(with_metaclass(metabase.MetaParams, object)):
-    """
-    Bar Filler to add missing calendar days to trading days
-
-    Params:
-
-      - fill_price (def: None):
-
-        > 0: The given value to fill
-        0 or None: Use the last known closing price
-        -1: Use the midpoint of the last bar (High-Low average)
-
-      - fill_vol (def: float('NaN')):
-
-        Value to use to fill the missing volume
-
-      - fill_oi (def: float('NaN')):
-
-        Value to use to fill the missing Open Interest
-    """
+    """Bar Filler to add missing calendar days to trading days"""
 
     params = (
         ("fill_price", None),
@@ -58,18 +45,18 @@ class CalendarDays(with_metaclass(metabase.MetaParams, object)):
     lastdt = date.max
 
     def __init__(self, data):
-        pass
+        """
+
+        :param data:
+
+        """
 
     def __call__(self, data):
-        """
-        If the data has a gap larger than 1 day amongst bars, the missing bars
+        """If the data has a gap larger than 1 day amongst bars, the missing bars
         are added to the stream.
 
-        Params:
-          - data: the data source to filter/process
-
-        Returns:
-          - False (always): this filter does not remove bars from the stream
+        :param data: the data source to filter
+        :returns: - False (always): this filter does not remove bars from the stream
 
         """
         dt = data.datetime.date()
@@ -80,10 +67,14 @@ class CalendarDays(with_metaclass(metabase.MetaParams, object)):
         return False  # no bar has been removed from the stream
 
     def _fillbars(self, data, dt, lastdt):
-        """
-        Fills one by one bars as needed from time_start to time_end
+        """Fills one by one bars as needed from time_start to time_end
 
         Invalidates the control dtime_prev if requested
+
+        :param data:
+        :param dt:
+        :param lastdt:
+
         """
         tm = data.datetime.time(0)  # get time part
 

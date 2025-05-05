@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,17 +18,20 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
-from backtrader.utils.py3 import filter, string_types, integer_types
-
-from backtrader import date2num
 import backtrader.feed as feed
+from backtrader import date2num
+from backtrader.utils.py3 import filter, integer_types, string_types
 
 
 class PandasDirectData(feed.DataBase):
-    """
-    Uses a Pandas DataFrame as the feed source, iterating directly over the
+    """Uses a Pandas DataFrame as the feed source, iterating directly over the
     tuples returned by "itertuples".
 
     This means that all parameters related to lines must have numeric
@@ -41,6 +44,8 @@ class PandasDirectData(feed.DataBase):
       - A negative value in any of the parameters for the Data lines
         indicates it's not present in the DataFrame
         it is
+
+
     """
 
     params = (
@@ -53,15 +58,25 @@ class PandasDirectData(feed.DataBase):
         ("openinterest", 6),
     )
 
-    datafields = ["datetime", "open", "high", "low", "close", "volume", "openinterest"]
+    datafields = [
+        "datetime",
+        "open",
+        "high",
+        "low",
+        "close",
+        "volume",
+        "openinterest",
+    ]
 
     def start(self):
+        """ """
         super(PandasDirectData, self).start()
 
         # reset the iterator on each start
         self._rows = self.p.dataname.itertuples()
 
     def _load(self):
+        """ """
         try:
             row = next(self._rows)
         except StopIteration:
@@ -102,32 +117,13 @@ class PandasDirectData(feed.DataBase):
 
 
 class PandasData(feed.DataBase):
-    """
-    Uses a Pandas DataFrame as the feed source, using indices into column
+    """Uses a Pandas DataFrame as the feed source, using indices into column
     names (which can be "numeric")
 
     This means that all parameters related to lines must have numeric
     values as indices into the tuples
 
-    Params:
 
-      - ``nocase`` (default *True*) case insensitive match of column names
-
-    Note:
-
-      - The ``dataname`` parameter is a Pandas DataFrame
-
-      - Values possible for datetime
-
-        - None: the index contains the datetime
-        - -1: no index, autodetect column
-        - >= 0 or string: specific colum identifier
-
-      - For other lines parameters
-
-        - None: column not present
-        - -1: autodetect
-        - >= 0 or string: specific colum identifier
     """
 
     params = (
@@ -151,9 +147,18 @@ class PandasData(feed.DataBase):
         ("openinterest", -1),
     )
 
-    datafields = ["datetime", "open", "high", "low", "close", "volume", "openinterest"]
+    datafields = [
+        "datetime",
+        "open",
+        "high",
+        "low",
+        "close",
+        "volume",
+        "openinterest",
+    ]
 
     def __init__(self):
+        """ """
         super(PandasData, self).__init__()
 
         # these "colnames" can be strings or numeric types
@@ -212,6 +217,7 @@ class PandasData(feed.DataBase):
                     self._colmapping[datafield] = defmapping
 
     def start(self):
+        """ """
         super(PandasData, self).start()
 
         # reset the length with each start
@@ -242,6 +248,7 @@ class PandasData(feed.DataBase):
             self._colmapping[k] = v
 
     def _load(self):
+        """ """
         self._idx += 1
 
         if self._idx >= len(self.p.dataname):

@@ -1,17 +1,15 @@
 import collections
 
-from xtquant import xttype
+# 导入队列工具和元类工具
+import random
 
-from backtrader import BrokerBase, OrderBase, Order, order, CommInfoBase
+from backtrader import BrokerBase, CommInfoBase, Order, OrderBase
 
 # 从backtrader框架导入经纪商基类和订单基类
 from backtrader.position import Position
 
 # 导入仓位管理类
-from backtrader.utils.py3 import queue, with_metaclass
-
-# 导入队列工具和元类工具
-import random
+from xtquant import xttype
 
 # 随机数生成模块
 from xtquant.xttrader import XtQuantTrader
@@ -27,7 +25,16 @@ from .qmtstore import QMTStore
 
 # 自定义的QMT订单类，继承自backtrader的订单基类
 class QMTOrder(OrderBase):
+    """ """
+
     def __init__(self, owner, data, ccxt_order):
+        """
+
+        :param owner:
+        :param data:
+        :param ccxt_order:
+
+        """
 
         self.owner = owner
         self.data = data
@@ -41,14 +48,24 @@ class QMTOrder(OrderBase):
 
 
 class MetaQMTBroker(BrokerBase.__class__):
+    """ """
+
     def __init__(cls, name, bases, dct):
-        """Class has already been created ... register"""
+        """Class has already been created ... register
+
+        :param name:
+        :param bases:
+        :param dct:
+
+        """
         # Initialize the class
         super(MetaQMTBroker, cls).__init__(name, bases, dct)
         QMTStore.BrokerCls = cls
 
 
 class StockCommission(CommInfoBase):
+    """ """
+
     params = (
         ("commission", 0.0003),  # 万三佣金
         ("stocklike", True),  # 股票模式（按数量计算）
@@ -56,11 +73,17 @@ class StockCommission(CommInfoBase):
 
 
 class QMTBroker(BrokerBase, metaclass=MetaQMTBroker):
+    """ """
 
     def __init__(self, **kwargs):
+        """
+
+        :param **kwargs:
+
+        """
 
         super(QMTBroker, self).__init__()  # 关键：调用父类初始化
-        comminfo = StockCommission()
+        StockCommission()
         self.setcommission()
         self.store = QMTStore(**kwargs)
         self.mini_qmt_path = kwargs.get("mini_qmt_path")
@@ -86,26 +109,42 @@ class QMTBroker(BrokerBase, metaclass=MetaQMTBroker):
 
         account = StockAccount(self.account_id)
         # 订阅账号
-        res = xt_trader.subscribe(account)
+        xt_trader.subscribe(account)
 
         self.xt_trader = xt_trader
         self.account = account
 
     def setcash(self, cash):
+        """
+
+        :param cash:
+
+        """
         self.cash = cash
         self.value = cash
 
     def query_stock_asset(self, account):
+        """
+
+        :param account:
+
+        """
         return self.cash
 
     def getcash(self):
-        res = self.query_stock_asset(self.account)
+        """ """
+        self.query_stock_asset(self.account)
 
         # self.cash = res.cash
 
         return self.cash
 
     def getvalue(self, datas=None):
+        """
+
+        :param datas:  (Default value = None)
+
+        """
 
         # res = self.query_stock_asset(self.account)
 
@@ -114,12 +153,19 @@ class QMTBroker(BrokerBase, metaclass=MetaQMTBroker):
         return self.value
 
     def getposition(self, data, clone=True):
+        """
+
+        :param data:
+        :param clone:  (Default value = True)
+
+        """
 
         xt_position = self.xt_trader.query_stock_position(self.account, data._dataname)
         pos = Position(size=xt_position.volume, price=xt_position.avg_price)
         return pos
 
     def get_notification(self):
+        """ """
         try:
             return self.notifs.popleft()
         except IndexError:
@@ -128,9 +174,15 @@ class QMTBroker(BrokerBase, metaclass=MetaQMTBroker):
         return None
 
     def notify(self, order):
+        """
+
+        :param order:
+
+        """
         self.notifs.append(order.clone())
 
     def next(self):
+        """ """
         # comminfo = self.broker.getcommissioninfo(self.data)
         for order_id in list(self._orders.keys()):
             qmt_order = self.xt_trader.query_order(self.account, order_id)
@@ -158,8 +210,24 @@ class QMTBroker(BrokerBase, metaclass=MetaQMTBroker):
         oco=None,
         trailamount=None,
         trailpercent=None,
-        **kwargs
+        **kwargs,
     ):
+        """
+
+        :param owner:
+        :param data:
+        :param size:
+        :param price:  (Default value = None)
+        :param plimit:  (Default value = None)
+        :param exectype:  (Default value = None)
+        :param valid:  (Default value = None)
+        :param tradeid:  (Default value = 0)
+        :param oco:  (Default value = None)
+        :param trailamount:  (Default value = None)
+        :param trailpercent:  (Default value = None)
+        :param **kwargs:
+
+        """
         order = {
             "stock_code": data._dataname,  # 股票代码（如 '600000.SH'）
             "order_type": (
@@ -193,8 +261,24 @@ class QMTBroker(BrokerBase, metaclass=MetaQMTBroker):
         oco=None,
         trailamount=None,
         trailperc7ent=None,
-        **kwargs
+        **kwargs,
     ):
+        """
+
+        :param owner:
+        :param data:
+        :param size:
+        :param price:  (Default value = None)
+        :param plimit:  (Default value = None)
+        :param exectype:  (Default value = None)
+        :param valid:  (Default value = None)
+        :param tradeid:  (Default value = 0)
+        :param oco:  (Default value = None)
+        :param trailamount:  (Default value = None)
+        :param trailperc7ent:  (Default value = None)
+        :param **kwargs:
+
+        """
         order = {
             "stock_code": data._dataname,
             "order_type": (
@@ -211,6 +295,11 @@ class QMTBroker(BrokerBase, metaclass=MetaQMTBroker):
         return bt_order
 
     def cancel(self, order):
+        """
+
+        :param order:
+
+        """
         self.xt_trader.cancel_order(self.account, order.ccxt_order)
         order.cancel()  # 标记为已取消
         self.notify(order)

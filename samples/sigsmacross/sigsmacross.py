@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
@@ -27,9 +32,16 @@ import backtrader as bt
 
 
 class SmaCross(bt.SignalStrategy):
+    """ """
+
     params = dict(sma1=10, sma2=20)
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if not order.alive():
             print(
                 "{} {} {}@{}".format(
@@ -41,10 +53,16 @@ class SmaCross(bt.SignalStrategy):
             )
 
     def notify_trade(self, trade):
+        """
+
+        :param trade:
+
+        """
         if trade.isclosed:
             print("profit {}".format(trade.pnlcomm))
 
     def __init__(self):
+        """ """
         sma1 = bt.ind.SMA(period=self.params.sma1)
         sma2 = bt.ind.SMA(period=self.params.sma2)
         crossover = bt.ind.CrossOver(sma1, sma2)
@@ -52,6 +70,11 @@ class SmaCross(bt.SignalStrategy):
 
 
 def runstrat(pargs=None):
+    """
+
+    :param pargs:  (Default value = None)
+
+    """
     args = parse_args(pargs)
 
     cerebro = bt.Cerebro()
@@ -73,6 +96,11 @@ def runstrat(pargs=None):
 
 
 def parse_args(pargs=None):
+    """
+
+    :param pargs:  (Default value = None)
+
+    """
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

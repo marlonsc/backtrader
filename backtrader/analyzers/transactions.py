@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,8 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
-
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import collections
 
@@ -36,25 +40,9 @@ class Transactions(bt.Analyzer):
 
     The result is used during next to record the transactions
 
-    Params:
 
-      - headers (default: ``True``)
+    :returns: each return as keys
 
-        Add an initial key to the dictionary holding the results with the names
-        of the datas
-
-        This analyzer was modeled to facilitate the integration with
-        ``pyfolio`` and the header names are taken from the samples used for
-        it::
-
-          'date', 'amount', 'price', 'sid', 'symbol', 'value'
-
-    Methods:
-
-      - get_analysis
-
-        Returns a dictionary with returns as values and the datetime points for
-        each return as keys
     """
 
     params = (
@@ -63,6 +51,7 @@ class Transactions(bt.Analyzer):
     )
 
     def start(self):
+        """ """
         super(Transactions, self).start()
         if self.p.headers:
             self.rets[self.p._pfheaders[0]] = [list(self.p._pfheaders[1:])]
@@ -71,6 +60,11 @@ class Transactions(bt.Analyzer):
         self._idnames = list(enumerate(self.strategy.getdatanames()))
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         # An order could have several partial executions per cycle (unlikely
         # but possible) and therefore: collect each new execution notification
         # and let the work for next
@@ -88,6 +82,7 @@ class Transactions(bt.Analyzer):
             pos.update(exbit.size, exbit.price)
 
     def next(self):
+        """ """
         # super(Transactions, self).next()  # let dtkey update
         entries = []
         for i, dname in self._idnames:

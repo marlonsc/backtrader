@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,19 +18,21 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
-
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import bisect
 import collections
 from datetime import date, datetime, timedelta
-from itertools import islice
 
 from .feed import AbstractDataBase
 from .metabase import MetaParams
-from .utils import date2num, num2date
+from .utils import TIME_MAX, date2num, num2date
 from .utils.py3 import integer_types, range, with_metaclass
-from .utils import TIME_MAX
 
 __all__ = ["SESSION_TIME", "SESSION_START", "SESSION_END", "Timer"]
 
@@ -38,6 +40,8 @@ SESSION_TIME, SESSION_START, SESSION_END = range(3)
 
 
 class Timer(with_metaclass(MetaParams, object)):
+    """ """
+
     params = (
         ("tid", None),
         ("owner", None),
@@ -57,10 +61,21 @@ class Timer(with_metaclass(MetaParams, object)):
     SESSION_TIME, SESSION_START, SESSION_END = range(3)
 
     def __init__(self, *args, **kwargs):
+        """
+
+        :param *args:
+        :param **kwargs:
+
+        """
         self.args = args
         self.kwargs = kwargs
 
     def start(self, data):
+        """
+
+        :param data:
+
+        """
         # write down the 'reset when' value
         if not isinstance(self.p.when, integer_types):  # expect time/datetime
             self._rstwhen = self.p.when
@@ -86,12 +101,22 @@ class Timer(with_metaclass(MetaParams, object)):
         self._weekmask = collections.deque()
 
     def _reset_when(self, ddate=datetime.min):
+        """
+
+        :param ddate:  (Default value = datetime.min)
+
+        """
         self._when = self._rstwhen
         self._dtwhen = self._dwhen = None
 
         self._lastcall = ddate
 
     def _check_month(self, ddate):
+        """
+
+        :param ddate:
+
+        """
         if not self.p.monthdays:
             return True
 
@@ -119,6 +144,11 @@ class Timer(with_metaclass(MetaParams, object)):
         return daycarry or curday
 
     def _check_week(self, ddate=date.min):
+        """
+
+        :param ddate:  (Default value = date.min)
+
+        """
         if not self.p.weekdays:
             return True
 
@@ -146,6 +176,11 @@ class Timer(with_metaclass(MetaParams, object)):
         return daycarry or curday
 
     def check(self, dt):
+        """
+
+        :param dt:
+
+        """
         d = num2date(dt)
         ddate = d.date()
         if self._lastcall == ddate:  # not repeating, awaiting date change

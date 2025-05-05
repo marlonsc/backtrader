@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,21 +18,36 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import random
+
 import backtrader as bt
 
 
 # The filter which changes the close price
 def close_changer(data, *args, **kwargs):
+    """
+
+    :param data:
+    :param *args:
+    :param **kwargs:
+
+    """
     data.close[0] += 50.0 * random.randint(-1, 1)
     return False  # length of stream is unchanged
 
 
 # override the standard markers
 class BuySellArrows(bt.observers.BuySell):
+    """ """
+
     plotlines = dict(
         buy=dict(marker="$\u21e7$", markersize=12.0),
         sell=dict(marker="$\u21e9$", markersize=12.0),
@@ -40,11 +55,15 @@ class BuySellArrows(bt.observers.BuySell):
 
 
 class St(bt.Strategy):
+    """ """
+
     def __init__(self):
+        """ """
         bt.obs.BuySell(self.data0, barplot=True)  # done here for
         BuySellArrows(self.data1, barplot=True)  # different markers per data
 
     def next(self):
+        """ """
         if not self.position:
             if random.randint(0, 1):
                 self.buy(data=self.data0)
@@ -56,6 +75,11 @@ class St(bt.Strategy):
 
 
 def runstrat(args=None):
+    """
+
+    :param args:  (Default value = None)
+
+    """
     args = parse_args(args)
     cerebro = bt.Cerebro()
 
@@ -84,6 +108,11 @@ def runstrat(args=None):
 
 
 def parse_args(pargs=None):
+    """
+
+    :param pargs:  (Default value = None)
+
+    """
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Compensation example",

@@ -41,30 +41,36 @@ USAGE:
 python strategies/bb_rsi_atr.py --data SPY --fromdate 2024-01-01 --todate 2024-12-31 --plot
 """
 
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
 import os
 import sys
+
 import backtrader as bt
 import backtrader.indicators as btind
 
 # Import utility functions
 try:
     from strategies.utils import (
-        get_db_data,
-        print_performance_metrics,
         TradeThrottling,
         add_standard_analyzers,
+        get_db_data,
+        print_performance_metrics,
     )
 except ModuleNotFoundError:
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     from strategies.utils import (
-        get_db_data,
-        print_performance_metrics,
         TradeThrottling,
         add_standard_analyzers,
+        get_db_data,
+        print_performance_metrics,
     )
 
 parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -110,12 +116,20 @@ class BBRSIATRStrategy(bt.Strategy, TradeThrottling):
     )
 
     def log(self, txt, dt=None, level="info"):
+        """
+
+        :param txt:
+        :param dt:  (Default value = None)
+        :param level:  (Default value = "info")
+
+        """
         if level == "debug" and self.p.loglevel != "debug":
             return
         dt = dt or self.datas[0].datetime.date(0)
         print(f"{dt.isoformat()}: {txt}")
 
     def __init__(self):
+        """ """
         self.dataclose = self.datas[0].close
         self.datahigh = self.datas[0].high
         self.datalow = self.datas[0].low
@@ -164,18 +178,22 @@ class BBRSIATRStrategy(bt.Strategy, TradeThrottling):
         )
 
     def is_in_date_range(self):
+        """ """
         current_date = self.datas[0].datetime.datetime(0)
         return self.start_date <= current_date <= self.end_date
 
     def volatility_filter(self):
+        """ """
         return self.atr[0] < self.atr_avg[0] * self.p.atr_mult
 
     def calculate_position_size(self):
+        """ """
         cash = self.broker.getcash()
         price = self.dataclose[0]
         return max(1, cash / price) if price > 0 else 0
 
     def next(self):
+        """ """
         if not self.is_in_date_range() or self.order:
             return
 
@@ -183,7 +201,8 @@ class BBRSIATRStrategy(bt.Strategy, TradeThrottling):
         if self.position:
             # Check stop loss and trailing stop against close only
             active_stop = max(
-                self.stop_price or -float("inf"), self.trailing_price or -float("inf")
+                self.stop_price or -float("inf"),
+                self.trailing_price or -float("inf"),
             )
             if self.dataclose[0] <= active_stop:
                 self.log(
@@ -211,7 +230,8 @@ class BBRSIATRStrategy(bt.Strategy, TradeThrottling):
             if not self.trailing_price or potential_trail > self.trailing_price:
                 self.trailing_price = potential_trail
                 self.log(
-                    f"TRAILING STOP UPDATED: {self.trailing_price:.2f}", level="debug"
+                    f"TRAILING STOP UPDATED: {self.trailing_price:.2f}",
+                    level="debug",
                 )
 
         # Entry logic
@@ -226,13 +246,19 @@ class BBRSIATRStrategy(bt.Strategy, TradeThrottling):
             self.entry_bar = self.data.datetime[0]  # Record entry bar
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status in [order.Submitted, order.Accepted]:
             return
 
         if order.status == order.Completed:
             self.total_commission += order.executed.comm
             if order.isbuy():
-                self.entry_price = self.dataclose[0]  # Use close price for consistency
+                # Use close price for consistency
+                self.entry_price = self.dataclose[0]
                 self.stop_price = self.entry_price * (1 - self.p.stop_loss_pct / 100)
                 self.trailing_price = None
                 self.last_trade_date = self.datas[0].datetime.date(0)
@@ -271,12 +297,18 @@ class BBRSIATRStrategy(bt.Strategy, TradeThrottling):
         self.order = None
 
     def notify_trade(self, trade):
+        """
+
+        :param trade:
+
+        """
         if trade.isclosed:
             self.log(
                 f"TRADE CLOSED: Gross PnL {trade.pnl:.2f}, Net PnL {trade.pnlcomm:.2f}"
             )
 
     def stop(self):
+        """ """
         self.log(f"Final Portfolio Value: {self.broker.getvalue():.2f}")
         if self.trade_durations:
             avg_duration = sum(self.trade_durations) / len(self.trade_durations)
@@ -284,6 +316,7 @@ class BBRSIATRStrategy(bt.Strategy, TradeThrottling):
 
 
 def parse_args():
+    """ """
     parser = argparse.ArgumentParser(
         description="Bollinger Bands RSI with ATR Strategy",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -304,7 +337,11 @@ def parse_args():
         "--cash", "-c", default=1000000.0, type=float, help="Starting cash"
     )  # Match PineScript
     parser.add_argument(
-        "--commission", "-cm", default=0.0, type=float, help="Commission percentage"
+        "--commission",
+        "-cm",
+        default=0.0,
+        type=float,
+        help="Commission percentage",
     )
     parser.add_argument(
         "--interval",
@@ -314,10 +351,18 @@ def parse_args():
         help="Data interval",
     )
     parser.add_argument(
-        "--bb-length", "-bl", default=20, type=int, help="Bollinger Bands period"
+        "--bb-length",
+        "-bl",
+        default=20,
+        type=int,
+        help="Bollinger Bands period",
     )
     parser.add_argument(
-        "--bb-mult", "-bm", default=2.0, type=float, help="BB std dev multiplier"
+        "--bb-mult",
+        "-bm",
+        default=2.0,
+        type=float,
+        help="BB std dev multiplier",
     )
     parser.add_argument(
         "--matype",
@@ -335,13 +380,25 @@ def parse_args():
     )
     parser.add_argument("--rsi-length", "-rl", default=11, type=int, help="RSI period")
     parser.add_argument(
-        "--rsi-oversold", "-ro", default=30, type=int, help="RSI oversold threshold"
+        "--rsi-oversold",
+        "-ro",
+        default=30,
+        type=int,
+        help="RSI oversold threshold",
     )
     parser.add_argument(
-        "--rsi-overbought", "-rb", default=70, type=int, help="RSI overbought threshold"
+        "--rsi-overbought",
+        "-rb",
+        default=70,
+        type=int,
+        help="RSI overbought threshold",
     )
     parser.add_argument(
-        "--stop-loss", "-sl", default=50.0, type=float, help="Stop loss percentage"
+        "--stop-loss",
+        "-sl",
+        default=50.0,
+        type=float,
+        help="Stop loss percentage",
     )
     parser.add_argument(
         "--trailing-stop",
@@ -352,7 +409,11 @@ def parse_args():
     )
     parser.add_argument("--atr-length", "-al", default=14, type=int, help="ATR period")
     parser.add_argument(
-        "--atr-mult", "-am", default=5.0, type=float, help="ATR volatility multiplier"
+        "--atr-mult",
+        "-am",
+        default=5.0,
+        type=float,
+        help="ATR volatility multiplier",
     )
     parser.add_argument(
         "--start-year", "-sy", default=2024, type=int, help="Start year"
@@ -369,6 +430,7 @@ def parse_args():
 
 
 def main():
+    """ """
     args = parse_args()
     fromdate = datetime.datetime.strptime(args.fromdate, "%Y-%m-%d")
     todate = datetime.datetime.strptime(args.todate, "%Y-%m-%d")

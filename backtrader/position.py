@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,15 +18,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-
-from copy import copy
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 
 class Position(object):
-    """
-    Keeps and updates the size and price of a position. The object has no
+    """Keeps and updates the size and price of a position. The object has no
     relationship to any asset. It only keeps size and price.
 
     Member Attributes:
@@ -35,9 +36,12 @@ class Position(object):
 
     The Position instances can be tested using len(position) to see if size
     is not null
+
+
     """
 
     def __str__(self):
+        """ """
         items = list()
         items.append("--- Position Begin")
         items.append("- Size: {}".format(self.size))
@@ -50,6 +54,12 @@ class Position(object):
         return "\n".join(items)
 
     def __init__(self, size=0, price=0.0):
+        """
+
+        :param size:  (Default value = 0)
+        :param price:  (Default value = 0.0)
+
+        """
         self._size = size
         if size:
             self.price = self.price_orig = price
@@ -66,27 +76,51 @@ class Position(object):
 
     @property
     def size(self):
+        """ """
         return self._size
 
     @size.setter
     def size(self, value):
+        """
+
+        :param value:
+
+        """
         self._size = value
 
     @property
     def position(self):
+        """ """
         return self._size
 
     @position.setter
     def position(self, value):
+        """
+
+        :param value:
+
+        """
         self._size = value
 
     def fix(self, size, price):
+        """
+
+        :param size:
+        :param price:
+
+        """
         oldsize = self.size
         self.size = size
         self.price = price
         return self.size == oldsize
 
     def set(self, size, price):
+        """
+
+        :param size:
+        :param price:
+
+        """
         if self.size > 0:
             if size > self.size:
                 self.upopened = size - self.size  # new 10 - old 5 -> 5
@@ -123,40 +157,36 @@ class Position(object):
         return self.size, self.price, self.upopened, self.upclosed
 
     def __len__(self):
+        """ """
         return abs(self.size)
 
     def __bool__(self):
+        """ """
         return bool(self.size != 0)
 
     __nonzero__ = __bool__
 
     def clone(self):
+        """ """
         return Position(size=self.size, price=self.price)
 
     def pseudoupdate(self, size, price):
+        """
+
+        :param size:
+        :param price:
+
+        """
         return Position(self.size, self.price).update(size, price)
 
     def update(self, size, price, dt=None):
-        """
-        Updates the current position and returns the updated size, price and
+        """Updates the current position and returns the updated size, price and
         units used to open/close a position
 
-        Args:
-            size (int): amount to update the position size
-                size < 0: A sell operation has taken place
-                size > 0: A buy operation has taken place
-
-            price (float):
-                Must always be positive to ensure consistency
-
-        Returns:
-            A tuple (non-named) contaning
-               size - new position size
-                   Simply the sum of the existing size plus the "size" argument
-               price - new position price
-                   If a position is increased the new average price will be
-                   returned
-                   If a position is reduced the price of the remaining size
+        :param size: new position size
+        :param price: new position price
+        :param dt:  (Default value = None)
+        :returns: If a position is reduced the price of the remaining size
                    does not change
                    If a position is closed the price is nullified
                    If a position is reversed the price is the price given as
@@ -172,6 +202,7 @@ class Position(object):
 
             Both opened and closed carry the same sign as the "size" argument
             because they refer to a part of the "size" argument
+
         """
         self.datetime = dt  # record datetime update (datetime.datetime)
 
@@ -188,7 +219,6 @@ class Position(object):
             opened, closed = size, 0
             self.price = price
         elif oldsize > 0:  # existing "long" position updated
-
             if size > 0:  # increased position
                 opened, closed = size, 0
                 self.price = (self.price * oldsize + size * price) / self.size
@@ -202,7 +232,6 @@ class Position(object):
                 self.price = price
 
         else:  # oldsize < 0 - existing short position updated
-
             if size < 0:  # increased position
                 opened, closed = size, 0
                 self.price = (self.price * oldsize + size * price) / self.size

@@ -1,0 +1,144 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# 🚩 Backtrader Project-Specific Guidelines (Strictly Mandatory)
+
+These rules extend the universal guidelines, focusing on the unique needs, architecture, and workflow of the backtrader project. They are strictly enforced and must not be overridden except by explicit maintainer approval.
+
+---
+
+## 1. Project Identity & Copyright
+
+**1.1. Project Scope**
+
+- backtrader is an open-source Python framework for backtesting, research, and live trading of financial strategies. It is modular, extensible, and supports multiple data sources, brokers, and custom analytics.
+
+**1.2. Copyright**
+
+- All copyright statements must use the year **2025** and the following format:
+  ```python
+  # Copyright (c) 2025 backtrader contributors
+  ```
+- Do not include author names, emails, or personal attribution in code, comments, or documentation, except where required by third-party licenses.
+
+---
+
+## 2. Directory Structure & Documentation
+
+**2.1. Directory Structure**
+
+- The root `README.md` defines the canonical directory structure and project scope. Do not reorganize or add top-level directories without explicit approval.
+- Each major subdirectory (e.g., `backtrader/`, `arbitrage/`, `backtest/`, `samples/`, `tests/`) must contain a `README.md` describing its purpose, main components, usage, and any non-obvious dependencies or conventions.
+
+**2.2. Documentation Standards**
+
+- All new or modified modules, classes, and public functions must include docstrings that comply with the universal documentation requirements.
+- For complex logic (e.g., custom indicators, analyzers, or strategy orchestration), precede the code with a high-level comment explaining the rationale, algorithm, and any critical constraints.
+- All comments, docstrings, and markdown must be line-wrapped at 90 characters.
+
+---
+
+## 3. Codebase Architecture & Extensibility
+
+**3.1. Modularity**
+
+- New features must be implemented as modular components (e.g., new indicators in `backtrader/indicators/`, new analyzers in `backtrader/analyzers/`, new strategies in `backtrader/strategies/`).
+- Avoid monolithic changes; prefer extension via subclassing, plugins, or new modules.
+
+**3.2. Backward Compatibility**
+
+- Do not break public APIs or remove existing features without explicit maintainer approval and a documented migration path.
+
+**3.3. Integration Points**
+
+- When integrating with external data sources, brokers, or analytics, follow the established adapter patterns in the relevant subdirectories.
+- Document any new integration points in the corresponding directory `README.md`.
+
+---
+
+## 4. Testing & Quality Assurance
+
+**4.1. Test Coverage**
+
+- All new code must be accompanied by unit or integration tests under the appropriate `tests/` subdirectory.
+- Tests must be runnable via `pytest` and should not require external services unless explicitly documented as integration tests.
+
+**4.2. Sample Strategies**
+
+- If adding new sample strategies or notebooks, place them in the `samples/` directory and provide a brief description and usage instructions in a local `README.md`.
+
+---
+
+## 5. Dependency Management
+
+**5.1. Version Pinning**
+
+- All Python dependencies must be explicitly version-pinned in `requirements.txt` or `pyproject.toml`.
+- Do not introduce or update dependencies without explicit approval.
+
+**5.2. Environment Isolation**
+
+- Use virtual environments for development and testing. Do not assume system-wide packages.
+
+---
+
+## 6. Security & Secrets
+
+**6.1. Secrets Handling**
+
+- Never commit real credentials, API keys, or secrets. Use only template files (e.g., `.sample`) to illustrate secret structure.
+
+**6.2. Security Scanning**
+
+- Enable automated secret and vulnerability scanning in CI.
+
+---
+
+## 7. Logging, Debugging, and Error Handling
+
+**7.1. Logging**
+
+- Use the standard logging facilities provided by backtrader or Python’s `logging` module.
+- Do not introduce new logging frameworks.
+
+**7.2. Error Reporting**
+
+- When raising exceptions or logging errors, include sufficient context (e.g., data feed, broker, strategy name) to aid debugging.
+- For critical errors, ensure that stack traces are preserved and actionable.
+
+---
+
+## 8. Contribution Workflow
+
+**8.1. Pull Requests**
+
+- All changes must be submitted via pull request and reviewed by a maintainer.
+- PRs must pass all CI checks (lint, tests, coverage) before merging.
+
+**8.2. Codeowners**
+
+- Follow the `.github/CODEOWNERS` file for reviewer assignment.
+
+---
+
+## 9. Project-Specific Conventions
+
+**9.1. Naming**
+
+- Use descriptive, consistent names for new modules, classes, and functions, following the established naming conventions in each subpackage.
+
+**9.2. Imports**
+
+- Use explicit relative imports within the `backtrader/` package to avoid ambiguity.
+
+**9.3. Platform Compatibility**
+
+- Ensure all code runs on Linux and macOS. Windows support is best-effort unless otherwise specified.
+
+---
+
+## 10. Compatibility with Universal Guidelines
+
+- These rules extend, but do not duplicate, the universal guidelines. In case of conflict, the stricter or lower-numbered rule prevails.

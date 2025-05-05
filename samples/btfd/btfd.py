@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,16 +18,21 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-# References:
-#  - https://www.reddit.com/r/algotrading/comments/5jez2b/can_anyone_replicate_this_strategy/
-#  - http://dark-bid.com/BTFD-only-strategy-that-matters.html
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
 
 import backtrader as bt
+
+# References:
+#  - https://www.reddit.com/r/algotrading/comments/5jez2b/can_anyone_replicate_this_strategy/
+#  - http://dark-bid.com/BTFD-only-strategy-that-matters.html
 
 
 class ValueUnlever(bt.observers.Value):
@@ -40,6 +45,7 @@ class ValueUnlever(bt.observers.Value):
     )
 
     def next(self):
+        """ """
         super(ValueUnlever, self).next()
         if self.p.lever:
             self.lines.value_lever[0] = self._owner.broker._valuelever
@@ -52,6 +58,8 @@ class ValueUnlever(bt.observers.Value):
 
 
 class St(bt.Strategy):
+    """ """
+
     params = (
         ("fall", -0.01),
         ("hold", 2),
@@ -63,6 +71,7 @@ class St(bt.Strategy):
     )
 
     def __init__(self):
+        """ """
         if self.p.approach == "closeclose":
             self.pctdown = self.data.close / self.data.close(-1) - 1.0
         elif self.p.approach == "openclose":
@@ -73,6 +82,7 @@ class St(bt.Strategy):
             self.pctdown = self.data.low / self.data.high - 1.0
 
     def next(self):
+        """ """
         if self.position:
             if len(self) == self.barexit:
                 self.close()
@@ -109,6 +119,7 @@ class St(bt.Strategy):
                     )
 
     def start(self):
+        """ """
         if self.p.prtrade:
             print(",".join(["TRADE", "Status", "Date", "Value", "PnL", "Commission"]))
         if self.p.prorder:
@@ -117,6 +128,11 @@ class St(bt.Strategy):
             print(",".join(["DATA", "Action", "Date", "Price", "PctDown"]))
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status in [order.Margin, order.Rejected, order.Canceled]:
             print("ORDER FAILED with status:", order.getstatusname())
         elif order.status == order.Completed:
@@ -140,6 +156,11 @@ class St(bt.Strategy):
                 )
 
     def notify_trade(self, trade):
+        """
+
+        :param trade:
+
+        """
         if not self.p.prtrade:
             return
 
@@ -178,6 +199,11 @@ class St(bt.Strategy):
 
 
 def runstrat(args=None):
+    """
+
+    :param args:  (Default value = None)
+
+    """
     args = parse_args(args)
 
     cerebro = bt.Cerebro()
@@ -219,16 +245,23 @@ def runstrat(args=None):
 
 
 def parse_args(pargs=None):
+    """
+
+    :param pargs:  (Default value = None)
+
+    """
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        description=" - ".join([
-            "BTFD",
-            "http://dark-bid.com/BTFD-only-strategy-that-matters.html",
-            (
-                "https://www.reddit.com/r/algotrading/comments/5jez2b/"
-                "can_anyone_replicate_this_strategy/"
-            ),
-        ]),
+        description=" - ".join(
+            [
+                "BTFD",
+                "http://dark-bid.com/BTFD-only-strategy-that-matters.html",
+                (
+                    "https://www.reddit.com/r/algotrading/comments/5jez2b/"
+                    "can_anyone_replicate_this_strategy/"
+                ),
+            ]
+        ),
     )
 
     parser.add_argument(

@@ -1,11 +1,12 @@
 import datetime
 
 import backtrader as bt
-
 from testcommon import getdatadir
 
 
 class BtTestStrategy(bt.Strategy):
+    """ """
+
     params = (
         ("period", 15),
         ("printdata", True),
@@ -14,6 +15,7 @@ class BtTestStrategy(bt.Strategy):
 
 
 def test_multidata_optimize():
+    """ """
     cerebro = bt.Cerebro(maxcpus=1, optreturn=False)
 
     cerebro.optstrategy(BtTestStrategy, period=[5, 6, 7])

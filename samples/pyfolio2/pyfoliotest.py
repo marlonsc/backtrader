@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,18 +18,23 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
-
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import collections
 import datetime
 
-
 import backtrader as bt
 
 
 class St(bt.SignalStrategy):
+    """ """
+
     params = (
         ("pfast", 13),
         ("pslow", 50),
@@ -39,6 +44,7 @@ class St(bt.SignalStrategy):
     )
 
     def __init__(self):
+        """ """
         self.sfast = bt.indicators.SMA(period=self.p.pfast)
         self.sslow = bt.indicators.SMA(period=self.p.pslow)
         self.cover = bt.indicators.CrossOver(self.sfast, self.sslow)
@@ -48,6 +54,7 @@ class St(bt.SignalStrategy):
             self.signal_add(bt.SIGNAL_LONG, self.cover)
 
     def start(self):
+        """ """
         super(self.__class__, self).start()
         if self.p.printdata:
             txtfields = list()
@@ -62,6 +69,7 @@ class St(bt.SignalStrategy):
             print(",".join(txtfields))
 
     def next(self):
+        """ """
         super(self.__class__, self).next()
         if self.p.printdata:
             # Print only 1st data ... is just a check that things are running
@@ -77,18 +85,25 @@ class St(bt.SignalStrategy):
             print(",".join(txtfields))
 
 
-_TFRAMES = collections.OrderedDict((
-    ("minutes", bt.TimeFrame.Minutes),
-    ("days", bt.TimeFrame.Days),
-    ("weeks", bt.TimeFrame.Weeks),
-    ("months", bt.TimeFrame.Months),
-    ("years", bt.TimeFrame.Years),
-))
+_TFRAMES = collections.OrderedDict(
+    (
+        ("minutes", bt.TimeFrame.Minutes),
+        ("days", bt.TimeFrame.Days),
+        ("weeks", bt.TimeFrame.Weeks),
+        ("months", bt.TimeFrame.Months),
+        ("years", bt.TimeFrame.Years),
+    )
+)
 
 _TFS = _TFRAMES.keys()
 
 
 def runstrat(args=None):
+    """
+
+    :param args: (Default value = None)
+
+    """
     args = parse_args(args)
 
     cerebro = bt.Cerebro()
@@ -125,7 +140,9 @@ def runstrat(args=None):
 
     if args.pyfolio:
         cerebro.addanalyzer(
-            bt.analyzers.PyFolio, _name="pyfolio", timeframe=_TFRAMES[args.pftimeframe]
+            bt.analyzers.PyFolio,
+            _name="pyfolio",
+            timeframe=_TFRAMES[args.pftimeframe],
         )
 
     if args.printout:
@@ -187,6 +204,11 @@ def runstrat(args=None):
 
 
 def parse_args(pargs=None):
+    """
+
+    :param pargs: (Default value = None)
+
+    """
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -248,7 +270,10 @@ def parse_args(pargs=None):
     )
 
     parser.add_argument(
-        "--pyfolio", required=False, action="store_true", help="Do pyfolio things"
+        "--pyfolio",
+        required=False,
+        action="store_true",
+        help="Do pyfolio things",
     )
 
     parser.add_argument(
@@ -264,7 +289,10 @@ def parse_args(pargs=None):
     )
 
     parser.add_argument(
-        "--printdata", required=False, action="store_true", help="Print data lines"
+        "--printdata",
+        required=False,
+        action="store_true",
+        help="Print data lines",
     )
 
     # Plot options

@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,17 +18,20 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
-
-from . import Indicator, SMA, PercentRank
+from . import SMA, Indicator, PercentRank
 
 __all__ = ["DV2"]
 
 
 class DV2(Indicator):
-    """
-    RSI(2) alternative
+    """RSI(2) alternative
     Developed by David Varadi of http://cssanalytics.wordpress.com/
 
     This seems to be the *Bounded* version.
@@ -36,6 +39,7 @@ class DV2(Indicator):
     See also:
 
       - http://web.archive.org/web/20131216100741/http://quantingdutchman.wordpress.com/2010/08/06/dv2-indicator-for-amibroker/
+
 
     """
 
@@ -47,6 +51,7 @@ class DV2(Indicator):
     lines = ("dv2",)
 
     def __init__(self):
+        """ """
         chl = self.data.close / ((self.data.high + self.data.low) / 2.0)
         dvu = self.p._movav(chl, period=self.p.maperiod)
         self.lines.dv2 = PercentRank(dvu, period=self.p.period) * 100

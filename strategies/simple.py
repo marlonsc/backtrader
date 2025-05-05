@@ -121,23 +121,25 @@ NOTES:
 - No transaction costs or slippage are considered beyond the simple commission rate.
 
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
+
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
+
+import backtrader as bt
 import pandas as pd
 import psycopg2
 import psycopg2.extras
-import os
-import sys
-import backtrader as bt
-import backtrader.indicators as btind
 
 
 class StockPriceData(bt.feeds.PandasData):
-    """
-    Stock Price Data Feed
-    """
+    """Stock Price Data Feed"""
 
     params = (
         ("datetime", None),  # Column containing the date (index)
@@ -152,8 +154,15 @@ class StockPriceData(bt.feeds.PandasData):
 
 
 def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate):
-    """
-    Get historical price data from PostgreSQL database
+    """Get historical price data from PostgreSQL database
+
+    :param symbol:
+    :param dbuser:
+    :param dbpass:
+    :param dbname:
+    :param fromdate:
+    :param todate:
+
     """
     # Format dates for database query
     from_str = fromdate.strftime("%Y-%m-%d %H:%M:%S")
@@ -191,7 +200,8 @@ def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate):
 
         # Convert to pandas DataFrame
         df = pd.DataFrame(
-            rows, columns=["Date", "Open", "High", "Low", "Close", "Volume", "RSI"]
+            rows,
+            columns=["Date", "Open", "High", "Low", "Close", "Volume", "RSI"],
         )
 
         # Convert 'Date' to datetime and set as index
@@ -229,6 +239,8 @@ def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate):
 
 
 class LinComb_Signal(bt.Strategy):
+    """ """
+
     params = (
         ("long_ravg", 25),
         ("short_ravg", 12),
@@ -241,16 +253,27 @@ class LinComb_Signal(bt.Strategy):
     )
 
     def log(self, txt, dt=None):
+        """
+
+        :param txt:
+        :param dt:  (Default value = None)
+
+        """
         if self.params.printlog:
             dt = dt or self.datas[0].datetime.date(0)
             print("%s, %s" % (dt.isoformat(), txt))
 
     def __init__(self):
+        """ """
         self.long_RAVG = bt.indicators.SMA(
-            self.data.close, period=self.params.long_ravg, plotname="Long Returns Avg"
+            self.data.close,
+            period=self.params.long_ravg,
+            plotname="Long Returns Avg",
         )
         self.short_RAVG = bt.indicators.SMA(
-            self.data.close, period=self.params.short_ravg, plotname="Short Returns Avg"
+            self.data.close,
+            period=self.params.short_ravg,
+            plotname="Short Returns Avg",
         )
 
         # Long and Short Cross signal
@@ -278,6 +301,11 @@ class LinComb_Signal(bt.Strategy):
         )
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status in [order.Submitted, order.Accepted]:
             # Buy/Sell order submitted/accepted to/by broker - Nothing to do
             return
@@ -299,6 +327,7 @@ class LinComb_Signal(bt.Strategy):
         self.order = None
 
     def next(self):
+        """ """
         # Create the signal with linear combination of other crossings
         signal = (
             self.params.cls * self.ls_cross
@@ -323,6 +352,8 @@ class LinComb_Signal(bt.Strategy):
 
 
 class RSI(bt.Strategy):
+    """ """
+
     params = (
         ("min_RSI", 35),
         ("max_RSI", 65),
@@ -332,17 +363,29 @@ class RSI(bt.Strategy):
     )
 
     def log(self, txt, dt=None):
+        """
+
+        :param txt:
+        :param dt:  (Default value = None)
+
+        """
         if self.params.printlog:
             dt = dt or self.datas[0].datetime.date(0)
             print("%s, %s" % (dt.isoformat(), txt))
 
     def __init__(self):
+        """ """
         # RSI indicator
         self.RSI = bt.indicators.RSI_SMA(
             self.data.close, period=self.params.look_back_period
         )
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status in [order.Submitted, order.Accepted]:
             # Buy/Sell order submitted/accepted to/by broker - Nothing to do
             return
@@ -364,6 +407,7 @@ class RSI(bt.Strategy):
         self.order = None
 
     def next(self):
+        """ """
 
         # Buy if over sold
         if self.RSI < self.params.min_RSI:
@@ -375,6 +419,8 @@ class RSI(bt.Strategy):
 
 
 class MACD(bt.Strategy):
+    """ """
+
     params = (
         ("fast_LBP", 12),
         ("slow_LBP", 26),
@@ -384,11 +430,18 @@ class MACD(bt.Strategy):
     )
 
     def log(self, txt, dt=None):
+        """
+
+        :param txt:
+        :param dt:  (Default value = None)
+
+        """
         if self.params.printlog:
             dt = dt or self.datas[0].datetime.date(0)
             print("%s, %s" % (dt.isoformat(), txt))
 
     def __init__(self):
+        """ """
         self.fast_EMA = bt.indicators.EMA(self.data, period=self.params.fast_LBP)
         self.slow_EMA = bt.indicators.EMA(self.data, period=self.params.slow_LBP)
 
@@ -400,6 +453,11 @@ class MACD(bt.Strategy):
         self.Hist = self.MACD - self.Signal
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status in [order.Submitted, order.Accepted]:
             # Buy/Sell order submitted/accepted to/by broker - Nothing to do
             return
@@ -421,6 +479,7 @@ class MACD(bt.Strategy):
         self.order = None
 
     def next(self):
+        """ """
 
         # If MACD is above Signal line
         if self.Crossing > 0:
@@ -434,14 +493,22 @@ class MACD(bt.Strategy):
 
 
 class Conventional_MA(bt.Strategy):
+    """ """
+
     params = (("maperiod", 25),)
 
     def log(self, txt, dt=None):
-        """Printing function for the complete strategy"""
+        """Printing function for the complete strategy
+
+        :param txt:
+        :param dt:  (Default value = None)
+
+        """
         dt = dt or self.datas[0].datetime.date(0)
         print("%s %s" % (dt.isoformat(), txt))
 
     def __init__(self):
+        """ """
         self.dataclose = self.datas[0].close
 
         # To keep track of pending orders and buy price/commission
@@ -455,6 +522,11 @@ class Conventional_MA(bt.Strategy):
         )
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status in [order.Submitted, order.Accepted]:
             return
 
@@ -462,7 +534,11 @@ class Conventional_MA(bt.Strategy):
             if order.isbuy():
                 self.log(
                     "BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f"
-                    % (order.executed.price, order.executed.value, order.executed.comm)
+                    % (
+                        order.executed.price,
+                        order.executed.value,
+                        order.executed.comm,
+                    )
                 )
 
                 self.buyprice = order.executed.price
@@ -471,7 +547,11 @@ class Conventional_MA(bt.Strategy):
             else:
                 self.log(
                     "SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm: %.2f"
-                    % (order.executed.price, order.executed.value, order.executed.comm)
+                    % (
+                        order.executed.price,
+                        order.executed.value,
+                        order.executed.comm,
+                    )
                 )
 
                 self.bar_executed = len(self)
@@ -482,12 +562,18 @@ class Conventional_MA(bt.Strategy):
         self.order = None
 
     def notify_trade(self, trade):
+        """
+
+        :param trade:
+
+        """
         if not trade.isclosed:
             return
 
         self.log("OPERATION PROFIT, GROSS %.2f, NET %.2f" % (trade.pnl, trade.pnlcomm))
 
     def next(self):
+        """ """
         self.log("Close, %.2f" % self.dataclose[0])
 
         if self.order:
@@ -505,14 +591,22 @@ class Conventional_MA(bt.Strategy):
 
 
 class Crossover_MA(bt.Strategy):
+    """ """
+
     params = (("smallmaperiod", 25), ("longmaperiod", 100))
 
     def log(self, txt, dt=None):
-        """Printing function for the complete strategy"""
+        """Printing function for the complete strategy
+
+        :param txt:
+        :param dt:  (Default value = None)
+
+        """
         dt = dt or self.datas[0].datetime.date(0)
         print("%s %s" % (dt.isoformat(), txt))
 
     def __init__(self):
+        """ """
         self.dataclose = self.datas[0].close
 
         # To keep track of pending orders and buy price/commission
@@ -529,6 +623,11 @@ class Crossover_MA(bt.Strategy):
         )
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status in [order.Submitted, order.Accepted]:
             return
 
@@ -536,7 +635,11 @@ class Crossover_MA(bt.Strategy):
             if order.isbuy():
                 self.log(
                     "BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f"
-                    % (order.executed.price, order.executed.value, order.executed.comm)
+                    % (
+                        order.executed.price,
+                        order.executed.value,
+                        order.executed.comm,
+                    )
                 )
 
                 self.buyprice = order.executed.price
@@ -545,7 +648,11 @@ class Crossover_MA(bt.Strategy):
             else:
                 self.log(
                     "SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm: %.2f"
-                    % (order.executed.price, order.executed.value, order.executed.comm)
+                    % (
+                        order.executed.price,
+                        order.executed.value,
+                        order.executed.comm,
+                    )
                 )
 
                 self.bar_executed = len(self)
@@ -556,12 +663,18 @@ class Crossover_MA(bt.Strategy):
         self.order = None
 
     def notify_trade(self, trade):
+        """
+
+        :param trade:
+
+        """
         if not trade.isclosed:
             return
 
         self.log("OPERATION PROFIT, GROSS %.2f, NET %.2f" % (trade.pnl, trade.pnlcomm))
 
     def next(self):
+        """ """
         self.log("Close, %.2f" % self.dataclose[0])
 
         if self.order:
@@ -579,14 +692,22 @@ class Crossover_MA(bt.Strategy):
 
 
 class my_EMA(bt.Strategy):
+    """ """
+
     params = (("maperiod", 35),)
 
     def log(self, txt, dt=None):
-        """Printing function for the complete strategy"""
+        """Printing function for the complete strategy
+
+        :param txt:
+        :param dt:  (Default value = None)
+
+        """
         dt = dt or self.datas[0].datetime.date(0)
         print("%s %s" % (dt.isoformat(), txt))
 
     def __init__(self):
+        """ """
         self.dataclose = self.datas[0].close
 
         # To keep track of pending orders and buy price/commission
@@ -600,6 +721,11 @@ class my_EMA(bt.Strategy):
         )
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status in [order.Submitted, order.Accepted]:
             return
 
@@ -607,7 +733,11 @@ class my_EMA(bt.Strategy):
             if order.isbuy():
                 self.log(
                     "BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f"
-                    % (order.executed.price, order.executed.value, order.executed.comm)
+                    % (
+                        order.executed.price,
+                        order.executed.value,
+                        order.executed.comm,
+                    )
                 )
 
                 self.buyprice = order.executed.price
@@ -616,7 +746,11 @@ class my_EMA(bt.Strategy):
             else:
                 self.log(
                     "SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm: %.2f"
-                    % (order.executed.price, order.executed.value, order.executed.comm)
+                    % (
+                        order.executed.price,
+                        order.executed.value,
+                        order.executed.comm,
+                    )
                 )
 
                 self.bar_executed = len(self)
@@ -627,12 +761,18 @@ class my_EMA(bt.Strategy):
         self.order = None
 
     def notify_trade(self, trade):
+        """
+
+        :param trade:
+
+        """
         if not trade.isclosed:
             return
 
         self.log("OPERATION PROFIT, GROSS %.2f, NET %.2f" % (trade.pnl, trade.pnlcomm))
 
     def next(self):
+        """ """
         self.log("Close, %.2f" % self.dataclose[0])
 
         if self.order:
@@ -650,14 +790,22 @@ class my_EMA(bt.Strategy):
 
 
 class WMA(bt.Strategy):
+    """ """
+
     params = (("maperiod", 30),)
 
     def log(self, txt, dt=None):
-        """Printing function for the complete strategy"""
+        """Printing function for the complete strategy
+
+        :param txt:
+        :param dt:  (Default value = None)
+
+        """
         dt = dt or self.datas[0].datetime.date(0)
         print("%s %s" % (dt.isoformat(), txt))
 
     def __init__(self):
+        """ """
         self.dataclose = self.datas[0].close
 
         # To keep track of pending orders and buy price/commission
@@ -671,6 +819,11 @@ class WMA(bt.Strategy):
         )
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status in [order.Submitted, order.Accepted]:
             return
 
@@ -678,7 +831,11 @@ class WMA(bt.Strategy):
             if order.isbuy():
                 self.log(
                     "BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f"
-                    % (order.executed.price, order.executed.value, order.executed.comm)
+                    % (
+                        order.executed.price,
+                        order.executed.value,
+                        order.executed.comm,
+                    )
                 )
 
                 self.buyprice = order.executed.price
@@ -687,7 +844,11 @@ class WMA(bt.Strategy):
             else:
                 self.log(
                     "SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm: %.2f"
-                    % (order.executed.price, order.executed.value, order.executed.comm)
+                    % (
+                        order.executed.price,
+                        order.executed.value,
+                        order.executed.comm,
+                    )
                 )
 
                 self.bar_executed = len(self)
@@ -698,12 +859,18 @@ class WMA(bt.Strategy):
         self.order = None
 
     def notify_trade(self, trade):
+        """
+
+        :param trade:
+
+        """
         if not trade.isclosed:
             return
 
         self.log("OPERATION PROFIT, GROSS %.2f, NET %.2f" % (trade.pnl, trade.pnlcomm))
 
     def next(self):
+        """ """
         self.log("Close, %.2f" % self.dataclose[0])
 
         if self.order:
@@ -721,14 +888,22 @@ class WMA(bt.Strategy):
 
 
 class BB_strat(bt.Strategy):
+    """ """
+
     params = (("maperiod", 30),)
 
     def log(self, txt, dt=None):
-        """Printing function for the complete strategy"""
+        """Printing function for the complete strategy
+
+        :param txt:
+        :param dt:  (Default value = None)
+
+        """
         dt = dt or self.datas[0].datetime.date(0)
         print("%s %s" % (dt.isoformat(), txt))
 
     def __init__(self):
+        """ """
         self.dataclose = self.datas[0].close
 
         # To keep track of pending orders and buy price/commission
@@ -740,6 +915,11 @@ class BB_strat(bt.Strategy):
         self.bbands = bbands = bt.indicators.BBands(self.datas[0])
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status in [order.Submitted, order.Accepted]:
             return
 
@@ -747,7 +927,11 @@ class BB_strat(bt.Strategy):
             if order.isbuy():
                 self.log(
                     "BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f"
-                    % (order.executed.price, order.executed.value, order.executed.comm)
+                    % (
+                        order.executed.price,
+                        order.executed.value,
+                        order.executed.comm,
+                    )
                 )
 
                 self.buyprice = order.executed.price
@@ -756,7 +940,11 @@ class BB_strat(bt.Strategy):
             else:
                 self.log(
                     "SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm: %.2f"
-                    % (order.executed.price, order.executed.value, order.executed.comm)
+                    % (
+                        order.executed.price,
+                        order.executed.value,
+                        order.executed.comm,
+                    )
                 )
 
                 self.bar_executed = len(self)
@@ -767,12 +955,18 @@ class BB_strat(bt.Strategy):
         self.order = None
 
     def notify_trade(self, trade):
+        """
+
+        :param trade:
+
+        """
         if not trade.isclosed:
             return
 
         self.log("OPERATION PROFIT, GROSS %.2f, NET %.2f" % (trade.pnl, trade.pnlcomm))
 
     def next(self):
+        """ """
         self.log("Close, %.2f" % self.dataclose[0])
 
         if self.order:
@@ -790,14 +984,22 @@ class BB_strat(bt.Strategy):
 
 
 class Counter_bb(bt.Strategy):
+    """ """
+
     params = (("maperiod", 30),)
 
     def log(self, txt, dt=None):
-        """Printing function for the complete strategy"""
+        """Printing function for the complete strategy
+
+        :param txt:
+        :param dt:  (Default value = None)
+
+        """
         dt = dt or self.datas[0].datetime.date(0)
         print("%s %s" % (dt.isoformat(), txt))
 
     def __init__(self):
+        """ """
         self.dataclose = self.datas[0].close
 
         # To keep track of pending orders and buy price/commission
@@ -809,6 +1011,11 @@ class Counter_bb(bt.Strategy):
         self.bbands = bbands = bt.indicators.BBands(self.datas[0])
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status in [order.Submitted, order.Accepted]:
             return
 
@@ -816,7 +1023,11 @@ class Counter_bb(bt.Strategy):
             if order.isbuy():
                 self.log(
                     "BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f"
-                    % (order.executed.price, order.executed.value, order.executed.comm)
+                    % (
+                        order.executed.price,
+                        order.executed.value,
+                        order.executed.comm,
+                    )
                 )
 
                 self.buyprice = order.executed.price
@@ -825,7 +1036,11 @@ class Counter_bb(bt.Strategy):
             else:
                 self.log(
                     "SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm: %.2f"
-                    % (order.executed.price, order.executed.value, order.executed.comm)
+                    % (
+                        order.executed.price,
+                        order.executed.value,
+                        order.executed.comm,
+                    )
                 )
 
                 self.bar_executed = len(self)
@@ -836,12 +1051,18 @@ class Counter_bb(bt.Strategy):
         self.order = None
 
     def notify_trade(self, trade):
+        """
+
+        :param trade:
+
+        """
         if not trade.isclosed:
             return
 
         self.log("OPERATION PROFIT, GROSS %.2f, NET %.2f" % (trade.pnl, trade.pnlcomm))
 
     def next(self):
+        """ """
         self.log("Close, %.2f" % self.dataclose[0])
 
         if self.order:
@@ -859,8 +1080,13 @@ class Counter_bb(bt.Strategy):
 
 
 def run_strategy(strategy_class, data, strategy_name, **kwargs):
-    """
-    Run a backtest for a specific strategy
+    """Run a backtest for a specific strategy
+
+    :param strategy_class:
+    :param data:
+    :param strategy_name:
+    :param **kwargs:
+
     """
     print("\n" + "=" * 50)
     print(f"Running {strategy_name} Strategy")
@@ -940,9 +1166,7 @@ def run_strategy(strategy_class, data, strategy_name, **kwargs):
 
 
 def parse_args():
-    """
-    Parse command line arguments
-    """
+    """Parse command line arguments"""
     parser = argparse.ArgumentParser(
         description=(
             "Backtest multiple trading strategies with data from PostgreSQL database"
@@ -969,7 +1193,10 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--todate", "-t", default="2020-12-31", help="Ending date in YYYY-MM-DD format"
+        "--todate",
+        "-t",
+        default="2020-12-31",
+        help="Ending date in YYYY-MM-DD format",
     )
 
     parser.add_argument(
@@ -977,7 +1204,11 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--commission", "-cm", default=0.001, type=float, help="Commission (percentage)"
+        "--commission",
+        "-cm",
+        default=0.001,
+        type=float,
+        help="Commission (percentage)",
     )
 
     parser.add_argument("--plot", "-pl", action="store_true", help="Plot the results")
@@ -996,9 +1227,7 @@ def parse_args():
 
 
 def main():
-    """
-    Main function
-    """
+    """Main function"""
     args = parse_args()
 
     # Convert dates
@@ -1019,9 +1248,15 @@ def main():
 
     # Define strategies to run
     strategies = {
-        "lincomb": {"class": LinComb_Signal, "name": "Linear Combination Signal"},
+        "lincomb": {
+            "class": LinComb_Signal,
+            "name": "Linear Combination Signal",
+        },
         "rsi": {"class": RSI, "name": "Relative Strength Index"},
-        "macd": {"class": MACD, "name": "Moving Average Convergence Divergence"},
+        "macd": {
+            "class": MACD,
+            "name": "Moving Average Convergence Divergence",
+        },
     }
 
     # Only add strategies that worked with our parameter handling
@@ -1063,7 +1298,7 @@ def main():
         sorted_results = sorted(results.items(), key=lambda x: x[1], reverse=True)
 
         for i, (strategy, value) in enumerate(sorted_results):
-            print(f"{i+1}. {strategies[strategy]['name']}: ${value:.2f}")
+            print(f"{i + 1}. {strategies[strategy]['name']}: ${value:.2f}")
 
 
 if __name__ == "__main__":

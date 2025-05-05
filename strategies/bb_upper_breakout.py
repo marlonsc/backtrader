@@ -91,35 +91,37 @@ python strategies/bb_upper_breakout.py --data SPY --fromdate 2024-01-01 --todate
 python strategies/bb_upper_breakout.py --data SPY --fromdate 2024-01-01 --todate 2024-12-31 --interval 1d
 """
 
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
 import os
 import sys
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
+
 import backtrader as bt
-import backtrader.indicators as btind
 
 # Import utility functions
 try:
     # Try direct import first (when running as a module)
     from strategies.utils import (
-        get_db_data,
-        print_performance_metrics,
         TradeThrottling,
         add_standard_analyzers,
+        get_db_data,
+        print_performance_metrics,
     )
 except ModuleNotFoundError:
     # If that fails, try relative import (when running script directly)
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     from strategies.utils import (
-        get_db_data,
-        print_performance_metrics,
         TradeThrottling,
         add_standard_analyzers,
+        get_db_data,
+        print_performance_metrics,
     )
 
 # Add the parent directory to the Python path to import shared modules
@@ -129,9 +131,7 @@ if parent_dir not in sys.path:
 
 
 class StockPriceData(bt.feeds.PandasData):
-    """
-    Stock Price Data Feed
-    """
+    """Stock Price Data Feed"""
 
     params = (
         ("datetime", None),  # Column containing the date (index)
@@ -144,8 +144,7 @@ class StockPriceData(bt.feeds.PandasData):
 
 
 class BBUpperBreakoutStrategy(bt.Strategy, TradeThrottling):
-    """
-    Bollinger Bands Upper Breakout Strategy
+    """Bollinger Bands Upper Breakout Strategy
 
     This strategy attempts to capture breakouts by:
     1. Buying when price closes above the upper Bollinger Band
@@ -164,6 +163,8 @@ class BBUpperBreakoutStrategy(bt.Strategy, TradeThrottling):
     - Periods following consolidation or base building
     - Market environments with sector rotation into new leadership
     - Avoid using in choppy, sideways, or range-bound markets
+
+
     """
 
     params = (
@@ -184,7 +185,13 @@ class BBUpperBreakoutStrategy(bt.Strategy, TradeThrottling):
     )
 
     def log(self, txt, dt=None, level="info"):
-        """Logging function"""
+        """Logging function
+
+        :param txt:
+        :param dt:  (Default value = None)
+        :param level:  (Default value = "info")
+
+        """
         if level == "debug" and self.p.loglevel != "debug":
             return
 
@@ -192,6 +199,7 @@ class BBUpperBreakoutStrategy(bt.Strategy, TradeThrottling):
         print(f"{dt.isoformat()}: {txt}")
 
     def __init__(self):
+        """ """
         # Store references to price data
         self.dataclose = self.datas[0].close
         self.dataopen = self.datas[0].open
@@ -274,6 +282,7 @@ class BBUpperBreakoutStrategy(bt.Strategy, TradeThrottling):
         return max(1, size)  # At least 1 share
 
     def next(self):
+        """ """
         # Check if we're in the date range
         if not self.is_in_date_range():
             return
@@ -305,7 +314,10 @@ class BBUpperBreakoutStrategy(bt.Strategy, TradeThrottling):
     def stop(self):
         """Called when backtest is complete"""
         self.log("Bollinger Bands Strategy completed", level="info")
-        self.log(f"Final Portfolio Value: {self.broker.getvalue():.2f}", level="info")
+        self.log(
+            f"Final Portfolio Value: {self.broker.getvalue():.2f}",
+            level="info",
+        )
 
         # Add a note about market conditions
         self.log("NOTE: This strategy is designed for trending markets", level="info")
@@ -316,7 +328,11 @@ class BBUpperBreakoutStrategy(bt.Strategy, TradeThrottling):
         )
 
     def notify_order(self, order):
-        """Handle order notifications"""
+        """Handle order notifications
+
+        :param order:
+
+        """
         if order.status in [order.Submitted, order.Accepted]:
             # Order pending, do nothing
             return
@@ -363,7 +379,11 @@ class BBUpperBreakoutStrategy(bt.Strategy, TradeThrottling):
         self.order = None
 
     def notify_trade(self, trade):
-        """Track completed trades"""
+        """Track completed trades
+
+        :param trade:
+
+        """
         if not trade.isclosed:
             return
 
@@ -400,7 +420,10 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--todate", "-t", default="2024-12-31", help="Ending date in YYYY-MM-DD format"
+        "--todate",
+        "-t",
+        default="2024-12-31",
+        help="Ending date in YYYY-MM-DD format",
     )
 
     parser.add_argument(
@@ -459,11 +482,19 @@ def parse_args():
 
     # Date range parameters
     parser.add_argument(
-        "--start-year", "-sy", default=2024, type=int, help="Start year for trading"
+        "--start-year",
+        "-sy",
+        default=2024,
+        type=int,
+        help="Start year for trading",
     )
 
     parser.add_argument(
-        "--start-month", "-sm", default=1, type=int, help="Start month for trading"
+        "--start-month",
+        "-sm",
+        default=1,
+        type=int,
+        help="Start month for trading",
     )
 
     parser.add_argument(
@@ -506,7 +537,8 @@ def main():
     original_todate = todate
 
     # Add padding to ensure we get data for the full date range specified
-    # Expand request to start of the year to ensure complete data for Buy & Hold
+    # Expand request to start of the year to ensure complete data for Buy &
+    # Hold
     padded_fromdate = datetime.datetime(fromdate.year, 1, 1)
 
     # Get data from database with padded date range and specified interval
@@ -567,7 +599,7 @@ def main():
     results = cerebro.run()
 
     # Get the strategy instance
-    strat = results[0]
+    results[0]
 
     # Print final portfolio value
     final_value = cerebro.broker.getvalue()

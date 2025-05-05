@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import collections
 import io
@@ -26,16 +31,22 @@ import itertools
 import sys
 
 try:  # For new Python versions
-    collectionsAbc = collections.abc  # collections.Iterable -> collections.abc.Iterable
+    # collections.Iterable -> collections.abc.Iterable
+    collectionsAbc = collections.abc
 except AttributeError:  # For old Python versions
     collectionsAbc = collections  # Используем collections.Iterable
 
 import backtrader as bt
-from backtrader.utils.py3 import map, with_metaclass, string_types, integer_types
+from backtrader.utils.py3 import (
+    integer_types,
+    map,
+    string_types,
+    with_metaclass,
+)
 
 
 class WriterBase(with_metaclass(bt.MetaParams, object)):
-    pass
+    """ """
 
 
 class WriterFile(WriterBase):
@@ -87,6 +98,7 @@ class WriterFile(WriterBase):
         Number of decimal places to round floats down to. With ``None`` no
         rounding is performed
 
+
     """
 
     params = (
@@ -103,11 +115,13 @@ class WriterFile(WriterBase):
     )
 
     def __init__(self):
+        """ """
         self._len = itertools.count(1)
         self.headers = list()
         self.values = list()
 
     def _start_output(self):
+        """ """
         # open file if needed
         if not hasattr(self, "out") or not self.out:
             if self.p.out is None:
@@ -121,6 +135,7 @@ class WriterFile(WriterBase):
                 self.close_out = self.p.close_out
 
     def start(self):
+        """ """
         self._start_output()
 
         if self.p.csv:
@@ -128,25 +143,44 @@ class WriterFile(WriterBase):
             self.writeiterable(self.headers, counter="Id")
 
     def stop(self):
+        """ """
         if self.close_out:
             self.out.close()
 
     def next(self):
+        """ """
         if self.p.csv:
             self.writeiterable(self.values, func=str, counter=next(self._len))
             self.values = list()
 
     def addheaders(self, headers):
+        """
+
+        :param headers:
+
+        """
         if self.p.csv:
             self.headers.extend(headers)
 
     def addvalues(self, values):
+        """
+
+        :param values:
+
+        """
         if self.p.csv:
             if self.p.csv_filternan:
                 values = map(lambda x: x if x == x else "", values)
             self.values.extend(values)
 
     def writeiterable(self, iterable, func=None, counter=""):
+        """
+
+        :param iterable:
+        :param func:  (Default value = None)
+        :param counter:  (Default value = "")
+
+        """
         if self.p.csv_counter:
             iterable = itertools.chain([counter], iterable)
 
@@ -157,13 +191,28 @@ class WriterFile(WriterBase):
         self.writeline(line)
 
     def writeline(self, line):
+        """
+
+        :param line:
+
+        """
         self.out.write(line + "\n")
 
     def writelines(self, lines):
+        """
+
+        :param lines:
+
+        """
         for l in lines:
             self.out.write(l + "\n")
 
     def writelineseparator(self, level=0):
+        """
+
+        :param level:  (Default value = 0)
+
+        """
         sepnum = level % len(self.p.separators)
         separator = self.p.separators[sepnum]
 
@@ -172,6 +221,13 @@ class WriterFile(WriterBase):
         self.writeline(line)
 
     def writedict(self, dct, level=0, recurse=False):
+        """
+
+        :param dct:
+        :param level:  (Default value = 0)
+        :param recurse:  (Default value = False)
+
+        """
         if not recurse:
             self.writelineseparator(level)
 
@@ -218,16 +274,21 @@ class WriterFile(WriterBase):
 
 
 class WriterStringIO(WriterFile):
+    """ """
+
     params = (("out", io.StringIO),)
 
     def __init__(self):
+        """ """
         super(WriterStringIO, self).__init__()
 
     def _start_output(self):
+        """ """
         super(WriterStringIO, self)._start_output()
         self.out = self.out()
 
     def stop(self):
+        """ """
         super(WriterStringIO, self).stop()
         # Leave the file positioned at the beginning
         self.out.seek(0)

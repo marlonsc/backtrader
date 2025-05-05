@@ -1,17 +1,29 @@
 #!/usr/bin/env python
 # -*- coding: utf-8; py-indent-offset:4 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import datetime
 
-from testcommon import getdatadir
 import backtrader as bt
 import pytest
 import pytz
+from testcommon import getdatadir
 from util_asserts import assert_data
 
 
 def _get_trading_calendar(open_hour, close_hour, close_minute):
+    """
+
+    :param open_hour:
+    :param close_hour:
+    :param close_minute:
+
+    """
     cal = bt.TradingCalendar(
         open=datetime.time(hour=open_hour),
         close=datetime.time(hour=close_hour, minute=close_minute),
@@ -20,15 +32,30 @@ def _get_trading_calendar(open_hour, close_hour, close_minute):
 
 
 def _run_cerebro(
-    use_tcal, open_hour=None, open_minute=None, close_hour=None, close_minute=None
+    use_tcal,
+    open_hour=None,
+    open_minute=None,
+    close_hour=None,
+    close_minute=None,
 ):
+    """
+
+    :param use_tcal:
+    :param open_hour:  (Default value = None)
+    :param open_minute:  (Default value = None)
+    :param close_hour:  (Default value = None)
+    :param close_minute:  (Default value = None)
+
+    """
     cerebro = bt.Cerebro()
     cerebro.addstrategy(bt.strategies.NullStrategy)
 
     if use_tcal:
         cerebro.addcalendar(
             _get_trading_calendar(
-                open_hour=open_hour, close_hour=close_hour, close_minute=close_minute
+                open_hour=open_hour,
+                close_hour=close_hour,
+                close_minute=close_minute,
             )
         )
 
@@ -44,21 +71,34 @@ def _run_cerebro(
 
 
 def test_no_tcal():
+    """ """
     strat = _run_cerebro(use_tcal=False)
 
     assert len(strat) == 4
 
     assert_data(
-        strat.data, -3, datetime.datetime(2015, 9, 23, 23, 59, 59, 999989), close=3072
+        strat.data,
+        -3,
+        datetime.datetime(2015, 9, 23, 23, 59, 59, 999989),
+        close=3072,
     )
     assert_data(
-        strat.data, -2, datetime.datetime(2015, 9, 24, 23, 59, 59, 999989), close=3600
+        strat.data,
+        -2,
+        datetime.datetime(2015, 9, 24, 23, 59, 59, 999989),
+        close=3600,
     )
     assert_data(
-        strat.data, -1, datetime.datetime(2015, 9, 25, 23, 59, 59, 999989), close=3075
+        strat.data,
+        -1,
+        datetime.datetime(2015, 9, 25, 23, 59, 59, 999989),
+        close=3075,
     )
     assert_data(
-        strat.data, 0, datetime.datetime(2015, 9, 26, 23, 59, 59, 999989), close=3078
+        strat.data,
+        0,
+        datetime.datetime(2015, 9, 26, 23, 59, 59, 999989),
+        close=3078,
     )
 
 
@@ -80,7 +120,11 @@ def test_tcal_8_to_20():
 
 
 def test_tcal_8_to_20_30(main=False):
-    """Trading calenadar times are a bit longer and contain some more ticks that would be filtered otherwise."""
+    """Trading calenadar times are a bit longer and contain some more ticks that would be filtered otherwise.
+
+    :param main:  (Default value = False)
+
+    """
     strat = _run_cerebro(
         use_tcal=True,
         open_hour=8,
@@ -99,7 +143,10 @@ def test_tcal_8_to_20_30(main=False):
 @pytest.mark.timeout(5)
 def test_bug_tcal_infinite_loop():
     """# results in an endless loop with standard bt because 22:00:02 is always outside of trading hours
-    # should be fixed in my branch!?"""
+    # should be fixed in my branch!?
+
+
+    """
     tradingcal = bt.TradingCalendar(
         open=datetime.time(hour=12), close=datetime.time(hour=22)
     )
@@ -108,14 +155,17 @@ def test_bug_tcal_infinite_loop():
 
 
 def test_bug_tcal_nodaycheck():
+    """ """
     tradingcal = bt.TradingCalendar(
         open=datetime.time(hour=12),
         close=datetime.time(hour=22),
-        earlydays=[(
-            datetime.date(2018, 11, 23),
-            datetime.time(hour=12),
-            datetime.time(hour=20),
-        )],
+        earlydays=[
+            (
+                datetime.date(2018, 11, 23),
+                datetime.time(hour=12),
+                datetime.time(hour=20),
+            )
+        ],
     )
 
     sched = tradingcal.schedule(datetime.datetime(2018, 11, 23, 20, 10, 0))
@@ -130,17 +180,24 @@ def test_bug_tcal_nodaycheck():
 def test_bug_tcal_utc_overflow():
     """the requested timestamp actually is date '2018-11-20' (not 21th) according to exhchange's timezone 'Pacific/Auckland' so it should return trading hours
     for that date. those trading hours differ since they are defined by the earlydays parameter (instead of regular trading hours)
+
+
     """
     tradingcal = bt.TradingCalendar(
         open=datetime.time(hour=10),
         close=datetime.time(hour=16, minute=45),
         earlydays=[
-            (datetime.date(2018, 11, 20), datetime.time(hour=9), datetime.time(hour=18))
+            (
+                datetime.date(2018, 11, 20),
+                datetime.time(hour=9),
+                datetime.time(hour=18),
+            )
         ],
     )
 
     sched = tradingcal.schedule(
-        datetime.datetime(2018, 11, 21, 3, 0, 0), pytz.timezone("Pacific/Auckland")
+        datetime.datetime(2018, 11, 21, 3, 0, 0),
+        pytz.timezone("Pacific/Auckland"),
     )
 
     assert sched == (

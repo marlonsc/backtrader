@@ -155,26 +155,29 @@ With plotting:
 python strategies/moving_average_crossover.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --short-period 50 --long-period 200 --plot
 """
 
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
-import pandas as pd
+
 import backtrader as bt
 
 # Import utility functions
 from strategies.utils import (
-    get_db_data,
-    print_performance_metrics,
     TradeThrottling,
     add_standard_analyzers,
+    get_db_data,
+    print_performance_metrics,
 )
 
 
 class StockPriceData(bt.feeds.PandasData):
-    """
-    Stock Price Data Feed
-    """
+    """Stock Price Data Feed"""
 
     params = (
         ("datetime", None),
@@ -188,8 +191,7 @@ class StockPriceData(bt.feeds.PandasData):
 
 
 class MovingAverageCrossStrategy(bt.Strategy, TradeThrottling):
-    """
-    Moving Average Crossover Strategy
+    """Moving Average Crossover Strategy
 
     This strategy generates buy and sell signals based on the crossover
     of a short-term moving average and a long-term moving average.
@@ -213,6 +215,8 @@ class MovingAverageCrossStrategy(bt.Strategy, TradeThrottling):
     - Stocks with clear directional momentum
     - Lower volatility periods with sustained price direction
     - Avoid during range-bound, choppy, or highly volatile markets
+
+
     """
 
     params = (
@@ -229,18 +233,26 @@ class MovingAverageCrossStrategy(bt.Strategy, TradeThrottling):
         ("risk_percent", 1.0),  # Percentage of equity to risk per trade
         ("max_position", 20.0),  # Maximum position size as percentage
         # Trade throttling
-        ("trade_throttle_days", 5),  # Minimum days between trades (0 = no throttling)
+        # Minimum days between trades (0 = no throttling)
+        ("trade_throttle_days", 5),
         # Other parameters
         ("printlog", False),  # Print log to console
     )
 
     def log(self, txt, dt=None, doprint=False):
-        """Log messages"""
+        """Log messages
+
+        :param txt:
+        :param dt:  (Default value = None)
+        :param doprint:  (Default value = False)
+
+        """
         if self.params.printlog or doprint:
             dt = dt or self.datas[0].datetime.date(0)
             print(f"{dt.isoformat()}: {txt}")
 
     def __init__(self):
+        """ """
         # Keep a reference to the "close" line
         self.dataclose = self.datas[0].close
         self.datahigh = self.datas[0].high
@@ -286,7 +298,11 @@ class MovingAverageCrossStrategy(bt.Strategy, TradeThrottling):
         self.atr = bt.indicators.ATR(self.datas[0], period=14)
 
     def notify_order(self, order):
-        """Process order notifications"""
+        """Process order notifications
+
+        :param order:
+
+        """
         if order.status in [order.Submitted, order.Accepted]:
             # Order still in progress - do nothing
             return
@@ -342,7 +358,11 @@ class MovingAverageCrossStrategy(bt.Strategy, TradeThrottling):
         self.order = None
 
     def notify_trade(self, trade):
-        """Process trade notifications"""
+        """Process trade notifications
+
+        :param trade:
+
+        """
         if not trade.isclosed:
             return
 
@@ -439,7 +459,8 @@ class MovingAverageCrossStrategy(bt.Strategy, TradeThrottling):
                 new_trail_price = self.highest_price * (
                     1.0 - self.p.trail_percent / 100.0
                 )
-                # Only update if the new trail price is higher than the current one
+                # Only update if the new trail price is higher than the current
+                # one
                 if new_trail_price > self.trail_price:
                     self.trail_price = new_trail_price
                     self.log(f"Trailing stop updated: {self.trail_price:.2f}")
@@ -477,14 +498,20 @@ class MovingAverageCrossStrategy(bt.Strategy, TradeThrottling):
     def stop(self):
         """Called when backtest is complete"""
         self.log("Moving Average Crossover Strategy completed", doprint=True)
-        self.log(f"Final Portfolio Value: {self.broker.getvalue():.2f}", doprint=True)
+        self.log(
+            f"Final Portfolio Value: {self.broker.getvalue():.2f}",
+            doprint=True,
+        )
 
         # Add a note about market conditions
         self.log(
             "NOTE: This strategy is specifically designed for trending markets",
             doprint=True,
         )
-        self.log("      It performs poorly in sideways or choppy markets", doprint=True)
+        self.log(
+            "      It performs poorly in sideways or choppy markets",
+            doprint=True,
+        )
 
 
 def parse_args():
@@ -564,10 +591,17 @@ def parse_args():
 
     # Risk management parameters
     parser.add_argument(
-        "--stop-loss", "-sl", type=float, default=2.0, help="Stop loss percentage"
+        "--stop-loss",
+        "-sl",
+        type=float,
+        default=2.0,
+        help="Stop loss percentage",
     )
     parser.add_argument(
-        "--trailing-stop", "-ts", action="store_true", help="Enable trailing stop loss"
+        "--trailing-stop",
+        "-ts",
+        action="store_true",
+        help="Enable trailing stop loss",
     )
     parser.add_argument(
         "--trail-percent",

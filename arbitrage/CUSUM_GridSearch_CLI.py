@@ -1,15 +1,9 @@
-import backtrader as bt
-import pandas as pd
-import numpy as np
-import sys
-import os
-import datetime
-import matplotlib.pyplot as plt
-import seaborn as sns
 import argparse
-from pathlib import Path
+import datetime
 
-from arbitrage.myutil import calculate_spread, check_and_align_data, cointegration_ratio
+import backtrader as bt
+import numpy as np
+import pandas as pd
 
 
 def calculate_rolling_spread(
@@ -165,12 +159,24 @@ class DynamicSpreadCUSUMStrategy(bt.Strategy):
         elif trade.justopened:
             print(
                 "TRADE %s OPENED %s  , SIZE %2d, PRICE %d "
-                % (trade.ref, bt.num2date(trade.dtopen), trade.size, trade.value)
+                % (
+                    trade.ref,
+                    bt.num2date(trade.dtopen),
+                    trade.size,
+                    trade.value,
+                )
             )
 
 
 def run_strategy(
-    data0, data1, data2, win, k_coeff, h_coeff, spread_window=60, initial_cash=100000
+    data0,
+    data1,
+    data2,
+    win,
+    k_coeff,
+    h_coeff,
+    spread_window=60,
+    initial_cash=100000,
 ):
     """运行单次回测"""
     # 创建回测引擎
@@ -287,7 +293,7 @@ def grid_search(
     if spread_windows is None:
         spread_windows = [20, 30, 60]
 
-    print(f"网格搜索参数:")
+    print("网格搜索参数:")
     print(f"  窗口大小(win): {win_values}")
     print(f"  k系数(k_coeff): {k_coeff_values}")
     print(f"  h系数(h_coeff): {h_coeff_values}")
@@ -302,10 +308,18 @@ def grid_search(
 
         # 添加数据
         data0 = bt.feeds.PandasData(
-            dataname=df0, datetime="date", nocase=True, fromdate=fromdate, todate=todate
+            dataname=df0,
+            datetime="date",
+            nocase=True,
+            fromdate=fromdate,
+            todate=todate,
         )
         data1 = bt.feeds.PandasData(
-            dataname=df1, datetime="date", nocase=True, fromdate=fromdate, todate=todate
+            dataname=df1,
+            datetime="date",
+            nocase=True,
+            fromdate=fromdate,
+            todate=todate,
         )
         data2 = SpreadData(dataname=df_spread, fromdate=fromdate, todate=todate)
 
@@ -313,7 +327,15 @@ def grid_search(
             for k_coeff in k_coeff_values:
                 for h_coeff in h_coeff_values:
                     param_combinations.append(
-                        (data0, data1, data2, win, k_coeff, h_coeff, spread_window)
+                        (
+                            data0,
+                            data1,
+                            data2,
+                            win,
+                            k_coeff,
+                            h_coeff,
+                            spread_window,
+                        )
                     )
 
     # 执行网格搜索
@@ -322,18 +344,31 @@ def grid_search(
 
     print(f"开始网格搜索，共{total_combinations}种参数组合...")
 
-    for i, (data0, data1, data2, win, k_coeff, h_coeff, spread_window) in enumerate(
-        param_combinations
-    ):
+    for i, (
+        data0,
+        data1,
+        data2,
+        win,
+        k_coeff,
+        h_coeff,
+        spread_window,
+    ) in enumerate(param_combinations):
         print(
-            f"测试参数组合 {i+1}/{total_combinations}: win={win},"
+            f"测试参数组合 {i + 1}/{total_combinations}: win={win},"
             f" k_coeff={k_coeff:.1f}, h_coeff={h_coeff:.1f},"
             f" spread_window={spread_window}"
         )
 
         try:
             result = run_strategy(
-                data0, data1, data2, win, k_coeff, h_coeff, spread_window, initial_cash
+                data0,
+                data1,
+                data2,
+                win,
+                k_coeff,
+                h_coeff,
+                spread_window,
+                initial_cash,
             )
             results.append(result)
 
@@ -351,7 +386,7 @@ def grid_search(
         # 按夏普比率排序
         sorted_results = sorted(
             results,
-            key=lambda x: x["sharpe"] if x["sharpe"] is not None else -float("inf"),
+            key=lambda x: (x["sharpe"] if x["sharpe"] is not None else -float("inf")),
             reverse=True,
         )
         best_result = sorted_results[0]
@@ -373,7 +408,7 @@ def grid_search(
         print("\n========= 所有参数组合结果（按夏普比率排序，仅显示前10个）=========")
         for i, result in enumerate(sorted_results[:10]):  # 只显示前10个最好的结果
             print(
-                f"{i+1}. spread_window={result['params']['spread_window']}, "
+                f"{i + 1}. spread_window={result['params']['spread_window']}, "
                 f"win={result['params']['win']}, "
                 f"k_coeff={result['params']['k_coeff']:.2f}, "
                 f"h_coeff={result['params']['h_coeff']:.2f}, "
@@ -417,7 +452,10 @@ def parse_args():
         "--h-coeff", type=float, nargs="+", help="h系数列表，例如：3.0 5.0 8.0"
     )
     parser.add_argument(
-        "--spread-window", type=int, nargs="+", help="价差计算窗口列表，例如：20 30 60"
+        "--spread-window",
+        type=int,
+        nargs="+",
+        help="价差计算窗口列表，例如：20 30 60",
     )
 
     # 输出目录
@@ -425,7 +463,10 @@ def parse_args():
 
     # 初始资金
     parser.add_argument(
-        "--cash", type=float, default=100000, help="回测初始资金金额，默认：100000"
+        "--cash",
+        type=float,
+        default=100000,
+        help="回测初始资金金额，默认：100000",
     )
 
     return parser.parse_args()

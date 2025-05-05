@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,10 +18,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
-import collections
 import datetime
 import itertools
 
@@ -29,6 +33,8 @@ import backtrader as bt
 
 
 class SMACrossOver(bt.Indicator):
+    """ """
+
     lines = ("signal",)
     params = (
         ("p1", 10),
@@ -36,15 +42,23 @@ class SMACrossOver(bt.Indicator):
     )
 
     def __init__(self):
+        """ """
         sma1 = bt.indicators.SMA(period=self.p.p1)
         sma2 = bt.indicators.SMA(period=self.p.p2)
         self.lines.signal = bt.indicators.CrossOver(sma1, sma2)
 
 
 class SlipSt(bt.SignalStrategy):
+    """ """
+
     opcounter = itertools.count(1)
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status == bt.Order.Completed:
             t = ""
             t += "{:02d}".format(next(self.opcounter))
@@ -55,6 +69,11 @@ class SlipSt(bt.SignalStrategy):
 
 
 def runstrat(args=None):
+    """
+
+    :param args:  (Default value = None)
+
+    """
     args = parse_args(args)
 
     cerebro = bt.Cerebro()
@@ -108,6 +127,11 @@ def runstrat(args=None):
 
 
 def parse_args(pargs=None):
+    """
+
+    :param pargs:  (Default value = None)
+
+    """
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -163,7 +187,10 @@ def parse_args(pargs=None):
     )
 
     parser.add_argument(
-        "--longonly", required=False, action="store_true", help="Long only strategy"
+        "--longonly",
+        required=False,
+        action="store_true",
+        help="Long only strategy",
     )
 
     pgroup = parser.add_mutually_exclusive_group(required=False)

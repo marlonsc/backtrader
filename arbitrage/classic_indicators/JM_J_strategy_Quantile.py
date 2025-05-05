@@ -1,12 +1,10 @@
-import backtrader as bt
-import pandas as pd
-import numpy as np
-import sys
-import os
-import datetime
 import argparse
+import datetime
+import os
 
-from arbitrage.myutil import calculate_spread, check_and_align_data, cointegration_ratio
+import backtrader as bt
+import numpy as np
+import pandas as pd
 
 # https://mp.weixin.qq.com/s/na-5duJiRM1fTJF0WrcptA
 
@@ -221,18 +219,20 @@ class DynamicSpreadQuantileStrategy(bt.Strategy):
         self.prev_portfolio_value = current_value
 
         self.record_dates.append(self.datetime.date())
-        self.record_data.append({
-            "date": self.datetime.date(),
-            "close": self.data2.close[0],
-            "upper_band": self.quantile.upper[0],
-            "lower_band": self.quantile.lower[0],
-            "mid_band": self.quantile.mid[0],
-            "portfolio_value": current_value,
-            "daily_return": daily_return,
-            "position": self.getposition(self.data0).size,
-            "beta": self.data2.beta[0],
-            "position_layers": self.position_layers,
-        })
+        self.record_data.append(
+            {
+                "date": self.datetime.date(),
+                "close": self.data2.close[0],
+                "upper_band": self.quantile.upper[0],
+                "lower_band": self.quantile.lower[0],
+                "mid_band": self.quantile.mid[0],
+                "portfolio_value": current_value,
+                "daily_return": daily_return,
+                "position": self.getposition(self.data0).size,
+                "beta": self.data2.beta[0],
+                "position_layers": self.position_layers,
+            }
+        )
 
         if self.order:
             return
@@ -385,7 +385,12 @@ class DynamicSpreadQuantileStrategy(bt.Strategy):
         elif trade.justopened:
             print(
                 "TRADE %s OPENED %s  , SIZE %2d, PRICE %d "
-                % (trade.ref, bt.num2date(trade.dtopen), trade.size, trade.value)
+                % (
+                    trade.ref,
+                    bt.num2date(trade.dtopen),
+                    trade.size,
+                    trade.value,
+                )
             )
 
     def get_backtest_data(self):
@@ -418,10 +423,18 @@ def main():
 
     # 添加数据
     data0 = bt.feeds.PandasData(
-        dataname=df0, datetime="date", nocase=True, fromdate=fromdate, todate=todate
+        dataname=df0,
+        datetime="date",
+        nocase=True,
+        fromdate=fromdate,
+        todate=todate,
     )
     data1 = bt.feeds.PandasData(
-        dataname=df1, datetime="date", nocase=True, fromdate=fromdate, todate=todate
+        dataname=df1,
+        datetime="date",
+        nocase=True,
+        fromdate=fromdate,
+        todate=todate,
     )
     data2 = SpreadData(dataname=df_spread, fromdate=fromdate, todate=todate)
 
@@ -495,10 +508,12 @@ def main():
         # 获取回测数据
         backtest_data = strategy.get_backtest_data()
         # 生成文件名
-        params_str = f"period{args.lookback_period}_upper{args.upper_quantile}_lower{args.lower_quantile}"
-        filename = (
-            f"outcome/Quantile_backtest_{args.df0_key.replace('/', '')}{args.df1_key.replace('/', '')}_{params_str}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
-        )
+        params_str = f"period{args.lookback_period}_upper{args.upper_quantile}_lower{
+            args.lower_quantile
+        }"
+        filename = f"outcome/Quantile_backtest_{args.df0_key.replace('/', '')}{
+            args.df1_key.replace('/', '')
+        }_{params_str}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
         # 确保目录存在
         os.makedirs(os.path.dirname(filename), exist_ok=True)
         # 保存CSV

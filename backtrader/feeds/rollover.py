@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,8 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
-
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 from datetime import datetime
 
@@ -27,13 +31,26 @@ import backtrader as bt
 
 
 class MetaRollOver(bt.DataBase.__class__):
+    """ """
+
     def __init__(cls, name, bases, dct):
-        """Class has already been created ... register"""
+        """Class has already been created ... register
+
+        :param name:
+        :param bases:
+        :param dct:
+
+        """
         # Initialize the class
         super(MetaRollOver, cls).__init__(name, bases, dct)
 
     def donew(cls, *args, **kwargs):
-        """Intercept const. to copy timeframe/compression from 1st data"""
+        """Intercept const. to copy timeframe/compression from 1st data
+
+        :param *args:
+        :param **kwargs:
+
+        """
         # Create the object and set the params in place
         _obj, args, kwargs = super(MetaRollOver, cls).donew(*args, **kwargs)
 
@@ -47,27 +64,8 @@ class MetaRollOver(bt.DataBase.__class__):
 class RollOver(bt.with_metaclass(MetaRollOver, bt.DataBase)):
     """Class that rolls over to the next future when a condition is met
 
-    Params:
 
-        - ``checkdate`` (default: ``None``)
-
-          This must be a *callable* with the following signature::
-
-            checkdate(dt, d):
-
-          Where:
-
-            - ``dt`` is a ``datetime.datetime`` object
-            - ``d`` is the current data feed for the active future
-
-          Expected Return Values:
-
-            - ``True``: as long as the callable returns this, a switchover can
-              happen to the next future
-
-        If a commodity expires on the 3rd Friday of March, ``checkdate`` could
-        return ``True`` for the entire week in which the expiration takes
-        place.
+    :returns: place.
 
             - ``False``: the expiration cannot take place
 
@@ -97,6 +95,7 @@ class RollOver(bt.with_metaclass(MetaRollOver, bt.DataBase)):
         than the volume from ``d1``
 
             - ``False``: the expiration cannot take place
+
     """
 
     params = (
@@ -107,13 +106,22 @@ class RollOver(bt.with_metaclass(MetaRollOver, bt.DataBase)):
 
     def islive(self):
         """Returns ``True`` to notify ``Cerebro`` that preloading and runonce
-        should be deactivated"""
+        should be deactivated
+
+
+        """
         return True
 
     def __init__(self, *args):
+        """
+
+        :param *args:
+
+        """
         self._rolls = args
 
     def start(self):
+        """ """
         super(RollOver, self).start()
         for d in self._rolls:
             d.setenvironment(self._env)
@@ -126,30 +134,47 @@ class RollOver(bt.with_metaclass(MetaRollOver, bt.DataBase)):
         self._dts = [datetime.min for xx in self._ds]
 
     def stop(self):
+        """ """
         super(RollOver, self).stop()
         for d in self._rolls:
             d.stop()
 
     def _gettz(self):
         """To be overriden by subclasses which may auto-calculate the
-        timezone"""
+        timezone
+
+
+        """
         if self._rolls:
             return self._rolls[0]._gettz()
         return bt.utils.date.Localizer(self.p.tz)
 
     def _checkdate(self, dt, d):
+        """
+
+        :param dt:
+        :param d:
+
+        """
         if self.p.checkdate is not None:
             return self.p.checkdate(dt, d)
 
         return False
 
     def _checkcondition(self, d0, d1):
+        """
+
+        :param d0:
+        :param d1:
+
+        """
         if self.p.checkcondition is not None:
             return self.p.checkcondition(d0, d1)
 
         return True
 
     def _load(self):
+        """ """
         while self._d is not None:
             _next = self._d.next()
             if _next is None:  # no values yet, more will come

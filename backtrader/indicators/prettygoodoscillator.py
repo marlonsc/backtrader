@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,15 +18,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
-
-from . import Indicator, MovAv, ATR
+from . import ATR, Indicator, MovAv
 
 
 class PrettyGoodOscillator(Indicator):
-    """
-    The "Pretty Good Oscillator" (PGO) by Mark Johnson measures the distance of
+    """The "Pretty Good Oscillator" (PGO) by Mark Johnson measures the distance of
     the current close from its simple moving average of period
     Average), expressed in terms of an average true range (see Average True
     Range) over a similar period.
@@ -45,6 +48,7 @@ class PrettyGoodOscillator(Indicator):
     See also:
       - http://user42.tuxfamily.org/chart/manual/Pretty-Good-Oscillator.html
 
+
     """
 
     alias = (
@@ -59,6 +63,7 @@ class PrettyGoodOscillator(Indicator):
     )
 
     def __init__(self):
+        """ """
         movav = self.p._movav(self.data, period=self.p.period)
         atr = ATR(self.data, period=self.p.period)
 

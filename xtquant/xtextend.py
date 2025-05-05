@@ -1,5 +1,14 @@
 class FileLock:
+    """ """
+
     def __init__(this, path, auto_lock=False):
+        """
+
+        :param this:
+        :param path:
+        :param auto_lock:  (Default value = False)
+
+        """
         this.path = path
         this.fhandle = None
         if auto_lock:
@@ -7,26 +16,41 @@ class FileLock:
         return
 
     def is_lock(this):
+        """
+
+        :param this:
+
+        """
         import os
 
         if os.path.exists(this.path):
             try:
                 os.remove(this.path)
                 return False
-            except Exception as e:
+            except Exception:
                 return True
         return False
 
     def lock(this):
+        """
+
+        :param this:
+
+        """
         if this.fhandle:
             raise this.fhandle
         try:
             this.fhandle = open(this.path, "w")
-        except Exception as e:
+        except Exception:
             return False
         return True
 
     def unlock(this):
+        """
+
+        :param this:
+
+        """
         if not this.fhandle:
             raise this.fhandle
         this.fhandle.close()
@@ -34,6 +58,11 @@ class FileLock:
         return True
 
     def clean(this):
+        """
+
+        :param this:
+
+        """
         import os
 
         if not os.path.exists(this.path):
@@ -42,24 +71,33 @@ class FileLock:
             if os.path.isfile(this.path):
                 os.remove(this.path)
                 return True
-        except Exception as e:
+        except Exception:
             pass
         return False
 
 
 class Extender:
+    """ """
+
     from ctypes import c_float, c_short
 
     value_type = c_float
     rank_type = c_short
 
     def __init__(self, base_dir):
+        """
+
+        :param base_dir:
+
+        """
         import os
 
         self.base_dir = os.path.join(base_dir, "EP")
 
     def read_config(self):
-        import json, os
+        """ """
+        import json
+        import os
 
         data = None
         with open(os.path.join(self.file, "config"), "r", encoding="utf-8") as f:
@@ -74,7 +112,14 @@ class Extender:
             self.timedatelist = data["tradedatelist"]
 
     def read_data(self, data, time_indexs, stock_length):
-        from ctypes import c_float, c_short, sizeof, cast, POINTER
+        """
+
+        :param data:
+        :param time_indexs:
+        :param stock_length:
+
+        """
+        from ctypes import POINTER, c_float, c_short, cast, sizeof
 
         res = {}
         num = (sizeof(self.value_type) + sizeof(self.rank_type)) * stock_length
@@ -93,11 +138,16 @@ class Extender:
         return res
 
     def format_time(self, times):
+        """
+
+        :param times:
+
+        """
         import time
 
-        if type(times) == str:
+        if isinstance(times, str):
             return int(time.mktime(time.strptime(times, "%Y%m%d"))) * 1000
-        elif type(times) == int:
+        elif isinstance(times, int):
             if times < 0:
                 return self.timedatelist[times]
             elif times < ((1 << 31) - 1):
@@ -106,7 +156,14 @@ class Extender:
                 return times
 
     def show_extend_data(self, file, times):
-        import time, os
+        """
+
+        :param file:
+        :param times:
+
+        """
+        import os
+        import time
 
         self.file = os.path.join(self.base_dir, file + "_Xdat")
         if not os.path.isdir(self.file):
@@ -125,7 +182,7 @@ class Extender:
 
         if not times:
             time_list = self.timedatelist
-        elif type(times) == list:
+        elif isinstance(times, list):
             time_list.extend([self.format_time(i) for i in times])
         else:
             time_list.append(self.format_time(times))
@@ -146,7 +203,14 @@ class Extender:
 
 
 def show_extend_data(file, times):
+    """
+
+    :param file:
+    :param times:
+
+    """
     import os
+
     from . import xtdata as xd
 
     exd = Extender(os.path.join(xd.init_data_dir(), "..", "datadir"))

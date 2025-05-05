@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,17 +18,22 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
-
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
-import random
 
 import backtrader as bt
 
 
 class St(bt.Strategy):
+    """ """
+
     params = (
         ("period", 10),
         ("printout", False),
@@ -36,10 +41,12 @@ class St(bt.Strategy):
     )
 
     def __init__(self):
+        """ """
         sma = bt.indicators.SMA(self.data, period=self.p.period)
         self.crossover = bt.indicators.CrossOver(self.data, sma)
 
     def start(self):
+        """ """
         if self.p.printout:
             txtfields = list()
             txtfields.append("Len")
@@ -53,6 +60,7 @@ class St(bt.Strategy):
             print(",".join(txtfields))
 
     def next(self):
+        """ """
         if self.p.printout:
             # Print only 1st data ... is just a check that things are running
             txtfields = list()
@@ -90,6 +98,11 @@ TIMEFRAMES = {
 
 
 def runstrat(args=None):
+    """
+
+    :param args: (Default value = None)
+
+    """
     args = parse_args(args)
 
     cerebro = bt.Cerebro()
@@ -123,7 +136,9 @@ def runstrat(args=None):
             benchdata = data1
 
         cerebro.addobserver(
-            bt.observers.Benchmark, data=benchdata, timeframe=TIMEFRAMES[args.timeframe]
+            bt.observers.Benchmark,
+            data=benchdata,
+            timeframe=TIMEFRAMES[args.timeframe],
         )
 
     cerebro.run()
@@ -137,6 +152,11 @@ def runstrat(args=None):
 
 
 def parse_args(pargs=None):
+    """
+
+    :param pargs: (Default value = None)
+
+    """
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -179,7 +199,10 @@ def parse_args(pargs=None):
     )
 
     parser.add_argument(
-        "--printout", required=False, action="store_true", help="Print data lines"
+        "--printout",
+        required=False,
+        action="store_true",
+        help="Print data lines",
     )
 
     parser.add_argument(

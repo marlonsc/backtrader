@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,14 +18,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
 
 # The above could be sent to an independent module
 import backtrader as bt
-from backtrader.utils import flushfile  # win32 quick stdout flushing
 
 StoreCls = bt.stores.OandaStore
 DataCls = bt.feeds.OandaData
@@ -33,6 +37,8 @@ DataCls = bt.feeds.OandaData
 
 
 class BtTestStrategy(bt.Strategy):
+    """ """
+
     params = dict(
         smaperiod=5,
         trade=False,
@@ -47,6 +53,7 @@ class BtTestStrategy(bt.Strategy):
     )
 
     def __init__(self):
+        """ """
         # To control operation entries
         self.orderid = list()
         self.order = None
@@ -62,15 +69,35 @@ class BtTestStrategy(bt.Strategy):
         print("--------------------------------------------------")
 
     def notify_data(self, data, status, *args, **kwargs):
+        """
+
+        :param data:
+        :param status:
+        :param *args:
+        :param **kwargs:
+
+        """
         print("*" * 5, "DATA NOTIF:", data._getstatusname(status), *args)
         if status == data.LIVE:
             self.counttostop = self.p.stopafter
             self.datastatus = 1
 
     def notify_store(self, msg, *args, **kwargs):
+        """
+
+        :param msg:
+        :param *args:
+        :param **kwargs:
+
+        """
         print("*" * 5, "STORE NOTIF:", msg)
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status in [order.Completed, order.Cancelled, order.Rejected]:
             self.order = None
 
@@ -79,14 +106,25 @@ class BtTestStrategy(bt.Strategy):
         print("-" * 50, "ORDER END")
 
     def notify_trade(self, trade):
+        """
+
+        :param trade:
+
+        """
         print("-" * 50, "TRADE BEGIN", datetime.datetime.now())
         print(trade)
         print("-" * 50, "TRADE END")
 
     def prenext(self):
+        """ """
         self.next(frompre=True)
 
     def next(self, frompre=False):
+        """
+
+        :param frompre:  (Default value = False)
+
+        """
         txt = list()
         txt.append("Data0")
         txt.append("%04d" % len(self.data0))
@@ -186,6 +224,7 @@ class BtTestStrategy(bt.Strategy):
             self.datastatus += 1
 
     def start(self):
+        """ """
         if self.data0.contractdetails is not None:
             print("-- Contract Details:")
             print(self.data0.contractdetails)
@@ -206,6 +245,7 @@ class BtTestStrategy(bt.Strategy):
 
 
 def runstrategy():
+    """ """
     args = parse_args()
 
     # Create a cerebro
@@ -336,6 +376,11 @@ def runstrategy():
 
 
 def parse_args(pargs=None):
+    """
+
+    :param pargs:  (Default value = None)
+
+    """
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Test Oanda integration",
@@ -564,7 +609,10 @@ def parse_args(pargs=None):
     )
 
     parser.add_argument(
-        "--broker", required=False, action="store_true", help="Use Oanda as broker"
+        "--broker",
+        required=False,
+        action="store_true",
+        help="Use Oanda as broker",
     )
 
     parser.add_argument(
@@ -579,7 +627,10 @@ def parse_args(pargs=None):
     )
 
     parser.add_argument(
-        "--usebracket", required=False, action="store_true", help="Test buy_bracket"
+        "--usebracket",
+        required=False,
+        action="store_true",
+        help="Test buy_bracket",
     )
 
     parser.add_argument(

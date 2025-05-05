@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,10 +18,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
-import collections
 import datetime
 import itertools
 
@@ -29,26 +33,39 @@ import backtrader as bt
 
 
 class SMACrossOver(bt.Signal):
+    """ """
+
     params = (
         ("p1", 10),
         ("p2", 30),
     )
 
     def __init__(self):
+        """ """
         sma1 = bt.indicators.SMA(period=self.p.p1)
         sma2 = bt.indicators.SMA(period=self.p.p2)
         self.lines.signal = bt.indicators.CrossOver(sma1, sma2)
 
 
 class NoExit(bt.Signal):
+    """ """
+
     def next(self):
+        """ """
         self.lines.signal[0] = 0.0
 
 
 class St(bt.SignalStrategy):
+    """ """
+
     opcounter = itertools.count(1)
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status == bt.Order.Completed:
             t = ""
             t += "{:02d}".format(next(self.opcounter))
@@ -58,6 +75,11 @@ class St(bt.SignalStrategy):
             print(t.format(order.executed.size, order.executed.price))
 
     def notify_trade(self, trade):
+        """
+
+        :param trade:
+
+        """
         if trade.isclosed:
             print(
                 "Trade closed with P&L: Gross {} Net {}".format(
@@ -67,6 +89,11 @@ class St(bt.SignalStrategy):
 
 
 def runstrat(args=None):
+    """
+
+    :param args:  (Default value = None)
+
+    """
     args = parse_args(args)
 
     cerebro = bt.Cerebro()
@@ -124,6 +151,11 @@ def runstrat(args=None):
 
 
 def parse_args(pargs=None):
+    """
+
+    :param pargs:  (Default value = None)
+
+    """
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -203,11 +235,17 @@ def parse_args(pargs=None):
 
     pgroup = parser.add_mutually_exclusive_group()
     pgroup.add_argument(
-        "--long", required=False, action="store_true", help="Do a long only strategy"
+        "--long",
+        required=False,
+        action="store_true",
+        help="Do a long only strategy",
     )
 
     pgroup.add_argument(
-        "--short", required=False, action="store_true", help="Do a long only strategy"
+        "--short",
+        required=False,
+        action="store_true",
+        help="Do a long only strategy",
     )
 
     parser.add_argument(

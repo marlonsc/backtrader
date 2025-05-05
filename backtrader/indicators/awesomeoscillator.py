@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,17 +18,22 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import backtrader as bt
+
 from . import MovAv
 
 __all__ = ["AwesomeOscillator", "AwesomeOsc", "AO"]
 
 
 class AwesomeOscillator(bt.Indicator):
-    """
-    Awesome Oscillator (AO) is a momentum indicator reflecting the precise
+    """Awesome Oscillator (AO) is a momentum indicator reflecting the precise
     changes in the market driving force which helps to identify the trend’s
     strength up to the points of formation and reversal.
 
@@ -40,6 +45,7 @@ class AwesomeOscillator(bt.Indicator):
     See:
       - https://www.metatrader5.com/en/terminal/help/indicators/bw_indicators/awesome
       - https://www.ifcmarkets.com/en/ntx-indicators/awesome-oscillator
+
 
     """
 
@@ -55,6 +61,7 @@ class AwesomeOscillator(bt.Indicator):
     plotlines = dict(ao=dict(_method="bar", alpha=0.50, width=1.0))
 
     def __init__(self):
+        """ """
         median_price = (self.data.high + self.data.low) / 2.0
         sma1 = self.p.movav(median_price, period=self.p.fast)
         sma2 = self.p.movav(median_price, period=self.p.slow)

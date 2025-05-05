@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,8 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
-
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
@@ -28,14 +32,17 @@ import backtrader as bt
 
 
 class St(bt.Strategy):
+    """ """
+
     params = ()
 
     def __init__(self):
+        """ """
         self.psar0 = bt.ind.ParabolicSAR(self.data0)
         self.psar1 = bt.ind.ParabolicSAR(self.data1)
-        pass
 
     def next(self):
+        """ """
         txt = []
         txt.append("{:04d}".format(len(self)))
         txt.append("{:04d}".format(len(self.data0)))
@@ -54,6 +61,11 @@ class St(bt.Strategy):
 
 
 def runstrat(args=None):
+    """
+
+    :param args: (Default value = None)
+
+    """
     args = parse_args(args)
 
     cerebro = bt.Cerebro()
@@ -94,6 +106,11 @@ def runstrat(args=None):
 
 
 def parse_args(pargs=None):
+    """
+
+    :param pargs: (Default value = None)
+
+    """
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Sample Skeleton",

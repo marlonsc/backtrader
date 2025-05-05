@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,14 +19,18 @@
 #
 ###############################################################################
 # Python 2/3 compatibility imports
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 from . import Indicator, MovAv
 
 
 class DetrendedPriceOscillator(Indicator):
-    """
-    Defined by Joe DiNapoli in his book *"Trading with DiNapoli levels"*
+    """Defined by Joe DiNapoli in his book *"Trading with DiNapoli levels"*
 
     It measures the price variations against a Moving Average (the trend)
     and therefore removes the "trend" factor from the price.
@@ -37,6 +41,8 @@ class DetrendedPriceOscillator(Indicator):
 
     See:
       - http://en.wikipedia.org/wiki/Detrended_price_oscillator
+
+
     """
 
     # Named alias for invocation
@@ -54,11 +60,13 @@ class DetrendedPriceOscillator(Indicator):
 
     # Indicator information after the name (in brackets)
     def _plotlabel(self):
+        """ """
         plabels = [self.p.period]
         plabels += [self.p.movav] * self.p.notdefault("movav")
         return plabels
 
     def __init__(self):
+        """ """
         # Create the Moving Average
         ma = self.p.movav(self.data, period=self.p.period)
 

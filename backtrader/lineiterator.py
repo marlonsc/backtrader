@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,24 +18,34 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import collections
-import operator
 import sys
 
-from .utils.py3 import map, range, zip, with_metaclass, string_types
-from .utils import DotDict
-
-from .lineroot import LineRoot, LineSingle
-from .linebuffer import LineActions, LineNum
-from .lineseries import LineSeries, LineSeriesMaker
 from .dataseries import DataSeries
-from . import metabase
+from .linebuffer import LineActions, LineNum
+from .lineroot import LineRoot, LineSingle
+from .lineseries import LineSeries, LineSeriesMaker
+from .utils import DotDict
+from .utils.py3 import range, string_types, with_metaclass, zip
 
 
 class MetaLineIterator(LineSeries.__class__):
+    """ """
+
     def donew(cls, *args, **kwargs):
+        """
+
+        :param *args:
+        :param **kwargs:
+
+        """
         _obj, args, kwargs = super(MetaLineIterator, cls).donew(*args, **kwargs)
 
         # Prepare to hold children that need to be calculated and
@@ -56,7 +66,7 @@ class MetaLineIterator(LineSeries.__class__):
             else:
                 try:
                     _obj.datas.append(LineSeriesMaker(LineNum(arg)))
-                except:
+                except BaseException:
                     # Not a LineNum and is not a LineSeries - bail out
                     break
 
@@ -79,7 +89,8 @@ class MetaLineIterator(LineSeries.__class__):
         _obj.ddatas = {x: None for x in _obj.datas}
 
         # For each found data add access member -
-        # for the first data 2 (data and data0) #这一段可以优化，第一个for可以包含在第二个for中，第二个for当d = 0就是第一个for执行的内容
+        # for the first data 2 (data and data0)
+        # #这一段可以优化，第一个for可以包含在第二个for中，第二个for当d = 0就是第一个for执行的内容
         if _obj.datas:
             _obj.data = data = _obj.datas[0]
 
@@ -106,6 +117,13 @@ class MetaLineIterator(LineSeries.__class__):
         return _obj, newargs, kwargs
 
     def dopreinit(cls, _obj, *args, **kwargs):
+        """
+
+        :param _obj:
+        :param *args:
+        :param **kwargs:
+
+        """
         _obj, args, kwargs = super(MetaLineIterator, cls).dopreinit(
             _obj, *args, **kwargs
         )
@@ -130,6 +148,13 @@ class MetaLineIterator(LineSeries.__class__):
         return _obj, args, kwargs
 
     def dopostinit(cls, _obj, *args, **kwargs):
+        """
+
+        :param _obj:
+        :param *args:
+        :param **kwargs:
+
+        """
         _obj, args, kwargs = super(MetaLineIterator, cls).dopostinit(
             _obj, *args, **kwargs
         )
@@ -149,6 +174,8 @@ class MetaLineIterator(LineSeries.__class__):
 
 
 class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
+    """ """
+
     _nextforce = False  # force cerebro to run in next mode (runonce=False)
 
     _mindatas = 1
@@ -175,6 +202,7 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
     )
 
     def _periodrecalc(self):
+        """ """
         # last check in case not all lineiterators were assigned to
         # lines (directly or indirectly after some operations)
         # An example is Kaufman's Adaptive Moving Average
@@ -184,6 +212,7 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
         self.updateminperiod(indminperiod)
 
     def _stage2(self):
+        """ """
         super(LineIterator, self)._stage2()
 
         for data in self.datas:
@@ -194,6 +223,7 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
                 lineiterator._stage2()
 
     def _stage1(self):
+        """ """
         super(LineIterator, self)._stage1()
 
         for data in self.datas:
@@ -204,9 +234,11 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
                 lineiterator._stage1()
 
     def getindicators(self):
+        """ """
         return self._lineiterators[LineIterator.IndType]
 
     def getindicators_lines(self):
+        """ """
         return [
             x
             for x in self._lineiterators[LineIterator.IndType]
@@ -214,9 +246,15 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
         ]
 
     def getobservers(self):
+        """ """
         return self._lineiterators[LineIterator.ObsType]
 
     def addindicator(self, indicator):
+        """
+
+        :param indicator:
+
+        """
         # store in right queue
         self._lineiterators[indicator._ltype].append(indicator)
 
@@ -232,6 +270,12 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
                 o = o._owner  # move up the hierarchy
 
     def bindlines(self, owner=None, own=None):
+        """
+
+        :param owner:  (Default value = None)
+        :param own:  (Default value = None)
+
+        """
         if not owner:
             owner = 0
 
@@ -268,6 +312,7 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
     bind2line = bind2lines
 
     def _next(self):
+        """ """
         clock_len = self._clk_update()
 
         for indicator in self._lineiterators[LineIterator.IndType]:
@@ -295,6 +340,7 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
                 self.prenext()
 
     def _clk_update(self):
+        """ """
         clock_len = len(self._clock)
         if clock_len != len(self):
             self.forward()
@@ -302,6 +348,7 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
         return clock_len
 
     def _once(self):
+        """ """
         self.forward(size=self._clock.buflen())
 
         for indicator in self._lineiterators[LineIterator.IndType]:
@@ -332,48 +379,75 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
             line.oncebinding()
 
     def preonce(self, start, end):
-        pass
+        """
+
+        :param start:
+        :param end:
+
+        """
 
     def oncestart(self, start, end):
+        """
+
+        :param start:
+        :param end:
+
+        """
         self.once(start, end)
 
     def once(self, start, end):
-        pass
+        """
+
+        :param start:
+        :param end:
+
+        """
 
     def prenext(self):
-        """
-        This method will be called before the minimum period of all
+        """This method will be called before the minimum period of all
         datas/indicators have been meet for the strategy to start executing
+
+
         """
-        pass
 
     def nextstart(self):
-        """
-        This method will be called once, exactly when the minimum period for
+        """This method will be called once, exactly when the minimum period for
         all datas/indicators have been meet. The default behavior is to call
         next
+
+
         """
 
         # Called once for 1st full calculation - defaults to regular next
         self.next()
 
     def next(self):
-        """
-        This method will be called for all remaining data points when the
+        """This method will be called for all remaining data points when the
         minimum period for all datas/indicators have been meet.
+
+
         """
-        pass
 
     def _addnotification(self, *args, **kwargs):
-        pass
+        """
+
+        :param *args:
+        :param **kwargs:
+
+        """
 
     def _notify(self):
-        pass
+        """ """
 
     def _plotinit(self):
-        pass
+        """ """
 
     def qbuffer(self, savemem=0):
+        """
+
+        :param savemem:  (Default value = 0)
+
+        """
         if savemem:
             for line in self.lines:
                 line.qbuffer()
@@ -393,6 +467,8 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
 
 
 class DataAccessor(LineIterator):
+    """ """
+
     PriceClose = DataSeries.Close
     PriceLow = DataSeries.Low
     PriceHigh = DataSeries.High
@@ -403,15 +479,15 @@ class DataAccessor(LineIterator):
 
 
 class IndicatorBase(DataAccessor):
-    pass
+    """ """
 
 
 class ObserverBase(DataAccessor):
-    pass
+    """ """
 
 
 class StrategyBase(DataAccessor):
-    pass
+    """ """
 
 
 # Utility class to couple lines/lineiterators which may have different lengths
@@ -419,7 +495,15 @@ class StrategyBase(DataAccessor):
 
 
 class SingleCoupler(LineActions):
+    """ """
+
     def __init__(self, cdata, clock=None):
+        """
+
+        :param cdata:
+        :param clock:  (Default value = None)
+
+        """
         super(SingleCoupler, self).__init__()
         self._clock = clock if clock is not None else self._owner
 
@@ -428,6 +512,7 @@ class SingleCoupler(LineActions):
         self.val = float("NaN")
 
     def next(self):
+        """ """
         if len(self.cdata) > self.dlen:
             self.val = self.cdata[0]
             self.dlen += 1
@@ -436,15 +521,19 @@ class SingleCoupler(LineActions):
 
 
 class MultiCoupler(LineIterator):
+    """ """
+
     _ltype = LineIterator.IndType
 
     def __init__(self):
+        """ """
         super(MultiCoupler, self).__init__()
         self.dlen = 0
         self.dsize = self.fullsize()  # shorcut for number of lines
         self.dvals = [float("NaN")] * self.dsize
 
     def next(self):
+        """ """
         if len(self.data) > self.dlen:
             self.dlen += 1
 
@@ -456,6 +545,13 @@ class MultiCoupler(LineIterator):
 
 
 def LinesCoupler(cdata, clock=None, **kwargs):
+    """
+
+    :param cdata:
+    :param clock:  (Default value = None)
+    :param **kwargs:
+
+    """
     if isinstance(cdata, LineSingle):
         return SingleCoupler(cdata, clock)  # return for single line
 

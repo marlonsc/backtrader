@@ -174,19 +174,25 @@ Adjusting lookback periods:
 python strategies/risk_adverse.py --data GOOGL --volatility-period 15 --high-low-period 40 --vol-period 3
 """
 
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
 import os
 import sys
-import pandas as pd
-import numpy as np
-import psycopg2
-import psycopg2.extras
-import matplotlib.pyplot as plt
+
 import backtrader as bt
-import backtrader.indicators as btind
+from strategies.utils import (
+    TradeThrottling,
+    add_standard_analyzers,
+    get_db_data,
+    print_performance_metrics,
+)
 
 # Add the parent directory to the Python path to import shared modules
 parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -194,18 +200,10 @@ if parent_dir not in sys.path:
     sys.path.append(parent_dir)
 
 # Import utility functions
-from strategies.utils import (
-    get_db_data,
-    print_performance_metrics,
-    TradeThrottling,
-    add_standard_analyzers,
-)
 
 
 class StockPriceData(bt.feeds.PandasData):
-    """
-    Stock Price Data Feed
-    """
+    """Stock Price Data Feed"""
 
     params = (
         ("datetime", None),  # Column containing the date (index)
@@ -219,8 +217,7 @@ class StockPriceData(bt.feeds.PandasData):
 
 
 class AverageVolatility(bt.Indicator):
-    """
-    Average Volatility Indicator
+    """Average Volatility Indicator
 
     Calculates the average volatility over a specified period as percentage change
     from close to close.
@@ -228,14 +225,14 @@ class AverageVolatility(bt.Indicator):
     Lines:
         - avg_volatility: Average volatility as a percentage
 
-    Params:
-        - period: The lookback period
+
     """
 
     lines = ("avg_volatility",)
     params = dict(period=20)
 
     def __init__(self):
+        """ """
         # Calculate daily percentage change
         self.pct_change = (
             100.0 * (self.data.close(-1) - self.data.close(-2)) / self.data.close(-2)
@@ -251,22 +248,21 @@ class AverageVolatility(bt.Indicator):
 
 
 class RecentHigh(bt.Indicator):
-    """
-    Recent High Indicator
+    """Recent High Indicator
 
     Detects if the current price is a new high within a specified lookback period.
 
     Lines:
         - new_high: 1 if current price is a new high, 0 otherwise
 
-    Params:
-        - lookback: The lookback period (default: 20)
+
     """
 
     lines = ("new_high",)
     params = dict(lookback=20)
 
     def __init__(self):
+        """ """
         # Compare current high with highest high in lookback period
         self.highest = bt.indicators.Highest(
             self.data.high, period=self.params.lookback
@@ -277,8 +273,7 @@ class RecentHigh(bt.Indicator):
 
 
 class DiffHighLow(bt.Indicator):
-    """
-    Difference High Low Indicator
+    """Difference High Low Indicator
 
     Calculates the ratio of the difference between the highest high and lowest low
     to the average price over a specified period.
@@ -286,14 +281,14 @@ class DiffHighLow(bt.Indicator):
     Lines:
         - diff: The ratio of high-low difference to average price
 
-    Params:
-        - period: The lookback period
+
     """
 
     lines = ("diff",)
     params = dict(period=60)
 
     def __init__(self):
+        """ """
         # Find highest high and lowest low in period
         self.highest = bt.indicators.Highest(self.data.high, period=self.params.period)
         self.lowest = bt.indicators.Lowest(self.data.low, period=self.params.period)
@@ -306,8 +301,7 @@ class DiffHighLow(bt.Indicator):
 
 
 class RiskAverseStrategy(bt.Strategy, TradeThrottling):
-    """
-    Risk Averse Strategy
+    """Risk Averse Strategy
 
     This strategy seeks to buy stocks with low volatility, recent new highs, high volume,
     and small differences between high and low prices. It exits positions when multiple
@@ -327,6 +321,8 @@ class RiskAverseStrategy(bt.Strategy, TradeThrottling):
     - Sectors with steady growth rather than erratic momentum
     - Quality stocks with consistent institutional buying
     - Avoid using in highly volatile or bear markets
+
+
     """
 
     params = (
@@ -335,7 +331,10 @@ class RiskAverseStrategy(bt.Strategy, TradeThrottling):
         ("volatility_threshold", 8.0),  # Maximum allowed volatility percentage
         # High-Low parameters
         ("high_low_period", 60),  # Period for high-low analysis
-        ("high_low_threshold", 0.3),  # Maximum allowed high-low difference ratio
+        (
+            "high_low_threshold",
+            0.3,
+        ),  # Maximum allowed high-low difference ratio
         # Volume parameters
         ("vol_period", 5),  # Period for volume moving average
         ("vol_threshold", 100000),  # Minimum required volume
@@ -357,8 +356,12 @@ class RiskAverseStrategy(bt.Strategy, TradeThrottling):
     )
 
     def log(self, txt, dt=None, level="info"):
-        """
-        Logging function for the strategy
+        """Logging function for the strategy
+
+        :param txt:
+        :param dt:  (Default value = None)
+        :param level:  (Default value = "info")
+
         """
         if level == "debug" and self.params.log_level != "debug":
             return
@@ -367,6 +370,7 @@ class RiskAverseStrategy(bt.Strategy, TradeThrottling):
         print(f"{dt.isoformat()}: {txt}")
 
     def __init__(self):
+        """ """
         super(RiskAverseStrategy, self).__init__()
 
         # Used to keep track of pending orders
@@ -419,12 +423,17 @@ class RiskAverseStrategy(bt.Strategy, TradeThrottling):
         )
 
     def calculate_position_size(self, price):
-        """Calculate how many shares to buy based on position sizing rules"""
+        """Calculate how many shares to buy based on position sizing rules
+
+        :param price:
+
+        """
         available_cash = self.broker.get_cash()
         value = self.broker.getvalue()
         current_price = price
 
-        # Calculate position size based on risk percentage if stop loss is enabled
+        # Calculate position size based on risk percentage if stop loss is
+        # enabled
         if self.params.use_stop_loss:
             # Calculate the risk amount in dollars
             risk_amount = value * (self.params.risk_percent / 100.0)
@@ -447,10 +456,12 @@ class RiskAverseStrategy(bt.Strategy, TradeThrottling):
                 # Use the smaller of the two sizes
                 size = min(risk_based_size, equity_based_size)
             else:
-                # If risk per share is zero or negative, use equity-based sizing
+                # If risk per share is zero or negative, use equity-based
+                # sizing
                 size = int((value * self.params.position_size) / current_price)
         else:
-            # Fixed percentage of available equity without risk-based calculation
+            # Fixed percentage of available equity without risk-based
+            # calculation
             cash_to_use = value * self.params.position_size
 
             # Make sure we don't exceed maximum available cash
@@ -463,6 +474,7 @@ class RiskAverseStrategy(bt.Strategy, TradeThrottling):
         return size
 
     def next(self):
+        """ """
         # If an order is pending, we cannot send a new one
         if self.order:
             return
@@ -624,7 +636,11 @@ class RiskAverseStrategy(bt.Strategy, TradeThrottling):
         )
 
     def notify_order(self, order):
-        """Handle order notifications"""
+        """Handle order notifications
+
+        :param order:
+
+        """
         if order.status in [order.Submitted, order.Accepted]:
             # Order pending, do nothing
             return
@@ -651,7 +667,11 @@ class RiskAverseStrategy(bt.Strategy, TradeThrottling):
         self.order = None
 
     def notify_trade(self, trade):
-        """Track completed trades"""
+        """Track completed trades
+
+        :param trade:
+
+        """
         if not trade.isclosed:
             return
 
@@ -669,9 +689,7 @@ class RiskAverseStrategy(bt.Strategy, TradeThrottling):
 
 
 def parse_args():
-    """
-    Parse command line arguments
-    """
+    """Parse command line arguments"""
     parser = argparse.ArgumentParser(
         description="Risk Averse Strategy",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -698,7 +716,10 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--todate", "-t", default="2024-12-31", help="Ending date in YYYY-MM-DD format"
+        "--todate",
+        "-t",
+        default="2024-12-31",
+        help="Ending date in YYYY-MM-DD format",
     )
 
     parser.add_argument(
@@ -794,9 +815,7 @@ def parse_args():
 
 
 def main():
-    """
-    Main function to run the strategy
-    """
+    """Main function to run the strategy"""
     args = parse_args()
 
     # Convert dates

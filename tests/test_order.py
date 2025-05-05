@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,45 +18,90 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import backtrader as bt
-from backtrader import Order, Position
+from backtrader import Position
 
 
 class FakeCommInfo(object):
+    """ """
+
     def getvaluesize(self, size, price):
+        """
+
+        :param size:
+        :param price:
+
+        """
         return 0
 
     def profitandloss(self, size, price, newprice):
+        """
+
+        :param size:
+        :param price:
+        :param newprice:
+
+        """
         return 0
 
     def getoperationcost(self, size, price):
+        """
+
+        :param size:
+        :param price:
+
+        """
         return 0.0
 
     def getcommission(self, size, price):
+        """
+
+        :param size:
+        :param price:
+
+        """
         return 0.0
 
 
 class FakeData(object):
-    """
-    Minimal interface to avoid errors when trade tries to get information from
+    """Minimal interface to avoid errors when trade tries to get information from
     the data during the test
+
+
     """
 
     def __len__(self):
+        """ """
         return 0
 
     @property
     def datetime(self):
+        """ """
         return [0.0]
 
     @property
     def close(self):
+        """ """
         return [0.0]
 
 
 def _execute(position, order, size, price, partial):
+    """
+
+    :param position:
+    :param order:
+    :param size:
+    :param price:
+    :param partial:
+
+    """
     # Find position and do a real update - accounting happens here
     pprice_orig = position.price
     psize, pprice, opened, closed = position.update(size, price)
@@ -94,16 +139,25 @@ def _execute(position, order, size, price, partial):
 
 
 def test_run(main=False):
+    """
+
+    :param main:  (Default value = False)
+
+    """
     position = Position()
     comminfo = FakeCommInfo()
     order = bt.BuyOrder(
-        data=FakeData(), size=100, price=1.0, exectype=bt.Order.Market, simulated=True
+        data=FakeData(),
+        size=100,
+        price=1.0,
+        exectype=bt.Order.Market,
+        simulated=True,
     )
     order.addcomminfo(comminfo)
 
-    ### Test that partially updating order will maintain correct iterpending sequence
-    ### (Orders are cloned for each notification. The pending bits should be reported
-    ###  related to the previous notification (clone))
+    # Test that partially updating order will maintain correct iterpending sequence
+    # (Orders are cloned for each notification. The pending bits should be reported
+    # related to the previous notification (clone))
 
     # Add two bits and validate we have two pending bits
     _execute(position, order, 10, 1.0, True)
@@ -117,7 +171,8 @@ def test_run(main=False):
     assert pending[1].size == 20
     assert pending[1].price == 1.1
 
-    # Add additional two bits and validate we still have two pending bits after clone
+    # Add additional two bits and validate we still have two pending bits
+    # after clone
     _execute(position, order, 30, 1.2, True)
     _execute(position, order, 40, 1.3, False)
 

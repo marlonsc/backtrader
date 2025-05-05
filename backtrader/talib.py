@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,15 +18,20 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-# The modules below should/must define __all__ with the objects wishes
-# or prepend an "_" (underscore) to private classes/variables
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import sys
 
 import backtrader as bt
 from backtrader.utils.py3 import with_metaclass
+
+# The modules below should/must define __all__ with the objects wishes
+# or prepend an "_" (underscore) to private classes/variables
 
 try:
     import talib
@@ -40,7 +45,10 @@ else:
 
     # Reverse TA_FUNC_FLAGS dict
     R_TA_FUNC_FLAGS = dict(
-        zip(talib.abstract.TA_FUNC_FLAGS.values(), talib.abstract.TA_FUNC_FLAGS.keys())
+        zip(
+            talib.abstract.TA_FUNC_FLAGS.values(),
+            talib.abstract.TA_FUNC_FLAGS.keys(),
+        )
     )
 
     FUNC_FLAGS_SAMESCALE = 16777216
@@ -64,12 +72,21 @@ else:
     # Generate all indicators as subclasses
 
     class _MetaTALibIndicator(bt.Indicator.__class__):
+        """ """
+
         _refname = "_taindcol"
         _taindcol = dict()
 
         _KNOWN_UNSTABLE = ["SAR"]
 
         def dopostinit(cls, _obj, *args, **kwargs):
+            """
+
+            :param _obj:
+            :param *args:
+            :param **kwargs:
+
+            """
             # Go to parent
             res = super(_MetaTALibIndicator, cls).dopostinit(_obj, *args, **kwargs)
             _obj, args, kwargs = res
@@ -84,17 +101,24 @@ else:
             elif cls.__name__ in cls._KNOWN_UNSTABLE:
                 _obj._lookback = 0
 
-            cerebro = bt.metabase.findowner(_obj, bt.Cerebro)
+            bt.metabase.findowner(_obj, bt.Cerebro)
             tafuncinfo = _obj._tabstract.info
             _obj._tafunc = getattr(talib, tafuncinfo["name"], None)
             return _obj, args, kwargs  # return the object and args
 
     class _TALibIndicator(with_metaclass(_MetaTALibIndicator, bt.Indicator)):
+        """ """
+
         CANDLEOVER = 1.02  # 2% over
         CANDLEREF = 1  # Open, High, Low, Close (0, 1, 2, 3)
 
         @classmethod
         def _subclass(cls, name):
+            """
+
+            :param name:
+
+            """
             # Module where the class has to end (namely this one)
             clsmodule = sys.modules[cls.__module__]
 
@@ -185,9 +209,21 @@ else:
             setattr(clsmodule, str(name), newcls)  # add to module
 
         def oncestart(self, start, end):
+            """
+
+            :param start:
+            :param end:
+
+            """
             pass  # if not ... a call with a single value to once will happen
 
         def once(self, start, end):
+            """
+
+            :param start:
+            :param end:
+
+            """
             import array
 
             # prepare the data arrays - single shot
@@ -210,6 +246,7 @@ else:
                     self.lines[i].array = array.array(str("d"), o)
 
         def next(self):
+            """ """
             # prepare the data arrays - single shot
             size = self._lookback or len(self)
             narrays = [np.array(x.lines[0].get(size=size)) for x in self.datas]

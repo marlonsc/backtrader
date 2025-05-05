@@ -10,13 +10,22 @@ import seaborn as sns
 
 
 class MAStrategy(bt.Strategy):
+    """ """
+
     params = (("ma_period1", 10), ("ma_period2", 60), ("price_period", 50))
 
     def log(self, txt, dt=None):
+        """
+
+        :param txt:
+        :param dt:  (Default value = None)
+
+        """
         dt = dt or self.datas[0].datetime.date(0)
         # print('%s, %s' % (dt.isoformat(), txt))
 
     def __init__(self):
+        """ """
         self.buy_order = None
         self.sell_order = None
         self.trades = []
@@ -34,7 +43,9 @@ class MAStrategy(bt.Strategy):
         self.isCrossUp = bt.indicators.CrossUp(self.ma1, self.ma2)
 
         data = pd.read_csv(
-            f"{base_dir}/up_stat_week.csv", index_col="id", dtype={"id": np.character}
+            f"{base_dir}/up_stat_week.csv",
+            index_col="id",
+            dtype={"id": np.character},
         )
         self.stat = {
             "low": data.low["000001"],
@@ -43,6 +54,11 @@ class MAStrategy(bt.Strategy):
         }
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         if order.status in [order.Submitted, order.Accepted]:
             # Buy/Sell order submitted/accepted to/by broker - Nothing to do
             return
@@ -68,6 +84,11 @@ class MAStrategy(bt.Strategy):
             self.log("Order Canceled/Margin/Rejected")
 
     def notify_trade(self, trade):
+        """
+
+        :param trade:
+
+        """
         if not trade.isclosed:
             return
 
@@ -75,6 +96,7 @@ class MAStrategy(bt.Strategy):
         self.log("OPERATION PROFIT, GROSS %.2f, NET %.2f" % (trade.pnl, trade.pnlcomm))
 
     def next(self):
+        """ """
         if not self.position:
             if (
                 self.check_direction(self.ma2) > 0
@@ -112,6 +134,11 @@ class MAStrategy(bt.Strategy):
                 self.sell_order = self.sell()
 
     def check_direction(self, line):
+        """
+
+        :param line:
+
+        """
         if line[0] > line[-1] > line[-2]:
             return 1  # up
         elif line[0] < line[-1] < line[-2]:
@@ -120,18 +147,28 @@ class MAStrategy(bt.Strategy):
             return 0
 
     def is_cross_up(self):
+        """ """
         return self.isCrossUp[0] > 0 or self.isCrossUp[-1] > 0 or self.isCrossUp[-2] > 0
 
     def get_percentage(self, val1, val2):
+        """
+
+        :param val1:
+        :param val2:
+
+        """
         return (val1 - val2) / val2 * 100
 
     def is_golden_cross(self):
+        """ """
         return self.ma1[0] >= self.ma2[0] and self.ma1[-1] < self.ma2[-1]
 
     def is_dead_cross(self):
+        """ """
         return self.ma1[0] < self.ma2[0] and self.ma1[-1] > self.ma2[-1]
 
     def check_low_price(self):
+        """ """
         close = self.data.close[0]
         i = 0
         while (
@@ -147,6 +184,11 @@ class MAStrategy(bt.Strategy):
 
 
 def test_one_stock(file):
+    """
+
+    :param file:
+
+    """
     cerebro = bt.Cerebro()
     cerebro.broker.setcash(10000.0)
     cerebro.broker.set_coc(True)
@@ -170,7 +212,7 @@ def test_one_stock(file):
         todate=datetime.datetime(2020, 1, 1),
     )
     cerebro.resampledata(data, timeframe=bt.TimeFrame.Weeks)
-    start_value = cerebro.broker.getvalue()
+    cerebro.broker.getvalue()
     result = cerebro.run()
     return result[0].trades
 

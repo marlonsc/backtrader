@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,18 +18,24 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
+from datetime import datetime, timedelta
 
-from datetime import datetime, date, timedelta
-
-from .dataseries import TimeFrame, _Bar
-from .utils.py3 import with_metaclass
 from . import metabase
+from .dataseries import TimeFrame, _Bar
 from .utils.date import date2num, num2date
+from .utils.py3 import with_metaclass
 
 
 class DTFaker(object):
+    """ """
+
     # This will only be used for data sources which at some point in time
     # return None from _load to indicate that a check of the resampler and/or
     # notification queue is needed
@@ -44,6 +50,12 @@ class DTFaker(object):
     # expected output by the user (local timezone or any specified)
 
     def __init__(self, data, forcedata=None):
+        """
+
+        :param data:
+        :param forcedata:  (Default value = None)
+
+        """
         self.data = data
 
         # Aliases
@@ -61,38 +73,80 @@ class DTFaker(object):
         self.sessionend = data.p.sessionend
 
     def __len__(self):
+        """ """
         return len(self.data)
 
     def __call__(self, idx=0):
+        """
+
+        :param idx:  (Default value = 0)
+
+        """
         return self._dtime  # simulates data.datetime.datetime()
 
     def datetime(self, idx=0):
+        """
+
+        :param idx:  (Default value = 0)
+
+        """
         return self._dtime
 
     def date(self, idx=0):
+        """
+
+        :param idx:  (Default value = 0)
+
+        """
         return self._dtime.date()
 
     def time(self, idx=0):
+        """
+
+        :param idx:  (Default value = 0)
+
+        """
         return self._dtime.time()
 
     @property
     def _calendar(self):
+        """ """
         return self.data._calendar
 
     def __getitem__(self, idx):
+        """
+
+        :param idx:
+
+        """
         return self._dt if idx == 0 else float("-inf")
 
     def num2date(self, *args, **kwargs):
+        """
+
+        :param *args:
+        :param **kwargs:
+
+        """
         return self.data.num2date(*args, **kwargs)
 
     def date2num(self, *args, **kwargs):
+        """
+
+        :param *args:
+        :param **kwargs:
+
+        """
         return self.data.date2num(*args, **kwargs)
 
     def _getnexteos(self):
+        """ """
         return self.data._getnexteos()
 
 
 class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
+    """ """
+
     params = (
         ("bar2edge", True),
         ("adjbartime", True),
@@ -105,6 +159,11 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
     )
 
     def __init__(self, data):
+        """
+
+        :param data:
+
+        """
         # Downsampling only. Upsampling is not implemented
         assert data._timeframe <= self.p.timeframe
         self.subdays = TimeFrame.Ticks < self.p.timeframe < TimeFrame.Days
@@ -134,12 +193,18 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
         self.data = data
 
     def reset(self):
+        """ """
         self.bar = _Bar(maxdate=True)
         self.compcount = 0
         self._firstbar = True
         self._nexteos = None
 
     def _latedata(self, data):
+        """
+
+        :param data:
+
+        """
         # new data at position 0, still untouched from stream
         if not self.subdays:
             return False
@@ -148,6 +213,13 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
         return len(data) > 1 and data.datetime[0] <= data.datetime[-1]
 
     def _checkbarover(self, data, fromcheck=False, forcedata=None):
+        """
+
+        :param data:
+        :param fromcheck:  (Default value = False)
+        :param forcedata:  (Default value = None)
+
+        """
         chkdata = DTFaker(data, forcedata) if fromcheck else data
 
         # scenarios:
@@ -179,6 +251,11 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
             return False
 
     def _barover(self, data):
+        """
+
+        :param data:
+
+        """
         tframe = self.p.timeframe
 
         if tframe == TimeFrame.Ticks:
@@ -201,11 +278,20 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
             return self._barover_years(data)
 
     def _eosset(self):
+        """ """
         if self._nexteos is None:
             self._nexteos, self._nextdteos = self.data._getnexteos()
             return
 
     def _eoscheck(self, data, seteos=True, exact=False, barovercond=False):
+        """
+
+        :param data:
+        :param seteos:  (Default value = True)
+        :param exact:  (Default value = False)
+        :param barovercond:  (Default value = False)
+
+        """
         if seteos:
             self._eosset()
 
@@ -236,9 +322,19 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
         return is_eos
 
     def _barover_days(self, data):
+        """
+
+        :param data:
+
+        """
         return self._eoscheck(data)
 
     def _barover_weeks(self, data):
+        """
+
+        :param data:
+
+        """
         if self.data._calendar is None:
             year, week, _ = data.num2date(self.bar.datetime).date().isocalendar()
             yearweek = year * 100 + week
@@ -251,6 +347,11 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
             return data._calendar.last_weekday(data.datetime.date())
 
     def _barover_months(self, data):
+        """
+
+        :param data:
+
+        """
         dt = data.num2date(self.bar.datetime).date()
         yearmonth = dt.year * 100 + dt.month
 
@@ -260,6 +361,11 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
         return bar_yearmonth > yearmonth
 
     def _barover_years(self, data):
+        """
+
+        :param data:
+
+        """
         return data.datetime.datetime().year > data.num2date(self.bar.datetime).year
 
     def _gettmpoint(self, tm):
@@ -268,6 +374,9 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
 
           - Ex 1: 00:05:00 in minutes -> point = 5
           - Ex 2: 00:05:20 in seconds -> point = 5 * 60 + 20 = 320
+
+        :param tm:
+
         """
         point = tm.hour * 60 + tm.minute
         restpoint = 0
@@ -287,6 +396,11 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
         return point, restpoint
 
     def _barover_subdays(self, data):
+        """
+
+        :param data:
+
+        """
         if self._eoscheck(data):
             return True
 
@@ -326,6 +440,10 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
         later. When this method is called the wall clock (incl data time
         offset) is called to check if the time has gone so far as to have to
         deliver the already stored data
+
+        :param data:
+        :param _forcedata:  (Default value = None)
+
         """
         if not self.bar.isopen():
             return
@@ -333,6 +451,11 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
         return self(data, fromcheck=True, forcedata=_forcedata)
 
     def _dataonedge(self, data):
+        """
+
+        :param data:
+
+        """
         if not self.subweeks:
             if data._calendar is None:
                 return False, True  # nothing can be done
@@ -383,6 +506,11 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
         return False, True  # subweeks, not subdays and not sessionend
 
     def _calcadjtime(self, greater=False):
+        """
+
+        :param greater:  (Default value = False)
+
+        """
         if self._nexteos is None:
             # Session has been exceeded - end of session is the mark
             return self._lastdteos  # utc-like
@@ -440,13 +568,16 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
         return dtnum
 
     def _adjusttime(self, greater=False, forcedata=None):
-        """
-        Adjusts the time of calculated bar (from underlying data source) by
+        """Adjusts the time of calculated bar (from underlying data source) by
         using the timeframe to the appropriate boundary, with compression taken
         into account
 
         Depending on param ``rightedge`` uses the starting boundary or the
         ending one
+
+        :param greater:  (Default value = False)
+        :param forcedata:  (Default value = None)
+
         """
         dtnum = self._calcadjtime(greater=greater)
         if greater and dtnum <= self.bar.datetime:
@@ -457,40 +588,7 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
 
 
 class Resampler(_BaseResampler):
-    """This class resamples data of a given timeframe to a larger timeframe.
-
-    Params
-
-      - bar2edge (default: True)
-
-        resamples using time boundaries as the target. For example with a
-        "ticks -> 5 seconds" the resulting 5 seconds bars will be aligned to
-        xx:00, xx:05, xx:10 ...
-
-      - adjbartime (default: True)
-
-        Use the time at the boundary to adjust the time of the delivered
-        resampled bar instead of the last seen timestamp. If resampling to "5
-        seconds" the time of the bar will be adjusted for example to hh:mm:05
-        even if the last seen timestamp was hh:mm:04.33
-
-        .. note::
-
-           Time will only be adjusted if "bar2edge" is True. It wouldn't make
-           sense to adjust the time if the bar has not been aligned to a
-           boundary
-
-      - rightedge (default: True)
-
-        Use the right edge of the time boundaries to set the time.
-
-        If False and compressing to 5 seconds the time of a resampled bar for
-        seconds between hh:mm:00 and hh:mm:04 will be hh:mm:00 (the starting
-        boundary
-
-        If True the used boundary for the time will be hh:mm:05 (the ending
-        boundary)
-    """
+    """This class resamples data of a given timeframe to a larger timeframe."""
 
     params = (
         ("bar2edge", True),
@@ -506,6 +604,9 @@ class Resampler(_BaseResampler):
         Can be called multiple times. It has the chance to (for example)
         produce extra bars which may still be accumulated and have to be
         delivered
+
+        :param data:
+
         """
         if self.bar.isopen():
             if self.doadjusttime:
@@ -518,7 +619,13 @@ class Resampler(_BaseResampler):
         return False
 
     def __call__(self, data, fromcheck=False, forcedata=None):
-        """Called for each set of values produced by the data source"""
+        """Called for each set of values produced by the data source
+
+        :param data:
+        :param fromcheck:  (Default value = False)
+        :param forcedata:  (Default value = None)
+
+        """
         consumed = False
         onedge = False
         docheckover = True
@@ -546,9 +653,9 @@ class Resampler(_BaseResampler):
         if consumed:
             self.bar.bupdate(data)  # update new or existing bar
             if not self.componly:
-                self._eoscheck(
-                    data, barovercond=True
-                )  # eoscheck was possibly skipped in dataonedge so lets give it a chance here
+                # eoscheck was possibly skipped in dataonedge so lets give it a
+                # chance here
+                self._eoscheck(data, barovercond=True)
             data.backwards()  # remove used bar
 
         # if self.bar.isopen and (onedge or (docheckover and checkbarover))
@@ -599,40 +706,7 @@ class Replayer(_BaseResampler):
     Only when the bar is complete will the "length" of the data be changed
     effectively delivering a closed bar
 
-    Params
 
-      - bar2edge (default: True)
-
-        replays using time boundaries as the target of the closed bar. For
-        example with a "ticks -> 5 seconds" the resulting 5 seconds bars will
-        be aligned to xx:00, xx:05, xx:10 ...
-
-      - adjbartime (default: False)
-
-        Use the time at the boundary to adjust the time of the delivered
-        resampled bar instead of the last seen timestamp. If resampling to "5
-        seconds" the time of the bar will be adjusted for example to hh:mm:05
-        even if the last seen timestamp was hh:mm:04.33
-
-        .. note::
-
-           Time will only be adjusted if "bar2edge" is True. It wouldn't make
-           sense to adjust the time if the bar has not been aligned to a
-           boundary
-
-        .. note:: if this parameter is True an extra tick with the *adjusted*
-                  time will be introduced at the end of the *replayed* bar
-
-      - rightedge (default: True)
-
-        Use the right edge of the time boundaries to set the time.
-
-        If False and compressing to 5 seconds the time of a resampled bar for
-        seconds between hh:mm:00 and hh:mm:04 will be hh:mm:00 (the starting
-        boundary
-
-        If True the used boundary for the time will be hh:mm:05 (the ending
-        boundary)
     """
 
     params = (
@@ -644,6 +718,13 @@ class Replayer(_BaseResampler):
     replaying = True
 
     def __call__(self, data, fromcheck=False, forcedata=None):
+        """
+
+        :param data:
+        :param fromcheck:  (Default value = False)
+        :param forcedata:  (Default value = None)
+
+        """
         consumed = False
         onedge = False
         takinglate = False
@@ -736,52 +817,78 @@ class Replayer(_BaseResampler):
 
 
 class ResamplerTicks(Resampler):
+    """ """
+
     params = (("timeframe", TimeFrame.Ticks),)
 
 
 class ResamplerSeconds(Resampler):
+    """ """
+
     params = (("timeframe", TimeFrame.Seconds),)
 
 
 class ResamplerMinutes(Resampler):
+    """ """
+
     params = (("timeframe", TimeFrame.Minutes),)
 
 
 class ResamplerDaily(Resampler):
+    """ """
+
     params = (("timeframe", TimeFrame.Days),)
 
 
 class ResamplerWeekly(Resampler):
+    """ """
+
     params = (("timeframe", TimeFrame.Weeks),)
 
 
 class ResamplerMonthly(Resampler):
+    """ """
+
     params = (("timeframe", TimeFrame.Months),)
 
 
 class ResamplerYearly(Resampler):
+    """ """
+
     params = (("timeframe", TimeFrame.Years),)
 
 
 class ReplayerTicks(Replayer):
+    """ """
+
     params = (("timeframe", TimeFrame.Ticks),)
 
 
 class ReplayerSeconds(Replayer):
+    """ """
+
     params = (("timeframe", TimeFrame.Seconds),)
 
 
 class ReplayerMinutes(Replayer):
+    """ """
+
     params = (("timeframe", TimeFrame.Minutes),)
 
 
 class ReplayerDaily(Replayer):
+    """ """
+
     params = (("timeframe", TimeFrame.Days),)
 
 
 class ReplayerWeekly(Replayer):
+    """ """
+
     params = (("timeframe", TimeFrame.Weeks),)
 
 
 class ReplayerMonthly(Replayer):
+    """ """
+
     params = (("timeframe", TimeFrame.Months),)

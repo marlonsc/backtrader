@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,12 +18,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import argparse
 import datetime
 import inspect
-import itertools
 import random
 import string
 import sys
@@ -56,7 +60,6 @@ try:
 except AttributeError:
     pass  # no oandapy available
 
-
 TIMEFRAMES = dict(
     microseconds=bt.TimeFrame.MicroSeconds,
     seconds=bt.TimeFrame.Seconds,
@@ -69,10 +72,15 @@ TIMEFRAMES = dict(
 
 
 def btrun(pargs=""):
+    """
+
+    :param pargs:  (Default value = "")
+
+    """
     args = parse_args(pargs)
 
     if args.flush:
-        import backtrader.utils.flushfile
+        pass
 
     stdstats = not args.nostdstats
 
@@ -167,6 +175,12 @@ def btrun(pargs=""):
 
 
 def setbroker(args, cerebro):
+    """
+
+    :param args:
+    :param cerebro:
+
+    """
     broker = cerebro.getbroker()
 
     if args.cash is not None:
@@ -204,6 +218,11 @@ def setbroker(args, cerebro):
 
 
 def getdatas(args):
+    """
+
+    :param args:
+
+    """
     # Get the data feed class from the global dictionary
     dfcls = DATAFORMATS[args.format]
 
@@ -245,6 +264,13 @@ def getdatas(args):
 
 
 def getmodclasses(mod, clstype, clsname=None):
+    """
+
+    :param mod:
+    :param clstype:
+    :param clsname:  (Default value = None)
+
+    """
     clsmembers = inspect.getmembers(mod, inspect.isclass)
 
     clslist = list()
@@ -263,6 +289,12 @@ def getmodclasses(mod, clstype, clsname=None):
 
 
 def getmodfunctions(mod, funcname=None):
+    """
+
+    :param mod:
+    :param funcname:  (Default value = None)
+
+    """
     members = inspect.getmembers(mod, inspect.isfunction) + inspect.getmembers(
         mod, inspect.ismethod
     )
@@ -280,6 +312,12 @@ def getmodfunctions(mod, funcname=None):
 
 
 def loadmodule(modpath, modname=""):
+    """
+
+    :param modpath:
+    :param modname:  (Default value = "")
+
+    """
     # generate a random name for the module
 
     if not modpath.endswith(".py"):
@@ -300,6 +338,12 @@ def loadmodule(modpath, modname=""):
 
 
 def loadmodule2(modpath, modname):
+    """
+
+    :param modpath:
+    :param modname:
+
+    """
     import imp
 
     try:
@@ -311,6 +355,12 @@ def loadmodule2(modpath, modname):
 
 
 def loadmodule3(modpath, modname):
+    """
+
+    :param modpath:
+    :param modname:
+
+    """
     import importlib.machinery
 
     try:
@@ -323,6 +373,14 @@ def loadmodule3(modpath, modname):
 
 
 def getobjects(iterable, clsbase, modbase, issignal=False):
+    """
+
+    :param iterable:
+    :param clsbase:
+    :param modbase:
+    :param issignal:  (Default value = False)
+
+    """
     retobjects = list()
 
     for item in iterable or []:
@@ -375,6 +433,12 @@ def getobjects(iterable, clsbase, modbase, issignal=False):
 
 
 def getfunctions(iterable, modbase):
+    """
+
+    :param iterable:
+    :param modbase:
+
+    """
     retfunctions = list()
 
     for item in iterable or []:
@@ -417,6 +481,11 @@ def getfunctions(iterable, modbase):
 
 
 def parse_args(pargs=""):
+    """
+
+    :param pargs:  (Default value = "")
+
+    """
     parser = argparse.ArgumentParser(
         description="Backtrader Run Script",
         formatter_class=argparse.RawTextHelpFormatter,
@@ -783,7 +852,11 @@ def parse_args(pargs=""):
     # Broker/Commissions
     group = parser.add_argument_group(title="Cash and Commission Scheme Args")
     group.add_argument(
-        "--cash", "-cash", required=False, type=float, help="Cash to set to the broker"
+        "--cash",
+        "-cash",
+        required=False,
+        type=float,
+        help="Cash to set to the broker",
     )
     group.add_argument(
         "--commission",
@@ -793,7 +866,11 @@ def parse_args(pargs=""):
         help="Commission value to set",
     )
     group.add_argument(
-        "--margin", "-marg", required=False, type=float, help="Margin type to set"
+        "--margin",
+        "-marg",
+        required=False,
+        type=float,
+        help="Margin type to set",
     )
     group.add_argument(
         "--mult", "-mul", required=False, type=float, help="Multiplier to use"

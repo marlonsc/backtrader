@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,35 +18,40 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import functools
 import math
 import operator
 
 from ..utils.py3 import map, range
-
 from . import Indicator
 
 
 class PeriodN(Indicator):
-    """
-    Base class for indicators which take a period (__init__ has to be called
+    """Base class for indicators which take a period (__init__ has to be called
     either via super or explicitly)
 
     This class has no defined lines
+
+
     """
 
     params = (("period", 1),)
 
     def __init__(self):
+        """ """
         super(PeriodN, self).__init__()
         self.addminperiod(self.p.period)
 
 
 class OperationN(PeriodN):
-    """
-    Calculates "func" for a given period
+    """Calculates "func" for a given period
 
     Serves as a base for classes that work with a period and can express the
     logic in a callable object
@@ -56,12 +61,21 @@ class OperationN(PeriodN):
 
     Formula:
       - line = func(data, period)
+
+
     """
 
     def next(self):
+        """ """
         self.line[0] = self.func(self.data.get(size=self.p.period))
 
     def once(self, start, end):
+        """
+
+        :param start:
+        :param end:
+
+        """
         dst = self.line.array
         src = self.data.array
         period = self.p.period
@@ -72,8 +86,7 @@ class OperationN(PeriodN):
 
 
 class BaseApplyN(OperationN):
-    """
-    Base class for ApplyN and others which may take a ``func`` as a parameter
+    """Base class for ApplyN and others which may take a ``func`` as a parameter
     but want to define the lines in the indicator.
 
     Calculates ``func`` for a given period where func is given as a parameter,
@@ -83,34 +96,39 @@ class BaseApplyN(OperationN):
       - lines[0] = func(data, period)
 
     Any extra lines defined beyond the first (index 0) are not calculated
+
+
     """
 
     params = (("func", None),)
 
     def __init__(self):
+        """ """
         self.func = self.p.func
         super(BaseApplyN, self).__init__()
 
 
 class ApplyN(BaseApplyN):
-    """
-    Calculates ``func`` for a given period
+    """Calculates ``func`` for a given period
 
     Formula:
       - line = func(data, period)
+
+
     """
 
     lines = ("apply",)
 
 
 class Highest(OperationN):
-    """
-    Calculates the highest value for the data in a given period
+    """Calculates the highest value for the data in a given period
 
     Uses the built-in ``max`` for the calculation
 
     Formula:
       - highest = max(data, period)
+
+
     """
 
     alias = ("MaxN",)
@@ -119,13 +137,14 @@ class Highest(OperationN):
 
 
 class Lowest(OperationN):
-    """
-    Calculates the lowest value for the data in a given period
+    """Calculates the lowest value for the data in a given period
 
     Uses the built-in ``min`` for the calculation
 
     Formula:
       - lowest = min(data, period)
+
+
     """
 
     alias = ("MinN",)
@@ -134,8 +153,7 @@ class Lowest(OperationN):
 
 
 class ReduceN(OperationN):
-    """
-    Calculates the Reduced value of the ``period`` data points applying
+    """Calculates the Reduced value of the ``period`` data points applying
     ``function``
 
     Uses the built-in ``reduce`` for the calculation plus the ``func`` that
@@ -149,12 +167,20 @@ class ReduceN(OperationN):
       - In order to mimic the python ``reduce``, this indicator takes a
         ``function`` non-named argument as the 1st argument, unlike other
         Indicators which take only named arguments
+
+
     """
 
     lines = ("reduced",)
     func = functools.reduce
 
     def __init__(self, function, **kwargs):
+        """
+
+        :param function:
+        :param **kwargs:
+
+        """
         if "initializer" not in kwargs:
             self.func = functools.partial(self.func, function)
         else:
@@ -166,14 +192,15 @@ class ReduceN(OperationN):
 
 
 class SumN(OperationN):
-    """
-    Calculates the Sum of the data values over a given period
+    """Calculates the Sum of the data values over a given period
 
     Uses ``math.fsum`` for the calculation rather than the built-in ``sum`` to
     avoid precision errors
 
     Formula:
       - sumn = sum(data, period)
+
+
     """
 
     lines = ("sumn",)
@@ -181,14 +208,15 @@ class SumN(OperationN):
 
 
 class AnyN(OperationN):
-    """
-    Has a value of ``True`` (stored as ``1.0`` in the lines) if *any* of the
+    """Has a value of ``True`` (stored as ``1.0`` in the lines) if *any* of the
     values in the ``period`` evaluates to non-zero (ie: ``True``)
 
     Uses the built-in ``any`` for the calculation
 
     Formula:
       - anyn = any(data, period)
+
+
     """
 
     lines = ("anyn",)
@@ -196,14 +224,15 @@ class AnyN(OperationN):
 
 
 class AllN(OperationN):
-    """
-    Has a value of ``True`` (stored as ``1.0`` in the lines) if *all* of the
+    """Has a value of ``True`` (stored as ``1.0`` in the lines) if *all* of the
     values in the ``period`` evaluates to non-zero (ie: ``True``)
 
     Uses the built-in ``all`` for the calculation
 
     Formula:
       - alln = all(data, period)
+
+
     """
 
     lines = ("alln",)
@@ -211,73 +240,87 @@ class AllN(OperationN):
 
 
 class FindFirstIndex(OperationN):
-    """
-    Returns the index of the last data that satisfies equality with the
+    """Returns the index of the last data that satisfies equality with the
     condition generated by the parameter _evalfunc
 
     Note:
-      Returned indexes look backwards. 0 is the current index and 1 is
-      the previous bar.
+
+
+    :returns: the previous bar.
 
     Formula:
       - index = first for which data[index] == _evalfunc(data)
+
     """
 
     lines = ("index",)
     params = (("_evalfunc", None),)
 
     def func(self, iterable):
+        """
+
+        :param iterable:
+
+        """
         m = self.p._evalfunc(iterable)
         return next(i for i, v in enumerate(reversed(iterable)) if v == m)
 
 
 class FindFirstIndexHighest(FindFirstIndex):
-    """
-    Returns the index of the first data that is the highest in the period
+    """Returns the index of the first data that is the highest in the period
 
     Note:
-      Returned indexes look backwards. 0 is the current index and 1 is
-      the previous bar.
+
+
+    :returns: the previous bar.
 
     Formula:
       - index = index of first data which is the highest
+
     """
 
     params = (("_evalfunc", max),)
 
 
 class FindFirstIndexLowest(FindFirstIndex):
-    """
-    Returns the index of the first data that is the lowest in the period
+    """Returns the index of the first data that is the lowest in the period
 
     Note:
-      Returned indexes look backwards. 0 is the current index and 1 is
-      the previous bar.
+
+
+    :returns: the previous bar.
 
     Formula:
       - index = index of first data which is the lowest
+
     """
 
     params = (("_evalfunc", min),)
 
 
 class FindLastIndex(OperationN):
-    """
-    Returns the index of the last data that satisfies equality with the
+    """Returns the index of the last data that satisfies equality with the
     condition generated by the parameter _evalfunc
 
     Note:
-      Returned indexes look backwards. 0 is the current index and 1 is
-      the previous bar.
+
+
+    :returns: the previous bar.
 
     Formula:
       - index = last for which data[index] == _evalfunc(data)
+
     """
 
     lines = ("index",)
     params = (("_evalfunc", None),)
 
     def func(self, iterable):
+        """
+
+        :param iterable:
+
+        """
         m = self.p._evalfunc(iterable)
         index = next(i for i, v in enumerate(iterable) if v == m)
         # The iterable goes from 0 -> period - 1. If the last element
@@ -287,41 +330,44 @@ class FindLastIndex(OperationN):
 
 
 class FindLastIndexHighest(FindLastIndex):
-    """
-    Returns the index of the last data that is the highest in the period
+    """Returns the index of the last data that is the highest in the period
 
     Note:
-      Returned indexes look backwards. 0 is the current index and 1 is
-      the previous bar.
+
+
+    :returns: the previous bar.
 
     Formula:
       - index = index of last data which is the highest
+
     """
 
     params = (("_evalfunc", max),)
 
 
 class FindLastIndexLowest(FindLastIndex):
-    """
-    Returns the index of the last data that is the lowest in the period
+    """Returns the index of the last data that is the lowest in the period
 
     Note:
-      Returned indexes look backwards. 0 is the current index and 1 is
-      the previous bar.
+
+
+    :returns: the previous bar.
 
     Formula:
       - index = index of last data which is the lowest
+
     """
 
     params = (("_evalfunc", min),)
 
 
 class Accum(Indicator):
-    """
-    Cummulative sum of the data values
+    """Cummulative sum of the data values
 
     Formula:
       - accum += data
+
+
     """
 
     alias = (
@@ -336,12 +382,20 @@ class Accum(Indicator):
     # initial look-back value is needed
 
     def nextstart(self):
+        """ """
         self.line[0] = self.p.seed + self.data[0]
 
     def next(self):
+        """ """
         self.line[0] = self.line[-1] + self.data[0]
 
     def oncestart(self, start, end):
+        """
+
+        :param start:
+        :param end:
+
+        """
         dst = self.line.array
         src = self.data.array
         prev = self.p.seed
@@ -350,6 +404,12 @@ class Accum(Indicator):
             dst[i] = prev = prev + src[i]
 
     def once(self, start, end):
+        """
+
+        :param start:
+        :param end:
+
+        """
         dst = self.line.array
         src = self.data.array
         prev = dst[start - 1]
@@ -359,14 +419,15 @@ class Accum(Indicator):
 
 
 class Average(PeriodN):
-    """
-    Averages a given data arithmetically over a period
+    """Averages a given data arithmetically over a period
 
     Formula:
       - av = data(period) / period
 
     See also:
       - https://en.wikipedia.org/wiki/Arithmetic_mean
+
+
     """
 
     alias = (
@@ -376,9 +437,16 @@ class Average(PeriodN):
     lines = ("av",)
 
     def next(self):
+        """ """
         self.line[0] = math.fsum(self.data.get(size=self.p.period)) / self.p.period
 
     def once(self, start, end):
+        """
+
+        :param start:
+        :param end:
+
+        """
         src = self.data.array
         dst = self.line.array
         period = self.p.period
@@ -388,8 +456,7 @@ class Average(PeriodN):
 
 
 class ExponentialSmoothing(Average):
-    """
-    Averages a given data over a period using exponential smoothing
+    """Averages a given data over a period using exponential smoothing
 
     A regular ArithmeticMean (Average) is used as the seed value considering
     the first period values of data
@@ -399,12 +466,15 @@ class ExponentialSmoothing(Average):
 
     See also:
       - https://en.wikipedia.org/wiki/Exponential_smoothing
+
+
     """
 
     alias = ("ExpSmoothing",)
     params = (("alpha", None),)
 
     def __init__(self):
+        """ """
         self.alpha = self.p.alpha
         if self.alpha is None:
             self.alpha = 2.0 / (1.0 + self.p.period)  # def EMA value
@@ -414,17 +484,31 @@ class ExponentialSmoothing(Average):
         super(ExponentialSmoothing, self).__init__()
 
     def nextstart(self):
+        """ """
         # Fetch the seed value from the base class calculation
         super(ExponentialSmoothing, self).next()
 
     def next(self):
+        """ """
         self.line[0] = self.line[-1] * self.alpha1 + self.data[0] * self.alpha
 
     def oncestart(self, start, end):
+        """
+
+        :param start:
+        :param end:
+
+        """
         # Fetch the seed value from the base class calculation
         super(ExponentialSmoothing, self).once(start, end)
 
     def once(self, start, end):
+        """
+
+        :param start:
+        :param end:
+
+        """
         darray = self.data.array
         larray = self.line.array
         alpha = self.alpha
@@ -437,8 +521,7 @@ class ExponentialSmoothing(Average):
 
 
 class ExponentialSmoothingDynamic(ExponentialSmoothing):
-    """
-    Averages a given data over a period using exponential smoothing
+    """Averages a given data over a period using exponential smoothing
 
     A regular ArithmeticMean (Average) is used as the seed value considering
     the first period values of data
@@ -451,11 +534,14 @@ class ExponentialSmoothingDynamic(ExponentialSmoothing):
 
     See also:
       - https://en.wikipedia.org/wiki/Exponential_smoothing
+
+
     """
 
     alias = ("ExpSmoothingDynamic",)
 
     def __init__(self):
+        """ """
         super(ExponentialSmoothingDynamic, self).__init__()
 
         # Hack: alpha is a "line" and carries a minperiod which is not being
@@ -465,9 +551,16 @@ class ExponentialSmoothingDynamic(ExponentialSmoothing):
         self.lines[0].incminperiod(minperioddiff)
 
     def next(self):
+        """ """
         self.line[0] = self.line[-1] * self.alpha1[0] + self.data[0] * self.alpha[0]
 
     def once(self, start, end):
+        """
+
+        :param start:
+        :param end:
+
+        """
         darray = self.data.array
         larray = self.line.array
         alpha = self.alpha.array
@@ -480,8 +573,7 @@ class ExponentialSmoothingDynamic(ExponentialSmoothing):
 
 
 class WeightedAverage(PeriodN):
-    """
-    Calculates the weighted average of the given data over a period
+    """Calculates the weighted average of the given data over a period
 
     The default weights (if none are provided) are linear to assigne more
     weight to the most recent data
@@ -493,6 +585,8 @@ class WeightedAverage(PeriodN):
 
     See:
       - https://en.wikipedia.org/wiki/Weighted_arithmetic_mean
+
+
     """
 
     alias = ("AverageWeighted",)
@@ -503,14 +597,22 @@ class WeightedAverage(PeriodN):
     )
 
     def __init__(self):
+        """ """
         super(WeightedAverage, self).__init__()
 
     def next(self):
+        """ """
         data = self.data.get(size=self.p.period)
         dataweighted = map(operator.mul, data, self.p.weights)
         self.line[0] = self.p.coef * math.fsum(dataweighted)
 
     def once(self, start, end):
+        """
+
+        :param start:
+        :param end:
+
+        """
         darray = self.data.array
         larray = self.line.array
         period = self.p.period

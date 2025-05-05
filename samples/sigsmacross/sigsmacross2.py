@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2023 Daniel Rodriguez
+# Copyright (C) 2015-2024 Daniel Rodriguez
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,11 +19,15 @@
 #
 ###############################################################################
 from datetime import datetime
+
 import backtrader as bt
 
 
 class SmaCross(bt.SignalStrategy):
+    """ """
+
     def __init__(self):
+        """ """
         sma1 = bt.ind.SMA(period=10)
         sma2 = bt.ind.SMA(period=30)
         crossover = bt.ind.CrossOver(sma1, sma2)
@@ -34,7 +38,9 @@ cerebro = bt.Cerebro()
 cerebro.addstrategy(SmaCross)
 
 data0 = bt.feeds.YahooFinanceData(
-    dataname="YHOO", fromdate=datetime(2011, 1, 1), todate=datetime(2012, 12, 31)
+    dataname="YHOO",
+    fromdate=datetime(2011, 1, 1),
+    todate=datetime(2012, 12, 31),
 )
 
 cerebro.adddata(data0)

@@ -1,13 +1,16 @@
-import backtrader as bt
-import pandas as pd
 import datetime
+
+import backtrader as bt
 import matplotlib.pyplot as plt
+import pandas as pd
 import seaborn as sns
 from arbitrage.myutil import calculate_spread  # 假设这是您的价差计算函数
 
 
 # 布林带价差交易策略（参数已优化为可通过网格搜索调整）
 class SpreadBollingerStrategy(bt.Strategy):
+    """ """
+
     params = (
         ("period", 15),  # 布林带周期（可调参数）
         ("devfactor", 1.5),  # 标准差倍数（可调参数）
@@ -17,6 +20,7 @@ class SpreadBollingerStrategy(bt.Strategy):
     )
 
     def __init__(self):
+        """ """
         # 布林带指标（使用价差序列）
         self.boll = bt.indicators.BollingerBands(
             self.data2.close,
@@ -31,6 +35,7 @@ class SpreadBollingerStrategy(bt.Strategy):
         self.position_size = 0
 
     def next(self):
+        """ """
         if self.order:  # 存在未完成订单时跳过
             return
 
@@ -51,7 +56,11 @@ class SpreadBollingerStrategy(bt.Strategy):
                 self._close_positions()
 
     def _execute_trade(self, direction):
-        """执行开仓操作"""
+        """执行开仓操作
+
+        :param direction:
+
+        """
         self.entry_price = self.data2.close[0]
         if direction == "short":
             self.sell(data=self.data0, size=self.p.size0)
@@ -66,7 +75,11 @@ class SpreadBollingerStrategy(bt.Strategy):
         self.close(data=self.data1)
 
     def notify_trade(self, trade):
-        """可选：交易通知记录"""
+        """可选：交易通知记录
+
+        :param trade:
+
+        """
         if self.p.printlog:
             if trade.isclosed:
                 print(f"{trade.ref} 平仓 | 盈利 {trade.pnlcomm:.2f}")
@@ -76,7 +89,14 @@ class SpreadBollingerStrategy(bt.Strategy):
 
 # 数据加载函数（与策略解耦）
 def load_data(symbol1, symbol2, fromdate, todate):
-    """加载数据并计算价差"""
+    """加载数据并计算价差
+
+    :param symbol1:
+    :param symbol2:
+    :param fromdate:
+    :param todate:
+
+    """
     output_file = "D:\\FutureData\\ricequant\\1d_2017to2024_noadjust.h5"
 
     # 加载原始数据
@@ -101,7 +121,11 @@ def load_data(symbol1, symbol2, fromdate, todate):
 
 # 回测配置函数
 def configure_cerebro(**kwargs):
-    """配置回测引擎"""
+    """配置回测引擎
+
+    :param **kwargs:
+
+    """
     cerebro = bt.Cerebro(stdstats=False)
 
     # 添加数据
@@ -144,7 +168,11 @@ def configure_cerebro(**kwargs):
 
 # 修改后的分析函数
 def analyze_results(results):
-    """分析优化结果并输出最佳参数组合"""
+    """分析优化结果并输出最佳参数组合
+
+    :param results:
+
+    """
     performance = []
 
     # 遍历所有参数组合的回测结果
@@ -158,13 +186,15 @@ def analyze_results(results):
         returns = strat.analyzers.returns.get_analysis()
 
         # 存储性能指标
-        performance.append({
-            "period": params.period,
-            "devfactor": params.devfactor,
-            "sharpe": sharpe["sharperatio"],
-            "max_dd": dd["max"]["drawdown"],
-            "return": returns["rnorm100"],
-        })
+        performance.append(
+            {
+                "period": params.period,
+                "devfactor": params.devfactor,
+                "sharpe": sharpe["sharperatio"],
+                "max_dd": dd["max"]["drawdown"],
+                "return": returns["rnorm100"],
+            }
+        )
 
     # 创建DataFrame
     df = pd.DataFrame(performance)
@@ -195,7 +225,7 @@ def analyze_results(results):
     # 输出前5最佳组合
     print("\n=========== 最佳参数组合 ===========")
     for i, result in enumerate(sorted_perf[:5]):
-        print(f"\n组合 {i+1}:")
+        print(f"\n组合 {i + 1}:")
         print(f"参数: {result['params']}")
         print(f"夏普比率: {result['sharpe']:.2f}")
         print(f"最大回撤: {result['max_dd']:.2f}%")

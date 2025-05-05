@@ -2,8 +2,11 @@
 
 
 def init_pyside2_path():
+    """ """
     try:
-        import os, PySide2
+        import os
+
+        import PySide2
 
         dirname = os.path.dirname(PySide2.__file__)
         plugin_path = os.path.join(dirname, "plugins", "platforms")

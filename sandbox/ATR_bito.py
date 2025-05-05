@@ -7,9 +7,7 @@ import pandas as pd
 
 # functions/classes
 
-
 if __name__ == "__main__":
-
     # Beispiel-Daten: Erstelle ein DataFrame mit OHLC-Daten
     data = {
         "High": [1.2, 1.3, 1.4, 1.5, 1.3],
@@ -35,15 +33,17 @@ if __name__ == "__main__":
 
     # Ausgabe des DataFrames
     print(
-        df[[
-            "High",
-            "Low",
-            "Close",
-            "Prev Close",
-            "High-Low",
-            "High-Prev Close",
-            "Low-Prev Close",
-            "True Range",
-            "ATR",
-        ]]
+        df[
+            [
+                "High",
+                "Low",
+                "Close",
+                "Prev Close",
+                "High-Low",
+                "High-Prev Close",
+                "Low-Prev Close",
+                "True Range",
+                "ATR",
+            ]
+        ]
     )

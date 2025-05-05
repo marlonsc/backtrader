@@ -1,17 +1,20 @@
 import backtrader as bt
 import pandas as pd
-from myutil import calculate_spread, check_and_align_data
 
 
 # 始终持有螺纹钢策略
 class AlwaysHoldRBStrategy(bt.Strategy):
+    """ """
+
     params = (("size_rb", 1),)  # 螺纹钢交易规模
 
     def __init__(self):
+        """ """
 
         self.order = None
 
     def next(self):
+        """ """
         # 始终持有螺纹钢，不做任何交易
 
         if not self.position:  # 如果没有持仓，则买入
@@ -24,6 +27,11 @@ class AlwaysHoldRBStrategy(bt.Strategy):
             )
 
     def notify_order(self, order):
+        """
+
+        :param order:
+
+        """
         # 订单状态通知
         if order.status in [order.Completed, order.Canceled, order.Margin]:
             self.order = None
@@ -36,14 +44,12 @@ df_RB = pd.read_hdf(output_file, key="data")
 # 确保 'date' 列转换为 datetime 类型
 df_RB["date"] = pd.to_datetime(df_RB["date"], errors="coerce")
 
-
 data1 = bt.feeds.PandasData(dataname=df_RB, datetime="date", nocase=True)
 
 # 创建回测引擎
 cerebro = bt.Cerebro()
 
 cerebro.adddata(data1, name="RB")
-
 
 # 添加策略
 cerebro.addstrategy(AlwaysHoldRBStrategy)
