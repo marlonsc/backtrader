@@ -344,7 +344,7 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
 
             return bar_yearweek > yearweek
         else:
-            return data._calendar.last_weekday(data.datetime.date())
+            return self.data._calendar.last_weekday(data.datetime.date())
 
     def _barover_months(self, data):
         """

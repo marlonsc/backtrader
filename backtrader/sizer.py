@@ -53,6 +53,9 @@ class Sizer(with_metaclass(MetaParams, object)):
     strategy = None
     broker = None
 
+    def __init__(self):
+        super().__init__()
+
     def getsizing(self, data, isbuy):
         """
 

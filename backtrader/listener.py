@@ -14,6 +14,9 @@ from backtrader.utils.py3 import with_metaclass
 class ListenerBase(with_metaclass(bt.MetaParams, object)):
     """ """
 
+    def __init__(self):
+        """ """
+
     def next(self):
         """ """
 

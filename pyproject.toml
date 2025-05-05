@@ -29,7 +29,7 @@ build-backend = "poetry.core.masonry.api"
 
 
 # optional-dependencies
-[project.optional-dependencies]
+[tool.poetry.extras]
 dev = [
     "pytest",
     "black",
