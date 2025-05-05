@@ -5,6 +5,11 @@ __pycache__/
 # C extensions
 *.so
 
+
+# Nate's wip
+wip/
+*.wip
+
 # Distribution / packaging
 .Python
 env/

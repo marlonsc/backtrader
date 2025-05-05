@@ -1,0 +1,5 @@
+https://bookmap.com/knowledgebase/docs/API
+we probably want to use bookmap for the api
+
+https://www.interactivebrokers.com/en/trading/ib-api.php
+for live trading we will need interactivebrokers

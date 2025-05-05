@@ -1,0 +1,12 @@
+backtrader
+pandas
+matplotlib
+numpy
+jupyter
+yfinance
+seaborn
+mcp
+pydantic-ai
+
+# Added missing dependencies based on imports across the project
+requests
