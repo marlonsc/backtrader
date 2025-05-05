@@ -675,7 +675,7 @@ class CSVDataBase(with_metaclass(MetaCSVDataBase, DataBase)):
                 self.f = io.open(self.p.dataname, 'r')
 
         if self.p.headers:
-            self.f.readline()  # skip the headers
+            self.f.readline(5_000_000)  # skip the headers
 
         self.separator = self.p.separator
 
