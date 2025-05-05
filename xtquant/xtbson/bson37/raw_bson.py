@@ -88,7 +88,9 @@ class RawBSONDocument(Mapping[str, Any]):
     __slots__ = ("__raw", "__inflated_doc", "__codec_options")
     _type_marker = _RAW_BSON_DOCUMENT_MARKER
 
-    def __init__(self, bson_bytes: bytes, codec_options: Optional[CodecOptions] = None) -> None:
+    def __init__(
+        self, bson_bytes: bytes, codec_options: Optional[CodecOptions] = None
+    ) -> None:
         """Create a new :class:`RawBSONDocument`
 
         :class:`RawBSONDocument` is a representation of a BSON document that
@@ -130,8 +132,8 @@ class RawBSONDocument(Mapping[str, Any]):
             codec_options = DEFAULT_RAW_BSON_OPTIONS
         elif not issubclass(codec_options.document_class, RawBSONDocument):
             raise TypeError(
-                "RawBSONDocument cannot use CodecOptions with document "
-                "class %s" % (codec_options.document_class,)
+                "RawBSONDocument cannot use CodecOptions with document class %s"
+                % (codec_options.document_class,)
             )
         self.__codec_options = codec_options
         # Validate the bson object size.
@@ -156,7 +158,9 @@ class RawBSONDocument(Mapping[str, Any]):
         return self.__inflated_doc
 
     @staticmethod
-    def _inflate_bson(bson_bytes: bytes, codec_options: CodecOptions) -> Mapping[Any, Any]:
+    def _inflate_bson(
+        bson_bytes: bytes, codec_options: CodecOptions
+    ) -> Mapping[Any, Any]:
         return _inflate_bson(bson_bytes, codec_options)
 
     def __getitem__(self, item: str) -> Any:
@@ -185,12 +189,18 @@ class _RawArrayBSONDocument(RawBSONDocument):
     """A RawBSONDocument that only expands sub-documents and arrays when accessed."""
 
     @staticmethod
-    def _inflate_bson(bson_bytes: bytes, codec_options: CodecOptions) -> Mapping[Any, Any]:
+    def _inflate_bson(
+        bson_bytes: bytes, codec_options: CodecOptions
+    ) -> Mapping[Any, Any]:
         return _inflate_bson(bson_bytes, codec_options, raw_array=True)
 
 
-DEFAULT_RAW_BSON_OPTIONS: CodecOptions = DEFAULT.with_options(document_class=RawBSONDocument)
-_RAW_ARRAY_BSON_OPTIONS: CodecOptions = DEFAULT.with_options(document_class=_RawArrayBSONDocument)
+DEFAULT_RAW_BSON_OPTIONS: CodecOptions = DEFAULT.with_options(
+    document_class=RawBSONDocument
+)
+_RAW_ARRAY_BSON_OPTIONS: CodecOptions = DEFAULT.with_options(
+    document_class=_RawArrayBSONDocument
+)
 """The default :class:`~bson.codec_options.CodecOptions` for
 :class:`RawBSONDocument`.
 """

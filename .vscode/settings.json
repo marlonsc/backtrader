@@ -1,9 +1,9 @@
 {
-    "files.exclude": {
-        "**/__pycache__": true
-    },
-    "editor.rulers": [80]
-}
-{
-    "python.languageServer": "None"
+  "files.exclude": {
+    "**/__pycache__": true
+  },
+  "editor.rulers": [
+    80
+  ],
+  "python.languageServer": "None"
 }

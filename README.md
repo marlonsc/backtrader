@@ -1,16 +1,19 @@
 # Slim Backtrader
-This is a fork of the original [backtrader](https://github.com/mementum/backtrader) - slimmed down. 
+
+This is a fork of the original [backtrader](https://github.com/mementum/backtrader) - slimmed down.
 Unnecessary features and updating the package to ensure compatibility with newer Python versions and dependencies.
 
 Aims of this project:
+
 - Slim down unnecessary features
 - Improve performance
 - Update aged implementations
 
 For now the focus is:
+
 - Code clean-up: remove unncessary imports
 - Syntax update: make it more modern
-- Remove deprecated integrations (i.e. pyfolio, IbPy, comtypes) 
+- Remove deprecated integrations (i.e. pyfolio, IbPy, comtypes)
 - Remove interactive plotting: the backend is heavy and slow
 - Improved support for parallel processing
 
@@ -53,7 +56,7 @@ A Python-based platform for live trading and backtesting, featuring:
 - **Broker Simulation**:
   - Supports multiple order types: *Market*, *Close*, *Limit*, *Stop*, *StopLimit*, *StopTrail*, *StopTrailLimit*, *OCO*, bracket orders, slippage, volume filling strategies, continuous cash adjustments for futures-like instruments
 
-- **Automated Staking**: 
+- **Automated Staking**:
   - Sizers for position sizing
 
 - **Cheating Modes**:
@@ -69,7 +72,7 @@ A Python-based platform for live trading and backtesting, featuring:
 
 Backtrader is self-contained with minimal external dependencies (plotting requires `matplotlib`).
 
-Currently, the installation takes place by navigating to the clone of this repository and running: 
+Currently, the installation takes place by navigating to the clone of this repository and running:
 
 ```shell script
 pip install -e
@@ -82,11 +85,11 @@ Works with:
 - Python version `>= 3.10`
 
 ## Documentation
-- **Original backtrader repository**: https://github.com/mementum/backtrader
+
+- **Original backtrader repository**: <https://github.com/mementum/backtrader>
 - **Blog**: [Backtrader Blog](http://www.backtrader.com/blog)
 - **Docs**: [Full Documentation](http://www.backtrader.com/docu)
 - **Indicators Reference**: [List of Built-in Indicators (122)](http://www.backtrader.com/docu/indautoref.html)
-
 
 ## Version Numbering
 

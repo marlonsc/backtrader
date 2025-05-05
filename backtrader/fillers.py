@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 
 from backtrader.utils.py3 import MAXINT, with_metaclass
@@ -28,7 +27,7 @@ from backtrader.metabase import MetaParams
 
 
 class FixedSize(with_metaclass(MetaParams, object)):
-    '''Returns the execution size for a given order using a *percentage* of the
+    """Returns the execution size for a given order using a *percentage* of the
     volume in a bar.
 
     This percentage is set with the parameter ``perc``
@@ -41,8 +40,9 @@ class FixedSize(with_metaclass(MetaParams, object)):
 
         If the value of this parameter evaluates to False, the entire volume
         of the bar will be used to match the order
-    '''
-    params = (('size', None),)
+    """
+
+    params = (("size", None),)
 
     def __call__(self, order, price, ago):
         size = self.p.size or MAXINT
@@ -50,7 +50,7 @@ class FixedSize(with_metaclass(MetaParams, object)):
 
 
 class FixedBarPerc(with_metaclass(MetaParams, object)):
-    '''Returns the execution size for a given order using a *percentage* of the
+    """Returns the execution size for a given order using a *percentage* of the
     volume in a bar.
 
     This percentage is set with the parameter ``perc``
@@ -60,8 +60,9 @@ class FixedBarPerc(with_metaclass(MetaParams, object)):
       - ``perc`` (default: ``100.0``) (valied values: ``0.0 - 100.0``)
 
         Percentage of the volume bar to use to execute an order
-    '''
-    params = (('perc', 100.0),)
+    """
+
+    params = (("perc", 100.0),)
 
     def __call__(self, order, price, ago):
         # Get the volume and scale it to the requested perc
@@ -71,7 +72,7 @@ class FixedBarPerc(with_metaclass(MetaParams, object)):
 
 
 class BarPointPerc(with_metaclass(MetaParams, object)):
-    '''Returns the execution size for a given order. The volume will be
+    """Returns the execution size for a given order. The volume will be
     distributed uniformly in the range *high*-*low* using ``minmov`` to
     partition.
 
@@ -90,10 +91,11 @@ class BarPointPerc(with_metaclass(MetaParams, object)):
         Percentage of the volume allocated to the order execution price to use
         for matching
 
-    '''
+    """
+
     params = (
-        ('minmov', None),
-        ('perc', 100.0),
+        ("minmov", None),
+        ("perc", 100.0),
     )
 
     def __call__(self, order, price, ago):

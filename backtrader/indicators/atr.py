@@ -18,14 +18,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from . import Indicator, Max, Min, MovAv
 
 
 class TrueHigh(Indicator):
-    '''
+    """
     Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"* for the ATR
 
@@ -37,8 +36,9 @@ class TrueHigh(Indicator):
 
     See:
       - http://en.wikipedia.org/wiki/Average_true_range
-    '''
-    lines = ('truehigh',)
+    """
+
+    lines = ("truehigh",)
 
     def __init__(self):
         self.lines.truehigh = Max(self.data.high, self.data.close(-1))
@@ -46,7 +46,7 @@ class TrueHigh(Indicator):
 
 
 class TrueLow(Indicator):
-    '''
+    """
     Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"* for the ATR
 
@@ -58,8 +58,9 @@ class TrueLow(Indicator):
 
     See:
       - http://en.wikipedia.org/wiki/Average_true_range
-    '''
-    lines = ('truelow',)
+    """
+
+    lines = ("truelow",)
 
     def __init__(self):
         self.lines.truelow = Min(self.data.low, self.data.close(-1))
@@ -67,7 +68,7 @@ class TrueLow(Indicator):
 
 
 class TrueRange(Indicator):
-    '''
+    """
     Defined by J. Welles Wilder, Jr. in 1978 in his book New Concepts in
     Technical Trading Systems.
 
@@ -83,10 +84,11 @@ class TrueRange(Indicator):
 
     The idea is to take the previous close into account to calculate the range
     if it yields a larger range than the daily range (High - Low)
-    '''
-    alias = ('TR',)
+    """
 
-    lines = ('tr',)
+    alias = ("TR",)
+
+    lines = ("tr",)
 
     def __init__(self):
         self.lines.tr = TrueHigh(self.data) - TrueLow(self.data)
@@ -94,7 +96,7 @@ class TrueRange(Indicator):
 
 
 class AverageTrueRange(Indicator):
-    '''
+    """
     Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"*.
 
@@ -106,15 +108,16 @@ class AverageTrueRange(Indicator):
 
     See:
       - http://en.wikipedia.org/wiki/Average_true_range
-    '''
-    alias = ('ATR',)
+    """
 
-    lines = ('atr',)
-    params = (('period', 14), ('movav', MovAv.Smoothed))
+    alias = ("ATR",)
+
+    lines = ("atr",)
+    params = (("period", 14), ("movav", MovAv.Smoothed))
 
     def _plotlabel(self):
         plabels = [self.p.period]
-        plabels += [self.p.movav] * self.p.notdefault('movav')
+        plabels += [self.p.movav] * self.p.notdefault("movav")
         return plabels
 
     def __init__(self):

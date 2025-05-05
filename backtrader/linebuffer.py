@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-'''
+"""
 
 .. module:: linebuffer
 
@@ -27,9 +27,8 @@ with appends, forwarding, rewinding, resetting and other
 
 .. moduleauthor:: Daniel Rodriguez
 
-'''
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+"""
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import array
 import collections
@@ -43,12 +42,11 @@ from .lineroot import LineRoot, LineSingle, LineMultiple
 from . import metabase
 from .utils import num2date, time2num
 
-
-NAN = float('NaN')
+NAN = float("NaN")
 
 
 class LineBuffer(LineSingle):
-    '''
+    """
     LineBuffer defines an interface to an "array.array" (or list) in which
     index 0 points to the item which is active for input and output.
 
@@ -68,7 +66,7 @@ class LineBuffer(LineSingle):
     The class can also hold "bindings" to other LineBuffers. When a value
     is set in this class
     it will also be set in the binding.
-    '''
+    """
 
     UnBounded, QBuffer = (0, 1)
 
@@ -100,8 +98,7 @@ class LineBuffer(LineSingle):
     idx = property(get_idx, set_idx)
 
     def reset(self):
-        ''' Resets the internal buffer structure and the indices
-        '''
+        """Resets the internal buffer structure and the indices"""
         if self.mode == self.QBuffer:
             # add extrasize to ensure resample/replay work because they will
             # use backwards to erase the last bar/tick before delivering a new
@@ -111,7 +108,7 @@ class LineBuffer(LineSingle):
             self.array = collections.deque(maxlen=self.maxlen + self.extrasize)
             self.useislice = True
         else:
-            self.array = array.array(str('d'))
+            self.array = array.array(str("d"))
             self.useislice = False
 
         self.lencount = 0
@@ -129,7 +126,7 @@ class LineBuffer(LineSingle):
         return []
 
     def minbuffer(self, size):
-        '''The linebuffer must guarantee the minimum requested size to be
+        """The linebuffer must guarantee the minimum requested size to be
         available.
 
         In non-dqbuffer mode, this is always true (of course until data is
@@ -138,7 +135,7 @@ class LineBuffer(LineSingle):
 
         In dqbuffer mode the buffer has to be adjusted for this if currently
         less than requested
-        '''
+        """
         if self.mode != self.QBuffer or self.maxlen >= size:
             return
 
@@ -150,20 +147,20 @@ class LineBuffer(LineSingle):
         return self.lencount
 
     def buflen(self):
-        ''' Real data that can be currently held in the internal buffer
+        """Real data that can be currently held in the internal buffer
 
         The internal buffer can be longer than the actual stored data to
         allow for "lookahead" operations. The real amount of data that is
         held/can be held in the buffer
         is returned
-        '''
+        """
         return len(self.array) - self.extension
 
     def __getitem__(self, ago):
         return self.array[self.idx + ago]
 
     def get(self, ago=0, size=1):
-        ''' Returns a slice of the array relative to *ago*
+        """Returns a slice of the array relative to *ago*
 
         Keyword Args:
             ago (int): Point of the array to which size will be added
@@ -175,16 +172,16 @@ class LineBuffer(LineSingle):
 
         Returns:
             A slice of the underlying buffer
-        '''
+        """
         if self.useislice:
             start = self.idx + ago - size + 1
             end = self.idx + ago + 1
             return list(islice(self.array, start, end))
 
-        return self.array[self.idx + ago - size + 1:self.idx + ago + 1]
+        return self.array[self.idx + ago - size + 1 : self.idx + ago + 1]
 
     def getzeroval(self, idx=0):
-        ''' Returns a single value of the array relative to the real zero
+        """Returns a single value of the array relative to the real zero
         of the buffer
 
         Keyword Args:
@@ -193,11 +190,11 @@ class LineBuffer(LineSingle):
 
         Returns:
             A slice of the underlying buffer
-        '''
+        """
         return self.array[idx]
 
     def getzero(self, idx=0, size=1):
-        ''' Returns a slice of the array relative to the real zero of the buffer
+        """Returns a slice of the array relative to the real zero of the buffer
 
         Keyword Args:
             idx (int): Where to start relative to the real start of the buffer
@@ -205,52 +202,52 @@ class LineBuffer(LineSingle):
 
         Returns:
             A slice of the underlying buffer
-        '''
+        """
         if self.useislice:
             return list(islice(self.array, idx, idx + size))
 
-        return self.array[idx:idx + size]
+        return self.array[idx : idx + size]
 
     def __setitem__(self, ago, value):
-        ''' Sets a value at position "ago" and executes any associated bindings
+        """Sets a value at position "ago" and executes any associated bindings
 
         Keyword Args:
             ago (int): Point of the array to which size will be added to return
             the slice
             value (variable): value to be set
-        '''
+        """
         self.array[self.idx + ago] = value
         for binding in self.bindings:
             binding[ago] = value
 
     def set(self, value, ago=0):
-        ''' Sets a value at position "ago" and executes any associated bindings
+        """Sets a value at position "ago" and executes any associated bindings
 
         Keyword Args:
             value (variable): value to be set
             ago (int): Point of the array to which size will be added to return
             the slice
-        '''
+        """
         self.array[self.idx + ago] = value
         for binding in self.bindings:
             binding[ago] = value
 
     def home(self):
-        ''' Rewinds the logical index to the beginning
+        """Rewinds the logical index to the beginning
 
         The underlying buffer remains untouched and the actual len can be found
         out with buflen
-        '''
+        """
         self.idx = -1
         self.lencount = 0
 
     def forward(self, value=NAN, size=1):
-        ''' Moves the logical index foward and enlarges the buffer as much as needed
+        """Moves the logical index foward and enlarges the buffer as much as needed
 
         Keyword Args:
             value (variable): value to be set in new positins
             size (int): How many extra positions to enlarge the buffer
-        '''
+        """
         self.idx += size
         self.lencount += size
 
@@ -258,12 +255,12 @@ class LineBuffer(LineSingle):
             self.array.append(value)
 
     def backwards(self, size=1, force=False):
-        ''' Moves the logical index backwards and reduces the buffer as much as needed
+        """Moves the logical index backwards and reduces the buffer as much as needed
 
         Keyword Args:
             size (int): How many extra positions to rewind and reduce the
             buffer
-        '''
+        """
         # Go directly to property setter to support force
         self.set_idx(self._idx - size, force=force)
         self.lencount -= size
@@ -277,16 +274,16 @@ class LineBuffer(LineSingle):
         self.lencount -= size
 
     def advance(self, size=1):
-        ''' Advances the logical index without touching the underlying buffer
+        """Advances the logical index without touching the underlying buffer
 
         Keyword Args:
             size (int): How many extra positions to move forward
-        '''
+        """
         self.idx += size
         self.lencount += size
 
     def extend(self, value=NAN, size=0):
-        ''' Extends the underlying array with positions that the index will not reach
+        """Extends the underlying array with positions that the index will not reach
 
         Keyword Args:
             value (variable): value to be set in new positins
@@ -294,25 +291,25 @@ class LineBuffer(LineSingle):
 
         The purpose is to allow for lookahead operations or to be able to
         set values in the buffer "future"
-        '''
+        """
         self.extension += size
         for i in range(size):
             self.array.append(value)
 
     def addbinding(self, binding):
-        ''' Adds another line binding
+        """Adds another line binding
 
         Keyword Args:
             binding (LineBuffer): another line that must be set when this line
             becomes a value
-        '''
+        """
         self.bindings.append(binding)
         # record in the binding when the period is starting (never sooner
         # than self)
         binding.updateminperiod(self._minperiod)
 
     def plot(self, idx=0, size=None):
-        ''' Returns a slice of the array relative to the real zero of the buffer
+        """Returns a slice of the array relative to the real zero of the buffer
 
         Keyword Args:
             idx (int): Where to start relative to the real start of the buffer
@@ -324,7 +321,7 @@ class LineBuffer(LineSingle):
 
         Returns:
             A slice of the underlying buffer
-        '''
+        """
         return self.getzero(idx, size or len(self))
 
     def plotrange(self, start, end):
@@ -334,18 +331,18 @@ class LineBuffer(LineSingle):
         return self.array[start:end]
 
     def oncebinding(self):
-        '''
+        """
         Executes the bindings when running in "once" mode
-        '''
+        """
         larray = self.array
         blen = self.buflen()
         for binding in self.bindings:
             binding.array[0:blen] = larray[0:blen]
 
     def bind2lines(self, binding=0):
-        '''
+        """
         Stores a binding to another line. "binding" can be an index or a name
-        '''
+        """
         if isinstance(binding, string_types):
             line = getattr(self._owner.lines, binding)
         else:
@@ -358,7 +355,7 @@ class LineBuffer(LineSingle):
     bind2line = bind2lines
 
     def __call__(self, ago=None):
-        '''Returns either a delayed verison of itself in the form of a
+        """Returns either a delayed verison of itself in the form of a
         LineDelay object or a timeframe adapting version with regards to a ago
 
         Param: ago (default: None)
@@ -368,16 +365,16 @@ class LineBuffer(LineSingle):
 
           If ago is anything else, it is assumed to be an int and a LineDelay
           object will be returned
-        '''
+        """
         from .lineiterator import LineCoupler
+
         if ago is None or isinstance(ago, LineRoot):
             return LineCoupler(self, ago)
 
         return LineDelay(self, ago)
 
     def _makeoperation(self, other, operation, r=False, _ownerskip=None):
-        return LinesOperation(self, other, operation, r=r,
-                              _ownerskip=_ownerskip)
+        return LinesOperation(self, other, operation, r=r, _ownerskip=_ownerskip)
 
     def _makeoperationown(self, operation, _ownerskip=None):
         return LineOwnOperation(self, operation, _ownerskip=_ownerskip)
@@ -386,45 +383,46 @@ class LineBuffer(LineSingle):
         self._tz = tz
 
     def datetime(self, ago=0, tz=None, naive=True):
-        return num2date(self.array[self.idx + ago],
-                        tz=tz or self._tz, naive=naive)
+        return num2date(self.array[self.idx + ago], tz=tz or self._tz, naive=naive)
 
     def date(self, ago=0, tz=None, naive=True):
-        return num2date(self.array[self.idx + ago],
-                        tz=tz or self._tz, naive=naive).date()
+        return num2date(
+            self.array[self.idx + ago], tz=tz or self._tz, naive=naive
+        ).date()
 
     def time(self, ago=0, tz=None, naive=True):
-        return num2date(self.array[self.idx + ago],
-                        tz=tz or self._tz, naive=naive).time()
+        return num2date(
+            self.array[self.idx + ago], tz=tz or self._tz, naive=naive
+        ).time()
 
     def dt(self, ago=0):
-        '''
+        """
         return numeric date part of datetimefloat
-        '''
+        """
         return math.trunc(self.array[self.idx + ago])
 
     def tm_raw(self, ago=0):
-        '''
+        """
         return raw numeric time part of datetimefloat
-        '''
+        """
         # This function is named raw because it retrieves the fractional part
         # without transforming it to time to avoid the influence of the day
         # count (integer part of coding)
         return math.modf(self.array[self.idx + ago])[0]
 
     def tm(self, ago=0):
-        '''
+        """
         return numeric time part of datetimefloat
-        '''
+        """
         # To avoid precision errors, this returns the fractional part after
         # having converted it to a datetime.time object to avoid precision
         # errors in comparisons
         return time2num(num2date(self.array[self.idx + ago]).time())
 
     def tm_lt(self, other, ago=0):
-        '''
+        """
         return numeric time part of datetimefloat
-        '''
+        """
         # To compare a raw "tm" part (fractional part of coded datetime)
         # with the tm of the current datetime, the raw "tm" has to be
         # brought in sync with the current "day" count (integer part) to avoid
@@ -434,9 +432,9 @@ class LineBuffer(LineSingle):
         return dtime < (dt + other)
 
     def tm_le(self, other, ago=0):
-        '''
+        """
         return numeric time part of datetimefloat
-        '''
+        """
         # To compare a raw "tm" part (fractional part of coded datetime)
         # with the tm of the current datetime, the raw "tm" has to be
         # brought in sync with the current "day" count (integer part) to avoid
@@ -446,9 +444,9 @@ class LineBuffer(LineSingle):
         return dtime <= (dt + other)
 
     def tm_eq(self, other, ago=0):
-        '''
+        """
         return numeric time part of datetimefloat
-        '''
+        """
         # To compare a raw "tm" part (fractional part of coded datetime)
         # with the tm of the current datetime, the raw "tm" has to be
         # brought in sync with the current "day" count (integer part) to avoid
@@ -458,9 +456,9 @@ class LineBuffer(LineSingle):
         return dtime == (dt + other)
 
     def tm_gt(self, other, ago=0):
-        '''
+        """
         return numeric time part of datetimefloat
-        '''
+        """
         # To compare a raw "tm" part (fractional part of coded datetime)
         # with the tm of the current datetime, the raw "tm" has to be
         # brought in sync with the current "day" count (integer part) to avoid
@@ -470,9 +468,9 @@ class LineBuffer(LineSingle):
         return dtime > (dt + other)
 
     def tm_ge(self, other, ago=0):
-        '''
+        """
         return numeric time part of datetimefloat
-        '''
+        """
         # To compare a raw "tm" part (fractional part of coded datetime)
         # with the tm of the current datetime, the raw "tm" has to be
         # brought in sync with the current "day" count (integer part) to avoid
@@ -482,24 +480,24 @@ class LineBuffer(LineSingle):
         return dtime >= (dt + other)
 
     def tm2dtime(self, tm, ago=0):
-        '''
+        """
         Returns the given ``tm`` in the frame of the (ago bars) datatime.
 
         Useful for external comparisons to avoid precision errors
-        '''
+        """
         return int(self.array[self.idx + ago]) + tm
 
     def tm2datetime(self, tm, ago=0):
-        '''
+        """
         Returns the given ``tm`` in the frame of the (ago bars) datatime.
 
         Useful for external comparisons to avoid precision errors
-        '''
+        """
         return num2date(int(self.array[self.idx + ago]) + tm)
 
 
 class MetaLineActions(LineBuffer.__class__):
-    '''
+    """
     Metaclass for Lineactions
 
     Scans the instance before init for LineBuffer (or parentclass LineSingle)
@@ -507,7 +505,8 @@ class MetaLineActions(LineBuffer.__class__):
 
     postinit it registers the instance to the owner (remember that owner has
     been found in the base Metaclass for LineRoot)
-    '''
+    """
+
     _acache = dict()
     _acacheuse = False
 
@@ -536,8 +535,9 @@ class MetaLineActions(LineBuffer.__class__):
         return cls._acache.setdefault(ckey, _obj)
 
     def dopreinit(cls, _obj, *args, **kwargs):
-        _obj, args, kwargs = \
-            super(MetaLineActions, cls).dopreinit(_obj, *args, **kwargs)
+        _obj, args, kwargs = super(MetaLineActions, cls).dopreinit(
+            _obj, *args, **kwargs
+        )
 
         _obj._clock = _obj._owner  # default setting
 
@@ -561,8 +561,9 @@ class MetaLineActions(LineBuffer.__class__):
         return _obj, args, kwargs
 
     def dopostinit(cls, _obj, *args, **kwargs):
-        _obj, args, kwargs = \
-            super(MetaLineActions, cls).dopostinit(_obj, *args, **kwargs)
+        _obj, args, kwargs = super(MetaLineActions, cls).dopostinit(
+            _obj, *args, **kwargs
+        )
 
         # register with _owner to be kicked later
         _obj._owner.addindicator(_obj)
@@ -583,13 +584,13 @@ class PseudoArray(object):
 
 
 class LineActions(with_metaclass(MetaLineActions, LineBuffer)):
-    '''
+    """
     Base class derived from LineBuffer intented to defined the
     minimum interface to make it compatible with a LineIterator by
     providing operational _next and _once interfaces.
 
     The metaclass does the dirty job of calculating minperiods and registering
-    '''
+    """
 
     _ltype = LineBuffer.IndType
 
@@ -647,10 +648,11 @@ def LineNum(num):
 
 
 class _LineDelay(LineActions):
-    '''
+    """
     Takes a LineBuffer (or derived) object and stores the value from
     "ago" periods effectively delaying the delivery of data
-    '''
+    """
+
     def __init__(self, a, ago):
         super(_LineDelay, self).__init__()
         self.a = a
@@ -675,10 +677,11 @@ class _LineDelay(LineActions):
 
 
 class _LineForward(LineActions):
-    '''
+    """
     Takes a LineBuffer (or derived) object and stores the value from
     "ago" periods from the future
-    '''
+    """
+
     def __init__(self, a, ago):
         super(_LineForward, self).__init__()
         self.a = a
@@ -705,8 +708,7 @@ class _LineForward(LineActions):
 
 
 class LinesOperation(LineActions):
-
-    '''
+    """
     Holds an operation that operates on a two operands. Example: mul
 
     It will "next"/traverse the array applying the operation on the
@@ -724,7 +726,7 @@ class LinesOperation(LineActions):
     No real execution time benefits were appreciated and therefore the loops
     have been kept in place for clarity (although the maps are not really
     unclear here)
-    '''
+    """
 
     def __init__(self, a, b, operation, r=False):
         super(LinesOperation, self).__init__()
@@ -806,12 +808,13 @@ class LinesOperation(LineActions):
 
 
 class LineOwnOperation(LineActions):
-    '''
+    """
     Holds an operation that operates on a single operand. Example: abs
 
     It will "next"/traverse the array applying the operation and storing
     the result in self
-    '''
+    """
+
     def __init__(self, a, operation):
         super(LineOwnOperation, self).__init__()
 

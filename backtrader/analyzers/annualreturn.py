@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from collections import OrderedDict
 
@@ -28,7 +27,7 @@ from backtrader import Analyzer
 
 
 class AnnualReturn(Analyzer):
-    '''
+    """
     This analyzer calculates the AnnualReturns by looking at the beginning
     and end of the year
 
@@ -45,7 +44,7 @@ class AnnualReturn(Analyzer):
     **get_analysis**:
 
       - Returns a dictionary of annual returns (key: year)
-    '''
+    """
 
     def stop(self):
         # Must have stats.broker
@@ -84,7 +83,7 @@ class AnnualReturn(Analyzer):
             try:
                 annualret = (value_end / value_start) - 1.0
             except ZeroDivisionError:
-                annualret = float('-inf')
+                annualret = float("-inf")
 
             self.rets.append(annualret)
             self.ret[cur_year] = round(annualret, 6)

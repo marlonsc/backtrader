@@ -22,8 +22,21 @@ you get the error: "TypeError: 'type' object is not subscriptable".
 import datetime
 import abc
 import enum
-from typing import Tuple, Generic, Optional, Mapping, Any, TypeVar, Type, Dict, Iterable, Tuple, MutableMapping, Callable, Union
-
+from typing import (
+    Tuple,
+    Generic,
+    Optional,
+    Mapping,
+    Any,
+    TypeVar,
+    Type,
+    Dict,
+    Iterable,
+    Tuple,
+    MutableMapping,
+    Callable,
+    Union,
+)
 
 class TypeEncoder(abc.ABC, metaclass=abc.ABCMeta):
     @property
@@ -49,9 +62,12 @@ class TypeRegistry:
     _encoder_map: Dict[Any, Any]
     _fallback_encoder: Optional[Fallback]
 
-    def __init__(self, type_codecs: Optional[Iterable[Codec]] = ..., fallback_encoder: Optional[Fallback] = ...) -> None: ...
+    def __init__(
+        self,
+        type_codecs: Optional[Iterable[Codec]] = ...,
+        fallback_encoder: Optional[Fallback] = ...,
+    ) -> None: ...
     def __eq__(self, other: Any) -> Any: ...
-
 
 _DocumentType = TypeVar("_DocumentType", bound=Mapping[str, Any])
 
@@ -83,26 +99,20 @@ class CodecOptions(Tuple, Generic[_DocumentType]):
 
     # CodecOptions API
     def with_options(self, **kwargs: Any) -> CodecOptions[_DocumentType]: ...
-
     def _arguments_repr(self) -> str: ...
-
     def _options_dict(self) -> Dict[Any, Any]: ...
 
     # NamedTuple API
     @classmethod
     def _make(cls, obj: Iterable) -> CodecOptions[_DocumentType]: ...
-
     def _asdict(self) -> Dict[str, Any]: ...
-
     def _replace(self, **kwargs: Any) -> CodecOptions[_DocumentType]: ...
 
     _source: str
     _fields: Tuple[str]
 
-
 DEFAULT_CODEC_OPTIONS: CodecOptions[MutableMapping[str, Any]]
 _RAW_BSON_DOCUMENT_MARKER: int
 
 def _raw_document_class(document_class: Any) -> bool: ...
-
 def _parse_codec_options(options: Any) -> CodecOptions: ...

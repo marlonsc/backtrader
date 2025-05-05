@@ -10,25 +10,32 @@ import subprocess, datetime, pathlib, pandas as pd, shutil, sys
 
 # ---------- 固定参数 ----------
 BASE_CMD = [
-    sys.executable,                                # 调用当前 python 解释器
+    sys.executable,  # 调用当前 python 解释器
     "arbitrage/JM_J_strategy_CUSUM.py",
-    "--window", "30",
-    "--win", "20",
-    "--k_coeff", "0.6",
-    "--h_coeff", "3",
-    "--setcash", "200000",
-    "--plot", "true",
-    "--setslippage", "0.0001",
-    "--export_csv", "true"
+    "--window",
+    "30",
+    "--win",
+    "20",
+    "--k_coeff",
+    "0.6",
+    "--h_coeff",
+    "3",
+    "--setcash",
+    "200000",
+    "--plot",
+    "true",
+    "--setslippage",
+    "0.0001",
+    "--export_csv",
+    "true",
 ]
 
 # 要跑的配对 (df0_key, df1_key)   ← 根据需要增删
 PAIRS = [
-    ("/J",  "/JM"),     # 豆粕 / 菜粕
-    ("/OI", "/Y"),      # 菜油 / 豆油
-    ("/L",  "/MA"),     # 线性塑料 / 甲醇
-    ("/P", "/Y")       # 螺纹钢 / PVC
-
+    ("/J", "/JM"),  # 豆粕 / 菜粕
+    ("/OI", "/Y"),  # 菜油 / 豆油
+    ("/L", "/MA"),  # 线性塑料 / 甲醇
+    ("/P", "/Y"),  # 螺纹钢 / PVC
 ]
 
 OUT_DIR = pathlib.Path("outcome")
@@ -61,7 +68,7 @@ for label, path in csv_paths:
     df.set_index("date", inplace=True)
     df_list.append(df)
 
-combined = pd.concat(df_list, axis=1).fillna(0)        # 无交易日补 0
+combined = pd.concat(df_list, axis=1).fillna(0)  # 无交易日补 0
 ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 combo_file = OUT_DIR / f"combined_daily_returns_{ts}.csv"
 combined.to_csv(combo_file)

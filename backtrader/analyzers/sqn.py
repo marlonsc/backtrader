@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import math
 
@@ -29,7 +28,7 @@ from backtrader.utils import AutoOrderedDict
 
 
 class SQN(Analyzer):
-    '''SQN or SystemQualityNumber. Defined by Van K. Tharp to categorize trading
+    """SQN or SystemQualityNumber. Defined by Van K. Tharp to categorize trading
     systems.
 
       - 1.6 - 1.9 Below average
@@ -52,12 +51,13 @@ class SQN(Analyzer):
         Returns a dictionary with keys "sqn" and "trades" (number of
         considered trades)
 
-    '''
-    alias = ('SystemQualityNumber',)
+    """
+
+    alias = ("SystemQualityNumber",)
 
     def create_analysis(self):
-        '''Replace default implementation to instantiate an AutoOrdereDict
-        rather than an OrderedDict'''
+        """Replace default implementation to instantiate an AutoOrdereDict
+        rather than an OrderedDict"""
         self.rets = AutoOrderedDict()
 
     def start(self):
@@ -81,15 +81,15 @@ class SQN(Analyzer):
         - 7.0 -     Holy Grail?
         """
         grade_mapping = {
-            (float('-inf'), 1.5): "G0-Invalid",
+            (float("-inf"), 1.5): "G0-Invalid",
             (1.6, 1.9): "G1-Below average",
             (2.0, 2.4): "G2-Average",
             (2.5, 2.9): "G3-Good",
             (3.0, 5.0): "G4-Excellent",
             (5.1, 6.9): "G5-Superb",
-            (7.0, float('inf')): "G6-Holy Grail?"
-            }
-        
+            (7.0, float("inf")): "G6-Holy Grail?",
+        }
+
         for range_, grade in grade_mapping.items():
             if range_[0] <= score <= range_[1]:
                 return grade

@@ -18,15 +18,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 
 from . import Indicator, MovingAverageBase, MovAv
 
 
 class DoubleExponentialMovingAverage(MovingAverageBase):
-    '''
+    """
     DEMA was first time introduced in 1994, in the article "Smoothing Data with
     Faster Moving Averages" by Patrick G. Mulloy in "Technical Analysis of
     Stocks & Commodities" magazine.
@@ -38,11 +37,15 @@ class DoubleExponentialMovingAverage(MovingAverageBase):
 
     See:
       (None)
-    '''
-    alias = ('DEMA', 'MovingAverageDoubleExponential',)
+    """
 
-    lines = ('dema',)
-    params = (('_movav', MovAv.EMA),)
+    alias = (
+        "DEMA",
+        "MovingAverageDoubleExponential",
+    )
+
+    lines = ("dema",)
+    params = (("_movav", MovAv.EMA),)
 
     def __init__(self):
         ema = self.p._movav(self.data, period=self.p.period)
@@ -53,7 +56,7 @@ class DoubleExponentialMovingAverage(MovingAverageBase):
 
 
 class TripleExponentialMovingAverage(MovingAverageBase):
-    '''
+    """
     TEMA was first time introduced in 1994, in the article "Smoothing Data with
     Faster Moving Averages" by Patrick G. Mulloy in "Technical Analysis of
     Stocks & Commodities" magazine.
@@ -68,11 +71,15 @@ class TripleExponentialMovingAverage(MovingAverageBase):
 
     See:
       (None)
-    '''
-    alias = ('TEMA', 'MovingAverageTripleExponential',)
+    """
 
-    lines = ('tema',)
-    params = (('_movav', MovAv.EMA),)
+    alias = (
+        "TEMA",
+        "MovingAverageTripleExponential",
+    )
+
+    lines = ("tema",)
+    params = (("_movav", MovAv.EMA),)
 
     def __init__(self):
         ema1 = self.p._movav(self.data, period=self.p.period)

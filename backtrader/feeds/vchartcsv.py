@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import datetime
 
@@ -29,19 +28,17 @@ from ..utils import date2num
 
 
 class VChartCSVData(feed.CSVDataBase):
-    '''
+    """
     Parses a `VisualChart <http://www.visualchart.com>`_ CSV exported file.
 
     Specific parameters (or specific meaning):
 
       - ``dataname``: The filename to parse or a file-like object
-    '''
+    """
 
     vctframes = dict(
-        I=TimeFrame.Minutes,
-        D=TimeFrame.Days,
-        W=TimeFrame.Weeks,
-        M=TimeFrame.Months)
+        I=TimeFrame.Minutes, D=TimeFrame.Days, W=TimeFrame.Weeks, M=TimeFrame.Months
+    )
 
     def _loadline(self, linetokens):
         itokens = iter(linetokens)
@@ -59,7 +56,7 @@ class VChartCSVData(feed.CSVDataBase):
         y, m, d = int(dttxt[0:4]), int(dttxt[4:6]), int(dttxt[6:8])
 
         tmtxt = next(itokens)
-        if timeframe == 'I':
+        if timeframe == "I":
             # use the provided time
             hh, mmss = divmod(int(tmtxt), 10000)
             mm, ss = divmod(mmss, 100)

@@ -18,15 +18,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 
 import backtrader as bt
 
 
 class PositionsValue(bt.Analyzer):
-    '''This analyzer reports the value of the positions of the current set of
+    """This analyzer reports the value of the positions of the current set of
     datas
 
     Params:
@@ -59,17 +58,17 @@ class PositionsValue(bt.Analyzer):
 
         Returns a dictionary with returns as values and the datetime points for
         each return as keys
-    '''
+    """
+
     params = (
-        ('headers',  False),
-        ('cash', False),
+        ("headers", False),
+        ("cash", False),
     )
 
     def start(self):
         if self.p.headers:
-            headers = [d._name or 'Data%d' % i
-                       for i, d in enumerate(self.datas)]
-            self.rets['Datetime'] = headers + ['cash'] * self.p.cash
+            headers = [d._name or "Data%d" % i for i, d in enumerate(self.datas)]
+            self.rets["Datetime"] = headers + ["cash"] * self.p.cash
 
         tf = min(d._timeframe for d in self.datas)
         self._usedate = tf >= bt.TimeFrame.Days

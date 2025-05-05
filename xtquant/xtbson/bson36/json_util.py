@@ -276,27 +276,35 @@ class JSONOptions(CodecOptions):
         self.json_mode = json_mode
         if self.json_mode == JSONMode.RELAXED:
             if strict_number_long:
-                raise ValueError("Cannot specify strict_number_long=True with" " JSONMode.RELAXED")
+                raise ValueError(
+                    "Cannot specify strict_number_long=True with JSONMode.RELAXED"
+                )
             if datetime_representation not in (None, DatetimeRepresentation.ISO8601):
                 raise ValueError(
                     "datetime_representation must be DatetimeRepresentation."
                     "ISO8601 or omitted with JSONMode.RELAXED"
                 )
             if strict_uuid not in (None, True):
-                raise ValueError("Cannot specify strict_uuid=False with JSONMode.RELAXED")
+                raise ValueError(
+                    "Cannot specify strict_uuid=False with JSONMode.RELAXED"
+                )
             self.strict_number_long = False
             self.datetime_representation = DatetimeRepresentation.ISO8601
             self.strict_uuid = True
         elif self.json_mode == JSONMode.CANONICAL:
             if strict_number_long not in (None, True):
-                raise ValueError("Cannot specify strict_number_long=False with" " JSONMode.RELAXED")
+                raise ValueError(
+                    "Cannot specify strict_number_long=False with JSONMode.RELAXED"
+                )
             if datetime_representation not in (None, DatetimeRepresentation.NUMBERLONG):
                 raise ValueError(
                     "datetime_representation must be DatetimeRepresentation."
                     "NUMBERLONG or omitted with JSONMode.RELAXED"
                 )
             if strict_uuid not in (None, True):
-                raise ValueError("Cannot specify strict_uuid=False with JSONMode.RELAXED")
+                raise ValueError(
+                    "Cannot specify strict_uuid=False with JSONMode.RELAXED"
+                )
             self.strict_number_long = True
             self.datetime_representation = DatetimeRepresentation.NUMBERLONG
             self.strict_uuid = True
@@ -329,14 +337,12 @@ class JSONOptions(CodecOptions):
     def _options_dict(self):
         # TODO: PYTHON-2442 use _asdict() instead
         options_dict = super(JSONOptions, self)._options_dict()
-        options_dict.update(
-            {
-                "strict_number_long": self.strict_number_long,
-                "datetime_representation": self.datetime_representation,
-                "strict_uuid": self.strict_uuid,
-                "json_mode": self.json_mode,
-            }
-        )
+        options_dict.update({
+            "strict_number_long": self.strict_number_long,
+            "datetime_representation": self.datetime_representation,
+            "strict_uuid": self.strict_uuid,
+            "json_mode": self.json_mode,
+        })
         return options_dict
 
     def with_options(self, **kwargs):
@@ -353,7 +359,12 @@ class JSONOptions(CodecOptions):
         .. versionadded:: 3.12
         """
         opts = self._options_dict()
-        for opt in ("strict_number_long", "datetime_representation", "strict_uuid", "json_mode"):
+        for opt in (
+            "strict_number_long",
+            "datetime_representation",
+            "strict_uuid",
+            "json_mode",
+        ):
             opts[opt] = kwargs.get(opt, getattr(self, opt))
         opts.update(kwargs)
         return JSONOptions(**opts)
@@ -572,10 +583,12 @@ def _parse_canonical_binary(doc, json_options):
     if not isinstance(b64, str):
         raise TypeError("$binary base64 must be a string: %s" % (doc,))
     if not isinstance(subtype, str) or len(subtype) > 2:
-        raise TypeError("$binary subType must be a string at most 2 " "characters: %s" % (doc,))
+        raise TypeError(
+            "$binary subType must be a string at most 2 characters: %s" % (doc,)
+        )
     if len(binary) != 2:
         raise TypeError(
-            '$binary must include only "base64" and "subType" ' "components: %s" % (doc,)
+            '$binary must include only "base64" and "subType" components: %s' % (doc,)
         )
 
     data = base64.b64decode(b64.encode())
@@ -677,7 +690,8 @@ def _parse_canonical_regex(doc):
     opts = regex["options"]
     if not isinstance(opts, str):
         raise TypeError(
-            "Bad $regularExpression options, options must be " "string, was type %s" % (type(opts))
+            "Bad $regularExpression options, options must be string, was type %s"
+            % (type(opts))
         )
     return Regex(regex["pattern"], opts)
 
@@ -698,9 +712,13 @@ def _parse_canonical_dbpointer(doc):
         if dbref.database is not None:
             raise TypeError("Bad $dbPointer, extra field $db: %s" % (dbref_doc,))
         if not isinstance(dbref.id, ObjectId):
-            raise TypeError("Bad $dbPointer, $id must be an ObjectId: %s" % (dbref_doc,))
+            raise TypeError(
+                "Bad $dbPointer, $id must be an ObjectId: %s" % (dbref_doc,)
+            )
         if len(dbref_doc) != 2:
-            raise TypeError("Bad $dbPointer, extra field(s) in DBRef: %s" % (dbref_doc,))
+            raise TypeError(
+                "Bad $dbPointer, extra field(s) in DBRef: %s" % (dbref_doc,)
+            )
         return dbref
     else:
         raise TypeError("Bad $dbPointer, expected a DBRef: %s" % (doc,))
@@ -764,9 +782,13 @@ def _parse_canonical_maxkey(doc):
 
 def _encode_binary(data, subtype, json_options):
     if json_options.json_mode == JSONMode.LEGACY:
-        return SON([("$binary", base64.b64encode(data).decode()), ("$type", "%02x" % subtype)])
+        return SON(
+            [("$binary", base64.b64encode(data).decode()), ("$type", "%02x" % subtype)]
+        )
     return {
-        "$binary": SON([("base64", base64.b64encode(data).decode()), ("subType", "%02x" % subtype)])
+        "$binary": SON(
+            [("base64", base64.b64encode(data).decode()), ("subType", "%02x" % subtype)]
+        )
     }
 
 
@@ -790,7 +812,10 @@ def default(obj, json_options=DEFAULT_JSON_OPTIONS):
                 millis = int(obj.microsecond / 1000)
                 fracsecs = ".%03d" % (millis,) if millis else ""
                 return {
-                    "$date": "%s%s%s" % (obj.strftime("%Y-%m-%dT%H:%M:%S"), fracsecs, tz_string)
+                    "$date": (
+                        "%s%s%s"
+                        % (obj.strftime("%Y-%m-%dT%H:%M:%S"), fracsecs, tz_string)
+                    )
                 }
 
         millis = bson._datetime_to_millis(obj)
@@ -829,14 +854,18 @@ def default(obj, json_options=DEFAULT_JSON_OPTIONS):
     if isinstance(obj, Code):
         if obj.scope is None:
             return {"$code": str(obj)}
-        return SON([("$code", str(obj)), ("$scope", _json_convert(obj.scope, json_options))])
+        return SON(
+            [("$code", str(obj)), ("$scope", _json_convert(obj.scope, json_options))]
+        )
     if isinstance(obj, Binary):
         return _encode_binary(obj, obj.subtype, json_options)
     if isinstance(obj, bytes):
         return _encode_binary(obj, 0, json_options)
     if isinstance(obj, uuid.UUID):
         if json_options.strict_uuid:
-            binval = Binary.from_uuid(obj, uuid_representation=json_options.uuid_representation)
+            binval = Binary.from_uuid(
+                obj, uuid_representation=json_options.uuid_representation
+            )
             return _encode_binary(binval, binval.subtype, json_options)
         else:
             return {"$uuid": obj.hex}

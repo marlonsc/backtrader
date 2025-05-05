@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import testcommon
 
@@ -86,5 +85,5 @@ def test_run(main=False):
     check_futures()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test_run(main=True)

@@ -112,8 +112,8 @@ class RawBSONDocument(_Mapping):
             codec_options = DEFAULT_RAW_BSON_OPTIONS
         elif codec_options.document_class is not RawBSONDocument:
             raise TypeError(
-                "RawBSONDocument cannot use CodecOptions with document "
-                "class %s" % (codec_options.document_class,)
+                "RawBSONDocument cannot use CodecOptions with document class %s"
+                % (codec_options.document_class,)
             )
         self.__codec_options = codec_options
         # Validate the bson object size.
@@ -152,7 +152,10 @@ class RawBSONDocument(_Mapping):
         return NotImplemented
 
     def __repr__(self):
-        return "RawBSONDocument(%r, codec_options=%r)" % (self.raw, self.__codec_options)
+        return "RawBSONDocument(%r, codec_options=%r)" % (
+            self.raw,
+            self.__codec_options,
+        )
 
 
 def _inflate_bson(bson_bytes, codec_options):

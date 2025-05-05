@@ -9,21 +9,22 @@ from .meta_config import (
 )
 from .get_bson import get_tabular_bson_head
 
+
 def _get_tabular_feather_single_ori(
-        codes: list,
-        table: str,
-        int_period: int,
-        start_timetag: int,
-        end_timetag: int,
-        count: int = -1,
-        **kwargs
+    codes: list,
+    table: str,
+    int_period: int,
+    start_timetag: int,
+    end_timetag: int,
+    count: int = -1,
+    **kwargs,
 ):
     from .. import xtdata
     from pyarrow import feather as fe
     import os
 
-    CONSTFIELD_TIME = '_time'
-    CONSTFIELD_CODE = '_stock'
+    CONSTFIELD_TIME = "_time"
+    CONSTFIELD_CODE = "_stock"
 
     file_path = os.path.join(xtdata.get_data_dir(), "EP", f"{table}_Xdat2", "data.fe")
     if not os.path.exists(file_path):
@@ -33,8 +34,10 @@ def _get_tabular_feather_single_ori(
 
     schema = fe_table.schema
     fe_fields = [f.name for f in schema]
+
     def _old_arrow_filter():
         from pyarrow import dataset as ds
+
         nonlocal fe_table, fe_fields
 
         expressions = []
@@ -56,9 +59,9 @@ def _get_tabular_feather_single_ori(
         else:
             return fe_table
 
-
     def _new_arrow_filter():
         from pyarrow import compute as pc
+
         nonlocal fe_table, fe_fields
 
         expressions = []
@@ -82,20 +85,21 @@ def _get_tabular_feather_single_ori(
     def do_filter():
         import pyarrow as pa
         from distutils import version
+
         nonlocal count
         # python3.6 pyarrow-6.0.1
         # python3.7 pyarrow-12.0.1
         # python3.8~12 pyarrow-17.0.0
         paver = version.LooseVersion(pa.__version__)
-        if paver <= version.LooseVersion('9.0.0'):
+        if paver <= version.LooseVersion("9.0.0"):
             _table = _old_arrow_filter()
         else:
             _table = _new_arrow_filter()
-        
+
         if count > 0:
             start_index = max(0, _table.num_rows - count)
             _table = _table.slice(start_index, count)
-        
+
         return _table
 
     return do_filter(), fe_fields
@@ -105,31 +109,31 @@ def _parse_fields(fields):
     if not __META_FIELDS__:
         _init_metainfos()
 
-    tmp = OrderedDict() # { table: { show_fields: list(), fe_fields: list() } }
+    tmp = OrderedDict()  # { table: { show_fields: list(), fe_fields: list() } }
     for field in fields:
-        if field.find('.') == -1:
+        if field.find(".") == -1:
             table = field
 
             if table not in __META_TABLES__:
                 continue
 
             if table not in tmp:
-                tmp[table] = {'show': list(), 'fe': list()}
+                tmp[table] = {"show": list(), "fe": list()}
 
             metaid = __META_TABLES__[table]
-            for key, f in __META_INFO__[metaid]['fields'].items():
-                if 'G' == key:
-                    tmp[table]['fe'].append('_time')
-                elif 'S' == key:
-                    tmp[table]['fe'].append('_stock')
+            for key, f in __META_INFO__[metaid]["fields"].items():
+                if "G" == key:
+                    tmp[table]["fe"].append("_time")
+                elif "S" == key:
+                    tmp[table]["fe"].append("_stock")
                 else:
-                    tmp[table]['fe'].append(f['modelName'])
+                    tmp[table]["fe"].append(f["modelName"])
 
-                tmp[table]['show'].append(f['modelName'])
+                tmp[table]["show"].append(f["modelName"])
 
         else:
-            table = field.split('.')[0]
-            ifield = field.split('.')[1]
+            table = field.split(".")[0]
+            ifield = field.split(".")[1]
 
             if field not in __META_FIELDS__:
                 continue
@@ -137,48 +141,49 @@ def _parse_fields(fields):
             metaid, key = __META_FIELDS__[field]
 
             if table not in tmp:
-                tmp[table] = {'show': list(), 'fe': list()}
+                tmp[table] = {"show": list(), "fe": list()}
 
-            if 'G' == key:
-                tmp[table]['fe'].append('_time')
-            elif 'S' == key:
-                tmp[table]['fe'].append('_stock')
+            if "G" == key:
+                tmp[table]["fe"].append("_time")
+            elif "S" == key:
+                tmp[table]["fe"].append("_stock")
             else:
-                tmp[table]['fe'].append(ifield)
+                tmp[table]["fe"].append(ifield)
 
-            tmp[table]['show'].append(ifield)
+            tmp[table]["show"].append(ifield)
 
-    return [(tb, sd['show'], sd['fe']) for tb, sd in tmp.items()]
+    return [(tb, sd["show"], sd["fe"]) for tb, sd in tmp.items()]
+
 
 def _parse_keys(fields):
     if not __META_FIELDS__:
         _init_metainfos()
 
-    tmp = OrderedDict() # { table: { show_keys: list(), fe_fields: list() } }
+    tmp = OrderedDict()  # { table: { show_keys: list(), fe_fields: list() } }
     for field in fields:
-        if field.find('.') == -1:
+        if field.find(".") == -1:
             table = field
 
             if table not in __META_TABLES__:
                 continue
 
             if table not in tmp:
-                tmp[table] = {'show': list(), 'fe': list()}
+                tmp[table] = {"show": list(), "fe": list()}
 
             metaid = __META_TABLES__[table]
-            for key, f in __META_INFO__[metaid]['fields'].items():
-                if 'G' == key:
-                    tmp[table]['fe'].append('_time')
-                elif 'S' == key:
-                    tmp[table]['fe'].append('_stock')
+            for key, f in __META_INFO__[metaid]["fields"].items():
+                if "G" == key:
+                    tmp[table]["fe"].append("_time")
+                elif "S" == key:
+                    tmp[table]["fe"].append("_stock")
                 else:
-                    tmp[table]['fe'].append(f['modelName'])
+                    tmp[table]["fe"].append(f["modelName"])
 
-                tmp[table]['show'].append(key)
+                tmp[table]["show"].append(key)
 
         else:
-            table = field.split('.')[0]
-            ifield = field.split('.')[1]
+            table = field.split(".")[0]
+            ifield = field.split(".")[1]
 
             if field not in __META_FIELDS__:
                 continue
@@ -186,41 +191,41 @@ def _parse_keys(fields):
             metaid, key = __META_FIELDS__[field]
 
             if table not in tmp:
-                tmp[table] = {'show': list(), 'fe': list()}
+                tmp[table] = {"show": list(), "fe": list()}
 
-            if 'G' == key:
-                tmp[table]['fe'].append('_time')
-            elif 'S' == key:
-                tmp[table]['fe'].append('_stock')
+            if "G" == key:
+                tmp[table]["fe"].append("_time")
+            elif "S" == key:
+                tmp[table]["fe"].append("_stock")
             else:
-                tmp[table]['fe'].append(ifield)
+                tmp[table]["fe"].append(ifield)
 
-            tmp[table]['show'].append(key)
+            tmp[table]["show"].append(key)
 
-    return [(tb, sd['show'], sd['fe']) for tb, sd in tmp.items()]
+    return [(tb, sd["show"], sd["fe"]) for tb, sd in tmp.items()]
 
 
 def get_tabular_fe_data(
-        codes: list,
-        fields: list,
-        period: str,
-        start_time: str,
-        end_time: str,
-        count: int = -1,
-        **kwargs
+    codes: list,
+    fields: list,
+    period: str,
+    start_time: str,
+    end_time: str,
+    count: int = -1,
+    **kwargs,
 ):
     import pandas as pd
 
     time_format = None
-    if period in ('1m', '5m', '15m', '30m', '60m', '1h'):
-        time_format = '%Y-%m-%d %H:%M:%S'
-    elif period in ('1d', '1w', '1mon', '1q', '1hy', '1y'):
-        time_format = '%Y-%m-%d'
-    elif period == '':
-        time_format = '%Y-%m-%d %H:%M:%S.%f'
+    if period in ("1m", "5m", "15m", "30m", "60m", "1h"):
+        time_format = "%Y-%m-%d %H:%M:%S"
+    elif period in ("1d", "1w", "1mon", "1q", "1hy", "1y"):
+        time_format = "%Y-%m-%d"
+    elif period == "":
+        time_format = "%Y-%m-%d %H:%M:%S.%f"
 
     if not time_format:
-        raise Exception('Unsupported period')
+        raise Exception("Unsupported period")
 
     int_period = __TABULAR_PERIODS__[period]
 
@@ -229,15 +234,16 @@ def get_tabular_fe_data(
 
     table_fields = _parse_fields(fields)
 
-    def datetime_to_timetag(timelabel, format=''):
-        '''
+    def datetime_to_timetag(timelabel, format=""):
+        """
         timelabel: str '20221231' '20221231235959'
         format: str '%Y%m%d' '%Y%m%d%H%M%S'
         return: int 1672502399000
-        '''
+        """
         import datetime as dt
+
         if not format:
-            format = '%Y%m%d' if len(timelabel) == 8 else '%Y%m%d%H%M%S'
+            format = "%Y%m%d" if len(timelabel) == 8 else "%Y%m%d%H%M%S"
         try:
             return dt.datetime.strptime(timelabel, format).timestamp() * 1000
         except:
@@ -249,7 +255,9 @@ def get_tabular_fe_data(
     dfs = []
     ordered_fields = []
     for table, show_fields, fe_fields in table_fields:
-        fe_table, fe_table_fields = _get_tabular_feather_single_ori(codes, table, int_period, start_timetag, end_timetag, count)
+        fe_table, fe_table_fields = _get_tabular_feather_single_ori(
+            codes, table, int_period, start_timetag, end_timetag, count
+        )
         if not fe_table:
             continue
 
@@ -267,7 +275,7 @@ def get_tabular_fe_data(
         rename_fields = {}
 
         for i in range(min(len(show_fields), len(fe_fields))):
-            show_field = f'{table}.{show_fields[i]}'
+            show_field = f"{table}.{show_fields[i]}"
             rename_fields[fe_fields[i]] = show_field
             ordered_fields.append(show_field)
 
@@ -282,25 +290,26 @@ def get_tabular_fe_data(
 
 
 def get_tabular_fe_bson(
-        codes: list,
-        fields: list,
-        period: str,
-        start_time: str,
-        end_time: str,
-        count: int = -1,
-        **kwargs
+    codes: list,
+    fields: list,
+    period: str,
+    start_time: str,
+    end_time: str,
+    count: int = -1,
+    **kwargs,
 ):
     from .. import xtbson
+
     time_format = None
-    if period in ('1m', '5m', '15m', '30m', '60m', '1h'):
-        time_format = '%Y-%m-%d %H:%M:%S'
-    elif period in ('1d', '1w', '1mon', '1q', '1hy', '1y'):
-        time_format = '%Y-%m-%d'
-    elif period == '':
-        time_format = '%Y-%m-%d %H:%M:%S.%f'
+    if period in ("1m", "5m", "15m", "30m", "60m", "1h"):
+        time_format = "%Y-%m-%d %H:%M:%S"
+    elif period in ("1d", "1w", "1mon", "1q", "1hy", "1y"):
+        time_format = "%Y-%m-%d"
+    elif period == "":
+        time_format = "%Y-%m-%d %H:%M:%S.%f"
 
     if not time_format:
-        raise Exception('Unsupported period')
+        raise Exception("Unsupported period")
 
     int_period = __TABULAR_PERIODS__[period]
 
@@ -309,15 +318,16 @@ def get_tabular_fe_bson(
 
     table_fields = _parse_keys(fields)
 
-    def datetime_to_timetag(timelabel, format=''):
-        '''
+    def datetime_to_timetag(timelabel, format=""):
+        """
         timelabel: str '20221231' '20221231235959'
         format: str '%Y%m%d' '%Y%m%d%H%M%S'
         return: int 1672502399000
-        '''
+        """
         import datetime as dt
+
         if not format:
-            format = '%Y%m%d' if len(timelabel) == 8 else '%Y%m%d%H%M%S'
+            format = "%Y%m%d" if len(timelabel) == 8 else "%Y%m%d%H%M%S"
         try:
             return dt.datetime.strptime(timelabel, format).timestamp() * 1000
         except:
@@ -329,17 +339,18 @@ def get_tabular_fe_bson(
     def _get_convert():
         import pyarrow as pa
         from distutils import version
+
         # python3.6 pyarrow-6.0.1
         # python3.7 pyarrow-12.0.1
         # python3.8~12 pyarrow-17.0.0
         def _old_arrow_convert(table):
-            return table.to_pandas().to_dict(orient='records')
+            return table.to_pandas().to_dict(orient="records")
 
         def _new_arrow_convert(table):
             return table.to_pylist()
 
         paver = version.LooseVersion(pa.__version__)
-        if paver < version.LooseVersion('7.0.0'):
+        if paver < version.LooseVersion("7.0.0"):
             return _old_arrow_convert
         else:
             return _new_arrow_convert
@@ -350,7 +361,9 @@ def get_tabular_fe_bson(
         table_head = get_tabular_bson_head(fields)
         ret_bsons.append(xtbson.encode(table_head))
 
-        fe_table, fe_table_fields = _get_tabular_feather_single_ori(codes, table, int_period, start_timetag, end_timetag, count)
+        fe_table, fe_table_fields = _get_tabular_feather_single_ori(
+            codes, table, int_period, start_timetag, end_timetag, count
+        )
 
         ifields = list()
         new_columns = list()
@@ -363,11 +376,10 @@ def get_tabular_fe_bson(
             continue
 
         fe_table = fe_table.select(ifields)
-        fe_table = fe_table.rename_columns(new_columns) # key_column
+        fe_table = fe_table.rename_columns(new_columns)  # key_column
 
         fe_datas = convert(fe_table)
         for data in fe_datas:
             ret_bsons.append(xtbson.encode(data))
 
     return ret_bsons
-

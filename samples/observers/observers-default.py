@@ -18,17 +18,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import backtrader as bt
 import backtrader.feeds as btfeeds
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cerebro = bt.Cerebro(stdstats=True)
     cerebro.addstrategy(bt.Strategy)
 
-    data = bt.feeds.BacktraderCSVData(dataname='../../datas/2006-day-001.txt')
+    data = bt.feeds.BacktraderCSVData(dataname="../../datas/2006-day-001.txt")
     cerebro.adddata(data)
 
     cerebro.run()

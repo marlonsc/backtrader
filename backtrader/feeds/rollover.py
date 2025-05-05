@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 
 from datetime import datetime
@@ -29,12 +28,12 @@ import backtrader as bt
 
 class MetaRollOver(bt.DataBase.__class__):
     def __init__(cls, name, bases, dct):
-        '''Class has already been created ... register'''
+        """Class has already been created ... register"""
         # Initialize the class
         super(MetaRollOver, cls).__init__(name, bases, dct)
 
     def donew(cls, *args, **kwargs):
-        '''Intercept const. to copy timeframe/compression from 1st data'''
+        """Intercept const. to copy timeframe/compression from 1st data"""
         # Create the object and set the params in place
         _obj, args, kwargs = super(MetaRollOver, cls).donew(*args, **kwargs)
 
@@ -46,7 +45,7 @@ class MetaRollOver(bt.DataBase.__class__):
 
 
 class RollOver(bt.with_metaclass(MetaRollOver, bt.DataBase)):
-    '''Class that rolls over to the next future when a condition is met
+    """Class that rolls over to the next future when a condition is met
 
     Params:
 
@@ -98,17 +97,17 @@ class RollOver(bt.with_metaclass(MetaRollOver, bt.DataBase)):
         than the volume from ``d1``
 
             - ``False``: the expiration cannot take place
-    '''
+    """
 
     params = (
         # ('rolls', []),  # array of futures to roll over
-        ('checkdate', None),  # callable
-        ('checkcondition', None),  # callable
+        ("checkdate", None),  # callable
+        ("checkcondition", None),  # callable
     )
 
     def islive(self):
-        '''Returns ``True`` to notify ``Cerebro`` that preloading and runonce
-        should be deactivated'''
+        """Returns ``True`` to notify ``Cerebro`` that preloading and runonce
+        should be deactivated"""
         return True
 
     def __init__(self, *args):
@@ -132,8 +131,8 @@ class RollOver(bt.with_metaclass(MetaRollOver, bt.DataBase)):
             d.stop()
 
     def _gettz(self):
-        '''To be overriden by subclasses which may auto-calculate the
-        timezone'''
+        """To be overriden by subclasses which may auto-calculate the
+        timezone"""
         if self._rolls:
             return self._rolls[0]._gettz()
         return bt.utils.date.Localizer(self.p.tz)

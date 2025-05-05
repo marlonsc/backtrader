@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
 # import
-	
+
 from colorama import Fore, Style
 import inspect
 import pandas as pd
@@ -13,18 +13,20 @@ import backtrader as bt
 
 # globals
 
+
 # functions/classes
 class TestStrategy_SMA(bt.Strategy):
     """
     Sandbox for different test strategies
     """
+
     params = (
-        ('bars_decline', 3),
-        ('bars_since_last_sell', 5),
-        ('ma_period', 15),
-        ('long_period', 25),
-        ('log_by_default', True),
-        ('delay', 1),
+        ("bars_decline", 3),
+        ("bars_since_last_sell", 5),
+        ("ma_period", 15),
+        ("long_period", 25),
+        ("log_by_default", True),
+        ("delay", 1),
     )
 
     def __init__(self):
@@ -42,52 +44,61 @@ class TestStrategy_SMA(bt.Strategy):
 
         # 105a For logging trade results only
         self.trade_results = pd.DataFrame({
-            'date': pd.Series(dtype='str'),
-            'price': pd.Series(dtype='float64'),
-            'pnl': pd.Series(dtype='float64'),
-            'pnlcomm': pd.Series(dtype='float64'),
+            "date": pd.Series(dtype="str"),
+            "price": pd.Series(dtype="float64"),
+            "pnl": pd.Series(dtype="float64"),
+            "pnlcomm": pd.Series(dtype="float64"),
         })
 
-        #106 Add a Moving Average indicator.
+        # 106 Add a Moving Average indicator.
         # Adding an indicator changes the strategy's behavior!
         # A SMA needs a certain number of bars (params.ma_period) to calculate the average.
         # No call to next() will be made until the SMA has enough bars to calculate the average.
-        self._sma = bt.indicators.MovingAverageSimple(self._dataclose, period=self.p.ma_period)
+        self._sma = bt.indicators.MovingAverageSimple(
+            self._dataclose, period=self.p.ma_period
+        )
 
         # Delayed indexing.
         # Wenn ich hier self._dataclose[-delay] nehme, wird der *jetzt* aktuelle Wert genommen
         # Die Formulierung hier ist äquivalent zu self._dataclose[-1] > self._sma in next()
         # Hier wird ein LineOwnOperation erzeugt, kein Wert (bool)
-        self._buy_condition:bt.LineOwnOperation = self._dataclose(-self.p.delay) > self._sma
-        self._sell_condition:bt.LineOwnOperation = self._dataclose(-self.p.delay) < self._sma
+        self._buy_condition: bt.LineOwnOperation = (
+            self._dataclose(-self.p.delay) > self._sma
+        )
+        self._sell_condition: bt.LineOwnOperation = (
+            self._dataclose(-self.p.delay) < self._sma
+        )
 
-        #beginregion More Indicators
+        # beginregion More Indicators
         # Carefull: Adding indicators might change the strategy's behavior! next() will not be called until all
         # indicators have enough bars to calculate, e.g. the SMA above.
         # Exponential Moving Average = trend indicator
-        #bt.indicators.ExponentialMovingAverage(self.datas[0], period=self.p.long_period)
+        # bt.indicators.ExponentialMovingAverage(self.datas[0], period=self.p.long_period)
         # Weighted Moving Average = trend indicator
-        #bt.indicators.WeightedMovingAverage(self.datas[0], period=self.p.long_period, subplot=True)
-        #bt.indicators.StochasticSlow(self.datas[0]) # Stochastic Oscillator
+        # bt.indicators.WeightedMovingAverage(self.datas[0], period=self.p.long_period, subplot=True)
+        # bt.indicators.StochasticSlow(self.datas[0]) # Stochastic Oscillator
         # Moving Average Convergence Divergence = trend indicator as histogram
-        #bt.indicators.MACDHisto(self.datas[0])
+        # bt.indicators.MACDHisto(self.datas[0])
         # Relative Strength Index = momentum indicator
-        #rsi = bt.indicators.RSI(self.datas[0])
+        # rsi = bt.indicators.RSI(self.datas[0])
         # Smoothed Moving Average of the RSI = trend indicator
-        #bt.indicators.SmoothedMovingAverage(rsi, period=10)
+        # bt.indicators.SmoothedMovingAverage(rsi, period=10)
         # Average True Range = volatility indicator
-        #self._atr = bt.indicators.ATR(self.datas[0],)   # plot=False) # Average True Range
-        #endregion
-
+        # self._atr = bt.indicators.ATR(self.datas[0],)   # plot=False) # Average True Range
+        # endregion
 
     def stop(self):
         """
         Called when the backtest is finished
         """
         final_value = self.broker.getvalue()
-        self.log(f'(MA Period {self.p.ma_period})\tEnding Value {final_value:,.2f}', caller='stop', print_it=True)
+        self.log(
+            f"(MA Period {self.p.ma_period})\tEnding Value {final_value:,.2f}",
+            caller="stop",
+            print_it=True,
+        )
 
-    def log(self,  txt:str, dt=None, caller:str = None, print_it:bool = False):
+    def log(self, txt: str, dt=None, caller: str = None, print_it: bool = False):
         """
         Logging function for this strategy
         """
@@ -98,10 +109,10 @@ class TestStrategy_SMA(bt.Strategy):
             caller = inspect.stack()[1].function
 
         dt = dt or self.datas[0].datetime.date(0)
-        formatted_date = dt.strftime('%d.%m.%Y')
+        formatted_date = dt.strftime("%d.%m.%Y")
         bars_processed = len(self)
 
-        print(f'{bars_processed:3} {caller:15}\t{formatted_date} {txt}')
+        print(f"{bars_processed:3} {caller:15}\t{formatted_date} {txt}")
 
     def next(self):
         """
@@ -115,10 +126,13 @@ class TestStrategy_SMA(bt.Strategy):
         # self.log(f'{self.data.open[0]:,.2f} {self.data.high[0]:,.2f} {self.data.low[0]:,.2f}'
         #          f' {Style.BRIGHT}{self.data.close[0]:,.2f}{Style.NORMAL}  Vol: {self.data.volume[0]:,.2f}')
 
-        self.log(f'Portfolio: Position size: {self.position.size} shares,'
-                 f' Available cash: {self.broker.get_cash():,.2f}'
-                 f' Investment value: {self.broker.get_value() - self.broker.get_cash():,.2f}'
-                 f' Portfolio value: {self.broker.get_value():,.2f}', caller='next', )
+        self.log(
+            f"Portfolio: Position size: {self.position.size} shares, Available cash:"
+            f" {self.broker.get_cash():,.2f} Investment value:"
+            f" {self.broker.get_value() - self.broker.get_cash():,.2f} Portfolio value:"
+            f" {self.broker.get_value():,.2f}",
+            caller="next",
+        )
 
         # demo for lines.get-method
         # slice = self._dataclose.get(size=5)
@@ -126,7 +140,11 @@ class TestStrategy_SMA(bt.Strategy):
 
         # Check if an order is pending ... if yes, we cannot send a 2nd one
         if self._order:
-            self.log(f'{Fore.RED}Order pending: {self._order.isbuy()} No new order allowed!{Fore.RESET}', caller='func next')
+            self.log(
+                f"{Fore.RED}Order pending: {self._order.isbuy()} No new order"
+                f" allowed!{Fore.RESET}",
+                caller="func next",
+            )
             return
 
         # 105 Check if the closing prices have decreased over the last `days_decline` bars
@@ -136,17 +154,25 @@ class TestStrategy_SMA(bt.Strategy):
         # Check if we are in the market. Every completed BUY order creates a position?
         if not self.position:
             # Noch nicht im Markt ... wir KÖNNTEN kaufen, wenn ...
-            if self._buy_condition: # (identisch zu self._buy_condition)
+            if self._buy_condition:  # (identisch zu self._buy_condition)
                 # KAUFEN, KAUFEN, KAUFEN!!! (mit allen möglichen Standardparametern)
-                buy_order_message = f'{Fore.GREEN}Erstelle KAUF-Bestellung {self._dataclose[0]:,.2f}{Fore.RESET}'
-                self.log(buy_order_message, caller='func next')
+                buy_order_message = (
+                    f"{Fore.GREEN}Erstelle KAUF-Bestellung"
+                    f" {self._dataclose[0]:,.2f}{Fore.RESET}"
+                )
+                self.log(buy_order_message, caller="func next")
                 self._order = self.buy()
         else:
             # Bereits im Markt (Positionen existieren) ... wir könnten verkaufen
             if self._sell_condition:
                 # VERKAUFEN, VERKAUFEN, VERKAUFEN!!! (mit allen möglichen Standardparametern)
-                sell_order_message = f'{Fore.YELLOW}Erstelle VERKAUF-Bestellung {self._dataclose[0]:,.2f}{Fore.RESET}'
-                self.log(sell_order_message, )
+                sell_order_message = (
+                    f"{Fore.YELLOW}Erstelle VERKAUF-Bestellung"
+                    f" {self._dataclose[0]:,.2f}{Fore.RESET}"
+                )
+                self.log(
+                    sell_order_message,
+                )
                 # Verfolge die erstellte Bestellung, um eine zweite Bestellung zu vermeiden
                 self._order = self.sell()
 
@@ -165,17 +191,26 @@ class TestStrategy_SMA(bt.Strategy):
         This method will be called whenever an order status changes
         Order details can be analyzed
         """
-        action = f'{Fore.GREEN}BUY{Fore.RESET}' if order.isbuy() else f'{Fore.YELLOW}SELL{Fore.RESET}'
+        action = (
+            f"{Fore.GREEN}BUY{Fore.RESET}"
+            if order.isbuy()
+            else f"{Fore.YELLOW}SELL{Fore.RESET}"
+        )
 
         if order.status in {order.Submitted, order.Accepted}:
-            self.log(f'{action} order {order.Status[order.status]} to/by broker - Nothing to do')
+            self.log(
+                f"{action} order {order.Status[order.status]} to/by broker - Nothing"
+                " to do"
+            )
             return
 
         # Check if an order has been completed
         # Attention: broker could reject order if not enough cash
         if order.status == order.Completed:
-            self.log(f'{Style.BRIGHT}{action} order executed at {order.executed.price:,.2f}'
-                     f'\tCommission: {order.executed.comm:,.2f} {Style.RESET_ALL}')
+            self.log(
+                f"{Style.BRIGHT}{action} order executed at {order.executed.price:,.2f}"
+                f"\tCommission: {order.executed.comm:,.2f} {Style.RESET_ALL}"
+            )
 
             # 105
             if order.isbuy():
@@ -187,7 +222,10 @@ class TestStrategy_SMA(bt.Strategy):
             self._bar_executed = len(self)  # Save the bar where the order was executed
 
         elif order.status in {order.Canceled, order.Margin, order.Rejected}:
-            self.log(f'{Fore.RED}Order note executed! Status = {order.status} (Canceled/Margin/Rejected){Fore.RESET}')
+            self.log(
+                f"{Fore.RED}Order note executed! Status ="
+                f" {order.status} (Canceled/Margin/Rejected){Fore.RESET}"
+            )
 
         # Write down: no pending order
         self._order = None
@@ -207,44 +245,55 @@ class TestStrategy_SMA(bt.Strategy):
             - Trade Status Change: When the status of a trade changes, it logs the new status.
         """
         if trade.isclosed:
-            result = 'profit' if trade.pnlcomm > 0 else 'loss'
+            result = "profit" if trade.pnlcomm > 0 else "loss"
             self.log(
-                    f'Trade is closed. Operation {result}, gross: {trade.pnl:,.2f}, net (incl.commission): {trade.pnlcomm:,.2f}'
+                f"Trade is closed. Operation {result}, gross: {trade.pnl:,.2f}, net"
+                f" (incl.commission): {trade.pnlcomm:,.2f}"
             )
             # 105a Log the trade results
             new_row = {
-                'date': self.datas[0].datetime.date(0).strftime('%d.%m.%Y'),
-                'price': float(trade.price),
-                'pnl': float(trade.pnl),
-                'pnlcomm': float(trade.pnlcomm)
+                "date": self.datas[0].datetime.date(0).strftime("%d.%m.%Y"),
+                "price": float(trade.price),
+                "pnl": float(trade.pnl),
+                "pnlcomm": float(trade.pnlcomm),
             }
 
             # Append the new row to the DataFrame
             self.trade_results = self.trade_results._append(new_row, ignore_index=True)
 
         else:
-            self.log(f'Trade status: {trade.status_names[trade.status]}\tNothing to do!')
+            self.log(
+                f"Trade status: {trade.status_names[trade.status]}\tNothing to do!"
+            )
             return
 
 
 class DelayedIndexing(TestStrategy_SMA):
-    params = (  ('period',20),
-                ('log_by_default', False),
-                ('delay', 1),
-                )
+    params = (
+        ("period", 20),
+        ("log_by_default", False),
+        ("delay", 1),
+    )
 
     def __init__(self):
         self._dataclose = self.data.close
-        self._sma = bt.indicators.SimpleMovingAverage(self._dataclose, period=self.p.period)
+        self._sma = bt.indicators.SimpleMovingAverage(
+            self._dataclose, period=self.p.period
+        )
         # _cmpval wird erst in next() berechnet (verzögert)
-        self._cmpval:bt.linebuffer.LinesOperation = self._dataclose(-self.p.delay) > self._sma
-        
+        self._cmpval: bt.linebuffer.LinesOperation = (
+            self._dataclose(-self.p.delay) > self._sma
+        )
+
     def next(self):
         if len(self) < self.p.delay:
             return
 
-        self.log(f'Close: {self._dataclose[0]:,.2f}'
-                 f'SMA: {self._sma[0]:,.2f}', caller='next', print_it=False)
+        self.log(
+            f"Close: {self._dataclose[0]:,.2f}SMA: {self._sma[0]:,.2f}",
+            caller="next",
+            print_it=False,
+        )
 
         # delayed
         # print(f'Using delayed indexing: {bool(self._cmpval)=}')
@@ -259,15 +308,16 @@ class DelayedIndexing(TestStrategy_SMA):
         #     print(f'Using __call__: {buy_condition_call=}')
 
         # Using direct negative indexing
-        buy_condition_index:bool = self._dataclose[-self.p.delay] > self._sma
+        buy_condition_index: bool = self._dataclose[-self.p.delay] > self._sma
         # self.log(f'Index and delayed call are {"identical" if buy_condition_index == self._cmpval else "different"}', caller='next', print_it=True)
         # print(f'Using direct indexing: {buy_condition_index=}')
 
-        #slice = self._dataclose.get(ago = -1, size=5)
+        # slice = self._dataclose.get(ago = -1, size=5)
         slice_len = 5
-        if len(self) > slice_len+1:
+        if len(self) > slice_len + 1:
             my_slice = self._dataclose[-slice_len:]
-        self.log(f'Close prices: {my_slice}', caller='next', print_it=True)
+        self.log(f"Close prices: {my_slice}", caller="next", print_it=True)
+
 
 class TestUsingOperators(TestStrategy_SMA):
     def __init__(self):
@@ -275,69 +325,94 @@ class TestUsingOperators(TestStrategy_SMA):
 
         # operator > overload
         close_over_sma = self._dataclose > self._sma
-        print(f'close_over_sma: {type(close_over_sma)=}')
+        print(f"close_over_sma: {type(close_over_sma)=}")
         # operator - overload
         sma_dist_to_high = self._sma - self.data.high
-        print(f'sma_dist_to_high: {type(sma_dist_to_high)=}')
+        print(f"sma_dist_to_high: {type(sma_dist_to_high)=}")
         # operator < overload; line-Object of bools
         sma_dist_small = sma_dist_to_high < 3
-        print(f'sma_dist_small: {type(sma_dist_small)=}')
-        
+        print(f"sma_dist_small: {type(sma_dist_small)=}")
+
         self._sell_signal = bt.indicators.And(close_over_sma, sma_dist_small)
-        print(f'sell_signal: {type(self._sell_signal)=}')
+        print(f"sell_signal: {type(self._sell_signal)=}")
 
     def next(self):
         # This strategy does nothing
 
         action = "SELL" if self._sell_signal else "HOLD"
-        self.log(f'{action}\tDaily close: {self._dataclose[0]:,.2f} SMA: {self._sma[0]:,.2f}',
-                     caller='TestUsingOperators.next', print_it=True)
+        self.log(
+            f"{action}\tDaily close: {self._dataclose[0]:,.2f} SMA:"
+            f" {self._sma[0]:,.2f}",
+            caller="TestUsingOperators.next",
+            print_it=True,
+        )
+
 
 class MySimpleMovingAverage(bt.indicators.SimpleMovingAverage):
-    lines = ('sma',)
+    lines = ("sma",)
 
     params = (
-        ('period', 20),
-        ('log_by_default', True),
+        ("period", 20),
+        ("log_by_default", True),
     )
 
     def __init__(self):
         super().__init__()
-        print(f'Created SimpleMovingAverage with period {self.p.period}',)
+        print(
+            f"Created SimpleMovingAverage with period {self.p.period}",
+        )
 
     def prenext(self):
-        print('MySimpleMovingAverage.prenext:: current period:', len(self))
+        print("MySimpleMovingAverage.prenext:: current period:", len(self))
 
     def nextstart(self):
-        print('MySimpleMovingAverage.nextstart:: current period:', len(self))
+        print("MySimpleMovingAverage.nextstart:: current period:", len(self))
         # emulate default behavior ... call next
         self.next()
 
     def next(self):
-        print('MySimpleMovingAverage.next:: current period:', len(self))
+        print("MySimpleMovingAverage.next:: current period:", len(self))
 
     def start(self):
-        self.log(f'Current Bar: {len(self):3}', caller='MySimpleMovingAverage.start', print_it=True)
-
+        self.log(
+            f"Current Bar: {len(self):3}",
+            caller="MySimpleMovingAverage.start",
+            print_it=True,
+        )
 
 
 class PlayWithIndicators(TestStrategy_SMA):
     def __init__(self):
         self.p.log_by_default = True
         self.sma = MySimpleMovingAverage(self.data, period=20)
-        
-    def start(self):
-        self.log(f'Current Bar: {len(self):3}', caller='PlayWithIndicators.start', print_it=True)
 
+    def start(self):
+        self.log(
+            f"Current Bar: {len(self):3}",
+            caller="PlayWithIndicators.start",
+            print_it=True,
+        )
 
     def next(self):
-        self.log(f'Current Bar: {len(self):3}', caller='PlayWithIndicators.next', print_it=True)
+        self.log(
+            f"Current Bar: {len(self):3}",
+            caller="PlayWithIndicators.next",
+            print_it=True,
+        )
 
     def prenext(self):
-        self.log(f'Current Bar: {len(self):3}', caller='PlayWithIndicators.prenext', print_it=True)
+        self.log(
+            f"Current Bar: {len(self):3}",
+            caller="PlayWithIndicators.prenext",
+            print_it=True,
+        )
 
     def nextstart(self):
-        self.log(f'Current Bar: {len(self):3}', caller='PlayWithIndicators.nextstart', print_it=True)
+        self.log(
+            f"Current Bar: {len(self):3}",
+            caller="PlayWithIndicators.nextstart",
+            print_it=True,
+        )
         # emulates the regular behavior of nextstart()
         self.next()
 
@@ -345,11 +420,13 @@ class PlayWithIndicators(TestStrategy_SMA):
 class EmptyCall(TestStrategy_SMA):
 
     def __init__(self):
-       
+
         # self._buysig = self._dataclose_daily(-self.p.delay) > self._sma
         if len(self.datas) < 2:
-            raise Exception('No weekly data to compare with')  # Default to no signal if no weekly data
-        
+            raise Exception(
+                "No weekly data to compare with"
+            )  # Default to no signal if no weekly data
+
         self._dataclose_daily = self.data0.close
         self._dataclose_weekly = self.data1.close
 
@@ -357,25 +434,28 @@ class EmptyCall(TestStrategy_SMA):
         self._sma1 = bt.indicators.SimpleMovingAverage(self._dataclose_weekly, period=5)
         # Erzeugt einen Indexfehler, weil die Daten unterschiedlich lang sind
         # sma_daily: 255, sma_weekly: 50
-        self._buysig = self._sma0 > self._sma1(-1  )
-        
+        self._buysig = self._sma0 > self._sma1(-1)
+
     def next(self):
         # This strategy does nothing
 
         if self._buysig[0] or True:
-            self.log(f'Daily close: {self._dataclose_daily[0]:,.2f} '
-                     f'Weekly close: {self._dataclose_weekly[0]:,.2f} '
-                     f'SMA (Daily): {self._sma0[0]:,.2f} '
-                     f'SMA (Weekly): {self._sma1[0]:,.2f}',
-                     caller='next', print_it=True)
+            self.log(
+                f"Daily close: {self._dataclose_daily[0]:,.2f} "
+                f"Weekly close: {self._dataclose_weekly[0]:,.2f} "
+                f"SMA (Daily): {self._sma0[0]:,.2f} "
+                f"SMA (Weekly): {self._sma1[0]:,.2f}",
+                caller="next",
+                print_it=True,
+            )
 
 
 class TestStrategy_simple(bt.Strategy):
 
     def log(self, txt, dt=None):
-        ''' Logging function fot this strategy'''
+        """Logging function fot this strategy"""
         dt = dt or self.datas[0].datetime.date(0)
-        print('%s, %s' % (dt.isoformat(), txt))
+        print("%s, %s" % (dt.isoformat(), txt))
 
     def __init__(self):
         # Keep a reference to the "close" line in the data[0] dataseries
@@ -383,7 +463,7 @@ class TestStrategy_simple(bt.Strategy):
 
     def next(self):
         # Simply log the closing price of the series from the reference
-        self.log('Close, %.2f' % self.dataclose[0])
+        self.log("Close, %.2f" % self.dataclose[0])
 
         if self.dataclose[0] < self.dataclose[-1]:
             # current close less than previous close
@@ -392,8 +472,9 @@ class TestStrategy_simple(bt.Strategy):
                 # previous close less than the previous close
 
                 # BUY, BUY, BUY!!! (with all possible default parameters)
-                self.log('BUY CREATE, %.2f' % self.dataclose[0])
+                self.log("BUY CREATE, %.2f" % self.dataclose[0])
                 self.buy()
+
 
 class TestStrategy_104(bt.Strategy):
 
@@ -402,7 +483,7 @@ class TestStrategy_104(bt.Strategy):
         Logging function fot this strategy
         """
         dt = dt or self.datas[0].datetime.date(0)
-        print('%s, %s' % (dt.isoformat(), txt))
+        print("%s, %s" % (dt.isoformat(), txt))
 
     def __init__(self):
         # Keep a reference to the "close" line in the data[0] dataseries
@@ -420,21 +501,21 @@ class TestStrategy_104(bt.Strategy):
         # Attention: broker could reject order if not enough cash
         if order.status in [order.Completed]:
             if order.isbuy():
-                self.log('BUY EXECUTED, %.2f' % order.executed.price)
+                self.log("BUY EXECUTED, %.2f" % order.executed.price)
             elif order.issell():
-                self.log('SELL EXECUTED, %.2f' % order.executed.price)
+                self.log("SELL EXECUTED, %.2f" % order.executed.price)
 
             self.bar_executed = len(self)
 
         elif order.status in [order.Canceled, order.Margin, order.Rejected]:
-            self.log('Order Canceled/Margin/Rejected')
+            self.log("Order Canceled/Margin/Rejected")
 
         # Write down: no pending order
         self.order = None
 
     def next(self):
         # Simply log the closing price of the series from the reference
-        self.log('Close, %.2f' % self.dataclose[0])
+        self.log("Close, %.2f" % self.dataclose[0])
 
         # Check if an order is pending ... if yes, we cannot send a 2nd one
         if self.order:
@@ -445,33 +526,34 @@ class TestStrategy_104(bt.Strategy):
 
             # Not yet ... we MIGHT BUY if ...
             if self.dataclose[0] < self.dataclose[-1]:
-                    # current close less than previous close
+                # current close less than previous close
 
-                    if self.dataclose[-1] < self.dataclose[-2]:
-                        # previous close less than the previous close
+                if self.dataclose[-1] < self.dataclose[-2]:
+                    # previous close less than the previous close
 
-                        # BUY, BUY, BUY!!! (with default parameters)
-                        self.log('BUY CREATE, %.2f' % self.dataclose[0])
+                    # BUY, BUY, BUY!!! (with default parameters)
+                    self.log("BUY CREATE, %.2f" % self.dataclose[0])
 
-                        # Keep track of the created order to avoid a 2nd order
-                        self.order = self.buy()
+                    # Keep track of the created order to avoid a 2nd order
+                    self.order = self.buy()
 
         else:
 
             # Already in the market ... we might sell
             if len(self) >= (self.bar_executed + 5):
                 # SELL, SELL, SELL!!! (with all possible default parameters)
-                self.log('SELL CREATE, %.2f' % self.dataclose[0])
+                self.log("SELL CREATE, %.2f" % self.dataclose[0])
 
                 # Keep track of the created order to avoid a 2nd order
                 self.order = self.sell()
 
+
 class TestStrategy_Commission(bt.Strategy):
 
     def log(self, txt, dt=None):
-        ''' Logging function fot this strategy'''
+        """Logging function fot this strategy"""
         dt = dt or self.datas[0].datetime.date(0)
-        print('%s, %s' % (dt.isoformat(), txt))
+        print("%s, %s" % (dt.isoformat(), txt))
 
     def __init__(self):
         # Keep a reference to the "close" line in the data[0] dataseries
@@ -492,23 +574,22 @@ class TestStrategy_Commission(bt.Strategy):
         if order.status in [order.Completed]:
             if order.isbuy():
                 self.log(
-                    'BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f' %
-                    (order.executed.price,
-                     order.executed.value,
-                     order.executed.comm))
+                    "BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f"
+                    % (order.executed.price, order.executed.value, order.executed.comm)
+                )
 
                 self.buyprice = order.executed.price
                 self.buycomm = order.executed.comm
             else:  # Sell
-                self.log('SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f' %
-                         (order.executed.price,
-                          order.executed.value,
-                          order.executed.comm))
+                self.log(
+                    "SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f"
+                    % (order.executed.price, order.executed.value, order.executed.comm)
+                )
 
             self.bar_executed = len(self)
 
         elif order.status in [order.Canceled, order.Margin, order.Rejected]:
-            self.log('Order Canceled/Margin/Rejected')
+            self.log("Order Canceled/Margin/Rejected")
 
         self.order = None
 
@@ -516,12 +597,11 @@ class TestStrategy_Commission(bt.Strategy):
         if not trade.isclosed:
             return
 
-        self.log('OPERATION PROFIT, GROSS %.2f, NET %.2f' %
-                 (trade.pnl, trade.pnlcomm))
+        self.log("OPERATION PROFIT, GROSS %.2f, NET %.2f" % (trade.pnl, trade.pnlcomm))
 
     def next(self):
         # Simply log the closing price of the series from the reference
-        self.log('Close, %.2f' % self.dataclose[0])
+        self.log("Close, %.2f" % self.dataclose[0])
 
         # Check if an order is pending ... if yes, we cannot send a 2nd one
         if self.order:
@@ -532,27 +612,27 @@ class TestStrategy_Commission(bt.Strategy):
 
             # Not yet ... we MIGHT BUY if ...
             if self.dataclose[0] < self.dataclose[-1]:
-                    # current close less than previous close
+                # current close less than previous close
 
-                    if self.dataclose[-1] < self.dataclose[-2]:
-                        # previous close less than the previous close
+                if self.dataclose[-1] < self.dataclose[-2]:
+                    # previous close less than the previous close
 
-                        # BUY, BUY, BUY!!! (with default parameters)
-                        self.log('BUY CREATE, %.2f' % self.dataclose[0])
+                    # BUY, BUY, BUY!!! (with default parameters)
+                    self.log("BUY CREATE, %.2f" % self.dataclose[0])
 
-                        # Keep track of the created order to avoid a 2nd order
-                        self.order = self.buy()
+                    # Keep track of the created order to avoid a 2nd order
+                    self.order = self.buy()
 
         else:
 
             # Already in the market ... we might sell
             if len(self) >= (self.bar_executed + 5):
                 # SELL, SELL, SELL!!! (with all possible default parameters)
-                self.log('SELL CREATE, %.2f' % self.dataclose[0])
+                self.log("SELL CREATE, %.2f" % self.dataclose[0])
 
                 # Keep track of the created order to avoid a 2nd order
                 self.order = self.sell()
 
 
-if __name__ == '__main__':
-    print('This script is not meant to be run directly.')
+if __name__ == "__main__":
+    print("This script is not meant to be run directly.")

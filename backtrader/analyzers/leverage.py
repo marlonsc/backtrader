@@ -18,14 +18,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import backtrader as bt
 
 
 class GrossLeverage(bt.Analyzer):
-    '''This analyzer calculates the Gross Leverage of the current strategy
+    """This analyzer calculates the Gross Leverage of the current strategy
     on a timeframe basis
 
     Params:
@@ -45,11 +44,9 @@ class GrossLeverage(bt.Analyzer):
 
         Returns a dictionary with returns as values and the datetime points for
         each return as keys
-    '''
+    """
 
-    params = (
-        ('fund', None),
-    )
+    params = (("fund", None),)
 
     def start(self):
         if self.p.fund is None:

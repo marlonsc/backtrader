@@ -18,16 +18,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import collections
 from datetime import date, datetime
 import io
 import itertools
 
-from ..utils.py3 import (urlopen, urlquote, ProxyHandler, build_opener,
-                         install_opener)
+from ..utils.py3 import urlopen, urlquote, ProxyHandler, build_opener, install_opener
 
 import backtrader as bt
 from .. import feed
@@ -35,7 +33,7 @@ from ..utils import date2num
 
 
 class YahooFinanceCSVData(feed.CSVDataBase):
-    '''
+    """
     Parses pre-downloaded Yahoo CSV Data Feeds (or locally generated if they
     comply to the Yahoo format)
 
@@ -77,17 +75,18 @@ class YahooFinanceCSVData(feed.CSVDataBase):
         close* is now fixed. The parameter is retained, in case the need to
         swap the columns again arose.
 
-    '''
-    lines = ('adjclose',)
+    """
+
+    lines = ("adjclose",)
 
     params = (
-        ('reverse', False),
-        ('adjclose', True),
-        ('adjvolume', True),
-        ('round', True),
-        ('decimals', 2),
-        ('roundvolume', False),
-        ('swapcloses', False),
+        ("reverse", False),
+        ("adjclose", True),
+        ("adjvolume", True),
+        ("round", True),
+        ("decimals", 2),
+        ("roundvolume", False),
+        ("swapcloses", False),
     )
 
     def start(self):
@@ -111,7 +110,7 @@ class YahooFinanceCSVData(feed.CSVDataBase):
         while True:
             nullseen = False
             for tok in linetokens[1:]:
-                if tok == 'null':
+                if tok == "null":
                     nullseen = True
                     linetokens = self._getnextline()  # refetch tokens
                     if not linetokens:
@@ -138,7 +137,7 @@ class YahooFinanceCSVData(feed.CSVDataBase):
 
         # 2018-11-16 ... Adjusted Close seems to always be delivered after
         # the close and before the volume columns
-        adjustedclose = float(linetokens[next(i)]) or 1.0   # SRL or 1.0 if empty
+        adjustedclose = float(linetokens[next(i)]) or 1.0  # SRL or 1.0 if empty
         try:
             v = float(linetokens[next(i)])
         except:  # cover the case in which volume is "null"
@@ -179,14 +178,13 @@ class YahooFinanceCSVData(feed.CSVDataBase):
 
 
 class YahooLegacyCSV(YahooFinanceCSVData):
-    '''
+    """
     This is intended to load files which were downloaded before Yahoo
     discontinued the original service in May-2017
 
-    '''
-    params = (
-        ('version', ''),
-    )
+    """
+
+    params = (("version", ""),)
 
 
 class YahooFinanceCSV(feed.CSVFeedBase):
@@ -194,7 +192,7 @@ class YahooFinanceCSV(feed.CSVFeedBase):
 
 
 class YahooFinanceData(YahooFinanceCSVData):
-    '''
+    """
     Executes a direct download of data from Yahoo servers for the given time
     range.
 
@@ -233,35 +231,37 @@ class YahooFinanceData(YahooFinanceCSVData):
 
         Number of times (each) to try to download the data
 
-      '''
+    """
 
     params = (
-        ('proxies', {}),
-        ('period', 'd'),
-        ('reverse', False),
-        ('urldown', 'https://query1.finance.yahoo.com/v7/finance/download'),
-        ('retries', 3),
+        ("proxies", {}),
+        ("period", "d"),
+        ("reverse", False),
+        ("urldown", "https://query1.finance.yahoo.com/v7/finance/download"),
+        ("retries", 3),
     )
 
     def start_v7(self):
         try:
             import requests
         except ImportError:
-            msg = ('The new Yahoo data feed requires to have the requests '
-                   'module installed. Please use pip install requests or '
-                   'the method of your choice')
+            msg = (
+                "The new Yahoo data feed requires to have the requests "
+                "module installed. Please use pip install requests or "
+                "the method of your choice"
+            )
             raise Exception(msg)
 
         self.error = None
 
         sesskwargs = dict()
         if self.p.proxies:
-            sesskwargs['proxies'] = self.p.proxies
+            sesskwargs["proxies"] = self.p.proxies
 
         # urldown/ticker?period1=posix1&period2=posix2&interval=1d&events=history
 
         # Try to download
-        urld = '{}/{}'.format(self.p.urldown, self.p.dataname)
+        urld = "{}/{}".format(self.p.urldown, self.p.dataname)
 
         urlargs = []
         posix = date(1970, 1, 1)
@@ -270,36 +270,36 @@ class YahooFinanceData(YahooFinanceCSVData):
             period1 = (self.p.fromdate.date() - posix).total_seconds()
         else:
             period1 = 0
-        urlargs.append('period1={}'.format(int(period1)))
+        urlargs.append("period1={}".format(int(period1)))
         if self.p.todate is not None:
             period2 = (self.p.todate.date() - posix).total_seconds()
         else:
             # use current time as todate if not provided
             period2 = (datetime.utcnow().date() - posix).total_seconds()
-        urlargs.append('period2={}'.format(int(period2)))
+        urlargs.append("period2={}".format(int(period2)))
 
         intervals = {
-            bt.TimeFrame.Days: '1d',
-            bt.TimeFrame.Weeks: '1wk',
-            bt.TimeFrame.Months: '1mo',
+            bt.TimeFrame.Days: "1d",
+            bt.TimeFrame.Weeks: "1wk",
+            bt.TimeFrame.Months: "1mo",
         }
 
-        urlargs.append('interval={}'.format(intervals[self.p.timeframe]))
-        urlargs.append('events=history')
+        urlargs.append("interval={}".format(intervals[self.p.timeframe]))
+        urlargs.append("events=history")
 
-        urld = '{}?{}'.format(urld, '&'.join(urlargs))
+        urld = "{}?{}".format(urld, "&".join(urlargs))
         f = None
         sess = requests.Session()
-        sess.headers['User-Agent'] = 'backtrader'
+        sess.headers["User-Agent"] = "backtrader"
         for i in range(self.p.retries + 1):  # at least once
             resp = sess.get(urld, **sesskwargs)
             if resp.status_code != requests.codes.ok:
                 continue
 
-            ctype = resp.headers['Content-Type']
+            ctype = resp.headers["Content-Type"]
             # Cover as many text types as possible for Yahoo changes
-            if not ctype.startswith('text/'):
-                self.error = 'Wrong content type: %s' % ctype
+            if not ctype.startswith("text/"):
+                self.error = "Wrong content type: %s" % ctype
                 continue  # HTML returned? wrong url?
 
             # buffer everything from the socket into a local buffer

@@ -18,18 +18,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import backtrader as bt
 from . import MovAv
 
-
-__all__ = ['AwesomeOscillator', 'AwesomeOsc', 'AO']
+__all__ = ["AwesomeOscillator", "AwesomeOsc", "AO"]
 
 
 class AwesomeOscillator(bt.Indicator):
-    '''
+    """
     Awesome Oscillator (AO) is a momentum indicator reflecting the precise
     changes in the market driving force which helps to identify the trend’s
     strength up to the points of formation and reversal.
@@ -43,17 +41,18 @@ class AwesomeOscillator(bt.Indicator):
       - https://www.metatrader5.com/en/terminal/help/indicators/bw_indicators/awesome
       - https://www.ifcmarkets.com/en/ntx-indicators/awesome-oscillator
 
-    '''
-    alias = ('AwesomeOsc', 'AO')
-    lines = ('ao',)
+    """
+
+    alias = ("AwesomeOsc", "AO")
+    lines = ("ao",)
 
     params = (
-        ('fast', 5),
-        ('slow', 34),
-        ('movav', MovAv.SMA),
+        ("fast", 5),
+        ("slow", 34),
+        ("movav", MovAv.SMA),
     )
 
-    plotlines = dict(ao=dict(_method='bar', alpha=0.50, width=1.0))
+    plotlines = dict(ao=dict(_method="bar", alpha=0.50, width=1.0))
 
     def __init__(self):
         median_price = (self.data.high + self.data.low) / 2.0

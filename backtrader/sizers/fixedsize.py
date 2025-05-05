@@ -18,14 +18,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import backtrader as bt
 
 
 class FixedSize(bt.Sizer):
-    '''
+    """
     This sizer simply returns a fixed size for any operation.
     Size can be controlled by number of tranches that a system
     wishes to use to scale into trades by specifying the ``tranches``
@@ -35,10 +34,9 @@ class FixedSize(bt.Sizer):
     Params:
       - ``stake`` (default: ``1``)
       - ``tranches`` (default: ``1``)
-    '''
+    """
 
-    params = (('stake', 1),
-              ('tranches', 1))
+    params = (("stake", 1), ("tranches", 1))
 
     def _getsizing(self, comminfo, cash, data, isbuy):
         if self.p.tranches > 1:
@@ -57,7 +55,7 @@ SizerFix = FixedSize
 
 
 class FixedReverser(bt.Sizer):
-    '''This sizer returns the needes fixed size to reverse an open position or
+    """This sizer returns the needes fixed size to reverse an open position or
     the fixed size to open one
 
       - To open a position: return the param ``stake``
@@ -66,8 +64,9 @@ class FixedReverser(bt.Sizer):
 
     Params:
       - ``stake`` (default: ``1``)
-    '''
-    params = (('stake', 1),)
+    """
+
+    params = (("stake", 1),)
 
     def _getsizing(self, comminfo, cash, data, isbuy):
         position = self.strategy.getposition(data)
@@ -76,7 +75,7 @@ class FixedReverser(bt.Sizer):
 
 
 class FixedSizeTarget(bt.Sizer):
-    '''
+    """
     This sizer simply returns a fixed target size, useful when coupled
     with Target Orders and specifically ``cerebro.target_order_size()``.
     Size can be controlled by number of tranches that a system
@@ -87,10 +86,9 @@ class FixedSizeTarget(bt.Sizer):
     Params:
       - ``stake`` (default: ``1``)
       - ``tranches`` (default: ``1``)
-    '''
+    """
 
-    params = (('stake', 1),
-              ('tranches', 1))
+    params = (("stake", 1), ("tranches", 1))
 
     def _getsizing(self, comminfo, cash, data, isbuy):
         if self.p.tranches > 1:
@@ -102,7 +100,6 @@ class FixedSizeTarget(bt.Sizer):
     def setsizing(self, stake):
         if self.p.tranches > 1:
             size = abs(int(self.p.stake / self.p.tranches))
-            self.p.stake = min((self.strategy.position.size + size),
-                               self.p.stake)
+            self.p.stake = min((self.strategy.position.size + size), self.p.stake)
         else:
             self.p.stake = stake  # OLD METHOD FOR SAMPLE COMPATIBILITY

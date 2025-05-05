@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import math
 
@@ -30,7 +29,7 @@ from ..mathsupport import standarddev
 
 
 class VWR(TimeFrameAnalyzerBase):
-    '''Variability-Weighted Return: Better SharpeRatio with Log Returns
+    """Variability-Weighted Return: Better SharpeRatio with Log Returns
 
     Alias:
 
@@ -95,13 +94,13 @@ class VWR(TimeFrameAnalyzerBase):
         The returned dict contains the following keys:
 
           - ``vwr``: Variability-Weighted Return
-    '''
+    """
 
     params = (
-        ('tann', None),
-        ('tau', 0.20),
-        ('sdev_max', 2.0),
-        ('fund', None),
+        ("tann", None),
+        ("tau", 0.20),
+        ("sdev_max", 2.0),
+        ("fund", None),
     )
 
     _TANN = {
@@ -113,9 +112,9 @@ class VWR(TimeFrameAnalyzerBase):
 
     def __init__(self):
         # Children log return analyzer
-        self._returns = Returns(timeframe=self.p.timeframe,
-                                compression=self.p.compression,
-                                tann=self.p.tann)
+        self._returns = Returns(
+            timeframe=self.p.timeframe, compression=self.p.compression, tann=self.p.tann
+        )
 
     def start(self):
         super(VWR, self).start()
@@ -142,8 +141,8 @@ class VWR(TimeFrameAnalyzerBase):
 
         # Get results from children
         rs = self._returns.get_analysis()
-        ravg = rs['ravg']
-        rnorm100 = rs['rnorm100']
+        ravg = rs["ravg"]
+        rnorm100 = rs["rnorm100"]
 
         # make n 1 based in enumerate (number of periods and not index)
         # skip initial placeholders for synchronization
@@ -157,7 +156,7 @@ class VWR(TimeFrameAnalyzerBase):
         sdev_p = standarddev(dts, bessel=True)
 
         vwr = rnorm100 * (1.0 - pow(sdev_p / self.p.sdev_max, self.p.tau))
-        self.rets['vwr'] = round(vwr, 6)
+        self.rets["vwr"] = round(vwr, 6)
 
     def notify_fund(self, cash, value, fundvalue, shares):
         if not self._fundmode:

@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import collections
 import datetime
@@ -28,8 +27,7 @@ import io
 import os.path
 
 import backtrader as bt
-from backtrader import (date2num, num2date, time2num, TimeFrame, dataseries,
-                        metabase)
+from backtrader import date2num, num2date, time2num, TimeFrame, dataseries, metabase
 
 from backtrader.utils.py3 import with_metaclass, zip, range, string_types
 from backtrader.utils import tzparse
@@ -42,19 +40,19 @@ class MetaAbstractDataBase(dataseries.OHLCDateTime.__class__):
     _indcol = dict()
 
     def __init__(cls, name, bases, dct):
-        '''
+        """
         Class has already been created ... register subclasses
-        '''
+        """
         # Initialize the class
         super(MetaAbstractDataBase, cls).__init__(name, bases, dct)
 
-        if not cls.aliased and \
-           name != 'DataBase' and not name.startswith('_'):
+        if not cls.aliased and name != "DataBase" and not name.startswith("_"):
             cls._indcol[name] = cls
 
     def dopreinit(cls, _obj, *args, **kwargs):
-        _obj, args, kwargs = \
-            super(MetaAbstractDataBase, cls).dopreinit(_obj, *args, **kwargs)
+        _obj, args, kwargs = super(MetaAbstractDataBase, cls).dopreinit(
+            _obj, *args, **kwargs
+        )
 
         # Find the owner and store it
         _obj._feed = metabase.findowner(_obj, FeedBase)
@@ -62,12 +60,13 @@ class MetaAbstractDataBase(dataseries.OHLCDateTime.__class__):
         _obj.notifs = collections.deque()  # store notifications for cerebro
 
         _obj._dataname = _obj.p.dataname
-        _obj._name = ''
+        _obj._name = ""
         return _obj, args, kwargs
 
     def dopostinit(cls, _obj, *args, **kwargs):
-        _obj, args, kwargs = \
-            super(MetaAbstractDataBase, cls).dopostinit(_obj, *args, **kwargs)
+        _obj, args, kwargs = super(MetaAbstractDataBase, cls).dopostinit(
+            _obj, *args, **kwargs
+        )
 
         # Either set by subclass or the parameter or use the dataname (ticker)
         _obj._name = _obj._name or _obj.p.name
@@ -92,16 +91,18 @@ class MetaAbstractDataBase(dataseries.OHLCDateTime.__class__):
         if isinstance(_obj.p.fromdate, datetime.date):
             # push it to the end of the day, or else intraday
             # values before the end of the day would be gone
-            if not hasattr(_obj.p.fromdate, 'hour'):
+            if not hasattr(_obj.p.fromdate, "hour"):
                 _obj.p.fromdate = datetime.datetime.combine(
-                    _obj.p.fromdate, _obj.p.sessionstart)
+                    _obj.p.fromdate, _obj.p.sessionstart
+                )
 
         if isinstance(_obj.p.todate, datetime.date):
             # push it to the end of the day, or else intraday
             # values before the end of the day would be gone
-            if not hasattr(_obj.p.todate, 'hour'):
+            if not hasattr(_obj.p.todate, "hour"):
                 _obj.p.todate = datetime.datetime.combine(
-                    _obj.p.todate, _obj.p.sessionend)
+                    _obj.p.todate, _obj.p.sessionend
+                )
 
         _obj._barstack = collections.deque()  # for filter operations
         _obj._barstash = collections.deque()  # for filter operations
@@ -111,7 +112,7 @@ class MetaAbstractDataBase(dataseries.OHLCDateTime.__class__):
         for fp in _obj.p.filters:
             if inspect.isclass(fp):
                 fp = fp(_obj)
-                if hasattr(fp, 'last'):
+                if hasattr(fp, "last"):
                     _obj._ffilters.append((fp, [], {}))
 
             _obj._filters.append((fp, [], {}))
@@ -119,31 +120,45 @@ class MetaAbstractDataBase(dataseries.OHLCDateTime.__class__):
         return _obj, args, kwargs
 
 
-class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
-                                      dataseries.OHLCDateTime)):
+class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateTime)):
 
     params = (
-        ('dataname', None),
-        ('name', ''),
-        ('compression', 1),
-        ('timeframe', TimeFrame.Days),
-        ('fromdate', ''), #保持与ib的兼容，使用''表示不指定具体日期
-        ('todate', ''),
-        ('sessionstart', None),
-        ('sessionend', None),
-        ('filters', []),
-        ('tz', None),
-        ('tzinput', None),
-        ('qcheck', 0.0),  # timeout in seconds (float) to check for events
-        ('calendar', None),
+        ("dataname", None),
+        ("name", ""),
+        ("compression", 1),
+        ("timeframe", TimeFrame.Days),
+        ("fromdate", ""),  # 保持与ib的兼容，使用''表示不指定具体日期
+        ("todate", ""),
+        ("sessionstart", None),
+        ("sessionend", None),
+        ("filters", []),
+        ("tz", None),
+        ("tzinput", None),
+        ("qcheck", 0.0),  # timeout in seconds (float) to check for events
+        ("calendar", None),
     )
 
-    (CONNECTED, DISCONNECTED, CONNBROKEN, DELAYED,
-     LIVE, NOTSUBSCRIBED, NOTSUPPORTED_TF, UNKNOWN) = range(8)
+    (
+        CONNECTED,
+        DISCONNECTED,
+        CONNBROKEN,
+        DELAYED,
+        LIVE,
+        NOTSUBSCRIBED,
+        NOTSUPPORTED_TF,
+        UNKNOWN,
+    ) = range(8)
 
     _NOTIFNAMES = [
-        'CONNECTED', 'DISCONNECTED', 'CONNBROKEN', 'DELAYED',
-        'LIVE', 'NOTSUBSCRIBED', 'NOTSUPPORTED_TIMEFRAME', 'UNKNOWN']
+        "CONNECTED",
+        "DISCONNECTED",
+        "CONNBROKEN",
+        "DELAYED",
+        "LIVE",
+        "NOTSUBSCRIBED",
+        "NOTSUPPORTED_TIMEFRAME",
+        "UNKNOWN",
+    ]
 
     @classmethod
     def _getstatusname(cls, status):
@@ -177,13 +192,13 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
         self._tzinput = bt.utils.date.Localizer(self._gettzinput())
 
         # Convert user input times to the output timezone (or min/max)
-        if self.p.fromdate == '':
-            self.fromdate = float('-inf')
+        if self.p.fromdate == "":
+            self.fromdate = float("-inf")
         else:
             self.fromdate = self.date2num(self.p.fromdate)
 
-        if self.p.todate == '':
-            self.todate = float('inf')
+        if self.p.todate == "":
+            self.todate = float("inf")
         else:
             self.todate = self.date2num(self.p.todate)
 
@@ -209,7 +224,7 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
         return self._tmoffset
 
     def _getnexteos(self):
-        '''Returns the next eos using a trading calendar if available'''
+        """Returns the next eos using a trading calendar if available"""
         if self._clone:
             return self.data._getnexteos()
 
@@ -234,12 +249,12 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
         return nexteos, nextdteos
 
     def _gettzinput(self):
-        '''Can be overriden by classes to return a timezone for input'''
+        """Can be overriden by classes to return a timezone for input"""
         return tzparse(self.p.tzinput)
 
     def _gettz(self):
-        '''To be overriden by subclasses which may auto-calculate the
-        timezone'''
+        """To be overriden by subclasses which may auto-calculate the
+        timezone"""
         return tzparse(self.p.tz)
 
     def date2num(self, dt):
@@ -265,19 +280,19 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
         self._qcheck = qwait
 
     def islive(self):
-        '''If this returns True, ``Cerebro`` will deactivate ``preload`` and
+        """If this returns True, ``Cerebro`` will deactivate ``preload`` and
         ``runonce`` because a live data source must be fetched tick by tick (or
-        bar by bar)'''
+        bar by bar)"""
         return False
 
     def put_notification(self, status, *args, **kwargs):
-        '''Add arguments to notification queue'''
+        """Add arguments to notification queue"""
         if self._laststatus != status:
             self.notifs.append((status, args, kwargs))
             self._laststatus = status
 
     def get_notifications(self):
-        '''Return the pending "store" notifications'''
+        """Return the pending "store" notifications"""
         # The background thread could keep on adding notifications. The None
         # mark allows to identify which is the last notification to deliver
         self.notifs.append(None)  # put a mark
@@ -306,7 +321,7 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
         # some filters have a state so give them a chance to reset
         # (e.g. resampler filter needs to clear state when running optimization)
         for ff, _, _ in self._filters:
-            if hasattr(ff, 'reset'):
+            if hasattr(ff, "reset"):
                 ff.reset()
 
     def stop(self):
@@ -322,7 +337,7 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
         return d
 
     def setenvironment(self, env):
-        '''Keep a reference to the environment'''
+        """Keep a reference to the environment"""
         self._env = env
 
     def getenvironment(self):
@@ -337,15 +352,15 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
             pobj = p(self, *args, **kwargs)
             self._filters.append((pobj, [], {}))
 
-            if hasattr(pobj, 'last'):
+            if hasattr(pobj, "last"):
                 self._ffilters.append((pobj, [], {}))
 
         else:
             self._filters.append((p, args, kwargs))
 
     def compensate(self, other):
-        '''Call it to let the broker know that actions on this asset will
-        compensate open positions in another'''
+        """Call it to let the broker know that actions on this asset will
+        compensate open positions in another"""
 
         self._compensate = other
 
@@ -355,19 +370,18 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
         # a real-time data feed is in use and 1 minutes bars are being
         # constructed with 5 seconds updates
         for lalias in self.getlinealiases():
-            if lalias != 'datetime':
-                setattr(self, 'tick_' + lalias, None)
+            if lalias != "datetime":
+                setattr(self, "tick_" + lalias, None)
 
         self.tick_last = None
 
     def _tick_fill(self, force=False):
         # If nothing filled the tick_xxx attributes, the bar is the tick
         alias0 = self._getlinealias(0)
-        if force or getattr(self, 'tick_' + alias0, None) is None:
+        if force or getattr(self, "tick_" + alias0, None) is None:
             for lalias in self.getlinealiases():
-                if lalias != 'datetime':
-                    setattr(self, 'tick_' + lalias,
-                            getattr(self.lines, lalias)[0])
+                if lalias != "datetime":
+                    setattr(self, "tick_" + lalias, getattr(self.lines, lalias)[0])
 
             self.tick_last = getattr(self.lines, alias0)[0]
 
@@ -375,7 +389,7 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
         if len(self) < self.buflen():
             return self.lines.datetime[1]  # return the future
 
-        return float('inf')  # max date else
+        return float("inf")  # max date else
 
     def advance(self, size=1, datamaster=None, ticks=True):
         if ticks:
@@ -469,7 +483,7 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
     def _check(self, forcedata=None):
         ret = 0
         for ff, fargs, fkwargs in self._filters:
-            if not hasattr(ff, 'check'):
+            if not hasattr(ff, "check"):
                 continue
             ff.check(self, _forcedata=forcedata, *fargs, **fkwargs)
 
@@ -546,17 +560,17 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
         return False
 
     def _add2stack(self, bar, stash=False):
-        '''Saves given bar (list of values) to the stack for later retrieval'''
+        """Saves given bar (list of values) to the stack for later retrieval"""
         if not stash:
             self._barstack.append(bar)
         else:
             self._barstash.append(bar)
 
     def _save2stack(self, erase=False, force=False, stash=False):
-        '''Saves current bar to the bar stack for later retrieval
+        """Saves current bar to the bar stack for later retrieval
 
         Parameter ``erase`` determines removal from the data stream
-        '''
+        """
         bar = [line[0] for line in self.itersize()]
         if not stash:
             self._barstack.append(bar)
@@ -567,10 +581,10 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
             self.backwards(force=force)
 
     def _updatebar(self, bar, forward=False, ago=0):
-        '''Load a value from the stack onto the lines to form the new bar
+        """Load a value from the stack onto the lines to form the new bar
 
         Returns True if values are present, False otherwise
-        '''
+        """
         if forward:
             self.forward()
 
@@ -578,10 +592,10 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
             line[0 + ago] = val
 
     def _fromstack(self, forward=False, stash=False):
-        '''Load a value from the stack onto the lines to form the new bar
+        """Load a value from the stack onto the lines to form the new bar
 
         Returns True if values are present, False otherwise
-        '''
+        """
 
         coll = self._barstack if not stash else self._barstash
 
@@ -625,7 +639,7 @@ class FeedBase(with_metaclass(metabase.MetaParams, object)):
         for pname, pvalue in self.p._getitems():
             kwargs.setdefault(pname, getattr(self.p, pname))
 
-        kwargs['dataname'] = dataname
+        kwargs["dataname"] = dataname
         data = self._getdata(**kwargs)
 
         data._name = name
@@ -637,7 +651,7 @@ class FeedBase(with_metaclass(metabase.MetaParams, object)):
         for pname, pvalue in self.p._getitems():
             kwargs.setdefault(pname, getattr(self.p, pname))
 
-        kwargs['dataname'] = dataname
+        kwargs["dataname"] = dataname
         return self.DataCls(**kwargs)
 
 
@@ -647,14 +661,15 @@ class MetaCSVDataBase(DataBase.__class__):
         if not _obj.p.name and not _obj._name:
             _obj._name, _ = os.path.splitext(os.path.basename(_obj.p.dataname))
 
-        _obj, args, kwargs = \
-            super(MetaCSVDataBase, cls).dopostinit(_obj, *args, **kwargs)
+        _obj, args, kwargs = super(MetaCSVDataBase, cls).dopostinit(
+            _obj, *args, **kwargs
+        )
 
         return _obj, args, kwargs
 
 
 class CSVDataBase(with_metaclass(MetaCSVDataBase, DataBase)):
-    '''
+    """
     Base class for classes implementing CSV DataFeeds
 
     The class takes care of opening the file, reading the lines and
@@ -666,20 +681,23 @@ class CSVDataBase(with_metaclass(MetaCSVDataBase, DataBase)):
 
     The return value of ``_loadline`` (True/False) will be the return value
     of ``_load`` which has been overriden by this base class
-    '''
+    """
 
     f = None
-    params = (('headers', True), ('separator', ','),)
+    params = (
+        ("headers", True),
+        ("separator", ","),
+    )
 
     def start(self):
         super(CSVDataBase, self).start()
 
         if self.f is None:
-            if hasattr(self.p.dataname, 'readline'):
+            if hasattr(self.p.dataname, "readline"):
                 self.f = self.p.dataname
             else:
                 # Let an exception propagate to let the caller know
-                self.f = io.open(self.p.dataname, 'r')
+                self.f = io.open(self.p.dataname, "r")
 
         if self.p.headers:
             self.f.readline(5_000_000)  # skip the headers
@@ -713,7 +731,7 @@ class CSVDataBase(with_metaclass(MetaCSVDataBase, DataBase)):
         if not line:
             return False
 
-        line = line.rstrip('\n')
+        line = line.rstrip("\n")
         linetokens = line.split(self.separator)
         return self._loadline(linetokens)
 
@@ -727,17 +745,16 @@ class CSVDataBase(with_metaclass(MetaCSVDataBase, DataBase)):
         if not line:
             return None
 
-        line = line.rstrip('\n')
+        line = line.rstrip("\n")
         linetokens = line.split(self.separator)
         return linetokens
 
 
 class CSVFeedBase(FeedBase):
-    params = (('basepath', ''),) + CSVDataBase.params._gettuple()
+    params = (("basepath", ""),) + CSVDataBase.params._gettuple()
 
     def _getdata(self, dataname, **kwargs):
-        return self.DataCls(dataname=self.p.basepath + dataname,
-                            **self.p._getkwargs())
+        return self.DataCls(dataname=self.p.basepath + dataname, **self.p._getkwargs())
 
 
 class DataClone(AbstractDataBase):

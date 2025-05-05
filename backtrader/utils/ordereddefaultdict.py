@@ -20,8 +20,7 @@
 ###############################################################################
 # From: http://stackoverflow.com/questions/4126348/how-do-i-rewrite-this-function-to-implement-ordereddict/4127426#4127426
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from collections import OrderedDict
 
@@ -34,7 +33,7 @@ class OrderedDefaultdict(OrderedDict):
             self.default_factory = None
         else:
             if not (args[0] is None or callable(args[0])):
-                raise TypeError('first argument must be callable or None')
+                raise TypeError("first argument must be callable or None")
             self.default_factory = args[0]
             args = args[1:]
         super(OrderedDefaultdict, self).__init__(*args, **kwargs)

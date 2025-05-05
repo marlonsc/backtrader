@@ -10,9 +10,9 @@ from testcommon import getdatadir
 
 class BtTestStrategy(bt.Strategy):
     params = (
-        ('period', 15),
-        ('printdata', True),
-        ('printops', True),
+        ("period", 15),
+        ("printdata", True),
+        ("printops", True),
     )
 
 
@@ -43,5 +43,5 @@ def test_pickle_datatrades():
     assert len(dt_loaded) == 751
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test_pickle_datatrades()

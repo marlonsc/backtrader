@@ -18,15 +18,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import datetime
 import math
 import time as _time
 
 from .py3 import string_types
-
 
 ZERO = datetime.timedelta(0)
 
@@ -56,16 +54,16 @@ def tzparse(tz):
     try:
         import pytz  # keep the import very local
     except ImportError:
-        return Localizer(tz)    # nothing can be done
+        return Localizer(tz)  # nothing can be done
 
     tzs = tz
-    if tzs == 'CST':  # usual alias
-        tzs = 'CST6CDT'
+    if tzs == "CST":  # usual alias
+        tzs = "CST6CDT"
 
     try:
         tz = pytz.timezone(tzs)
     except pytz.UnknownTimeZoneError:
-        return Localizer(tz)    # nothing can be done
+        return Localizer(tz)  # nothing can be done
 
     return tz
 
@@ -76,7 +74,7 @@ def Localizer(tz):
     def localize(self, dt):
         return dt.replace(tzinfo=self)
 
-    if tz is not None and not hasattr(tz, 'localize'):
+    if tz is not None and not hasattr(tz, "localize"):
         # patch the tz instance with a bound method
         tz.localize = types.MethodType(localize, tz)
 
@@ -118,9 +116,17 @@ class _LocalTimezone(datetime.tzinfo):
         return _time.tzname[self._isdst(dt)]
 
     def _isdst(self, dt):
-        tt = (dt.year, dt.month, dt.day,
-              dt.hour, dt.minute, dt.second,
-              dt.weekday(), 0, 0)
+        tt = (
+            dt.year,
+            dt.month,
+            dt.day,
+            dt.hour,
+            dt.minute,
+            dt.second,
+            dt.weekday(),
+            0,
+            0,
+        )
         try:
             stamp = _time.mktime(tt)
         except (ValueError, OverflowError):
@@ -174,16 +180,23 @@ def num2date(x, tz=None, naive=True):
 
     if True and tz is not None:
         dt = datetime.datetime(
-            dt.year, dt.month, dt.day, int(hour), int(minute), int(second),
-            microsecond, tzinfo=UTC)
+            dt.year,
+            dt.month,
+            dt.day,
+            int(hour),
+            int(minute),
+            int(second),
+            microsecond,
+            tzinfo=UTC,
+        )
         dt = dt.astimezone(tz)
         if naive:
             dt = dt.replace(tzinfo=None)
     else:
         # If not tz has been passed return a non-timezoned dt
         dt = datetime.datetime(
-            dt.year, dt.month, dt.day, int(hour), int(minute), int(second),
-            microsecond)
+            dt.year, dt.month, dt.day, int(hour), int(minute), int(second), microsecond
+        )
 
     if microsecond > 999990:  # compensate for rounding errors
         dt += datetime.timedelta(microseconds=1e6 - microsecond)
@@ -208,21 +221,25 @@ def date2num(dt, tz=None):
     if tz is not None:
         dt = tz.localize(dt)
 
-    if hasattr(dt, 'tzinfo') and dt.tzinfo is not None:
+    if hasattr(dt, "tzinfo") and dt.tzinfo is not None:
         delta = dt.tzinfo.utcoffset(dt)
         if delta is not None:
             dt -= delta
 
     base = float(dt.toordinal())
-    if hasattr(dt, 'hour'):
+    if hasattr(dt, "hour"):
         # base += (dt.hour / HOURS_PER_DAY +
         #          dt.minute / MINUTES_PER_DAY +
         #          dt.second / SECONDS_PER_DAY +
         #          dt.microsecond / MUSECONDS_PER_DAY
         #         )
-        base = math.fsum(
-            (base, dt.hour / HOURS_PER_DAY, dt.minute / MINUTES_PER_DAY,
-             dt.second / SECONDS_PER_DAY, dt.microsecond / MUSECONDS_PER_DAY))
+        base = math.fsum((
+            base,
+            dt.hour / HOURS_PER_DAY,
+            dt.minute / MINUTES_PER_DAY,
+            dt.second / SECONDS_PER_DAY,
+            dt.microsecond / MUSECONDS_PER_DAY,
+        ))
 
     return base
 
@@ -232,9 +249,11 @@ def time2num(tm):
     Converts the hour/minute/second/microsecond part of tm (datetime.datetime
     or time) to a num
     """
-    num = (tm.hour / HOURS_PER_DAY +
-           tm.minute / MINUTES_PER_DAY +
-           tm.second / SECONDS_PER_DAY +
-           tm.microsecond / MUSECONDS_PER_DAY)
+    num = (
+        tm.hour / HOURS_PER_DAY
+        + tm.minute / MINUTES_PER_DAY
+        + tm.second / SECONDS_PER_DAY
+        + tm.microsecond / MUSECONDS_PER_DAY
+    )
 
     return num

@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tools for working with MongoDB ObjectIds.
-"""
+"""Tools for working with MongoDB ObjectIds."""
 
 import binascii
 import calendar
@@ -103,7 +102,9 @@ class ObjectId(object):
             self.__validate(oid)
 
     @classmethod
-    def from_datetime(cls: Type["ObjectId"], generation_time: datetime.datetime) -> "ObjectId":
+    def from_datetime(
+        cls: Type["ObjectId"], generation_time: datetime.datetime
+    ) -> "ObjectId":
         """Create a dummy ObjectId instance with a specific generation time.
 
         This method is useful for doing range queries on a field
@@ -203,7 +204,8 @@ class ObjectId(object):
                 _raise_invalid_id(oid)
         else:
             raise TypeError(
-                "id must be an instance of (bytes, str, ObjectId), not %s" % (type(oid),)
+                "id must be an instance of (bytes, str, ObjectId), not %s"
+                % (type(oid),)
             )
 
     @property

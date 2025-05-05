@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import functools
 import math
@@ -41,7 +40,7 @@ class Logic(LineActions):
 
 
 class DivByZero(Logic):
-    '''This operation is a Lines object and fills it values by executing a
+    """This operation is a Lines object and fills it values by executing a
     division on the numerator / denominator arguments and avoiding a division
     by zero exception by checking the denominator
 
@@ -50,7 +49,8 @@ class DivByZero(Logic):
       - b: denominator (numeric or iterable object ... mostly a Lines object)
       - zero (def: 0.0): value to apply if division by zero would be raised
 
-    '''
+    """
+
     def __init__(self, a, b, zero=0.0):
         super(DivByZero, self).__init__(a, b)
         self.a = a
@@ -74,7 +74,7 @@ class DivByZero(Logic):
 
 
 class DivZeroByZero(Logic):
-    '''This operation is a Lines object and fills it values by executing a
+    """This operation is a Lines object and fills it values by executing a
     division on the numerator / denominator arguments and avoiding a division
     by zero exception or an indetermination by checking the
     denominator/numerator pair
@@ -84,8 +84,9 @@ class DivZeroByZero(Logic):
       - b: denominator (numeric or iterable object ... mostly a Lines object)
       - single (def: +inf): value to apply if division is x / 0
       - dual (def: 0.0): value to apply if division is 0 / 0
-    '''
-    def __init__(self, a, b, single=float('inf'), dual=0.0):
+    """
+
+    def __init__(self, a, b, single=float("inf"), dual=0.0):
         super(DivZeroByZero, self).__init__(a, b)
         self.a = a
         self.b = b
@@ -203,6 +204,7 @@ class MultiLogic(Logic):
         for i in range(start, end):
             dst[i] = flogic([arr[i] for arr in arrays])
 
+
 class SingleLogic(Logic):
     def next(self):
         self[0] = self.flogic(self.args[0])
@@ -219,19 +221,18 @@ class SingleLogic(Logic):
 class MultiLogicReduce(MultiLogic):
     def __init__(self, *args, **kwargs):
         super(MultiLogicReduce, self).__init__(*args)
-        if 'initializer' not in kwargs:
+        if "initializer" not in kwargs:
             self.flogic = functools.partial(functools.reduce, self.flogic)
         else:
-            self.flogic = functools.partial(functools.reduce, self.flogic,
-                                            initializer=kwargs['initializer'])
+            self.flogic = functools.partial(
+                functools.reduce, self.flogic, initializer=kwargs["initializer"]
+            )
 
 
 class Reduce(MultiLogicReduce):
     def __init__(self, flogic, *args, **kwargs):
         self.flogic = flogic
         super(Reduce, self).__init__(*args, **kwargs)
-
-
 
 
 # The _xxxlogic functions are defined at module scope to make them

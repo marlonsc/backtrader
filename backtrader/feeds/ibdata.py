@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import datetime
 import time
@@ -29,8 +28,7 @@ from dateutil.relativedelta import relativedelta
 import backtrader as bt
 from backtrader.feed import DataBase
 from backtrader import TimeFrame, date2num, num2date
-from backtrader.utils.py3 import (integer_types, queue, string_types,
-                                  with_metaclass)
+from backtrader.utils.py3 import integer_types, queue, string_types, with_metaclass
 from backtrader.metabase import MetaParams
 from backtrader.stores import ibstore, ibstore_insync
 from backtrader.commissions.ibcommission import IBCommInfo
@@ -38,7 +36,7 @@ from backtrader.commissions.ibcommission import IBCommInfo
 
 class MetaIBData(DataBase.__class__):
     def __init__(cls, name, bases, dct):
-        '''Class has already been created ... register'''
+        """Class has already been created ... register"""
         # Initialize the class
         super(MetaIBData, cls).__init__(name, bases, dct)
 
@@ -46,13 +44,14 @@ class MetaIBData(DataBase.__class__):
         # ibstore.IBStore.DataCls = cls
         ibstore_insync.IBStoreInsync.DataCls = cls
 
+
 class IBData(with_metaclass(MetaIBData, DataBase)):
-    '''Interactive Brokers Data Feed.
+    """Interactive Brokers Data Feed.
 
     Supports the following contract specifications in parameter ``dataname``:
 
     Pattern: secType-others
-        BONDS & CFDs & CommoditiesCopy & CryptocurrencyCopy & Continuous Futures * 
+        BONDS & CFDs & CommoditiesCopy & CryptocurrencyCopy & Continuous Futures *
         Forex Pairs & IndicesCopy & Mutual Funds & STK & Standard Warrants:
             secType-symbol-currency-exchange-primaryExchange(only for STK)
             BOND-912828C57-USD-SMART
@@ -88,7 +87,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
             OPT-GOOG-USD-BOX-'20190315'-'100'-1180-C
             WAR-GOOG-EUR-FWB-20201117-'001'-15000-C
 
-             
+
 
     Params:
 
@@ -104,24 +103,24 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
 
       - ``primaryExchange`` (default: ``None``)
 
-        For certain smart-routed stock contracts that have the same symbol, 
-        currency and exchange, you would also need to specify the primary 
-        exchange attribute to uniquely define the contract. This should be 
+        For certain smart-routed stock contracts that have the same symbol,
+        currency and exchange, you would also need to specify the primary
+        exchange attribute to uniquely define the contract. This should be
         defined as the native exchange of a contract
 
       - ``right`` (default: ``None``)
 
-        Warrants, like options, require an expiration date, a right, 
+        Warrants, like options, require an expiration date, a right,
         a strike and an optional multiplier.
 
       - ``strike`` (default: ``None``)
 
-        Warrants, like options, require an expiration date, a right, 
+        Warrants, like options, require an expiration date, a right,
         a strike and an optional multiplier.
 
       - ``expiry`` (default: ``None``)
 
-        Warrants, like options, require an expiration date, a right, 
+        Warrants, like options, require an expiration date, a right,
         a strike and an optional multiplier.
         In this case expiry is 'lastTradeDateOrContractMonth'
       - ``currency`` (default: ``''``)
@@ -131,20 +130,20 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
 
       - ``multiplier`` (default: ``None``)
 
-        Occasionally, you can expect to have more than a single future 
-        contract for the same underlying with the same expiry. To rule 
+        Occasionally, you can expect to have more than a single future
+        contract for the same underlying with the same expiry. To rule
         out the ambiguity, the contract's multiplier can be given
 
       - ``tradingClass`` (default: ``None``)
 
-        It is not unusual to find many option contracts with an almost identical 
-        description (i.e. underlying symbol, strike, last trading date, 
+        It is not unusual to find many option contracts with an almost identical
+        description (i.e. underlying symbol, strike, last trading date,
         multiplier, etc.). Adding more details such as the trading class will help
 
       - ``localSymbol`` (default: ``None``)
 
-        Warrants, like options, require an expiration date, a right, a strike and 
-        a multiplier. For some warrants it will be necessary to define a 
+        Warrants, like options, require an expiration date, a right, a strike and
+        a multiplier. For some warrants it will be necessary to define a
         localSymbol or conId to uniquely identify the contract
       - ``historical`` (default: ``False``)
 
@@ -167,7 +166,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
           - 'TRADES' for any other
 
         Use 'ASK' for the Ask quote of cash assets
-        
+
         Check the IB API docs if another value is wished
         (TRADES,MIDPOINT,BID,ASK,BID_ASK,ADJUSTED_LAST,HISTORICAL_VOLATILITY,
          OPTION_IMPLIED_VOLATILITY, REBATE_RATE, FEE_RATE,
@@ -247,53 +246,72 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         Or else: ``IBData`` as ``IBData(dataname='AAPL', currency='USD')``
         which uses the default values (``STK`` and ``SMART``) and overrides
         the currency to be ``USD``
-    '''
+    """
+
     params = (
-        ('secType', 'STK'),  # usual industry value
-        ('exchange', 'SMART'),  # usual industry value
-        ('primaryExchange', None),  # native exchange of the contract
-        ('right', None),  # Option or Warrant Call('C') or Put('P')
-        ('strike', None),  # Future, Option or Warrant strike price
-        ('multiplier', None),  # Future, Option or Warrant multiplier
-        ('expiry', None),  # Future, Option or Warrant lastTradeDateOrContractMonth date 
-        ('currency', ''),  # currency for the contract
-        ('localSymbol', None),  # Warrant localSymbol override
-        ('rtbar', False),  # use RealTime 5 seconds bars
-        ('historical', False),  # only historical download
-        ('durationStr', '1 W'), #historical - The amount of time to go back from the request’s given enddatetime.
-        ('barSizeSetting', '4 hours'),   # historical - The data’s granularity or Valid Bar Sizes
-        ('what', None),  # historical - what to show
-        ('useRTH', False),  # historical - download only Regular Trading Hours
-        ('formatDate', 1),  # historical -  The format in which the incoming bars’ date should be presented. 
-        ('keepUpToDate', False),    # historical -  Whether a subscription is made to return 
-        ('qcheck', 0.5),  # timeout in seconds (float) to check for events
-        ('backfill_start', True),  # do backfilling at the start
-        ('backfill', True),  # do backfilling when reconnecting
-        ('backfill_from', None),  # additional data source to do backfill from
-        ('latethrough', False),  # let late samples through
-        ('tradename', None),  # use a different asset as order target
-        ('numberOfTicks', 1000),  # Number of distinct data points. Max is 1000 per request.
-        ('ignoreSize', False),  # Omit updates that reflect only changes in size, and not price. Applicable to Bid_Ask data requests.
+        ("secType", "STK"),  # usual industry value
+        ("exchange", "SMART"),  # usual industry value
+        ("primaryExchange", None),  # native exchange of the contract
+        ("right", None),  # Option or Warrant Call('C') or Put('P')
+        ("strike", None),  # Future, Option or Warrant strike price
+        ("multiplier", None),  # Future, Option or Warrant multiplier
+        ("expiry", None),  # Future, Option or Warrant lastTradeDateOrContractMonth date
+        ("currency", ""),  # currency for the contract
+        ("localSymbol", None),  # Warrant localSymbol override
+        ("rtbar", False),  # use RealTime 5 seconds bars
+        ("historical", False),  # only historical download
+        (
+            "durationStr",
+            "1 W",
+        ),  # historical - The amount of time to go back from the request’s given enddatetime.
+        (
+            "barSizeSetting",
+            "4 hours",
+        ),  # historical - The data’s granularity or Valid Bar Sizes
+        ("what", None),  # historical - what to show
+        ("useRTH", False),  # historical - download only Regular Trading Hours
+        (
+            "formatDate",
+            1,
+        ),  # historical -  The format in which the incoming bars’ date should be presented.
+        (
+            "keepUpToDate",
+            False,
+        ),  # historical -  Whether a subscription is made to return
+        ("qcheck", 0.5),  # timeout in seconds (float) to check for events
+        ("backfill_start", True),  # do backfilling at the start
+        ("backfill", True),  # do backfilling when reconnecting
+        ("backfill_from", None),  # additional data source to do backfill from
+        ("latethrough", False),  # let late samples through
+        ("tradename", None),  # use a different asset as order target
+        (
+            "numberOfTicks",
+            1000,
+        ),  # Number of distinct data points. Max is 1000 per request.
+        (
+            "ignoreSize",
+            False,
+        ),  # Omit updates that reflect only changes in size, and not price. Applicable to Bid_Ask data requests.
     )
 
     _IBCommissionTypes = {
-        None : IBCommInfo.COMM_FIXED,  # default
-        'STK' : IBCommInfo.COMM_STOCK,
-        'FUT' : IBCommInfo.COMM_FUTURE,
-        'OPT' : IBCommInfo.COMM_OPTION,
-        'CASH' : IBCommInfo.COMM_FOREX,
+        None: IBCommInfo.COMM_FIXED,  # default
+        "STK": IBCommInfo.COMM_STOCK,
+        "FUT": IBCommInfo.COMM_FUTURE,
+        "OPT": IBCommInfo.COMM_OPTION,
+        "CASH": IBCommInfo.COMM_FOREX,
     }
 
     _IBFUTMargin = {
-        'M6E' : {'Initial':374.049, 'Maintenance':325.26},
-        'M6B' : {'Initial':272.374, 'Maintenance':236.847},
-        'M6A' : {'Initial':261.883, 'Maintenance':227.725},
-        'MSF' : {'Initial':488.304, 'Maintenance':424.6125},
-        'MCD' : {'Initial':169.445, 'Maintenance':147.343},
-        'MJY' : {'Initial':377.996, 'Maintenance':328.692},
+        "M6E": {"Initial": 374.049, "Maintenance": 325.26},
+        "M6B": {"Initial": 272.374, "Maintenance": 236.847},
+        "M6A": {"Initial": 261.883, "Maintenance": 227.725},
+        "MSF": {"Initial": 488.304, "Maintenance": 424.6125},
+        "MCD": {"Initial": 169.445, "Maintenance": 147.343},
+        "MJY": {"Initial": 377.996, "Maintenance": 328.692},
     }
 
-    #_store = ibstore.IBStore
+    # _store = ibstore.IBStore
     _store = ibstore_insync.IBStoreInsync
 
     # Minimum size supported by real-time bars
@@ -327,8 +345,8 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
 
         tzs = self.p.tz if tzstr else self.contractdetails.timeZoneId
 
-        if tzs == 'CST':  # reported by TWS, not compatible with pytz. patch it
-            tzs = 'CST6CDT'
+        if tzs == "CST":  # reported by TWS, not compatible with pytz. patch it
+            tzs = "CST6CDT"
 
         try:
             tz = pytz.timezone(tzs)
@@ -339,8 +357,8 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         return tz
 
     def islive(self):
-        '''Returns ``True`` to notify ``Cerebro`` that preloading and runonce
-        should be deactivated'''
+        """Returns ``True`` to notify ``Cerebro`` that preloading and runonce
+        should be deactivated"""
         return not self.p.historical
 
     def __init__(self, **kwargs):
@@ -348,52 +366,69 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         self.precontract = self.parsecontract(self.p.dataname)
         self.pretradecontract = self.parsecontract(self.p.tradename)
         self.constractStartDate = None  # 用于保存合约开始日期，data/datetime
-        self.commission = None #用于保存数据对应的佣金信息,在生成对应合同时初始化
+        self.commission = None  # 用于保存数据对应的佣金信息,在生成对应合同时初始化
         self._lock_q = threading.Condition()  # sync access to qlive
 
     def caldate(self):
         duranumber = int(self.p.durationStr.split()[0])
         duraunit = self.p.durationStr.split()[1]
-        
+
         todate = self.p.todate
 
-        if self.p.todate == '':
+        if self.p.todate == "":
             todate = datetime.datetime.now()
         elif isinstance(self.p.todate, datetime.date):
             # push it to the end of the day, or else intraday
             # values before the end of the day would be gone
-            if not hasattr(self.p.todate, 'hour'):
+            if not hasattr(self.p.todate, "hour"):
                 todate = self.p.todate = datetime.datetime.combine(
-                    self.p.todate, self.p.sessionend)
-                
-        units_map = {
-            'Y': 'years',
-            'M': 'months',
-            'W': 'weeks',
-            'D': 'days',
-            'S': 'seconds'
-            }
+                    self.p.todate, self.p.sessionend
+                )
 
+        units_map = {
+            "Y": "years",
+            "M": "months",
+            "W": "weeks",
+            "D": "days",
+            "S": "seconds",
+        }
 
         kwargs = {units_map[duraunit]: duranumber}
         self.p.fromdate = todate - relativedelta(**kwargs)
 
     def setenvironment(self, env):
-        '''Receives an environment (cerebro) and passes it over to the store it
-        belongs to'''
+        """Receives an environment (cerebro) and passes it over to the store it
+        belongs to"""
         super(IBData, self).setenvironment(env)
         env.addstore(self.ib)
 
     CONTRACT_TYPE = [
-        'BOND', 'CFD', 'CMDTY', 'CRYPTO', 'CONTFUT', 'CASH', 'IND', 'FUND',
-        'STK', 'IOPT', 'FIGI', 'CUSIP', 'ISIN', 'FUT', 'FOP', 'OPT', 'WAR']
+        "BOND",
+        "CFD",
+        "CMDTY",
+        "CRYPTO",
+        "CONTFUT",
+        "CASH",
+        "IND",
+        "FUND",
+        "STK",
+        "IOPT",
+        "FIGI",
+        "CUSIP",
+        "ISIN",
+        "FUT",
+        "FOP",
+        "OPT",
+        "WAR",
+    ]
+
     def parsecontract(self, dataname):
-        '''
+        """
         Parses dataname generates a default contract
-        
+
         Pattern: secType-others
-        
-        BONDS & CFDs & CommoditiesCopy & CryptocurrencyCopy & Continuous Futures * 
+
+        BONDS & CFDs & CommoditiesCopy & CryptocurrencyCopy & Continuous Futures *
         Forex Pairs & IndicesCopy & Mutual Funds & STK & Standard Warrants:
             secType-symbol-currency-exchange-primaryExchange(only for STK)
             BOND-122014AJ2-USD-SMART    #EndData=datetime(2024, 5, 16) / ''
@@ -425,7 +460,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
             FOP-GBL-EUR-EUREX-'20230224'-'1000'-138-C
             OPT-GOOG-USD-SMART-20241220-100-180-C #EndData=datetime(2024, 10, 16) / '' 1M 1hour
             WAR-GOOG-EUR-FWB-20201117-001-15000-C
-        '''
+        """
 
         # Set defaults for optional tokens in the ticker string
         if dataname is None:
@@ -435,39 +470,41 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         precon = self.ib.makecontract()
 
         # split the ticker string
-        tokens = iter(dataname.split('-'))
+        tokens = iter(dataname.split("-"))
 
         # Symbol and security type are compulsory
         sectype = next(tokens)
 
         assert sectype in self.CONTRACT_TYPE
 
-        if sectype in ['CUSIP', 'FIGI', 'ISIN']:
+        if sectype in ["CUSIP", "FIGI", "ISIN"]:
             precon.secIdType = self.p.secType = sectype
             precon.secId = next(tokens)
             precon.exchange = self.p.exchange = next(tokens)
         else:
             precon.secType = self.p.secType = sectype
-            if sectype == 'IOPT':
+            if sectype == "IOPT":
                 precon.localsymbol = self.p.localsymbol = next(tokens)
             else:
                 precon.symbol = self.p.symbol = next(tokens)
             precon.currency = self.p.currency = next(tokens)
             precon.exchange = self.p.exchange = next(tokens)
 
-            if sectype == 'STK':
+            if sectype == "STK":
                 try:
                     precon.primaryExchange = self.p.primaryExchange = next(tokens)
                 except StopIteration:
                     pass
-            elif sectype in ['FUT', 'FOP', 'OPT', 'WAR']:
+            elif sectype in ["FUT", "FOP", "OPT", "WAR"]:
                 expiry = next(tokens)
                 multiplier = next(tokens)
                 strike = next(tokens)
-                if sectype == 'FUT':
+                if sectype == "FUT":
                     precon.lastTradeDateOrContractMonth = self.p.expiry = expiry
-                    precon.IncludeExpired = self.p.IncludeExpired = bool(strike) #只是同一位置，变量名与实际变更不一致
-                    if multiplier != 'None':
+                    precon.IncludeExpired = self.p.IncludeExpired = bool(
+                        strike
+                    )  # 只是同一位置，变量名与实际变更不一致
+                    if multiplier != "None":
                         precon.multiplier = self.p.multiplier = multiplier
                 else:
                     precon.lastTradeDateOrContractMonth = self.p.expiry = expiry
@@ -475,30 +512,30 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
                     precon.strike = self.p.strike = int(strike)
                     precon.right = self.p.right = next(tokens)
 
+        print(f"precon= {precon}")
+        return precon
 
-        print(f'precon= {precon}')
-        return precon   
-    
     def updatecomminfo(self, contract=None):
 
         broker = self.ib.getbroker()
         commparams = dict()
-        commparams['commtype'] = self._IBCommissionTypes.get(contract.secType, None)
-        if contract.secType in ['FUT', 'FOP', 'OPT']:
-            commparams['margin'] = self._IBFUTMargin.get(contract.symbol, None).get('Initial', None)  
+        commparams["commtype"] = self._IBCommissionTypes.get(contract.secType, None)
+        if contract.secType in ["FUT", "FOP", "OPT"]:
+            commparams["margin"] = self._IBFUTMargin.get(contract.symbol, None).get(
+                "Initial", None
+            )
         else:
-            commparams['margin'] = None
-        mult = getattr(contract, 'multiplier', 1.0)
-        if mult == '':
+            commparams["margin"] = None
+        mult = getattr(contract, "multiplier", 1.0)
+        if mult == "":
             mult = 1.0
-        commparams['mult'] = mult
+        commparams["mult"] = mult
         self.commission = IBCommInfo(**commparams)
         broker.addcommissioninfo(self.commission, name=self._name)
 
-
     def start(self):
-        '''Starts the IB connecction and gets the real contract and
-        contractdetails if it exists'''
+        """Starts the IB connecction and gets the real contract and
+        contractdetails if it exists"""
         super(IBData, self).start()
         # Kickstart store and get queue to wait on
         self.qlive = self.ib.start(data=self)
@@ -531,19 +568,16 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         self.put_notification(self.CONNECTED)
         # get real contract details with real conId (contractId)
         cds = self.ib.reqContractDetails(self.precontract)
-        assert len(cds)==1
-        
+        assert len(cds) == 1
+
         if cds is not None:
             cdetails = cds[0]
             self.contract = cdetails.contract
             self.contractdetails = cdetails
             self.constractStartDateUTC = self.ib.reqHeadTimeStamp(
-                contract=self.contract,
-                whatToShow="TRADES", 
-                useRTH=1, 
-                formatDate=1
-                ) #format=1 UTC time format=2 epoch time
-            self.updatecomminfo(self.contract)            
+                contract=self.contract, whatToShow="TRADES", useRTH=1, formatDate=1
+            )  # format=1 UTC time format=2 epoch time
+            self.updatecomminfo(self.contract)
         else:
             # no contract can be found (or many)
             self.put_notification(self.DISCONNECTED)
@@ -571,7 +605,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
             self._st_start()
 
     def reqdata(self):
-        '''request real-time data. checks cash vs non-cash) and param useRT'''
+        """request real-time data. checks cash vs non-cash) and param useRT"""
         if self.contract is None or self._subcription_valid:
             return
 
@@ -580,15 +614,19 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         elif self._usertvol and self._timeframe == bt.TimeFrame.Ticks:
             self.qlive = self.ib.reqTickByTickData(self.contract, self.p.what)
         else:
-            self.qlive = self.ib.reqRealTimeBars(contract=self.contract, barSize=5, whatToShow= self.p.what, useRTH=self.p.useRTH)
+            self.qlive = self.ib.reqRealTimeBars(
+                contract=self.contract,
+                barSize=5,
+                whatToShow=self.p.what,
+                useRTH=self.p.useRTH,
+            )
             self.qlive.updateEvent += self.onliveupdate
-
 
         self._subcription_valid = True
         return self.qlive
 
     def canceldata(self):
-        '''Cancels Market Data subscription, checking asset type and rtbar'''
+        """Cancels Market Data subscription, checking asset type and rtbar"""
         if self.contract is None:
             return
 
@@ -607,7 +645,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
             d = len(self.lines.close)
             self.forward()
             self._load_rtbar(bar, hist=hist)
-            
+
     def onliveupdate(self, bars, hasNewBar):
         # 对于hisorical数据，bars保存reqhistoricaEnd开始的所有数据
         # bars长度为0，表示未接收到update数据
@@ -615,21 +653,25 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         if self.p.historical:
             newdatalen = len(bars)
 
-            if newdatalen < 2: #无数据或仅有一个数据，不处理。
+            if newdatalen < 2:  # 无数据或仅有一个数据，不处理。
                 return
-            
+
             if hasNewBar:
                 curtime = bars[-1].date
-                if newdatalen==2:
+                if newdatalen == 2:
                     print(f"onliveupdate size:1 bar.date:{bars[0].date}")
                 else:
-                    print(f"onliveupdate size:{newdatalen-1} from {bars[0].date} to {bars[-2].date}")  
-                self.updatelivedata(newdatalen-1, bars[:-1]) #有2个以上数据,按timeframe频率更新，避免频率重复调用,一直更新到倒数第2个数据，仅保存最后一个数据:-1不包含-1，只到-2
+                    print(
+                        f"onliveupdate size:{newdatalen-1} from {bars[0].date} to"
+                        f" {bars[-2].date}"
+                    )
+                self.updatelivedata(
+                    newdatalen - 1, bars[:-1]
+                )  # 有2个以上数据,按timeframe频率更新，避免频率重复调用,一直更新到倒数第2个数据，仅保存最后一个数据:-1不包含-1，只到-2
                 bars[:] = bars[-1:]
         else:
             with self._lock_q:
                 self._lock_q.notify()
-
 
     def _load(self):
         if self.contract is None or self._state == self._ST_OVER:
@@ -645,7 +687,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
                     try:
                         msg = self.qlive.pop(0)
                     except Exception as e:
-                        #print("_load live data Exception:", e)
+                        # print("_load live data Exception:", e)
                         return None
 
                 if msg is None:  # Conn broken during historical/backfilling
@@ -658,7 +700,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
 
                     self._statelivereconn = self.p.backfill
                     continue
-                
+
                 if msg == -504:  # Conn broken during live
                     self._subcription_valid = False
                     self.put_notification(self.CONNBROKEN)
@@ -694,7 +736,9 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
                         self.reqdata()  # resubscribe
                     continue
 
-                elif msg == -10225:  # Bust event occurred, current subscription is deactivated.
+                elif (
+                    msg == -10225
+                ):  # Bust event occurred, current subscription is deactivated.
                     self._subcription_valid = False
                     if not self._statelivereconn:
                         self._statelivereconn = self.p.backfill
@@ -736,19 +780,27 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
                 dtend = msg.datetime if self._usertvol else msg.time
 
                 self.qhist = self.ib.reqHistoricalData(
-                    contract=self.contract, endDateTime=dtend, 
-                    durationStr=self.p.durationStr, barSizeSetting=self.p.barSizeSetting,
-                    whatToShow=self.p.what, useRTH=self.p.useRTH,
-                    formatDate=self.p.formatDate,keepUpToDate=self.p.keepUpToDate
-                    )
+                    contract=self.contract,
+                    endDateTime=dtend,
+                    durationStr=self.p.durationStr,
+                    barSizeSetting=self.p.barSizeSetting,
+                    whatToShow=self.p.what,
+                    useRTH=self.p.useRTH,
+                    formatDate=self.p.formatDate,
+                    keepUpToDate=self.p.keepUpToDate,
+                )
                 self.qhist.updateEvent += self.onliveupdate
 
                 self.p.fromdate = self.qhist[0].date
                 self.p.todate = self.qhist[-1].date
                 if isinstance(self.p.fromdate, datetime.date):
-                    self.p.fromdate = datetime.datetime.combine(self.p.fromdate, datetime.time())
+                    self.p.fromdate = datetime.datetime.combine(
+                        self.p.fromdate, datetime.time()
+                    )
                 if isinstance(self.p.todate, datetime.date):
-                    self.p.todate = datetime.datetime.combine(self.p.todate, datetime.time())
+                    self.p.todate = datetime.datetime.combine(
+                        self.p.todate, datetime.time()
+                    )
                 self._state = self._ST_HISTORBACK
                 self._statelivereconn = False  # no longer in live
                 continue
@@ -757,7 +809,10 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
                 if len(self.qhist) > 0:
                     msg = self.qhist.pop(0)
                     if len(self.qhist) == 0:
-                        print(f"Historical total:{len(self)} final historical data {msg.date}")
+                        print(
+                            f"Historical total:{len(self)} final historical data"
+                            f" {msg.date}"
+                        )
                 else:
                     if self.p.historical:  # only historical
                         self.put_notification(self.DISCONNECTED)
@@ -831,35 +886,41 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         # 重载start_finish方法，ibdata额外增加数据开始日期判断
         super()._start_finish()
 
-        if self.constractStartDateUTC and self.fromdate < date2num(self.constractStartDateUTC):
+        if self.constractStartDateUTC and self.fromdate < date2num(
+            self.constractStartDateUTC
+        ):
             print(
-                f'From <{self.p.fromdate}> To <{self.constractStartDateUTC}>'
-                f'has no constract data, '
-                f'data start from {self.constractStartDateUTC}'
-                )
+                f"From <{self.p.fromdate}> To <{self.constractStartDateUTC}>"
+                "has no constract data, "
+                f"data start from {self.constractStartDateUTC}"
+            )
 
     def _st_start(self):
         if self.p.historical:
             self.put_notification(self.DELAYED)
-            dtend = ''
-            if self.p.todate != '':
+            dtend = ""
+            if self.p.todate != "":
                 dtend = num2date(self.todate)
 
             if self._timeframe == bt.TimeFrame.Ticks:
                 self.qhist = self.ib.reqHistoricalTicksEx(
-                    contract=self.contract, enddate=dtend,
-                    what=self.p.what, useRTH=self.p.useRTH, tz=self._tz)
+                    contract=self.contract,
+                    enddate=dtend,
+                    what=self.p.what,
+                    useRTH=self.p.useRTH,
+                    tz=self._tz,
+                )
             else:
                 self.qhist = self.ib.reqHistoricalData(
-                    contract=self.contract, 
-                    endDateTime=self.p.todate, 
-                    durationStr=self.p.durationStr, 
+                    contract=self.contract,
+                    endDateTime=self.p.todate,
+                    durationStr=self.p.durationStr,
                     barSizeSetting=self.p.barSizeSetting,
-                    whatToShow=self.p.what, 
+                    whatToShow=self.p.what,
                     useRTH=self.p.useRTH,
                     formatDate=self.p.formatDate,
-                    keepUpToDate=self.p.keepUpToDate
-                    )
+                    keepUpToDate=self.p.keepUpToDate,
+                )
                 self.qhist.updateEvent += self.onliveupdate
 
             assert len(self.qhist) > 0
@@ -867,14 +928,12 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
             self.p.todate = self.qhist[-1].date
             if isinstance(self.p.fromdate, datetime.date):
                 self.p.fromdate = datetime.datetime.combine(
-                    self.p.fromdate, 
-                    datetime.time()
-                    )
+                    self.p.fromdate, datetime.time()
+                )
             if isinstance(self.p.todate, datetime.date):
                 self.p.todate = datetime.datetime.combine(
-                    self.p.todate, 
-                    datetime.time()
-                    )
+                    self.p.todate, datetime.time()
+                )
             self._state = self._ST_HISTORBACK
             return True  # continue before
 
@@ -945,14 +1004,14 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
 
         self.lines.datetime[0] = dt
 
-        if tick.dataType == 'RT_TICK_MIDPOINT':
+        if tick.dataType == "RT_TICK_MIDPOINT":
             self.lines.close[0] = tick.midPoint
-        elif tick.dataType == 'RT_TICK_BID_ASK':
+        elif tick.dataType == "RT_TICK_BID_ASK":
             self.lines.open[0] = tick.bidPrice
             self.lines.close[0] = tick.askPrice
             self.lines.volume[0] = tick.bidSize
             self.lines.openinterest[0] = tick.askSize
-        elif tick.dataType == 'RT_TICK_LAST':
+        elif tick.dataType == "RT_TICK_LAST":
             self.lines.close[0] = tick.price
             self.lines.volume[0] = tick.size
 

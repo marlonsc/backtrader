@@ -11,17 +11,20 @@ _logger = logging.getLogger(__name__)
 
 class FakeFeed(bt.DataBase):
     class State(Enum):
-        BACKTEST = 0,
-        BACKFILL = 1,
-        LIVE = 2,
+        BACKTEST = (0,)
+        BACKFILL = (1,)
+        LIVE = (2,)
 
     params = (
-        ('starting_value', 200),
-        ('tick_interval', datetime.timedelta(seconds=25)),
-        ('start_delay', 0),
-        ('run_duration', datetime.timedelta(seconds=30)),  # only used when not backtest mode
-        ('num_gen_bars', 10),  # number of bars to generate in backtest or backfill mode
-        ('live', True),
+        ("starting_value", 200),
+        ("tick_interval", datetime.timedelta(seconds=25)),
+        ("start_delay", 0),
+        (
+            "run_duration",
+            datetime.timedelta(seconds=30),
+        ),  # only used when not backtest mode
+        ("num_gen_bars", 10),  # number of bars to generate in backtest or backfill mode
+        ("live", True),
     )
 
     def __init__(self):
@@ -33,7 +36,9 @@ class FakeFeed(bt.DataBase):
         self._current_comp = 0
         self._num_bars_delivered = 0
         self._compression_in_effect = None
-        self._tmoffset = datetime.timedelta(seconds=-0.5)  # configure offset cause we are sending slightly delayed ticked data (of course!)
+        self._tmoffset = datetime.timedelta(
+            seconds=-0.5
+        )  # configure offset cause we are sending slightly delayed ticked data (of course!)
         self._start_ts = None  # time of the first call to _load to obey start_delay
 
     def start(self):
@@ -101,7 +106,11 @@ class FakeFeed(bt.DataBase):
             return self._load_bar(now)
 
     def _load_bar(self, now, backfill=False):
-        tf, comp = (self.p.timeframe, self.p.compression) if not backfill else (self._timeframe, self._compression)
+        tf, comp = (
+            (self.p.timeframe, self.p.compression)
+            if not backfill
+            else (self._timeframe, self._compression)
+        )
         if tf == bt.TimeFrame.Ticks:
             delta = self.p.tick_interval * comp
         elif tf == bt.TimeFrame.Seconds:
@@ -111,11 +120,15 @@ class FakeFeed(bt.DataBase):
         elif tf == bt.TimeFrame.Days:
             delta = datetime.timedelta(days=comp)
         else:
-            raise RuntimeError(f"{self._name} - Unsupported timeframe: {self.p.timeframe}")
+            raise RuntimeError(
+                f"{self._name} - Unsupported timeframe: {self.p.timeframe}"
+            )
 
         if self._last_delivered is None:
             if backfill:
-                self._last_delivered = self._time_floored(now - delta * self.p.num_gen_bars, tf, comp)  # go back one bar too far since we add one instantly
+                self._last_delivered = self._time_floored(
+                    now - delta * self.p.num_gen_bars, tf, comp
+                )  # go back one bar too far since we add one instantly
             else:
                 self._last_delivered = self._time_floored(now, tf)
 
@@ -124,7 +137,13 @@ class FakeFeed(bt.DataBase):
         _logger.info(f"{self._name} - Loading bar: {self._last_delivered}")
 
         if backfill:
-            self._update_bar(self._last_delivered, self._cur_value, self._cur_value, self._cur_value + comp, self._cur_value + comp)
+            self._update_bar(
+                self._last_delivered,
+                self._cur_value,
+                self._cur_value,
+                self._cur_value + comp,
+                self._cur_value + comp,
+            )
             self._cur_value += comp
         else:
             self._update_line(self._last_delivered, self._cur_value)
@@ -137,21 +156,24 @@ class FakeFeed(bt.DataBase):
     def _time_floored(now, timeframe, comp=1):
         t = now
         if timeframe in [bt.TimeFrame.Seconds, bt.TimeFrame.Ticks]:
-            t -= datetime.timedelta(seconds=t.second % comp,
-                                    microseconds=t.microsecond)
+            t -= datetime.timedelta(seconds=t.second % comp, microseconds=t.microsecond)
         elif timeframe == bt.TimeFrame.Minutes:
-            t -= datetime.timedelta(minutes=t.minute % comp,
-                                    seconds=t.second,
-                                    microseconds=t.microsecond)
+            t -= datetime.timedelta(
+                minutes=t.minute % comp, seconds=t.second, microseconds=t.microsecond
+            )
         elif timeframe == bt.TimeFrame.Days:
             if comp != 1:
-                raise Exception('For timeframe days only compression of 1 is supported.')
-            t -= datetime.timedelta(hours=t.hour,
-                                    minutes=t.minute,
-                                    seconds=t.second,
-                                    microseconds=t.microsecond)
+                raise Exception(
+                    "For timeframe days only compression of 1 is supported."
+                )
+            t -= datetime.timedelta(
+                hours=t.hour,
+                minutes=t.minute,
+                seconds=t.second,
+                microseconds=t.microsecond,
+            )
         else:
-            raise Exception(f'TimeFrame {timeframe} not supported')
+            raise Exception(f"TimeFrame {timeframe} not supported")
         return t
 
     def _load_live(self, now):
@@ -166,7 +188,10 @@ class FakeFeed(bt.DataBase):
         if tf == bt.TimeFrame.Ticks:
             if now - self._last_delivered < self.p.tick_interval:
                 return None
-            _logger.info(f"{self._name} - Delivering - now: {now} - lastDel: {self._last_delivered}")
+            _logger.info(
+                f"{self._name} - Delivering - now: {now} - lastDel:"
+                f" {self._last_delivered}"
+            )
             self._last_delivered += self.p.tick_interval
         else:
             if tf == bt.TimeFrame.Minutes:
@@ -180,7 +205,9 @@ class FakeFeed(bt.DataBase):
 
         self._current_comp += 1
 
-        if self._current_comp == comp:  # do not use self._compression as it is modified by resampler already
+        if (
+            self._current_comp == comp
+        ):  # do not use self._compression as it is modified by resampler already
             self._current_comp = 0
 
             self._update_line(self._last_delivered, self._cur_value)
@@ -189,4 +216,3 @@ class FakeFeed(bt.DataBase):
             return True
         else:
             return None
-

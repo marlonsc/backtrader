@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import testcommon
 
@@ -27,9 +26,7 @@ import backtrader as bt
 import backtrader.indicators as btind
 
 chkdatas = 1
-chkvals = [
-    ['0.543029', '-2.347884', '0.416325']
-]
+chkvals = [["0.543029", "-2.347884", "0.416325"]]
 
 chkmin = 15
 chkind = btind.PGO
@@ -37,14 +34,16 @@ chkind = btind.PGO
 
 def test_run(main=False):
     datas = [testcommon.getdata(i) for i in range(chkdatas)]
-    testcommon.runtest(datas,
-                       testcommon.TestStrategy,
-                       main=main,
-                       plot=main,
-                       chkind=chkind,
-                       chkmin=chkmin,
-                       chkvals=chkvals)
+    testcommon.runtest(
+        datas,
+        testcommon.TestStrategy,
+        main=main,
+        plot=main,
+        chkind=chkind,
+        chkmin=chkmin,
+        chkvals=chkvals,
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test_run(main=True)

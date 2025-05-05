@@ -1,4 +1,4 @@
-#coding=utf-8
+# coding=utf-8
 from . import xtconstant as _XTCONST_
 
 """
@@ -6,20 +6,22 @@ from . import xtconstant as _XTCONST_
 包含股票+信用
 """
 
+
 class StockAccount(object):
     """
     定义证券账号类, 用于证券账号的报撤单等
     """
-    def __new__(cls, account_id, account_type = 'STOCK'):
+
+    def __new__(cls, account_id, account_type="STOCK"):
         """
         :param account_id: 资金账号
         :return: 若资金账号不为字符串，返回类型错误
         """
         if not isinstance(account_id, str):
-            return u"资金账号必须为字符串类型"
+            return "资金账号必须为字符串类型"
         return super(StockAccount, cls).__new__(cls)
 
-    def __init__(self, account_id, account_type = 'STOCK'):
+    def __init__(self, account_id, account_type="STOCK"):
         """
         :param account_id: 资金账号
         """
@@ -36,6 +38,7 @@ class XtAsset(object):
     """
     迅投股票账号资金结构
     """
+
     def __init__(self, account_id, cash, frozen_cash, market_value, total_asset):
         """
         :param account_id: 资金账号
@@ -56,11 +59,28 @@ class XtOrder(object):
     """
     迅投股票委托结构
     """
-    def __init__(self, account_id, stock_code,
-                 order_id, order_sysid, order_time, order_type, order_volume,
-                 price_type, price, traded_volume, traded_price,
-                 order_status, status_msg, strategy_name, order_remark, direction, offset_flag,
-                 stock_code1):
+
+    def __init__(
+        self,
+        account_id,
+        stock_code,
+        order_id,
+        order_sysid,
+        order_time,
+        order_type,
+        order_volume,
+        price_type,
+        price,
+        traded_volume,
+        traded_price,
+        order_status,
+        status_msg,
+        strategy_name,
+        order_remark,
+        direction,
+        offset_flag,
+        stock_code1,
+    ):
         """
         :param account_id: 资金账号
         :param stock_code: 证券代码, 例如"600000.SH"
@@ -105,10 +125,26 @@ class XtTrade(object):
     """
     迅投股票成交结构
     """
-    def __init__(self, account_id, stock_code,
-                 order_type, traded_id, traded_time, traded_price, traded_volume, traded_amount,
-                 order_id, order_sysid, strategy_name, order_remark, direction, offset_flag,
-                 stock_code1, commission):
+
+    def __init__(
+        self,
+        account_id,
+        stock_code,
+        order_type,
+        traded_id,
+        traded_time,
+        traded_price,
+        traded_volume,
+        traded_amount,
+        order_id,
+        order_sysid,
+        strategy_name,
+        order_remark,
+        direction,
+        offset_flag,
+        stock_code1,
+        commission,
+    ):
         """
         :param account_id: 资金账号
         :param stock_code: 证券代码, 例如"600000.SH"
@@ -149,10 +185,22 @@ class XtPosition(object):
     """
     迅投股票持仓结构
     """
-    def __init__(self, account_id, stock_code,
-                 volume, can_use_volume, open_price, market_value,
-                 frozen_volume, on_road_volume, yesterday_volume, avg_price, direction,
-                 stock_code1):
+
+    def __init__(
+        self,
+        account_id,
+        stock_code,
+        volume,
+        can_use_volume,
+        open_price,
+        market_value,
+        frozen_volume,
+        on_road_volume,
+        yesterday_volume,
+        avg_price,
+        direction,
+        stock_code1,
+    ):
         """
         :param account_id: 资金账号
         :param stock_code: 证券代码, 例如"600000.SH"
@@ -185,9 +233,16 @@ class XtOrderError(object):
     """
     迅投股票委托失败结构
     """
-    def __init__(self, account_id, order_id,
-                 error_id=None, error_msg=None,
-                 strategy_name=None, order_remark=None):
+
+    def __init__(
+        self,
+        account_id,
+        order_id,
+        error_id=None,
+        error_msg=None,
+        strategy_name=None,
+        order_remark=None,
+    ):
         """
         :param account_id: 资金账号
         :param order_id: 订单编号
@@ -209,8 +264,10 @@ class XtCancelError(object):
     """
     迅投股票委托撤单失败结构
     """
-    def __init__(self, account_id, order_id, market, order_sysid,
-                 error_id=None, error_msg=None):
+
+    def __init__(
+        self, account_id, order_id, market, order_sysid, error_id=None, error_msg=None
+    ):
         """
         :param account_id: 资金账号
         :param order_id: 订单编号
@@ -232,7 +289,10 @@ class XtOrderResponse(object):
     """
     迅投异步下单接口对应的委托反馈
     """
-    def __init__(self, account_id, order_id, strategy_name, order_remark, error_msg, seq):
+
+    def __init__(
+        self, account_id, order_id, strategy_name, order_remark, error_msg, seq
+    ):
         """
         :param account_id: 资金账号
         :param order_id: 订单编号
@@ -248,11 +308,15 @@ class XtOrderResponse(object):
         self.error_msg = error_msg
         self.seq = seq
 
+
 class XtCancelOrderResponse(object):
     """
     迅投异步委托撤单请求返回结构
     """
-    def __init__(self, account_id, cancel_result, order_id, order_sysid, seq, error_msg):
+
+    def __init__(
+        self, account_id, cancel_result, order_id, order_sysid, seq, error_msg
+    ):
         """
         :param account_id: 资金账号
         :param cancel_result: 撤单结果
@@ -274,11 +338,25 @@ class XtCreditOrder(XtOrder):
     """
     迅投信用委托结构
     """
-    def __init__(self, account_id, stock_code,
-                 order_id, order_time, order_type, order_volume,
-                 price_type, price, traded_volume, traded_price,
-                 order_status, status_msg, order_remark, contract_no,
-                 stock_code1):
+
+    def __init__(
+        self,
+        account_id,
+        stock_code,
+        order_id,
+        order_time,
+        order_type,
+        order_volume,
+        price_type,
+        price,
+        traded_volume,
+        traded_price,
+        order_status,
+        status_msg,
+        order_remark,
+        contract_no,
+        stock_code1,
+    ):
         """
         :param account_id: 资金账号
         :param stock_code: 证券代码, 例如"600000.SH"
@@ -317,10 +395,19 @@ class XtCreditDeal(object):
     """
     迅投信用成交结构
     """
-    def __init__(self, account_id, stock_code,
-                 traded_id, traded_time, traded_price,
-                 traded_volume, order_id, contract_no,
-                 stock_code1):
+
+    def __init__(
+        self,
+        account_id,
+        stock_code,
+        traded_id,
+        traded_time,
+        traded_price,
+        traded_volume,
+        order_id,
+        contract_no,
+        stock_code1,
+    ):
         """
         :param account_id: 资金账号
         :param stock_code: 证券代码, 例如"600000.SH"
@@ -342,10 +429,12 @@ class XtCreditDeal(object):
         self.contract_no = contract_no
         self.stock_code1 = stock_code1
 
+
 class XtAccountStatus(object):
     """
     迅投账号状态结构
     """
+
     def __init__(self, account_id, account_type, status):
         """
         :param account_id: 资金账号
@@ -356,10 +445,12 @@ class XtAccountStatus(object):
         self.account_id = account_id
         self.status = status
 
+
 class XtSmtAppointmentResponse(object):
     """
     迅投约券相关异步接口的反馈
     """
+
     def __init__(self, seq, success, msg, apply_id):
         """
         :param seq: 异步请求序号

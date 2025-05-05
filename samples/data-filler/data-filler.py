@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import argparse
 import datetime
@@ -41,13 +40,13 @@ def runstrategy():
     cerebro = bt.Cerebro()
 
     # Get the dates from the args
-    fromdate = datetime.datetime.strptime(args.fromdate, '%Y-%m-%d')
-    todate = datetime.datetime.strptime(args.todate, '%Y-%m-%d')
+    fromdate = datetime.datetime.strptime(args.fromdate, "%Y-%m-%d")
+    todate = datetime.datetime.strptime(args.todate, "%Y-%m-%d")
 
     # Get the session times to pass them to the indicator
     # datetime.time has no strptime ...
-    dtstart = datetime.datetime.strptime(args.tstart, '%H:%M')
-    dtend = datetime.datetime.strptime(args.tend, '%H:%M')
+    dtstart = datetime.datetime.strptime(args.tstart, "%H:%M")
+    dtend = datetime.datetime.strptime(args.tend, "%H:%M")
 
     # Create the 1st data
     data = btfeeds.BacktraderCSVData(
@@ -73,9 +72,7 @@ def runstrategy():
         # Calculate backward period - tend tstart are in same day
         # + 1 to include last moment of the interval dstart <-> dtend
         td = ((dtend - dtstart).seconds // 60) + 1
-        cerebro.addindicator(RelativeVolume,
-                             period=td,
-                             volisnan=math.isnan(args.fvol))
+        cerebro.addindicator(RelativeVolume, period=td, volisnan=math.isnan(args.fvol))
 
     # Add an empty strategy
     cerebro.addstrategy(bt.Strategy)
@@ -93,60 +90,87 @@ def runstrategy():
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(
-        description='DataFilter/DataFiller Sample')
+    parser = argparse.ArgumentParser(description="DataFilter/DataFiller Sample")
 
-    parser.add_argument('--data', '-d',
-                        default='../../datas/2006-01-02-volume-min-001.txt',
-                        help='data to add to the system')
+    parser.add_argument(
+        "--data",
+        "-d",
+        default="../../datas/2006-01-02-volume-min-001.txt",
+        help="data to add to the system",
+    )
 
-    parser.add_argument('--filter', '-ft', action='store_true',
-                        help='Filter using session start/end times')
+    parser.add_argument(
+        "--filter",
+        "-ft",
+        action="store_true",
+        help="Filter using session start/end times",
+    )
 
-    parser.add_argument('--filler', '-fl', action='store_true',
-                        help='Fill missing bars inside start/end times')
+    parser.add_argument(
+        "--filler",
+        "-fl",
+        action="store_true",
+        help="Fill missing bars inside start/end times",
+    )
 
-    parser.add_argument('--fvol', required=False, default=0.0,
-                        type=float,
-                        help='Use as fill volume for missing bar (def: 0.0)')
+    parser.add_argument(
+        "--fvol",
+        required=False,
+        default=0.0,
+        type=float,
+        help="Use as fill volume for missing bar (def: 0.0)",
+    )
 
-    parser.add_argument('--tstart', '-ts',
-                        # default='09:14:59',
-                        # help='Start time for the Session Filter (%H:%M:%S)')
-                        default='09:15',
-                        help='Start time for the Session Filter (HH:MM)')
+    parser.add_argument(
+        "--tstart",
+        "-ts",
+        # default='09:14:59',
+        # help='Start time for the Session Filter (%H:%M:%S)')
+        default="09:15",
+        help="Start time for the Session Filter (HH:MM)",
+    )
 
-    parser.add_argument('--tend', '-te',
-                        # default='17:15:59',
-                        # help='End time for the Session Filter (%H:%M:%S)')
-                        default='17:15',
-                        help='End time for the Session Filter (HH:MM)')
+    parser.add_argument(
+        "--tend",
+        "-te",
+        # default='17:15:59',
+        # help='End time for the Session Filter (%H:%M:%S)')
+        default="17:15",
+        help="End time for the Session Filter (HH:MM)",
+    )
 
-    parser.add_argument('--relvol', '-rv', action='store_true',
-                        help='Add relative volume indicator')
+    parser.add_argument(
+        "--relvol", "-rv", action="store_true", help="Add relative volume indicator"
+    )
 
-    parser.add_argument('--fromdate', '-f',
-                        default='2006-01-01',
-                        help='Starting date in YYYY-MM-DD format')
+    parser.add_argument(
+        "--fromdate",
+        "-f",
+        default="2006-01-01",
+        help="Starting date in YYYY-MM-DD format",
+    )
 
-    parser.add_argument('--todate', '-t',
-                        default='2006-12-31',
-                        help='Starting date in YYYY-MM-DD format')
+    parser.add_argument(
+        "--todate",
+        "-t",
+        default="2006-12-31",
+        help="Starting date in YYYY-MM-DD format",
+    )
 
-    parser.add_argument('--writer', '-w', action='store_true',
-                        help='Add a writer to cerebro')
+    parser.add_argument(
+        "--writer", "-w", action="store_true", help="Add a writer to cerebro"
+    )
 
-    parser.add_argument('--wrcsv', '-wc', action='store_true',
-                        help='Enable CSV Output in the writer')
+    parser.add_argument(
+        "--wrcsv", "-wc", action="store_true", help="Enable CSV Output in the writer"
+    )
 
-    parser.add_argument('--plot', '-p', action='store_true',
-                        help='Plot the read data')
+    parser.add_argument("--plot", "-p", action="store_true", help="Plot the read data")
 
-    parser.add_argument('--numfigs', '-n', default=1,
-                        help='Plot using numfigs figures')
+    parser.add_argument("--numfigs", "-n", default=1, help="Plot using numfigs figures")
 
     return parser.parse_args()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     runstrategy()

@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 
 import backtrader as bt
@@ -27,7 +26,7 @@ import backtrader.indicators as btind
 
 
 class MA_CrossOver(bt.Strategy):
-    '''This is a long-only strategy which operates on a moving average cross
+    """This is a long-only strategy which operates on a moving average cross
 
     Note:
       - Although the default
@@ -47,16 +46,17 @@ class MA_CrossOver(bt.Strategy):
     Order Execution Type:
       - Market
 
-    '''
-    alias = ('SMA_CrossOver',)
+    """
+
+    alias = ("SMA_CrossOver",)
 
     params = (
         # period for the fast Moving Average
-        ('fast', 10),
+        ("fast", 10),
         # period for the slow moving average
-        ('slow', 30),
+        ("slow", 30),
         # moving average to use
-        ('_movav', btind.MovAv.SMA)
+        ("_movav", btind.MovAv.SMA),
     )
 
     def __init__(self):

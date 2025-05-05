@@ -7,12 +7,12 @@ from backtrader.analyzers import TimeReturn
 
 class Sortino(Analyzer):
     params = (
-        ('timeframe', TimeFrame.Years),
-        ('compression', 1),
-        ('riskfreerate', 0.01),
-        ('factor', None),
-        ('convertrate', True),
-        ('annualize', False),
+        ("timeframe", TimeFrame.Years),
+        ("compression", 1),
+        ("riskfreerate", 0.01),
+        ("factor", None),
+        ("convertrate", True),
+        ("annualize", False),
     )
 
     RATEFACTORS = {
@@ -25,8 +25,8 @@ class Sortino(Analyzer):
     def __init__(self):
         super(Sortino, self).__init__()
         self.ret = TimeReturn(
-            timeframe=self.p.timeframe,
-            compression=self.p.compression)
+            timeframe=self.p.timeframe, compression=self.p.compression
+        )
         self.ratio = 0.0
 
     def stop(self):
@@ -54,13 +54,12 @@ class Sortino(Analyzer):
             #   T = Target (risk-free rate)
             #   TDD = Downside Risk
             ret_free_avg = np.mean(returns) - rate
-            tdd = math.sqrt(np.mean([min(0, r - rate)**2 for r in returns]))
+            tdd = math.sqrt(np.mean([min(0, r - rate) ** 2 for r in returns]))
 
             try:
                 ratio = ret_free_avg / tdd
 
-                if factor is not None and \
-                        self.p.convertrate and self.p.annualize:
+                if factor is not None and self.p.convertrate and self.p.annualize:
 
                     ratio = math.sqrt(factor) * ratio
             except (ValueError, TypeError, ZeroDivisionError):
@@ -71,4 +70,4 @@ class Sortino(Analyzer):
             ratio = None
 
         self.ratio = round(ratio, 4) if ratio else ratio
-        self.rets['sortinoratio'] = self.ratio
+        self.rets["sortinoratio"] = self.ratio

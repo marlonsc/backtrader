@@ -18,14 +18,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from backtrader import TimeFrameAnalyzerBase
 
 
 class TimeReturn(TimeFrameAnalyzerBase):
-    '''This analyzer calculates the Returns by looking at the beginning
+    """This analyzer calculates the Returns by looking at the beginning
     and end of the timeframe
 
     Params:
@@ -85,12 +84,12 @@ class TimeReturn(TimeFrameAnalyzerBase):
 
         Returns a dictionary with returns as values and the datetime points for
         each return as keys
-    '''
+    """
 
     params = (
-        ('data', None),
-        ('firstopen', True),
-        ('fund', None),
+        ("data", None),
+        ("firstopen", True),
+        ("fund", None),
     )
 
     def start(self):
@@ -142,7 +141,7 @@ class TimeReturn(TimeFrameAnalyzerBase):
         self._lastvalue = self._value  # keep last value
 
     def optimize(self):
-        '''Optimizies the object if optreturn is in effect'''
+        """Optimizies the object if optreturn is in effect"""
         super().optimize()
 
         self.strategy = None

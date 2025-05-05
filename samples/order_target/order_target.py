@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import argparse
 from datetime import datetime
@@ -28,7 +27,7 @@ import backtrader as bt
 
 
 class TheStrategy(bt.Strategy):
-    '''
+    """
     This strategy is loosely based on some of the examples from the Van
     K. Tharp book: *Trade Your Way To Financial Freedom*. The logic:
 
@@ -45,12 +44,12 @@ class TheStrategy(bt.Strategy):
          exit.
        - If not, update the stop price if the new stop price would be higher
          than the current
-    '''
+    """
 
     params = (
-        ('use_target_size', False),
-        ('use_target_value', False),
-        ('use_target_percent', False),
+        ("use_target_size", False),
+        ("use_target_value", False),
+        ("use_target_percent", False),
     )
 
     def notify_order(self, order):
@@ -67,19 +66,23 @@ class TheStrategy(bt.Strategy):
         dt = self.data.datetime.date()
 
         portfolio_value = self.broker.get_value()
-        print('%04d - %s - Position Size:     %02d - Value %.2f' %
-              (len(self), dt.isoformat(), self.position.size, portfolio_value))
+        print(
+            "%04d - %s - Position Size:     %02d - Value %.2f"
+            % (len(self), dt.isoformat(), self.position.size, portfolio_value)
+        )
 
         data_value = self.broker.get_value([self.data])
 
         if self.p.use_target_value:
-            print('%04d - %s - data value %.2f' %
-                  (len(self), dt.isoformat(), data_value))
+            print(
+                "%04d - %s - data value %.2f" % (len(self), dt.isoformat(), data_value)
+            )
 
         elif self.p.use_target_percent:
             port_perc = data_value / portfolio_value
-            print('%04d - %s - data percent %.2f' %
-                  (len(self), dt.isoformat(), port_perc))
+            print(
+                "%04d - %s - data percent %.2f" % (len(self), dt.isoformat(), port_perc)
+            )
 
         if self.order:
             return  # pending order execution
@@ -90,24 +93,30 @@ class TheStrategy(bt.Strategy):
 
         if self.p.use_target_size:
             target = size
-            print('%04d - %s - Order Target Size: %02d' %
-                  (len(self), dt.isoformat(), size))
+            print(
+                "%04d - %s - Order Target Size: %02d"
+                % (len(self), dt.isoformat(), size)
+            )
 
             self.order = self.order_target_size(target=size)
 
         elif self.p.use_target_value:
             value = size * 1000
 
-            print('%04d - %s - Order Target Value: %.2f' %
-                  (len(self), dt.isoformat(), value))
+            print(
+                "%04d - %s - Order Target Value: %.2f"
+                % (len(self), dt.isoformat(), value)
+            )
 
             self.order = self.order_target_value(target=value)
 
         elif self.p.use_target_percent:
             percent = size / 100.0
 
-            print('%04d - %s - Order Target Percent: %.2f' %
-                  (len(self), dt.isoformat(), percent))
+            print(
+                "%04d - %s - Order Target Percent: %.2f"
+                % (len(self), dt.isoformat(), percent)
+            )
 
             self.order = self.order_target_percent(target=percent)
 
@@ -120,26 +129,28 @@ def runstrat(args=None):
 
     dkwargs = dict()
     if args.fromdate is not None:
-        dkwargs['fromdate'] = datetime.strptime(args.fromdate, '%Y-%m-%d')
+        dkwargs["fromdate"] = datetime.strptime(args.fromdate, "%Y-%m-%d")
     if args.todate is not None:
-        dkwargs['todate'] = datetime.strptime(args.todate, '%Y-%m-%d')
+        dkwargs["todate"] = datetime.strptime(args.todate, "%Y-%m-%d")
 
     # data
     data = bt.feeds.YahooFinanceCSVData(dataname=args.data, **dkwargs)
     cerebro.adddata(data)
 
     # strategy
-    cerebro.addstrategy(TheStrategy,
-                        use_target_size=args.target_size,
-                        use_target_value=args.target_value,
-                        use_target_percent=args.target_percent)
+    cerebro.addstrategy(
+        TheStrategy,
+        use_target_size=args.target_size,
+        use_target_value=args.target_value,
+        use_target_percent=args.target_percent,
+    )
 
     cerebro.run()
 
     if args.plot:
-        pkwargs = dict(style='bar')
+        pkwargs = dict(style="bar")
         if args.plot is not True:  # evals to True but is not True
-            npkwargs = eval('dict(' + args.plot + ')')  # args were passed
+            npkwargs = eval("dict(" + args.plot + ")")  # args were passed
             pkwargs.update(npkwargs)
 
         cerebro.plot(**pkwargs)
@@ -149,44 +160,78 @@ def parse_args(pargs=None):
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        description='Sample for Order Target')
+        description="Sample for Order Target",
+    )
 
-    parser.add_argument('--data', required=False,
-                        default='../../datas/yhoo-1996-2015.txt',
-                        help='Specific data to be read in')
+    parser.add_argument(
+        "--data",
+        required=False,
+        default="../../datas/yhoo-1996-2015.txt",
+        help="Specific data to be read in",
+    )
 
-    parser.add_argument('--fromdate', required=False,
-                        default='2005-01-01',
-                        help='Starting date in YYYY-MM-DD format')
+    parser.add_argument(
+        "--fromdate",
+        required=False,
+        default="2005-01-01",
+        help="Starting date in YYYY-MM-DD format",
+    )
 
-    parser.add_argument('--todate', required=False,
-                        default='2006-12-31',
-                        help='Ending date in YYYY-MM-DD format')
+    parser.add_argument(
+        "--todate",
+        required=False,
+        default="2006-12-31",
+        help="Ending date in YYYY-MM-DD format",
+    )
 
-    parser.add_argument('--cash', required=False, action='store',
-                        type=float, default=1000000,
-                        help='Ending date in YYYY-MM-DD format')
+    parser.add_argument(
+        "--cash",
+        required=False,
+        action="store",
+        type=float,
+        default=1000000,
+        help="Ending date in YYYY-MM-DD format",
+    )
 
     pgroup = parser.add_mutually_exclusive_group(required=True)
 
-    pgroup.add_argument('--target-size', required=False, action='store_true',
-                        help=('Use order_target_size'))
+    pgroup.add_argument(
+        "--target-size",
+        required=False,
+        action="store_true",
+        help="Use order_target_size",
+    )
 
-    pgroup.add_argument('--target-value', required=False, action='store_true',
-                        help=('Use order_target_value'))
+    pgroup.add_argument(
+        "--target-value",
+        required=False,
+        action="store_true",
+        help="Use order_target_value",
+    )
 
-    pgroup.add_argument('--target-percent', required=False,
-                        action='store_true',
-                        help=('Use order_target_percent'))
+    pgroup.add_argument(
+        "--target-percent",
+        required=False,
+        action="store_true",
+        help="Use order_target_percent",
+    )
 
     # Plot options
-    parser.add_argument('--plot', '-p', nargs='?', required=False,
-                        metavar='kwargs', const=True,
-                        help=('Plot the read data applying any kwargs passed\n'
-                              '\n'
-                              'For example:\n'
-                              '\n'
-                              '  --plot style="candle" (to plot candles)\n'))
+    parser.add_argument(
+        "--plot",
+        "-p",
+        nargs="?",
+        required=False,
+        metavar="kwargs",
+        const=True,
+        help=(
+            "Plot the read data applying any kwargs passed\n"
+            "\n"
+            "For example:\n"
+            "\n"
+            '  --plot style="candle" (to plot candles)\n'
+        ),
+    )
 
     if pargs is not None:
         return parser.parse_args(pargs)
@@ -194,5 +239,5 @@ def parse_args(pargs=None):
     return parser.parse_args()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     runstrat()

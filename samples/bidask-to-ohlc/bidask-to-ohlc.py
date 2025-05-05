@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,)
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+)
+
 #                        unicode_literals)
 
 import argparse
@@ -30,11 +35,19 @@ import backtrader.feeds as btfeeds
 
 class St(bt.Strategy):
     def next(self):
-        print(','.join(str(x) for x in [
-            self.data.datetime.datetime(),
-            self.data.open[0], self.data.high[0],
-            self.data.high[0], self.data.close[0],
-            self.data.volume[0]]))
+        print(
+            ",".join(
+                str(x)
+                for x in [
+                    self.data.datetime.datetime(),
+                    self.data.open[0],
+                    self.data.high[0],
+                    self.data.high[0],
+                    self.data.close[0],
+                    self.data.volume[0],
+                ]
+            )
+        )
 
 
 def runstrat():
@@ -44,7 +57,7 @@ def runstrat():
 
     data = btfeeds.GenericCSVData(
         dataname=args.data,
-        dtformat='%d/%m/%y',
+        dtformat="%d/%m/%y",
         # tmformat='%H%M%S',  # already the default value
         # datetime=0,  # position at default
         time=1,  # position of time
@@ -54,36 +67,47 @@ def runstrat():
         close=5,
         volume=7,
         openinterest=-1,  # -1 for not present
-        timeframe=bt.TimeFrame.Ticks)
+        timeframe=bt.TimeFrame.Ticks,
+    )
 
-    cerebro.resampledata(data,
-                         timeframe=bt.TimeFrame.Ticks,
-                         compression=args.compression)
+    cerebro.resampledata(
+        data, timeframe=bt.TimeFrame.Ticks, compression=args.compression
+    )
 
     cerebro.addstrategy(St)
 
     cerebro.run()
     if args.plot:
-        cerebro.plot(style='bar')
+        cerebro.plot(style="bar")
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        description='BidAsk to OHLC')
+        description="BidAsk to OHLC",
+    )
 
-    parser.add_argument('--data', required=False,
-                        default='../../datas/bidask2.csv',
-                        help='Data file to be read in')
+    parser.add_argument(
+        "--data",
+        required=False,
+        default="../../datas/bidask2.csv",
+        help="Data file to be read in",
+    )
 
-    parser.add_argument('--compression', required=False, default=2, type=int,
-                        help='How much to compress the bars')
+    parser.add_argument(
+        "--compression",
+        required=False,
+        default=2,
+        type=int,
+        help="How much to compress the bars",
+    )
 
-    parser.add_argument('--plot', required=False, action='store_true',
-                        help='Plot the vars')
+    parser.add_argument(
+        "--plot", required=False, action="store_true", help="Plot the vars"
+    )
 
     return parser.parse_args()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     runstrat()

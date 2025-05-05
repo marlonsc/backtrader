@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import math
 
@@ -27,13 +26,16 @@ import backtrader as bt
 
 
 class OrderObserver(bt.observer.Observer):
-    lines = ('created', 'expired',)
+    lines = (
+        "created",
+        "expired",
+    )
 
     plotinfo = dict(plot=True, subplot=True, plotlinelabels=True)
 
     plotlines = dict(
-        created=dict(marker='*', markersize=8.0, color='lime', fillstyle='full'),
-        expired=dict(marker='s', markersize=8.0, color='red', fillstyle='full')
+        created=dict(marker="*", markersize=8.0, color="lime", fillstyle="full"),
+        expired=dict(marker="s", markersize=8.0, color="red", fillstyle="full"),
     )
 
     def next(self):

@@ -18,15 +18,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import backtrader as bt
 from . import TimeReturn
 
 
 class Benchmark(TimeReturn):
-    '''This observer stores the *returns* of the strategy and the *return* of a
+    """This observer stores the *returns* of the strategy and the *return* of a
     reference asset which is one of the datas passed to the system.
 
     Params:
@@ -77,18 +76,19 @@ class Benchmark(TimeReturn):
     Remember that at any moment of a ``run`` the current values can be checked
     by looking at the *lines* by name at index ``0``.
 
-    '''
+    """
+
     _stclock = True
 
-    lines = ('benchmark',)
-    plotlines = dict(benchmark=dict(_name='Benchmark'))
+    lines = ("benchmark",)
+    plotlines = dict(benchmark=dict(_name="Benchmark"))
 
     params = (
-        ('data', None),
-        ('_doprenext', False),
+        ("data", None),
+        ("_doprenext", False),
         # Set to false to ensure the asset is measured at 0% in the 1st tick
-        ('firstopen', False),
-        ('fund', None)
+        ("firstopen", False),
+        ("fund", None),
     )
 
     def _plotlabel(self):
@@ -111,8 +111,7 @@ class Benchmark(TimeReturn):
 
     def next(self):
         super(Benchmark, self).next()
-        self.lines.benchmark[0] = self.tbench.rets.get(self.treturn.dtkey,
-                                                       float('NaN'))
+        self.lines.benchmark[0] = self.tbench.rets.get(self.treturn.dtkey, float("NaN"))
 
     def prenext(self):
         if self.p._doprenext:

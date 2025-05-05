@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import math
 
@@ -27,14 +26,14 @@ import backtrader as bt
 
 
 class MTradeObserver(bt.observer.Observer):
-    lines = ('Id_0', 'Id_1', 'Id_2')
+    lines = ("Id_0", "Id_1", "Id_2")
 
     plotinfo = dict(plot=True, subplot=True, plotlinelabels=True)
 
     plotlines = dict(
-        Id_0=dict(marker='*', markersize=8.0, color='lime', fillstyle='full'),
-        Id_1=dict(marker='o', markersize=8.0, color='red', fillstyle='full'),
-        Id_2=dict(marker='s', markersize=8.0, color='blue', fillstyle='full')
+        Id_0=dict(marker="*", markersize=8.0, color="lime", fillstyle="full"),
+        Id_1=dict(marker="o", markersize=8.0, color="red", fillstyle="full"),
+        Id_2=dict(marker="s", markersize=8.0, color="blue", fillstyle="full"),
     )
 
     def next(self):

@@ -1,26 +1,30 @@
-import backtrader as bt # 导入 Backtrader 
-import backtrader.indicators as btind # 导入策略分析模块
-from backtest.feeds.datafeeds import StockCsvData
-import pandas as pd
 import datetime
 import os
 import sys
+
+import backtrader as bt  # Import Backtrader
+from backtest.feeds.datafeeds import StockCsvData
 from backtrader_plotting import Bokeh
 from backtrader_plotting.schemes import Tradimo
- 
-# 创建策略
+
+
+# Create strategy
 class TestStrategy(bt.Strategy):
-    # 可选，设置回测的可变参数：如移动均线的周期
-    params = (
-        ('maperiod', 15), 
-    )
+    """
+    TestStrategy: Example Backtrader strategy for demonstration and testing purposes.
+    All comments and docstrings are in English and follow Neptor/GEN-AI guidelines.
+    """
+    # Optional, set backtest parameters: e.g., moving average period
+    params = (("maperiod", 15),)
+
     def log(self, txt, dt=None):
-        '''可选，构建策略打印日志的函数：可用于打印订单记录或交易记录等'''
+        """Optional, build a function to print strategy logs: can be used to print order or trade records, etc."""
         dt = dt or self.datas[0].datetime.date(0)
-        print('%s, %s' % (dt.isoformat(), txt))
- 
+        print(f"{dt.isoformat()}, {txt}")
+
     def __init__(self):
-        '''必选，初始化属性、计算指标等'''
+        """Required, initialize attributes, calculate indicators, etc."""
+        super().__init__()
         # Keep a reference to the "close" line in the data[0] dataseries
         self.dataclose = self.datas[0].close
 
@@ -29,23 +33,21 @@ class TestStrategy(bt.Strategy):
         self.buyprice = None
         self.buycomm = None
 
-        # Add a MovingAverageSimple indicator
-        # self.sma = bt.indicators.SimpleMovingAverage(
-        #     self.datas[0], period=self.params.maperiod)
-        self.sma = bt.talib.SMA(self.data.close, timeperiod=self.params.maperiod)
+        # Add a Simple Moving Average indicator
+        self.sma = bt.indicators.SimpleMovingAverage(
+            self.datas[0], period=self.params.maperiod
+        )
 
-        # Indicators for the plotting show
+        # Example indicators for plotting (only supported arguments)
         bt.indicators.ExponentialMovingAverage(self.datas[0], period=25)
-        bt.indicators.WeightedMovingAverage(self.datas[0], period=25,
-                                            subplot=True)
-        bt.indicators.StochasticSlow(self.datas[0])
+        bt.indicators.WeightedMovingAverage(self.datas[0], period=25)
         bt.indicators.MACDHisto(self.datas[0])
         rsi = bt.indicators.RSI(self.datas[0])
         bt.indicators.SmoothedMovingAverage(rsi, period=10)
-        bt.indicators.ATR(self.datas[0], plot=False)
- 
+        bt.indicators.ATR(self.datas[0])
+
     def notify_order(self, order):
-        '''可选，打印订单信息'''
+        """Optional, print order information"""
         if order.status in [order.Submitted, order.Accepted]:
             # Buy/Sell order submitted/accepted to/by broker - Nothing to do
             return
@@ -55,39 +57,37 @@ class TestStrategy(bt.Strategy):
         if order.status in [order.Completed]:
             if order.isbuy():
                 self.log(
-                    'BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f' %
-                    (order.executed.price,
-                     order.executed.value,
-                     order.executed.comm))
+                    f"BUY EXECUTED, Price: {order.executed.price:.2f}, "
+                    f"Cost: {order.executed.value:.2f}, Comm {order.executed.comm:.2f}"
+                )
 
                 self.buyprice = order.executed.price
                 self.buycomm = order.executed.comm
             else:  # Sell
-                self.log('SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f' %
-                         (order.executed.price,
-                          order.executed.value,
-                          order.executed.comm))
+                self.log(
+                    f"SELL EXECUTED, Price: {order.executed.price:.2f}, "
+                    f"Cost: {order.executed.value:.2f}, Comm {order.executed.comm:.2f}"
+                )
 
             self.bar_executed = len(self)
 
         elif order.status in [order.Canceled, order.Margin, order.Rejected]:
-            self.log('Order Canceled/Margin/Rejected')
+            self.log("Order Canceled/Margin/Rejected")
 
         # Write down: no pending order
         self.order = None
- 
+
     def notify_trade(self, trade):
-        '''可选，打印交易信息'''
+        """Optional, print trade information"""
         if not trade.isclosed:
             return
 
-        self.log('OPERATION PROFIT, GROSS %.2f, NET %.2f' %
-                 (trade.pnl, trade.pnlcomm))
- 
+        self.log(f"OPERATION PROFIT, GROSS {trade.pnl:.2f}, NET {trade.pnlcomm:.2f}")
+
     def next(self):
-        '''必选，编写交易策略逻辑'''
+        """Required, write trading strategy logic"""
         # Simply log the closing price of the series from the reference
-        self.log('Close, %.2f' % self.dataclose[0])
+        self.log(f"Close, {self.dataclose[0]:.2f}")
 
         # Check if an order is pending ... if yes, we cannot send a 2nd one
         if self.order:
@@ -100,7 +100,7 @@ class TestStrategy(bt.Strategy):
             if self.dataclose[0] > self.sma[0]:
 
                 # BUY, BUY, BUY!!! (with all possible default parameters)
-                self.log('BUY CREATE, %.2f' % self.dataclose[0])
+                self.log(f"BUY CREATE, {self.dataclose[0]:.2f}")
 
                 # Keep track of the created order to avoid a 2nd order
                 self.order = self.buy()
@@ -109,33 +109,34 @@ class TestStrategy(bt.Strategy):
 
             if self.dataclose[0] < self.sma[0]:
                 # SELL, SELL, SELL!!! (with all possible default parameters)
-                self.log('SELL CREATE, %.2f' % self.dataclose[0])
+                self.log(f"SELL CREATE, {self.dataclose[0]:.2f}")
 
                 # Keep track of the created order to avoid a 2nd order
                 self.order = self.sell()
- 
-# 实例化 cerebro
+
+
+# Instantiate cerebro
 cerebro = bt.Cerebro()
-# 通过 feeds 读取数据
+# Read data via feeds
 # daily_price = pd.read_csv("daily_price.csv", parse_dates=['datetime'])
-# # 将数据传递给 “大脑”
-# # 按股票代码，依次循环传入数据
+# # Pass data to the 'brain'
+# # Loop through each stock code and pass data
 # for stock in daily_price['sec_code'].unique():
-#     # 日期对齐
-#     data = pd.DataFrame(index=daily_price.index.unique()) # 获取回测区间内所有交易日
+#     # Date alignment
+#     data = pd.DataFrame(index=daily_price.index.unique()) # Get all trading days in the backtest period
 #     df = daily_price.query(f"sec_code=='{stock}'")[['open','high','low','close','volume','openinterest']]
 #     data_ = pd.merge(data, df, left_index=True, right_index=True, how='left')
-#     # 缺失值处理：日期对齐时会使得有些交易日的数据为空，所以需要对缺失数据进行填充
-#     # 补充的交易日缺失行情数据，需对缺失数据进行填充。比如将缺失的 volume 填充为 0，表示股票无法交易的状态；将缺失的高开低收做前向填充；将上市前缺失的高开低收填充为 0 等；
+#     # Handle missing values: date alignment may cause some trading days to have missing data, so missing data needs to be filled
+#     # For missing trading day market data, fill missing data. For example, fill missing volume with 0 to indicate the stock cannot be traded; forward fill missing open/high/low/close; fill missing open/high/low/close before listing with 0, etc.
 #     data_.loc[:,['volume','openinterest']] = data_.loc[:,['volume','openinterest']].fillna(0)
 #     data_.loc[:,['open','high','low','close']] = data_.loc[:,['open','high','low','close']].fillna(method='pad')
 #     data_.loc[:,['open','high','low','close']] = data_.loc[:,['open','high','low','close']].fillna(0)
-#     # 导入数据
+#     # Import data
 #     datafeed = btfeeds.PandasData(dataname=data_, fromdate=datetime.datetime(2019,1,2), todate=datetime.datetime(2021,1,28))
-#     cerebro.adddata(datafeed, name=stock) # 通过 name 实现数据集与股票的一一对应
+#     cerebro.adddata(datafeed, name=stock) # Pass data set and stock one-to-one via name
 #     print(f"{stock} Done !")
 modpath = os.path.dirname(os.path.abspath(sys.argv[0]))
-datapath = os.path.join(modpath, '../../datas/stock/zh_a/000517.csv')
+datapath = os.path.join(modpath, "../../datas/stock/zh_a/000517.csv")
 
 # Create a Data Feed
 data = StockCsvData(
@@ -144,30 +145,34 @@ data = StockCsvData(
     fromdate=datetime.datetime(2003, 1, 1),
     # Do not pass values after this date
     todate=datetime.datetime(2003, 12, 31),
-    reverse=False)
+    reverse=False,
+)
 
 # Add the Data Feed to Cerebro
 cerebro.adddata(data)
 
-# 通过经纪商设置初始资金
+# Set initial capital via broker
 cerebro.broker.setcash(1000000)
-# 设置单笔交易的数量
+# Set the quantity per trade
 cerebro.addsizer(bt.sizers.FixedSize, stake=10)
-# 设置交易佣金
+# Set trading commission
 cerebro.broker.setcommission(commission=0.0003)
-# 滑点：双边各 0.0001
+# Slippage: 0.0001 per side
 cerebro.broker.set_slippage_perc(perc=0.0001)
-# 添加策略
+# Add strategy
 cerebro.addstrategy(TestStrategy, maperiod=20)
-# 添加策略分析指标
-cerebro.addanalyzer(bt.analyzers.TimeReturn, _name='pnl') # 返回收益率时序数据
-cerebro.addanalyzer(bt.analyzers.AnnualReturn, _name='_AnnualReturn') # 年化收益率
-cerebro.addanalyzer(bt.analyzers.SharpeRatio, _name='_SharpeRatio') # 夏普比率
-cerebro.addanalyzer(bt.analyzers.DrawDown, _name='_DrawDown') # 回撤
-# 添加观测器
+# Add strategy analyzers
+# Return time series data of return rate
+cerebro.addanalyzer(bt.analyzers.TimeReturn, _name="pnl")
+cerebro.addanalyzer(
+    bt.analyzers.AnnualReturn, _name="_AnnualReturn"
+)  # Annual return rate
+cerebro.addanalyzer(bt.analyzers.SharpeRatio, _name="_SharpeRatio")  # Sharpe ratio
+cerebro.addanalyzer(bt.analyzers.DrawDown, _name="_DrawDown")  # Drawdown
+# Add observers
 # cerebro.addobserver(...)
-# 启动回测
+# Start backtest
 cerebro.run()
-# 可视化回测结果
-b = Bokeh(style='bar', scheme=Tradimo())
+# Visualize backtest results
+b = Bokeh(style="bar", scheme=Tradimo())
 cerebro.plot(b)

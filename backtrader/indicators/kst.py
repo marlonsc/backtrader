@@ -18,15 +18,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import backtrader as bt
 from . import SMA, ROC100
 
 
 class KnowSureThing(bt.Indicator):
-    '''
+    """
     It is a "summed" momentum indicator. Developed by Martin Pring and
     published in 1992 in Stocks & Commodities.
 
@@ -51,16 +50,26 @@ class KnowSureThing(bt.Indicator):
       - ``_movav`` and ``_movavs``, allows to change the Moving Average type
         applied for the calculation of kst and signal
 
-    '''
-    alias = ('KST',)
-    lines = ('kst', 'signal',)
+    """
+
+    alias = ("KST",)
+    lines = (
+        "kst",
+        "signal",
+    )
     params = (
-        ('rp1', 10), ('rp2', 15), ('rp3', 20), ('rp4', 30),
-        ('rma1', 10), ('rma2', 10), ('rma3', 10), ('rma4', 10),
-        ('rsignal', 9),
-        ('rfactors', [1.0, 2.0, 3.0, 4.0]),
-        ('_rmovav', SMA),
-        ('_smovav', SMA),
+        ("rp1", 10),
+        ("rp2", 15),
+        ("rp3", 20),
+        ("rp4", 30),
+        ("rma1", 10),
+        ("rma2", 10),
+        ("rma3", 10),
+        ("rma4", 10),
+        ("rsignal", 9),
+        ("rfactors", [1.0, 2.0, 3.0, 4.0]),
+        ("_rmovav", SMA),
+        ("_smovav", SMA),
     )
 
     plotinfo = dict(plothlines=[0.0])
@@ -70,8 +79,9 @@ class KnowSureThing(bt.Indicator):
         rcma2 = self.p._rmovav(ROC100(period=self.p.rp2), period=self.p.rma2)
         rcma3 = self.p._rmovav(ROC100(period=self.p.rp3), period=self.p.rma3)
         rcma4 = self.p._rmovav(ROC100(period=self.p.rp4), period=self.p.rma4)
-        self.l.kst = sum([rfi * rci for rfi, rci in
-                          zip(self.p.rfactors, [rcma1, rcma2, rcma3, rcma4])])
+        self.l.kst = sum([
+            rfi * rci for rfi, rci in zip(self.p.rfactors, [rcma1, rcma2, rcma3, rcma4])
+        ])
 
         self.l.signal = self.p._smovav(self.l.kst, period=self.p.rsignal)
         super(KnowSureThing, self).__init__()

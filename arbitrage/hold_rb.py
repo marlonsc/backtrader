@@ -2,44 +2,47 @@ import backtrader as bt
 import pandas as pd
 from myutil import calculate_spread, check_and_align_data
 
+
 # 始终持有螺纹钢策略
 class AlwaysHoldRBStrategy(bt.Strategy):
-    params = (
-        ('size_rb', 1),  # 螺纹钢交易规模
-    )
-    
+    params = (("size_rb", 1),)  # 螺纹钢交易规模
+
     def __init__(self):
 
         self.order = None
-        
+
     def next(self):
         # 始终持有螺纹钢，不做任何交易
 
         if not self.position:  # 如果没有持仓，则买入
-            self.order = self.buy(data=self.data0, size=self.p.size_rb, price=self.data0.close[0])  # 买1手螺纹钢
-            print(f"下单价格: {self.data0.close[0]}, 时间: {self.data0.datetime.datetime()}, 持仓: {self.position}")
+            self.order = self.buy(
+                data=self.data0, size=self.p.size_rb, price=self.data0.close[0]
+            )  # 买1手螺纹钢
+            print(
+                f"下单价格: {self.data0.close[0]}, 时间:"
+                f" {self.data0.datetime.datetime()}, 持仓: {self.position}"
+            )
 
-    
     def notify_order(self, order):
-        # 订单状态通知      
+        # 订单状态通知
         if order.status in [order.Completed, order.Canceled, order.Margin]:
             self.order = None
 
 
 # 读取数据
-output_file = 'D://y5//RB_daily.h5'
-df_RB = pd.read_hdf(output_file, key='data')
+output_file = "D://y5//RB_daily.h5"
+df_RB = pd.read_hdf(output_file, key="data")
 
 # 确保 'date' 列转换为 datetime 类型
-df_RB['date'] = pd.to_datetime(df_RB['date'], errors='coerce')
+df_RB["date"] = pd.to_datetime(df_RB["date"], errors="coerce")
 
 
-data1 = bt.feeds.PandasData(dataname=df_RB, datetime='date', nocase=True)
+data1 = bt.feeds.PandasData(dataname=df_RB, datetime="date", nocase=True)
 
 # 创建回测引擎
 cerebro = bt.Cerebro()
 
-cerebro.adddata(data1, name='RB')
+cerebro.adddata(data1, name="RB")
 
 
 # 添加策略
@@ -49,22 +52,24 @@ cerebro.addstrategy(AlwaysHoldRBStrategy)
 # cerebro.broker.setcash(1000000.0)
 
 # 添加分析器：SharpeRatio、DrawDown、AnnualReturn 和 Returns
-cerebro.addanalyzer(bt.analyzers.SharpeRatio, 
-                    timeframe=bt.TimeFrame.Days,  # 按日数据计算
-                    riskfreerate=0,            # 默认年化1%的风险无风险利率
-                    annualize=True,           # 不进行年化
-
-
-                    ) 
-cerebro.addanalyzer(bt.analyzers.AnnualReturn)      
+cerebro.addanalyzer(
+    bt.analyzers.SharpeRatio,
+    timeframe=bt.TimeFrame.Days,  # 按日数据计算
+    riskfreerate=0,  # 默认年化1%的风险无风险利率
+    annualize=True,  # 不进行年化
+)
+cerebro.addanalyzer(bt.analyzers.AnnualReturn)
 cerebro.addanalyzer(bt.analyzers.DrawDown)  # 回撤分析器
-cerebro.addanalyzer(bt.analyzers.Returns,
-                    # timeframe=bt.TimeFrame.Days,  # 按日数据计算
-                    tann=bt.TimeFrame.Days,  # 年化因子，252 个交易日
-                    )  # 自定义名称
+cerebro.addanalyzer(
+    bt.analyzers.Returns,
+    # timeframe=bt.TimeFrame.Days,  # 按日数据计算
+    tann=bt.TimeFrame.Days,  # 年化因子，252 个交易日
+)  # 自定义名称
 
 # 添加CAGR分析器
-cerebro.addanalyzer(bt.analyzers.CAGRAnalyzer, period=bt.TimeFrame.Days)  # 这里的period可以是daily, weekly, monthly等
+cerebro.addanalyzer(
+    bt.analyzers.CAGRAnalyzer, period=bt.TimeFrame.Days
+)  # 这里的period可以是daily, weekly, monthly等
 # 运行回测
 results = cerebro.run()
 

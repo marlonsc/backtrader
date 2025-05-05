@@ -8,11 +8,12 @@ import yfinance as yf
 
 # globals
 
+
 # functions
 class MomentumStrategy(bt.Strategy):
     params = (
-        ('threshold', 0.001),  # Threshold for generating buy/sell signals
-        ('size', 10),  # Number of shares to trade
+        ("threshold", 0.001),  # Threshold for generating buy/sell signals
+        ("size", 10),  # Number of shares to trade
     )
 
     def __init__(self):
@@ -31,10 +32,11 @@ class MomentumStrategy(bt.Strategy):
             if self.data_close[-1] > self.data_close[-2] * (1 + self.p.threshold):
                 self.sell(size=self.p.size)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
 
     # Download the data
-    data = yf.download('NVDA', start='2022-01-01', end='2023-12-31')
+    data = yf.download("NVDA", start="2022-01-01", end="2023-12-31")
     # Create a data feed
     data_feed = bt.feeds.PandasData(dataname=data)
 
@@ -44,7 +46,7 @@ if __name__ == '__main__':
     # Add the strategy.
     # Threshold is the percentage change in the price that should trigger a buy/sell signal
     # Size is the number of shares to trade
-    cerebro.addstrategy(MomentumStrategy, threshold = 0.01, size = 10)
+    cerebro.addstrategy(MomentumStrategy, threshold=0.01, size=10)
 
     # Add the data feed
     cerebro.adddata(data_feed)

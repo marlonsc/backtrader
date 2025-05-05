@@ -154,7 +154,9 @@ class TypeRegistry(object):
 
         if self._fallback_encoder is not None:
             if not callable(fallback_encoder):
-                raise TypeError("fallback_encoder %r is not a callable" % (fallback_encoder))
+                raise TypeError(
+                    "fallback_encoder %r is not a callable" % (fallback_encoder)
+                )
 
         for codec in self.__type_codecs:
             is_valid_codec = False
@@ -168,7 +170,12 @@ class TypeRegistry(object):
             if not is_valid_codec:
                 raise TypeError(
                     "Expected an instance of %s, %s, or %s, got %r instead"
-                    % (TypeEncoder.__name__, TypeDecoder.__name__, TypeCodec.__name__, codec)
+                    % (
+                        TypeEncoder.__name__,
+                        TypeDecoder.__name__,
+                        TypeCodec.__name__,
+                        codec,
+                    )
                 )
 
     def _validate_type_encoder(self, codec: _Codec) -> None:
@@ -364,7 +371,9 @@ class CodecOptions(_BaseCodecOptions):
             if not isinstance(tzinfo, datetime.tzinfo):
                 raise TypeError("tzinfo must be an instance of datetime.tzinfo")
             if not tz_aware:
-                raise ValueError("cannot specify tzinfo without also setting tz_aware=True")
+                raise ValueError(
+                    "cannot specify tzinfo without also setting tz_aware=True"
+                )
 
         type_registry = type_registry or TypeRegistry()
 
@@ -386,7 +395,9 @@ class CodecOptions(_BaseCodecOptions):
 
     def _arguments_repr(self) -> str:
         """Representation of the arguments used to create this object."""
-        document_class_repr = "dict" if self.document_class is dict else repr(self.document_class)
+        document_class_repr = (
+            "dict" if self.document_class is dict else repr(self.document_class)
+        )
 
         uuid_rep_repr = UUID_REPRESENTATION_NAMES.get(
             self.uuid_representation, self.uuid_representation

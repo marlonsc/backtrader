@@ -18,18 +18,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import backtrader as bt
 from . import MovAv, AwesomeOscillator
 
-
-__all__ = ['AccelerationDecelerationOscillator', 'AccDeOsc']
+__all__ = ["AccelerationDecelerationOscillator", "AccDeOsc"]
 
 
 class AccelerationDecelerationOscillator(bt.Indicator):
-    '''
+    """
     Acceleration/Deceleration Technical Indicator (AC) measures acceleration
     and deceleration of the current driving force. This indicator will change
     direction before any changes in the driving force, which, it its turn, will
@@ -42,16 +40,17 @@ class AccelerationDecelerationOscillator(bt.Indicator):
       - https://www.metatrader5.com/en/terminal/help/indicators/bw_indicators/ao
       - https://www.ifcmarkets.com/en/ntx-indicators/ntx-indicators-accelerator-decelerator-oscillator
 
-    '''
-    alias = ('AccDeOsc',)
-    lines = ('accde', )
+    """
+
+    alias = ("AccDeOsc",)
+    lines = ("accde",)
 
     params = (
-        ('period', 5),
-        ('movav', MovAv.SMA),
+        ("period", 5),
+        ("movav", MovAv.SMA),
     )
 
-    plotlines = dict(accde=dict(_method='bar', alpha=0.50, width=1.0))
+    plotlines = dict(accde=dict(_method="bar", alpha=0.50, width=1.0))
 
     def __init__(self):
         ao = AwesomeOscillator()

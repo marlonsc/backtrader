@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import collections
 from datetime import datetime, timedelta
@@ -28,7 +27,7 @@ from backtrader import AbstractDataBase, TimeFrame
 
 
 class DataFiller(AbstractDataBase):
-    '''This class will fill gaps in the source data using the following
+    """This class will fill gaps in the source data using the following
     information bits from the underlying data source
 
       - timeframe and compression to dimension the output bars
@@ -50,13 +49,13 @@ class DataFiller(AbstractDataBase):
       - ``fill_vol`` (def: NaN): used to fill the volume of missing bars
 
       - ``fill_oi`` (def: NaN): used to fill the openinterest of missing bars
-    '''
+    """
 
     params = (
-        ('fill_price', None),
-        ('fill_vol', float('NaN')),
-        ('fill_oi', float('NaN')),
-        )
+        ("fill_price", None),
+        ("fill_vol", float("NaN")),
+        ("fill_oi", float("NaN")),
+    )
 
     def start(self):
         super(DataFiller, self).start()
@@ -152,8 +151,7 @@ class DataFiller(AbstractDataBase):
                 dtime_prev += self._tdunit
 
             # Calculate session start for new bar
-            sstart = datetime.combine(
-                dtime_cur.date(), self.p.dataname.sessionstart)
+            sstart = datetime.combine(dtime_cur.date(), self.p.dataname.sessionstart)
 
             # 2. check for missing bars from new boundary (start)
             # check gap from new sessionstart

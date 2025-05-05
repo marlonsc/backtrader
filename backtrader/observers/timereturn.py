@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import calendar
 import datetime
@@ -31,7 +30,7 @@ from backtrader.utils.py3 import MAXINT
 
 
 class TimeReturn(Observer):
-    '''This observer stores the *returns* of the strategy.
+    """This observer stores the *returns* of the strategy.
 
     Params:
 
@@ -59,31 +58,33 @@ class TimeReturn(Observer):
     Remember that at any moment of a ``run`` the current values can be checked
     by looking at the *lines* by name at index ``0``.
 
-    '''
+    """
+
     _stclock = True
 
-    lines = ('timereturn',)
+    lines = ("timereturn",)
     plotinfo = dict(plot=True, subplot=True)
-    plotlines = dict(timereturn=dict(_name='Return'))
+    plotlines = dict(timereturn=dict(_name="Return"))
 
     params = (
-        ('timeframe', None),
-        ('compression', None),
-        ('fund', None),
+        ("timeframe", None),
+        ("compression", None),
+        ("fund", None),
     )
 
     def _plotlabel(self):
         return [
             # Use the final tf/comp values calculated by the return analyzer
-            TimeFrame.getname(self.treturn.timeframe,
-                              self.treturn.compression),
-            str(self.treturn.compression)
+            TimeFrame.getname(self.treturn.timeframe, self.treturn.compression),
+            str(self.treturn.compression),
         ]
 
     def __init__(self):
-        self.treturn = self._owner._addanalyzer_slave(bt.analyzers.TimeReturn,
-                                                      **self.p._getkwargs())
+        self.treturn = self._owner._addanalyzer_slave(
+            bt.analyzers.TimeReturn, **self.p._getkwargs()
+        )
 
     def next(self):
-        self.lines.timereturn[0] = self.treturn.rets.get(self.treturn.dtkey,
-                                                         float('NaN'))
+        self.lines.timereturn[0] = self.treturn.rets.get(
+            self.treturn.dtkey, float("NaN")
+        )

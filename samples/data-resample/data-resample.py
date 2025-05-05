@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import argparse
 
@@ -37,15 +36,13 @@ def runstrat():
     cerebro.addstrategy(bt.Strategy)
 
     # Load the Data
-    datapath = args.dataname or '../../datas/2006-day-001.txt'
-    data = btfeeds.BacktraderCSVData(
-        dataname=datapath)
+    datapath = args.dataname or "../../datas/2006-day-001.txt"
+    data = btfeeds.BacktraderCSVData(dataname=datapath)
 
     # Handy dictionary for the argument timeframe conversion
     tframes = dict(
-        daily=bt.TimeFrame.Days,
-        weekly=bt.TimeFrame.Weeks,
-        monthly=bt.TimeFrame.Months)
+        daily=bt.TimeFrame.Days, weekly=bt.TimeFrame.Weeks, monthly=bt.TimeFrame.Months
+    )
 
     # Resample the data
     if args.oldrs:
@@ -53,43 +50,56 @@ def runstrat():
         data = bt.DataResampler(
             dataname=data,
             timeframe=tframes[args.timeframe],
-            compression=args.compression)
+            compression=args.compression,
+        )
 
         # Add the resample data instead of the original
         cerebro.adddata(data)
     else:
         # New resampler
         cerebro.resampledata(
-            data,
-            timeframe=tframes[args.timeframe],
-            compression=args.compression)
+            data, timeframe=tframes[args.timeframe], compression=args.compression
+        )
 
     # Run over everything
     cerebro.run()
 
     # Plot the result
-    cerebro.plot(style='bar')
+    cerebro.plot(style="bar")
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(
-        description='Resample down to minutes')
+    parser = argparse.ArgumentParser(description="Resample down to minutes")
 
-    parser.add_argument('--dataname', default='', required=False,
-                        help='File Data to Load')
+    parser.add_argument(
+        "--dataname", default="", required=False, help="File Data to Load"
+    )
 
-    parser.add_argument('--oldrs', required=False, action='store_true',
-                        help='Use deprecated DataResampler')
+    parser.add_argument(
+        "--oldrs",
+        required=False,
+        action="store_true",
+        help="Use deprecated DataResampler",
+    )
 
-    parser.add_argument('--timeframe', default='weekly', required=False,
-                        choices=['daily', 'weekly', 'monthly'],
-                        help='Timeframe to resample to')
+    parser.add_argument(
+        "--timeframe",
+        default="weekly",
+        required=False,
+        choices=["daily", "weekly", "monthly"],
+        help="Timeframe to resample to",
+    )
 
-    parser.add_argument('--compression', default=1, required=False, type=int,
-                        help='Compress n bars into 1')
+    parser.add_argument(
+        "--compression",
+        default=1,
+        required=False,
+        type=int,
+        help="Compress n bars into 1",
+    )
 
     return parser.parse_args()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     runstrat()

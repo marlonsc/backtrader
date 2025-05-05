@@ -18,15 +18,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 
 from . import GenericCSVData
 
 
 class SierraChartCSVData(GenericCSVData):
-    '''
+    """
     Parses a `SierraChart <http://www.sierrachart.com>`_ CSV exported file.
 
     Specific parameters (or specific meaning):
@@ -34,6 +33,6 @@ class SierraChartCSVData(GenericCSVData):
       - ``dataname``: The filename to parse or a file-like object
 
       - Uses GenericCSVData and simply modifies the dateformat (dtformat) to
-    '''
+    """
 
-    params = (('dtformat', '%Y/%m/%d'),)
+    params = (("dtformat", "%Y/%m/%d"),)

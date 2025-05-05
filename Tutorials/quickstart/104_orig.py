@@ -15,8 +15,8 @@ import backtrader as bt
 # Create a Stratey
 
 
-if __name__ == '__main__':
-    ticker_data = Path.cwd().parent / 'datas/orcl-1995-2014.txt'
+if __name__ == "__main__":
+    ticker_data = Path.cwd().parent / "datas/orcl-1995-2014.txt"
 
     # Create a cerebro entity
     cerebro = bt.Cerebro()
@@ -35,7 +35,8 @@ if __name__ == '__main__':
         # Do not pass values before this date
         todate=datetime.datetime(2000, 12, 31),
         # Do not pass values after this date
-        reverse=False)
+        reverse=False,
+    )
 
     # Add the Data Feed to Cerebro
     cerebro.adddata(data)
@@ -46,10 +47,10 @@ if __name__ == '__main__':
     cerebro.broker.setcommission(commission=0.001)
 
     # Print out the starting conditions
-    print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
+    print("Starting Portfolio Value: %.2f" % cerebro.broker.getvalue())
 
     # Run over everything
     cerebro.run()
 
     # Print out the final result
-    print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
+    print("Final Portfolio Value: %.2f" % cerebro.broker.getvalue())

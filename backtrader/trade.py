@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import itertools
 
@@ -29,7 +28,7 @@ from .utils.py3 import range
 
 
 class TradeHistory(AutoOrderedDict):
-    '''Represents the status and update event for each update a Trade has
+    """Represents the status and update event for each update a Trade has
 
     This object is a dictionary which allows '.' notation
 
@@ -53,11 +52,12 @@ class TradeHistory(AutoOrderedDict):
         - ``size`` (``int``): size of the update
         - ``price`` (``float``):price of the update
         - ``commission`` (``float``): price of the update
-    '''
+    """
 
-    def __init__(self,
-                 status, dt, barlen, size, price, value, pnl, pnlcomm, tz, event=None):
-        '''Initializes the object to the current status of the Trade'''
+    def __init__(
+        self, status, dt, barlen, size, price, value, pnl, pnlcomm, tz, event=None
+    ):
+        """Initializes the object to the current status of the Trade"""
         super(TradeHistory, self).__init__()
         self.status.status = status
         self.status.dt = dt
@@ -72,12 +72,24 @@ class TradeHistory(AutoOrderedDict):
             self.event = event
 
     def __reduce__(self):
-        return (self.__class__, (self.status.status, self.status.dt, self.status.barlen, self.status.size,
-                                 self.status.price, self.status.value, self.status.pnl, self.status.pnlcomm,
-                                 self.status.tz, self.event, ))
+        return (
+            self.__class__,
+            (
+                self.status.status,
+                self.status.dt,
+                self.status.barlen,
+                self.status.size,
+                self.status.price,
+                self.status.value,
+                self.status.pnl,
+                self.status.pnlcomm,
+                self.status.tz,
+                self.event,
+            ),
+        )
 
     def doupdate(self, order, size, price, commission):
-        '''Used to fill the ``update`` part of the history entry'''
+        """Used to fill the ``update`` part of the history entry"""
         self.event.order = order
         self.event.size = size
         self.event.price = price
@@ -87,12 +99,12 @@ class TradeHistory(AutoOrderedDict):
         self._close()
 
     def datetime(self, tz=None, naive=True):
-        '''Returns a datetime for the time the update event happened'''
+        """Returns a datetime for the time the update event happened"""
         return num2date(self.status.dt, tz or self.status.tz, naive)
 
 
 class Trade(object):
-    '''Keeps track of the life of an trade: size, price,
+    """Keeps track of the life of an trade: size, price,
     commission (and value?)
 
     An trade starts at 0 can be increased and reduced and can
@@ -143,27 +155,49 @@ class Trade(object):
         The first entry in the history is the Opening Event
         The last entry in the history is the Closing Event
 
-    '''
+    """
+
     refbasis = itertools.count(1)
 
-    status_names = ['Created', 'Open', 'Closed']
+    status_names = ["Created", "Open", "Closed"]
     Created, Open, Closed = range(3)
 
     def __str__(self):
         toprint = (
-            'ref', 'data', 'tradeid',
-            'size', 'price', 'value', 'commission', 'pnl', 'pnlcomm',
-            'justopened', 'isopen', 'isclosed',
-            'baropen', 'dtopen', 'barclose', 'dtclose', 'barlen',
-            'historyon', 'history',
-            'status')
-
-        return '\n'.join(
-            (':'.join((x, str(getattr(self, x)))) for x in toprint)
+            "ref",
+            "data",
+            "tradeid",
+            "size",
+            "price",
+            "value",
+            "commission",
+            "pnl",
+            "pnlcomm",
+            "justopened",
+            "isopen",
+            "isclosed",
+            "baropen",
+            "dtopen",
+            "barclose",
+            "dtclose",
+            "barlen",
+            "historyon",
+            "history",
+            "status",
         )
 
-    def __init__(self, data=None, tradeid=0, historyon=False,
-                 size=0, price=0.0, value=0.0, commission=0.0):
+        return "\n".join((":".join((x, str(getattr(self, x)))) for x in toprint))
+
+    def __init__(
+        self,
+        data=None,
+        tradeid=0,
+        historyon=False,
+        size=0,
+        price=0.0,
+        value=0.0,
+        commission=0.0,
+    ):
 
         self.ref = next(self.refbasis)
         self.data = data
@@ -194,34 +228,33 @@ class Trade(object):
         self.status = self.Created
 
     def __len__(self):
-        '''Absolute size of the trade'''
+        """Absolute size of the trade"""
         return abs(self.size)
 
     def __bool__(self):
-        '''Trade size is not 0'''
+        """Trade size is not 0"""
         return self.size != 0
 
     __nonzero__ = __bool__
 
     def getdataname(self):
-        '''Shortcut to retrieve the name of the data this trade references'''
+        """Shortcut to retrieve the name of the data this trade references"""
         return self.data._name
 
     def open_datetime(self, tz=None, naive=True):
-        '''Returns a datetime.datetime object with the datetime in which
+        """Returns a datetime.datetime object with the datetime in which
         the trade was opened
-        '''
+        """
         return self.data.num2date(self.dtopen, tz=tz, naive=naive)
 
     def close_datetime(self, tz=None, naive=True):
-        '''Returns a datetime.datetime object with the datetime in which
+        """Returns a datetime.datetime object with the datetime in which
         the trade was closed
-        '''
+        """
         return self.data.num2date(self.dtclose, tz=tz, naive=naive)
 
-    def update(self, order, size, price, value, commission, pnl,
-               comminfo):
-        '''
+    def update(self, order, size, price, value, commission, pnl, comminfo):
+        """
         Updates the current trade. The logic does not check if the
         trade is reversed, which is not conceptually supported by the
         object.
@@ -249,7 +282,7 @@ class Trade(object):
             commission (float): incurred commission in the new size/price op
             pnl (float): (unused) generated by the executed part
                          Not used because the trade has an independent pnl
-        '''
+        """
         if not size:
             return  # empty update, skip all other calculations
 
@@ -308,8 +341,15 @@ class Trade(object):
         if self.historyon:
             dt0 = self.data.datetime[0] if not order.p.simulated else 0.0
             histentry = TradeHistory(
-                self.status, dt0, self.barlen,
-                self.size, self.price, self.value,
-                self.pnl, self.pnlcomm, self.data._tz)
+                self.status,
+                dt0,
+                self.barlen,
+                self.size,
+                self.price,
+                self.value,
+                self.pnl,
+                self.pnlcomm,
+                self.data._tz,
+            )
             histentry.doupdate(order, size, price, commission)
             self.history.append(histentry)

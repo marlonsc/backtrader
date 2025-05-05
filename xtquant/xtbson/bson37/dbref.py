@@ -119,9 +119,12 @@ class DBRef(object):
 
     def __hash__(self) -> int:
         """Get a hash value for this :class:`DBRef`."""
-        return hash(
-            (self.__collection, self.__id, self.__database, tuple(sorted(self.__kwargs.items())))
-        )
+        return hash((
+            self.__collection,
+            self.__id,
+            self.__database,
+            tuple(sorted(self.__kwargs.items())),
+        ))
 
     def __deepcopy__(self, memo: Any) -> "DBRef":
         """Support function for `copy.deepcopy()`."""

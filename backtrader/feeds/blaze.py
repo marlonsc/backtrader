@@ -18,15 +18,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from backtrader import date2num
 import backtrader.feed as feed
 
 
 class BlazeData(feed.DataBase):
-    '''
+    """
     Support for `Blaze <blaze.pydata.org>`_ ``Data`` objects.
 
     Only numeric indices to columns are supported.
@@ -38,23 +37,21 @@ class BlazeData(feed.DataBase):
       - A negative value in any of the parameters for the Data lines
         indicates it's not present in the DataFrame
         it is
-    '''
+    """
 
     params = (
         # datetime must be present
-        ('datetime', 0),
+        ("datetime", 0),
         # pass -1 for any of the following to indicate absence
-        ('open', 1),
-        ('high', 2),
-        ('low', 3),
-        ('close', 4),
-        ('volume', 5),
-        ('openinterest', 6),
+        ("open", 1),
+        ("high", 2),
+        ("low", 3),
+        ("close", 4),
+        ("volume", 5),
+        ("openinterest", 6),
     )
 
-    datafields = [
-        'datetime', 'open', 'high', 'low', 'close', 'volume', 'openinterest'
-    ]
+    datafields = ["datetime", "open", "high", "low", "close", "volume", "openinterest"]
 
     def start(self):
         super(BlazeData, self).start()

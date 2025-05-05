@@ -57,7 +57,9 @@ class SON(Dict[_Key, _Value]):
 
     def __init__(
         self,
-        data: Optional[Union[Mapping[_Key, _Value], Iterable[Tuple[_Key, _Value]]]] = None,
+        data: Optional[
+            Union[Mapping[_Key, _Value], Iterable[Tuple[_Key, _Value]]]
+        ] = None,
         **kwargs: Any
     ) -> None:
         self.__keys = []
@@ -65,7 +67,9 @@ class SON(Dict[_Key, _Value]):
         self.update(data)
         self.update(kwargs)
 
-    def __new__(cls: Type["SON[_Key, _Value]"], *args: Any, **kwargs: Any) -> "SON[_Key, _Value]":
+    def __new__(
+        cls: Type["SON[_Key, _Value]"], *args: Any, **kwargs: Any
+    ) -> "SON[_Key, _Value]":
         instance = super(SON, cls).__new__(cls, *args, **kwargs)
         instance.__keys = []
         return instance
@@ -124,7 +128,9 @@ class SON(Dict[_Key, _Value]):
 
     def pop(self, key: _Key, *args: Union[_Value, _T]) -> Union[_Value, _T]:
         if len(args) > 1:
-            raise TypeError("pop expected at most 2 arguments, got " + repr(1 + len(args)))
+            raise TypeError(
+                "pop expected at most 2 arguments, got " + repr(1 + len(args))
+            )
         try:
             value = self[key]
         except KeyError:

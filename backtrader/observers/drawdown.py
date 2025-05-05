@@ -18,15 +18,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import backtrader as bt
 from .. import Observer
 
 
 class DrawDown(Observer):
-    '''This observer keeps track of the current drawdown level (plotted) and
+    """This observer keeps track of the current drawdown level (plotted) and
     the maxdrawdown (not plotted) levels
 
     Params:
@@ -40,23 +39,28 @@ class DrawDown(Observer):
 
         Set it to ``True`` or ``False`` for a specific behavior
 
-    '''
+    """
+
     _stclock = True
 
-    params = (
-        ('fund', None),
-    )
+    params = (("fund", None),)
 
-    lines = ('drawdown', 'maxdrawdown',)
+    lines = (
+        "drawdown",
+        "maxdrawdown",
+    )
 
     plotinfo = dict(plot=True, subplot=True)
 
-    plotlines = dict(maxdrawdown=dict(_plotskip=True,))
+    plotlines = dict(
+        maxdrawdown=dict(
+            _plotskip=True,
+        )
+    )
 
     def __init__(self):
         kwargs = self.p._getkwargs()
-        self._dd = self._owner._addanalyzer_slave(bt.analyzers.DrawDown,
-                                                  **kwargs)
+        self._dd = self._owner._addanalyzer_slave(bt.analyzers.DrawDown, **kwargs)
 
     def next(self):
         self.lines.drawdown[0] = self._dd.rets.drawdown  # update drawdown
@@ -64,18 +68,26 @@ class DrawDown(Observer):
 
 
 class DrawDownLength(Observer):
-    '''This observer keeps track of the current drawdown length (plotted) and
+    """This observer keeps track of the current drawdown length (plotted) and
     the drawdown max length (not plotted)
 
     Params: None
-    '''
+    """
+
     _stclock = True
 
-    lines = ('len', 'maxlen',)
+    lines = (
+        "len",
+        "maxlen",
+    )
 
     plotinfo = dict(plot=True, subplot=True)
 
-    plotlines = dict(maxlength=dict(_plotskip=True,))
+    plotlines = dict(
+        maxlength=dict(
+            _plotskip=True,
+        )
+    )
 
     def __init__(self):
         self._dd = self._owner._addanalyzer_slave(bt.analyzers.DrawDown)

@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 
 # Initialize parameters
 initial_capital = 10000  # Starting capital in dollars
-bet_amount = 100         # Amount risked per bet
-days = 365               # Number of days (bets)
+bet_amount = 100  # Amount risked per bet
+days = 365  # Number of days (bets)
 capital_list = [initial_capital]  # List to store capital evolution
 
 # Simulate the betting over 365 days
@@ -29,7 +29,7 @@ plt.plot(capital_list, label="Capital Over Time")
 plt.title("Capital Evolution over 365 Days (Strategy 3)")
 plt.xlabel("Day")
 plt.ylabel("Capital ($)")
-plt.axhline(y=initial_capital, color='gray', linestyle='--', label="Initial Capital")
+plt.axhline(y=initial_capital, color="gray", linestyle="--", label="Initial Capital")
 plt.legend()
 plt.grid(True)
 plt.show()

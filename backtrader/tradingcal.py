@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 
 from datetime import datetime, timedelta, time
@@ -28,7 +27,7 @@ from .metabase import MetaParams
 from backtrader.utils.py3 import string_types, with_metaclass
 from backtrader.utils import UTC
 
-__all__ = ['TradingCalendarBase', 'TradingCalendar', 'PandasMarketCalendar']
+__all__ = ["TradingCalendarBase", "TradingCalendar", "PandasMarketCalendar"]
 
 # Imprecission in the full time conversion to float would wrap over to next day
 # if microseconds is 999999 as defined in time.max
@@ -36,8 +35,16 @@ _time_max = time(hour=23, minute=59, second=59, microsecond=999990)
 
 
 MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY = range(7)
-(ISONODAY, ISOMONDAY, ISOTUESDAY, ISOWEDNESDAY, ISOTHURSDAY, ISOFRIDAY,
- ISOSATURDAY, ISOSUNDAY) = range(8)
+(
+    ISONODAY,
+    ISOMONDAY,
+    ISOTUESDAY,
+    ISOWEDNESDAY,
+    ISOTHURSDAY,
+    ISOFRIDAY,
+    ISOSATURDAY,
+    ISOSUNDAY,
+) = range(8)
 
 WEEKEND = [SATURDAY, SUNDAY]
 ISOWEEKEND = [ISOSATURDAY, ISOSUNDAY]
@@ -46,65 +53,65 @@ ONEDAY = timedelta(days=1)
 
 class TradingCalendarBase(with_metaclass(MetaParams, object)):
     def _nextday(self, day):
-        '''
+        """
         Returns the next trading day (datetime/date instance) after ``day``
         (datetime/date instance) and the isocalendar components
 
         The return value is a tuple with 2 components: (nextday, (y, w, d))
-        '''
+        """
         raise NotImplementedError
 
     def schedule(self, day):
-        '''
+        """
         Returns a tuple with the opening and closing times (``datetime.time``)
         for the given ``date`` (``datetime/date`` instance)
-        '''
+        """
         raise NotImplementedError
 
     def nextday(self, day):
-        '''
+        """
         Returns the next trading day (datetime/date instance) after ``day``
         (datetime/date instance)
-        '''
+        """
         return self._nextday(day)[0]  # 1st ret elem is next day
 
     def nextday_week(self, day):
-        '''
+        """
         Returns the iso week number of the next trading day, given a ``day``
         (datetime/date) instance
-        '''
+        """
         self._nextday(day)[1][1]  # 2 elem is isocal / 0 - y, 1 - wk, 2 - day
 
     def last_weekday(self, day):
-        '''
+        """
         Returns ``True`` if the given ``day`` (datetime/date) instance is the
         last trading day of this week
-        '''
+        """
         # Next day must be greater than day. If the week changes is enough for
         # a week change even if the number is smaller (year change)
         return day.isocalendar()[1] != self._nextday(day)[1][1]
 
     def last_monthday(self, day):
-        '''
+        """
         Returns ``True`` if the given ``day`` (datetime/date) instance is the
         last trading day of this month
-        '''
+        """
         # Next day must be greater than day. If the week changes is enough for
         # a week change even if the number is smaller (year change)
         return day.month != self._nextday(day)[0].month
 
     def last_yearday(self, day):
-        '''
+        """
         Returns ``True`` if the given ``day`` (datetime/date) instance is the
         last trading day of this month
-        '''
+        """
         # Next day must be greater than day. If the week changes is enough for
         # a week change even if the number is smaller (year change)
         return day.year != self._nextday(day)[0].year
 
 
 class TradingCalendar(TradingCalendarBase):
-    '''
+    """
     Wrapper of ``pandas_market_calendars`` for a trading calendar. The package
     ``pandas_market_calendar`` must be installed
 
@@ -134,25 +141,26 @@ class TradingCalendar(TradingCalendarBase):
         market doesn't trade. This is usually Saturday and Sunday and hence the
         default
 
-    '''
+    """
+
     params = (
-        ('open', time.min),
-        ('close', _time_max),
-        ('holidays', []),  # list of non trading days (date)
-        ('earlydays', []),  # list of tuples (date, opentime, closetime)
-        ('offdays', ISOWEEKEND),  # list of non trading (isoweekdays)
+        ("open", time.min),
+        ("close", _time_max),
+        ("holidays", []),  # list of non trading days (date)
+        ("earlydays", []),  # list of tuples (date, opentime, closetime)
+        ("offdays", ISOWEEKEND),  # list of non trading (isoweekdays)
     )
 
     def __init__(self):
         self._earlydays = [x[0] for x in self.p.earlydays]  # speed up searches
 
     def _nextday(self, day):
-        '''
+        """
         Returns the next trading day (datetime/date instance) after ``day``
         (datetime/date instance) and the isocalendar components
 
         The return value is a tuple with 2 components: (nextday, (y, w, d))
-        '''
+        """
         while True:
             day += ONEDAY
             isocal = day.isocalendar()
@@ -162,7 +170,7 @@ class TradingCalendar(TradingCalendarBase):
             return day, isocal
 
     def schedule(self, ts, tz=None):
-        '''
+        """
         Returns the opening and closing times for the given ``day``. If the
         method is called, the assumption is that ``day`` is an actual trading
         day
@@ -174,9 +182,11 @@ class TradingCalendar(TradingCalendarBase):
         Return values are UTC-based naive datetime objects.
 
         ts is meant to be an aware datetime while tz is the timezone of opening/closing times.
-        '''
+        """
         if ts.tzinfo is not None:
-            raise RuntimeError('Parameter ts is an aware datetime object but is expected to be naive!')
+            raise RuntimeError(
+                "Parameter ts is an aware datetime object but is expected to be naive!"
+            )
 
         def tzshift(dt):
             if tz is None:
@@ -208,7 +218,7 @@ class TradingCalendar(TradingCalendarBase):
 
 
 class PandasMarketCalendar(TradingCalendarBase):
-    '''
+    """
     Wrapper of ``pandas_market_calendars`` for a trading calendar. The package
     ``pandas_market_calendar`` must be installed
 
@@ -233,10 +243,11 @@ class PandasMarketCalendar(TradingCalendarBase):
 
       - http://pandas-market-calendars.readthedocs.io/
 
-    '''
+    """
+
     params = (
-        ('calendar', None),  # A pandas_market_calendars instance or exch name
-        ('cachesize', 365),  # Number of days to cache in advance
+        ("calendar", None),  # A pandas_market_calendars instance or exch name
+        ("cachesize", 365),  # Number of days to cache in advance
     )
 
     def __init__(self):
@@ -244,20 +255,22 @@ class PandasMarketCalendar(TradingCalendarBase):
 
         if isinstance(self._calendar, string_types):  # use passed mkt name
             import pandas_market_calendars as mcal
+
             self._calendar = mcal.get_calendar(self._calendar)
 
         import pandas as pd  # guaranteed because of pandas_market_calendars
+
         self.dcache = pd.DatetimeIndex([0.0])
         self.idcache = pd.DataFrame(index=pd.DatetimeIndex([0.0]))
         self.csize = timedelta(days=self.p.cachesize)
 
     def _nextday(self, day):
-        '''
+        """
         Returns the next trading day (datetime/date instance) after ``day``
         (datetime/date instance) and the isocalendar components
 
         The return value is a tuple with 2 components: (nextday, (y, w, d))
-        '''
+        """
         day += ONEDAY
         while True:
             i = self.dcache.searchsorted(day)
@@ -270,13 +283,13 @@ class PandasMarketCalendar(TradingCalendarBase):
             return d, d.isocalendar()
 
     def schedule(self, day, tz=None):
-        '''
+        """
         Returns the opening and closing times for the given ``day``. If the
         method is called, the assumption is that ``day`` is an actual trading
         day
 
         The return value is a tuple with 2 components: opentime, closetime
-        '''
+        """
         while True:
             i = self.idcache.index.searchsorted(day.date())
             if i == len(self.idcache):

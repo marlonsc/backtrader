@@ -30,9 +30,9 @@ STRATEGY LOGIC:
 1. Bullish Crossover (Golden Cross):
    - The shorter-term MA crosses above the longer-term MA
    - This is a buy signal
-   
+
 2. Bearish Crossover (Death Cross):
-   - The shorter-term MA crosses below the longer-term MA  
+   - The shorter-term MA crosses below the longer-term MA
    - This is a sell signal
 
 MARKET CONDITIONS:
@@ -155,8 +155,7 @@ With plotting:
 python strategies/moving_average_crossover.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --short-period 50 --long-period 200 --plot
 """
 
-from __future__ import (absolute_import, division, print_function,
-                       unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import argparse
 import datetime
@@ -164,87 +163,89 @@ import pandas as pd
 import backtrader as bt
 
 # Import utility functions
-from strategies.utils import (get_db_data, print_performance_metrics, 
-                            TradeThrottling, add_standard_analyzers)
+from strategies.utils import (
+    get_db_data,
+    print_performance_metrics,
+    TradeThrottling,
+    add_standard_analyzers,
+)
 
 
 class StockPriceData(bt.feeds.PandasData):
     """
     Stock Price Data Feed
     """
+
     params = (
-        ('datetime', None),
-        ('open', 'Open'),
-        ('high', 'High'),
-        ('low', 'Low'),
-        ('close', 'Close'),
-        ('volume', 'Volume'),
-        ('openinterest', None)
+        ("datetime", None),
+        ("open", "Open"),
+        ("high", "High"),
+        ("low", "Low"),
+        ("close", "Close"),
+        ("volume", "Volume"),
+        ("openinterest", None),
     )
 
 
 class MovingAverageCrossStrategy(bt.Strategy, TradeThrottling):
     """
     Moving Average Crossover Strategy
-    
+
     This strategy generates buy and sell signals based on the crossover
     of a short-term moving average and a long-term moving average.
-    
+
     A buy signal is generated when the short-term MA crosses above the long-term MA.
     A sell signal is generated when the short-term MA crosses below the long-term MA.
 
     ** IMPORTANT: This strategy is specifically designed for trending markets **
     It performs poorly in sideways or choppy markets where prices oscillate without
     establishing a clear trend.
-    
+
     Strategy Logic:
     - Buy when the short-term MA crosses above the long-term MA
     - Sell when the short-term MA crosses below the long-term MA
     - Optional confirmation period to reduce false signals
     - Uses risk-based position sizing
     - Implements stop-loss and optional trailing stop
-    
+
     Best Market Conditions:
     - Strong trending markets (either bullish or bearish)
     - Stocks with clear directional momentum
     - Lower volatility periods with sustained price direction
     - Avoid during range-bound, choppy, or highly volatile markets
     """
+
     params = (
         # Moving average parameters
-        ('short_period', 50),            # Short MA period
-        ('long_period', 200),            # Long MA period
-        ('ma_type', 'SMA'),              # Moving average type: SMA, EMA, WMA, SMMA
-        ('confirmation', 1),             # Number of bars to confirm a crossover
-        
+        ("short_period", 50),  # Short MA period
+        ("long_period", 200),  # Long MA period
+        ("ma_type", "SMA"),  # Moving average type: SMA, EMA, WMA, SMMA
+        ("confirmation", 1),  # Number of bars to confirm a crossover
         # Risk management parameters
-        ('stop_loss', 2.0),              # Stop loss percentage
-        ('trailing_stop', False),        # Use trailing stop loss
-        ('trail_percent', 2.0),          # Trailing stop percentage
-        
+        ("stop_loss", 2.0),  # Stop loss percentage
+        ("trailing_stop", False),  # Use trailing stop loss
+        ("trail_percent", 2.0),  # Trailing stop percentage
         # Position sizing parameters
-        ('risk_percent', 1.0),           # Percentage of equity to risk per trade
-        ('max_position', 20.0),          # Maximum position size as percentage
-        
+        ("risk_percent", 1.0),  # Percentage of equity to risk per trade
+        ("max_position", 20.0),  # Maximum position size as percentage
         # Trade throttling
-        ('trade_throttle_days', 5),      # Minimum days between trades (0 = no throttling)
-        
+        ("trade_throttle_days", 5),  # Minimum days between trades (0 = no throttling)
         # Other parameters
-        ('printlog', False),             # Print log to console
+        ("printlog", False),  # Print log to console
     )
-    
+
     def log(self, txt, dt=None, doprint=False):
         """Log messages"""
         if self.params.printlog or doprint:
             dt = dt or self.datas[0].datetime.date(0)
-            print(f'{dt.isoformat()}: {txt}')
-    
+            print(f"{dt.isoformat()}: {txt}")
+
     def __init__(self):
         # Keep a reference to the "close" line
         self.dataclose = self.datas[0].close
         self.datahigh = self.datas[0].high
         self.datalow = self.datas[0].low
-        
+
         # Order and position tracking
         self.order = None
         self.buyprice = None
@@ -252,313 +253,386 @@ class MovingAverageCrossStrategy(bt.Strategy, TradeThrottling):
         self.stop_price = None
         self.trail_price = None
         self.highest_price = None
-        
+
         # Confirmation tracking
         self.crossover_count = 0
         self.cross_direction = None  # 'up' or 'down'
-        
+
         # For trade throttling
         self.last_trade_date = None
-        
+
         # Create moving average indicators
         # First determine which MA type to use
-        if self.p.ma_type == 'SMA':
+        if self.p.ma_type == "SMA":
             ma_class = bt.indicators.SimpleMovingAverage
-        elif self.p.ma_type == 'EMA':
+        elif self.p.ma_type == "EMA":
             ma_class = bt.indicators.ExponentialMovingAverage
-        elif self.p.ma_type == 'WMA':
+        elif self.p.ma_type == "WMA":
             ma_class = bt.indicators.WeightedMovingAverage
-        elif self.p.ma_type == 'SMMA':
+        elif self.p.ma_type == "SMMA":
             ma_class = bt.indicators.SmoothedMovingAverage
         else:
             # Default to SMA
             ma_class = bt.indicators.SimpleMovingAverage
-        
+
         # Create the moving averages
         self.ma_short = ma_class(self.datas[0], period=self.p.short_period)
         self.ma_long = ma_class(self.datas[0], period=self.p.long_period)
-        
+
         # Create crossover indicator
         self.crossover = bt.indicators.CrossOver(self.ma_short, self.ma_long)
-        
+
         # Add ATR for stop loss calculation
         self.atr = bt.indicators.ATR(self.datas[0], period=14)
-    
+
     def notify_order(self, order):
         """Process order notifications"""
         if order.status in [order.Submitted, order.Accepted]:
             # Order still in progress - do nothing
             return
-        
+
         # Order completed
         if order.status in [order.Completed]:
             if order.isbuy():
                 self.log(
-                    f'BUY EXECUTED: Price: {order.executed.price:.2f}, '
-                    f'Size: {order.executed.size}, '
-                    f'Cost: {order.executed.value:.2f}, '
-                    f'Comm: {order.executed.comm:.2f}'
+                    f"BUY EXECUTED: Price: {order.executed.price:.2f}, "
+                    f"Size: {order.executed.size}, "
+                    f"Cost: {order.executed.value:.2f}, "
+                    f"Comm: {order.executed.comm:.2f}"
                 )
                 self.buyprice = order.executed.price
                 self.buycomm = order.executed.comm
-                
+
                 # Set stop loss
                 self.stop_price = self.buyprice * (1.0 - self.p.stop_loss / 100.0)
-                self.log(f'Stop loss set at: {self.stop_price:.2f} ({self.p.stop_loss}%)')
-                
+                self.log(
+                    f"Stop loss set at: {self.stop_price:.2f} ({self.p.stop_loss}%)"
+                )
+
                 # Set trailing stop if enabled
                 if self.p.trailing_stop:
-                    self.trail_price = self.buyprice * (1.0 - self.p.trail_percent / 100.0)
+                    self.trail_price = self.buyprice * (
+                        1.0 - self.p.trail_percent / 100.0
+                    )
                     self.highest_price = self.buyprice
-                    self.log(f'Trailing stop set at: {self.trail_price:.2f} ({self.p.trail_percent}%)')
-                
+                    self.log(
+                        "Trailing stop set at:"
+                        f" {self.trail_price:.2f} ({self.p.trail_percent}%)"
+                    )
+
                 # Update last trade date for throttling
                 self.last_trade_date = self.datas[0].datetime.date(0)
-                
+
             else:  # sell
                 self.log(
-                    f'SELL EXECUTED: Price: {order.executed.price:.2f}, '
-                    f'Size: {order.executed.size}, '
-                    f'Cost: {order.executed.value:.2f}, '
-                    f'Comm: {order.executed.comm:.2f}'
+                    f"SELL EXECUTED: Price: {order.executed.price:.2f}, "
+                    f"Size: {order.executed.size}, "
+                    f"Cost: {order.executed.value:.2f}, "
+                    f"Comm: {order.executed.comm:.2f}"
                 )
                 # Reset stop and trail prices
                 self.stop_price = None
                 self.trail_price = None
                 self.highest_price = None
-        
+
         elif order.status in [order.Canceled, order.Margin, order.Rejected]:
-            self.log(f'Order {order.Status[order.status]}')
-        
+            self.log(f"Order {order.Status[order.status]}")
+
         # Reset the order
         self.order = None
-    
+
     def notify_trade(self, trade):
         """Process trade notifications"""
         if not trade.isclosed:
             return
-        
-        self.log(f'OPERATION PROFIT, GROSS: {trade.pnl:.2f}, NET: {trade.pnlcomm:.2f}')
-    
+
+        self.log(f"OPERATION PROFIT, GROSS: {trade.pnl:.2f}, NET: {trade.pnlcomm:.2f}")
+
     def calculate_position_size(self):
         """Calculate position size based on risk percentage"""
         current_price = self.dataclose[0]
         value = self.broker.getvalue()
-        
+
         # Calculate stop loss price
         stop_price = current_price * (1.0 - self.p.stop_loss / 100.0)
-        
+
         # Calculate risk amount based on portfolio value
         risk_amount = value * (self.p.risk_percent / 100)
-        
+
         # Calculate risk per share
         risk_per_share = current_price - stop_price
-        
+
         # Calculate position size based on risk
         if risk_per_share > 0:
             size = int(risk_amount / risk_per_share)
-            
+
             # Ensure we don't exceed maximum percentage of available cash
             cash = self.broker.getcash()
             max_size = int((cash * self.p.max_position / 100) / current_price)
             size = min(size, max_size)
-            
+
             return size
-        
+
         return 0
-    
+
     def next(self):
         """Main strategy logic executed for each bar"""
         # Skip if order is pending
         if self.order:
             return
-            
+
         # Check if we are in the market
         if not self.position:
             # BUY LOGIC
-            
+
             # Check if we're allowed to trade based on the throttling rules
             if not self.can_trade_now():
                 return
-                
+
             # Check for a buy signal (short MA crossing above long MA)
             if self.crossover > 0:
                 # Track the crossover for confirmation if needed
-                if self.cross_direction != 'up':
-                    self.cross_direction = 'up'
+                if self.cross_direction != "up":
+                    self.cross_direction = "up"
                     self.crossover_count = 1
                 else:
                     self.crossover_count += 1
-                
+
                 # Check if we have enough confirmation bars
                 if self.crossover_count >= self.p.confirmation:
                     # Calculate position size based on risk
                     size = self.calculate_position_size()
-                    
+
                     if size > 0:
-                        self.log(f'BUY CREATE: {self.dataclose[0]:.2f}, Size: {size}')
+                        self.log(f"BUY CREATE: {self.dataclose[0]:.2f}, Size: {size}")
                         self.order = self.buy(size=size)
-                        
+
                         # Store the highest price seen for trailing stop
                         self.highest_price = self.dataclose[0]
-                        
+
                         # Update the last trade date for throttling
                         self.last_trade_date = self.datas[0].datetime.date(0)
             else:
                 # Reset counter if crossover direction changes
-                if self.crossover < 0 and self.cross_direction != 'down':
-                    self.cross_direction = 'down'
+                if self.crossover < 0 and self.cross_direction != "down":
+                    self.cross_direction = "down"
                     self.crossover_count = 1
                 elif self.crossover < 0:
                     self.crossover_count += 1
                 else:
                     self.crossover_count = 0
                     self.cross_direction = None
-        
+
         else:
             # SELL LOGIC - We are in the market, look for a sell signal
-            
+
             # Check for stop loss
             if self.datalow[0] <= self.stop_price:
-                self.log(f'SELL CREATE (Stop Loss): {self.datalow[0]:.2f}')
+                self.log(f"SELL CREATE (Stop Loss): {self.datalow[0]:.2f}")
                 self.order = self.sell()
                 return
-                
+
             # Update trailing stop if enabled
             if self.p.trailing_stop and self.datahigh[0] > self.highest_price:
                 self.highest_price = self.datahigh[0]
                 # Calculate new trail stop price
-                new_trail_price = self.highest_price * (1.0 - self.p.trail_percent / 100.0)
+                new_trail_price = self.highest_price * (
+                    1.0 - self.p.trail_percent / 100.0
+                )
                 # Only update if the new trail price is higher than the current one
                 if new_trail_price > self.trail_price:
                     self.trail_price = new_trail_price
-                    self.log(f'Trailing stop updated: {self.trail_price:.2f}')
-            
+                    self.log(f"Trailing stop updated: {self.trail_price:.2f}")
+
             # Check if trailing stop is hit
             if self.p.trailing_stop and self.datalow[0] <= self.trail_price:
-                self.log(f'SELL CREATE (Trailing Stop): {self.datalow[0]:.2f}')
+                self.log(f"SELL CREATE (Trailing Stop): {self.datalow[0]:.2f}")
                 self.order = self.sell()
                 return
-                
+
             # Check for a sell signal (short MA crossing below long MA)
             if self.crossover < 0:
                 # Track the crossover for confirmation if needed
-                if self.cross_direction != 'down':
-                    self.cross_direction = 'down'
+                if self.cross_direction != "down":
+                    self.cross_direction = "down"
                     self.crossover_count = 1
                 else:
                     self.crossover_count += 1
-                
+
                 # Check if we have enough confirmation bars
                 if self.crossover_count >= self.p.confirmation:
-                    self.log(f'SELL CREATE: {self.dataclose[0]:.2f}')
+                    self.log(f"SELL CREATE: {self.dataclose[0]:.2f}")
                     self.order = self.sell()
             else:
                 # Reset counter if crossover direction changes
-                if self.crossover > 0 and self.cross_direction != 'up':
-                    self.cross_direction = 'up'
+                if self.crossover > 0 and self.cross_direction != "up":
+                    self.cross_direction = "up"
                     self.crossover_count = 1
                 elif self.crossover > 0:
                     self.crossover_count += 1
                 else:
                     self.crossover_count = 0
                     self.cross_direction = None
-    
+
     def stop(self):
         """Called when backtest is complete"""
-        self.log('Moving Average Crossover Strategy completed', doprint=True)
-        self.log(f'Final Portfolio Value: {self.broker.getvalue():.2f}', doprint=True)
-        
+        self.log("Moving Average Crossover Strategy completed", doprint=True)
+        self.log(f"Final Portfolio Value: {self.broker.getvalue():.2f}", doprint=True)
+
         # Add a note about market conditions
-        self.log('NOTE: This strategy is specifically designed for trending markets', doprint=True)
-        self.log('      It performs poorly in sideways or choppy markets', doprint=True)
+        self.log(
+            "NOTE: This strategy is specifically designed for trending markets",
+            doprint=True,
+        )
+        self.log("      It performs poorly in sideways or choppy markets", doprint=True)
 
 
 def parse_args():
     """Parse command line arguments"""
     parser = argparse.ArgumentParser(
-        description='Moving Average Crossover Strategy',
+        description="Moving Average Crossover Strategy",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    
+
     # Required arguments
-    parser.add_argument('--data', '-d', required=True,
-                       help='Stock symbol to retrieve data for')
-    
+    parser.add_argument(
+        "--data", "-d", required=True, help="Stock symbol to retrieve data for"
+    )
+
     # Date range arguments
-    parser.add_argument('--fromdate', '-f', type=str, default='2024-01-01',
-                       help='Start date for the backtest in YYYY-MM-DD format')
-    parser.add_argument('--todate', '-t', type=str, default='2024-12-31',
-                       help='End date for the backtest in YYYY-MM-DD format')
-    
+    parser.add_argument(
+        "--fromdate",
+        "-f",
+        type=str,
+        default="2024-01-01",
+        help="Start date for the backtest in YYYY-MM-DD format",
+    )
+    parser.add_argument(
+        "--todate",
+        "-t",
+        type=str,
+        default="2024-12-31",
+        help="End date for the backtest in YYYY-MM-DD format",
+    )
+
     # Database arguments
-    parser.add_argument('--dbuser', '-u', default='jason',
-                       help='PostgreSQL username')
-    parser.add_argument('--dbpass', '-pw', default='fsck',
-                       help='PostgreSQL password')
-    parser.add_argument('--dbname', '-n', default='market_data',
-                       help='PostgreSQL database name')
-    
+    parser.add_argument("--dbuser", "-u", default="jason", help="PostgreSQL username")
+    parser.add_argument("--dbpass", "-pw", default="fsck", help="PostgreSQL password")
+    parser.add_argument(
+        "--dbname", "-n", default="market_data", help="PostgreSQL database name"
+    )
+
     # Strategy arguments
-    parser.add_argument('--cash', '-c', type=float, default=100000.0,
-                       help='Initial cash for the backtest')
-    
+    parser.add_argument(
+        "--cash",
+        "-c",
+        type=float,
+        default=100000.0,
+        help="Initial cash for the backtest",
+    )
+
     # Moving average parameters
-    parser.add_argument('--short-period', '-sp', type=int, default=50,
-                       help='Period for short moving average')
-    parser.add_argument('--long-period', '-lp', type=int, default=200,
-                       help='Period for long moving average')
-    parser.add_argument('--ma-type', '-mt', type=str, default='SMA',
-                       choices=['SMA', 'EMA', 'WMA', 'SMMA'],
-                       help='Moving average type')
-    parser.add_argument('--confirmation', '-cf', type=int, default=1,
-                       help='Number of bars to confirm a crossover')
-    
+    parser.add_argument(
+        "--short-period",
+        "-sp",
+        type=int,
+        default=50,
+        help="Period for short moving average",
+    )
+    parser.add_argument(
+        "--long-period",
+        "-lp",
+        type=int,
+        default=200,
+        help="Period for long moving average",
+    )
+    parser.add_argument(
+        "--ma-type",
+        "-mt",
+        type=str,
+        default="SMA",
+        choices=["SMA", "EMA", "WMA", "SMMA"],
+        help="Moving average type",
+    )
+    parser.add_argument(
+        "--confirmation",
+        "-cf",
+        type=int,
+        default=1,
+        help="Number of bars to confirm a crossover",
+    )
+
     # Risk management parameters
-    parser.add_argument('--stop-loss', '-sl', type=float, default=2.0,
-                       help='Stop loss percentage')
-    parser.add_argument('--trailing-stop', '-ts', action='store_true',
-                       help='Enable trailing stop loss')
-    parser.add_argument('--trail-percent', '-tp', type=float, default=2.0,
-                       help='Trailing stop percentage')
-    
+    parser.add_argument(
+        "--stop-loss", "-sl", type=float, default=2.0, help="Stop loss percentage"
+    )
+    parser.add_argument(
+        "--trailing-stop", "-ts", action="store_true", help="Enable trailing stop loss"
+    )
+    parser.add_argument(
+        "--trail-percent",
+        "-tp",
+        type=float,
+        default=2.0,
+        help="Trailing stop percentage",
+    )
+
     # Position sizing parameters
-    parser.add_argument('--risk-percent', '-rp', type=float, default=1.0,
-                       help='Percentage of equity to risk per trade')
-    parser.add_argument('--max-position', '-mp', type=float, default=20.0,
-                       help='Maximum position size as percentage of equity')
-    
+    parser.add_argument(
+        "--risk-percent",
+        "-rp",
+        type=float,
+        default=1.0,
+        help="Percentage of equity to risk per trade",
+    )
+    parser.add_argument(
+        "--max-position",
+        "-mp",
+        type=float,
+        default=20.0,
+        help="Maximum position size as percentage of equity",
+    )
+
     # Trade throttling
-    parser.add_argument('--trade-throttle-days', '-ttd', type=int, default=5,
-                       help='Minimum days between trades (0 = no throttling)')
-    
+    parser.add_argument(
+        "--trade-throttle-days",
+        "-ttd",
+        type=int,
+        default=5,
+        help="Minimum days between trades (0 = no throttling)",
+    )
+
     # Other parameters
-    parser.add_argument('--plot', '-pl', action='store_true',
-                       help='Generate and show a plot of the trading activity')
-    
+    parser.add_argument(
+        "--plot",
+        "-pl",
+        action="store_true",
+        help="Generate and show a plot of the trading activity",
+    )
+
     return parser.parse_args()
 
 
 def main():
     """Main function to run the backtest"""
     args = parse_args()
-    
+
     # Convert date strings to datetime objects
-    fromdate = datetime.datetime.strptime(args.fromdate, '%Y-%m-%d')
-    todate = datetime.datetime.strptime(args.todate, '%Y-%m-%d')
-    
+    fromdate = datetime.datetime.strptime(args.fromdate, "%Y-%m-%d")
+    todate = datetime.datetime.strptime(args.todate, "%Y-%m-%d")
+
     # Get data from database
     df = get_db_data(args.data, args.dbuser, args.dbpass, args.dbname, fromdate, todate)
-    
+
     # Create a Data Feed
     data = StockPriceData(dataname=df)
-    
+
     # Create a cerebro entity
     cerebro = bt.Cerebro()
-    
+
     # Add the data feed to cerebro
     cerebro.adddata(data)
-    
+
     # Add strategy to cerebro
     cerebro.addstrategy(
         MovingAverageCrossStrategy,
@@ -567,110 +641,107 @@ def main():
         long_period=args.long_period,
         ma_type=args.ma_type,
         confirmation=args.confirmation,
-        
         # Risk management parameters
         stop_loss=args.stop_loss,
         trailing_stop=args.trailing_stop,
         trail_percent=args.trail_percent,
-        
         # Risk management parameters
         risk_percent=args.risk_percent,
         max_position=args.max_position,
-        
         # Trade throttling
         trade_throttle_days=args.trade_throttle_days,
     )
-    
+
     # Set initial cash
     cerebro.broker.setcash(args.cash)
-    
+
     # Set commission - 0.1%
     cerebro.broker.setcommission(commission=0.001)
-    
+
     # Add the standard analyzers
     add_standard_analyzers(cerebro)
-    
+
     # Print out the starting conditions
-    print(f'Starting Portfolio Value: ${cerebro.broker.getvalue():.2f}')
-    
+    print(f"Starting Portfolio Value: ${cerebro.broker.getvalue():.2f}")
+
     # Run the strategy
     results = cerebro.run()
-    
+
     # Print final portfolio value
     final_value = cerebro.broker.getvalue()
-    print(f'Final Portfolio Value: ${final_value:.2f}')
-    print(f'Profit/Loss: ${final_value - args.cash:.2f}')
-    
+    print(f"Final Portfolio Value: ${final_value:.2f}")
+    print(f"Profit/Loss: ${final_value - args.cash:.2f}")
+
     # Print standard performance metrics
     print_performance_metrics(cerebro, results)
-    
+
     # Extract and display detailed performance metrics
     print("\n==== DETAILED PERFORMANCE METRICS ====")
-    
+
     # Get the first strategy instance
     strat = results[0]
-    
+
     # Return
     ret_analyzer = strat.analyzers.returns
-    total_return = ret_analyzer.get_analysis()['rtot'] * 100
+    total_return = ret_analyzer.get_analysis()["rtot"] * 100
     print(f"Return: {total_return:.2f}%")
-    
+
     # Sharpe Ratio
-    sharpe = strat.analyzers.sharpe_ratio.get_analysis()['sharperatio']
+    sharpe = strat.analyzers.sharpe_ratio.get_analysis()["sharperatio"]
     if sharpe is None:
         sharpe = 0.0
     print(f"Sharpe Ratio: {sharpe:.4f}")
-    
+
     # Max Drawdown
     dd = strat.analyzers.drawdown.get_analysis()
-    max_dd = dd.get('max', {}).get('drawdown', 0.0)
+    max_dd = dd.get("max", {}).get("drawdown", 0.0)
     print(f"Max Drawdown: {max_dd:.2f}%")
-    
+
     # Trade statistics
     trade_analysis = strat.analyzers.trade_analyzer.get_analysis()
-    
+
     # Total Trades
-    total_trades = trade_analysis.get('total', {}).get('total', 0)
+    total_trades = trade_analysis.get("total", {}).get("total", 0)
     print(f"Total Trades: {total_trades}")
-    
+
     # Won Trades
-    won_trades = trade_analysis.get('won', {}).get('total', 0)
+    won_trades = trade_analysis.get("won", {}).get("total", 0)
     print(f"Won Trades: {won_trades}")
-    
+
     # Lost Trades
-    lost_trades = trade_analysis.get('lost', {}).get('total', 0)
+    lost_trades = trade_analysis.get("lost", {}).get("total", 0)
     print(f"Lost Trades: {lost_trades}")
-    
+
     # Win Rate
     if total_trades > 0:
         win_rate = (won_trades / total_trades) * 100
     else:
         win_rate = 0.0
     print(f"Win Rate: {win_rate:.2f}%")
-    
+
     # Average Win
-    avg_win = trade_analysis.get('won', {}).get('pnl', {}).get('average', 0.0)
+    avg_win = trade_analysis.get("won", {}).get("pnl", {}).get("average", 0.0)
     print(f"Average Win: ${avg_win:.2f}")
-    
+
     # Average Loss
-    avg_loss = trade_analysis.get('lost', {}).get('pnl', {}).get('average', 0.0)
+    avg_loss = trade_analysis.get("lost", {}).get("pnl", {}).get("average", 0.0)
     print(f"Average Loss: ${avg_loss:.2f}")
-    
+
     # Profit Factor
-    gross_profit = trade_analysis.get('won', {}).get('pnl', {}).get('total', 0.0)
-    gross_loss = abs(trade_analysis.get('lost', {}).get('pnl', {}).get('total', 0.0))
-    
+    gross_profit = trade_analysis.get("won", {}).get("pnl", {}).get("total", 0.0)
+    gross_loss = abs(trade_analysis.get("lost", {}).get("pnl", {}).get("total", 0.0))
+
     if gross_loss != 0:
         profit_factor = gross_profit / gross_loss
     else:
-        profit_factor = float('inf') if gross_profit > 0 else 0.0
-    
+        profit_factor = float("inf") if gross_profit > 0 else 0.0
+
     print(f"Profit Factor: {profit_factor:.2f}")
-    
+
     # Plot the result if requested
     if args.plot:
-        cerebro.plot(style='candlestick', barup='green', bardown='red')
+        cerebro.plot(style="candlestick", barup="green", bardown="red")
 
 
-if __name__ == '__main__':
-    main() 
+if __name__ == "__main__":
+    main()

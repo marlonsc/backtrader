@@ -1,104 +1,105 @@
-import backtrader as bt # 导入 Backtrader 
-import backtrader.indicators as btind # 导入策略分析模块
+import backtrader as bt  # Import Backtrader
+import backtrader.indicators as btind  # Import strategy indicator module
 from backtest.feeds.datafeeds import StockCsvData
- 
-# 创建策略
+
+
+# Create strategy
 class StrategyTemplate(bt.Strategy):
-    # 可选，设置回测的可变参数：如移动均线的周期
-    params = (
-        (...,...), # 最后一个“,”最好别删！
-    )
+    # Optional, set backtest parameters: e.g., moving average period
+    params = ((..., ...),)  # It is best not to delete the last comma!
+
     def log(self, txt, dt=None):
-        '''可选，构建策略打印日志的函数：可用于打印订单记录或交易记录等'''
+        """Optional, build a function to print strategy logs: can be used to print order or trade records, etc."""
         dt = dt or self.datas[0].datetime.date(0)
-        print('%s, %s' % (dt.isoformat(), txt))
- 
+        print("%s, %s" % (dt.isoformat(), txt))
+
     def __init__(self):
-        '''必选，初始化属性、计算指标等'''
+        """Required, initialize attributes, calculate indicators, etc."""
         pass
 
     def start(self):
-        '''在回测开始之前调用,对应第0根bar'''
-        # 回测开始之前的有关处理逻辑可以写在这里
-        # 默认调用空的 start() 函数，用于启动回测 
+        """Called before backtest starts, corresponds to bar 0"""
+        # Logic to be processed before the backtest starts can be written here
+        # By default, calls an empty start() function to start the backtest
         pass
 
     def prenext(self):
-        '''策略准备阶段,对应第1根bar-第 min_period-1 根bar'''
-        # 该函数主要用于等待指标计算，指标计算完成前都会默认调用prenext()空函数
-        # min_period 就是 __init__ 中计算完成所有指标的第1个值所需的最小时间段
+        """Strategy preparation phase, corresponds to bar 1 to bar min_period-1"""
+        # This function is mainly used to wait for indicator calculation; before indicators are ready, prenext() is called by default
+        # min_period is the minimum period required to calculate the first value of all indicators in __init__
         pass
-    
+
     def nextstart(self):
-        '''策略正常运行的第一个时点，对应第 min_period 根bar'''
-        # 只有在 __init__ 中所有指标都有值可用的情况下，才会开始运行策略
-        # nextstart()只运行一次，主要用于告知后面可以开始启动 next() 了
-        # nextstart()的默认实现是简单地调用next(),所以next中的策略逻辑从第 min_period根bar就已经开始执行
+        """First time the strategy runs normally, corresponds to bar min_period"""
+        # The strategy only starts running when all indicators in __init__ have values available
+        # nextstart() runs only once, mainly to indicate that next() can start running
+        # The default implementation of nextstart() simply calls next(), so the logic in next() starts from bar min_period
         pass
- 
+
     def next(self):
-        '''必选，编写交易策略逻辑'''
-        sma = btind.SimpleMovingAverage(...) # 计算均线
+        """Required, write trading strategy logic"""
+        sma = btind.SimpleMovingAverage(...)  # Calculate moving average
         pass
 
     def notify_order(self, order):
-        '''可选，打印订单信息'''
+        """Optional, print order information"""
         pass
- 
+
     def notify_trade(self, trade):
-        '''可选，打印交易信息'''
+        """Optional, print trade information"""
         pass
 
     def notify_cashvalue(self, cash, value):
-        '''通知当前资金和总资产'''
+        """Notify current cash and total asset value"""
         pass
-    
+
     def notify_fund(self, cash, value, fundvalue, shares):
-        '''返回当前资金、总资产、基金价值、基金份额'''
+        """Return current cash, total asset value, fund value, and fund shares"""
         pass
-    
+
     def notify_store(self, msg, *args, **kwargs):
-        '''返回供应商发出的信息通知'''
+        """Return notifications sent by the broker/store"""
         pass
-    
+
     def notify_data(self, data, status, *args, **kwargs):
-        '''返回数据相关的通知'''
+        """Return data-related notifications"""
         pass
-    
+
     def notify_timer(self, timer, when, *args, **kwargs):
-        '''返回定时器的通知'''
-        # 定时器可以通过函数add_time()添加
+        """Return timer notifications"""
+        # Timers can be added via add_time()
         pass
- 
-# 实例化 cerebro
+
+
+# Instantiate cerebro
 cerebro = bt.Cerebro()
-# 通过 feeds 读取数据
-data = StockCsvData(...) 
-# 将数据传递给 “大脑”
-cerebro.adddata(data) 
-# 通过经纪商设置初始资金
+# Read data via feeds
+data = StockCsvData(...)
+# Pass data to the 'brain'
+cerebro.adddata(data)
+# Set initial capital via broker
 cerebro.broker.setcash(...)
-# 设置单笔交易的数量
+# Set the quantity per trade
 cerebro.addsizer(...)
-# 设置交易佣金，双边各 0.0003
+# Set trading commission, 0.0003 per side
 cerebro.broker.setcommission(commission=0.0003)
-# 设置滑点，双边各0.0001
+# Set slippage, 0.0001 per side
 cerebro.broker.set_slippage_perc(perc=0.0001)
-# 订单成交量不超过当日成交量的50%
+# Order volume does not exceed 50% of daily volume
 cerebro.broker.set_filler(bt.broker.fillers.FixedBarPerc(perc=50))
-# 添加策略
+# Add strategy
 cerebro.addstrategy(...)
-# 优化策略
+# Optimize strategy
 # cerebro.optstrategy(StrategyTemplate, maperiod=range(10, 31))
-# 添加策略分析指标
+# Add strategy analyzers
 cerebro.addanalyzer(...)
-# 添加观测器
+# Add observers
 cerebro.addobserver(...)
-# 启动回测
+# Start backtest
 result = cerebro.run()
-# 从返回的 result 中提取回测结果
+# Extract backtest results from result
 # strat = result[0]
-# 返回日度收益率序列
+# Return daily return series
 # daily_return = pd.Series(strat.analyzers.pnl.get_analysis())
-# 可视化回测结果
+# Visualize backtest results
 cerebro.plot()

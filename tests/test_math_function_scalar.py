@@ -22,7 +22,6 @@ import os
 import time
 import math
 
-
 try:
     time_clock = time.process_time
 except:
@@ -76,8 +75,8 @@ class SlipTestStrategy(bt.SignalStrategy):
     def next(self):
         if self.p.printdata:
             self.log(
-                " open {:.2f} close {:.2f}, max {:.2f}, log {:5.3f}, ceiling {:5.3f}, floor {:5.3f}, "
-                "cross {:2.0f} abs cross {:2.0f}".format(
+                " open {:.2f} close {:.2f}, max {:.2f}, log {:5.3f}, ceiling {:5.3f},"
+                " floor {:5.3f}, cross {:2.0f} abs cross {:2.0f}".format(
                     self.datas[0].open[0],
                     self.datas[0].close[0],
                     self.mx[0],
@@ -103,7 +102,7 @@ class SlipTestStrategy(bt.SignalStrategy):
 
 
 def test_run(main=False):
-    """ Test addition of scalar math functions to Backtrader. See backtrader2 pr#22 """
+    """Test addition of scalar math functions to Backtrader. See backtrader2 pr#22"""
 
     cerebro = bt.Cerebro()
 
@@ -120,7 +119,7 @@ def test_run(main=False):
     datapath = os.path.join(modpath, dataspath, datafile)
     data0 = bt.feeds.GenericCSVData(
         dataname=datapath,
-        dtformat=("%Y-%m-%d"),
+        dtformat="%Y-%m-%d",
         timeframe=bt.TimeFrame.Days,
         compression=1,
     )

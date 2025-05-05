@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 
 import collections
@@ -31,7 +30,7 @@ from . import TimeReturn, PositionsValue, Transactions, GrossLeverage
 
 
 class PyFolio(bt.Analyzer):
-    '''This analyzer uses 4 children analyzers to collect data and transforms it
+    """This analyzer uses 4 children analyzers to collect data and transforms it
     in to a data set compatible with ``pyfolio``
 
     Children Analyzer
@@ -77,15 +76,12 @@ class PyFolio(bt.Analyzer):
 
         Returns a dictionary with returns as values and the datetime points for
         each return as keys
-    '''
-    params = (
-        ('timeframe', bt.TimeFrame.Days),
-        ('compression', 1)
-    )
+    """
+
+    params = (("timeframe", bt.TimeFrame.Days), ("compression", 1))
 
     def __init__(self):
-        dtfcomp = dict(timeframe=self.p.timeframe,
-                       compression=self.p.compression)
+        dtfcomp = dict(timeframe=self.p.timeframe, compression=self.p.compression)
 
         self._returns = TimeReturn(**dtfcomp)
         self._positions = PositionsValue(headers=True, cash=True)
@@ -94,13 +90,13 @@ class PyFolio(bt.Analyzer):
 
     def stop(self):
         super(PyFolio, self).stop()
-        self.rets['returns'] = self._returns.get_analysis()
-        self.rets['positions'] = self._positions.get_analysis()
-        self.rets['transactions'] = self._transactions.get_analysis()
-        self.rets['gross_lev'] = self._gross_lev.get_analysis()
+        self.rets["returns"] = self._returns.get_analysis()
+        self.rets["positions"] = self._positions.get_analysis()
+        self.rets["transactions"] = self._transactions.get_analysis()
+        self.rets["gross_lev"] = self._gross_lev.get_analysis()
 
     def get_pf_items(self):
-        '''Returns a tuple of 4 elements which can be used for further processing with
+        """Returns a tuple of 4 elements which can be used for further processing with
           ``pyfolio``
 
           returns, positions, transactions, gross_leverage
@@ -111,31 +107,32 @@ class PyFolio(bt.Analyzer):
         by, for example, ``pyfolio.create_full_tear_sheet``
 
         The method will break if ``pandas`` is not installed
-        '''
+        """
         # keep import local to avoid disturbing installations with no pandas
         import pandas
         from pandas import DataFrame as DF
 
         #
         # Returns
-        cols = ['index', 'return']
-        returns = DF.from_records(iteritems(self.rets['returns']),
-                                  index=cols[0], columns=cols)
+        cols = ["index", "return"]
+        returns = DF.from_records(
+            iteritems(self.rets["returns"]), index=cols[0], columns=cols
+        )
         returns.index = pandas.to_datetime(returns.index)
-        returns.index = returns.index.tz_localize('UTC')
-        rets = returns['return']
+        returns.index = returns.index.tz_localize("UTC")
+        rets = returns["return"]
         #
         # Positions
-        pss = self.rets['positions']
+        pss = self.rets["positions"]
         ps = [[k] + v[-2:] for k, v in iteritems(pss)]
         cols = ps.pop(0)  # headers are in the first entry
         positions = DF.from_records(ps, index=cols[0], columns=cols)
         positions.index = pandas.to_datetime(positions.index)
-        positions.index = positions.index.tz_localize('UTC')
+        positions.index = positions.index.tz_localize("UTC")
 
         #
         # Transactions
-        txss = self.rets['transactions']
+        txss = self.rets["transactions"]
         txs = list()
         # The transactions have a common key (date) and can potentially happend
         # for several assets. The dictionary has a single key and a list of
@@ -148,16 +145,17 @@ class PyFolio(bt.Analyzer):
         cols = txs.pop(0)  # headers are in the first entry
         transactions = DF.from_records(txs, index=cols[0], columns=cols)
         transactions.index = pandas.to_datetime(transactions.index)
-        transactions.index = transactions.index.tz_localize('UTC')
+        transactions.index = transactions.index.tz_localize("UTC")
 
         # Gross Leverage
-        cols = ['index', 'gross_lev']
-        gross_lev = DF.from_records(iteritems(self.rets['gross_lev']),
-                                    index=cols[0], columns=cols)
+        cols = ["index", "gross_lev"]
+        gross_lev = DF.from_records(
+            iteritems(self.rets["gross_lev"]), index=cols[0], columns=cols
+        )
 
         gross_lev.index = pandas.to_datetime(gross_lev.index)
-        gross_lev.index = gross_lev.index.tz_localize('UTC')
-        glev = gross_lev['gross_lev']
+        gross_lev.index = gross_lev.index.tz_localize("UTC")
+        glev = gross_lev["gross_lev"]
 
         # Return all together
         return rets, positions, transactions, glev

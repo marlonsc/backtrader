@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import argparse
 import datetime
@@ -30,7 +29,6 @@ import sys
 
 import backtrader as bt
 from backtrader.utils.py3 import bytes
-
 
 DATAFORMATS = dict(
     btcsv=bt.feeds.BacktraderCSVData,
@@ -49,47 +47,47 @@ DATAFORMATS = dict(
 
 class RewriteStrategy(bt.Strategy):
     params = (
-        ('separator', ','),
-        ('outfile', None),
+        ("separator", ","),
+        ("outfile", None),
     )
 
     def start(self):
         if self.p.outfile is None:
             self.f = sys.stdout
         else:
-            self.f = open(self.p.outfile, 'wb')
+            self.f = open(self.p.outfile, "wb")
 
         if self.data._timeframe < bt.TimeFrame.Days:
-            headers = 'Date,Time,Open,High,Low,Close,Volume,OpenInterest'
+            headers = "Date,Time,Open,High,Low,Close,Volume,OpenInterest"
         else:
-            headers = 'Date,Open,High,Low,Close,Volume,OpenInterest'
+            headers = "Date,Open,High,Low,Close,Volume,OpenInterest"
 
-        headers += '\n'
+        headers += "\n"
         self.f.write(bytes(headers))
 
     def next(self):
         fields = list()
-        dt = self.data.datetime.date(0).strftime('%Y-%m-%d')
+        dt = self.data.datetime.date(0).strftime("%Y-%m-%d")
         fields.append(dt)
         if self.data._timeframe < bt.TimeFrame.Days:
-            tm = self.data.datetime.time(0).strftime('%H:%M:%S')
+            tm = self.data.datetime.time(0).strftime("%H:%M:%S")
             fields.append(tm)
 
-        o = '%.2f' % self.data.open[0]
+        o = "%.2f" % self.data.open[0]
         fields.append(o)
-        h = '%.2f' % self.data.high[0]
+        h = "%.2f" % self.data.high[0]
         fields.append(h)
-        l = '%.2f' % self.data.low[0]
+        l = "%.2f" % self.data.low[0]
         fields.append(l)
-        c = '%.2f' % self.data.close[0]
+        c = "%.2f" % self.data.close[0]
         fields.append(c)
-        v = '%d' % self.data.volume[0]
+        v = "%d" % self.data.volume[0]
         fields.append(v)
-        oi = '%d' % self.data.openinterest[0]
+        oi = "%d" % self.data.openinterest[0]
         fields.append(oi)
 
         txt = self.p.separator.join(fields)
-        txt += '\n'
+        txt += "\n"
         self.f.write(bytes(txt))
 
 
@@ -99,40 +97,38 @@ def runstrat(pargs=None):
     cerebro = bt.Cerebro()
 
     dfkwargs = dict()
-    if args.format == 'yahoo_unreversed':
-        dfkwargs['reverse'] = True
+    if args.format == "yahoo_unreversed":
+        dfkwargs["reverse"] = True
 
-    fmtstr = '%Y-%m-%d'
+    fmtstr = "%Y-%m-%d"
     if args.fromdate:
-        dtsplit = args.fromdate.split('T')
+        dtsplit = args.fromdate.split("T")
         if len(dtsplit) > 1:
-            fmtstr += 'T%H:%M:%S'
+            fmtstr += "T%H:%M:%S"
 
         fromdate = datetime.datetime.strptime(args.fromdate, fmtstr)
-        dfkwargs['fromdate'] = fromdate
+        dfkwargs["fromdate"] = fromdate
 
-    fmtstr = '%Y-%m-%d'
+    fmtstr = "%Y-%m-%d"
     if args.todate:
-        dtsplit = args.todate.split('T')
+        dtsplit = args.todate.split("T")
         if len(dtsplit) > 1:
-            fmtstr += 'T%H:%M:%S'
+            fmtstr += "T%H:%M:%S"
         todate = datetime.datetime.strptime(args.todate, fmtstr)
-        dfkwargs['todate'] = todate
+        dfkwargs["todate"] = todate
 
     dfcls = DATAFORMATS[args.format]
     data = dfcls(dataname=args.infile, **dfkwargs)
     cerebro.adddata(data)
 
-    cerebro.addstrategy(RewriteStrategy,
-                        separator=args.separator,
-                        outfile=args.outfile)
+    cerebro.addstrategy(RewriteStrategy, separator=args.separator, outfile=args.outfile)
 
     cerebro.run(stdstats=False)
 
     if args.plot:
-        pkwargs = dict(style='bar')
+        pkwargs = dict(style="bar")
         if args.plot is not True:  # evals to True but is not True
-            npkwargs = eval('dict(' + args.plot + ')')  # args were passed
+            npkwargs = eval("dict(" + args.plot + ")")  # args were passed
             pkwargs.update(npkwargs)
 
         cerebro.plot(**pkwargs)
@@ -141,36 +137,52 @@ def runstrat(pargs=None):
 def parse_args(pargs=None):
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        description='Rewrite formats to BacktraderCSVData format')
+        description="Rewrite formats to BacktraderCSVData format",
+    )
 
-    parser.add_argument('--format', '-fmt', required=False,
-                        choices=DATAFORMATS.keys(),
-                        default=next(iter(DATAFORMATS)),
-                        help='File to be read in')
+    parser.add_argument(
+        "--format",
+        "-fmt",
+        required=False,
+        choices=DATAFORMATS.keys(),
+        default=next(iter(DATAFORMATS)),
+        help="File to be read in",
+    )
 
-    parser.add_argument('--infile', '-i', required=True,
-                        help='File to be read in')
+    parser.add_argument("--infile", "-i", required=True, help="File to be read in")
 
-    parser.add_argument('--outfile', '-o', default=None, required=False,
-                        help='File to write to')
+    parser.add_argument(
+        "--outfile", "-o", default=None, required=False, help="File to write to"
+    )
 
-    parser.add_argument('--fromdate', '-f', required=False,
-                        help='Starting date in YYYY-MM-DD format')
+    parser.add_argument(
+        "--fromdate", "-f", required=False, help="Starting date in YYYY-MM-DD format"
+    )
 
-    parser.add_argument('--todate', '-t', required=False,
-                        help='Ending date in YYYY-MM-DD format')
+    parser.add_argument(
+        "--todate", "-t", required=False, help="Ending date in YYYY-MM-DD format"
+    )
 
-    parser.add_argument('--separator', '-s', required=False, default=',',
-                        help='Plot the read data')
+    parser.add_argument(
+        "--separator", "-s", required=False, default=",", help="Plot the read data"
+    )
 
     # Plot options
-    parser.add_argument('--plot', '-p', nargs='?', required=False,
-                        metavar='kwargs', const=True,
-                        help=('Plot the read data applying any kwargs passed\n'
-                              '\n'
-                              'For example:\n'
-                              '\n'
-                              '  --plot style="candle" (to plot candles)\n'))
+    parser.add_argument(
+        "--plot",
+        "-p",
+        nargs="?",
+        required=False,
+        metavar="kwargs",
+        const=True,
+        help=(
+            "Plot the read data applying any kwargs passed\n"
+            "\n"
+            "For example:\n"
+            "\n"
+            '  --plot style="candle" (to plot candles)\n'
+        ),
+    )
 
     if pargs is not None:
         return parser.parse_args(pargs)
@@ -178,5 +190,5 @@ def parse_args(pargs=None):
     return parser.parse_args()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     runstrat()

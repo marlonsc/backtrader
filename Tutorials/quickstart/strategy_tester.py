@@ -8,11 +8,13 @@ from pathlib import Path
 import pandas as pd
 
 import backtrader as bt
-from test_strategies import (DelayedIndexing, 
-                             TestStrategy_SMA, 
-                             EmptyCall, 
-                             TestUsingOperators, 
-                             PlayWithIndicators)
+from test_strategies import (
+    DelayedIndexing,
+    TestStrategy_SMA,
+    EmptyCall,
+    TestUsingOperators,
+    PlayWithIndicators,
+)
 
 # globals
 debug = False
@@ -20,37 +22,37 @@ debug = False
 # functions/classes
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Datas are in a subfolder of the samples.
-    datas = Path.cwd() / 'datas'
-    ticker_data = datas / '2006-day-001.txt'        # 'datas/orcl-1995-2014.txt'
-    ticker_weekly = datas / '2006-week-001.txt'
+    datas = Path.cwd() / "datas"
+    ticker_data = datas / "2006-day-001.txt"  # 'datas/orcl-1995-2014.txt'
+    ticker_weekly = datas / "2006-week-001.txt"
 
     # Create a Data Feed
     data_0 = bt.feeds.YahooFinanceCSVData(
-            dataname=ticker_data,
-            # Do not pass values before this date
-            fromdate=datetime(2006, 1, 1),
-            # Do not pass values after this date
-            todate=datetime(2006, 12, 31),
-            reverse=False,
-            adjclose=False,
-            adjvolume=False,
-            timeframe=bt.TimeFrame.Days,
+        dataname=ticker_data,
+        # Do not pass values before this date
+        fromdate=datetime(2006, 1, 1),
+        # Do not pass values after this date
+        todate=datetime(2006, 12, 31),
+        reverse=False,
+        adjclose=False,
+        adjvolume=False,
+        timeframe=bt.TimeFrame.Days,
     )
-   
+
     data_weekly = bt.feeds.YahooFinanceCSVData(
-            dataname=ticker_weekly,
-            # Do not pass values before this date
-            fromdate=datetime(2006, 1, 1),
-            # Do not pass values after this date
-            todate=datetime(2006, 12, 31),
-            reverse=False,
-            adjclose=False,
-            adjvolume=False,
-            timeframe=bt.TimeFrame.Weeks,
+        dataname=ticker_weekly,
+        # Do not pass values before this date
+        fromdate=datetime(2006, 1, 1),
+        # Do not pass values after this date
+        todate=datetime(2006, 12, 31),
+        reverse=False,
+        adjclose=False,
+        adjvolume=False,
+        timeframe=bt.TimeFrame.Weeks,
     )
-   
+
     cerebro = bt.Cerebro()
 
     # Add the Data Feed to Cerebro
@@ -71,8 +73,8 @@ if __name__ == '__main__':
     if False:
         strats = cerebro.optstrategy(
             TestStrategy_SMA,
-            ma_period=[3,10,15,18,22,35], #range(10, 31),
-            log_by_default = False,
+            ma_period=[3, 10, 15, 18, 22, 35],  # range(10, 31),
+            log_by_default=False,
         )
 
     # cerebro.addstrategy(DelayedIndexing)
@@ -81,32 +83,31 @@ if __name__ == '__main__':
     # cerebro.addstrategy(TestUsingOperators)
 
     # Print out the starting conditions
-    print(f'Starting Portfolio Value: {cerebro.broker.getvalue():,.2f}')
+    print(f"Starting Portfolio Value: {cerebro.broker.getvalue():,.2f}")
 
     # Run over everything
     # maxcpus=1 ist wichtig, wenn mehrere Varianten über optstrategy analysiert werden
     cerebro.run(maxcpus=1)
 
-    print('Trade Results:')
+    print("Trade Results:")
 
     if debug:
         df: pd.DataFrame = cerebro.runstrats[0][0].trade_results
         print(df)
-        print(f'Profit (w/o commission):\t{df.pnl.sum():,.2f}')
-        print(f'Profit (incl. commission)\t{df.pnlcomm.sum():,.2f}')
+        print(f"Profit (w/o commission):\t{df.pnl.sum():,.2f}")
+        print(f"Profit (incl. commission)\t{df.pnlcomm.sum():,.2f}")
 
         # Print out the final result
-        print(f'Final Portfolio Value: {cerebro.broker.getvalue():,.2f}')
+        print(f"Final Portfolio Value: {cerebro.broker.getvalue():,.2f}")
 
     # cerebro.plot()
 
-    if debug:    # Print out the final result
-        print('#\tDate\t\tOpen\tHigh\tLow\tClose\t\tVolume\tAdj Close')
+    if debug:  # Print out the final result
+        print("#\tDate\t\tOpen\tHigh\tLow\tClose\t\tVolume\tAdj Close")
         for i in range(len(data_0)):
             x = data_0._load()
             print(
-                f'{i}\t{data_0.datetime.date(0)}\t{data_0.open[0]:.2f}\t'
-                f'{data_0.high[0]:.2f}\t{data_0.low[0]:.2f}\t{data_0.close[0]:.2f}\t'
-                f'{data_0.volume[0]:.2f}\t{data_0.close[0]:.2f}'
-                )
-
+                f"{i}\t{data_0.datetime.date(0)}\t{data_0.open[0]:.2f}\t"
+                f"{data_0.high[0]:.2f}\t{data_0.low[0]:.2f}\t{data_0.close[0]:.2f}\t"
+                f"{data_0.volume[0]:.2f}\t{data_0.close[0]:.2f}"
+            )

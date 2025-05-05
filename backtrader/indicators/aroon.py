@@ -18,14 +18,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from . import Indicator, FindFirstIndexHighest, FindFirstIndexLowest
 
 
 class _AroonBase(Indicator):
-    '''
+    """
     Base class which does the calculation of the AroonUp/AroonDown values and
     defines the common parameters.
 
@@ -35,11 +34,16 @@ class _AroonBase(Indicator):
     Values are not assigned to lines but rather stored in the "up" and "down"
     instance variables, which can be used by subclasses to for assignment or
     further calculations
-    '''
+    """
+
     _up = False
     _down = False
 
-    params = (('period', 14), ('upperband', 70), ('lowerband', 30),)
+    params = (
+        ("period", 14),
+        ("upperband", 70),
+        ("lowerband", 30),
+    )
     plotinfo = dict(plotymargin=0.05, plotyhlines=[0, 100])
 
     def _plotlabel(self):
@@ -67,7 +71,7 @@ class _AroonBase(Indicator):
 
 
 class AroonUp(_AroonBase):
-    '''
+    """
     This is the AroonUp from the indicator AroonUpDown developed by Tushar
     Chande in 1995.
 
@@ -85,10 +89,11 @@ class AroonUp(_AroonBase):
 
     See:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:aroon
-    '''
+    """
+
     _up = True
 
-    lines = ('aroonup',)
+    lines = ("aroonup",)
 
     def __init__(self):
         super(AroonUp, self).__init__()
@@ -97,7 +102,7 @@ class AroonUp(_AroonBase):
 
 
 class AroonDown(_AroonBase):
-    '''
+    """
     This is the AroonDown from the indicator AroonUpDown developed by Tushar
     Chande in 1995.
 
@@ -115,10 +120,11 @@ class AroonDown(_AroonBase):
 
     See:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:aroon
-    '''
+    """
+
     _down = True
 
-    lines = ('aroondown',)
+    lines = ("aroondown",)
 
     def __init__(self):
         super(AroonDown, self).__init__()
@@ -127,7 +133,7 @@ class AroonDown(_AroonBase):
 
 
 class AroonUpDown(AroonUp, AroonDown):
-    '''
+    """
     Developed by Tushar Chande in 1995.
 
     It tries to determine if a trend exists or not by calculating how far away
@@ -148,12 +154,13 @@ class AroonUpDown(AroonUp, AroonDown):
 
     See:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:aroon
-    '''
-    alias = ('AroonIndicator',)
+    """
+
+    alias = ("AroonIndicator",)
 
 
 class AroonOscillator(_AroonBase):
-    '''
+    """
     It is a variation of the AroonUpDown indicator which shows the current
     difference between the AroonUp and AroonDown value, trying to present a
     visualization which indicates which is stronger (greater than 0 -> AroonUp
@@ -164,13 +171,14 @@ class AroonOscillator(_AroonBase):
 
     See:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:aroon
-    '''
+    """
+
     _up = True
     _down = True
 
-    alias = ('AroonOsc',)
+    alias = ("AroonOsc",)
 
-    lines = ('aroonosc',)
+    lines = ("aroonosc",)
 
     def _plotinit(self):
         super(AroonOscillator, self)._plotinit()
@@ -185,7 +193,7 @@ class AroonOscillator(_AroonBase):
 
 
 class AroonUpDownOscillator(AroonUpDown, AroonOscillator):
-    '''
+    """
     Presents together the indicators AroonUpDown and AroonOsc
 
     Formula:
@@ -193,5 +201,6 @@ class AroonUpDownOscillator(AroonUpDown, AroonOscillator):
 
     See:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:aroon
-    '''
-    alias = ('AroonUpDownOsc',)
+    """
+
+    alias = ("AroonUpDownOsc",)

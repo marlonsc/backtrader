@@ -1,11 +1,11 @@
 # -*- coding: UTF-8 -*-
 
 
-
 import backtrader as bt
 
+
 class CostAverageStrategy(bt.Strategy):
-    params = (('amount', 1000), ('interval', 5))
+    params = (("amount", 1000), ("interval", 5))
 
     def __init__(self):
         self.counter = 0
@@ -15,11 +15,12 @@ class CostAverageStrategy(bt.Strategy):
             self.buy(size=self.p.amount / self.data.close[0])
         self.counter += 1
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     cerebro = bt.Cerebro()
     cerebro.addstrategy(CostAverageStrategy)
 
-    data = bt.feeds.BacktraderCSVData(dataname='../../datas/2006-day-001.txt')
+    data = bt.feeds.BacktraderCSVData(dataname="../../datas/2006-day-001.txt")
     cerebro.adddata(data)
 
     cerebro.run()

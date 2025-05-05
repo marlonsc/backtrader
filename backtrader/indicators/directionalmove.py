@@ -18,14 +18,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from . import Indicator, And, If, MovAv, ATR, DivByZero
 
 
 class UpMove(Indicator):
-    '''
+    """
     Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"* as part of the Directional Move System to
     calculate Directional Indicators.
@@ -37,8 +36,9 @@ class UpMove(Indicator):
 
     See:
       - https://en.wikipedia.org/wiki/Average_directional_movement_index
-    '''
-    lines = ('upmove',)
+    """
+
+    lines = ("upmove",)
 
     def __init__(self):
         self.lines.upmove = self.data - self.data(-1)
@@ -46,7 +46,7 @@ class UpMove(Indicator):
 
 
 class DownMove(Indicator):
-    '''
+    """
     Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"* as part of the Directional Move System to
     calculate Directional Indicators.
@@ -58,8 +58,9 @@ class DownMove(Indicator):
 
     See:
       - https://en.wikipedia.org/wiki/Average_directional_movement_index
-    '''
-    lines = ('downmove',)
+    """
+
+    lines = ("downmove",)
 
     def __init__(self):
         self.lines.downmove = self.data(-1) - self.data
@@ -67,7 +68,7 @@ class DownMove(Indicator):
 
 
 class _DirectionalIndicator(Indicator):
-    '''
+    """
     This class serves as the root base class for all "Directional Movement
     System" related indicators, given that the calculations are first common
     and then derived from the common calculations.
@@ -75,14 +76,20 @@ class _DirectionalIndicator(Indicator):
     It can calculate the +DI and -DI values (using kwargs as the hint as to
     what to calculate) but doesn't assign them to lines. This is left for
     sublcases of this class.
-    '''
-    params = (('period', 14), ('movav', MovAv.Smoothed), ('safediv', False), ('safezero', 0.0))
+    """
 
-    plotlines = dict(plusDI=dict(_name='+DI'), minusDI=dict(_name='-DI'))
+    params = (
+        ("period", 14),
+        ("movav", MovAv.Smoothed),
+        ("safediv", False),
+        ("safezero", 0.0),
+    )
+
+    plotlines = dict(plusDI=dict(_name="+DI"), minusDI=dict(_name="-DI"))
 
     def _plotlabel(self):
         plabels = [self.p.period]
-        plabels += [self.p.movav] * self.p.notdefault('movav')
+        plabels += [self.p.movav] * self.p.notdefault("movav")
         return plabels
 
     def __init__(self, _plus=True, _minus=True):
@@ -115,7 +122,7 @@ class _DirectionalIndicator(Indicator):
 
 
 class DirectionalIndicator(_DirectionalIndicator):
-    '''
+    """
     Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"*.
 
@@ -142,9 +149,13 @@ class DirectionalIndicator(_DirectionalIndicator):
 
     See:
       - https://en.wikipedia.org/wiki/Average_directional_movement_index
-    '''
-    alias = ('DI',)
-    lines = ('plusDI', 'minusDI',)
+    """
+
+    alias = ("DI",)
+    lines = (
+        "plusDI",
+        "minusDI",
+    )
 
     def __init__(self):
         super(DirectionalIndicator, self).__init__()
@@ -154,7 +165,7 @@ class DirectionalIndicator(_DirectionalIndicator):
 
 
 class PlusDirectionalIndicator(_DirectionalIndicator):
-    '''
+    """
     Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"*.
 
@@ -179,11 +190,12 @@ class PlusDirectionalIndicator(_DirectionalIndicator):
 
     See:
       - https://en.wikipedia.org/wiki/Average_directional_movement_index
-    '''
-    alias = (('PlusDI', '+DI'),)
-    lines = ('plusDI',)
+    """
 
-    plotinfo = dict(plotname='+DirectionalIndicator')
+    alias = (("PlusDI", "+DI"),)
+    lines = ("plusDI",)
+
+    plotinfo = dict(plotname="+DirectionalIndicator")
 
     def __init__(self):
         super(PlusDirectionalIndicator, self).__init__(_minus=False)
@@ -192,7 +204,7 @@ class PlusDirectionalIndicator(_DirectionalIndicator):
 
 
 class MinusDirectionalIndicator(_DirectionalIndicator):
-    '''
+    """
     Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"*.
 
@@ -217,11 +229,12 @@ class MinusDirectionalIndicator(_DirectionalIndicator):
 
     See:
       - https://en.wikipedia.org/wiki/Average_directional_movement_index
-    '''
-    alias = (('MinusDI', '-DI'),)
-    lines = ('minusDI',)
+    """
 
-    plotinfo = dict(plotname='-DirectionalIndicator')
+    alias = (("MinusDI", "-DI"),)
+    lines = ("minusDI",)
+
+    plotinfo = dict(plotname="-DirectionalIndicator")
 
     def __init__(self):
         super(MinusDirectionalIndicator, self).__init__(_plus=False)
@@ -230,7 +243,7 @@ class MinusDirectionalIndicator(_DirectionalIndicator):
 
 
 class AverageDirectionalMovementIndex(_DirectionalIndicator):
-    '''
+    """
     Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"*.
 
@@ -259,25 +272,30 @@ class AverageDirectionalMovementIndex(_DirectionalIndicator):
 
     See:
       - https://en.wikipedia.org/wiki/Average_directional_movement_index
-    '''
-    alias = ('ADX',)
+    """
 
-    lines = ('adx',)
+    alias = ("ADX",)
 
-    plotlines = dict(adx=dict(_name='ADX'))
+    lines = ("adx",)
+
+    plotlines = dict(adx=dict(_name="ADX"))
 
     def __init__(self):
         super(AverageDirectionalMovementIndex, self).__init__()
 
         if self.p.safediv:
-            dx = DivByZero(abs(self.DIplus - self.DIminus), self.DIplus + self.DIminus, zero=self.p.safezero)
+            dx = DivByZero(
+                abs(self.DIplus - self.DIminus),
+                self.DIplus + self.DIminus,
+                zero=self.p.safezero,
+            )
         else:
             dx = abs(self.DIplus - self.DIminus) / (self.DIplus + self.DIminus)
         self.lines.adx = 100.0 * self.p.movav(dx, period=self.p.period)
 
 
 class AverageDirectionalMovementIndexRating(AverageDirectionalMovementIndex):
-    '''
+    """
     Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"*.
 
@@ -309,11 +327,12 @@ class AverageDirectionalMovementIndexRating(AverageDirectionalMovementIndex):
 
     See:
       - https://en.wikipedia.org/wiki/Average_directional_movement_index
-    '''
-    alias = ('ADXR',)
+    """
 
-    lines = ('adxr',)
-    plotlines = dict(adxr=dict(_name='ADXR'))
+    alias = ("ADXR",)
+
+    lines = ("adxr",)
+    plotlines = dict(adxr=dict(_name="ADXR"))
 
     def __init__(self):
         super(AverageDirectionalMovementIndexRating, self).__init__()
@@ -321,9 +340,8 @@ class AverageDirectionalMovementIndexRating(AverageDirectionalMovementIndex):
         self.lines.adxr = (self.l.adx + self.l.adx(-self.p.period)) / 2.0
 
 
-class DirectionalMovementIndex(AverageDirectionalMovementIndex,
-                               DirectionalIndicator):
-    '''
+class DirectionalMovementIndex(AverageDirectionalMovementIndex, DirectionalIndicator):
+    """
     Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"*.
 
@@ -352,13 +370,13 @@ class DirectionalMovementIndex(AverageDirectionalMovementIndex,
 
     See:
       - https://en.wikipedia.org/wiki/Average_directional_movement_index
-    '''
-    alias = ('DMI',)
+    """
+
+    alias = ("DMI",)
 
 
-class DirectionalMovement(AverageDirectionalMovementIndexRating,
-                          DirectionalIndicator):
-    '''
+class DirectionalMovement(AverageDirectionalMovementIndexRating, DirectionalIndicator):
+    """
     Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"*.
 
@@ -388,5 +406,6 @@ class DirectionalMovement(AverageDirectionalMovementIndexRating,
 
     See:
       - https://en.wikipedia.org/wiki/Average_directional_movement_index
-    '''
-    alias = ('DM',)
+    """
+
+    alias = ("DM",)

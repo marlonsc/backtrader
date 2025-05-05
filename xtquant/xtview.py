@@ -1,14 +1,14 @@
-#coding:utf-8
+# coding:utf-8
 
 from . import xtbson as _BSON_
 
 ### connection
 
 __client = None
-__client_last_spec = ('', None)
+__client_last_spec = ("", None)
 
 
-def connect(ip = '', port = None, remember_if_success = True):
+def connect(ip="", port=None, remember_if_success=True):
     global __client
 
     if __client:
@@ -21,15 +21,15 @@ def connect(ip = '', port = None, remember_if_success = True):
     from . import xtconn
 
     if not ip:
-        ip = 'localhost'
+        ip = "localhost"
 
     if port:
-        server_list = [f'{ip}:{port}']
+        server_list = [f"{ip}:{port}"]
         __client = xtconn.connect_any(server_list)
     else:
         server_list = xtconn.scan_available_server_addr()
 
-        default_addr = 'localhost:58610'
+        default_addr = "localhost:58610"
         if not default_addr in server_list:
             server_list.append(default_addr)
 
@@ -45,7 +45,7 @@ def connect(ip = '', port = None, remember_if_success = True):
     return __client
 
 
-def reconnect(ip = '', port = None, remember_if_success = True):
+def reconnect(ip="", port=None, remember_if_success=True):
     global __client
 
     if __client:
@@ -77,11 +77,9 @@ def try_except(func):
             return func(*args, **kwargs)
         except Exception:
             exc_type, exc_instance, exc_traceback = sys.exc_info()
-            formatted_traceback = ''.join(traceback.format_tb(exc_traceback))
-            message = '\n{0} raise {1}:{2}'.format(
-                formatted_traceback,
-                exc_type.__name__,
-                exc_instance
+            formatted_traceback = "".join(traceback.format_tb(exc_traceback))
+            message = "\n{0} raise {1}:{2}".format(
+                formatted_traceback, exc_type.__name__, exc_instance
             )
             # raise exc_type(message)
             print(message)
@@ -89,21 +87,26 @@ def try_except(func):
 
     return wrapper
 
+
 def _BSON_call_common(interface, func, param):
     return _BSON_.BSON.decode(interface(func, _BSON_.BSON.encode(param)))
+
 
 def create_view(viewID, view_type, title, group_id):
     client = get_client()
     return client.createView(viewID, view_type, title, group_id)
 
-#def reset_view(viewID):
+
+# def reset_view(viewID):
 #    return
+
 
 def close_view(viewID):
     client = get_client()
     return client.closeView(viewID)
 
-#def set_view_index(viewID, datas):
+
+# def set_view_index(viewID, datas):
 #    '''
 #    设置模型指标属性
 #    index: { "output1": { "datatype": se::OutputDataType } }
@@ -111,29 +114,41 @@ def close_view(viewID):
 #    client = get_client()
 #    return client.setViewIndex(viewID, datas)
 
+
 def push_view_data(viewID, datas):
-    '''
+    """
     推送模型结果数据
     datas: { "timetags: [t1, t2, ...], "outputs": { "output1": [value1, value2, ...], ... }, "overwrite": "full/increase" }
-    '''
+    """
     client = get_client()
-    bresult = client.pushViewData(viewID, 'index', _BSON_.BSON.encode(datas))
+    bresult = client.pushViewData(viewID, "index", _BSON_.BSON.encode(datas))
     return _BSON_.BSON.decode(bresult)
 
-def switch_graph_view(stock_code = None, period = None, dividendtype = None, graphtype = None):
+
+def switch_graph_view(stock_code=None, period=None, dividendtype=None, graphtype=None):
     cl = get_client()
 
     result = _BSON_call_common(
-        cl.commonControl, 'switchgraphview'
-        , {
-            "stockcode": stock_code
-            , "period": period
-            , "dividendtype": dividendtype
-            , "graphtype": graphtype
-        }
+        cl.commonControl,
+        "switchgraphview",
+        {
+            "stockcode": stock_code,
+            "period": period,
+            "dividendtype": dividendtype,
+            "graphtype": graphtype,
+        },
     )
 
-def add_schedule(schedule_name, begin_time = '', finish_time = '', interval = 60, run = False, only_work_date = False, always_run = False):
+
+def add_schedule(
+    schedule_name,
+    begin_time="",
+    finish_time="",
+    interval=60,
+    run=False,
+    only_work_date=False,
+    always_run=False,
+):
     """
     ToDo: 向客户端添加调度任务
     Args:
@@ -169,19 +184,29 @@ def add_schedule(schedule_name, begin_time = '', finish_time = '', interval = 60
     cl = get_client()
 
     result = _BSON_call_common(
-        cl.commonControl, 'addschedule'
-        , {
-            'name': schedule_name
-            , 'starttime': -1 if begin_time == '' else int(begin_time)
-            , 'endtime': -1
-            , 'interval': interval * 1000
-            , 'run': run
-            , 'onlyworkdate': only_work_date
-            , 'alwaysrun': always_run
-        }
+        cl.commonControl,
+        "addschedule",
+        {
+            "name": schedule_name,
+            "starttime": -1 if begin_time == "" else int(begin_time),
+            "endtime": -1,
+            "interval": interval * 1000,
+            "run": run,
+            "onlyworkdate": only_work_date,
+            "alwaysrun": always_run,
+        },
     )
 
-def add_schedule_download_task(schedule_name, stock_code = [], period = '', recentday = 0, start_time = '', end_time = '', incrementally = False):
+
+def add_schedule_download_task(
+    schedule_name,
+    stock_code=[],
+    period="",
+    recentday=0,
+    start_time="",
+    end_time="",
+    incrementally=False,
+):
     '''
     Args:
         stock_code(list)  : 下载标的的code组成的list
@@ -210,7 +235,7 @@ def add_schedule_download_task(schedule_name, stock_code = [], period = '', rece
 
     d_stockcode = {}
     for stock in stock_code:
-        sp_stock = stock.split('.')
+        sp_stock = stock.split(".")
         if len(sp_stock) == 2:
             if sp_stock[1] not in d_stockcode:
                 d_stockcode[sp_stock[1]] = []
@@ -222,67 +247,74 @@ def add_schedule_download_task(schedule_name, stock_code = [], period = '', rece
     cl = get_client()
 
     result = _BSON_call_common(
-        cl.commonControl, 'addscheduledownloadtask'
-        , {
-            'name': schedule_name
-            , 'market': list(d_stockcode.keys())
-            , 'stockcode': list(d_stockcode.values())
-            , 'period': period
-            , 'recentday': recentday
-            , 'starttime': start_time
-            , 'endtime': end_time
-            , 'incrementally': incrementally
-        }
+        cl.commonControl,
+        "addscheduledownloadtask",
+        {
+            "name": schedule_name,
+            "market": list(d_stockcode.keys()),
+            "stockcode": list(d_stockcode.values()),
+            "period": period,
+            "recentday": recentday,
+            "starttime": start_time,
+            "endtime": end_time,
+            "incrementally": incrementally,
+        },
     )
     return
 
-def modify_schedule_task(schedule_name, begin_time = '', finish_time = '', interval = 60, run = False, only_work_date = False, always_run = False):
+
+def modify_schedule_task(
+    schedule_name,
+    begin_time="",
+    finish_time="",
+    interval=60,
+    run=False,
+    only_work_date=False,
+    always_run=False,
+):
     cl = get_client()
 
     result = _BSON_call_common(
-        cl.commonControl, 'modifyschedule'
-        , {
-            'name': schedule_name
-            , 'starttime': -1 if begin_time == '' else int(begin_time)
-            , 'endtime': -1
-            , 'interval': interval * 1000
-            , 'run': run
-            , 'onlyworkdate': only_work_date
-            , 'alwaysrun': always_run
-        }
+        cl.commonControl,
+        "modifyschedule",
+        {
+            "name": schedule_name,
+            "starttime": -1 if begin_time == "" else int(begin_time),
+            "endtime": -1,
+            "interval": interval * 1000,
+            "run": run,
+            "onlyworkdate": only_work_date,
+            "alwaysrun": always_run,
+        },
     )
+
 
 def remove_schedule(schedule_name):
     cl = get_client()
 
     result = _BSON_call_common(
-        cl.commonControl, 'removeschedule'
-        , {
-            'name': schedule_name
-        }
+        cl.commonControl, "removeschedule", {"name": schedule_name}
     )
     return
+
 
 def remove_schedule_download_task(schedule_name, task_id):
     cl = get_client()
 
     result = _BSON_call_common(
-        cl.commonControl, 'removescheduledownloadtask'
-        , {
-            'name': schedule_name
-            , 'taskids': task_id
-        }
+        cl.commonControl,
+        "removescheduledownloadtask",
+        {"name": schedule_name, "taskids": task_id},
     )
     return
+
 
 def query_schedule_task():
     cl = get_client()
 
-    inst = _BSON_call_common(
-        cl.commonControl, 'queryschedule', {}
-    )
+    inst = _BSON_call_common(cl.commonControl, "queryschedule", {})
 
-    return inst.get('result', [])
+    return inst.get("result", [])
 
 
 def push_xtview_data(data_type, time, datas):
@@ -312,15 +344,15 @@ def push_xtview_data(data_type, time, datas):
             types.append(0)
 
     result = _BSON_call_common(
-        cl.custom_data_control, 'pushxtviewdata'
-        , {
-            'dataType': data_type
-            ,'timetags': timeData
-            , 'names' : name_list
-            , 'types' : types
-            , 'numericDatas' : numericDatas
-            , 'stringDatas' : stringDatas
-        }
+        cl.custom_data_control,
+        "pushxtviewdata",
+        {
+            "dataType": data_type,
+            "timetags": timeData,
+            "names": name_list,
+            "types": types,
+            "numericDatas": numericDatas,
+            "stringDatas": stringDatas,
+        },
     )
     return
-

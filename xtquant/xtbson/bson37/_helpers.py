@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """Setstate and getstate functions for objects with __slots__, allowing
-    compatibility with default pickling protocol
+compatibility with default pickling protocol
 """
 from typing import Any, Mapping
 

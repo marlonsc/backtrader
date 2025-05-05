@@ -17,6 +17,8 @@ import backtrader as bt
 from xtquant.xttrader import XtQuantTrader, XtQuantTraderCallback
 from xtquant.xttype import StockAccount
 import backtrader as bt
+
+
 class MyXtQuantTraderCallback(XtQuantTraderCallback):
     def on_disconnected(self):
         print("[连接状态] 与交易服务器连接断开")
@@ -70,40 +72,60 @@ class MyXtQuantTraderCallback(XtQuantTraderCallback):
         # 需映射状态码（如已连接/断开）
 
 
-
 class my_broker:
     def __init__(self, use_real_trading=False):
-        self.path = r'E:\software\QMT\userdata_mini'
+        self.path = r"E:\software\QMT\userdata_mini"
         self.session_id = 123456
         self.xt_trader = XtQuantTrader(self.path, self.session_id)
         callback = MyXtQuantTraderCallback()
-        self.acc = StockAccount('39131771')
+        self.acc = StockAccount("39131771")
         self.xt_trader.register_callback(callback)
         self.use_real_trading = use_real_trading  # 新增标志位判断是否实盘
 
-        if use_real_trading:#如果实盘才连接
+        if use_real_trading:  # 如果实盘才连接
             self.xt_trader.start()
             connect_result = self.xt_trader.connect()
             if connect_result != 0:
                 import sys
-                sys.exit('链接失败，程序即将退出 %d' % connect_result)
+
+                sys.exit("链接失败，程序即将退出 %d" % connect_result)
             subscribe_result = self.xt_trader.subscribe(self.acc)
             if subscribe_result != 0:
-                print('账号订阅失败 %d' % subscribe_result)
+                print("账号订阅失败 %d" % subscribe_result)
 
     def buy(self, stock_code, price, quantity):
         if self.use_real_trading:
-            fix_result_order_id = self.xt_trader.order_stock(self.acc, stock_code, xtconstant.STOCK_BUY, quantity, xtconstant.FIX_PRICE, price)
+            fix_result_order_id = self.xt_trader.order_stock(
+                self.acc,
+                stock_code,
+                xtconstant.STOCK_BUY,
+                quantity,
+                xtconstant.FIX_PRICE,
+                price,
+            )
             print(fix_result_order_id)
         else:
-            print("模拟买入，股票代码: %s, 价格: %.2f, 数量: %d" % (stock_code, price, quantity))
+            print(
+                "模拟买入，股票代码: %s, 价格: %.2f, 数量: %d"
+                % (stock_code, price, quantity)
+            )
 
     def sell(self, stock_code, price, quantity):
         if self.use_real_trading:
-            fix_result_order_id = self.xt_trader.order_stock(self.acc, stock_code, xtconstant.STOCK_SELL, quantity, xtconstant.FIX_PRICE, price)
+            fix_result_order_id = self.xt_trader.order_stock(
+                self.acc,
+                stock_code,
+                xtconstant.STOCK_SELL,
+                quantity,
+                xtconstant.FIX_PRICE,
+                price,
+            )
             print(fix_result_order_id)
         else:
-            print("模拟卖出，股票代码: %s, 价格: %.2f, 数量: %d" % (stock_code, price, quantity))
+            print(
+                "模拟卖出，股票代码: %s, 价格: %.2f, 数量: %d"
+                % (stock_code, price, quantity)
+            )
 
     def cancel_order(self, order_id):
         if self.use_real_trading:
@@ -113,19 +135,24 @@ class my_broker:
         if self.use_real_trading:
             order = self.xt_trader.query_stock_orders(self.acc, False)
             return order
+
+
 class TestStrategy(bt.Strategy):
     params = (
-        ('use_real_trading', False),  #
-        ('any', 50),
+        ("use_real_trading", False),  #
+        ("any", 50),
     )
+
     def log(self, txt, dt=None):
         dt = dt or self.datas[0].datetime.date(0)
-        print('%s, %s' % (dt.isoformat(), txt))
+        print("%s, %s" % (dt.isoformat(), txt))
 
     def __init__(self):
         self.dataclose = self.datas[0].close
         self.order = None
-        self.mbroker = my_broker(use_real_trading=self.p.use_real_trading)  # 默认不使用实盘
+        self.mbroker = my_broker(
+            use_real_trading=self.p.use_real_trading
+        )  # 默认不使用实盘
 
     def notify_order(self, order):
         if order.status in [order.Submitted, order.Accepted]:
@@ -133,14 +160,14 @@ class TestStrategy(bt.Strategy):
 
         if order.status in [order.Completed]:
             if order.isbuy():
-                self.log('BUY EXECUTED, %.2f' % order.executed.price)
+                self.log("BUY EXECUTED, %.2f" % order.executed.price)
             elif order.issell():
-                self.log('SELL EXECUTED, %.2f' % order.executed.price)
+                self.log("SELL EXECUTED, %.2f" % order.executed.price)
 
             self.bar_executed = len(self)
 
         elif order.status in [order.Canceled, order.Margin, order.Rejected]:
-            self.log('Order Canceled/Margin/Rejected')
+            self.log("Order Canceled/Margin/Rejected")
 
         self.order = None
 
@@ -148,7 +175,7 @@ class TestStrategy(bt.Strategy):
 
         data = self.datas[0]
         stock_code = data._name
-        self.log('Close, %.2f' % self.dataclose[0])
+        self.log("Close, %.2f" % self.dataclose[0])
 
         if self.order:
             return
@@ -158,28 +185,33 @@ class TestStrategy(bt.Strategy):
                 if self.dataclose[-1] < self.dataclose[-2]:
                     # 模拟下单
                     self.mbroker.buy(stock_code=stock_code, price=1, quantity=200)
-                    self.log('BUY CREATE, %.2f' % self.dataclose[0])
+                    self.log("BUY CREATE, %.2f" % self.dataclose[0])
                     self.order = self.buy()
 
         else:
             if len(self) >= (self.bar_executed + 5):
-                self.log('SELL CREATE, %.2f' % self.dataclose[0])
+                self.log("SELL CREATE, %.2f" % self.dataclose[0])
                 self.order = self.sell()
 
+
 class AnotherStrategy(bt.Strategy):
-    params = (('period1', 10),
-              ('period2', 30),
-              ('period3', 30),
-              ('use_real_trading', False),
-              )
+    params = (
+        ("period1", 10),
+        ("period2", 30),
+        ("period3", 30),
+        ("use_real_trading", False),
+    )
+
     def log(self, txt, dt=None):
         dt = dt or self.datas[0].datetime.date(0)
-        print('%s, %s' % (dt.isoformat(), txt))
+        print("%s, %s" % (dt.isoformat(), txt))
 
     def __init__(self):
         self.dataclose = self.datas[0].close
         self.order = None
-        self.mbroker = my_broker(use_real_trading=self.p.use_real_trading)  # 默认不使用实盘
+        self.mbroker = my_broker(
+            use_real_trading=self.p.use_real_trading
+        )  # 默认不使用实盘
 
     def notify_order(self, order):
         if order.status in [order.Submitted, order.Accepted]:
@@ -187,21 +219,21 @@ class AnotherStrategy(bt.Strategy):
 
         if order.status in [order.Completed]:
             if order.isbuy():
-                self.log('BUY EXECUTED, %.2f' % order.executed.price)
+                self.log("BUY EXECUTED, %.2f" % order.executed.price)
             elif order.issell():
-                self.log('SELL EXECUTED, %.2f' % order.executed.price)
+                self.log("SELL EXECUTED, %.2f" % order.executed.price)
 
             self.bar_executed = len(self)
 
         elif order.status in [order.Canceled, order.Margin, order.Rejected]:
-            self.log('Order Canceled/Margin/Rejected')
+            self.log("Order Canceled/Margin/Rejected")
 
         self.order = None
 
     def next(self):
         data = self.datas[0]
         stock_code = data._name
-        self.log('Close, %.2f' % self.dataclose[0])
+        self.log("Close, %.2f" % self.dataclose[0])
 
         if self.order:
             return
@@ -211,20 +243,25 @@ class AnotherStrategy(bt.Strategy):
                 if self.dataclose[-1] > self.dataclose[-2]:
                     # 模拟下单
                     self.mbroker.buy(stock_code=stock_code, price=1000, quantity=200)
-                    self.log('BUY CREATE, %.2f' % self.dataclose[0])
+                    self.log("BUY CREATE, %.2f" % self.dataclose[0])
                     self.order = self.buy()
 
         else:
             if len(self) >= (self.bar_executed + 5):
-                self.log('SELL CREATE, %.2f' % self.dataclose[0])
+                self.log("SELL CREATE, %.2f" % self.dataclose[0])
                 self.order = self.sell()
+
+
 class SmaCross(bt.SignalStrategy):
-    params = (('period1', 10),
-              ('period2', 30),
-              ('use_real_trading', False),
-              )
+    params = (
+        ("period1", 10),
+        ("period2", 30),
+        ("use_real_trading", False),
+    )
 
     def __init__(self):
-        sma1, sma2 = bt.ind.SMA(period=self.p.period1), bt.ind.SMA(period=self.p.period2)
+        sma1, sma2 = bt.ind.SMA(period=self.p.period1), bt.ind.SMA(
+            period=self.p.period2
+        )
         crossover = bt.ind.CrossOver(sma1, sma2)
         self.signal_add(bt.SIGNAL_LONG, crossover)

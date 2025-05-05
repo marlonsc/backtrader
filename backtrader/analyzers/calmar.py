@@ -18,18 +18,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import backtrader as bt
 from . import TimeDrawDown
 
-
-__all__ = ['Calmar']
+__all__ = ["Calmar"]
 
 
 class Calmar(bt.TimeFrameAnalyzerBase):
-    '''This analyzer calculates the CalmarRatio
+    """This analyzer calculates the CalmarRatio
     timeframe which can be different from the one used in the underlying data
     Params:
 
@@ -70,24 +68,29 @@ class Calmar(bt.TimeFrameAnalyzerBase):
 
     Attributes:
       - ``calmar`` the latest calculated calmar ratio
-    '''
+    """
 
-    packages = ('collections', 'math',)
+    packages = (
+        "collections",
+        "math",
+    )
 
     params = (
-        ('timeframe', bt.TimeFrame.Months),  # default in calmar
-        ('period', 36),
-        ('fund', None),
+        ("timeframe", bt.TimeFrame.Months),  # default in calmar
+        ("period", 36),
+        ("fund", None),
     )
 
     def __init__(self):
-        self._maxdd = TimeDrawDown(timeframe=self.p.timeframe,
-                                   compression=self.p.compression)
+        self._maxdd = TimeDrawDown(
+            timeframe=self.p.timeframe, compression=self.p.compression
+        )
 
     def start(self):
-        self._mdd = float('-inf')
-        self._values = collections.deque([float('Nan')] * self.p.period,
-                                         maxlen=self.p.period)
+        self._mdd = float("-inf")
+        self._values = collections.deque(
+            [float("Nan")] * self.p.period, maxlen=self.p.period
+        )
         if self.p.fund is None:
             self._fundmode = self.strategy.broker.fundmode
         else:
@@ -105,7 +108,7 @@ class Calmar(bt.TimeFrameAnalyzerBase):
         else:
             self._values.append(self.strategy.broker.fundvalue)
         rann = math.log(self._values[-1] / self._values[0]) / len(self._values)
-        self.calmar = calmar = rann / (self._mdd or float('Inf'))
+        self.calmar = calmar = rann / (self._mdd or float("Inf"))
 
         self.rets[self.dtkey] = calmar
 

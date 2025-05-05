@@ -18,19 +18,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import sys
-
 
 try:
     import matplotlib
 except ImportError:
-    raise ImportError(
-        'Matplotlib seems to be missing. Needed for plotting support')
+    raise ImportError("Matplotlib seems to be missing. Needed for plotting support")
 else:
-    touse = 'Agg' if sys.platform != 'darwin' else 'MacOSX'
+    touse = "Agg" if sys.platform != "darwin" else "MacOSX"
     try:
         matplotlib.use(touse)
     except:
@@ -41,6 +38,6 @@ else:
 
 # from .plot import Plot, Plot_OldSync
 # from .plot import Plot_OldSync,CustomPlot
-from .plot import  Plot_OldSync
+from .plot import Plot_OldSync
 
 from .scheme import PlotScheme

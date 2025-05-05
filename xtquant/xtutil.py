@@ -1,10 +1,11 @@
-#coding:utf-8
+# coding:utf-8
 
 from . import xtbson as _BSON_
 
 
 def read_from_bson_buffer(buffer):
     import ctypes as ct
+
     result = []
 
     pos = 0
@@ -30,7 +31,7 @@ def read_from_bson_buffer(buffer):
 
 
 def write_to_bson_buffer(data_list):
-    buffer = b''
+    buffer = b""
 
     for data in data_list:
         buffer += _BSON_.encode(data)
@@ -40,13 +41,14 @@ def write_to_bson_buffer(data_list):
 
 def read_from_feather_file(file):
     import feather as fe
+
     meta = {}
     return meta, fe.read_dataframe(file)
 
 
-def write_to_feather_file(data, file, meta = None):
+def write_to_feather_file(data, file, meta=None):
     import feather as fe
+
     if not meta:
         meta = {}
     return
-

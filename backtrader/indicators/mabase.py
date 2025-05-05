@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from ..utils.py3 import with_metaclass
 
@@ -27,7 +26,7 @@ from . import Indicator
 
 
 class MovingAverage(object):
-    '''MovingAverage (alias MovAv)
+    """MovingAverage (alias MovAv)
 
     A placeholder to gather all Moving Average Types in a single place.
 
@@ -45,12 +44,13 @@ class MovingAverage(object):
 
       sma = MovAv.MovingAverageSimple(self.data, period)
 
-    '''
+    """
+
     _movavs = []
 
     @classmethod
     def register(cls, regcls):
-        if getattr(regcls, '_notregister', False):
+        if getattr(regcls, "_notregister", False):
             return
 
         cls._movavs.append(regcls)
@@ -58,11 +58,11 @@ class MovingAverage(object):
         clsname = regcls.__name__
         setattr(cls, clsname, regcls)
 
-        clsalias = ''
-        if clsname.endswith('MovingAverage'):
-            clsalias = clsname.split('MovingAverage')[0]
-        elif clsname.startswith('MovingAverage'):
-            clsalias = clsname.split('MovingAverage')[1]
+        clsalias = ""
+        if clsname.endswith("MovingAverage"):
+            clsalias = clsname.split("MovingAverage")[0]
+        elif clsname.startswith("MovingAverage"):
+            clsalias = clsname.split("MovingAverage")[1]
 
         if clsalias:
             setattr(cls, clsalias, regcls)
@@ -87,5 +87,5 @@ class MetaMovAvBase(Indicator.__class__):
 
 
 class MovingAverageBase(with_metaclass(MetaMovAvBase, Indicator)):
-    params = (('period', 30),)
+    params = (("period", 30),)
     plotinfo = dict(subplot=False)

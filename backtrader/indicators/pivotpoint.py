@@ -18,14 +18,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from . import Indicator, CmpEx
 
 
 class PivotPoint(Indicator):
-    '''
+    """
     Defines a level of significance by taking into account the average of price
     bar components of the past period of a larger timeframe. For example when
     operating with days, the values are taking from the already "past" month
@@ -61,20 +60,27 @@ class PivotPoint(Indicator):
     See:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:pivot_points
       - https://en.wikipedia.org/wiki/Pivot_point_(technical_analysis)
-    '''
-    lines = ('p', 's1', 's2', 'r1', 'r2',)
+    """
+
+    lines = (
+        "p",
+        "s1",
+        "s2",
+        "r1",
+        "r2",
+    )
     plotinfo = dict(subplot=False)
 
     params = (
-        ('open', False),  # add opening price to the pivot point
-        ('close', False),  # use close twice in the calcs
-        ('_autoplot', True),  # attempt to plot on real target data
+        ("open", False),  # add opening price to the pivot point
+        ("close", False),  # use close twice in the calcs
+        ("_autoplot", True),  # attempt to plot on real target data
     )
 
     def _plotinit(self):
         # Try to plot to the actual timeframe master
         if self.p._autoplot:
-            if hasattr(self.data, 'data'):
+            if hasattr(self.data, "data"):
                 self.plotinfo.plotmaster = self.data.data
 
     def __init__(self):
@@ -104,7 +110,7 @@ class PivotPoint(Indicator):
 
 
 class FibonacciPivotPoint(Indicator):
-    '''
+    """
     Defines a level of significance by taking into account the average of price
     bar components of the past period of a larger timeframe. For example when
     operating with days, the values are taking from the already "past" month
@@ -143,22 +149,23 @@ class FibonacciPivotPoint(Indicator):
 
     See:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:pivot_points
-    '''
-    lines = ('p', 's1', 's2', 's3', 'r1', 'r2', 'r3')
+    """
+
+    lines = ("p", "s1", "s2", "s3", "r1", "r2", "r3")
     plotinfo = dict(subplot=False)
     params = (
-        ('open', False),  # add opening price to the pivot point
-        ('close', False),  # use close twice in the calcs
-        ('_autoplot', True),  # attempt to plot on real target data
-        ('level1', 0.382),
-        ('level2', 0.618),
-        ('level3', 1.0),
+        ("open", False),  # add opening price to the pivot point
+        ("close", False),  # use close twice in the calcs
+        ("_autoplot", True),  # attempt to plot on real target data
+        ("level1", 0.382),
+        ("level2", 0.618),
+        ("level3", 1.0),
     )
 
     def _plotinit(self):
         # Try to plot to the actual timeframe master
         if self.p._autoplot:
-            if hasattr(self.data, 'data'):
+            if hasattr(self.data, "data"):
                 self.plotinfo.plotmaster = self.data.data
 
     def __init__(self):
@@ -190,7 +197,7 @@ class FibonacciPivotPoint(Indicator):
 
 
 class DemarkPivotPoint(Indicator):
-    '''
+    """
     Defines a level of significance by taking into account the average of price
     bar components of the past period of a larger timeframe. For example when
     operating with days, the values are taking from the already "past" month
@@ -230,22 +237,27 @@ class DemarkPivotPoint(Indicator):
 
     See:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:pivot_points
-    '''
-    lines = ('p', 's1', 'r1',)
+    """
+
+    lines = (
+        "p",
+        "s1",
+        "r1",
+    )
     plotinfo = dict(subplot=False)
     params = (
-        ('open', False),  # add opening price to the pivot point
-        ('close', False),  # use close twice in the calcs
-        ('_autoplot', True),  # attempt to plot on real target data
-        ('level1', 0.382),
-        ('level2', 0.618),
-        ('level3', 1.0),
+        ("open", False),  # add opening price to the pivot point
+        ("close", False),  # use close twice in the calcs
+        ("_autoplot", True),  # attempt to plot on real target data
+        ("level1", 0.382),
+        ("level2", 0.618),
+        ("level3", 1.0),
     )
 
     def _plotinit(self):
         # Try to plot to the actual timeframe master
         if self.p._autoplot:
-            if hasattr(self.data, 'data'):
+            if hasattr(self.data, "data"):
                 self.plotinfo.plotmaster = self.data.data
 
     def __init__(self):

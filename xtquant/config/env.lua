@@ -1,7 +1,6 @@
-
 g_minVersion = "2.0.1.600"
 g_minMobileVersion = "1.0.0.0"
-g_company = "î£ÖÇÈÚ¿Æ"
+g_company = "ï¿½ï¿½ï¿½ï¿½Ú¿ï¿½"
 g_is_address_from_daemon = false
 g_use_proxy_whole_quoter = 1
 g_use_future_whole_quoter = 0
@@ -63,66 +62,66 @@ g_ttservice_global_config = {
 }
 
 g_future_quote_platforms = {
-    {m_nId=20001, m_strName="CTPÊµÅÌ", m_strAbbrName="sqsp", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},    
-    {m_nId=20002, m_strName="ºãÉúÊµÅÌ", m_strAbbrName="hssp", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
-    {m_nId=21018, m_strName="v8tÊµÅÌ", m_strAbbrName="sqsp", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},       
-    {m_nId=21001, m_strName="CTPÄ£Äâ", m_strAbbrName="gdmn", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
-    {m_nId=21002, m_strName="ºãÉúÄ£Äâ", m_strAbbrName="hsmn", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
-    {m_nId=21003, m_strName="v8tÄ£Äâ", m_strAbbrName="gdmn", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
-    {m_nId=20000, m_strName="Ñ¸Í¶¸ß¼¶ÐÐÇé", m_strAbbrName="xtgj", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
-    {m_nId=21111, m_strName="×Ê¹ÜÊµÅÌ", m_strAbbrName="xtgj", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
-    {m_nId=21112, m_strName="×Ê¹ÜÄ£Äâ", m_strAbbrName="xtgj", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
-    {m_nId=20013, m_strName="ºãÉúÊµÅÌ", m_strAbbrName="hshl", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
-    {m_nId=21013, m_strName="ºãÉúÄ£Äâ", m_strAbbrName="hshl", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
-    {m_nId=21015, m_strName="ºãÉú´óÔ½", m_strAbbrName="hsdy", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
-    {m_nId=21014, m_strName="ºãÉúÓ¢´ó", m_strAbbrName="hsyd", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
-    {m_nId=21017, m_strName="ºãÉú½ð¹È", m_strAbbrName="hsjg", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
-    {m_nId=21019, m_strName="ºãÉúÖÐÔ­", m_strAbbrName="hszy", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
-    {m_nId=20015, m_strName="ºãÉú´óÔ½ÊµÅÌ", m_strAbbrName="hsdysp", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
-    {m_nId=20014, m_strName="ºãÉúÓ¢´óÊµÅÌ", m_strAbbrName="hsydsp", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
-    {m_nId=20017, m_strName="ºãÉú½ð¹ÈÊµÅÌ", m_strAbbrName="hsjgsp", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
-    {m_nId=20019, m_strName="ºãÉúÖÐÔ­ÊµÅÌ", m_strAbbrName="hszysp", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
+    {m_nId=20001, m_strName="CTPÊµï¿½ï¿½", m_strAbbrName="sqsp", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
+    {m_nId=20002, m_strName="ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½", m_strAbbrName="hssp", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
+    {m_nId=21018, m_strName="v8tÊµï¿½ï¿½", m_strAbbrName="sqsp", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
+    {m_nId=21001, m_strName="CTPÄ£ï¿½ï¿½", m_strAbbrName="gdmn", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
+    {m_nId=21002, m_strName="ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½", m_strAbbrName="hsmn", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
+    {m_nId=21003, m_strName="v8tÄ£ï¿½ï¿½", m_strAbbrName="gdmn", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
+    {m_nId=20000, m_strName="Ñ¸Í¶ï¿½ß¼ï¿½ï¿½ï¿½ï¿½ï¿½", m_strAbbrName="xtgj", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
+    {m_nId=21111, m_strName="ï¿½Ê¹ï¿½Êµï¿½ï¿½", m_strAbbrName="xtgj", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
+    {m_nId=21112, m_strName="ï¿½Ê¹ï¿½Ä£ï¿½ï¿½", m_strAbbrName="xtgj", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
+    {m_nId=20013, m_strName="ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½", m_strAbbrName="hshl", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
+    {m_nId=21013, m_strName="ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½", m_strAbbrName="hshl", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
+    {m_nId=21015, m_strName="ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô½", m_strAbbrName="hsdy", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
+    {m_nId=21014, m_strName="ï¿½ï¿½ï¿½ï¿½Ó¢ï¿½ï¿½", m_strAbbrName="hsyd", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
+    {m_nId=21017, m_strName="ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½", m_strAbbrName="hsjg", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
+    {m_nId=21019, m_strName="ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô­", m_strAbbrName="hszy", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
+    {m_nId=20015, m_strName="ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô½Êµï¿½ï¿½", m_strAbbrName="hsdysp", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
+    {m_nId=20014, m_strName="ï¿½ï¿½ï¿½ï¿½Ó¢ï¿½ï¿½Êµï¿½ï¿½", m_strAbbrName="hsydsp", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
+    {m_nId=20017, m_strName="ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½", m_strAbbrName="hsjgsp", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
+    {m_nId=20019, m_strName="ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô­Êµï¿½ï¿½", m_strAbbrName="hszysp", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=1,},
 }
 
 g_futureoption_quote_platforms = {
-    {m_nId=70001, m_strName="CTPÊµÅÌ", m_strAbbrName="sqsp", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=5,},     
-    {m_nId=71001, m_strName="CTPÄ£Äâ", m_strAbbrName="gdmn", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=5,},
-    {m_nId=71111, m_strName="×Ê¹ÜÊµÅÌ", m_strAbbrName="xtgj", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=5,},
-    {m_nId=71112, m_strName="×Ê¹ÜÄ£Äâ", m_strAbbrName="xtgj", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=5,},
+    {m_nId=70001, m_strName="CTPÊµï¿½ï¿½", m_strAbbrName="sqsp", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=5,},
+    {m_nId=71001, m_strName="CTPÄ£ï¿½ï¿½", m_strAbbrName="gdmn", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=5,},
+    {m_nId=71111, m_strName="ï¿½Ê¹ï¿½Êµï¿½ï¿½", m_strAbbrName="xtgj", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=5,},
+    {m_nId=71112, m_strName="ï¿½Ê¹ï¿½Ä£ï¿½ï¿½", m_strAbbrName="xtgj", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=5,},
 }
 
 g_stock_quote_platforms = {
-    {m_nId=10000, m_strName="Ñ¸Í¶¸ß¼¶ÐÐÇé", m_strAbbrName="xtgj", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=2,},
-    {m_nId=1111, m_strName="×Ê¹ÜÊµÅÌ", m_strAbbrName="xtgj", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=2,},
-    {m_nId=1112, m_strName="×Ê¹ÜÄ£Äâ", m_strAbbrName="xtgj", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=2,},
+    {m_nId=10000, m_strName="Ñ¸Í¶ï¿½ß¼ï¿½ï¿½ï¿½ï¿½ï¿½", m_strAbbrName="xtgj", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=2,},
+    {m_nId=1111, m_strName="ï¿½Ê¹ï¿½Êµï¿½ï¿½", m_strAbbrName="xtgj", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=2,},
+    {m_nId=1112, m_strName="ï¿½Ê¹ï¿½Ä£ï¿½ï¿½", m_strAbbrName="xtgj", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=2,},
 }
 
 g_credit_quote_platforms = {
-    {m_nId=10000, m_strName="Ñ¸Í¶¸ß¼¶ÐÐÇé", m_strAbbrName="xtgj", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=3,},
+    {m_nId=10000, m_strName="Ñ¸Í¶ï¿½ß¼ï¿½ï¿½ï¿½ï¿½ï¿½", m_strAbbrName="xtgj", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=3,},
 }
 
 g_stockoption_quote_platforms = {
-    {m_nId=10001, m_strName="Ñ¸Í¶¸ß¼¶ÐÐÇé", m_strAbbrName="xtgj", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=6,},
-    {m_nId=1211, m_strName="×Ê¹ÜÊµÅÌ", m_strAbbrName="xtgj", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=6,},
-    {m_nId=1212, m_strName="×Ê¹ÜÄ£Äâ", m_strAbbrName="xtgj", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=6,},
+    {m_nId=10001, m_strName="Ñ¸Í¶ï¿½ß¼ï¿½ï¿½ï¿½ï¿½ï¿½", m_strAbbrName="xtgj", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=6,},
+    {m_nId=1211, m_strName="ï¿½Ê¹ï¿½Êµï¿½ï¿½", m_strAbbrName="xtgj", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=6,},
+    {m_nId=1212, m_strName="ï¿½Ê¹ï¿½Ä£ï¿½ï¿½", m_strAbbrName="xtgj", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=6,},
 }
 
 g_hgt_quote_platforms = {
-    {m_nId=10003, m_strName="Ñ¸Í¶¸ß¼¶ÐÐÇé", m_strAbbrName="hgtmn", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=7,},
-    {m_nId=1411, m_strName="×Ê¹ÜÊµÅÌ", m_strAbbrName="xtgj", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=7,},
-    {m_nId=1412, m_strName="×Ê¹ÜÄ£Äâ", m_strAbbrName="xtgj", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=7,},
+    {m_nId=10003, m_strName="Ñ¸Í¶ï¿½ß¼ï¿½ï¿½ï¿½ï¿½ï¿½", m_strAbbrName="hgtmn", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=7,},
+    {m_nId=1411, m_strName="ï¿½Ê¹ï¿½Êµï¿½ï¿½", m_strAbbrName="xtgj", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=7,},
+    {m_nId=1412, m_strName="ï¿½Ê¹ï¿½Ä£ï¿½ï¿½", m_strAbbrName="xtgj", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=7,},
 }
 
 g_new3board_quote_platforms = {
-    {m_nId=10002, m_strName="Ñ¸Í¶¸ß¼¶ÐÐÇé", m_strAbbrName="neeq", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=10,},
-    {m_nId=1311, m_strName="×Ê¹ÜÊµÅÌ", m_strAbbrName="neeq", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=10,},
-    {m_nId=1312, m_strName="×Ê¹ÜÄ£Äâ", m_strAbbrName="neeq", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=10,},
+    {m_nId=10002, m_strName="Ñ¸Í¶ï¿½ß¼ï¿½ï¿½ï¿½ï¿½ï¿½", m_strAbbrName="neeq", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=10,},
+    {m_nId=1311, m_strName="ï¿½Ê¹ï¿½Êµï¿½ï¿½", m_strAbbrName="neeq", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=10,},
+    {m_nId=1312, m_strName="ï¿½Ê¹ï¿½Ä£ï¿½ï¿½", m_strAbbrName="neeq", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=10,},
 }
 
 g_gold_quote_platforms = {
-	{m_nId=31003, m_strName="Ñ¸Í¶¸ß¼¶ÐÐÇé", m_strAbbrName="zxjtgold", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=4,},
-    {m_nId=31111, m_strName="×Ê¹ÜÊµÅÌ", m_strAbbrName="zxjtgold", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=4,},
-    {m_nId=31112, m_strName="×Ê¹ÜÄ£Äâ", m_strAbbrName="zxjtgold", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=4,},
+	{m_nId=31003, m_strName="Ñ¸Í¶ï¿½ß¼ï¿½ï¿½ï¿½ï¿½ï¿½", m_strAbbrName="zxjtgold", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=4,},
+    {m_nId=31111, m_strName="ï¿½Ê¹ï¿½Êµï¿½ï¿½", m_strAbbrName="zxjtgold", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=4,},
+    {m_nId=31112, m_strName="ï¿½Ê¹ï¿½Ä£ï¿½ï¿½", m_strAbbrName="zxjtgold", m_strLogo="broker_logo_1", m_strBrokerTag="xtbroker", m_strQuoterTag="xtquoter", m_nType=4,},
 }
 
 g_future_order_limits = {
@@ -131,28 +130,28 @@ g_future_order_limits = {
 }
 
 g_banks = {
-    {m_strLogo="bank_logo_1", m_strId="1", m_strName="¹¤ÉÌÒøÐÐ",},
-    {m_strLogo="bank_logo_2", m_strId="2", m_strName="Å©ÒµÒøÐÐ",},
-    {m_strLogo="bank_logo_3", m_strId="3", m_strName="ÖÐ¹úÒøÐÐ",},
-    {m_strLogo="bank_logo_4", m_strId="4", m_strName="½¨ÉèÒøÐÐ",},
-    {m_strLogo="bank_logo_5", m_strId="5", m_strName="½»Í¨ÒøÐÐ",},
-    {m_strLogo="bank_logo_6", m_strId="6", m_strName="ÉîÛÚ½¨ÐÐ",},
-    {m_strLogo="bank_logo_Z", m_strId="Z", m_strName="ÆäËüÒøÐÐ",}
-}  
+    {m_strLogo="bank_logo_1", m_strId="1", m_strName="ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",},
+    {m_strLogo="bank_logo_2", m_strId="2", m_strName="Å©Òµï¿½ï¿½ï¿½ï¿½",},
+    {m_strLogo="bank_logo_3", m_strId="3", m_strName="ï¿½Ð¹ï¿½ï¿½ï¿½ï¿½ï¿½",},
+    {m_strLogo="bank_logo_4", m_strId="4", m_strName="ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",},
+    {m_strLogo="bank_logo_5", m_strId="5", m_strName="ï¿½ï¿½Í¨ï¿½ï¿½ï¿½ï¿½",},
+    {m_strLogo="bank_logo_6", m_strId="6", m_strName="ï¿½ï¿½ï¿½Ú½ï¿½ï¿½ï¿½",},
+    {m_strLogo="bank_logo_Z", m_strId="Z", m_strName="ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",}
+}
 
 g_batchOrder_config = {
-    -- ÊÇ·ñ²ÉÓÃÅúÁ¿ÏÂµ¥, 0 ±íÊ¾ ²»Ê¹ÓÃ
+    -- Whether to enable batch ordinary order, 0 means disabled
     is_batch_ordinaryOrder = 1,
-    -- Èç¹û ²ÉÓÃÅúÁ¿ÏÂµ¥£¬ÉèÖÃ¶àÉÙºÁÃë·¢ËÍÒ»´Î»º³åÊý¾Ý
+    -- After how many batch ordinary orders to send all at once
     buffer_clear_duration_milli_sec = 100,
     buffer_clear_max_order_num = 100,
-    -- apiserver µ¥Î»Ê±¼äÄÚµÄ ÏÂµ¥Á¿
+    -- apiserver order upper limit per time window
     api_order_upper_limit = 1000,
-    -- Èç¹ûÉèÖÃÁË ÏÂµ¥Á¿ÉÏÏÞ£¬ÉèÖÃ¶àÉÙºÁÃë´ïµ½Õâ¸öÉÏÏÞ²Å´ò»ØÇëÇó
+    -- The upper limit of batch order per time window, after reaching the limit, send immediately
     api_order_duration_milli_sec = 1000,
-    -- ÉèÖÃËã·¨µ¥×îÐ¡ÏÂµ¥¼ä¸ô Îª 0.5s
+    -- Minimum interval for algorithmic orders, 0.5s
     api_min_algorithm_order_duration_milli_sec = 500,
-    -- ÉèÖÃ×éºÏµ¥×îÐ¡ÏÂµ¥¼ä¸ôÎª 10s
+    -- Minimum interval for group orders, 10s
     api_min_group_order_duration_milli_sec = 10000,
     max_order_duration_milli_sec = -1,
     max_order_count = -1,

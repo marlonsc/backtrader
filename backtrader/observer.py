@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 
 from .lineiterator import LineIterator, ObserverBase, StrategyBase
@@ -34,8 +33,7 @@ class MetaObserver(ObserverBase.__class__):
         return _obj, args, kwargs  # return the instantiated object and args
 
     def dopreinit(cls, _obj, *args, **kwargs):
-        _obj, args, kwargs = \
-            super(MetaObserver, cls).dopreinit(_obj, *args, **kwargs)
+        _obj, args, kwargs = super(MetaObserver, cls).dopreinit(_obj, *args, **kwargs)
 
         if _obj._stclock:  # Change clock if strategy wide observer
             _obj._clock = _obj._owner

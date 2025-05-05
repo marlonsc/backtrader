@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import uuid
 
@@ -30,7 +29,7 @@ from ..trade import Trade
 
 
 class Trades(Observer):
-    '''This observer keeps track of full trades and plot the PnL level achieved
+    """This observer keeps track of full trades and plot the PnL level achieved
     when a trade is closed.
 
     A trade is open when a position goes from 0 (or crossing over 0) to X and
@@ -42,25 +41,39 @@ class Trades(Observer):
 
         Show net/profit and loss, i.e.: after commission. If set to ``False``
         if will show the result of trades before commission
-    '''
+    """
+
     _stclock = True
 
-    lines = ('pnlplus', 'pnlminus')
+    lines = ("pnlplus", "pnlminus")
 
     params = dict(pnlcomm=True)
 
-    plotinfo = dict(plot=True, subplot=True,
-                    plotname='Trades - Net Profit/Loss',
-                    plotymargin=0.10,
-                    plothlines=[0.0])
+    plotinfo = dict(
+        plot=True,
+        subplot=True,
+        plotname="Trades - Net Profit/Loss",
+        plotymargin=0.10,
+        plothlines=[0.0],
+    )
 
     plotlines = dict(
-        pnlplus=dict(_name='Positive',
-                     ls='', marker='o', color='blue',
-                     markersize=8.0, fillstyle='full'),
-        pnlminus=dict(_name='Negative',
-                      ls='', marker='o', color='red',
-                      markersize=8.0, fillstyle='full')
+        pnlplus=dict(
+            _name="Positive",
+            ls="",
+            marker="o",
+            color="blue",
+            markersize=8.0,
+            fillstyle="full",
+        ),
+        pnlminus=dict(
+            _name="Negative",
+            ls="",
+            marker="o",
+            color="red",
+            markersize=8.0,
+            fillstyle="full",
+        ),
     )
 
     def __init__(self):
@@ -112,24 +125,62 @@ class MetaDataTrades(Observer.__class__):
         if _obj.params.usenames:
             lnames = tuple(x._name for x in _obj.datas)
         else:
-            lnames = tuple('data{}'.format(x) for x in range(len(_obj.datas)))
+            lnames = tuple("data{}".format(x) for x in range(len(_obj.datas)))
 
         # Generate a new lines class
         linescls_params = (uuid.uuid4().hex, lnames, 0, ())
         linescls = cls.lines._derive(*linescls_params)
-        setattr(_obj, 'linescls_params', linescls_params)
+        setattr(_obj, "linescls_params", linescls_params)
 
         # Instantiate lines
         _obj.lines = linescls()
 
         # Generate plotlines info
-        markers = ['o', 'v', '^', '<', '>', '1', '2', '3', '4', '8', 's', 'p',
-                   '*', 'h', 'H', '+', 'x', 'D', 'd']
+        markers = [
+            "o",
+            "v",
+            "^",
+            "<",
+            ">",
+            "1",
+            "2",
+            "3",
+            "4",
+            "8",
+            "s",
+            "p",
+            "*",
+            "h",
+            "H",
+            "+",
+            "x",
+            "D",
+            "d",
+        ]
 
-        colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'b', 'g', 'r', 'c', 'm',
-                  'y', 'k', 'b', 'g', 'r', 'c', 'm']
+        colors = [
+            "b",
+            "g",
+            "r",
+            "c",
+            "m",
+            "y",
+            "k",
+            "b",
+            "g",
+            "r",
+            "c",
+            "m",
+            "y",
+            "k",
+            "b",
+            "g",
+            "r",
+            "c",
+            "m",
+        ]
 
-        basedict = dict(ls='', markersize=8.0, fillstyle='full')
+        basedict = dict(ls="", markersize=8.0, fillstyle="full")
 
         plines = dict()
         for lname, marker, color in zip(lnames, markers, colors):
@@ -138,7 +189,7 @@ class MetaDataTrades(Observer.__class__):
 
         plotlinescls_params = (uuid.uuid4().hex, plines, [], True)
         plotlines = cls.plotlines._derive(*plotlinescls_params)
-        setattr(_obj, 'plotlinescls_params', plotlinescls_params)
+        setattr(_obj, "plotlinescls_params", plotlinescls_params)
         _obj.plotlines = plotlines()
 
         return _obj, args, kwargs  # return the instantiated object and args
@@ -147,10 +198,9 @@ class MetaDataTrades(Observer.__class__):
 class DataTrades(with_metaclass(MetaDataTrades, Observer)):
     _stclock = True
 
-    params = (('usenames', True),)
+    params = (("usenames", True),)
 
-    plotinfo = dict(plot=True, subplot=True, plothlines=[0.0],
-                    plotymargin=0.10)
+    plotinfo = dict(plot=True, subplot=True, plothlines=[0.0], plotymargin=0.10)
 
     plotlines = dict()
 

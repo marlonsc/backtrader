@@ -18,17 +18,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from . import PeriodN
 
-
-__all__ = ['LaguerreRSI', 'LRSI', 'LaguerreFilter', 'LAGF']
+__all__ = ["LaguerreRSI", "LRSI", "LaguerreFilter", "LAGF"]
 
 
 class LaguerreRSI(PeriodN):
-    '''
+    """
     Defined by John F. Ehlers in `Cybernetic Analysis for Stock and Futures`,
     2004, published by Wiley. `ISBN: 978-0-471-46307-8`
 
@@ -38,18 +36,16 @@ class LaguerreRSI(PeriodN):
 
     ``gamma`` is meant to have values between ``0.2`` and ``0.8``, with the
     best balance found theoretically at the default of ``0.5``
-    '''
-    alias = ('LRSI',)
-    lines = ('lrsi',)
+    """
+
+    alias = ("LRSI",)
+    lines = ("lrsi",)
     params = (
-        ('gamma', 0.5),
-        ('period', 6),
+        ("gamma", 0.5),
+        ("period", 6),
     )
 
-    plotinfo = dict(
-        plotymargin=0.15,
-        plotyticks=[0.0, 0.2, 0.5, 0.8, 1.0]
-    )
+    plotinfo = dict(plotymargin=0.15, plotyticks=[0.0, 0.2, 0.5, 0.8, 1.0])
 
     l0, l1, l2, l3 = 0.0, 0.0, 0.0, 0.0
 
@@ -86,16 +82,17 @@ class LaguerreRSI(PeriodN):
 
 
 class LaguerreFilter(PeriodN):
-    '''
+    """
     Defined by John F. Ehlers in `Cybernetic Analysis for Stock and Futures`,
     2004, published by Wiley. `ISBN: 978-0-471-46307-8`
 
     ``gamma`` is meant to have values between ``0.2`` and ``0.8``, with the
     best balance found theoretically at the default of ``0.5``
-    '''
-    alias = ('LAGF',)
-    lines = ('lfilter',)
-    params = (('gamma', 0.5),)
+    """
+
+    alias = ("LAGF",)
+    lines = ("lfilter",)
+    params = (("gamma", 0.5),)
     plotinfo = dict(subplot=False)
 
     l0, l1, l2, l3 = 0.0, 0.0, 0.0, 0.0

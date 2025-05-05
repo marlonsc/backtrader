@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import datetime
 import os
@@ -30,19 +29,17 @@ import backtrader.indicators as btind
 import pandas
 
 chkdatas = 1
-chkvals = [
-    ['4063.463000', '3644.444667', '3554.693333']
-]
+chkvals = [["4063.463000", "3644.444667", "3554.693333"]]
 
 chkmin = 30  # period will be in weeks
 chkind = [btind.SMA]
 chkargs = dict()
 
 modpath = os.path.dirname(os.path.abspath(__file__))
-dataspath = '../datas'
+dataspath = "../datas"
 datafiles = [
-    '2006-day-001.txt',
-    '2006-day-001-optix.txt',
+    "2006-day-001.txt",
+    "2006-day-001-optix.txt",
 ]
 
 FROMDATE = datetime.datetime(2006, 1, 1)
@@ -51,10 +48,12 @@ TODATE = datetime.datetime(2006, 12, 31)
 
 class PandasDataOptix(btfeeds.PandasData):
 
-    lines = ('optix_close', 'optix_pess', 'optix_opt',)
-    params = (('optix_close', -1),
-              ('optix_pess', -1),
-              ('optix_opt', -1))
+    lines = (
+        "optix_close",
+        "optix_pess",
+        "optix_opt",
+    )
+    params = (("optix_close", -1), ("optix_pess", -1), ("optix_opt", -1))
 
 
 def getdata(index, noheaders=True):
@@ -65,11 +64,9 @@ def getdata(index, noheaders=True):
     skiprows = 1 if noheaders else 0
     header = None if noheaders else 0
 
-    dataframe = pandas.read_csv(datapath,
-                                skiprows=skiprows,
-                                header=header,
-                                parse_dates=True,
-                                index_col=0)
+    dataframe = pandas.read_csv(
+        datapath, skiprows=skiprows, header=header, parse_dates=True, index_col=0
+    )
 
     # Pass it to the backtrader datafeed and add it to the cerebro
     # Data in upper case for headers, nocase=True.
@@ -78,6 +75,7 @@ def getdata(index, noheaders=True):
     else:
         data = btfeeds.PandasData(dataname=dataframe, nocase=True)
     return data
+
 
 def test_run(main=False):
     # Create list with bool possibilitys for:
@@ -88,16 +86,18 @@ def test_run(main=False):
 
     for runonce in [True, False]:
         datas = data
-        testcommon.runtest(datas,
-                           testcommon.TestStrategy,
-                           main=main,
-                           runonce=runonce,
-                           plot=False,
-                           chkind=chkind,
-                           chkmin=chkmin,
-                           chkvals=chkvals,
-                           chkargs=chkargs)
+        testcommon.runtest(
+            datas,
+            testcommon.TestStrategy,
+            main=main,
+            runonce=runonce,
+            plot=False,
+            chkind=chkind,
+            chkmin=chkmin,
+            chkvals=chkvals,
+            chkargs=chkargs,
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test_run(main=True)

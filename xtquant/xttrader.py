@@ -1,23 +1,28 @@
-#coding=utf-8
+# coding=utf-8
 
 from . import xtpythonclient as _XTQC_
 from . import xttype as _XTTYPE_
 from . import xtbson as bson
 from . import xtconstant as _XTCONST_
 
-def title(s = None):
+
+def title(s=None):
     import inspect
+
     if not s:
         s = inspect.stack()[1].function
-    print('-' * 33 + s + '-' * 33)
+    print("-" * 33 + s + "-" * 33)
     return
 
-def cp(s = None):
+
+def cp(s=None):
     import inspect
+
     st = inspect.stack()
-    pos = {'title':st[1].function, 'line':st[1].lineno}
-    print('-' * 33 + f'{pos}, {s}' + '-' * 33)
+    pos = {"title": st[1].function, "line": st[1].lineno}
+    print("-" * 33 + f"{pos}, {s}" + "-" * 33)
     return
+
 
 # 交易回调类
 class XtQuantTraderCallback(object):
@@ -26,7 +31,7 @@ class XtQuantTraderCallback(object):
         连接成功推送
         """
         pass
-        
+
     def on_disconnected(self):
         """
         连接断开推送
@@ -88,7 +93,7 @@ class XtQuantTraderCallback(object):
         :return:
         """
         pass
-    
+
     def on_cancel_order_stock_async_response(self, response):
         """
         :param response: XtCancelOrderResponse 对象
@@ -103,6 +108,7 @@ class XtQuantTraderCallback(object):
         """
         pass
 
+
 class XtQuantTrader(object):
     def __init__(self, path, session, callback=None):
         """
@@ -113,7 +119,9 @@ class XtQuantTrader(object):
         import asyncio
         from threading import current_thread
 
-        self.async_client = _XTQC_.XtQuantAsyncClient(path.encode('gb18030'), 'xtquant', session)
+        self.async_client = _XTQC_.XtQuantAsyncClient(
+            path.encode("gb18030"), "xtquant", session
+        )
         self.callback = callback
 
         self.connected = False
@@ -130,42 +138,49 @@ class XtQuantTrader(object):
         self.relaxed_resp_order_enabled = False
         self.relaxed_resp_executor = None
 
-        self.queuing_order_seq = set() # 发起委托的seq,获取resp时移除
-        self.handled_async_order_stock_order_id = set() # 已处理了返回的委托order_id
-        self.queuing_order_errors_byseq = {} # 队列中的委托失败信息，在对应委托尚未返回(检测seq或者order_id)时存入，等待回调error_callback
+        self.queuing_order_seq = set()  # 发起委托的seq,获取resp时移除
+        self.handled_async_order_stock_order_id = set()  # 已处理了返回的委托order_id
+        self.queuing_order_errors_byseq = (
+            {}
+        )  # 队列中的委托失败信息，在对应委托尚未返回(检测seq或者order_id)时存入，等待回调error_callback
         self.queuing_order_errors_byid = {}
 
         self.handled_async_cancel_order_stock_order_id = set()
         self.handled_async_cancel_order_stock_order_sys_id = set()
         self.queuing_cancel_errors_by_order_id = {}
         self.queuing_cancel_errors_by_order_sys_id = {}
-        
-        
-    #########################
-        #push
+
+        #########################
+        # push
         def on_common_push_callback_wrapper(argc, callback):
             if argc == 0:
+
                 def on_push_data():
                     self.executor.submit(callback)
+
                 return on_push_data
             elif argc == 1:
+
                 def on_push_data(data):
                     self.executor.submit(callback, data)
+
                 return on_push_data
             elif argc == 2:
+
                 def on_push_data(data1, data2):
                     self.executor.submit(callback, data1, data2)
+
                 return on_push_data
             else:
                 return None
-        
-        #response
+
+        # response
         def on_common_resp_callback(seq, resp):
             callback = self.cbs.pop(seq, None)
             if callback:
                 self.resp_executor.submit(callback, resp)
             return
-        
+
         self.async_client.bindOnSubscribeRespCallback(on_common_resp_callback)
         self.async_client.bindOnUnsubscribeRespCallback(on_common_resp_callback)
         self.async_client.bindOnQueryStockAssetCallback(on_common_resp_callback)
@@ -184,22 +199,33 @@ class XtQuantTrader(object):
         self.async_client.bindOnSmtQueryQuoterRespCallback(on_common_resp_callback)
         self.async_client.bindOnSmtQueryOrderRespCallback(on_common_resp_callback)
         self.async_client.bindOnSmtQueryCompactRespCallback(on_common_resp_callback)
-        self.async_client.bindOnQueryPositionStatisticsRespCallback(on_common_resp_callback)
+        self.async_client.bindOnQueryPositionStatisticsRespCallback(
+            on_common_resp_callback
+        )
         self.async_client.bindOnExportDataRespCallback(on_common_resp_callback)
-        self.async_client.bindOnSyncTransactionFromExternalRespCallback(on_common_resp_callback)
-        
+        self.async_client.bindOnSyncTransactionFromExternalRespCallback(
+            on_common_resp_callback
+        )
+
         self.async_client.bindOnQueryAccountInfosCallback(on_common_resp_callback)
         self.async_client.bindOnQueryAccountStatusCallback(on_common_resp_callback)
-    #########################
-        
+        #########################
+
         enable_push = 1
-        
-        #order push
-        
+
+        # order push
+
         def on_push_OrderStockAsyncResponse(seq, resp):
             callback = self.cbs.pop(seq, None)
             if callback:
-                resp = _XTTYPE_.XtOrderResponse(resp.m_strAccountID, resp.m_nOrderID, resp.m_strStrategyName, resp.m_strOrderRemark, resp.m_strErrorMsg, seq)
+                resp = _XTTYPE_.XtOrderResponse(
+                    resp.m_strAccountID,
+                    resp.m_nOrderID,
+                    resp.m_strStrategyName,
+                    resp.m_strOrderRemark,
+                    resp.m_strErrorMsg,
+                    seq,
+                )
                 callback(resp)
                 self.queuing_order_seq.discard(seq)
                 e = self.queuing_order_errors_byseq.pop(seq, None)
@@ -210,75 +236,115 @@ class XtQuantTrader(object):
                 else:
                     self.handled_async_order_stock_order_id.add(resp.order_id)
             return
-        
+
         if enable_push:
-            self.async_client.bindOnOrderStockRespCallback(on_common_push_callback_wrapper(2, on_push_OrderStockAsyncResponse))
-        
+            self.async_client.bindOnOrderStockRespCallback(
+                on_common_push_callback_wrapper(2, on_push_OrderStockAsyncResponse)
+            )
+
         def on_push_CancelOrderStockAsyncResponse(seq, resp):
             callback = self.cbs.pop(seq, None)
             if callback:
-                resp = _XTTYPE_.XtCancelOrderResponse(resp.m_strAccountID, resp.m_nCancelResult, resp.m_nOrderID, resp.m_strOrderSysID, seq, resp.m_strErrorMsg)
+                resp = _XTTYPE_.XtCancelOrderResponse(
+                    resp.m_strAccountID,
+                    resp.m_nCancelResult,
+                    resp.m_nOrderID,
+                    resp.m_strOrderSysID,
+                    seq,
+                    resp.m_strErrorMsg,
+                )
                 callback(resp)
-                
+
                 if not resp.order_sysid:
                     e = self.queuing_cancel_errors_by_order_id.pop(resp.order_id, None)
                     if e is not None:
-                        self.handled_async_cancel_order_stock_order_id.discard(resp.order_id)
+                        self.handled_async_cancel_order_stock_order_id.discard(
+                            resp.order_id
+                        )
                         self.callback.on_cancel_error(e)
                     else:
-                        self.handled_async_cancel_order_stock_order_id.add(resp.order_id)
+                        self.handled_async_cancel_order_stock_order_id.add(
+                            resp.order_id
+                        )
                 else:
-                    e = self.queuing_cancel_errors_by_order_sys_id.pop(resp.order_sysid, None)
+                    e = self.queuing_cancel_errors_by_order_sys_id.pop(
+                        resp.order_sysid, None
+                    )
                     if e is not None:
-                        self.handled_async_cancel_order_stock_order_sys_id.discard(resp.order_sysid)
+                        self.handled_async_cancel_order_stock_order_sys_id.discard(
+                            resp.order_sysid
+                        )
                         self.callback.on_cancel_error(e)
                     else:
-                        self.handled_async_cancel_order_stock_order_sys_id.add(resp.order_sysid)
+                        self.handled_async_cancel_order_stock_order_sys_id.add(
+                            resp.order_sysid
+                        )
             return
-        
+
         if enable_push:
-            self.async_client.bindOnCancelOrderStockRespCallback(on_common_push_callback_wrapper(2, on_push_CancelOrderStockAsyncResponse))
-            
+            self.async_client.bindOnCancelOrderStockRespCallback(
+                on_common_push_callback_wrapper(
+                    2, on_push_CancelOrderStockAsyncResponse
+                )
+            )
+
         def on_push_disconnected():
             if self.callback:
                 self.callback.on_disconnected()
 
         if enable_push:
-            self.async_client.bindOnDisconnectedCallback(on_common_push_callback_wrapper(0, on_push_disconnected))
+            self.async_client.bindOnDisconnectedCallback(
+                on_common_push_callback_wrapper(0, on_push_disconnected)
+            )
 
         def on_push_AccountStatus(data):
-            data = _XTTYPE_.XtAccountStatus(data.m_strAccountID, data.m_nAccountType, data.m_nStatus)
+            data = _XTTYPE_.XtAccountStatus(
+                data.m_strAccountID, data.m_nAccountType, data.m_nStatus
+            )
             self.callback.on_account_status(data)
 
         if enable_push:
-            self.async_client.bindOnUpdateAccountStatusCallback(on_common_push_callback_wrapper(1, on_push_AccountStatus))
+            self.async_client.bindOnUpdateAccountStatusCallback(
+                on_common_push_callback_wrapper(1, on_push_AccountStatus)
+            )
 
         def on_push_StockAsset(data):
             self.callback.on_stock_asset(data)
 
         if enable_push:
-            self.async_client.bindOnStockAssetCallback(on_common_push_callback_wrapper(1, on_push_StockAsset))
+            self.async_client.bindOnStockAssetCallback(
+                on_common_push_callback_wrapper(1, on_push_StockAsset)
+            )
 
         def on_push_OrderStock(data):
             self.callback.on_stock_order(data)
 
         if enable_push:
-            self.async_client.bindOnStockOrderCallback(on_common_push_callback_wrapper(1, on_push_OrderStock))
+            self.async_client.bindOnStockOrderCallback(
+                on_common_push_callback_wrapper(1, on_push_OrderStock)
+            )
 
         def on_push_StockTrade(data):
             self.callback.on_stock_trade(data)
 
         if enable_push:
-            self.async_client.bindOnStockTradeCallback(on_common_push_callback_wrapper(1, on_push_StockTrade))
+            self.async_client.bindOnStockTradeCallback(
+                on_common_push_callback_wrapper(1, on_push_StockTrade)
+            )
 
         def on_push_StockPosition(data):
             self.callback.on_stock_position(data)
 
         if enable_push:
-            self.async_client.bindOnStockPositionCallback(on_common_push_callback_wrapper(1, on_push_StockPosition))
+            self.async_client.bindOnStockPositionCallback(
+                on_common_push_callback_wrapper(1, on_push_StockPosition)
+            )
 
         def on_push_OrderError(data):
-            if data.seq not in self.queuing_order_seq or data.order_id in self.handled_async_order_stock_order_id:
+            if (
+                data.seq not in self.queuing_order_seq
+                or data.order_id in self.handled_async_order_stock_order_id
+            ):
                 self.handled_async_order_stock_order_id.discard(data.order_id)
                 self.callback.on_order_error(data)
             else:
@@ -286,32 +352,42 @@ class XtQuantTrader(object):
                 self.queuing_order_errors_byid[data.order_id] = data
 
         if enable_push:
-            self.async_client.bindOnOrderErrorCallback(on_common_push_callback_wrapper(1, on_push_OrderError))
+            self.async_client.bindOnOrderErrorCallback(
+                on_common_push_callback_wrapper(1, on_push_OrderError)
+            )
 
         def on_push_CancelError(data):
             if data.order_id in self.handled_async_cancel_order_stock_order_id:
                 self.handled_async_cancel_order_stock_order_id.discard(data.order_id)
-                self.callback.on_cancel_error(data)      
+                self.callback.on_cancel_error(data)
             elif data.order_sysid in self.handled_async_cancel_order_stock_order_sys_id:
-                self.handled_async_cancel_order_stock_order_sys_id.discard(data.order_sysid)
+                self.handled_async_cancel_order_stock_order_sys_id.discard(
+                    data.order_sysid
+                )
                 self.callback.on_cancel_error(data)
             else:
                 self.queuing_cancel_errors_by_order_id[data.order_id] = data
                 self.queuing_cancel_errors_by_order_sys_id[data.order_sysid] = data
 
         if enable_push:
-            self.async_client.bindOnCancelErrorCallback(on_common_push_callback_wrapper(1, on_push_CancelError))
-        
+            self.async_client.bindOnCancelErrorCallback(
+                on_common_push_callback_wrapper(1, on_push_CancelError)
+            )
+
         def on_push_SmtAppointmentAsyncResponse(seq, resp):
             callback = self.cbs.pop(seq, None)
             if callback:
-                resp = _XTTYPE_.XtSmtAppointmentResponse(seq, resp.m_bSuccess, resp.m_strMsg, resp.m_strApplyID)
+                resp = _XTTYPE_.XtSmtAppointmentResponse(
+                    seq, resp.m_bSuccess, resp.m_strMsg, resp.m_strApplyID
+                )
                 callback(resp)
             return
-        
+
         if enable_push:
-            self.async_client.bindOnSmtAppointmentRespCallback(on_common_push_callback_wrapper(2, on_push_SmtAppointmentAsyncResponse))
-        
+            self.async_client.bindOnSmtAppointmentRespCallback(
+                on_common_push_callback_wrapper(2, on_push_SmtAppointmentAsyncResponse)
+            )
+
     ########################
 
     def common_op_async_with_seq(self, seq, callable, callback):
@@ -319,6 +395,7 @@ class XtQuantTrader(object):
 
         def apply(func, *args):
             return func(*args)
+
         apply(*callable)
 
         return seq
@@ -328,21 +405,23 @@ class XtQuantTrader(object):
 
     def common_op_sync_with_seq(self, seq, callable):
         from concurrent.futures import Future
+
         future = Future()
-        self.cbs[seq] = lambda resp:future.set_result(resp)
+        self.cbs[seq] = lambda resp: future.set_result(resp)
 
         def apply(func, *args):
             return func(*args)
+
         apply(*callable)
 
         return future.result()
 
     #########################
-    
-    
+
     def __del__(self):
         import asyncio
         from threading import current_thread
+
         if "MainThread" == current_thread().name:
             asyncio.set_event_loop(self.oldloop)
 
@@ -351,18 +430,23 @@ class XtQuantTrader(object):
 
     def start(self):
         from concurrent.futures import ThreadPoolExecutor
+
         self.async_client.init()
         self.async_client.start()
-        self.executor = ThreadPoolExecutor(max_workers = 1)
-        self.relaxed_resp_executor = ThreadPoolExecutor(max_workers = 1)
-        self.resp_executor = self.relaxed_resp_executor if self.relaxed_resp_order_enabled else self.executor
+        self.executor = ThreadPoolExecutor(max_workers=1)
+        self.relaxed_resp_executor = ThreadPoolExecutor(max_workers=1)
+        self.resp_executor = (
+            self.relaxed_resp_executor
+            if self.relaxed_resp_order_enabled
+            else self.executor
+        )
         return
 
     def stop(self):
         self.async_client.stop()
         self.loop.call_soon_threadsafe(self.loop.stop)
-        self.executor.shutdown(wait = True)
-        self.relaxed_resp_executor.shutdown(wait = True)
+        self.executor.shutdown(wait=True)
+        self.relaxed_resp_executor.shutdown(wait=True)
         return
 
     def connect(self):
@@ -372,19 +456,26 @@ class XtQuantTrader(object):
 
     def sleep(self, time):
         import asyncio
+
         async def sleep_coroutine(time):
             await asyncio.sleep(time)
+
         asyncio.run_coroutine_threadsafe(sleep_coroutine(time), self.loop).result()
 
     def run_forever(self):
         import time
+
         while True:
             time.sleep(2)
         return
 
     def set_relaxed_response_order_enabled(self, enabled):
         self.relaxed_resp_order_enabled = enabled
-        self.resp_executor = self.relaxed_resp_executor if self.relaxed_resp_order_enabled else self.executor
+        self.resp_executor = (
+            self.relaxed_resp_executor
+            if self.relaxed_resp_order_enabled
+            else self.executor
+        )
         return
 
     def subscribe(self, account):
@@ -393,8 +484,7 @@ class XtQuantTrader(object):
         req.m_strAccountID = account.account_id
         seq = self.async_client.nextSeq()
         return self.common_op_sync_with_seq(
-            seq,
-            (self.async_client.subscribeWithSeq, seq, req)
+            seq, (self.async_client.subscribeWithSeq, seq, req)
         )
 
     def unsubscribe(self, account):
@@ -403,12 +493,20 @@ class XtQuantTrader(object):
         req.m_strAccountID = account.account_id
         seq = self.async_client.nextSeq()
         return self.common_op_sync_with_seq(
-            seq,
-            (self.async_client.unsubscribeWithSeq, seq, req)
+            seq, (self.async_client.unsubscribeWithSeq, seq, req)
         )
 
-    def order_stock_async(self, account, stock_code, order_type, order_volume, price_type, price, strategy_name='',
-                          order_remark=''):
+    def order_stock_async(
+        self,
+        account,
+        stock_code,
+        order_type,
+        order_volume,
+        price_type,
+        price,
+        strategy_name="",
+        order_remark="",
+    ):
         """
         :param account: 证券账号
         :param stock_code: 证券代码, 例如"600000.SH"
@@ -440,8 +538,17 @@ class XtQuantTrader(object):
         self.async_client.orderStockWithSeq(seq, req)
         return seq
 
-    def order_stock(self, account, stock_code, order_type, order_volume, price_type, price, strategy_name='',
-                          order_remark=''):
+    def order_stock(
+        self,
+        account,
+        stock_code,
+        order_type,
+        order_volume,
+        price_type,
+        price,
+        strategy_name="",
+        order_remark="",
+    ):
         """
         :param account: 证券账号
         :param stock_code: 证券代码, 例如"600000.SH"
@@ -466,12 +573,11 @@ class XtQuantTrader(object):
         req.m_strOrderRemarkNew = order_remark
         req.m_dOrderAmount = order_volume
         req.m_strStockCode1 = stock_code
-        
+
         seq = self.async_client.nextSeq()
         self.queuing_order_seq.add(seq)
         resp = self.common_op_sync_with_seq(
-            seq,
-            (self.async_client.orderStockWithSeq, seq, req)
+            seq, (self.async_client.orderStockWithSeq, seq, req)
         )
         return resp.order_id
 
@@ -485,11 +591,10 @@ class XtQuantTrader(object):
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
         req.m_nOrderID = order_id
-        
+
         seq = self.async_client.nextSeq()
         resp = self.common_op_sync_with_seq(
-            seq,
-            (self.async_client.cancelOrderStockWithSeq, seq, req)
+            seq, (self.async_client.cancelOrderStockWithSeq, seq, req)
         )
         return resp.cancel_result
 
@@ -503,7 +608,7 @@ class XtQuantTrader(object):
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
         req.m_nOrderID = order_id
-        
+
         seq = self.async_client.nextSeq()
         self.cbs[seq] = self.callback.on_cancel_order_stock_async_response
         self.async_client.cancelOrderStockWithSeq(seq, req)
@@ -525,11 +630,10 @@ class XtQuantTrader(object):
         else:
             req.m_nMarket = market
         req.m_strOrderSysID = sysid
-        
+
         seq = self.async_client.nextSeq()
         resp = self.common_op_sync_with_seq(
-            seq,
-            (self.async_client.cancelOrderStockWithSeq, seq, req)
+            seq, (self.async_client.cancelOrderStockWithSeq, seq, req)
         )
         return resp.cancel_result
 
@@ -549,7 +653,7 @@ class XtQuantTrader(object):
         else:
             req.m_nMarket = market
         req.m_strOrderSysID = sysid
-        
+
         seq = self.async_client.nextSeq()
         self.cbs[seq] = self.callback.on_cancel_order_stock_async_response
         self.async_client.cancelOrderStockWithSeq(seq, req)
@@ -560,51 +664,45 @@ class XtQuantTrader(object):
         :return: 返回账号列表
         """
         req = _XTQC_.QueryAccountInfosReq()
-        
+
         seq = self.async_client.nextSeq()
         return self.common_op_sync_with_seq(
-            seq,
-            (self.async_client.queryAccountInfosWithSeq, seq, req)
+            seq, (self.async_client.queryAccountInfosWithSeq, seq, req)
         )
-        
+
     query_account_info = query_account_infos
-    
+
     def query_account_infos_async(self, callback):
         """
         :return: 返回账号列表
         """
         req = _XTQC_.QueryAccountInfosReq()
-        
+
         seq = self.async_client.nextSeq()
         return self.common_op_async_with_seq(
-            seq,
-            (self.async_client.queryAccountInfosWithSeq, seq, req)
-            , callback
+            seq, (self.async_client.queryAccountInfosWithSeq, seq, req), callback
         )
-        
+
     def query_account_status(self):
         """
         :return: 返回账号状态
         """
         req = _XTQC_.QueryAccountStatusReq()
-        
+
         seq = self.async_client.nextSeq()
         return self.common_op_sync_with_seq(
-            seq,
-            (self.async_client.queryAccountStatusWithSeq, seq, req)
+            seq, (self.async_client.queryAccountStatusWithSeq, seq, req)
         )
-    
+
     def query_account_status_async(self, callback):
         """
         :return: 返回账号状态
         """
         req = _XTQC_.QueryAccountStatusReq()
-        
+
         seq = self.async_client.nextSeq()
         return self.common_op_async_with_seq(
-            seq,
-            (self.async_client.queryAccountStatusWithSeq, seq, req)
-            , callback
+            seq, (self.async_client.queryAccountStatusWithSeq, seq, req), callback
         )
 
     def query_stock_asset(self, account):
@@ -615,17 +713,16 @@ class XtQuantTrader(object):
         req = _XTQC_.QueryStockAssetReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
-        
+
         seq = self.async_client.nextSeq()
         resp = self.common_op_sync_with_seq(
-            seq,
-            (self.async_client.queryStockAssetWithSeq, seq, req)
+            seq, (self.async_client.queryStockAssetWithSeq, seq, req)
         )
 
         if resp and len(resp):
             return resp[0]
         return None
-    
+
     def query_stock_asset_async(self, account, callback):
         """
         :param account: 证券账号
@@ -634,14 +731,14 @@ class XtQuantTrader(object):
         req = _XTQC_.QueryStockAssetReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
-        
+
         seq = self.async_client.nextSeq()
+
         def _cb(resp):
             callback(resp[0] if resp else None)
+
         resp = self.common_op_async_with_seq(
-            seq,
-            (self.async_client.queryStockAssetWithSeq, seq, req)
-            , _cb
+            seq, (self.async_client.queryStockAssetWithSeq, seq, req), _cb
         )
         return
 
@@ -655,17 +752,16 @@ class XtQuantTrader(object):
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
         req.m_nOrderID = order_id
-        
+
         seq = self.async_client.nextSeq()
         resp = self.common_op_sync_with_seq(
-            seq,
-            (self.async_client.queryStockOrdersWithSeq, seq, req)
+            seq, (self.async_client.queryStockOrdersWithSeq, seq, req)
         )
         if resp and len(resp):
             return resp[0]
         return None
 
-    def query_stock_orders(self, account, cancelable_only = False):
+    def query_stock_orders(self, account, cancelable_only=False):
         """
         :param account: 证券账号
         :param cancelable_only: 仅查询可撤委托
@@ -675,14 +771,13 @@ class XtQuantTrader(object):
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
         req.m_bCanCancel = cancelable_only
-        
+
         seq = self.async_client.nextSeq()
         return self.common_op_sync_with_seq(
-            seq,
-            (self.async_client.queryStockOrdersWithSeq, seq, req)
+            seq, (self.async_client.queryStockOrdersWithSeq, seq, req)
         )
-    
-    def query_stock_orders_async(self, account, callback, cancelable_only = False):
+
+    def query_stock_orders_async(self, account, callback, cancelable_only=False):
         """
         :param account: 证券账号
         :param cancelable_only: 仅查询可撤委托
@@ -692,14 +787,12 @@ class XtQuantTrader(object):
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
         req.m_bCanCancel = cancelable_only
-        
+
         seq = self.async_client.nextSeq()
         return self.common_op_async_with_seq(
-            seq,
-            (self.async_client.queryStockOrdersWithSeq, seq, req)
-            , callback
+            seq, (self.async_client.queryStockOrdersWithSeq, seq, req), callback
         )
-    
+
     def query_stock_trades(self, account):
         """
         :param account:  证券账号
@@ -708,13 +801,12 @@ class XtQuantTrader(object):
         req = _XTQC_.QueryStockTradesReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
-        
+
         seq = self.async_client.nextSeq()
         return self.common_op_sync_with_seq(
-            seq,
-            (self.async_client.queryStockTradesWithSeq, seq, req)
+            seq, (self.async_client.queryStockTradesWithSeq, seq, req)
         )
-    
+
     def query_stock_trades_async(self, account, callback):
         """
         :param account:  证券账号
@@ -723,12 +815,10 @@ class XtQuantTrader(object):
         req = _XTQC_.QueryStockTradesReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
-        
+
         seq = self.async_client.nextSeq()
         return self.common_op_async_with_seq(
-            seq,
-            (self.async_client.queryStockTradesWithSeq, seq, req)
-            , callback
+            seq, (self.async_client.queryStockTradesWithSeq, seq, req), callback
         )
 
     def query_stock_position(self, account, stock_code):
@@ -742,11 +832,10 @@ class XtQuantTrader(object):
         req.m_strAccountID = account.account_id
         req.m_strStockCode = stock_code
         req.m_strStockCode1 = stock_code
-        
+
         seq = self.async_client.nextSeq()
         resp = self.common_op_sync_with_seq(
-            seq,
-            (self.async_client.queryStockPositionsWithSeq, seq, req)
+            seq, (self.async_client.queryStockPositionsWithSeq, seq, req)
         )
         if resp and len(resp):
             return resp[0]
@@ -760,13 +849,12 @@ class XtQuantTrader(object):
         req = _XTQC_.QueryStockPositionsReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
-        
+
         seq = self.async_client.nextSeq()
         return self.common_op_sync_with_seq(
-            seq,
-            (self.async_client.queryStockPositionsWithSeq, seq, req)
+            seq, (self.async_client.queryStockPositionsWithSeq, seq, req)
         )
-    
+
     def query_stock_positions_async(self, account, callback):
         """
         :param account: 证券账号
@@ -775,12 +863,10 @@ class XtQuantTrader(object):
         req = _XTQC_.QueryStockPositionsReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
-        
+
         seq = self.async_client.nextSeq()
         return self.common_op_async_with_seq(
-            seq
-            , (self.async_client.queryStockPositionsWithSeq, seq, req)
-            , callback
+            seq, (self.async_client.queryStockPositionsWithSeq, seq, req), callback
         )
 
     def query_credit_detail(self, account):
@@ -791,13 +877,12 @@ class XtQuantTrader(object):
         req = _XTQC_.QueryCreditDetailReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
-        
+
         seq = self.async_client.nextSeq()
         return self.common_op_sync_with_seq(
-            seq,
-            (self.async_client.queryCreditDetailWithSeq, seq, req)
+            seq, (self.async_client.queryCreditDetailWithSeq, seq, req)
         )
-    
+
     def query_credit_detail_async(self, account, callback):
         """
         :param account: 证券账号
@@ -806,12 +891,10 @@ class XtQuantTrader(object):
         req = _XTQC_.QueryCreditDetailReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
-        
+
         seq = self.async_client.nextSeq()
         return self.common_op_async_with_seq(
-            seq,
-            (self.async_client.queryCreditDetailWithSeq, seq, req)
-            , callback
+            seq, (self.async_client.queryCreditDetailWithSeq, seq, req), callback
         )
 
     def query_stk_compacts(self, account):
@@ -822,13 +905,12 @@ class XtQuantTrader(object):
         req = _XTQC_.QueryStkCompactsReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
-        
+
         seq = self.async_client.nextSeq()
         return self.common_op_sync_with_seq(
-            seq,
-            (self.async_client.queryStkCompactsWithSeq, seq, req)
+            seq, (self.async_client.queryStkCompactsWithSeq, seq, req)
         )
-    
+
     def query_stk_compacts_async(self, account, callback):
         """
         :param account: 证券账号
@@ -837,14 +919,12 @@ class XtQuantTrader(object):
         req = _XTQC_.QueryStkCompactsReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
-        
+
         seq = self.async_client.nextSeq()
         return self.common_op_async_with_seq(
-            seq,
-            (self.async_client.queryStkCompactsWithSeq, seq, req)
-            , callback
+            seq, (self.async_client.queryStkCompactsWithSeq, seq, req), callback
         )
-    
+
     def query_credit_subjects(self, account):
         """
         :param account: 证券账号
@@ -853,13 +933,12 @@ class XtQuantTrader(object):
         req = _XTQC_.QueryCreditSubjectsReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
-        
+
         seq = self.async_client.nextSeq()
         return self.common_op_sync_with_seq(
-            seq,
-            (self.async_client.queryCreditSubjectsWithSeq, seq, req)
+            seq, (self.async_client.queryCreditSubjectsWithSeq, seq, req)
         )
-    
+
     def query_credit_subjects_async(self, account, callback):
         """
         :param account: 证券账号
@@ -868,14 +947,12 @@ class XtQuantTrader(object):
         req = _XTQC_.QueryCreditSubjectsReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
-        
+
         seq = self.async_client.nextSeq()
         return self.common_op_async_with_seq(
-            seq,
-            (self.async_client.queryCreditSubjectsWithSeq, seq, req)
-            , callback
+            seq, (self.async_client.queryCreditSubjectsWithSeq, seq, req), callback
         )
-    
+
     def query_credit_slo_code(self, account):
         """
         :param account: 证券账号
@@ -884,13 +961,12 @@ class XtQuantTrader(object):
         req = _XTQC_.QueryCreditSloCodeReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
-        
+
         seq = self.async_client.nextSeq()
         return self.common_op_sync_with_seq(
-            seq,
-            (self.async_client.queryCreditSloCodeWithSeq, seq, req)
+            seq, (self.async_client.queryCreditSloCodeWithSeq, seq, req)
         )
-    
+
     def query_credit_slo_code_async(self, account, callback):
         """
         :param account: 证券账号
@@ -899,14 +975,12 @@ class XtQuantTrader(object):
         req = _XTQC_.QueryCreditSloCodeReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
-        
+
         seq = self.async_client.nextSeq()
         return self.common_op_async_with_seq(
-            seq,
-            (self.async_client.queryCreditSloCodeWithSeq, seq, req)
-            , callback
+            seq, (self.async_client.queryCreditSloCodeWithSeq, seq, req), callback
         )
-    
+
     def query_credit_assure(self, account):
         """
         :param account: 证券账号
@@ -915,13 +989,12 @@ class XtQuantTrader(object):
         req = _XTQC_.QueryCreditAssureReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
-        
+
         seq = self.async_client.nextSeq()
         return self.common_op_sync_with_seq(
-            seq,
-            (self.async_client.queryCreditAssureWithSeq, seq, req)
+            seq, (self.async_client.queryCreditAssureWithSeq, seq, req)
         )
-    
+
     def query_credit_assure_async(self, account, callback):
         """
         :param account: 证券账号
@@ -930,14 +1003,12 @@ class XtQuantTrader(object):
         req = _XTQC_.QueryCreditAssureReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
-        
+
         seq = self.async_client.nextSeq()
         return self.common_op_async_with_seq(
-            seq,
-            (self.async_client.queryCreditAssureWithSeq, seq, req)
-            , callback
+            seq, (self.async_client.queryCreditAssureWithSeq, seq, req), callback
         )
-    
+
     def query_new_purchase_limit(self, account):
         """
         :param account: 证券账号
@@ -946,17 +1017,18 @@ class XtQuantTrader(object):
         req = _XTQC_.QueryNewPurchaseLimitReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
-        
+
         seq = self.async_client.nextSeq()
         new_purchase_limit_list = self.common_op_sync_with_seq(
-            seq,
-            (self.async_client.queryNewPurchaseLimitWithSeq, seq, req)
+            seq, (self.async_client.queryNewPurchaseLimitWithSeq, seq, req)
         )
         new_purchase_limit_result = dict()
         for item in new_purchase_limit_list:
-            new_purchase_limit_result[item.m_strNewPurchaseLimitKey] = item.m_nNewPurchaseLimitValue
+            new_purchase_limit_result[item.m_strNewPurchaseLimitKey] = (
+                item.m_nNewPurchaseLimitValue
+            )
         return new_purchase_limit_result
-        
+
     def query_new_purchase_limit_async(self, account, callback):
         """
         :param account: 证券账号
@@ -965,52 +1037,47 @@ class XtQuantTrader(object):
         req = _XTQC_.QueryNewPurchaseLimitReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
-        
+
         seq = self.async_client.nextSeq()
         return self.common_op_async_with_seq(
-            seq,
-            (self.async_client.queryNewPurchaseLimitWithSeq, seq, req)
-            , callback
+            seq, (self.async_client.queryNewPurchaseLimitWithSeq, seq, req), callback
         )
-    
+
     def query_ipo_data(self):
         """
         :return: 返回新股新债信息
         """
         req = _XTQC_.QueryIPODataReq()
-        req.m_strIPOType = ''
-        
+        req.m_strIPOType = ""
+
         seq = self.async_client.nextSeq()
         ipo_data_list = self.common_op_sync_with_seq(
-            seq,
-            (self.async_client.queryIPODataWithSeq, seq, req)
+            seq, (self.async_client.queryIPODataWithSeq, seq, req)
         )
         ipo_data_result = dict()
         for item in ipo_data_list:
             ipo_data_result[item.m_strIPOCode] = {
-                'name': item.m_strIPOName, 
-                'type':  item.m_strIPOType, 
-                'maxPurchaseNum':  item.m_nMaxPurchaseNum, 
-                'minPurchaseNum':  item.m_nMinPurchaseNum, 
-                'purchaseDate':  item.m_strPurchaseDate, 
-                'issuePrice': item.m_dIssuePrice,
+                "name": item.m_strIPOName,
+                "type": item.m_strIPOType,
+                "maxPurchaseNum": item.m_nMaxPurchaseNum,
+                "minPurchaseNum": item.m_nMinPurchaseNum,
+                "purchaseDate": item.m_strPurchaseDate,
+                "issuePrice": item.m_dIssuePrice,
             }
         return ipo_data_result
-        
+
     def query_ipo_data_async(self, callback):
         """
         :return: 返回新股新债信息
         """
         req = _XTQC_.QueryIPODataReq()
-        req.m_strIPOType = ''
-        
+        req.m_strIPOType = ""
+
         seq = self.async_client.nextSeq()
         return self.common_op_async_with_seq(
-            seq,
-            (self.async_client.queryIPODataWithSeq, seq, req)
-            , callback
+            seq, (self.async_client.queryIPODataWithSeq, seq, req), callback
         )
-    
+
     def fund_transfer(self, account, transfer_direction, price):
         """
         :param account: 证券账号
@@ -1023,15 +1090,16 @@ class XtQuantTrader(object):
         req.m_strAccountID = account.account_id
         req.m_nOrderType = transfer_direction
         req.m_dPrice = price
-        
+
         seq = self.async_client.nextSeq()
         transfer_result = self.common_op_sync_with_seq(
-            seq,
-            (self.async_client.transferWithSeq, seq, req)
+            seq, (self.async_client.transferWithSeq, seq, req)
         )
         return transfer_result.m_bSuccess, transfer_result.m_strMsg
-        
-    def secu_transfer(self, account, transfer_direction, stock_code, volume, transfer_type):
+
+    def secu_transfer(
+        self, account, transfer_direction, stock_code, volume, transfer_type
+    ):
         """
         :param account: 证券账号
         :param transfer_direction: 划拨方向
@@ -1048,14 +1116,13 @@ class XtQuantTrader(object):
         req.m_nOrderVolume = volume
         req.m_nCreditTransferType = transfer_type
         req.m_strStockCode1 = stock_code
-        
+
         seq = self.async_client.nextSeq()
         transfer_result = self.common_op_sync_with_seq(
-            seq,
-            (self.async_client.transferWithSeq, seq, req)
+            seq, (self.async_client.transferWithSeq, seq, req)
         )
         return transfer_result.m_bSuccess, transfer_result.m_strMsg
-        
+
     def query_com_fund(self, account):
         """
         :param account: 证券账号
@@ -1064,28 +1131,27 @@ class XtQuantTrader(object):
         req = _XTQC_.QueryComFundReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
-        
+
         seq = self.async_client.nextSeq()
         fund_list = self.common_op_sync_with_seq(
-            seq,
-            (self.async_client.queryComFundWithSeq, seq, req)
+            seq, (self.async_client.queryComFundWithSeq, seq, req)
         )
         result = dict()
         if fund_list[0]:
             result = {
-                'success': fund_list[0].m_bSuccess,
-                'error': fund_list[0].m_strMsg,
-                'currentBalance': fund_list[0].m_dCurrentBalance,
-                'enableBalance': fund_list[0].m_dEnableBalance, 
-                'fetchBalance': fund_list[0].m_dFetchBalance,
-                'interest': fund_list[0].m_dInterest,
-                'assetBalance': fund_list[0].m_dAssetBalance,
-                'fetchCash': fund_list[0].m_dFetchCash,
-                'marketValue': fund_list[0].m_dMarketValue,
-                'debt': fund_list[0].m_dDebt,
+                "success": fund_list[0].m_bSuccess,
+                "error": fund_list[0].m_strMsg,
+                "currentBalance": fund_list[0].m_dCurrentBalance,
+                "enableBalance": fund_list[0].m_dEnableBalance,
+                "fetchBalance": fund_list[0].m_dFetchBalance,
+                "interest": fund_list[0].m_dInterest,
+                "assetBalance": fund_list[0].m_dAssetBalance,
+                "fetchCash": fund_list[0].m_dFetchCash,
+                "marketValue": fund_list[0].m_dMarketValue,
+                "debt": fund_list[0].m_dDebt,
             }
         return result
-    
+
     def query_com_position(self, account):
         """
         :param account: 证券账号
@@ -1094,33 +1160,31 @@ class XtQuantTrader(object):
         req = _XTQC_.QueryComPositionReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
-        
+
         seq = self.async_client.nextSeq()
         position_list = self.common_op_sync_with_seq(
-            seq,
-            (self.async_client.queryComPositionWithSeq, seq, req)
+            seq, (self.async_client.queryComPositionWithSeq, seq, req)
         )
         result = list()
         for item in position_list:
-            result.append(
-            {
-                'success': item.m_bSuccess,
-                'error': item.m_strMsg,
-                'stockAccount': item.m_strAccountID,
-                'exchangeType':  item.m_strExchangeType, 
-                'stockCode': item.m_strStockCode,
-                'stockName': item.m_strStockName,
-                'totalAmt': item.m_dTotalAmt,
-                'enableAmount': item.m_dEnableAmount,
-                'lastPrice': item.m_dLastPrice,
-                'costPrice': item.m_dCostPrice,
-                'income': item.m_dIncome,
-                'incomeRate': item.m_dIncomeRate,
-                'marketValue': item.m_dMarketValue,
-                'costBalance': item.m_dCostBalance,
-                'bsOnTheWayVol': item.m_nBsOnTheWayVol,
-                'prEnableVol': item.m_nPrEnableVol,
-                'stockCode1': item.m_strStockCode1,
+            result.append({
+                "success": item.m_bSuccess,
+                "error": item.m_strMsg,
+                "stockAccount": item.m_strAccountID,
+                "exchangeType": item.m_strExchangeType,
+                "stockCode": item.m_strStockCode,
+                "stockName": item.m_strStockName,
+                "totalAmt": item.m_dTotalAmt,
+                "enableAmount": item.m_dEnableAmount,
+                "lastPrice": item.m_dLastPrice,
+                "costPrice": item.m_dCostPrice,
+                "income": item.m_dIncome,
+                "incomeRate": item.m_dIncomeRate,
+                "marketValue": item.m_dMarketValue,
+                "costBalance": item.m_dCostBalance,
+                "bsOnTheWayVol": item.m_nBsOnTheWayVol,
+                "prEnableVol": item.m_nPrEnableVol,
+                "stockCode1": item.m_strStockCode1,
             })
         return result
 
@@ -1132,40 +1196,40 @@ class XtQuantTrader(object):
         req = _XTQC_.SmtQueryQuoterReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
-        
+
         seq = self.async_client.nextSeq()
         quoter_list = self.common_op_sync_with_seq(
-            seq,
-            (self.async_client.smtQueryQuoterWithSeq, seq, req)
+            seq, (self.async_client.smtQueryQuoterWithSeq, seq, req)
         )
         result = list()
         for item in quoter_list:
-            result.append(
-            {
-                'success': item.m_bSuccess,
-                'error': item.m_strMsg,
-                'finType': item.m_strFinType,
-                'stockType': item.m_strStockType,
-                'date': item.m_nDate,
-                'code': item.m_strCode,
-                'codeName': item.m_strCodeName,
-                'exchangeType': item.m_strExchangeType,
-                'fsmpOccupedRate': item.m_dFsmpOccupedRate,
-                'fineRate': item.m_dFineRate,
-                'fsmpreendRate': item.m_dFsmpreendRate,
-                'usedRate': item.m_dUsedRate,
-                'unUusedRate': item.m_dUnUusedRate,
-                'initDate': item.m_nInitDate,
-                'endDate': item.m_nEndDate,
-                'enableSloAmountT0': item.m_dEnableSloAmountT0,
-                'enableSloAmountT3': item.m_dEnableSloAmountT3,
-                'srcGroupId': item.m_strSrcGroupID,
-                'applyMode': item.m_strApplyMode,
-                'lowDate': item.m_nLowDate
+            result.append({
+                "success": item.m_bSuccess,
+                "error": item.m_strMsg,
+                "finType": item.m_strFinType,
+                "stockType": item.m_strStockType,
+                "date": item.m_nDate,
+                "code": item.m_strCode,
+                "codeName": item.m_strCodeName,
+                "exchangeType": item.m_strExchangeType,
+                "fsmpOccupedRate": item.m_dFsmpOccupedRate,
+                "fineRate": item.m_dFineRate,
+                "fsmpreendRate": item.m_dFsmpreendRate,
+                "usedRate": item.m_dUsedRate,
+                "unUusedRate": item.m_dUnUusedRate,
+                "initDate": item.m_nInitDate,
+                "endDate": item.m_nEndDate,
+                "enableSloAmountT0": item.m_dEnableSloAmountT0,
+                "enableSloAmountT3": item.m_dEnableSloAmountT3,
+                "srcGroupId": item.m_strSrcGroupID,
+                "applyMode": item.m_strApplyMode,
+                "lowDate": item.m_nLowDate,
             })
         return result
 
-    def smt_negotiate_order_async(self, account, src_group_id, order_code, date, amount, apply_rate, dict_param={}):
+    def smt_negotiate_order_async(
+        self, account, src_group_id, order_code, date, amount, apply_rate, dict_param={}
+    ):
         """
         :param account: 证券账号
         :param src_group_id: 来源组编号
@@ -1187,18 +1251,20 @@ class XtQuantTrader(object):
         req.m_nDate = date
         req.m_nAmount = amount
         req.m_dApplyRate = apply_rate
-        
-        if 'subFareRate' in dict_param:
-            req.m_dSubFareRate = dict_param['subFareRate']
-        if 'fineRate' in dict_param:
-            req.m_dFineRate = dict_param['fineRate']
-        
+
+        if "subFareRate" in dict_param:
+            req.m_dSubFareRate = dict_param["subFareRate"]
+        if "fineRate" in dict_param:
+            req.m_dFineRate = dict_param["fineRate"]
+
         seq = self.async_client.nextSeq()
         self.cbs[seq] = self.callback.on_smt_appointment_async_response
         self.async_client.smtNegotiateOrderWithSeq(seq, req)
         return seq
 
-    def smt_appointment_order_async(self, account, order_code, date, amount, apply_rate):
+    def smt_appointment_order_async(
+        self, account, order_code, date, amount, apply_rate
+    ):
         """
         :param account: 证券账号
         :param order_code: 证券代码，如'600000.SH'
@@ -1214,7 +1280,7 @@ class XtQuantTrader(object):
         req.m_nDate = date
         req.m_nAmount = amount
         req.m_dApplyRate = apply_rate
-        
+
         seq = self.async_client.nextSeq()
         self.cbs[seq] = self.callback.on_smt_appointment_async_response
         self.async_client.smtAppointmentOrderWithSeq(seq, req)
@@ -1230,7 +1296,7 @@ class XtQuantTrader(object):
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
         req.m_strApplyId = applyId
-        
+
         seq = self.async_client.nextSeq()
         self.cbs[seq] = self.callback.on_smt_appointment_async_response
         self.async_client.smtAppointmentCancelWithSeq(seq, req)
@@ -1244,42 +1310,40 @@ class XtQuantTrader(object):
         req = _XTQC_.SmtQueryOrderReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
-        
+
         seq = self.async_client.nextSeq()
         order_list = self.common_op_sync_with_seq(
-            seq,
-            (self.async_client.smtQueryOrderWithSeq, seq, req)
+            seq, (self.async_client.smtQueryOrderWithSeq, seq, req)
         )
         result = list()
         for item in order_list:
-            result.append(
-            {
-                'success': item.m_bSuccess,
-                'error': item.m_strMsg,
-                'initDate': item.m_nInitDate,
-                'currDate': item.m_nCurrDate,
-                'currTime': item.m_nCurrTime,
-                'applyId': item.m_strApplyID,
-                'srcGroupId': item.m_strSrcGroupID,
-                'cashcompactId': item.m_strCashcompactID,
-                'applyMode': item.m_strApplyMode,
-                'finType': item.m_strFinType,
-                'exchangeType': item.m_strExchangeType,
-                'code': item.m_strCode,
-                'codeName': item.m_strCodeName,
-                'date': item.m_nDate,
-                'applyRate': item.m_dApplyRate,
-                'entrustBalance': item.m_dEntrustBalance,
-                'entrustAmount': item.m_dEntrustAmount,
-                'businessBalance': item.m_dBusinessBalance,
-                'businessAmount': item.m_dBusinessAmount,
-                'validDate': item.m_nValidDate,
-                'dateClear': item.m_nDateClear,
-                'entrustNo': item.m_strEntrustNo,
-                'applyStatus': item.m_strApplyStatus,
-                'usedRate': item.m_dUsedRate,
-                'unUusedRate': item.m_dUnUusedRate,
-                'comGroupId': item.m_strComGroupID
+            result.append({
+                "success": item.m_bSuccess,
+                "error": item.m_strMsg,
+                "initDate": item.m_nInitDate,
+                "currDate": item.m_nCurrDate,
+                "currTime": item.m_nCurrTime,
+                "applyId": item.m_strApplyID,
+                "srcGroupId": item.m_strSrcGroupID,
+                "cashcompactId": item.m_strCashcompactID,
+                "applyMode": item.m_strApplyMode,
+                "finType": item.m_strFinType,
+                "exchangeType": item.m_strExchangeType,
+                "code": item.m_strCode,
+                "codeName": item.m_strCodeName,
+                "date": item.m_nDate,
+                "applyRate": item.m_dApplyRate,
+                "entrustBalance": item.m_dEntrustBalance,
+                "entrustAmount": item.m_dEntrustAmount,
+                "businessBalance": item.m_dBusinessBalance,
+                "businessAmount": item.m_dBusinessAmount,
+                "validDate": item.m_nValidDate,
+                "dateClear": item.m_nDateClear,
+                "entrustNo": item.m_strEntrustNo,
+                "applyStatus": item.m_strApplyStatus,
+                "usedRate": item.m_dUsedRate,
+                "unUusedRate": item.m_dUnUusedRate,
+                "comGroupId": item.m_strComGroupID,
             })
         return result
 
@@ -1291,65 +1355,65 @@ class XtQuantTrader(object):
         req = _XTQC_.SmtQueryCompactReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
-        
+
         seq = self.async_client.nextSeq()
         compact_list = self.common_op_sync_with_seq(
-            seq,
-            (self.async_client.smtQueryCompactWithSeq, seq, req)
+            seq, (self.async_client.smtQueryCompactWithSeq, seq, req)
         )
         result = list()
         for item in compact_list:
-            result.append(
-            {
-                'success': item.m_bSuccess,
-                'error': item.m_strMsg,
-                'createDate': item.m_nCreateDate,
-                'cashcompactId': item.m_strCashcompactID,
-                'oriCashcompactId': item.m_strOriCashcompactID,
-                'applyId': item.m_strApplyID,
-                'srcGroupId': item.m_strSrcGroupID,
-                'comGroupId': item.m_strComGroupID,
-                'finType': item.m_strFinType,
-                'exchangeType': item.m_strExchangeType,
-                'code': item.m_strCode,
-                'codeName': item.m_strCodeName,
-                'date': item.m_nDate,
-                'beginCompacAmount': item.m_dBeginCompacAmount,
-                'beginCompacBalance': item.m_dBeginCompacBalance,
-                'compacAmount': item.m_dCompacAmount,
-                'compacBalance': item.m_dCompacBalance,
-                'returnAmount': item.m_dReturnAmount,
-                'returnBalance': item.m_dReturnBalance,
-                'realBuyAmount': item.m_dRealBuyAmount,
-                'fsmpOccupedRate': item.m_dFsmpOccupedRate,
-                'compactInterest': item.m_dCompactInterest,
-                'compactFineInterest': item.m_dCompactFineInterest,
-                'repaidInterest': item.m_dRepaidInterest,
-                'repaidFineInterest': item.m_dRepaidFineInterest,
-                'fineRate': item.m_dFineRate,
-                'preendRate': item.m_dPreendRate,
-                'compactType': item.m_strCompactType,
-                'postponeTimes': item.m_nPostponeTimes,
-                'compactStatus': item.m_strCompactStatus,
-                'lastInterestDate': item.m_nLastInterestDate,
-                'interestEndDate': item.m_nInterestEndDate,
-                'validDate': item.m_nValidDate,
-                'dateClear': item.m_nDateClear,
-                'usedAmount': item.m_dUsedAmount,
-                'usedBalance': item.m_dUsedBalance,
-                'usedRate': item.m_dUsedRate,
-                'unUusedRate': item.m_dUnUusedRate,
-                'srcGroupName': item.m_strSrcGroupName,
-                'repaidDate': item.m_nRepaidDate,
-                'preOccupedInterest': item.m_dPreOccupedInterest,
-                'compactInterestx': item.m_dCompactInterestx,
-                'enPostponeAmount': item.m_dEnPostponeAmount,
-                'postponeStatus': item.m_strPostponeStatus,
-                'applyMode': item.m_strApplyMode
+            result.append({
+                "success": item.m_bSuccess,
+                "error": item.m_strMsg,
+                "createDate": item.m_nCreateDate,
+                "cashcompactId": item.m_strCashcompactID,
+                "oriCashcompactId": item.m_strOriCashcompactID,
+                "applyId": item.m_strApplyID,
+                "srcGroupId": item.m_strSrcGroupID,
+                "comGroupId": item.m_strComGroupID,
+                "finType": item.m_strFinType,
+                "exchangeType": item.m_strExchangeType,
+                "code": item.m_strCode,
+                "codeName": item.m_strCodeName,
+                "date": item.m_nDate,
+                "beginCompacAmount": item.m_dBeginCompacAmount,
+                "beginCompacBalance": item.m_dBeginCompacBalance,
+                "compacAmount": item.m_dCompacAmount,
+                "compacBalance": item.m_dCompacBalance,
+                "returnAmount": item.m_dReturnAmount,
+                "returnBalance": item.m_dReturnBalance,
+                "realBuyAmount": item.m_dRealBuyAmount,
+                "fsmpOccupedRate": item.m_dFsmpOccupedRate,
+                "compactInterest": item.m_dCompactInterest,
+                "compactFineInterest": item.m_dCompactFineInterest,
+                "repaidInterest": item.m_dRepaidInterest,
+                "repaidFineInterest": item.m_dRepaidFineInterest,
+                "fineRate": item.m_dFineRate,
+                "preendRate": item.m_dPreendRate,
+                "compactType": item.m_strCompactType,
+                "postponeTimes": item.m_nPostponeTimes,
+                "compactStatus": item.m_strCompactStatus,
+                "lastInterestDate": item.m_nLastInterestDate,
+                "interestEndDate": item.m_nInterestEndDate,
+                "validDate": item.m_nValidDate,
+                "dateClear": item.m_nDateClear,
+                "usedAmount": item.m_dUsedAmount,
+                "usedBalance": item.m_dUsedBalance,
+                "usedRate": item.m_dUsedRate,
+                "unUusedRate": item.m_dUnUusedRate,
+                "srcGroupName": item.m_strSrcGroupName,
+                "repaidDate": item.m_nRepaidDate,
+                "preOccupedInterest": item.m_dPreOccupedInterest,
+                "compactInterestx": item.m_dCompactInterestx,
+                "enPostponeAmount": item.m_dEnPostponeAmount,
+                "postponeStatus": item.m_strPostponeStatus,
+                "applyMode": item.m_strApplyMode,
             })
         return result
 
-    def smt_compact_renewal_async(self, account, cash_compact_id, order_code, defer_days, defer_num, apply_rate):
+    def smt_compact_renewal_async(
+        self, account, cash_compact_id, order_code, defer_days, defer_num, apply_rate
+    ):
         """
         :param account: 证券账号
         :param cash_compact_id: 头寸合约编号
@@ -1367,13 +1431,15 @@ class XtQuantTrader(object):
         req.m_nDeferDays = defer_days
         req.m_nDeferNum = defer_num
         req.m_dApplyRate = apply_rate
-        
+
         seq = self.async_client.nextSeq()
         self.cbs[seq] = self.callback.on_smt_appointment_async_response
         self.async_client.smtCompactRenewalWithSeq(seq, req)
         return seq
 
-    def smt_compact_return_async(self, account, src_group_id, cash_compact_id, order_code, occur_amount):
+    def smt_compact_return_async(
+        self, account, src_group_id, cash_compact_id, order_code, occur_amount
+    ):
         """
         :param account: 证券账号
         :param src_group_id: 来源组编号
@@ -1389,12 +1455,12 @@ class XtQuantTrader(object):
         req.m_strCompactId = cash_compact_id
         req.m_strOrderCode = order_code
         req.m_nOccurAmount = occur_amount
-        
+
         seq = self.async_client.nextSeq()
         self.cbs[seq] = self.callback.on_smt_appointment_async_response
         self.async_client.smtCompactReturnWithSeq(seq, req)
         return seq
-        
+
     def query_position_statistics(self, account):
         """
         :param account: 证券账号
@@ -1403,14 +1469,21 @@ class XtQuantTrader(object):
         req = _XTQC_.QueryPositionStatisticsReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
-        
+
         seq = self.async_client.nextSeq()
         return self.common_op_sync_with_seq(
-            seq,
-            (self.async_client.queryPositionStatisticsWithSeq, seq, req)
+            seq, (self.async_client.queryPositionStatisticsWithSeq, seq, req)
         )
 
-    def export_data(self, account, result_path, data_type, start_time = None, end_time = None, user_param = {}):
+    def export_data(
+        self,
+        account,
+        result_path,
+        data_type,
+        start_time=None,
+        end_time=None,
+        user_param={},
+    ):
         """
         :param account: 证券账号
         :param result_path: 导出路径，包含文件名及.csv后缀，如'C:\\Users\\Desktop\\test\\deal.csv'
@@ -1421,32 +1494,49 @@ class XtQuantTrader(object):
         :return: 返回dict格式的结果反馈信息
         """
         fix_param = dict()
-        fix_param['accountID'] = account.account_id
-        fix_param['accountType'] = account.account_type
-        fix_param['resultPath'] = result_path
-        fix_param['dataType'] = data_type
-        fix_param['startTime'] = start_time
-        fix_param['endTime'] = end_time
+        fix_param["accountID"] = account.account_id
+        fix_param["accountType"] = account.account_type
+        fix_param["resultPath"] = result_path
+        fix_param["dataType"] = data_type
+        fix_param["startTime"] = start_time
+        fix_param["endTime"] = end_time
         seq = self.async_client.nextSeq()
         resp = self.common_op_sync_with_seq(
             seq,
-            (self.async_client.exportDataWithSeq, seq, bson.BSON.encode(fix_param), bson.BSON.encode(user_param))
+            (
+                self.async_client.exportDataWithSeq,
+                seq,
+                bson.BSON.encode(fix_param),
+                bson.BSON.encode(user_param),
+            ),
         )
         import json
+
         result = json.loads(resp)
         return result
 
-    def query_data(self, account, result_path, data_type, start_time = None, end_time = None, user_param = {}):
+    def query_data(
+        self,
+        account,
+        result_path,
+        data_type,
+        start_time=None,
+        end_time=None,
+        user_param={},
+    ):
         """
         入参同export_data
         :return: 返回dict格式的数据信息
         """
-        result = self.export_data(account, result_path, data_type, start_time, end_time, user_param)
-        if 'error' in result.keys():
+        result = self.export_data(
+            account, result_path, data_type, start_time, end_time, user_param
+        )
+        if "error" in result.keys():
             return result
         else:
             import pandas as pd
             import os
+
             data = pd.read_csv(result_path)
             os.remove(result_path)
             return data
@@ -1460,17 +1550,22 @@ class XtQuantTrader(object):
         :return: 返回dict格式的结果反馈信息
         """
         fix_param = dict()
-        fix_param['operation'] = operation
-        fix_param['dataType'] = data_type
-        fix_param['accountID'] = account.account_id
-        fix_param['accountType'] = account.account_type
+        fix_param["operation"] = operation
+        fix_param["dataType"] = data_type
+        fix_param["accountID"] = account.account_id
+        fix_param["accountType"] = account.account_type
         bson_list = [bson.BSON.encode(it) for it in deal_list]
         seq = self.async_client.nextSeq()
         resp = self.common_op_sync_with_seq(
             seq,
-            (self.async_client.syncTransactionFromExternalWithSeq, seq, bson.BSON.encode(fix_param), bson_list)
+            (
+                self.async_client.syncTransactionFromExternalWithSeq,
+                seq,
+                bson.BSON.encode(fix_param),
+                bson_list,
+            ),
         )
         import json
+
         result = json.loads(resp)
         return result
-

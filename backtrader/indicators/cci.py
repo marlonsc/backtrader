@@ -18,14 +18,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from . import Indicator, Max, MovAv, MeanDev
 
 
 class CommodityChannelIndex(Indicator):
-    '''
+    """
     Introduced by Donald Lambert in 1980 to measure variations of the
     "typical price" (see below) from its mean to identify extremes and
     reversals
@@ -39,20 +38,23 @@ class CommodityChannelIndex(Indicator):
 
     See:
       - https://en.wikipedia.org/wiki/Commodity_channel_index
-    '''
-    alias = ('CCI',)
+    """
 
-    lines = ('cci',)
+    alias = ("CCI",)
 
-    params = (('period', 20),
-              ('factor', 0.015),
-              ('movav', MovAv.Simple),
-              ('upperband', 100.0),
-              ('lowerband', -100.0),)
+    lines = ("cci",)
+
+    params = (
+        ("period", 20),
+        ("factor", 0.015),
+        ("movav", MovAv.Simple),
+        ("upperband", 100.0),
+        ("lowerband", -100.0),
+    )
 
     def _plotlabel(self):
         plabels = [self.p.period, self.p.factor]
-        plabels += [self.p.movav] * self.p.notdefault('movav')
+        plabels += [self.p.movav] * self.p.notdefault("movav")
         return plabels
 
     def _plotinit(self):

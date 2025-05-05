@@ -14,13 +14,13 @@ import backtrader as bt
 # functions
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     cerebro = bt.Cerebro()
     cerebro.broker.setcash(66_000)
 
-    print(f'Starting Portfolio Value: {cerebro.broker.getvalue():,.2f}€')
+    print(f"Starting Portfolio Value: {cerebro.broker.getvalue():,.2f}€")
 
     cerebro.run()
 
-    print(f'Final Portfolio Value: {cerebro.broker.getvalue():,.2f}€')
+    print(f"Final Portfolio Value: {cerebro.broker.getvalue():,.2f}€")

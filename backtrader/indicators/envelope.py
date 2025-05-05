@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import sys
 
@@ -27,7 +26,7 @@ from . import Indicator, MovingAverage
 
 
 class EnvelopeMixIn(object):
-    '''
+    """
     MixIn class to create a subclass with another indicator. The main line of
     that indicator will be surrounded by an upper and lower band separated a
     given "perc"entage from the input main line
@@ -43,10 +42,17 @@ class EnvelopeMixIn(object):
 
     See also:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:moving_average_envelopes
-    '''
-    lines = ('top', 'bot',)
-    params = (('perc', 2.5),)
-    plotlines = dict(top=dict(_samecolor=True), bot=dict(_samecolor=True),)
+    """
+
+    lines = (
+        "top",
+        "bot",
+    )
+    params = (("perc", 2.5),)
+    plotlines = dict(
+        top=dict(_samecolor=True),
+        bot=dict(_samecolor=True),
+    )
 
     def __init__(self):
         # Mix-in & directly from object -> does not necessarily need super
@@ -60,7 +66,7 @@ class EnvelopeMixIn(object):
 
 
 class _EnvelopeBase(Indicator):
-    lines = ('src',)
+    lines = ("src",)
 
     # plot the envelope lines along the passed source
     plotinfo = dict(subplot=False)
@@ -74,7 +80,7 @@ class _EnvelopeBase(Indicator):
 
 
 class Envelope(_EnvelopeBase, EnvelopeMixIn):
-    '''
+    """
     It creates envelopes bands separated from the source data by a given
     percentage
 
@@ -85,13 +91,13 @@ class Envelope(_EnvelopeBase, EnvelopeMixIn):
 
     See also:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:moving_average_envelopes
-    '''
+    """
 
 
 # Automatic creation of Moving Average Envelope classes
 
 for movav in MovingAverage._movavs[1:]:
-    _newclsdoc = '''
+    _newclsdoc = """
     %s and envelope bands separated "perc" from it
 
     Formula:
@@ -101,26 +107,28 @@ for movav in MovingAverage._movavs[1:]:
 
     See also:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:moving_average_envelopes
-    '''
+    """
     # Skip aliases - they will be created automatically
-    if getattr(movav, 'aliased', ''):
+    if getattr(movav, "aliased", ""):
         continue
 
     movname = movav.__name__
     linename = movav.lines._getlinealias(0)
-    newclsname = movname + 'Envelope'
+    newclsname = movname + "Envelope"
 
     newaliases = []
-    for alias in getattr(movav, 'alias', []):
-        for suffix in ['Envelope']:
+    for alias in getattr(movav, "alias", []):
+        for suffix in ["Envelope"]:
             newaliases.append(alias + suffix)
 
     newclsdoc = _newclsdoc % (movname, linename, movname, linename, linename)
 
-    newclsdct = {'__doc__': newclsdoc,
-                 '__module__': EnvelopeMixIn.__module__,
-                 '_notregister': True,
-                 'alias': newaliases}
+    newclsdct = {
+        "__doc__": newclsdoc,
+        "__module__": EnvelopeMixIn.__module__,
+        "_notregister": True,
+        "alias": newaliases,
+    }
     newcls = type(str(newclsname), (movav, EnvelopeMixIn), newclsdct)
     module = sys.modules[EnvelopeMixIn.__module__]
     setattr(module, newclsname, newcls)

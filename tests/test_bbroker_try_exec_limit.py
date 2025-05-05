@@ -22,7 +22,6 @@ import datetime
 import os
 import time
 
-
 try:
     time_clock = time.process_time
 except:
@@ -125,7 +124,7 @@ class SlipTestStrategy(bt.SignalStrategy):
 
 
 def test_run(main=False):
-    """ Test a fix in bbroker. See backtrader2 pr#22 """
+    """Test a fix in bbroker. See backtrader2 pr#22"""
 
     cerebro = bt.Cerebro()
 
@@ -144,7 +143,7 @@ def test_run(main=False):
     datapath = os.path.join(modpath, dataspath, datafile)
     data0 = bt.feeds.GenericCSVData(
         dataname=datapath,
-        dtformat=("%Y-%m-%d"),
+        dtformat="%Y-%m-%d",
         timeframe=bt.TimeFrame.Days,
         compression=1,
     )

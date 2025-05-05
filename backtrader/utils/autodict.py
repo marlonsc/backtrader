@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from collections import OrderedDict, defaultdict
 
@@ -39,7 +38,7 @@ class AutoDictList(dict):
 class DotDict(dict):
     # If the attribut is not found in the usual places try the dict itself
     def __getattr__(self, key):
-        if key.startswith('__'):
+        if key.startswith("__"):
             return super(DotDict, self).__getattr__(key)
         return self[key]
 
@@ -64,13 +63,13 @@ class AutoDict(dict):
         return value
 
     def __getattr__(self, key):
-        if False and key.startswith('_'):
+        if False and key.startswith("_"):
             raise AttributeError
 
         return self[key]
 
     def __setattr__(self, key, value):
-        if False and key.startswith('_'):
+        if False and key.startswith("_"):
             self.__dict__[key] = value
             return
 
@@ -98,13 +97,13 @@ class AutoOrderedDict(OrderedDict):
         return value
 
     def __getattr__(self, key):
-        if key.startswith('_'):
+        if key.startswith("_"):
             raise AttributeError
 
         return self[key]
 
     def __setattr__(self, key, value):
-        if key.startswith('_'):
+        if key.startswith("_"):
             self.__dict__[key] = value
             return
 

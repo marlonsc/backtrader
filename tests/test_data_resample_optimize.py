@@ -7,15 +7,15 @@ import testcommon
 
 class BtTestStrategy(bt.Strategy):
     params = (
-        ('period', 15),
-        ('printdata', True),
-        ('printops', True),
+        ("period", 15),
+        ("printdata", True),
+        ("printops", True),
     )
 
     def log(self, txt, dt=None):
         dt = dt or self.data.datetime[0]
         dt = bt.num2date(dt)
-        print('%s, %s' % (dt.isoformat(), txt))
+        print("%s, %s" % (dt.isoformat(), txt))
 
     def __init__(self):
         pass

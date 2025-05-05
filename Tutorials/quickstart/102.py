@@ -12,18 +12,18 @@ import backtrader as bt
 # functions
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Datas are in a subfolder of the samples.
-    datapath = Path.cwd().parent / 'datas/orcl-1995-2014.txt'
+    datapath = Path.cwd().parent / "datas/orcl-1995-2014.txt"
 
     # Create a Data Feed
     data = bt.feeds.YahooFinanceCSVData(
-            dataname=datapath,
-            # Do not pass values before this date
-            fromdate=datetime.datetime(2000, 1, 1),
-            # Do not pass values after this date
-            todate=datetime.datetime(2000, 12, 31),
-            reverse=False
+        dataname=datapath,
+        # Do not pass values before this date
+        fromdate=datetime.datetime(2000, 1, 1),
+        # Do not pass values after this date
+        todate=datetime.datetime(2000, 12, 31),
+        reverse=False,
     )
 
     cerebro = bt.Cerebro()
@@ -35,10 +35,10 @@ if __name__ == '__main__':
     cerebro.broker.setcash(100_000)
 
     # Print out the starting conditions
-    print(f'Starting Portfolio Value: {cerebro.broker.getvalue():,.2f}')
+    print(f"Starting Portfolio Value: {cerebro.broker.getvalue():,.2f}")
 
     # Run over everything
     cerebro.run()
 
     # Print out the final result
-    print(f'Final Portfolio Value: {cerebro.broker.getvalue():,.2f}')
+    print(f"Final Portfolio Value: {cerebro.broker.getvalue():,.2f}")

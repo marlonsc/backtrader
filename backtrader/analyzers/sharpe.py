@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import math
 
@@ -31,7 +30,7 @@ from backtrader.analyzers import TimeReturn, AnnualReturn
 
 
 class SharpeRatio(Analyzer):
-    '''This analyzer calculates the SharpeRatio of a strategy using a risk free
+    """This analyzer calculates the SharpeRatio of a strategy using a risk free
     asset which is simply an interest rate
 
     See also:
@@ -108,20 +107,20 @@ class SharpeRatio(Analyzer):
 
         Returns a dictionary with key "sharperatio" holding the ratio
 
-    '''
-    params = (
-        ('timeframe', TimeFrame.Years),
-        ('compression', 1),
-        ('riskfreerate', 0.01),
-        ('factor', None),
-        ('convertrate', True),
-        ('annualize', False),
-        ('stddev_sample', False),
+    """
 
+    params = (
+        ("timeframe", TimeFrame.Years),
+        ("compression", 1),
+        ("riskfreerate", 0.01),
+        ("factor", None),
+        ("convertrate", True),
+        ("annualize", False),
+        ("stddev_sample", False),
         # old behavior
-        ('daysfactor', None),
-        ('legacyannual', False),
-        ('fund', None),
+        ("daysfactor", None),
+        ("legacyannual", False),
+        ("fund", None),
     )
 
     RATEFACTORS = {
@@ -138,7 +137,8 @@ class SharpeRatio(Analyzer):
             self.timereturn = TimeReturn(
                 timeframe=self.p.timeframe,
                 compression=self.p.compression,
-                fund=self.p.fund)
+                fund=self.p.fund,
+            )
 
     def stop(self):
         super(SharpeRatio, self).stop()
@@ -157,8 +157,7 @@ class SharpeRatio(Analyzer):
             factor = None
 
             # Hack to identify old code
-            if self.p.timeframe == TimeFrame.Days and \
-               self.p.daysfactor is not None:
+            if self.p.timeframe == TimeFrame.Days and self.p.daysfactor is not None:
 
                 factor = self.p.daysfactor
 
@@ -185,14 +184,14 @@ class SharpeRatio(Analyzer):
                 # Get the excess returns - arithmetic mean - original sharpe
                 ret_free = [r - rate for r in returns]
                 ret_free_avg = average(ret_free)
-                retdev = standarddev(ret_free, avgx=ret_free_avg,
-                                     bessel=self.p.stddev_sample)
+                retdev = standarddev(
+                    ret_free, avgx=ret_free_avg, bessel=self.p.stddev_sample
+                )
 
                 try:
                     ratio = ret_free_avg / retdev
 
-                    if factor is not None and \
-                       self.p.convertrate and self.p.annualize:
+                    if factor is not None and self.p.convertrate and self.p.annualize:
 
                         ratio = math.sqrt(factor) * ratio
                 except (ValueError, TypeError, ZeroDivisionError):
@@ -203,26 +202,25 @@ class SharpeRatio(Analyzer):
 
             self.ratio = ratio
 
-
-            self.rets['sharperatio'] = round(self.ratio, 4) if self.ratio else self.ratio
+            self.rets["sharperatio"] = (
+                round(self.ratio, 4) if self.ratio else self.ratio
+            )
 
     def optimize(self):
-        '''Optimizies the object if optreturn is in effect'''
+        """Optimizies the object if optreturn is in effect"""
         super().optimize()
 
         self.timereturn.optimize()
 
 
 class SharpeRatio_A(SharpeRatio):
-    '''Extension of the SharpeRatio which returns the Sharpe Ratio directly in
+    """Extension of the SharpeRatio which returns the Sharpe Ratio directly in
     annualized form
 
     The following param has been changed from ``SharpeRatio``
 
       - ``annualize`` (default: ``True``)
 
-    '''
+    """
 
-    params = (
-        ('annualize', True),
-    )
+    params = (("annualize", True),)

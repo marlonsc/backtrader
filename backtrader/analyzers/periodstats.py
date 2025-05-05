@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 
 import backtrader as bt
@@ -27,12 +26,11 @@ from backtrader.utils.py3 import itervalues
 from backtrader.mathsupport import average, standarddev
 from . import TimeReturn
 
-
-__all__ = ['PeriodStats']
+__all__ = ["PeriodStats"]
 
 
 class PeriodStats(bt.Analyzer):
-    '''Calculates basic statistics for given timeframe
+    """Calculates basic statistics for given timeframe
 
     Params:
 
@@ -73,18 +71,19 @@ class PeriodStats(bt.Analyzer):
 
     If the parameter ``zeroispos`` is set to ``True``, periods with no change
     will be counted as positive
-    '''
+    """
 
     params = (
-        ('timeframe', bt.TimeFrame.Years),
-        ('compression', 1),
-        ('zeroispos', False),
-        ('fund', None),
+        ("timeframe", bt.TimeFrame.Years),
+        ("compression", 1),
+        ("zeroispos", False),
+        ("fund", None),
     )
 
     def __init__(self):
-        self._tr = TimeReturn(timeframe=self.p.timeframe,
-                              compression=self.p.compression, fund=self.p.fund)
+        self._tr = TimeReturn(
+            timeframe=self.p.timeframe, compression=self.p.compression, fund=self.p.fund
+        )
 
     def stop(self):
         trets = self._tr.get_analysis()  # dict key = date, value = ret
@@ -101,12 +100,12 @@ class PeriodStats(bt.Analyzer):
                 else:
                     nul += tret == 0.0
 
-        self.rets['average'] = avg = average(trets)
-        self.rets['stddev'] = standarddev(trets, avg)
+        self.rets["average"] = avg = average(trets)
+        self.rets["stddev"] = standarddev(trets, avg)
 
-        self.rets['positive'] = pos
-        self.rets['negative'] = neg
-        self.rets['nochange'] = nul
+        self.rets["positive"] = pos
+        self.rets["negative"] = neg
+        self.rets["nochange"] = nul
 
-        self.rets['best'] = max(trets)
-        self.rets['worst'] = min(trets)
+        self.rets["best"] = max(trets)
+        self.rets["worst"] = min(trets)

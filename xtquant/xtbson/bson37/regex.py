@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tools for representing MongoDB regular expressions.
-"""
+"""Tools for representing MongoDB regular expressions."""
 
 import re
 from typing import Any, Generic, Pattern, Type, TypeVar, Union
@@ -79,7 +78,9 @@ class Regex(Generic[_T]):
         .. _PCRE: http://www.pcre.org/
         """
         if not isinstance(regex, RE_TYPE):
-            raise TypeError("regex must be a compiled regular expression, not %s" % type(regex))
+            raise TypeError(
+                "regex must be a compiled regular expression, not %s" % type(regex)
+            )
 
         return Regex(regex.pattern, regex.flags)
 

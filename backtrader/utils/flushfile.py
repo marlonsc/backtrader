@@ -18,8 +18,7 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import sys
 
@@ -36,7 +35,8 @@ class flushfile(object):
     def flush(self):
         self.f.flush()
 
-if sys.platform == 'win32':
+
+if sys.platform == "win32":
     sys.stdout = flushfile(sys.stdout)
     sys.stderr = flushfile(sys.stderr)
 

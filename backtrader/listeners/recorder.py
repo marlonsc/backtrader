@@ -19,28 +19,31 @@ class RecorderListener(ListenerBase):
 
     @staticmethod
     def print_line_snapshot(name, snapshot):
-        line = snapshot['array']
-        if name == 'datetime':
+        line = snapshot["array"]
+        if name == "datetime":
             line = [bt.num2date(x) for x in line]
-        _logger.debug(f"Line '{name:20}' idx: {snapshot['idx']} - lencount: {snapshot['lencount']} - {list(reversed(line))}")
+        _logger.debug(
+            f"Line '{name:20}' idx: {snapshot['idx']} - lencount:"
+            f" {snapshot['lencount']} - {list(reversed(line))}"
+        )
 
     @staticmethod
     def print_next(idx, next):
         _logger.debug(f'--- Next: {next["prenext"]} - #{idx}')
-        RecorderListener.print_line_snapshot('datetime', next['strategy']['datetime'])
+        RecorderListener.print_line_snapshot("datetime", next["strategy"]["datetime"])
 
-        for di, data in enumerate(next['datas']):
-            _logger.debug(f'\t--- Data {di}')
+        for di, data in enumerate(next["datas"]):
+            _logger.debug(f"\t--- Data {di}")
             for k, v in data[1].items():
                 RecorderListener.print_line_snapshot(k, v)
 
-        for oi, obs in enumerate(next['observers']):
-            _logger.debug(f'\t--- Obvserver {oi}')
+        for oi, obs in enumerate(next["observers"]):
+            _logger.debug(f"\t--- Obvserver {oi}")
             for k, v in obs[1].items():
                 RecorderListener.print_line_snapshot(k, v)
 
-        for ii, ind in enumerate(next['indicators']):
-            _logger.debug(f'\t--- Indicators {ii}')
+        for ii, ind in enumerate(next["indicators"]):
+            _logger.debug(f"\t--- Indicators {ii}")
             for k, v in ind[1].items():
                 RecorderListener.print_line_snapshot(k, v)
 
@@ -56,7 +59,11 @@ class RecorderListener(ListenerBase):
         for lineidx in range(data.lines.size()):
             line = data.lines[lineidx]
             linealias = data.lines._getlinealias(lineidx)
-            lines[linealias] = {'idx': line.idx, 'lencount': line.lencount, 'array': copy.deepcopy(line.array)}
+            lines[linealias] = {
+                "idx": line.idx,
+                "lencount": line.lencount,
+                "array": copy.deepcopy(line.array),
+            }
 
         return lines
 
@@ -73,7 +80,13 @@ class RecorderListener(ListenerBase):
         for ind in strat.getindicators():
             indlines.append((ind.__class__, self._copy_lines(ind)))
 
-        self.nexts.append({'prenext': is_prenext, 'strategy': self._copy_lines(strat), 'datas': curbars, 'observers': oblines, 'indicators': indlines})
+        self.nexts.append({
+            "prenext": is_prenext,
+            "strategy": self._copy_lines(strat),
+            "datas": curbars,
+            "observers": oblines,
+            "indicators": indlines,
+        })
 
         _logger.info(f"------------------- next")
         self.print_next(len(strat), self.nexts[-1])
@@ -81,7 +94,7 @@ class RecorderListener(ListenerBase):
 
     def next(self):
         for s in self._cerebro.runningstrats:
-            #minper = s._getminperstatus()
-            #if minper > 0:
+            # minper = s._getminperstatus()
+            # if minper > 0:
             #    continue
             self._record_data(s)

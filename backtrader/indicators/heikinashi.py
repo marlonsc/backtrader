@@ -18,19 +18,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 
 import backtrader as bt
 from backtrader.utils.py3 import range
 
-
-__all__ = ['HeikinAshi']
+__all__ = ["HeikinAshi"]
 
 
 class HeikinAshi(bt.Indicator):
-    '''
+    """
     Heikin Ashi candlesticks in the forms of lines
 
     Formula:
@@ -42,14 +40,32 @@ class HeikinAshi(bt.Indicator):
     See also:
         https://en.wikipedia.org/wiki/Candlestick_chart#Heikin_Ashi_candlesticks
         http://stockcharts.com/school/doku.php?id=chart_school:chart_analysis:heikin_ashi
-    '''
-    lines = ('ha_open', 'ha_high', 'ha_low', 'ha_close',)
+    """
+
+    lines = (
+        "ha_open",
+        "ha_high",
+        "ha_low",
+        "ha_close",
+    )
 
     linealias = (
-        ('ha_open', 'open',),
-        ('ha_high', 'high',),
-        ('ha_low', 'low',),
-        ('ha_close', 'close',),
+        (
+            "ha_open",
+            "open",
+        ),
+        (
+            "ha_high",
+            "high",
+        ),
+        (
+            "ha_low",
+            "low",
+        ),
+        (
+            "ha_close",
+            "close",
+        ),
     )
 
     plotinfo = dict(subplot=False)

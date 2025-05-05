@@ -100,7 +100,9 @@ class SON(dict):
 
     def pop(self, key, *args):
         if len(args) > 1:
-            raise TypeError("pop expected at most 2 arguments, got " + repr(1 + len(args)))
+            raise TypeError(
+                "pop expected at most 2 arguments, got " + repr(1 + len(args))
+            )
         try:
             value = self[key]
         except KeyError:

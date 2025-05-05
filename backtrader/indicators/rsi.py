@@ -18,15 +18,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from . import Indicator, Max, MovAv
 from . import DivZeroByZero
 
 
 class UpDay(Indicator):
-    '''
+    """
     Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"* for the RSI
 
@@ -38,9 +37,10 @@ class UpDay(Indicator):
 
     See:
       - http://en.wikipedia.org/wiki/Relative_strength_index
-    '''
-    lines = ('upday',)
-    params = (('period', 1),)
+    """
+
+    lines = ("upday",)
+    params = (("period", 1),)
 
     def __init__(self):
         self.lines.upday = Max(self.data - self.data(-self.p.period), 0.0)
@@ -48,7 +48,7 @@ class UpDay(Indicator):
 
 
 class DownDay(Indicator):
-    '''
+    """
     Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"* for the RSI
 
@@ -60,9 +60,10 @@ class DownDay(Indicator):
 
     See:
       - http://en.wikipedia.org/wiki/Relative_strength_index
-    '''
-    lines = ('downday',)
-    params = (('period', 1),)
+    """
+
+    lines = ("downday",)
+    params = (("period", 1),)
 
     def __init__(self):
         self.lines.downday = Max(self.data(-self.p.period) - self.data, 0.0)
@@ -70,7 +71,7 @@ class DownDay(Indicator):
 
 
 class UpDayBool(Indicator):
-    '''
+    """
     Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"* for the RSI
 
@@ -85,9 +86,10 @@ class UpDayBool(Indicator):
 
     See:
       - http://en.wikipedia.org/wiki/Relative_strength_index
-    '''
-    lines = ('upday',)
-    params = (('period', 1),)
+    """
+
+    lines = ("upday",)
+    params = (("period", 1),)
 
     def __init__(self):
         self.lines.upday = self.data > self.data(-self.p.period)
@@ -95,7 +97,7 @@ class UpDayBool(Indicator):
 
 
 class DownDayBool(Indicator):
-    '''
+    """
     Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"* for the RSI
 
@@ -110,9 +112,10 @@ class DownDayBool(Indicator):
 
     See:
       - http://en.wikipedia.org/wiki/Relative_strength_index
-    '''
-    lines = ('downday',)
-    params = (('period', 1),)
+    """
+
+    lines = ("downday",)
+    params = (("period", 1),)
 
     def __init__(self):
         self.lines.downday = self.data(-self.p.period) > self.data
@@ -120,7 +123,7 @@ class DownDayBool(Indicator):
 
 
 class RelativeStrengthIndex(Indicator):
-    '''Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
+    """Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"*.
 
     It measures momentum by calculating the ration of higher closes and
@@ -151,25 +154,30 @@ class RelativeStrengthIndex(Indicator):
 
       - ``safelow``  (default: 50.0) will be used as RSI value for the
         ``0 / 0`` case
-    '''
-    alias = ('RSI', 'RSI_SMMA', 'RSI_Wilder',)
+    """
 
-    lines = ('rsi',)
+    alias = (
+        "RSI",
+        "RSI_SMMA",
+        "RSI_Wilder",
+    )
+
+    lines = ("rsi",)
     params = (
-        ('period', 14),
-        ('movav', MovAv.Smoothed),
-        ('upperband', 70.0),
-        ('lowerband', 30.0),
-        ('safediv', False),
-        ('safehigh', 100.0),
-        ('safelow', 50.0),
-        ('lookback', 1),
+        ("period", 14),
+        ("movav", MovAv.Smoothed),
+        ("upperband", 70.0),
+        ("lowerband", 30.0),
+        ("safediv", False),
+        ("safehigh", 100.0),
+        ("safelow", 50.0),
+        ("lookback", 1),
     )
 
     def _plotlabel(self):
         plabels = [self.p.period]
-        plabels += [self.p.movav] * self.p.notdefault('movav')
-        plabels += [self.p.lookback] * self.p.notdefault('lookback')
+        plabels += [self.p.movav] * self.p.notdefault("movav")
+        plabels += [self.p.lookback] * self.p.notdefault("lookback")
         return plabels
 
     def _plotinit(self):
@@ -194,39 +202,42 @@ class RelativeStrengthIndex(Indicator):
         try:
             rs = (-100.0 / (rsi - 100.0)) - 1.0
         except ZeroDivisionError:
-            return float('inf')
+            return float("inf")
 
         return rs
 
 
 class RSI_Safe(RSI):
-    '''
+    """
     Subclass of RSI which changes parameers ``safediv`` to ``True`` as the
     default value
 
     See:
       - http://en.wikipedia.org/wiki/Relative_strength_index
-    '''
-    params = (('safediv', True),)
+    """
+
+    params = (("safediv", True),)
 
 
 class RSI_SMA(RSI):
-    '''
+    """
     Uses a SimpleMovingAverage as described in Wikipedia and other soures
 
     See:
       - http://en.wikipedia.org/wiki/Relative_strength_index
-    '''
-    alias = ('RSI_Cutler',)
+    """
 
-    params = (('movav', MovAv.Simple),)
+    alias = ("RSI_Cutler",)
+
+    params = (("movav", MovAv.Simple),)
 
 
 class RSI_EMA(RSI):
-    '''
+    """
     Uses an ExponentialMovingAverage as described in Wikipedia
 
     See:
       - http://en.wikipedia.org/wiki/Relative_strength_index
-    '''
-    params = (('movav', MovAv.Exponential),)
+    """
+
+    params = (("movav", MovAv.Exponential),)

@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 
 import backtrader as bt
@@ -27,7 +26,7 @@ from . import EMA
 
 
 class TrueStrengthIndicator(bt.Indicator):
-    '''
+    """
     The True Strength Indicators was first introduced in Stocks & Commodities
     Magazine by its author William Blau. It measures momentum with a double
     exponential (default) of the prices.
@@ -52,15 +51,16 @@ class TrueStrengthIndicator(bt.Indicator):
       - ``period2``: the period for the 2nd smoothing
       - ``pchange``: the lookback period for the price change
       - ``_movav``: the moving average to apply for the smoothing
-    '''
-    alias = ('TSI',)
+    """
+
+    alias = ("TSI",)
     params = (
-        ('period1', 25),
-        ('period2', 13),
-        ('pchange', 1),
-        ('_movav', EMA),
+        ("period1", 25),
+        ("period2", 13),
+        ("pchange", 1),
+        ("_movav", EMA),
     )
-    lines = ('tsi',)
+    lines = ("tsi",)
 
     def __init__(self):
         pc = self.data - self.data(-self.p.pchange)

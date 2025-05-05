@@ -19,13 +19,12 @@ class Candle(BaseModel):
         low (float): The lowest price during the candlestick period.
         volume (Optional[float]): The trading volume during the candlestick period.
     """
+
     period: Period
     symbol: str
     timestamp: datetime
-    open_: float = Field(..., validation_alias="open",
-                         serialization_alias="open")
-    close_: float = Field(..., validation_alias="close",
-                          serialization_alias="close")
+    open_: float = Field(..., validation_alias="open", serialization_alias="open")
+    close_: float = Field(..., validation_alias="close", serialization_alias="close")
     high: float
     low: float
     volume: Optional[float] = None
@@ -39,6 +38,7 @@ class TradeDirection(str):
         LONG (str): Represents a long trade direction.
         SHORT (str): Represents a short trade direction.
     """
+
     LONG = "long"
     SHORT = "short"
 
@@ -54,6 +54,7 @@ class Order(BaseModel):
         duration (Literal): The duration of the order (e.g., day, good_till_cancelled).
         price (float): The price at which the order is to be executed.
     """
+
     symbol: str
     kind: Literal["limit", "stop", "market"]
     size: float
@@ -74,6 +75,7 @@ class EntryDecision(BaseModel):
         timestamp (datetime): The timestamp of the decision.
         reasoning (Optional[str]): The reasoning behind the decision.
     """
+
     action: Literal["buy_to_open", "sell_to_open"]
     symbol: str
     size: float
@@ -81,7 +83,8 @@ class EntryDecision(BaseModel):
     take_profit: float
     timestamp: datetime
     reasoning: Optional[str] = Field(
-        description="Why did the agent make this decision?")
+        description="Why did the agent make this decision?"
+    )
 
 
 class ExitDecision(BaseModel):
@@ -96,11 +99,11 @@ class ExitDecision(BaseModel):
         timestamp (datetime): The timestamp of the decision.
         reasoning (Optional[str]): Additional reasoning for the exit decision.
     """
+
     action: Literal["sell_to_close", "buy_to_close"]
     symbol: str
     size: float
-    reason: Literal["take_profit_hit",
-                    "stop_loss_hit", "manual_exit", "time_expired"]
+    reason: Literal["take_profit_hit", "stop_loss_hit", "manual_exit", "time_expired"]
     timestamp: datetime
     reasoning: Optional[str] = None
 
@@ -116,6 +119,7 @@ class OpenPosition(BaseModel):
         entry_price (float): The price at which the position was entered.
         entry_time (datetime): The timestamp of when the position was opened.
     """
+
     symbol: str
     size: float
     direction: Literal["long", "short"]
@@ -135,6 +139,7 @@ class TradeLog(BaseModel):
         open_pnl (Optional[float]): The unrealized profit and loss.
         realized_pnl (Optional[float]): The realized profit and loss.
     """
+
     symbol: str
     direction: Literal["long", "short"]
     entry_: EntryDecision = Field(validation_alias="entry")

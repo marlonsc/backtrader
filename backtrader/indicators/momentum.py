@@ -18,14 +18,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from . import Indicator
 
 
 class Momentum(Indicator):
-    '''
+    """
     Measures the change in price by calculating the difference between the
     current price and the price from a given period ago
 
@@ -35,9 +34,10 @@ class Momentum(Indicator):
 
     See:
       - http://en.wikipedia.org/wiki/Momentum_(technical_analysis)
-    '''
-    lines = ('momentum',)
-    params = (('period', 12),)
+    """
+
+    lines = ("momentum",)
+    params = (("period", 12),)
     plotinfo = dict(plothlines=[0.0])
 
     def __init__(self):
@@ -46,7 +46,7 @@ class Momentum(Indicator):
 
 
 class MomentumOscillator(Indicator):
-    '''
+    """
     Measures the ratio of change in prices over a period
 
     Formula:
@@ -54,15 +54,15 @@ class MomentumOscillator(Indicator):
 
     See:
       - http://ta.mql4.com/indicators/oscillators/momentum
-    '''
-    alias = ('MomentumOsc',)
+    """
+
+    alias = ("MomentumOsc",)
 
     # Named output lines
-    lines = ('momosc',)
+    lines = ("momosc",)
 
     # Accepted parameters (and defaults) -
-    params = (('period', 12),
-              ('band', 100.0))
+    params = (("period", 12), ("band", 100.0))
 
     def _plotlabel(self):
         plabels = [self.p.period]
@@ -77,7 +77,7 @@ class MomentumOscillator(Indicator):
 
 
 class RateOfChange(Indicator):
-    '''
+    """
     Measures the ratio of change in prices over a period
 
     Formula:
@@ -85,14 +85,15 @@ class RateOfChange(Indicator):
 
     See:
       - http://en.wikipedia.org/wiki/Momentum_(technical_analysis)
-    '''
-    alias = ('ROC',)
+    """
+
+    alias = ("ROC",)
 
     # Named output lines
-    lines = ('roc',)
+    lines = ("roc",)
 
     # Accepted parameters (and defaults) -
-    params = (('period', 12),)
+    params = (("period", 12),)
 
     def __init__(self):
         dperiod = self.data(-self.p.period)
@@ -101,7 +102,7 @@ class RateOfChange(Indicator):
 
 
 class RateOfChange100(Indicator):
-    '''
+    """
     Measures the ratio of change in prices over a period with base 100
 
     This is for example how ROC is defined in stockcharts
@@ -112,14 +113,15 @@ class RateOfChange100(Indicator):
     See:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:rate_of_change_roc_and_momentum
 
-    '''
-    alias = ('ROC100',)
+    """
+
+    alias = ("ROC100",)
 
     # Named output lines
-    lines = ('roc100',)
+    lines = ("roc100",)
 
     # Accepted parameters (and defaults)
-    params = (('period', 12),)
+    params = (("period", 12),)
 
     def __init__(self):
         self.l.roc100 = 100.0 * ROC(self.data, period=self.p.period)

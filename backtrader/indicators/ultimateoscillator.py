@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 
 import backtrader as bt
@@ -27,7 +26,7 @@ from backtrader.indicators import SumN, TrueLow, TrueRange
 
 
 class UltimateOscillator(bt.Indicator):
-    '''
+    """
     Formula:
       # Buying Pressure = Close - TrueLow
       BP = Close - Minimum(Low or Prior Close)
@@ -45,15 +44,16 @@ class UltimateOscillator(bt.Indicator):
 
       - https://en.wikipedia.org/wiki/Ultimate_oscillator
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:ultimate_oscillator
-    '''
-    lines = ('uo',)
+    """
+
+    lines = ("uo",)
 
     params = (
-        ('p1', 7),
-        ('p2', 14),
-        ('p3', 28),
-        ('upperband', 70.0),
-        ('lowerband', 30.0),
+        ("p1", 7),
+        ("p2", 14),
+        ("p3", 28),
+        ("upperband", 70.0),
+        ("lowerband", 30.0),
     )
 
     def _plotinit(self):

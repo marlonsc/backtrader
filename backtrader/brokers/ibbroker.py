@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import collections
 from copy import copy
@@ -28,33 +27,39 @@ import threading
 import uuid
 
 from backtrader.feed import DataBase
-from backtrader import (date2num, BrokerBase, Order)
-from backtrader.utils.py3 import (string_types, 
-    integer_types, with_metaclass, queue, MAXFLOAT)
+from backtrader import date2num, BrokerBase, Order
+from backtrader.utils.py3 import (
+    string_types,
+    integer_types,
+    with_metaclass,
+    queue,
+    MAXFLOAT,
+)
 from backtrader.metabase import MetaParams
 from backtrader.commissions.ibcommission import IBCommInfo
 from backtrader.orders.iborder import IBOrder
 from backtrader.position import Position
 from backtrader.stores import ibstore_insync
 
+
 class MetaSingletonIBBroker(BrokerBase.__class__):
     def __init__(cls, name, bases, dct):
-        '''Class has already been created ... register'''
+        """Class has already been created ... register"""
         # Initialize the class
         super(MetaSingletonIBBroker, cls).__init__(name, bases, dct)
-        #ibstore.IBStore.BrokerCls = cls
+        # ibstore.IBStore.BrokerCls = cls
         ibstore_insync.IBStoreInsync.BrokerCls = cls
         cls._singleton = None
 
     def __call__(cls, *args, **kwargs):
         if cls._singleton is None:
-            cls._singleton = (
-                super(MetaSingletonIBBroker, cls).__call__(*args, **kwargs))
+            cls._singleton = super(MetaSingletonIBBroker, cls).__call__(*args, **kwargs)
 
         return cls._singleton
 
+
 class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
-    '''Broker implementation for Interactive Brokers.
+    """Broker implementation for Interactive Brokers.
 
     This class maps the orders/positions from Interactive Brokers to the
     internal API of ``backtrader``.
@@ -75,25 +80,26 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
         management which would also allow tradeid with multiple ids (profit and
         loss would also be calculated locally), but could be considered to be
         defeating the purpose of working with a live broker
-    '''
+    """
+
     params = (
-        ('cash', 10000.0),
-        ('checksubmit', True), 
-        ('filler', None),
+        ("cash", 10000.0),
+        ("checksubmit", True),
+        ("filler", None),
         # slippage options 滑点
-        ('slip_perc', 0.0),
-        ('slip_fixed', 0.0),
-        ('slip_open', False),
-        ('slip_match', True),
-        ('slip_limit', True),
-        ('slip_out', False),
-        ('coc', False),
-        ('coo', False),
-        ('int2pnl', True),
-        ('shortcash', True),
-        ('fundstartval', 100.0),
-        ('fundmode', False),
-        ('runmode', None),
+        ("slip_perc", 0.0),
+        ("slip_fixed", 0.0),
+        ("slip_open", False),
+        ("slip_match", True),
+        ("slip_limit", True),
+        ("slip_out", False),
+        ("coc", False),
+        ("coo", False),
+        ("int2pnl", True),
+        ("shortcash", True),
+        ("fundstartval", 100.0),
+        ("fundmode", False),
+        ("runmode", None),
     )
 
     def __init__(self, **kwargs):
@@ -101,7 +107,7 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
         self._userhist = []
         self._fundhist = []
         # share_value, net asset value
-        self._fhistlast = [float('NaN'), float('NaN')]
+        self._fhistlast = [float("NaN"), float("NaN")]
         self.ib = ibstore_insync.IBStoreInsync()
         if self.p.runmode:
             self.runmode = self.p.runmode
@@ -109,12 +115,12 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
             self.runmode = self.ib.runmode
 
     def init(self):
-        '''
+        """
         init会在super().__init__中调用,
         因此init的执行是在__init__中的第一句被调用,__init__中初始化的代码都init()后执行
 
         init会被重复调用,在init和broker.start()中都会被调用
-        '''
+        """
         super(IBBroker, self).init()
         self.startingcash = self.cash = self.validcash = self.p.cash
         self.startingvalue = self.value = 0.0
@@ -132,14 +138,14 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
         self.positions = collections.defaultdict(Position)
         self.d_credit = collections.defaultdict(float)  # credit per data
         self.notifs = collections.deque()
-        
+
         self.submitted = collections.deque()
 
         # to keep dependent orders if needed
         self._pchildren = collections.defaultdict(collections.deque)
 
         self._ocos = dict()
-        self._ocol = collections.defaultdict(list) 
+        self._ocol = collections.defaultdict(list)
 
         self._fundval = self.p.fundstartval
         self._fundshares = self.p.cash / self._fundval
@@ -159,63 +165,64 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
                 if self.positions[data] is None:
                     position = self.ib.getposition(data=data, clone=True)
                     self.positions[data] = Position()
-                    self.positions[data].price = \
-                        position.avgCost/abs(position.position)
+                    self.positions[data].price = position.avgCost / abs(
+                        position.position
+                    )
                     self.positions[data].size = position.position
 
     @property
     def checkorder(self):
-        #True: 本地检查，事件驱动
-        #False: 平台检查，平台回调驱动，本地仅保存状态
-        return self.runmode == 'backtest'
-        
+        # True: 本地检查，事件驱动
+        # False: 平台检查，平台回调驱动，本地仅保存状态
+        return self.runmode == "backtest"
+
     def get_notification(self):
         try:
             return self.notifs.popleft()
         except IndexError:
             pass
 
-        return None  
-    
+        return None
+
     def set_fundmode(self, fundmode, fundstartval=None):
-        '''Set the actual fundmode (True or False)
+        """Set the actual fundmode (True or False)
 
         If the argument fundstartval is not ``None``, it will used
-        '''
+        """
         self.p.fundmode = fundmode
         if fundstartval is not None:
             self.set_fundstartval(fundstartval)
 
     def get_fundmode(self):
-        '''Returns the actual fundmode (True or False)'''
+        """Returns the actual fundmode (True or False)"""
         return self.p.fundmode
 
     fundmode = property(get_fundmode, set_fundmode)
 
     def set_fundstartval(self, fundstartval):
-        '''Set the starting value of the fund-like performance tracker'''
+        """Set the starting value of the fund-like performance tracker"""
         self.p.fundstartval = fundstartval
 
     def set_int2pnl(self, int2pnl):
-        '''Configure assignment of interest to profit and loss'''
+        """Configure assignment of interest to profit and loss"""
         self.p.int2pnl = int2pnl
 
     def set_coc(self, coc):
-        '''Configure the Cheat-On-Close method to buy the close on order bar'''
+        """Configure the Cheat-On-Close method to buy the close on order bar"""
         self.p.coc = coc
 
     def set_coo(self, coo):
-        '''Configure the Cheat-On-Open method to buy the close on order bar'''
+        """Configure the Cheat-On-Open method to buy the close on order bar"""
         self.p.coo = coo
 
     def set_shortcash(self, shortcash):
-        '''Configure the shortcash parameters'''
+        """Configure the shortcash parameters"""
         self.p.shortcash = shortcash
 
-    def set_slippage_perc(self, perc,
-                          slip_open=True, slip_limit=True,
-                          slip_match=True, slip_out=False):
-        '''Configure slippage to be percentage based'''
+    def set_slippage_perc(
+        self, perc, slip_open=True, slip_limit=True, slip_match=True, slip_out=False
+    ):
+        """Configure slippage to be percentage based"""
         self.p.slip_perc = perc
         self.p.slip_fixed = 0.0
         self.p.slip_open = slip_open
@@ -223,10 +230,10 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
         self.p.slip_match = slip_match
         self.p.slip_out = slip_out
 
-    def set_slippage_fixed(self, fixed,
-                           slip_open=True, slip_limit=True,
-                           slip_match=True, slip_out=False):
-        '''Configure slippage to be fixed points based'''
+    def set_slippage_fixed(
+        self, fixed, slip_open=True, slip_limit=True, slip_match=True, slip_out=False
+    ):
+        """Configure slippage to be fixed points based"""
         self.p.slip_perc = 0.0
         self.p.slip_fixed = fixed
         self.p.slip_open = slip_open
@@ -235,11 +242,11 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
         self.p.slip_out = slip_out
 
     def set_filler(self, filler):
-        '''Sets a volume filler for volume filling execution'''
+        """Sets a volume filler for volume filling execution"""
         self.p.filler = filler
 
     def set_checksubmit(self, checksubmit):
-        '''Sets the checksubmit parameter'''
+        """Sets the checksubmit parameter"""
         self.p.checksubmit = checksubmit
 
     def get_cash(self):
@@ -249,6 +256,7 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
         else:
             self.cash = self.ib.get_acc_cash()
             return self.cash
+
     getcash = get_cash
 
     def get_validcash(self):
@@ -260,7 +268,7 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
             return self.self.validcash
 
     def set_cash(self, cash):
-        '''Sets the cash parameter (alias: ``setcash``)'''
+        """Sets the cash parameter (alias: ``setcash``)"""
         if self.checkorder:
             self.startingcash = self.cash = self.p.cash = cash
             self._value = cash
@@ -268,17 +276,17 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
     setcash = set_cash
 
     def add_cash(self, cash):
-        '''Add/Remove cash to the system (use a negative value to remove)'''
+        """Add/Remove cash to the system (use a negative value to remove)"""
         self._cash_addition.append(cash)
 
     def get_fundshares(self):
-        '''Returns the current number of shares in the fund-like mode'''
+        """Returns the current number of shares in the fund-like mode"""
         return self._fundshares
 
     fundshares = property(get_fundshares)
 
     def get_fundvalue(self):
-        '''Returns the Fund-like share value'''
+        """Returns the Fund-like share value"""
         return self._fundval
 
     fundvalue = property(get_fundvalue)
@@ -309,9 +317,9 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
             self.ib.cancelOrder(order.orderId)
 
     def get_value(self, datas=None, mkt=False, lever=False):
-        '''Returns the portfolio value of the given datas (if datas is ``None``, then
+        """Returns the portfolio value of the given datas (if datas is ``None``, then
         the total portfolio value will be returned (alias: ``getvalue``)
-        '''
+        """
         if self.checkorder:
             if datas is None:
                 if mkt:
@@ -323,6 +331,7 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
         else:
             self.value = self.ib.get_acc_value()
             return self.value
+
     getvalue = get_value
 
     def _get_value(self, datas=None, lever=False):
@@ -344,8 +353,9 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
             else:
                 dvalue = comminfo.getvaluesize(position.size, data.close[0])
 
-            dunrealized = comminfo.profitandloss(position.size, position.price,
-                                                 data.close[0])
+            dunrealized = comminfo.profitandloss(
+                position.size, position.price, data.close[0]
+            )
             if datas and len(datas) == 1:
                 if lever and dvalue > 0:
                     dvalue -= dunrealized
@@ -360,7 +370,7 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
 
             if dvalue > 0:  # long position - unlever
                 dvalue -= dunrealized
-                pos_value_unlever += (dvalue / comminfo.get_leverage())
+                pos_value_unlever += dvalue / comminfo.get_leverage()
                 pos_value_unlever += dunrealized
             else:
                 pos_value_unlever += dvalue
@@ -398,7 +408,6 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
         else:
             return self.positions[data]
 
-
     def orderstatus(self, order):
         try:
             o = self.orders.index(order)
@@ -409,7 +418,7 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
 
     def _take_children(self, order):
         oref = order.ref
-        pref = getattr(order.parent, 'ref', oref)  # parent ref or self
+        pref = getattr(order.parent, "ref", oref)  # parent ref or self
 
         if oref != pref:
             if pref not in self._pchildren:
@@ -458,7 +467,8 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
             comminfo = self.getcommissioninfo(order.data)
 
             position = positions.setdefault(
-                order.data, self.positions[order.data].clone())
+                order.data, self.positions[order.data].clone()
+            )
 
             # pseudo-execute the order to get the remaining cash after exec
             cash = self._execute(order, cash=cash, position=position)
@@ -481,7 +491,7 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
 
     def _bracketize(self, order, cancel=False):
         oref = order.ref
-        pref = getattr(order.parent, 'ref', oref)
+        pref = getattr(order.parent, "ref", oref)
         parent = oref == pref
 
         pc = self._pchildren[pref]  # defdict - guaranteed
@@ -519,48 +529,43 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
             self._ocos[oref] = ocoref  # ref to group leader
             self._ocol[ocoref].append(oref)  # add to group
 
-    def _makeorder(self, action, owner, data, size,**kwargs):
-        '''
+    def _makeorder(self, action, owner, data, size, **kwargs):
+        """
         开仓必须使用BKT bracketOrder 套利单
         平仓必须使用LMT limitOrder 限价单
-        '''
-        order = IBOrder(action=action, 
-                    owner=owner, 
-                    data=data, 
-                    size=size,
-                    **kwargs)
+        """
+        order = IBOrder(action=action, owner=owner, data=data, size=size, **kwargs)
 
         order.addcomminfo(self.getcommissioninfo(data))
         return order
-            
-    def buy(self, owner, data, size, **kwargs):  
-        action = kwargs.pop('action', 'BUY')
+
+    def buy(self, owner, data, size, **kwargs):
+        action = kwargs.pop("action", "BUY")
         if self.checkorder:
             order = IBOrder(owner=owner, data=data, size=size, action=action, **kwargs)
-            oco = kwargs.get('oco', None)
+            oco = kwargs.get("oco", None)
             order.addinfo(**kwargs)
             self._ocoize(order, oco)
             return self.submit(order)
         else:
-            order = self._makeorder('BUY', owner, data, size, **kwargs)
+            order = self._makeorder("BUY", owner, data, size, **kwargs)
             return self.ib.placeOrder(order.data.tradecontract, order)
-  
 
     def sell(self, owner, data, size, **kwargs):
-        action = kwargs.pop('action', 'SELL')
+        action = kwargs.pop("action", "SELL")
         if self.checkorder:
             order = IBOrder(owner=owner, data=data, size=size, action=action, **kwargs)
-            oco = kwargs.get('oco', None)      
+            oco = kwargs.get("oco", None)
             order.addinfo(**kwargs)
             self._ocoize(order, oco)
             return self.submit(order)
         else:
-            order = self._makeorder('SELL', owner, data, size,**kwargs)
+            order = self._makeorder("SELL", owner, data, size, **kwargs)
             return self.ib.placeOrder(order.data.tradecontract, order)
-    
-    
-    def _execute(self, order, ago=None, price=None, cash=None, position=None,
-                 dtcoc=None):
+
+    def _execute(
+        self, order, ago=None, price=None, cash=None, position=None, dtcoc=None
+    ):
         # ago = None is used a flag for pseudo execution
         if ago is not None and price is None:
             return  # no psuedo exec no price - no execution
@@ -632,9 +637,7 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
             if ago is not None:
                 # Cashadjust closed contracts: prev close vs exec price
                 # The operation can inject or take cash out
-                cash += comminfo.cashadjust(-closed,
-                                            position.adjbase,
-                                            price)
+                cash += comminfo.cashadjust(-closed, position.adjbase, price)
 
                 # Update system cash
                 self.cash = cash
@@ -672,8 +675,7 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
                     # futures from a common base price with regards to the
                     # close price
                     adjsize = psize - opened
-                    cash += comminfo.cashadjust(adjsize,
-                                                position.adjbase, price)
+                    cash += comminfo.cashadjust(adjsize, position.adjbase, price)
 
                 # record adjust price base for end of bar cash adjustment
                 position.adjbase = price
@@ -700,12 +702,21 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
                 closedcomm += self.d_credit.pop(data, 0.0)
 
             # Execute and notify the order
-            order.execute(dtcoc or data.datetime[ago],
-                          execsize, price,
-                          closed, closedvalue, closedcomm,
-                          opened, openedvalue, openedcomm,
-                          comminfo.margin, pnl,
-                          psize, pprice)
+            order.execute(
+                dtcoc or data.datetime[ago],
+                execsize,
+                price,
+                closed,
+                closedvalue,
+                closedcomm,
+                opened,
+                openedvalue,
+                openedcomm,
+                comminfo.margin,
+                pnl,
+                psize,
+                pprice,
+            )
 
             order.addcomminfo(comminfo)
 
@@ -722,18 +733,17 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
     def notify(self, order):
         self.notifs.append(order.clone())
 
-    
     def _try_exec_historical(self, order):
         self._execute(order, ago=0, price=order.created.price)
 
     def _try_exec_market(self, order, popen, phigh, plow):
         ago = 0
-        if self.p.coc and order.info.get('coc', True):
+        if self.p.coc and order.info.get("coc", True):
             dtcoc = order.created.dt
             exprice = order.created.pclose
         else:
             if not self.p.coo and order.data.datetime[0] <= order.created.dt:
-                return    # can only execute after creation time
+                return  # can only execute after creation time
 
             dtcoc = None
             exprice = popen
@@ -776,8 +786,7 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
             if plimit >= popen:
                 # open smaller/equal than requested - buy cheaper
                 pmax = min(phigh, plimit)
-                p = self._slip_up(pmax, popen, doslip=self.p.slip_open,
-                                  lim=True)
+                p = self._slip_up(pmax, popen, doslip=self.p.slip_open, lim=True)
                 self._execute(order, ago=0, price=p)
             elif plimit >= plow:
                 # day low below req price ... match limit price
@@ -787,8 +796,7 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
             if plimit <= popen:
                 # open greater/equal than requested - sell more expensive
                 pmin = max(plow, plimit)
-                p = self._slip_down(plimit, popen, doslip=self.p.slip_open,
-                                    lim=True)
+                p = self._slip_down(plimit, popen, doslip=self.p.slip_open, lim=True)
                 self._execute(order, ago=0, price=p)
             elif plimit <= phigh:
                 # day high above req price ... match limit price
@@ -819,9 +827,7 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
         if order.alive() and order.exectype == Order.StopTrail:
             order.trailadjust(pclose)
 
-    def _try_exec_stoplimit(self, order,
-                            popen, phigh, plow, pclose,
-                            pcreated, plimit):
+    def _try_exec_stoplimit(self, order, popen, phigh, plow, pclose, pcreated, plimit):
         if order.isbuy():
             if popen >= pcreated:
                 order.triggered = True
@@ -916,16 +922,16 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
     def _try_exec(self, order):
         data = order.data
 
-        popen = getattr(data, 'tick_open', None)
+        popen = getattr(data, "tick_open", None)
         if popen is None:
             popen = data.open[0]
-        phigh = getattr(data, 'tick_high', None)
+        phigh = getattr(data, "tick_high", None)
         if phigh is None:
             phigh = data.high[0]
-        plow = getattr(data, 'tick_low', None)
+        plow = getattr(data, "tick_low", None)
         if plow is None:
             plow = data.low[0]
-        pclose = getattr(data, 'tick_close', None)
+        pclose = getattr(data, "tick_close", None)
         if pclose is None:
             pclose = data.close[0]
 
@@ -941,17 +947,19 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
         elif order.exectype == Order.Limit:
             self._try_exec_limit(order, popen, phigh, plow, pcreated)
 
-        elif (order.triggered and
-              order.exectype in [Order.StopLimit, Order.StopTrailLimit]):
+        elif order.triggered and order.exectype in [
+            Order.StopLimit,
+            Order.StopTrailLimit,
+        ]:
             self._try_exec_limit(order, popen, phigh, plow, plimit)
 
         elif order.exectype in [Order.Stop, Order.StopTrail]:
             self._try_exec_stop(order, popen, phigh, plow, pcreated, pclose)
 
         elif order.exectype in [Order.StopLimit, Order.StopTrailLimit]:
-            self._try_exec_stoplimit(order,
-                                     popen, phigh, plow, pclose,
-                                     pcreated, plimit)
+            self._try_exec_stoplimit(
+                order, popen, phigh, plow, pclose, pcreated, plimit
+            )
 
         elif order.exectype == Order.Historical:
             self._try_exec_historical(order)
@@ -964,11 +972,11 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
 
         dt = f[0]  # date/datetime instance
         if isinstance(dt, string_types):
-            dtfmt = '%Y-%m-%d'
-            if 'T' in dt:
-                dtfmt += 'T%H:%M:%S'
-                if '.' in dt:
-                    dtfmt += '.%f'
+            dtfmt = "%Y-%m-%d"
+            if "T" in dt:
+                dtfmt += "T%H:%M:%S"
+                if "." in dt:
+                    dtfmt += ".%f"
             dt = datetime.datetime.strptime(dt, dtfmt)
             f[0] = dt  # update value
 
@@ -1011,19 +1019,17 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
 
                 dt = uhorder[0]  # date/datetime instance
                 if isinstance(dt, string_types):
-                    dtfmt = '%Y-%m-%d'
-                    if 'T' in dt:
-                        dtfmt += 'T%H:%M:%S'
-                        if '.' in dt:
-                            dtfmt += '.%f'
+                    dtfmt = "%Y-%m-%d"
+                    if "T" in dt:
+                        dtfmt += "T%H:%M:%S"
+                        if "." in dt:
+                            dtfmt += ".%f"
                     dt = datetime.datetime.strptime(dt, dtfmt)
                     uhorder[0] = dt
                 elif isinstance(dt, datetime.datetime):
                     pass
                 elif isinstance(dt, datetime.date):
-                    dt = datetime.datetime(year=dt.year,
-                                           month=dt.month,
-                                           day=dt.day)
+                    dt = datetime.datetime(year=dt.year, month=dt.month, day=dt.day)
                     uhorder[0] = dt
 
                 if dt > d.datetime.datetime():
@@ -1033,18 +1039,26 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
                 price = uhorder[2]
                 owner = self.cerebro.runningstrats[0]
                 if size > 0:
-                    o = self.buy(owner=owner, data=d,
-                                 size=size, price=price,
-                                 exectype=Order.Historical,
-                                 histnotify=uhnotify,
-                                 _checksubmit=False)
+                    o = self.buy(
+                        owner=owner,
+                        data=d,
+                        size=size,
+                        price=price,
+                        exectype=Order.Historical,
+                        histnotify=uhnotify,
+                        _checksubmit=False,
+                    )
 
                 elif size < 0:
-                    o = self.sell(owner=owner, data=d,
-                                  size=abs(size), price=price,
-                                  exectype=Order.Historical,
-                                  histnotify=uhnotify,
-                                  _checksubmit=False)
+                    o = self.sell(
+                        owner=owner,
+                        data=d,
+                        size=abs(size),
+                        price=price,
+                        exectype=Order.Historical,
+                        histnotify=uhnotify,
+                        _checksubmit=False,
+                    )
 
                 # update to next potential order
                 uhist[0] = uhorder = next(uhorders, None)
@@ -1084,7 +1098,7 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
                     self._ococheck(order)
                     self._bracketize(order, cancel=True)
 
-                elif not order.active():     #只针对子订单
+                elif not order.active():  # 只针对子订单
                     self.pending.append(order)  # cannot yet be processed
 
                 else:
@@ -1102,10 +1116,10 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
                 # futures change cash every bar
                 if pos:
                     comminfo = self.getcommissioninfo(data)
-                    self.cash += comminfo.cashadjust(pos.size,
-                                                    pos.adjbase,
-                                                    data.close[0])
-                
+                    self.cash += comminfo.cashadjust(
+                        pos.size, pos.adjbase, data.close[0]
+                    )
+
                     # record the last adjustment price
                     pos.adjbase = data.close[0]
 
@@ -1185,60 +1199,70 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
                 oid = ex.orderId
                 order = self.orderbyid[oid]
                 ostatus = self.ordstatus[oid].pop(ex.cumQty)
-                
+
                 position = self.getposition(contract=order.data, clone=False)
                 pprice_orig = position.price
-                size = ex.shares if ex.side[0] == 'B' else -ex.shares
+                size = ex.shares if ex.side[0] == "B" else -ex.shares
                 price = ex.price
                 # use pseudoupdate and let the updateportfolio do the real update?
                 psize, pprice, opened, closed = position.update(float(size), price)
-                
+
                 # split commission between closed and opened
                 comm = cr.commission
-                closedcomm = comm *  float(closed) / float(size)
+                closedcomm = comm * float(closed) / float(size)
                 openedcomm = comm - closedcomm
-                
+
                 comminfo = order.comminfo
                 closedvalue = comminfo.getoperationcost(closed, pprice_orig)
                 openedvalue = comminfo.getoperationcost(opened, price)
-                
+
                 # default in m_pnl is MAXFLOAT
                 pnl = cr.realizedPNL if closed else 0.0
-				
-				# The internal broker calc should yield the same result
-				# pnl = comminfo.profitandloss(-closed, pprice_orig, price)
-				
-				# Use the actual time provided by the execution object
-				# The report from TWS is in actual local time, not the data's tz
-				#dt = date2num(datetime.strptime(ex.time, '%Y%m%d  %H:%M:%S'))
+
+                # The internal broker calc should yield the same result
+                # pnl = comminfo.profitandloss(-closed, pprice_orig, price)
+
+                # Use the actual time provided by the execution object
+                # The report from TWS is in actual local time, not the data's tz
+                # dt = date2num(datetime.strptime(ex.time, '%Y%m%d  %H:%M:%S'))
                 dt_array = [] if ex.time == None else ex.time.split(" ")
                 if dt_array and len(dt_array) > 1:
                     dt_array.pop()
                     ex_time = " ".join(dt_array)
-                    dt = date2num(datetime.strptime(ex_time, '%Y%m%d %H:%M:%S'))
+                    dt = date2num(datetime.strptime(ex_time, "%Y%m%d %H:%M:%S"))
                 else:
-                    dt = date2num(datetime.strptime(ex.time, '%Y%m%d %H:%M:%S %A'))															 
-					
-				# Need to simulate a margin, but it plays no role, because it is
-				# controlled by a real broker. Let's set the price of the item
+                    dt = date2num(datetime.strptime(ex.time, "%Y%m%d %H:%M:%S %A"))
+
+                # Need to simulate a margin, but it plays no role, because it is
+                # controlled by a real broker. Let's set the price of the item
                 margin = order.data.close[0]
-                
-                order.execute(dt, float(size),  price,
-                          float(closed), closedvalue, closedcomm,
-                          opened, openedvalue, openedcomm,
-                          margin, pnl,
-                          float(psize), pprice)
-                
+
+                order.execute(
+                    dt,
+                    float(size),
+                    price,
+                    float(closed),
+                    closedvalue,
+                    closedcomm,
+                    opened,
+                    openedvalue,
+                    openedcomm,
+                    margin,
+                    pnl,
+                    float(psize),
+                    pprice,
+                )
+
                 if ostatus.status == self.FILLED:
                     order.completed()
                     self.ordstatus.pop(oid)  # nothing left to be reported
                 else:
                     order.partial()
-                
+
                 if oid not in self.tonotify:  # Lock needed
                     self.tonotify.append(oid)
             except Exception as e:
-                self.ib._logger.exception(f"Exception: {e}")						  
+                self.ib._logger.exception(f"Exception: {e}")
 
     def push_portupdate(self):
         # If the IBStore receives a Portfolio update, then this method will be
@@ -1280,7 +1304,6 @@ class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
             except (KeyError, AttributeError):
                 return  # no order or no id in error
 
-            if msg.orderState.status in ['PendingCancel', 'Cancelled',
-                                           'Canceled']:
+            if msg.orderState.status in ["PendingCancel", "Cancelled", "Canceled"]:
                 # This is most likely due to an expiration]
                 order._willexpire = True
