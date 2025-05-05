@@ -28,6 +28,7 @@ import backtrader as bt
 import backtrader.indicators as btind
 import backtrader.feeds as btfeeds
 import backtrader.filters as btfilters
+import yfinance as yf
 
 
 def runstrat():
@@ -43,10 +44,13 @@ def runstrat():
     fromdate = datetime.datetime.strptime(args.fromdate, '%Y-%m-%d')
     todate = datetime.datetime.strptime(args.todate, '%Y-%m-%d')
 
-    data = btfeeds.YahooFinanceData(
-        dataname=args.data,
-        fromdate=fromdate,
-        todate=todate)
+    # data = btfeeds.YahooFinanceData(
+    #     dataname=args.data,
+    #     fromdate=fromdate,
+    #     todate=todate)
+
+    data = bt.feeds.PandasData(dataname=yf.download('SPY', '2015-07-06', '2021-07-01', auto_adjust=True))
+
 
     # Add the resample data instead of the original
     cerebro.adddata(data)
