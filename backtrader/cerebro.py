@@ -656,21 +656,21 @@ class Cerebro(with_metaclass(MetaParams, object)):
         self.indicators.append((indcls, args, kwargs))
 
     def addanalyzer(self, ancls, *args, **kwargs):
-        '''
+        """
         Adds an ``Analyzer`` class to the mix. Instantiation will be done at
         ``run`` time
-        '''
+        """
         self.analyzers.append((ancls, args, kwargs))
 
     def addobserver(self, obscls, *args, **kwargs):
-        '''
+        """
         Adds an ``Observer`` class to the mix. Instantiation will be done at
         ``run`` time
-        '''
+        """
         self.observers.append((False, obscls, args, kwargs))
 
     def addobservermulti(self, obscls, *args, **kwargs):
-        '''
+        """
         Adds an ``Observer`` class to the mix. Instantiation will be done at
         ``run`` time
 
@@ -678,11 +678,11 @@ class Cerebro(with_metaclass(MetaParams, object)):
         buy/sell observer which observes individual datas.
 
         A counter-example is the CashValue, which observes system-wide values
-        '''
+        """
         self.observers.append((True, obscls, args, kwargs))
 
     def addstorecb(self, callback):
-        '''
+        """
         Adds a callback to get messages which would be handled by the
         notify_store method
 
@@ -694,7 +694,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
         implementation defined (depend entirely on the *data/broker/store*) but
         in general one should expect them to be *printable* to allow for
         reception and experimentation.
-        '''
+        """
         self.storecbs.append(callback)
 
     def _notify_store(self, msg, *args, **kwargs):
@@ -704,7 +704,8 @@ class Cerebro(with_metaclass(MetaParams, object)):
         self.notify_store(msg, *args, **kwargs)
 
     def notify_store(self, msg, *args, **kwargs):
-        '''Receive store notifications in cerebro
+        """
+        Receive store notifications in cerebro
 
         This method can be overridden in ``Cerebro`` subclasses
 
@@ -712,7 +713,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
         implementation defined (depend entirely on the *data/broker/store*) but
         in general one should expect them to be *printable* to allow for
         reception and experimentation.
-        '''
+        """
         pass
 
     def _storenotify(self):
@@ -725,7 +726,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
                     strat.notify_store(msg, *args, **kwargs)
 
     def adddatacb(self, callback):
-        '''
+        """
         Adds a callback to get messages which would be handled by the
         notify_data method
 
@@ -737,7 +738,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
         defined (depend entirely on the *data/broker/store*) but in general one
         should expect them to be *printable* to allow for reception and
         experimentation.
-        '''
+        """
         self.datacbs.append(callback)
 
     def _datanotify(self):

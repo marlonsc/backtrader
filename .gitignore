@@ -80,3 +80,6 @@ datas/*.py
 .idea/
 
 turtle/data/*
+
+poetry.lock
+.venv/
