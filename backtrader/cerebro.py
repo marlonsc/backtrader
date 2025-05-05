@@ -1023,7 +1023,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
 
                 figs.append(rfig)
 
-            plotter.show()
+            #plotter.show()
 
         return figs
 
