@@ -777,7 +777,7 @@ class Decoder:
         n = int(n)
 
         expirations = fields[:n]
-        strikes = [float(field) for field in fields[n + 1 :]]
+        strikes = [float(field) for field in fields[n + 1:]]
 
         self.wrapper.securityDefinitionOptionParameter(
             int(reqId),

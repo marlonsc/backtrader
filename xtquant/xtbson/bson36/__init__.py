@@ -261,7 +261,7 @@ def _get_object(data, view, position, obj_end, opts, dummy):
     obj_size, end = _get_object_size(data, position, obj_end)
     if _raw_document_class(opts.document_class):
         return (
-            opts.document_class(data[position : end + 1], opts),
+            opts.document_class(data[position: end + 1], opts),
             position + obj_size,
         )
 
@@ -818,7 +818,7 @@ def _encode_dbref(name, value, check_keys, opts):
         buf += _element_to_bson(key, val, check_keys, opts)
 
     buf += b"\x00"
-    buf[begin : begin + 4] = _PACK_INT(len(buf) - begin)
+    buf[begin: begin + 4] = _PACK_INT(len(buf) - begin)
     return bytes(buf)
 
 
@@ -1384,7 +1384,7 @@ def decode_all(data, codec_options=DEFAULT_CODEC_OPTIONS):
             if use_raw:
                 docs.append(
                     codec_options.document_class(
-                        data[position : obj_end + 1], codec_options
+                        data[position: obj_end + 1], codec_options
                     )
                 )
             else:
@@ -1527,7 +1527,7 @@ def decode_iter(data, codec_options=DEFAULT_CODEC_OPTIONS):
     end = len(data) - 1
     while position < end:
         obj_size = _UNPACK_INT_FROM(data, position)[0]
-        elements = data[position : position + obj_size]
+        elements = data[position: position + obj_size]
         position += obj_size
 
         yield _bson_to_dict(elements, codec_options)

@@ -121,7 +121,7 @@ class VChartData(feed.DataBase):
 
         self.lines.datetime[0] = date2num(dt)
 
-        o, h, l, c, v, oi = bdata[self.dtsize :]
+        o, h, l, c, v, oi = bdata[self.dtsize:]
         self.lines.open[0] = o
         self.lines.high[0] = h
         self.lines.low[0] = l

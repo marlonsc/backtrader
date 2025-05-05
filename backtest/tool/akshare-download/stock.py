@@ -224,7 +224,7 @@ if __name__ == "__main__":
     pbar = tqdm(total=len(stock_list))
     # group per 20
     n = 20
-    stock_lists = [stock_list[i : i + n] for i in range(0, len(stock_list), n)]
+    stock_lists = [stock_list[i: i + n] for i in range(0, len(stock_list), n)]
 
     def bar_update(num):
         """

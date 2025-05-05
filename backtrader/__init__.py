@@ -25,6 +25,26 @@ from __future__ import (
     unicode_literals,
 )
 
-from .sizers import SizerFix  # old sizer for compatibility
+from .sizers.fixedsize import SizerFix
+from . import feeds
+from .indicator import Indicator
+from .analyzer import Analyzer
+from .strategy import Strategy
+from .observer import Observer
+from .signal import Signal
+from .cerebro import Cerebro
+from . import TimeFrame
+
+__all__ = [
+    "feeds",
+    "TimeFrame",
+    "Cerebro",
+    "Analyzer",
+    "Observer",
+    "Strategy",
+    "Indicator",
+    "Signal",
+    "SizerFix",
+]
 
 # Load contributed indicators and studies

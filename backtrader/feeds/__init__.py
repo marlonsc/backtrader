@@ -39,3 +39,30 @@ try:
     pass
 except ImportError:
     pass  # The user may not have something installed
+
+from .btcsv import BacktraderCSVData
+from .vchartcsv import VChartCSVData
+from .vchartfile import VChartFile
+from .sierrachart import SierraChartCSVData
+from .mt4csv import MT4CSVData
+from .yahoo import YahooFinanceCSVData, YahooFinanceData
+from .vcdata import VCData
+from .ibdata import IBData
+from .oanda import OandaData
+from .pandafeed import PandasData
+from .csvgeneric import GenericCSVData
+
+__all__ = [
+    "BacktraderCSVData",
+    "VChartCSVData",
+    "VChartFile",
+    "SierraChartCSVData",
+    "MT4CSVData",
+    "YahooFinanceCSVData",
+    "YahooFinanceData",
+    "VCData",
+    "IBData",
+    "OandaData",
+    "PandasData",
+    "GenericCSVData",
+]

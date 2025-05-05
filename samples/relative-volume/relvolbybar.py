@@ -15,6 +15,7 @@ See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with this program.
 If not, see <http://www.gnu.org/licenses/>.
 """
+
 from __future__ import (
     absolute_import,
     division,
@@ -49,7 +50,7 @@ class RelativeVolumeByBar(bt.Indicator):
         plabels = [
             f"prestart: {self.p.prestart.strftime('%H:%M')}",
             f"start: {self.p.start.strftime('%H:%M')}",
-            f"end: {self.p.end.strftime('%H:%M')}"
+            f"end: {self.p.end.strftime('%H:%M')}",
         ]
         return plabels
 
@@ -91,7 +92,7 @@ class RelativeVolumeByBar(bt.Indicator):
         self.vcount[tm] += 1
         vol = self.data.volume[0]
         if self.vcount[tm] == self.days and self.pvol.get(tm, 0) != 0:
-            getattr(self.lines, 'rvbb')[0] = vol / self.pvol[tm]
+            getattr(self.lines, "rvbb")[0] = vol / self.pvol[tm]
         self.vcount[tm] = self.days
         self.pvol[tm] = vol
 
@@ -100,8 +101,8 @@ class RelativeVolumeByBar(bt.Indicator):
         minend = self.p.end.hour * 60 + self.p.end.minute
         minstart = self.p.prestart.hour * 60 + self.p.prestart.minute
         minbuffer = minend - minstart
-        tframe = getattr(self.data, '_timeframe', bt.TimeFrame.Minutes)
-        tcomp = getattr(self.data, '_compression', 1)
+        tframe = getattr(self.data, "_timeframe", bt.TimeFrame.Minutes)
+        tcomp = getattr(self.data, "_compression", 1)
         # Use 1 as a fallback for minperiod if not defined
         minperiod = 1
         if tframe == bt.TimeFrame.Seconds:

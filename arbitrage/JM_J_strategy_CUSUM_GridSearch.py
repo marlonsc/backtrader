@@ -27,8 +27,8 @@ def calculate_rolling_spread(
 
     # 2) Estimate β_t, and shift one day forward
     beta_raw = (
-        df["close0"].rolling(window).cov(df["close1"]) /
-        df["close1"].rolling(window).var()
+        df["close0"].rolling(window).cov(df["close1"])
+        / df["close1"].rolling(window).var()
     )
     # Prevent future + keep 1 decimal place
     beta_shift = beta_raw.shift(1).round(1)

@@ -146,7 +146,7 @@ class VChartFile(bt.with_metaclass(MetaVChartFile, bt.DataBase)):
         self.lines.datetime[0] = date2num(dt)  # Store time
 
         # Get the rest of the fields
-        o, h, l, c, v, oi = bdata[self._dtsize :]
+        o, h, l, c, v, oi = bdata[self._dtsize:]
         self.lines.open[0] = o
         self.lines.high[0] = h
         self.lines.low[0] = l

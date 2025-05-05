@@ -150,7 +150,8 @@ class XtQuantTrader(object):
 
         self.queuing_order_seq = set()  # 发起委托的seq,获取resp时移除
         self.handled_async_order_stock_order_id = set()  # 已处理了返回的委托order_id
-        self.queuing_order_errors_byseq = {}  # 队列中的委托失败信息，在对应委托尚未返回(检测seq或者order_id)时存入，等待回调error_callback
+        # 队列中的委托失败信息，在对应委托尚未返回(检测seq或者order_id)时存入，等待回调error_callback
+        self.queuing_order_errors_byseq = {}
         self.queuing_order_errors_byid = {}
 
         self.handled_async_cancel_order_stock_order_id = set()

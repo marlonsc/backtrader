@@ -81,10 +81,10 @@ class SharpeDiffStrategy(bt.Strategy):
             return
 
         # 计算15日波动率
-        j_vol_15d = np.std(self.returns_j[-self.p.return_period :]) * np.sqrt(
+        j_vol_15d = np.std(self.returns_j[-self.p.return_period:]) * np.sqrt(
             self.p.return_period
         )
-        jm_vol_15d = np.std(self.returns_jm[-self.p.return_period :]) * np.sqrt(
+        jm_vol_15d = np.std(self.returns_jm[-self.p.return_period:]) * np.sqrt(
             self.p.return_period
         )
 
@@ -103,11 +103,11 @@ class SharpeDiffStrategy(bt.Strategy):
         # 计算20日移动平均和标准差
         if len(self.delta_sharpe_values) >= self.p.ma_period:
             # 计算20日移动平均 MA(ΔSharpe) = MA20(ΔSharpe)
-            ma_delta = np.mean(self.delta_sharpe_values[-self.p.ma_period :])
+            ma_delta = np.mean(self.delta_sharpe_values[-self.p.ma_period:])
             self.delta_sharpe_ma.append(ma_delta)
 
             # 计算20日标准差 σΔSharpe = Std20(ΔSharpe)
-            std_delta = np.std(self.delta_sharpe_values[-self.p.ma_period :])
+            std_delta = np.std(self.delta_sharpe_values[-self.p.ma_period:])
             self.delta_sharpe_std.append(std_delta)
 
             # 计算布林带上下轨

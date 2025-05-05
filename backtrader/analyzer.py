@@ -18,6 +18,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
+"""
+Analyzer module for Backtrader. Provides base classes and metaclasses for analyzers,
+which are used to compute and report statistics and results from strategies.
+"""
+
 from __future__ import (
     absolute_import,
     division,
@@ -30,12 +35,15 @@ import datetime
 import pprint as pp
 from collections import OrderedDict
 
-import backtrader as bt
-from backtrader import TimeFrame
-from backtrader.utils.py3 import MAXINT, with_metaclass
+from . import TimeFrame
+from .utils.py3 import MAXINT, with_metaclass
+from .metabase import MetaParams, findowner
+from .strategy import Strategy
+from .observer import Observer
+from .writer import WriterFile
 
 
-class MetaAnalyzer(bt.MetaParams):
+class MetaAnalyzer(MetaParams):
     """ """
 
     def donew(cls, *args, **kwargs):
@@ -50,11 +58,11 @@ class MetaAnalyzer(bt.MetaParams):
 
         _obj._children = list()
 
-        _obj.strategy = strategy = bt.metabase.findowner(_obj, bt.Strategy)
-        _obj._parent = bt.metabase.findowner(_obj, Analyzer)
+        _obj.strategy = strategy = findowner(_obj, Strategy)
+        _obj._parent = findowner(_obj, Analyzer)
 
         # Register with a master observer if created inside one
-        masterobs = bt.metabase.findowner(_obj, bt.Observer)
+        masterobs = findowner(_obj, Observer)
         if masterobs is not None:
             masterobs._register_analyzer(_obj)
 
@@ -64,20 +72,20 @@ class MetaAnalyzer(bt.MetaParams):
         if _obj.datas:
             _obj.data = data = _obj.datas[0]
 
-            for l, line in enumerate(data.lines):
-                linealias = data._getlinealias(l)
+            for line_idx, line in enumerate(data.lines):
+                linealias = data._getlinealias(line_idx)
                 if linealias:
-                    setattr(_obj, "data_%s" % linealias, line)
-                setattr(_obj, "data_%d" % l, line)
+                    setattr(_obj, f"data_{linealias}", line)
+                setattr(_obj, f"data_{line_idx}", line)
 
-            for d, data in enumerate(_obj.datas):
-                setattr(_obj, "data%d" % d, data)
+            for data_idx, data in enumerate(_obj.datas):
+                setattr(_obj, f"data{data_idx}", data)
 
-                for l, line in enumerate(data.lines):
-                    linealias = data._getlinealias(l)
+                for line_idx, line in enumerate(data.lines):
+                    linealias = data._getlinealias(line_idx)
                     if linealias:
-                        setattr(_obj, "data%d_%s" % (d, linealias), line)
-                    setattr(_obj, "data%d_%d" % (d, l), line)
+                        setattr(_obj, f"data{data_idx}_{linealias}", line)
+                    setattr(_obj, f"data{data_idx}_{line_idx}", line)
 
         _obj.create_analysis()
 
@@ -153,6 +161,16 @@ class Analyzer(with_metaclass(MetaAnalyzer, object)):
     """
 
     csv = True
+
+    def __init__(self, *args, **kwargs):
+        self.p = None  # Garante que self.p exista antes de qualquer acesso
+        self._children = []
+        self.strategy = None
+        if not hasattr(self, "p") or self.p is None:
+            param_dict = dict((k, v) for k, v in getattr(self, "params", []))
+            self.p = type("Params", (), param_dict)()
+        self.data = None
+        super().__init__(*args, **kwargs)
 
     def __len__(self):
         """Support for invoking ``len`` on analyzers by actually returning the
@@ -359,7 +377,7 @@ class Analyzer(with_metaclass(MetaAnalyzer, object)):
         :param **kwargs:
 
         """
-        writer = bt.WriterFile(*args, **kwargs)
+        writer = WriterFile(*args, **kwargs)
         writer.start()
         pdct = dict()
         pdct[self.__class__.__name__] = self.get_analysis()
@@ -389,20 +407,19 @@ class Analyzer(with_metaclass(MetaAnalyzer, object)):
 class MetaTimeFrameAnalyzerBase(Analyzer.__class__):
     """ """
 
-    def __new__(meta, name, bases, dct):
+    def __new__(mcs, name, bases, dct):
         """
-
-        :param meta:
-        :param name:
-        :param bases:
-        :param dct:
-
+        Metaclass __new__ method for MetaTimeFrameAnalyzerBase.
+        :param mcs: Metaclass
+        :param name: Class name
+        :param bases: Base classes
+        :param dct: Class dict
         """
         # Hack to support original method name
         if "_on_dt_over" in dct:
             dct["on_dt_over"] = dct.pop("_on_dt_over")  # rename method
 
-        return super(MetaTimeFrameAnalyzerBase, meta).__new__(meta, name, bases, dct)
+        return super(MetaTimeFrameAnalyzerBase, mcs).__new__(mcs, name, bases, dct)
 
 
 class TimeFrameAnalyzerBase(with_metaclass(MetaTimeFrameAnalyzerBase, Analyzer)):
@@ -414,11 +431,37 @@ class TimeFrameAnalyzerBase(with_metaclass(MetaTimeFrameAnalyzerBase, Analyzer))
         ("_doprenext", True),
     )
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not hasattr(self, "p") or self.p is None:
+            param_dict = dict((k, v) for k, v in getattr(self, "params", []))
+            for key in ["timeframe", "compression", "_doprenext"]:
+                param_dict.setdefault(key, None)
+            self.p = type("Params", (), param_dict)()
+        for key in ["timeframe", "compression", "_doprenext"]:
+            if not hasattr(self.p, key):
+                setattr(self.p, key, None)
+        if not hasattr(self, "data"):
+            self.data = None
+
     def _start(self):
-        """ """
+        """Inicializa atributos de timeframe e compressão."""
+        # Ensure self.p and self.data are set before use
+        if self.p is None:
+            # Convert params tuple to an object with attributes, defaulting to None
+            param_dict = dict((k, v) for k, v in self.params)
+            for key in ["timeframe", "compression", "_doprenext"]:
+                param_dict.setdefault(key, None)
+            self.p = type("Params", (), param_dict)()
+        if self.data is None:
+            self.data = getattr(self, "data", None)
         # Override to add specific attributes
-        self.timeframe = self.p.timeframe or self.data._timeframe
-        self.compression = self.p.compression or self.data._compression
+        self.timeframe = getattr(self.p, "timeframe", None) or getattr(
+            self.data, "_timeframe", None
+        )
+        self.compression = getattr(self.p, "compression", None) or getattr(
+            self.data, "_compression", None
+        )
 
         self.dtcmp, self.dtkey = self._get_dt_cmpkey(datetime.datetime.min)
         super(TimeFrameAnalyzerBase, self)._start()
@@ -431,7 +474,7 @@ class TimeFrameAnalyzerBase(with_metaclass(MetaTimeFrameAnalyzerBase, Analyzer))
         if self._dt_over():
             self.on_dt_over()
 
-        if self.p._doprenext:
+        if getattr(self.p, "_doprenext", True):
             self.prenext()
 
     def _nextstart(self):
@@ -439,7 +482,9 @@ class TimeFrameAnalyzerBase(with_metaclass(MetaTimeFrameAnalyzerBase, Analyzer))
         for child in self._children:
             child._nextstart()
 
-        if self._dt_over() or not self.p._doprenext:  # exec if no prenext
+        if self._dt_over() or not getattr(
+            self.p, "_doprenext", True
+        ):  # exec if no prenext
             self.on_dt_over()
 
         self.nextstart()
@@ -458,7 +503,7 @@ class TimeFrameAnalyzerBase(with_metaclass(MetaTimeFrameAnalyzerBase, Analyzer))
         """ """
 
     def _dt_over(self):
-        """ """
+        """Verifica se houve avanço de período temporal."""
         if self.timeframe == TimeFrame.NoTimeFrame:
             dtcmp, dtkey = MAXINT, datetime.datetime.max
         else:
@@ -466,9 +511,9 @@ class TimeFrameAnalyzerBase(with_metaclass(MetaTimeFrameAnalyzerBase, Analyzer))
             dt = self.strategy.datetime.datetime()
             dtcmp, dtkey = self._get_dt_cmpkey(dt)
 
-        if self.dtcmp is None or dtcmp > self.dtcmp:
-            self.dtkey, self.dtkey1 = dtkey, self.dtkey
-            self.dtcmp, self.dtcmp1 = dtcmp, self.dtcmp
+        if getattr(self, "dtcmp", None) is None or dtcmp > self.dtcmp:
+            self.dtkey, self.dtkey1 = dtkey, getattr(self, "dtkey", None)
+            self.dtcmp, self.dtcmp1 = dtcmp, getattr(self, "dtcmp", None)
             return True
 
         return False
@@ -507,12 +552,12 @@ class TimeFrameAnalyzerBase(with_metaclass(MetaTimeFrameAnalyzerBase, Analyzer))
         return dtcmp, dtkey
 
     def _get_subday_cmpkey(self, dt):
-        """
-
-        :param dt:
-
-        """
+        """Calcula chave de comparação para subperíodos do dia."""
         # Calculate intraday position
+        ph = 0
+        pm = 0
+        ps = 0
+        pus = 0
         point = dt.hour * 60 + dt.minute
 
         if self.timeframe < TimeFrame.Minutes:
@@ -548,11 +593,6 @@ class TimeFrameAnalyzerBase(with_metaclass(MetaTimeFrameAnalyzerBase, Analyzer))
         if ph > 23:  # went over midnight:
             extradays = ph // 24
             ph %= 24
-
-        # moving 1 minor unit to the left to be in the boundary
-        # pm -= self.timeframe == TimeFrame.Minutes
-        # ps -= self.timeframe == TimeFrame.Seconds
-        # pus -= self.timeframe == TimeFrame.MicroSeconds
 
         tadjust = datetime.timedelta(
             minutes=self.timeframe == TimeFrame.Minutes,

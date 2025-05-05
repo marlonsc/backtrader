@@ -25,15 +25,15 @@ from __future__ import (
     unicode_literals,
 )
 
-from backtrader.comminfo import CommInfoBase
-from backtrader.metabase import MetaParams
-from backtrader.utils.py3 import with_metaclass
+from .comminfo import CommInfoBase
+from .metabase import MetaParams
+from .utils.py3 import with_metaclass
 
 
 class MetaBroker(MetaParams):
     """ """
 
-    def __init__(cls, name, bases, dct):
+    def __new__(cls, name, bases, dct):
         """Class has already been created ... fill missing methods if needed be
 
         :param name:
@@ -42,24 +42,27 @@ class MetaBroker(MetaParams):
 
         """
         # Initialize the class
-        super(MetaBroker, cls).__init__(name, bases, dct)
+        new_cls = super(MetaBroker, cls).__new__(cls, name, bases, dct)
         translations = {
             "get_cash": "getcash",
             "get_value": "getvalue",
         }
 
         for attr, trans in translations.items():
-            if not hasattr(cls, attr):
-                setattr(cls, name, getattr(cls, trans))
+            if not hasattr(new_cls, attr):
+                setattr(new_cls, attr, getattr(new_cls, trans))
+        return new_cls
 
 
 class BrokerBase(with_metaclass(MetaBroker, object)):
     """ """
 
-    params = (("commission", CommInfoBase(percabs=True)),)
+    params = (("commission", CommInfoBase()),)
 
     def __init__(self):
         """ """
+        if not hasattr(self, "p"):
+            self.p = type("Params", (), dict(self.params))()
         self.comminfo = dict()
         self.init()
 
@@ -140,18 +143,17 @@ class BrokerBase(with_metaclass(MetaBroker, object)):
 
         """
 
-        comm = CommInfoBase(
-            commission=commission,
-            margin=margin,
-            mult=mult,
-            commtype=commtype,
-            stocklike=stocklike,
-            percabs=percabs,
-            interest=interest,
-            interest_long=interest_long,
-            leverage=leverage,
-            automargin=automargin,
-        )
+        comm = CommInfoBase()
+        comm.commission = commission
+        comm.margin = margin
+        comm.mult = mult
+        comm.commtype = commtype
+        comm.stocklike = stocklike
+        comm.percabs = percabs
+        comm.interest = interest
+        comm.interest_long = interest_long
+        comm.leverage = leverage
+        comm.automargin = automargin
         self.comminfo[name] = comm
 
     def addcommissioninfo(self, comminfo, name=None):

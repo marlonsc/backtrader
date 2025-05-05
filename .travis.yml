@@ -3,26 +3,22 @@ language: python
 services:
   - xvfb
 python:
-  - "3.6"
-  - "3.7"
-  - "3.8" 
-  - "pypy"
-  - "pypy3"
+  - "3.8"
+  - "3.9"
+  - "3.10"
 # - "nightly"
 
 matrix:
   allow_failures:
-    python: "nightly"
-
-install: pip install tox-travis
+    - python: "nightly"
 
 # command to install dependencies
 install:
+  - pip install -r requirements-test.txt
   - pip install pandas
   - pip install git+https://github.com/blampe/IbPy.git
 # - pip install your_package
 
-script: tox
-
-# command to run tests
-script: cd tests && nosetests -v -v
+script:
+  - pytest
+  - cd tests && nosetests -v

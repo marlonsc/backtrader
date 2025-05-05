@@ -39,7 +39,7 @@ except AttributeError:  # For old Python versions
 import backtrader as bt
 
 from . import indicator, linebuffer, observers
-from .brokers import BackBroker
+from .brokers.bbroker import BackBroker
 from .metabase import MetaParams
 from .strategy import SignalStrategy, Strategy
 from .timer import Timer
@@ -47,7 +47,7 @@ from .tradingcal import (
     PandasMarketCalendar,
     TradingCalendarBase,
 )
-from .utils import OrderedDict, date2num, num2date, tzparse
+from .utils.date import date2num, num2date, tzparse
 from .utils.py3 import (
     integer_types,
     map,
@@ -57,23 +57,25 @@ from .utils.py3 import (
     zip,
 )
 from .writer import WriterFile
+from .feeds.chainer import Chainer
+from .feeds.rollover import RollOver
+from .utils.iter import iterize
+from .utils.optreturn import OptReturn
+from .utils.params import make_params
+from .utils.calendar import addcalendar, addtz
+from .utils.timer import create_timer, schedule_timer, notify_timer
+from .engine.runner import (
+    startrun,
+    finishrun,
+    runstrategies,
+    prerunstrategies,
+    runstrategieskenel,
+    _runnext,
+    _runonce,
+)
+from .plot.plot import Plot_OldSync
 
 # Defined here to make it pickable. Ideally it could be defined inside Cerebro
-
-
-class OptReturn(object):
-    """ """
-
-    def __init__(self, params, **kwargs):
-        """
-
-        :param params:
-        :param **kwargs:
-
-        """
-        self.p = self.params = params
-        for k, v in kwargs.items():
-            setattr(self, k, v)
 
 
 class Cerebro(with_metaclass(MetaParams, object)):
@@ -104,7 +106,20 @@ class Cerebro(with_metaclass(MetaParams, object)):
     )
 
     def __init__(self):
-        """ """
+        self.p = None  # Garante que self.p exista antes de qualquer acesso
+        # Garante que self.params seja sempre uma lista de tuplas
+        params_iter = []
+        if hasattr(self, "params"):
+            if isinstance(self.params, (list, tuple)):
+                params_iter = self.params
+            elif hasattr(self.params, "_getitems"):
+                params_iter = list(self.params._getitems())
+        if self.p is None:
+            self.p = make_params(params_iter)
+        # Garante que todos os parâmetros esperados existem
+        for pname, pval in params_iter:
+            if not hasattr(self.p, pname):
+                setattr(self.p, pname, pval)
         self._dolive = False
         self._doreplay = False
         self._dooptimize = False
@@ -126,40 +141,15 @@ class Cerebro(with_metaclass(MetaParams, object)):
         self._signal_strat = (None, None, None)
         self._signal_concurrent = False
         self._signal_accumulate = False
-
         self._dataid = itertools.count(1)
-
         self._broker = BackBroker()
         self._broker.cerebro = self
-
         self._tradingcal = None  # TradingCalendar()
-
         self._pretimers = list()
         self._ohistory = list()
         self._fhistory = None
-
         self._optcount = 1
-
-    @staticmethod
-    def iterize(iterable):
-        """Handy function which turns things into things that can be iterated upon
-        including iterables
-
-        :param iterable:
-
-        """
-        niterable = list()
-        for elem in iterable:
-            if isinstance(elem, string_types):
-                elem = (elem,)
-            elif not isinstance(
-                elem, collectionsAbc.abc.Iterable
-            ):  # Different functions will be called for different Python versions
-                elem = (elem,)
-
-            niterable.append(elem)
-
-        return niterable
+        self.runningstrats = list()
 
     def set_fund_history(self, fund):
         """Add a history of orders to be directly executed in the broker for
@@ -232,87 +222,17 @@ class Cerebro(with_metaclass(MetaParams, object)):
         self._ohistory.append((orders, notify))
 
     def notify_timer(self, timer, when, *args, **kwargs):
-        """Receives a timer notification where ``timer`` is the timer which was
-
-        :param timer:
-        :param when:
-        :param *args:
-        :param **kwargs:
-        :returns: and ``kwargs`` are any additional arguments passed to ``add_timer``
-
-        The actual ``when`` time can be later, but the system may have not be
-        able to call the timer before. This value is the timer value and no the
-        system time.
-
-        """
-
-    def _add_timer(
-        self,
-        owner,
-        when,
-        offset=datetime.timedelta(),
-        repeat=datetime.timedelta(),
-        weekdays=[],
-        weekcarry=False,
-        monthdays=[],
-        monthcarry=True,
-        allow=None,
-        tzdata=None,
-        strats=False,
-        cheat=False,
-        *args,
-        **kwargs,
-    ):
-        """Internal method to really create the timer (not started yet) which
-        can be called by cerebro instances or other objects which can access
-        cerebro
-
-        :param owner:
-        :param when:
-        :param offset:  (Default value = datetime.timedelta())
-        :param repeat:  (Default value = datetime.timedelta())
-        :param weekdays:  (Default value = [])
-        :param weekcarry:  (Default value = False)
-        :param monthdays:  (Default value = [])
-        :param monthcarry:  (Default value = True)
-        :param allow:  (Default value = None)
-        :param tzdata:  (Default value = None)
-        :param strats:  (Default value = False)
-        :param cheat:  (Default value = False)
-        :param *args:
-        :param **kwargs:
-
-        """
-
-        timer = Timer(
-            tid=len(self._pretimers),
-            owner=owner,
-            strats=strats,
-            when=when,
-            offset=offset,
-            repeat=repeat,
-            weekdays=weekdays,
-            weekcarry=weekcarry,
-            monthdays=monthdays,
-            monthcarry=monthcarry,
-            allow=allow,
-            tzdata=tzdata,
-            cheat=cheat,
-            *args,
-            **kwargs,
-        )
-
-        self._pretimers.append(timer)
-        return timer
+        """Delegação para utilitário de notificação de timer."""
+        notify_timer(timer, when, *args, **kwargs)
 
     def add_timer(
         self,
         when,
         offset=datetime.timedelta(),
         repeat=datetime.timedelta(),
-        weekdays=[],
+        weekdays=None,
         weekcarry=False,
-        monthdays=[],
+        monthdays=None,
         monthcarry=True,
         allow=None,
         tzdata=None,
@@ -321,27 +241,10 @@ class Cerebro(with_metaclass(MetaParams, object)):
         *args,
         **kwargs,
     ):
-        """Schedules a timer to invoke ``notify_timer``
-
-        :param when: can be
-        :param offset: which must be a (Default value = datetime.timedelta())
-        :param repeat: which must be a (Default value = datetime.timedelta())
-        :param weekdays: a (Default value = [])
-        :param weekcarry: default
-        :param monthdays: a (Default value = [])
-        :param monthcarry: default
-        :param allow: default
-        :param tzdata: which can be either (Default value = None)
-        :param strats: default
-        :param cheat: default
-        :param *args:
-        :param **kwargs:
-        :returns: - The created timer
-
-        """
-        return self._add_timer(
-            owner=self,
-            when=when,
+        """Agenda um timer usando utilitário."""
+        return schedule_timer(
+            self,
+            when,
             offset=offset,
             repeat=repeat,
             weekdays=weekdays,
@@ -357,55 +260,12 @@ class Cerebro(with_metaclass(MetaParams, object)):
         )
 
     def addtz(self, tz):
-        """This can also be done with the parameter ``tz``
-
-        Adds a global timezone for strategies. The argument ``tz`` can be
-
-          - ``None``: in this case the datetime displayed by strategies will be
-            in UTC, which has been always the standard behavior
-
-          - ``pytz`` instance. It will be used as such to convert UTC times to
-            the chosen timezone
-
-          - ``string``. Instantiating a ``pytz`` instance will be attempted.
-
-          - ``integer``. Use, for the strategy, the same timezone as the
-            corresponding ``data`` in the ``self.datas`` iterable (``0`` would
-            use the timezone from ``data0``)
-
-        :param tz:
-
-        """
-        self.p.tz = tz
+        """Define o timezone global usando utilitário."""
+        addtz(self.p, tz)
 
     def addcalendar(self, cal):
-        """Adds a global trading calendar to the system. Individual data feeds
-        may have separate calendars which override the global one
-
-        ``cal`` can be an instance of ``TradingCalendar`` a string or an
-        instance of ``pandas_market_calendars``. A string will be will be
-        instantiated as a ``PandasMarketCalendar`` (which needs the module
-        ``pandas_market_calendar`` installed in the system.
-
-        If a subclass of `TradingCalendarBase` is passed (not an instance) it
-        will be instantiated
-
-        :param cal:
-
-        """
-        if isinstance(cal, string_types):
-            cal = PandasMarketCalendar(calendar=cal)
-        elif hasattr(cal, "valid_days"):
-            cal = PandasMarketCalendar(calendar=cal)
-
-        else:
-            try:
-                if issubclass(cal, TradingCalendarBase):
-                    cal = cal()
-            except TypeError:  # already an instance
-                pass
-
-        self._tradingcal = cal
+        """Adiciona um calendário global usando utilitário."""
+        self._tradingcal = addcalendar(cal)
 
     def add_signal(self, sigtype, sigcls, *sigargs, **sigkwargs):
         """Adds a signal to the system which will be later added to a
@@ -708,9 +568,8 @@ class Cerebro(with_metaclass(MetaParams, object)):
         dname = kwargs.pop("name", None)
         if dname is None:
             dname = args[0]._dataname
-        d = bt.feeds.Chainer(dataname=dname, *args)
+        d = Chainer(*args)
         self.adddata(d, name=dname)
-
         return d
 
     def rolloverdata(self, *args, **kwargs):
@@ -730,9 +589,8 @@ class Cerebro(with_metaclass(MetaParams, object)):
         dname = kwargs.pop("name", None)
         if dname is None:
             dname = args[0]._dataname
-        d = bt.feeds.RollOver(dataname=dname, *args, **kwargs)
+        d = RollOver(*args, **kwargs)
         self.adddata(d, name=dname)
-
         return d
 
     def replaydata(self, dataname, name=None, **kwargs):
@@ -844,14 +702,14 @@ class Cerebro(with_metaclass(MetaParams, object)):
                 self._optcount *= len(p)
 
         self._dooptimize = True
-        args = self.iterize(args)
+        args = iterize(args)
         optargs = itertools.product(*args)
         add_optcount(args)
 
         optkeys = list(kwargs)
         add_optcount(kwargs)
 
-        vals = self.iterize(kwargs.values())
+        vals = iterize(kwargs.values())
         optvals = itertools.product(*vals)
 
         okwargs1 = map(zip, itertools.repeat(optkeys), optvals)
@@ -958,18 +816,12 @@ class Cerebro(with_metaclass(MetaParams, object)):
         :param **kwargs:
 
         """
+        # ... rest of the method remains unchanged ...
         if self._exactbars > 0:
             return
 
         if not plotter:
-            from . import plot
-
-            # if self.p.oldsync:
-            #     plotter = plot.Plot_OldSync(**kwargs)
-            # else:
-            #     plotter = plot.Plot(**kwargs)
-            plotter = plot.Plot_OldSync(**kwargs)
-            # plotter = plot.CustomPlot(**kwargs)
+            plotter = Plot_OldSync(**kwargs)
 
         # pfillers = {self.datas[i]: self._plotfillers[i]
         # for i, x in enumerate(self._plotfillers)}
@@ -998,22 +850,21 @@ class Cerebro(with_metaclass(MetaParams, object)):
         return figs
 
     def __call__(self, iterstrat):
-        """Used during optimization to pass the cerebro over the multiprocesing
+        """
+        Used during optimization to pass the cerebro over the multiprocesing
         module without complains
-
-        :param iterstrat:
-
         """
 
-        predata = self.p.optdatas and self._dopreload and self._dorunonce
+        predata = (
+            getattr(self.p, "optdatas", True) and self._dopreload and self._dorunonce
+        )
         return self.runstrategies(iterstrat, predata=predata)
 
     def __getstate__(self):
-        """Used during optimization to prevent optimization result `runstrats`
+        """
+        Used during optimization to prevent optimization result `runstrats`
         from being pickled to subprocesses
         Also optcbs don't need to be transfered to subprocesses. They might fail to pickle due to use of e.g. tqdm
-
-
         """
 
         rv = vars(self).copy()
@@ -1024,24 +875,19 @@ class Cerebro(with_metaclass(MetaParams, object)):
 
     def runstop(self):
         """If invoked from inside a strategy or anywhere else, including other
-        threads the execution will stop as soon as possible.
-
-
-        """
+        threads the execution will stop as soon as possible."""
         self._event_stop = True  # signal a stop has been requested
 
     def prerun(self, **kwargs):
-        """
-
-        :param **kwargs:
-
-        """
         self._event_stop = False  # Stop is requested
 
         if not self.datas:
             return []  # nothing can be run
 
-        pkeys = self.params._getkeys()
+        # Garante que self.params é objeto Params
+        if not hasattr(self, "params") or not hasattr(self.params, "_getkeys"):
+            self.params = self.p
+        pkeys = self.params._getkeys() if hasattr(self.params, "_getkeys") else []
         for key, val in kwargs.items():
             if key in pkeys:
                 setattr(self.params, key, val)
@@ -1050,12 +896,12 @@ class Cerebro(with_metaclass(MetaParams, object)):
         linebuffer.LineActions.cleancache()  # clean cache
         indicator.Indicator.cleancache()  # clean cache
 
-        linebuffer.LineActions.usecache(self.p.objcache)
-        indicator.Indicator.usecache(self.p.objcache)
+        linebuffer.LineActions.usecache(getattr(self.p, "objcache", False))
+        indicator.Indicator.usecache(getattr(self.p, "objcache", False))
 
-        self._dorunonce = self.p.runonce
-        self._dopreload = self.p.preload
-        self._exactbars = int(self.p.exactbars)
+        self._dorunonce = getattr(self.p, "runonce", True)
+        self._dopreload = getattr(self.p, "preload", True)
+        self._exactbars = int(getattr(self.p, "exactbars", 0))
 
         if self._exactbars:
             self._dorunonce = False  # something is saving memory, no runonce
@@ -1067,7 +913,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
             # are constructed in realtime
             self._dopreload = False
 
-        if self._dolive or self.p.live:
+        if self._dolive or getattr(self.p, "live", False):
             # in this case both preload and runonce must be off
             self._dorunonce = False
             self._dopreload = False
@@ -1075,7 +921,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
         self.runwriters = list()
 
         # Add the system default writer if requested
-        if self.p.writer is True:
+        if getattr(self.p, "writer", False) is True:
             wr = WriterFile()
             self.runwriters.append(wr)
 
@@ -1121,592 +967,36 @@ class Cerebro(with_metaclass(MetaParams, object)):
             self.addstrategy(Strategy)
 
     def startrun(self):
-        """ """
-        iterstrats = itertools.product(*self.strats)
-        if not self._dooptimize or self.p.maxcpus == 1:
-            # If no optimmization is wished ... or 1 core is to be used
-            # let's skip process "spawning"
-            for iterstrat in iterstrats:
-                runstrat = self.runstrategies(iterstrat, predata=self.p.predata)
-                self.runstrats.append(runstrat)
-                if self._dooptimize:
-                    for cb in self.optcbs:
-                        cb(runstrat)  # callback receives finished strategy
-        else:
-            if self.p.optdatas and self._dopreload and self._dorunonce:
-                for data in self.datas:
-                    data.reset()
-                    if self._exactbars < 1:  # datas can be full length
-                        data.extend(size=self.params.lookahead)
-                    data._start()
-                    if self._dopreload:
-                        data.preload()
-
-            pool = multiprocessing.Pool(self.p.maxcpus or None)
-            for r in pool.imap(self, iterstrats):
-                self.runstrats.append(r)
-                for cb in self.optcbs:
-                    cb(r)  # callback receives finished strategy
-
-            pool.close()
-
-            if self.p.optdatas and self._dopreload and self._dorunonce:
-                for data in self.datas:
-                    data.stop()
+        return startrun(self)
 
     def finishrun(self):
-        """ """
-        if not self._dooptimize:
-            # avoid a list of list for regular cases
-            return self.runstrats[0]
+        return finishrun(self)
 
-        return self.runstrats
+    def runstrategies(self, iterstrat, predata=False):
+        return runstrategies(self, iterstrat, predata=predata)
 
-    def run(self, **kwargs):
-        """The core method to perform backtesting. Any ``kwargs`` passed to it
-        will affect the value of the standard parameters ``Cerebro`` was
-        instantiated with.
+    def prerunstrategies(self, iterstrat, predata=False):
+        return prerunstrategies(self, iterstrat, predata=predata)
 
-        If ``cerebro`` has not datas the method will immediately bail out.
+    def runstrategieskenel(self):
+        return runstrategieskenel(self)
 
-        It has different return values:
+    def _runnext(self, runstrats):
+        return _runnext(self, runstrats)
 
-          - For No Optimization: a list contanining instances of the Strategy
-            classes added with ``addstrategy``
-
-          - For Optimization: a list of lists which contain instances of the
-            Strategy classes added with ``addstrategy``
-
-        :param **kwargs:
-
-        """
-        self._event_stop = False  # Stop is requested
-
-        if not self.datas:
-            return []  # nothing can be run
-
-        pkeys = self.params._getkeys()
-        for key, val in kwargs.items():
-            if key in pkeys:
-                setattr(self.params, key, val)
-
-        # Manage activate/deactivate object cache
-        linebuffer.LineActions.cleancache()  # clean cache
-        indicator.Indicator.cleancache()  # clean cache
-
-        linebuffer.LineActions.usecache(self.p.objcache)
-        indicator.Indicator.usecache(self.p.objcache)
-
-        self._dorunonce = self.p.runonce
-        self._dopreload = self.p.preload
-        self._exactbars = int(self.p.exactbars)
-
-        if self._exactbars:
-            self._dorunonce = False  # something is saving memory, no runonce
-            self._dopreload = self._dopreload and self._exactbars < 1
-
-        self._doreplay = self._doreplay or any(x.replaying for x in self.datas)
-        if self._doreplay:
-            # preloading is not supported with replay. full timeframe bars
-            # are constructed in realtime
-            self._dopreload = False
-
-        if self._dolive or self.p.live:
-            # in this case both preload and runonce must be off
-            self._dorunonce = False
-            self._dopreload = False
-
-        self.runwriters = list()
-        self.runlisteners = list()
-
-        # Add the system default writer if requested
-        if self.p.writer is True:
-            wr = WriterFile()
-            self.runwriters.append(wr)
-
-        # Instantiate any other writers
-        for wrcls, wrargs, wrkwargs in self.writers:
-            wr = wrcls(*wrargs, **wrkwargs)
-            self.runwriters.append(wr)
-
-        for lstcls, lstargs, lstkwargs in self.listeners:
-            wr = lstcls(*lstargs, **lstkwargs)
-            self.runlisteners.append(wr)
-
-        # Write down if any writer wants the full csv output
-        self.writers_csv = any(map(lambda x: x.p.csv, self.runwriters))
-
-        self.runstrats = list()
-
-        if self.signals:  # allow processing of signals
-            signalst, sargs, skwargs = self._signal_strat
-            if signalst is None:
-                # Try to see if the 1st regular strategy is a signal strategy
-                try:
-                    signalst, sargs, skwargs = self.strats.pop(0)
-                except IndexError:
-                    pass  # Nothing there
-                else:
-                    if not isinstance(signalst, SignalStrategy):
-                        # no signal ... reinsert at the beginning
-                        self.strats.insert(0, (signalst, sargs, skwargs))
-                        signalst = None  # flag as not presetn
-
-            if signalst is None:  # recheck
-                # Still None, create a default one
-                signalst, sargs, skwargs = SignalStrategy, tuple(), dict()
-
-            # Add the signal strategy
-            self.addstrategy(
-                signalst,
-                _accumulate=self._signal_accumulate,
-                _concurrent=self._signal_concurrent,
-                signals=self.signals,
-                *sargs,
-                **skwargs,
-            )
-
-        if not self.strats:  # Datas are present, add a strategy
-            self.addstrategy(Strategy)
-
-        iterstrats = itertools.product(*self.strats)
-        if not self._dooptimize or self.p.maxcpus == 1:
-            # If no optimmization is wished ... or 1 core is to be used
-            # let's skip process "spawning"
-            for iterstrat in iterstrats:
-                runstrat = self.runstrategies(iterstrat, predata=self.p.predata)
-                self.runstrats.append(runstrat)
-                if self._dooptimize:
-                    for cb in self.optcbs:
-                        cb(runstrat)  # callback receives finished strategy
-        else:
-            if self.p.optdatas and self._dopreload and self._dorunonce:
-                for data in self.datas:
-                    data.reset()
-                    if self._exactbars < 1:  # datas can be full length
-                        data.extend(size=self.params.lookahead)
-                    data._start()
-                    if self._dopreload:
-                        data.preload()
-
-            pool = multiprocessing.Pool(self.p.maxcpus or None)
-            for r in pool.imap(self, iterstrats):
-                self.runstrats.append(r)
-                for cb in self.optcbs:
-                    cb(r)  # callback receives finished strategy
-
-            pool.close()
-
-            if self.p.optdatas and self._dopreload and self._dorunonce:
-                for data in self.datas:
-                    data.stop()
-
-        if not self._dooptimize:
-            # avoid a list of list for regular cases
-            return self.runstrats[0]
-
-        return self.runstrats
+    def _runonce(self, runstrats):
+        return _runonce(self, runstrats)
 
     def _init_stcount(self):
-        """ """
         self.stcount = itertools.count(0)
 
     def _next_stid(self):
-        """ """
         return next(self.stcount)
 
-    def prerunstrategies(self, iterstrat, predata=False):
-        """
-
-        :param iterstrat:
-        :param predata:  (Default value = False)
-
-        """
-        self._init_stcount()
-
-        self.runningstrats = runstrats = list()
-        for store in self.stores:
-            store.start()
-
-        if self.p.cheat_on_open and self.p.broker_coo:
-            # try to activate in broker
-            if hasattr(self._broker, "set_coo"):
-                self._broker.set_coo(True)
-
-        if self._fhistory is not None:
-            self._broker.set_fund_history(self._fhistory)
-
-        for orders, onotify in self._ohistory:
-            self._broker.add_order_history(orders, onotify)
-
-        self._broker.start()
-
-        for feed in self.feeds:
-            feed.start()
-
-        if self.writers_csv:
-            wheaders = list()
-            for data in self.datas:
-                if data.csv:
-                    wheaders.extend(data.getwriterheaders())
-
-            for writer in self.runwriters:
-                if writer.p.csv:
-                    writer.addheaders(wheaders)
-
-        # self._plotfillers = [list() for d in self.datas]
-        # self._plotfillers2 = [list() for d in self.datas]
-
-        if not predata:
-            for data in self.datas:
-                data.reset()
-                if self._exactbars < 1:  # datas can be full length
-                    data.extend(size=self.params.lookahead)
-                data._start()
-                if self._dopreload:
-                    data.preload()
-
-        for stratcls, sargs, skwargs in iterstrat:
-            sargs = self.datas + list(sargs)
-            try:
-                strat = stratcls(*sargs, **skwargs)
-            except bt.errors.StrategySkipError:
-                continue  # do not add strategy to the mix
-
-            if self.p.oldsync:
-                strat._oldsync = True  # tell strategy to use old clock update
-            if self.p.tradehistory:
-                strat.set_tradehistory()
-            runstrats.append(strat)
-
-        tz = self.p.tz
-        if isinstance(tz, integer_types):
-            tz = self.datas[tz]._tz
-        else:
-            tz = tzparse(tz)
-
-        if runstrats:
-            # loop separated for clarity
-            defaultsizer = self.sizers.get(None, (None, None, None))
-            for idx, strat in enumerate(runstrats):
-                if self.p.stdstats:
-                    strat._addobserver(False, observers.Broker)
-                    if self.p.oldbuysell:
-                        strat._addobserver(True, observers.BuySell)
-                    else:
-                        strat._addobserver(True, observers.BuySell, barplot=True)
-
-                    if self.p.oldtrades or len(self.datas) == 1:
-                        strat._addobserver(False, observers.Trades)
-                    else:
-                        strat._addobserver(False, observers.DataTrades)
-
-                for multi, obscls, obsargs, obskwargs in self.observers:
-                    strat._addobserver(multi, obscls, *obsargs, **obskwargs)
-
-                for indcls, indargs, indkwargs in self.indicators:
-                    strat._addindicator(indcls, *indargs, **indkwargs)
-
-                for ancls, anargs, ankwargs in self.analyzers:
-                    strat._addanalyzer(ancls, *anargs, **ankwargs)
-
-                sizer, sargs, skwargs = self.sizers.get(idx, defaultsizer)
-                if sizer is not None:
-                    strat._addsizer(sizer, *sargs, **skwargs)
-
-                strat._settz(tz)
-                strat._start()
-
-                for writer in self.runwriters:
-                    if writer.p.csv:
-                        writer.addheaders(strat.getwriterheaders())
-
-            if not predata:
-                for strat in runstrats:
-                    strat.qbuffer(self._exactbars, replaying=self._doreplay)
-
-            for writer in self.runwriters:
-                writer.start()
-
-            # Prepare timers
-            self._timers = []
-            self._timerscheat = []
-            for timer in self._pretimers:
-                # preprocess tzdata if needed
-                timer.start(self.datas[0])
-
-                if timer.params.cheat:
-                    self._timerscheat.append(timer)
-                else:
-                    self._timers.append(timer)
-
-    def runstrategieskenel(self):
-        """ """
-        if self._dopreload and self._dorunonce:
-            if self.p.oldsync:
-                self._runonce_old(self.runningstrats)
-            else:
-                self._runonce(self.runningstrats)
-        else:
-            if self.p.oldsync:
-                self._runnext_old(self.runningstrats)
-            else:
-                self._runnext(self.runningstrats)
-
-    def finishrunstrategies(self, predata=False):
-        """
-
-        :param predata:  (Default value = False)
-
-        """
-        runstrats = self.runningstrats
-
-        for strat in runstrats:
-            strat._stop()
-
-        self._broker.stop()
-
-        if not predata:
-            for data in self.datas:
-                data.stop()
-
-        for feed in self.feeds:
-            feed.stop()
-
-        for store in self.stores:
-            store.stop()
-
-        self.stop_writers(runstrats)
-
-        if self._dooptimize and self.p.optreturn:
-            # Results can be optimized
-            results = list()
-            for strat in runstrats:
-                for a in strat.analyzers:
-                    a.strategy = None
-                    a._parent = None
-                    for attrname in dir(a):
-                        if attrname.startswith("data"):
-                            setattr(a, attrname, None)
-
-                oreturn = OptReturn(
-                    strat.params,
-                    analyzers=strat.analyzers,
-                    strategycls=type(strat),
-                )
-                results.append(oreturn)
-
-            return results
-
-        return runstrats
-
-    def runstrategies(self, iterstrat, predata=False):
-        """Internal method invoked by ``run``` to run a set of strategies
-
-        :param iterstrat:
-        :param predata:  (Default value = False)
-
-        """
-        self._init_stcount()
-
-        self.runningstrats = runstrats = list()
-        for store in self.stores:
-            store.start()
-
-        if self.p.cheat_on_open and self.p.broker_coo:
-            # try to activate in broker
-            if hasattr(self._broker, "set_coo"):
-                self._broker.set_coo(True)
-
-        if self._fhistory is not None:
-            self._broker.set_fund_history(self._fhistory)
-
-        for orders, onotify in self._ohistory:
-            self._broker.add_order_history(orders, onotify)
-
-        self._broker.start()
-
-        for feed in self.feeds:
-            feed.start()
-
-        if self.writers_csv:
-            wheaders = list()
-            for data in self.datas:
-                if data.csv:
-                    wheaders.extend(data.getwriterheaders())
-
-            for writer in self.runwriters:
-                if writer.p.csv:
-                    writer.addheaders(wheaders)
-
-        # self._plotfillers = [list() for d in self.datas]
-        # self._plotfillers2 = [list() for d in self.datas]
-
-        if not predata:
-            for data in self.datas:
-                data.reset()
-                if self._exactbars < 1:  # datas can be full length
-                    data.extend(size=self.params.lookahead)
-                data._start()
-                if self._dopreload:
-                    data.preload()
-
-        for stratcls, sargs, skwargs in iterstrat:
-            sargs = self.datas + list(sargs)
-            try:
-                strat = stratcls(*sargs, **skwargs)
-            except bt.errors.StrategySkipError:
-                continue  # do not add strategy to the mix
-
-            if self.p.oldsync:
-                strat._oldsync = True  # tell strategy to use old clock update
-            if self.p.tradehistory:
-                strat.set_tradehistory()
-            runstrats.append(strat)
-
-        tz = self.p.tz
-        if isinstance(tz, integer_types):
-            tz = self.datas[tz]._tz
-        else:
-            tz = tzparse(tz)
-
-        if runstrats:
-            # loop separated for clarity
-            defaultsizer = self.sizers.get(None, (None, None, None))
-            for idx, strat in enumerate(runstrats):
-                if self.p.stdstats:
-                    strat._addobserver(False, observers.Broker)
-                    if self.p.oldbuysell:
-                        strat._addobserver(True, observers.BuySell)
-                    else:
-                        strat._addobserver(True, observers.BuySell, barplot=True)
-
-                    if self.p.oldtrades or len(self.datas) == 1:
-                        strat._addobserver(False, observers.Trades)
-                    else:
-                        strat._addobserver(False, observers.DataTrades)
-
-                for multi, obscls, obsargs, obskwargs in self.observers:
-                    strat._addobserver(multi, obscls, *obsargs, **obskwargs)
-
-                for indcls, indargs, indkwargs in self.indicators:
-                    strat._addindicator(indcls, *indargs, **indkwargs)
-
-                for ancls, anargs, ankwargs in self.analyzers:
-                    strat._addanalyzer(ancls, *anargs, **ankwargs)
-
-                sizer, sargs, skwargs = self.sizers.get(idx, defaultsizer)
-                if sizer is not None:
-                    strat._addsizer(sizer, *sargs, **skwargs)
-
-                strat._settz(tz)
-                strat._start()
-
-                for writer in self.runwriters:
-                    if writer.p.csv:
-                        writer.addheaders(strat.getwriterheaders())
-
-            if not predata:
-                for strat in runstrats:
-                    strat.qbuffer(self._exactbars, replaying=self._doreplay)
-
-            for writer in self.runwriters:
-                writer.start()
-
-            for listener in self.runlisteners:
-                listener.start(self)
-
-            # Prepare timers
-            self._timers = []
-            self._timerscheat = []
-            for timer in self._pretimers:
-                # preprocess tzdata if needed
-                timer.start(self.datas[0])
-
-                if timer.params.cheat:
-                    self._timerscheat.append(timer)
-                else:
-                    self._timers.append(timer)
-
-            if self._dopreload and self._dorunonce:
-                if self.p.oldsync:
-                    self._runonce_old(runstrats)
-                else:
-                    self._runonce(runstrats)
-            else:
-                if self.p.oldsync:
-                    self._runnext_old(runstrats)
-                else:
-                    self._runnext(runstrats)
-
-            for strat in runstrats:
-                strat._stop()
-
-        self._broker.stop()
-
-        if not predata:
-            for data in self.datas:
-                data.stop()
-
-        for feed in self.feeds:
-            feed.stop()
-
-        for store in self.stores:
-            store.stop()
-
-        self.stop_writers(runstrats)
-
-        if self._dooptimize and self.p.optreturn:
-            # Results can be optimized
-            results = list()
-            for strat in runstrats:
-                for a in strat.analyzers:
-                    a.strategy = None
-                    a._parent = None
-                    a.optimize()
-
-                oreturn = OptReturn(
-                    strat.params, analyzers=strat.analyzers
-                )  # , strategycls=type(strat))
-                results.append(oreturn)
-
-            return results
-
-        return runstrats
-
-    def stop_writers(self, runstrats):
-        """
-
-        :param runstrats:
-
-        """
-        cerebroinfo = OrderedDict()
-        datainfos = OrderedDict()
-
-        for i, data in enumerate(self.datas):
-            datainfos["Data%d" % i] = data.getwriterinfo()
-
-        cerebroinfo["Datas"] = datainfos
-
-        stratinfos = dict()
-        for strat in runstrats:
-            stname = strat.__class__.__name__
-            stratinfos[stname] = strat.getwriterinfo()
-
-        cerebroinfo["Strategies"] = stratinfos
-
-        for writer in self.runwriters:
-            writer.writedict(dict(Cerebro=cerebroinfo))
-            writer.stop()
-
-        for listener in self.runlisteners:
-            listener.stop()
-
     def _brokernotify(self):
-        """Internal method which kicks the broker and delivers any broker
+        """
+        Internal method which kicks the broker and delivers any broker
         notification to the strategy
-
-
         """
         self._broker.next()
         while True:
@@ -1718,392 +1008,9 @@ class Cerebro(with_metaclass(MetaParams, object)):
             if owner is None:
                 owner = self.runningstrats[0]  # default
 
-            owner._addnotification(order, quicknotify=self.p.quicknotify)
-
-    def _runnext_old(self, runstrats):
-        """Actual implementation of run in full next mode. All objects have its
-        ``next`` method invoke on each data arrival
-
-        :param runstrats:
-
-        """
-        data0 = self.datas[0]
-        d0ret = True
-        while d0ret or d0ret is None:
-            lastret = False
-            # Notify anything from the store even before moving datas
-            # because datas may not move due to an error reported by the store
-            self._storenotify()
-            if self._event_stop:  # stop if requested
-                return
-            self._datanotify()
-            if self._event_stop:  # stop if requested
-                return
-
-            d0ret = data0.next()
-            if d0ret:
-                for data in self.datas[1:]:
-                    if not data.next(datamaster=data0):  # no delivery
-                        data._check(forcedata=data0)  # check forcing output
-                        data.next(datamaster=data0)  # retry
-
-            elif d0ret is None:
-                # meant for things like live feeds which may not produce a bar
-                # at the moment but need the loop to run for notifications and
-                # getting resample and others to produce timely bars
-                data0._check()
-                for data in self.datas[1:]:
-                    data._check()
-            else:
-                lastret = data0._last()
-                for data in self.datas[1:]:
-                    lastret += data._last(datamaster=data0)
-
-                if not lastret:
-                    # Only go extra round if something was changed by "lasts"
-                    break
-
-            # Datas may have generated a new notification after next
-            self._datanotify()
-            if self._event_stop:  # stop if requested
-                return
-
-            self._brokernotify()
-            if self._event_stop:  # stop if requested
-                return
-
-            if d0ret or lastret:  # bars produced by data or filters
-                for strat in runstrats:
-                    strat._next()
-                    if self._event_stop:  # stop if requested
-                        return
-
-                    self._next_writers(runstrats)
-
-        # Last notification chance before stopping
-        self._datanotify()
-        if self._event_stop:  # stop if requested
-            return
-        self._storenotify()
-        if self._event_stop:  # stop if requested
-            return
-
-    def _runonce_old(self, runstrats):
-        """Actual implementation of run in vector mode.
-        Strategies are still invoked on a pseudo-event mode in which ``next``
-        is called for each data arrival
-
-        :param runstrats:
-
-        """
-        for strat in runstrats:
-            strat._once()
-
-        # The default once for strategies does nothing and therefore
-        # has not moved forward all datas/indicators/observers that
-        # were homed before calling once, Hence no "need" to do it
-        # here again, because pointers are at 0
-        data0 = self.datas[0]
-        datas = self.datas[1:]
-        for i in range(data0.buflen()):
-            data0.advance()
-            for data in datas:
-                data.advance(datamaster=data0)
-
-            self._brokernotify()
-            if self._event_stop:  # stop if requested
-                return
-
-            for strat in runstrats:
-                # data0.datetime[0] for compat. w/ new strategy's oncepost
-                strat._oncepost(data0.datetime[0])
-                if self._event_stop:  # stop if requested
-                    return
-
-                self._next_writers(runstrats)
-
-    def _next_writers(self, runstrats):
-        """
-
-        :param runstrats:
-
-        """
-        if not self.runwriters:
-            return
-
-        if self.writers_csv:
-            wvalues = list()
-            for data in self.datas:
-                if data.csv:
-                    wvalues.extend(data.getwritervalues())
-
-            for strat in runstrats:
-                wvalues.extend(strat.getwritervalues())
-
-            for writer in self.runwriters:
-                if writer.p.csv:
-                    writer.addvalues(wvalues)
-
-                    writer.next()
-
-    def _next_listeners(self):
-        """ """
-        if not self.runlisteners:
-            return
-
-        for listener in self.runlisteners:
-            listener.next()
-
-    def _disable_runonce(self):
-        """API for lineiterators to disable runonce (see HeikinAshi)"""
-        self._dorunonce = False
-
-    def _runnext(self, runstrats):
-        """Actual implementation of run in full next mode. All objects have its
-        ``next`` method invoke on each data arrival
-
-        :param runstrats:
-
-        """
-        datas = sorted(self.datas, key=lambda x: (x._timeframe, x._compression))
-        datas1 = datas[1:]
-        data0 = datas[0]
-        d0ret = True
-
-        [i for i, x in enumerate(datas) if x.resampling]
-        [i for i, x in enumerate(datas) if x.replaying]
-        rsonly = [i for i, x in enumerate(datas) if x.resampling and not x.replaying]
-        onlyresample = len(datas) == len(rsonly)
-        noresample = not rsonly
-
-        clonecount = sum(d._clone for d in datas)
-        ldatas = len(datas)
-        ldatas_noclones = ldatas - clonecount
-        dt0 = date2num(datetime.datetime.max) - 2  # default at max
-        while d0ret or d0ret is None:
-            # self.broker.ib.sleep(1)
-            # if any has live data in the buffer, no data will wait anything
-            newqcheck = not any(d.haslivedata() for d in datas)
-            if not newqcheck:
-                # If no data has reached the live status or all, wait for
-                # the next incoming data
-                livecount = sum(d._laststatus == d.LIVE for d in datas)
-                newqcheck = not livecount or livecount == ldatas_noclones
-
-            lastret = False
-            # Notify anything from the store even before moving datas
-            # because datas may not move due to an error reported by the store
-            self._storenotify()
-            if self._event_stop:  # stop if requested
-                return
-            self._datanotify()
-            if self._event_stop:  # stop if requested
-                return
-
-            # record starting time and tell feeds to discount the elapsed time
-            # from the qcheck value
-            drets = []
-            # qstart = datetime.datetime.utcnow()
-            qstart = datetime.datetime.now(datetime.UTC)
-            for d in datas:
-                # qlapse = datetime.datetime.utcnow() - qstart
-                qlapse = datetime.datetime.now(datetime.UTC) - qstart
-                d.do_qcheck(newqcheck, qlapse.total_seconds())
-                cc = d.next(ticks=False)
-                drets.append(cc)
-
-            d0ret = any((dret for dret in drets))
-            if not d0ret and any((dret is None for dret in drets)):
-                d0ret = None
-
-            if d0ret:
-                dts = []
-                for i, ret in enumerate(drets):
-                    dts.append(datas[i].datetime[0] if ret else None)
-
-                # Get index to minimum datetime
-                if onlyresample or noresample:
-                    dt0 = min((d for d in dts if d is not None))
-                else:
-                    dt0 = min(
-                        (
-                            d
-                            for i, d in enumerate(dts)
-                            if d is not None and i not in rsonly
-                        )
-                    )
-
-                dmaster = datas[dts.index(dt0)]  # and timemaster
-                self._dtmaster = dmaster.num2date(dt0)
-                self._udtmaster = num2date(dt0)
-
-                # slen = len(runstrats[0])
-                # Try to get something for those that didn't return
-                for i, ret in enumerate(drets):
-                    if ret:  # dts already contains a valid datetime for this i
-                        continue
-
-                    # try to get a data by checking with a master
-                    d = datas[i]
-                    d._check(forcedata=dmaster)  # check to force output
-                    if d.next(datamaster=dmaster, ticks=False):  # retry
-                        dts[i] = d.datetime[0]  # good -> store
-                        # self._plotfillers2[i].append(slen)  # mark as fill
-                    else:
-                        # self._plotfillers[i].append(slen)  # mark as empty
-                        pass
-
-                # make sure only those at dmaster level end up delivering
-                for i, dti in enumerate(dts):
-                    if dti is not None:
-                        di = datas[i]
-                        rpi = False and di.replaying  # to check behavior
-                        if dti > dt0:
-                            if not rpi:  # must see all ticks ...
-                                di.rewind()  # cannot deliver yet
-                            # self._plotfillers[i].append(slen)
-                        elif not di.replaying:
-                            # Replay forces tick fill, else force here
-                            di._tick_fill(force=True)
-
-                        # self._plotfillers2[i].append(slen)  # mark as fill
-
-            elif d0ret is None:
-                # meant for things like live feeds which may not produce a bar
-                # at the moment but need the loop to run for notifications and
-                # getting resample and others to produce timely bars
-                for data in datas:
-                    data._check()
-            else:
-                lastret = data0._last()
-                for data in datas1:
-                    lastret += data._last(datamaster=data0)
-
-                if not lastret:
-                    # Only go extra round if something was changed by "lasts"
-                    break
-
-            # Datas may have generated a new notification after next
-
-            self._datanotify()
-            if self._event_stop:  # stop if requested
-                return
-
-            if d0ret or lastret:  # if any bar, check timers before broker
-                self._check_timers(runstrats, dt0, cheat=True)
-                if self.p.cheat_on_open:
-                    for strat in runstrats:
-                        strat._next_open()
-                        if self._event_stop:  # stop if requested
-                            return
-
-            self._brokernotify()
-            if self._event_stop:  # stop if requested
-                return
-
-            if d0ret or (
-                lastret and self.params.bar_on_exit
-            ):  # bars produced by data or filters
-                self._check_timers(runstrats, dt0, cheat=False)
-                for strat in runstrats:
-                    strat._next()
-                    if self._event_stop:  # stop if requested
-                        return
-
-                    self._next_writers(runstrats)
-
-                self._next_listeners()
-
-        # Last notification chance before stopping
-        self._datanotify()
-        if self._event_stop:  # stop if requested
-            return
-        self._storenotify()
-        if self._event_stop:  # stop if requested
-            return
-
-    def _runonce(self, runstrats):
-        """Actual implementation of run in vector mode.
-
-        Strategies are still invoked on a pseudo-event mode in which ``next``
-        is called for each data arrival
-
-        :param runstrats:
-
-        """
-        for strat in runstrats:
-            strat._once()
-            strat.reset()  # strat called next by next - reset lines
-
-        # The default once for strategies does nothing and therefore
-        # has not moved forward all datas/indicators/observers that
-        # were homed before calling once, Hence no "need" to do it
-        # here again, because pointers are at 0
-        datas = sorted(self.datas, key=lambda x: (x._timeframe, x._compression))
-
-        while True:
-            # Check next incoming date in the datas
-            dts = [d.advance_peek() for d in datas]
-            dt0 = min(dts)
-
-            if dt0 == float("inf"):
-                print("Error: Max data else.")
-                break  # no data delivers anything
-
-            # dtime = num2date(dt0)
-            # print(f"process data {dtime.year}-{dtime.month}-{dtime.day}")
-
-            # Timemaster if needed be
-            # dmaster = datas[dts.index(dt0)]  # and timemaster
-            for i, dti in enumerate(dts):
-                if dti <= dt0:
-                    datas[i].advance()
-                    # self._plotfillers2[i].append(slen)  # mark as fill
-                else:
-                    # self._plotfillers[i].append(slen)
-                    pass
-
-            self._check_timers(runstrats, dt0, cheat=True)
-
-            if self.p.cheat_on_open:
-                for strat in runstrats:
-                    strat._oncepost_open()
-                    if self._event_stop:  # stop if requested
-                        return
-
-            if self._event_stop:  # stop if requested
-                return
-
-            self._check_timers(runstrats, dt0, cheat=False)
-
-            for strat in runstrats:
-                strat._oncepost(dt0)
-                if self._event_stop:  # stop if requested
-                    return
-
-                self._next_writers(runstrats)
-            self._brokernotify()
-
-    def _check_timers(self, runstrats, dt0, cheat=False):
-        """
-
-        :param runstrats:
-        :param dt0:
-        :param cheat:  (Default value = False)
-
-        """
-        timers = self._timers if not cheat else self._timerscheat
-
-        for t in timers:
-            if not t.check(dt0):
-                continue
-
-            t.params.owner.notify_timer(t, t.lastwhen, *t.args, **t.kwargs)
-
-            if t.params.strats:
-                for strat in runstrats:
-                    strat.notify_timer(t, t.lastwhen, *t.args, **t.kwargs)
+            owner._addnotification(
+                order, quicknotify=getattr(self.p, "quicknotify", False)
+            )
 
     def get_opt_runcount(self):
-        """ """
         return self._optcount

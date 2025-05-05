@@ -81,5 +81,6 @@ datas/*.py
 
 turtle/data/*
 
+.ruff_cache/
 poetry.lock
 .venv/

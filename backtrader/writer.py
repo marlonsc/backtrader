@@ -37,16 +37,40 @@ except AttributeError:  # For old Python versions
     collectionsAbc = collections  # Используем collections.Iterable
 
 import backtrader as bt
-from backtrader.utils.py3 import (
+from .utils.py3 import (
     integer_types,
     map,
     string_types,
     with_metaclass,
+    MAXINT,
 )
+from .lineseries import LineSeries
+from .metabase import MetaParams
+from .strategy import Strategy
 
 
-class WriterBase(with_metaclass(bt.MetaParams, object)):
+class WriterBase(with_metaclass(MetaParams, object)):
     """ """
+
+    def __init__(self, *args, **kwargs):
+        # Ensure self.p is initialized before any access
+        if not hasattr(self, "p") or self.p is None:
+            param_dict = dict((k, v) for k, v in getattr(self, "params", []))
+            for key, default in [
+                ("out", None),
+                ("close_out", False),
+                ("csv", False),
+                ("csvsep", ","),
+                ("csv_filternan", True),
+                ("csv_counter", True),
+                ("indent", 2),
+                ("separators", ["=", "-", "+", "*", ".", "~", '"', "^", "#"]),
+                ("seplen", 79),
+                ("rounding", None),
+            ]:
+                param_dict.setdefault(key, default)
+            self.p = type("Params", (), param_dict)()
+        super().__init__(*args, **kwargs)
 
 
 class WriterFile(WriterBase):
@@ -116,29 +140,50 @@ class WriterFile(WriterBase):
 
     def __init__(self):
         """ """
+        # Ensure self.p is initialized before any access
+        if not hasattr(self, "p") or self.p is None:
+            param_dict = dict((k, v) for k, v in getattr(self, "params", []))
+            for key, default in [
+                ("out", None),
+                ("close_out", False),
+                ("csv", False),
+                ("csvsep", ","),
+                ("csv_filternan", True),
+                ("csv_counter", True),
+                ("indent", 2),
+                ("separators", ["=", "-", "+", "*", ".", "~", '"', "^", "#"]),
+                ("seplen", 79),
+                ("rounding", None),
+            ]:
+                param_dict.setdefault(key, default)
+            self.p = type("Params", (), param_dict)()
         self._len = itertools.count(1)
         self.headers = list()
         self.values = list()
+        self.out = None  # Ensure 'out' is always defined
+        super().__init__()
 
     def _start_output(self):
         """ """
         # open file if needed
         if not hasattr(self, "out") or not self.out:
-            if self.p.out is None:
+            pout = getattr(self.p, "out", None)
+            pclose_out = getattr(self.p, "close_out", False)
+            if pout is None:
                 self.out = sys.stdout
                 self.close_out = False
-            elif isinstance(self.p.out, string_types):
-                self.out = open(self.p.out, "w")
+            elif isinstance(pout, string_types):
+                self.out = open(pout, "w")
                 self.close_out = True
             else:
-                self.out = self.p.out
-                self.close_out = self.p.close_out
+                self.out = pout
+                self.close_out = pclose_out
 
     def start(self):
         """ """
         self._start_output()
 
-        if self.p.csv:
+        if getattr(self.p, "csv", False):
             self.writelineseparator()
             self.writeiterable(self.headers, counter="Id")
 
@@ -149,7 +194,7 @@ class WriterFile(WriterBase):
 
     def next(self):
         """ """
-        if self.p.csv:
+        if getattr(self.p, "csv", False):
             self.writeiterable(self.values, func=str, counter=next(self._len))
             self.values = list()
 
@@ -159,7 +204,7 @@ class WriterFile(WriterBase):
         :param headers:
 
         """
-        if self.p.csv:
+        if getattr(self.p, "csv", False):
             self.headers.extend(headers)
 
     def addvalues(self, values):
@@ -168,8 +213,8 @@ class WriterFile(WriterBase):
         :param values:
 
         """
-        if self.p.csv:
-            if self.p.csv_filternan:
+        if getattr(self.p, "csv", False):
+            if getattr(self.p, "csv_filternan", True):
                 values = map(lambda x: x if x == x else "", values)
             self.values.extend(values)
 
@@ -181,13 +226,13 @@ class WriterFile(WriterBase):
         :param counter:  (Default value = "")
 
         """
-        if self.p.csv_counter:
+        if getattr(self.p, "csv_counter", True):
             iterable = itertools.chain([counter], iterable)
 
         if func is not None:
             iterable = map(lambda x: func(x), iterable)
 
-        line = self.p.csvsep.join(iterable)
+        line = getattr(self.p, "csvsep", ",").join(iterable)
         self.writeline(line)
 
     def writeline(self, line):
@@ -213,11 +258,16 @@ class WriterFile(WriterBase):
         :param level:  (Default value = 0)
 
         """
-        sepnum = level % len(self.p.separators)
-        separator = self.p.separators[sepnum]
+        separators = getattr(
+            self.p, "separators", ["=", "-", "+", "*", ".", "~", '"', "^", "#"]
+        )
+        sepnum = level % len(separators)
+        separator = separators[sepnum]
 
-        line = " " * (level * self.p.indent)
-        line += separator * (self.p.seplen - (level * self.p.indent))
+        indent = getattr(self.p, "indent", 2)
+        seplen = getattr(self.p, "seplen", 79)
+        line = " " * (level * indent)
+        line += separator * (seplen - (level * indent))
         self.writeline(line)
 
     def writedict(self, dct, level=0, recurse=False):
@@ -231,7 +281,7 @@ class WriterFile(WriterBase):
         if not recurse:
             self.writelineseparator(level)
 
-        indent0 = level * self.p.indent
+        indent0 = level * getattr(self.p, "indent", 2)
         for key, val in dct.items():
             kline = " " * indent0
             if recurse:
@@ -240,7 +290,7 @@ class WriterFile(WriterBase):
             kline += str(key) + ":"
 
             try:
-                sclass = issubclass(val, bt.LineSeries)
+                sclass = issubclass(val, LineSeries)
             except TypeError:
                 sclass = False
 
@@ -254,8 +304,8 @@ class WriterFile(WriterBase):
                 kline += " " + str(val)
                 self.writeline(kline)
             elif isinstance(val, float):
-                if self.p.rounding is not None:
-                    val = round(val, self.p.rounding)
+                if getattr(self.p, "rounding", None) is not None:
+                    val = round(val, getattr(self.p, "rounding", None))
                 kline += " " + str(val)
                 self.writeline(kline)
             elif isinstance(val, dict):
@@ -280,7 +330,24 @@ class WriterStringIO(WriterFile):
 
     def __init__(self):
         """ """
-        super(WriterStringIO, self).__init__()
+        # Ensure self.p is initialized before any access
+        if not hasattr(self, "p") or self.p is None:
+            param_dict = dict((k, v) for k, v in getattr(self, "params", []))
+            for key, default in [
+                ("out", io.StringIO),
+                ("close_out", False),
+                ("csv", False),
+                ("csvsep", ","),
+                ("csv_filternan", True),
+                ("csv_counter", True),
+                ("indent", 2),
+                ("separators", ["=", "-", "+", "*", ".", "~", '"', "^", "#"]),
+                ("seplen", 79),
+                ("rounding", None),
+            ]:
+                param_dict.setdefault(key, default)
+            self.p = type("Params", (), param_dict)()
+        super().__init__()
 
     def _start_output(self):
         """ """

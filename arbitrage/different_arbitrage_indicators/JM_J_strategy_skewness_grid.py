@@ -69,8 +69,8 @@ class SkewnessArbitrageStrategy(bt.Strategy):
             return
 
         # 计算偏度 - 只保留最近的skew_period个收益率
-        j_returns = np.array(self.returns_j[-self.p.skew_period :])
-        jm_returns = np.array(self.returns_jm[-self.p.skew_period :])
+        j_returns = np.array(self.returns_j[-self.p.skew_period:])
+        jm_returns = np.array(self.returns_jm[-self.p.skew_period:])
 
         # 计算J合约偏度
         j_mean = np.mean(j_returns)
@@ -95,7 +95,7 @@ class SkewnessArbitrageStrategy(bt.Strategy):
         # 计算历史偏度差的均值和标准差
         if len(self.delta_skew_values) >= self.p.lookback_period:
             hist_delta_values = np.array(
-                self.delta_skew_values[-self.p.lookback_period :]
+                self.delta_skew_values[-self.p.lookback_period:]
             )
             self.delta_mean = np.mean(hist_delta_values)
             self.delta_std = np.std(hist_delta_values)
@@ -215,7 +215,7 @@ class SkewnessArbitrageStrategy(bt.Strategy):
         """ """
         # 创建日期索引
         if len(self.dates) > len(self.skew_j_values):
-            dates = self.dates[-(len(self.skew_j_values)) :]
+            dates = self.dates[-(len(self.skew_j_values)):]
         else:
             dates = self.dates
 

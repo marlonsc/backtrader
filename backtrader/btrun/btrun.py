@@ -18,6 +18,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
+"""
+btrun.py - Backtrader command-line runner for strategies, analyzers, and data feeds.
+
+This module provides a command-line interface to configure and run backtrader
+strategies, analyzers, observers, and data feeds. It supports modular extension
+and dynamic loading of user components.
+"""
+
 from __future__ import (
     absolute_import,
     division,
@@ -31,51 +39,112 @@ import inspect
 import random
 import string
 import sys
+import logging
+import importlib
+import ast
 
-import backtrader as bt
+from ..feeds import (
+    BacktraderCSVData,
+    VChartCSVData,
+    VChartFile,
+    SierraChartCSVData,
+    MT4CSVData,
+    YahooFinanceCSVData,
+    YahooFinanceData,
+    VCData,
+    IBData,
+    OandaData,
+)
+from .. import TimeFrame, Cerebro, Analyzer, Strategy, Observer
+from .. import signals as bt_signals
+from .. import indicators as bt_indicators
+from .. import observers as bt_observers
+from .. import analyzers as bt_analyzers
+from ..writer import WriterFile
 
 DATAFORMATS = dict(
-    btcsv=bt.feeds.BacktraderCSVData,
-    vchartcsv=bt.feeds.VChartCSVData,
-    vcfile=bt.feeds.VChartFile,
-    sierracsv=bt.feeds.SierraChartCSVData,
-    mt4csv=bt.feeds.MT4CSVData,
-    yahoocsv=bt.feeds.YahooFinanceCSVData,
-    yahoocsv_unreversed=bt.feeds.YahooFinanceCSVData,
-    yahoo=bt.feeds.YahooFinanceData,
+    btcsv=BacktraderCSVData,
+    vchartcsv=VChartCSVData,
+    vcfile=VChartFile,
+    sierracsv=SierraChartCSVData,
+    mt4csv=MT4CSVData,
+    yahoocsv=YahooFinanceCSVData,
+    yahoocsv_unreversed=YahooFinanceCSVData,
+    yahoo=YahooFinanceData,
 )
 
 try:
-    DATAFORMATS["vcdata"] = bt.feeds.VCData
+    DATAFORMATS["vcdata"] = VCData
 except AttributeError:
     pass  # no comtypes available
 
 try:
-    DATAFORMATS["ibdata"] = (bt.feeds.IBData,)
+    DATAFORMATS["ibdata"] = (IBData,)
 except AttributeError:
     pass  # no ibpy available
 
 try:
-    DATAFORMATS["oandadata"] = (bt.feeds.OandaData,)
+    DATAFORMATS["oandadata"] = (OandaData,)
 except AttributeError:
     pass  # no oandapy available
 
 TIMEFRAMES = dict(
-    microseconds=bt.TimeFrame.MicroSeconds,
-    seconds=bt.TimeFrame.Seconds,
-    minutes=bt.TimeFrame.Minutes,
-    days=bt.TimeFrame.Days,
-    weeks=bt.TimeFrame.Weeks,
-    months=bt.TimeFrame.Months,
-    years=bt.TimeFrame.Years,
+    microseconds=TimeFrame.MicroSeconds,
+    seconds=TimeFrame.Seconds,
+    minutes=TimeFrame.Minutes,
+    days=TimeFrame.Days,
+    weeks=TimeFrame.Weeks,
+    months=TimeFrame.Months,
+    years=TimeFrame.Years,
 )
+
+__all__ = [
+    "btrun",
+    "setbroker",
+    "getdatas",
+    "getmodclasses",
+    "getmodfunctions",
+    "loadmodule",
+    "getobjects",
+    "getfunctions",
+    "parse_args",
+]
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s %(message)s",
+)
+logger = logging.getLogger(__name__)
+
+
+# Helper to safely parse dict-like strings (key1=val1,key2=val2)
+def safe_kwargs_parse(s):
+    """Safely parse a string of key=value pairs into a dict."""
+    if not s.strip():
+        return {}
+    try:
+        # Replace '=' with ':' and wrap in braces to make it a dict literal
+        s = s.replace("=", ":")
+        return ast.literal_eval("{" + s + "}")
+    except Exception as e:  # Acceptable: only parsing user input, not executing logic
+        raise ValueError(f"Invalid kwargs string: {s}") from e
 
 
 def btrun(pargs=""):
     """
+    Run the Backtrader command-line interface with the given arguments.
 
-    :param pargs:  (Default value = "")
+    Args:
+        pargs (str, optional): Command-line arguments as a string. Defaults to
+            "".
 
+    Returns:
+        None
+
+    Side Effects:
+        Configures and runs a Backtrader Cerebro instance, loads data, strategies,
+        analyzers, observers, and writers as specified by the arguments. May plot
+        results or print analyzer output. Exits the process on critical errors.
     """
     args = parse_args(pargs)
 
@@ -85,12 +154,13 @@ def btrun(pargs=""):
     stdstats = not args.nostdstats
 
     cer_kwargs_str = args.cerebro
-    cer_kwargs = eval("dict(" + cer_kwargs_str + ")")
+    cer_kwargs = safe_kwargs_parse(cer_kwargs_str)
     if "stdstats" not in cer_kwargs:
         cer_kwargs.update(stdstats=stdstats)
 
-    cerebro = bt.Cerebro(**cer_kwargs)
+    cerebro = Cerebro(**cer_kwargs)
 
+    tfcp = None  # Fix possibly using variable before assignment
     if args.resample is not None or args.replay is not None:
         if args.resample is not None:
             tfcp = args.resample.split(":")
@@ -115,35 +185,37 @@ def btrun(pargs=""):
             cerebro.adddata(data)
 
     # get and add signals
-    signals = getobjects(args.signals, bt.Indicator, bt.signals, issignal=True)
+    signals = getobjects(
+        args.signals, bt_indicators.Indicator, bt_signals, issignal=True
+    )
     for sig, kwargs, sigtype in signals:
-        stype = getattr(bt.signal, "SIGNAL_" + sigtype.upper())
+        stype = getattr(bt_signals, "SIGNAL_" + sigtype.upper())
         cerebro.add_signal(stype, sig, **kwargs)
 
     # get and add strategies
-    strategies = getobjects(args.strategies, bt.Strategy, bt.strategies)
+    strategies = getobjects(args.strategies, Strategy, bt_signals)
     for strat, kwargs in strategies:
         cerebro.addstrategy(strat, **kwargs)
 
-    inds = getobjects(args.indicators, bt.Indicator, bt.indicators)
+    inds = getobjects(args.indicators, bt_indicators.Indicator, bt_indicators)
     for ind, kwargs in inds:
         cerebro.addindicator(ind, **kwargs)
 
-    obs = getobjects(args.observers, bt.Observer, bt.observers)
+    obs = getobjects(args.observers, Observer, bt_observers)
     for ob, kwargs in obs:
         cerebro.addobserver(ob, **kwargs)
 
-    ans = getobjects(args.analyzers, bt.Analyzer, bt.analyzers)
+    ans = getobjects(args.analyzers, Analyzer, bt_analyzers)
     for an, kwargs in ans:
         cerebro.addanalyzer(an, **kwargs)
 
     setbroker(args, cerebro)
 
     for wrkwargs_str in args.writers or []:
-        wrkwargs = eval("dict(" + wrkwargs_str + ")")
-        cerebro.addwriter(bt.WriterFile, **wrkwargs)
+        wrkwargs = safe_kwargs_parse(wrkwargs_str)
+        cerebro.addwriter(WriterFile, **wrkwargs)
 
-    ans = getfunctions(args.hooks, bt.Cerebro)
+    ans = getfunctions(args.hooks, Cerebro)
     for hook, kwargs in ans:
         hook(cerebro, **kwargs)
     runsts = cerebro.run()
@@ -151,23 +223,19 @@ def btrun(pargs=""):
 
     if args.pranalyzer or args.ppranalyzer:
         if runst.analyzers:
-            print("====================")
-            print("== Analyzers")
-            print("====================")
+            logger.info("====================\n== Analyzers\n====================")
             for name, analyzer in runst.analyzers.getitems():
                 if args.pranalyzer:
                     analyzer.print()
                 elif args.ppranalyzer:
-                    print("##########")
-                    print(name)
-                    print("##########")
+                    logger.info("##########\n%s\n##########", name)
                     analyzer.pprint()
 
     if args.plot:
         pkwargs = dict(style="bar")
         if args.plot is not True:
             # evaluates to True but is not "True" - args were passed
-            ekwargs = eval("dict(" + args.plot + ")")
+            ekwargs = safe_kwargs_parse(args.plot)
             pkwargs.update(ekwargs)
 
         # cerebro.plot(numfigs=args.plotfigs, style=args.plotstyle)
@@ -176,10 +244,18 @@ def btrun(pargs=""):
 
 def setbroker(args, cerebro):
     """
+    Configure the broker instance in Cerebro with cash, commission, margin, and
+    slippage settings from the parsed arguments.
 
-    :param args:
-    :param cerebro:
+    Args:
+        args: Parsed command-line arguments.
+        cerebro: The Backtrader Cerebro instance to configure.
 
+    Returns:
+        None
+
+    Side Effects:
+        Modifies the broker state in the Cerebro instance.
     """
     broker = cerebro.getbroker()
 
@@ -219,9 +295,17 @@ def setbroker(args, cerebro):
 
 def getdatas(args):
     """
+    Create and return a list of Backtrader data feed objects based on the parsed
+    arguments.
 
-    :param args:
+    Args:
+        args: Parsed command-line arguments.
 
+    Returns:
+        list: List of Backtrader data feed objects.
+
+    Side Effects:
+        Instantiates data feed objects, may parse dates from arguments.
     """
     # Get the data feed class from the global dictionary
     dfcls = DATAFORMATS[args.format]
@@ -265,11 +349,16 @@ def getdatas(args):
 
 def getmodclasses(mod, clstype, clsname=None):
     """
+    Retrieve classes of a given type from a module, optionally filtering by class
+    name.
 
-    :param mod:
-    :param clstype:
-    :param clsname:  (Default value = None)
+    Args:
+        mod: The module to search for classes.
+        clstype: The base class type to match.
+        clsname (str, optional): Specific class name to match. Defaults to None.
 
+    Returns:
+        list: List of matching class objects.
     """
     clsmembers = inspect.getmembers(mod, inspect.isclass)
 
@@ -290,10 +379,15 @@ def getmodclasses(mod, clstype, clsname=None):
 
 def getmodfunctions(mod, funcname=None):
     """
+    Retrieve functions or methods from a module, optionally filtering by function
+    name.
 
-    :param mod:
-    :param funcname:  (Default value = None)
+    Args:
+        mod: The module to search for functions.
+        funcname (str, optional): Specific function name to match. Defaults to None.
 
+    Returns:
+        list: List of matching function or method objects.
     """
     members = inspect.getmembers(mod, inspect.isfunction) + inspect.getmembers(
         mod, inspect.ismethod
@@ -313,73 +407,47 @@ def getmodfunctions(mod, funcname=None):
 
 def loadmodule(modpath, modname=""):
     """
+    Dynamically load a Python module from a file path, optionally with a given
+    module name.
 
-    :param modpath:
-    :param modname:  (Default value = "")
+    Args:
+        modpath (str): Path to the module file.
+        modname (str, optional): Name to assign to the loaded module. Defaults to
+            "".
 
+    Returns:
+        tuple: (module object or None, exception or None)
     """
-    # generate a random name for the module
-
     if not modpath.endswith(".py"):
         modpath += ".py"
-
     if not modname:
         chars = string.ascii_uppercase + string.digits
         modname = "".join(random.choice(chars) for _ in range(10))
-
-    version = (sys.version_info[0], sys.version_info[1])
-
-    if version < (3, 3):
-        mod, e = loadmodule2(modpath, modname)
-    else:
-        mod, e = loadmodule3(modpath, modname)
-
-    return mod, e
-
-
-def loadmodule2(modpath, modname):
-    """
-
-    :param modpath:
-    :param modname:
-
-    """
-    import imp
-
     try:
-        mod = imp.load_source(modname, modpath)
+        spec = importlib.util.spec_from_file_location(modname, modpath)
+        if spec is None:
+            return None, ImportError(f"Cannot create spec for {modpath}")
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod, None
     except Exception as e:
-        return (None, e)
-
-    return (mod, None)
-
-
-def loadmodule3(modpath, modname):
-    """
-
-    :param modpath:
-    :param modname:
-
-    """
-    import importlib.machinery
-
-    try:
-        loader = importlib.machinery.SourceFileLoader(modname, modpath)
-        mod = loader.load_module()
-    except Exception as e:
-        return (None, e)
-
-    return (mod, None)
+        return None, e
 
 
 def getobjects(iterable, clsbase, modbase, issignal=False):
     """
+    Load and instantiate objects (classes) from modules or built-in modules,
+    optionally handling signal types.
 
-    :param iterable:
-    :param clsbase:
-    :param modbase:
-    :param issignal:  (Default value = False)
+    Args:
+        iterable (list): List of module/class/kwargs specifiers.
+        clsbase: Base class type to match.
+        modbase: Default module to use if not specified.
+        issignal (bool, optional): Whether to handle signal type parsing.
+            Defaults to False.
 
+    Returns:
+        list: List of (class, kwargs) or (class, kwargs, sigtype) tuples.
     """
     retobjects = list()
 
@@ -405,15 +473,14 @@ def getobjects(iterable, clsbase, modbase, issignal=False):
                 kwargs = dict()
             else:
                 name = kwtokens[0]
-                kwtext = "dict(" + kwtokens[1] + ")"
-                kwargs = eval(kwtext)
+                kwtext = safe_kwargs_parse(kwtokens[1])
+                kwargs = kwtext
 
         if modpath:
             mod, e = loadmodule(modpath)
 
             if not mod:
-                print("")
-                print("Failed to load module %s:" % modpath, e)
+                logger.error("Failed to load module %s: %s", modpath, e)
                 sys.exit(1)
         else:
             mod = modbase
@@ -421,7 +488,7 @@ def getobjects(iterable, clsbase, modbase, issignal=False):
         loaded = getmodclasses(mod=mod, clstype=clsbase, clsname=name)
 
         if not loaded:
-            print("No class %s / module %s" % (str(name), modpath))
+            logger.error("No class %s / module %s", str(name), modpath)
             sys.exit(1)
 
         if issignal:
@@ -434,10 +501,14 @@ def getobjects(iterable, clsbase, modbase, issignal=False):
 
 def getfunctions(iterable, modbase):
     """
+    Load and return functions from modules or built-in modules.
 
-    :param iterable:
-    :param modbase:
+    Args:
+        iterable (list): List of module/function/kwargs specifiers.
+        modbase: Default module to use if not specified.
 
+    Returns:
+        list: List of (function, kwargs) tuples.
     """
     retfunctions = list()
 
@@ -456,15 +527,14 @@ def getfunctions(iterable, modbase):
                 kwargs = dict()
             else:
                 name = kwtokens[0]
-                kwtext = "dict(" + kwtokens[1] + ")"
-                kwargs = eval(kwtext)
+                kwtext = safe_kwargs_parse(kwtokens[1])
+                kwargs = kwtext
 
         if modpath:
             mod, e = loadmodule(modpath)
 
             if not mod:
-                print("")
-                print("Failed to load module %s:" % modpath, e)
+                logger.error("Failed to load module %s: %s", modpath, e)
                 sys.exit(1)
         else:
             mod = modbase
@@ -472,7 +542,7 @@ def getfunctions(iterable, modbase):
         loaded = getmodfunctions(mod=mod, funcname=name)
 
         if not loaded:
-            print("No function %s / module %s" % (str(name), modpath))
+            logger.error("No function %s / module %s", str(name), modpath)
             sys.exit(1)
 
         retfunctions.append((loaded[0], kwargs))
@@ -482,9 +552,13 @@ def getfunctions(iterable, modbase):
 
 def parse_args(pargs=""):
     """
+    Parse command-line arguments for the Backtrader runner.
 
-    :param pargs:  (Default value = "")
+    Args:
+        pargs (str, optional): Arguments as a string. Defaults to "".
 
+    Returns:
+        argparse.Namespace: Parsed arguments namespace.
     """
     parser = argparse.ArgumentParser(
         description="Backtrader Run Script",

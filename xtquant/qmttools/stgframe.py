@@ -111,7 +111,7 @@ class StrategyLoader:
             if "." in C.stock_code:
                 pos = C.stock_code.rfind(".")
                 C.stockcode = C.stock_code[0:pos]
-                C.market = C.stock_code[pos + 1 :].upper()
+                C.market = C.stock_code[pos + 1:].upper()
 
             if C.stockcode and C.market:
                 C.stock_code = C.stockcode + "." + C.market

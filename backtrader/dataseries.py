@@ -124,7 +124,7 @@ class DataSeries(LineSeries):
         for lo in self.LineOrder:
             headers.append(self._getlinealias(lo))
 
-        morelines = self.getlinealiases()[len(self.LineOrder) :]
+        morelines = self.getlinealiases()[len(self.LineOrder):]
         headers.extend(morelines)
 
         return headers

@@ -266,7 +266,7 @@ class Lines(object):
 
     def itersize(self):
         """ """
-        return iter(self.lines[0 : self.size()])
+        return iter(self.lines[0: self.size()])
 
     def __init__(self, initlines=None):
         """Create the lines recording during "_derive" or else use the

@@ -436,7 +436,9 @@ class CodecOptions(_BaseCodecOptions):
             is_mapping = issubclass(doc_class, _MutableMapping)
         except TypeError:
             if hasattr(doc_class, "__origin__"):
-                is_mapping = issubclass(doc_class.__origin__, _MutableMapping)  # type: ignore[union-attr]
+                is_mapping = issubclass(
+                    doc_class.__origin__,
+                    _MutableMapping)  # type: ignore[union-attr]
         if not (is_mapping or _raw_document_class(doc_class)):
             raise TypeError(
                 "document_class must be dict, bson.son.SON, "

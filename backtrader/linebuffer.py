@@ -211,7 +211,7 @@ class LineBuffer(LineSingle):
             end = self.idx + ago + 1
             return list(islice(self.array, start, end))
 
-        return self.array[self.idx + ago - size + 1 : self.idx + ago + 1]
+        return self.array[self.idx + ago - size + 1: self.idx + ago + 1]
 
     def getzeroval(self, idx=0):
         """Returns a single value of the array relative to the real zero
@@ -242,7 +242,7 @@ class LineBuffer(LineSingle):
         if self.useislice:
             return list(islice(self.array, idx, idx + size))
 
-        return self.array[idx : idx + size]
+        return self.array[idx: idx + size]
 
     def __setitem__(self, ago, value):
         """Sets a value at position "ago" and executes any associated bindings
