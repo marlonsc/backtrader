@@ -1,4 +1,13 @@
 # strategies.py
+# 此模块用于统一存放书写的策略类，数据来源为mini QMT
+# 初始化策略的时候需要实例化broker来获取数据：self.mbroker = my_broker(use_real_trading=self.p.use_real_trading)
+# 需要输入参数来判断时候需要发送委托：
+# params = (
+#         ('use_real_trading', False),  # 默认参数
+#     )
+# 如果需要发送委托需要自行插入broker的buy()方法
+
+
 import backtrader as bt
 from qmtbt import QMTStore
 from datetime import datetime
@@ -106,7 +115,8 @@ class my_broker:
             return order
 class TestStrategy(bt.Strategy):
     params = (
-        ('use_real_trading', False),  # 默认参数
+        ('use_real_trading', False),  #
+        ('any', 50),
     )
     def log(self, txt, dt=None):
         dt = dt or self.datas[0].datetime.date(0)
@@ -135,6 +145,7 @@ class TestStrategy(bt.Strategy):
         self.order = None
 
     def next(self):
+
         data = self.datas[0]
         stock_code = data._name
         self.log('Close, %.2f' % self.dataclose[0])
@@ -210,7 +221,6 @@ class AnotherStrategy(bt.Strategy):
 class SmaCross(bt.SignalStrategy):
     params = (('period1', 10),
               ('period2', 30),
-              ('period3', 30),
               ('use_real_trading', False),
               )
 

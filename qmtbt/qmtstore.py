@@ -96,7 +96,7 @@ class QMTStore(object, metaclass=MetaSingleton):
                 df = df.drop(col, axis=1).join(expanded_df)
         return df
 
-    def _fetch_history(self, symbol, period, start_time='', end_time='', count=-1, dividend_type='none', download=True):
+    def _fetch_history(self, symbol, period, start_time='', end_time='', count=-1, dividend_type='front', download=True):
         """
         获取历史数据
         
@@ -107,9 +107,10 @@ class QMTStore(object, metaclass=MetaSingleton):
             end_time: 终止日期
 
         """
+        print("下载数据"+symbol)
         if download:
             xtdata.download_history_data(stock_code=symbol, period=period, start_time=start_time, end_time=end_time)
-        res = xtdata.get_market_data_ex(stock_list=[symbol], period=period, start_time=start_time, end_time=end_time, count=count, dividend_type=dividend_type)
+        res = xtdata.get_market_data_ex(stock_list=[symbol], period=period, start_time=start_time, end_time=end_time, count=count, dividend_type=dividend_type,fill_data=True)
         res = res[symbol]
         if period == 'tick':
             res = self._auto_expand_array_columns(res)

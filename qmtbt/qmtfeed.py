@@ -38,7 +38,7 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
 
     params = (
         ('live', False),  # only historical download
-        ('timeframe', bt.TimeFrame.Ticks)
+        ('timeframe', bt.TimeFrame.Days)
     )
 
     def __init__(self, **kwargs):
@@ -134,8 +134,10 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
         res = self.store._fetch_history(symbol=self.p.dataname, period=period, start_time=start_time, end_time=end_time)
         result = res.to_dict('records')
         for item in result:
-            if item.get('close') != 0 and item.get('lastPrice') != 0:
-                self._data.append(item)
+            # if item.get('close') != 0 and item.get('lastPrice') != 0:
+            #     self._data.append(item)
+            self._data.append(item)
+
 
     def _live_data(self, period):
 
