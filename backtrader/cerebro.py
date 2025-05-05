@@ -1694,7 +1694,6 @@ class Cerebro(with_metaclass(MetaParams, object)):
                     if self._event_stop:  # stop if requested
                         return
 
-            self._brokernotify()
             if self._event_stop:  # stop if requested
                 return
 
@@ -1706,6 +1705,8 @@ class Cerebro(with_metaclass(MetaParams, object)):
                     return
 
                 self._next_writers(runstrats)
+            self._brokernotify()
+
 
     def _check_timers(self, runstrats, dt0, cheat=False):
         timers = self._timers if not cheat else self._timerscheat
