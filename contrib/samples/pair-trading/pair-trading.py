@@ -194,7 +194,7 @@ def runstrategy():
     )
 
     # Add the 1st data to cerebro
-    cerebro.adddata(data0)
+    cerebro.adddata(data0, name="PEP")
 
     # Create the 2nd data
     data1 = btfeeds.YahooFinanceCSVData(
@@ -202,7 +202,7 @@ def runstrategy():
     )
 
     # Add the 2nd data to cerebro
-    cerebro.adddata(data1)
+    cerebro.adddata(data1, name="KO")
 
     # Add the strategy
     cerebro.addstrategy(PairTradingStrategy, period=args.period, stake=args.stake)
