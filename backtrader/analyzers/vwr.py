@@ -157,7 +157,7 @@ class VWR(TimeFrameAnalyzerBase):
         sdev_p = standarddev(dts, bessel=True)
 
         vwr = rnorm100 * (1.0 - pow(sdev_p / self.p.sdev_max, self.p.tau))
-        self.rets['vwr'] = vwr
+        self.rets['vwr'] = round(vwr, 6)
 
     def notify_fund(self, cash, value, fundvalue, shares):
         if not self._fundmode:

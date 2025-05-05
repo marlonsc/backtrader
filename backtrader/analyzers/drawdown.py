@@ -99,8 +99,8 @@ class DrawDown(bt.Analyzer):
         r = self.rets
 
         # calculate current drawdown values
-        r.moneydown = moneydown = self._maxvalue - self._value
-        r.drawdown = drawdown = 100.0 * moneydown / self._maxvalue
+        r.moneydown = moneydown = round(self._maxvalue - self._value, 2)
+        r.drawdown = drawdown = round(100.0 * moneydown / self._maxvalue, 2)
 
         # maxximum drawdown values
         r.max.moneydown = max(r.max.moneydown, moneydown)
@@ -193,5 +193,5 @@ class TimeDrawDown(bt.TimeFrameAnalyzerBase):
         self.maxddlen = max(self.maxddlen, self.ddlen)
 
     def stop(self):
-        self.rets['maxdrawdown'] = self.maxdd
+        self.rets['maxdrawdown'] = round(self.maxdd, 2)
         self.rets['maxdrawdownperiod'] = self.maxddlen

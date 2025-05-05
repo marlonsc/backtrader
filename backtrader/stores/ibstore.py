@@ -30,8 +30,8 @@ import random
 import threading
 import time
 
-from ib.ext.Contract import Contract
-import ib.opt as ibopt
+#from ib.ext.Contract import Contract
+#import ib.opt as ibopt
 
 from backtrader import TimeFrame, Position
 from backtrader.metabase import MetaParams
@@ -318,10 +318,6 @@ class IBStore(with_metaclass(MetaSingleton, object)):
             self.conn.disconnect()  # disconnect should be an invariant
         except AttributeError:
             pass    # conn may have never been connected and lack "disconnect"
-
-        # Unblock any calls set on these events
-        self._event_managed_accounts.set()
-        self._event_accdownload.set()
 
     def logmsg(self, *args):
         # for logging purposes

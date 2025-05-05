@@ -120,7 +120,9 @@ class CommInfoBase(with_metaclass(MetaParams)):
     COMM_PERC, COMM_FIXED = range(2)
 
     params = (
-        ('commission', 0.0), ('mult', 1.0), ('margin', None),
+        ('commission', 0.0), 
+        ('mult', 1.0), 
+        ('margin', None),
         ('commtype', None),
         ('stocklike', False),
         ('percabs', False),

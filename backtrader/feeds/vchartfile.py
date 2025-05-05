@@ -36,7 +36,7 @@ class MetaVChartFile(bt.DataBase.__class__):
         super(MetaVChartFile, cls).__init__(name, bases, dct)
 
         # Register with the store
-        bt.stores.VChartFile.DataCls = cls
+        bt.stores.VChartFileStore.DataCls = cls
 
 
 class VChartFile(bt.with_metaclass(MetaVChartFile, bt.DataBase)):
@@ -53,7 +53,7 @@ class VChartFile(bt.with_metaclass(MetaVChartFile, bt.DataBase)):
     def start(self):
         super(VChartFile, self).start()
         if self._store is None:
-            self._store = bt.stores.VChartFile()
+            self._store = bt.stores.VChartFileStore()
             self._store.start()
 
         self._store.start(data=self)

@@ -51,7 +51,7 @@ class Position(object):
         return '\n'.join(items)
 
     def __init__(self, size=0, price=0.0):
-        self.size = size
+        self._size = size
         if size:
             self.price = self.price_orig = price
         else:
@@ -64,6 +64,22 @@ class Position(object):
         self.set(size, price)
 
         self.updt = None
+
+    @property
+    def size(self):
+        return self._size
+
+    @size.setter
+    def size(self, value):
+        self._size = value
+
+    @property
+    def position(self):
+        return self._size  
+
+    @position.setter
+    def position(self, value):
+        self._size = value
 
     def fix(self, size, price):
         oldsize = self.size

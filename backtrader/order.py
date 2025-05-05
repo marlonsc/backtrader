@@ -221,14 +221,24 @@ class OrderData(object):
 
 class OrderBase(with_metaclass(MetaParams, object)):
     params = (
-        ('owner', None), ('data', None),
-        ('size', None), ('price', None), ('pricelimit', None),
-        ('exectype', None), ('valid', None), ('tradeid', 0), ('oco', None),
-        ('trailamount', None), ('trailpercent', None),
-        ('parent', None), ('transmit', True),
+        ('owner', None), 
+        ('data', None),
+        ('size', None), 
+        ('price', None), 
+        ('pricelimit', None),
+        ('plimit', None),
+        ('exectype', None), 
+        ('valid', None), 
+        ('tradeid', 0), 
+        ('oco', None),
+        ('trailamount', None), 
+        ('trailpercent', None),
+        ('parent', None), 
+        ('transmit', True),
         ('simulated', False),
         # To support historical order evaluation
         ('histnotify', False),
+        ('orderId', 0),
     )
 
     DAY = datetime.timedelta()  # constant for DAY order identification

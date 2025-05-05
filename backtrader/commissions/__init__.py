@@ -20,9 +20,13 @@
 ###############################################################################
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
+try:
+    from .ibcommission import IBCommInfo
+except ImportError:
+    pass  # The user may not have ibpy installed
 
+"""
 from ..comminfo import CommInfoBase
-
 
 class CommInfo(CommInfoBase):
     pass  # clone of CommissionInfo but with xx% instead of 0.xx
@@ -62,3 +66,4 @@ class CommInfo_Stocks_Fixed(CommInfo_Stocks):
     params = (
         ('commtype', CommInfoBase.COMM_FIXED),
     )
+"""

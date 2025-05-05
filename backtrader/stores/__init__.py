@@ -25,7 +25,17 @@ from __future__ import (absolute_import, division, print_function,
 # or prepend an "_" (underscore) to private classes/variables
 
 try:
+    from . import ibstores as ibstores
+except ImportError:
+    pass  # The user may not have ibpy installed
+
+try:
     from .ibstore import IBStore
+except ImportError:
+    pass  # The user may not have ibpy installed
+	
+try:
+    from .ibstore_insync import IBStoreInsync
 except ImportError:
     pass  # The user may not have ibpy installed
 
@@ -40,4 +50,4 @@ except ImportError:
     pass  # The user may not have a module installed
 
 
-from .vchartfile import VChartFile
+from .vchartfile import VChartFileStore

@@ -23,221 +23,37 @@ from __future__ import (absolute_import, division, print_function,
 
 import collections
 from copy import copy
-from datetime import date, datetime, timedelta
+from datetime import datetime
 import threading
 import uuid
 
-import ib.ext.Order
-import ib.opt as ibopt
-
 from backtrader.feed import DataBase
-from backtrader import (TimeFrame, num2date, date2num, BrokerBase,
-                        Order, OrderBase, OrderData)
-from backtrader.utils.py3 import bytes, bstr, with_metaclass, queue, MAXFLOAT
+from backtrader import (date2num, BrokerBase, Order)
+from backtrader.utils.py3 import (string_types, 
+    integer_types, with_metaclass, queue, MAXFLOAT)
 from backtrader.metabase import MetaParams
-from backtrader.comminfo import CommInfoBase
+from backtrader.commissions.ibcommission import IBCommInfo
+from backtrader.orders.iborder import IBOrder
 from backtrader.position import Position
-from backtrader.stores import ibstore
-from backtrader.utils import AutoDict, AutoOrderedDict
-from backtrader.comminfo import CommInfoBase
+from backtrader.stores import ibstore_insync
 
-bytes = bstr  # py2/3 need for ibpy
-
-
-class IBOrderState(object):
-    # wraps OrderState object and can print it
-    _fields = ['status', 'initMargin', 'maintMargin', 'equityWithLoan',
-               'commission', 'minCommission', 'maxCommission',
-               'commissionCurrency', 'warningText']
-
-    def __init__(self, orderstate):
-        for f in self._fields:
-            fname = 'm_' + f
-            setattr(self, fname, getattr(orderstate, fname))
-
-    def __str__(self):
-        txt = list()
-        txt.append('--- ORDERSTATE BEGIN')
-        for f in self._fields:
-            fname = 'm_' + f
-            txt.append('{}: {}'.format(f.capitalize(), getattr(self, fname)))
-        txt.append('--- ORDERSTATE END')
-        return '\n'.join(txt)
-
-
-class IBOrder(OrderBase, ib.ext.Order.Order):
-    '''Subclasses the IBPy order to provide the minimum extra functionality
-    needed to be compatible with the internally defined orders
-
-    Once ``OrderBase`` has processed the parameters, the __init__ method takes
-    over to use the parameter values and set the appropriate values in the
-    ib.ext.Order.Order object
-
-    Any extra parameters supplied with kwargs are applied directly to the
-    ib.ext.Order.Order object, which could be used as follows::
-
-      Example: if the 4 order execution types directly supported by
-      ``backtrader`` are not enough, in the case of for example
-      *Interactive Brokers* the following could be passed as *kwargs*::
-
-        orderType='LIT', lmtPrice=10.0, auxPrice=9.8
-
-      This would override the settings created by ``backtrader`` and
-      generate a ``LIMIT IF TOUCHED`` order with a *touched* price of 9.8
-      and a *limit* price of 10.0.
-
-    This would be done almost always from the ``Buy`` and ``Sell`` methods of
-    the ``Strategy`` subclass being used in ``Cerebro``
-    '''
-
-    def __str__(self):
-        '''Get the printout from the base class and add some ib.Order specific
-        fields'''
-        basetxt = super(IBOrder, self).__str__()
-        tojoin = [basetxt]
-        tojoin.append('Ref: {}'.format(self.ref))
-        tojoin.append('orderId: {}'.format(self.m_orderId))
-        tojoin.append('Action: {}'.format(self.m_action))
-        tojoin.append('Size (ib): {}'.format(self.m_totalQuantity))
-        tojoin.append('Lmt Price: {}'.format(self.m_lmtPrice))
-        tojoin.append('Aux Price: {}'.format(self.m_auxPrice))
-        tojoin.append('OrderType: {}'.format(self.m_orderType))
-        tojoin.append('Tif (Time in Force): {}'.format(self.m_tif))
-        tojoin.append('GoodTillDate: {}'.format(self.m_goodTillDate))
-        return '\n'.join(tojoin)
-
-    # Map backtrader order types to the ib specifics
-    _IBOrdTypes = {
-        None: bytes('MKT'),  # default
-        Order.Market: bytes('MKT'),
-        Order.Limit: bytes('LMT'),
-        Order.Close: bytes('MOC'),
-        Order.Stop: bytes('STP'),
-        Order.StopLimit: bytes('STPLMT'),
-        Order.StopTrail: bytes('TRAIL'),
-        Order.StopTrailLimit: bytes('TRAIL LIMIT'),
-    }
-
-    def __init__(self, action, **kwargs):
-
-        # Marker to indicate an openOrder has been seen with
-        # PendinCancel/Cancelled which is indication of an upcoming
-        # cancellation
-        self._willexpire = False
-
-        self.ordtype = self.Buy if action == 'BUY' else self.Sell
-
-        super(IBOrder, self).__init__()
-        ib.ext.Order.Order.__init__(self)  # Invoke 2nd base class
-
-        # Now fill in the specific IB parameters
-        self.m_orderType = self._IBOrdTypes[self.exectype]
-        self.m_permid = 0
-
-        # 'B' or 'S' should be enough
-        self.m_action = bytes(action)
-
-        # Set the prices
-        self.m_lmtPrice = 0.0
-        self.m_auxPrice = 0.0
-
-        if self.exectype == self.Market:  # is it really needed for Market?
-            pass
-        elif self.exectype == self.Close:  # is it ireally needed for Close?
-            pass
-        elif self.exectype == self.Limit:
-            self.m_lmtPrice = self.price
-        elif self.exectype == self.Stop:
-            self.m_auxPrice = self.price  # stop price / exec is market
-        elif self.exectype == self.StopLimit:
-            self.m_lmtPrice = self.pricelimit  # req limit execution
-            self.m_auxPrice = self.price  # trigger price
-        elif self.exectype == self.StopTrail:
-            if self.trailamount is not None:
-                self.m_auxPrice = self.trailamount
-            elif self.trailpercent is not None:
-                # value expected in % format ... multiply 100.0
-                self.m_trailingPercent = self.trailpercent * 100.0
-        elif self.exectype == self.StopTrailLimit:
-            self.m_trailStopPrice = self.m_lmtPrice = self.price
-            # The limit offset is set relative to the price difference in TWS
-            self.m_lmtPrice = self.pricelimit
-            if self.trailamount is not None:
-                self.m_auxPrice = self.trailamount
-            elif self.trailpercent is not None:
-                # value expected in % format ... multiply 100.0
-                self.m_trailingPercent = self.trailpercent * 100.0
-
-        self.m_totalQuantity = abs(self.size)  # ib takes only positives
-
-        self.m_transmit = self.transmit
-        if self.parent is not None:
-            self.m_parentId = self.parent.m_orderId
-
-        # Time In Force: DAY, GTC, IOC, GTD
-        if self.valid is None:
-            tif = 'GTC'  # Good til cancelled
-        elif isinstance(self.valid, (datetime, date)):
-            tif = 'GTD'  # Good til date
-            self.m_goodTillDate = bytes(self.valid.strftime('%Y%m%d %H:%M:%S'))
-        elif isinstance(self.valid, (timedelta,)):
-            if self.valid == self.DAY:
-                tif = 'DAY'
-            else:
-                tif = 'GTD'  # Good til date
-                valid = datetime.now() + self.valid  # .now, using localtime
-                self.m_goodTillDate = bytes(valid.strftime('%Y%m%d %H:%M:%S'))
-
-        elif self.valid == 0:
-            tif = 'DAY'
-        else:
-            tif = 'GTD'  # Good til date
-            valid = num2date(self.valid)
-            self.m_goodTillDate = bytes(valid.strftime('%Y%m%d %H:%M:%S'))
-
-        self.m_tif = bytes(tif)
-
-        # OCA
-        self.m_ocaType = 1  # Cancel all remaining orders with block
-
-        # pass any custom arguments to the order
-        for k in kwargs:
-            setattr(self, (not hasattr(self, k)) * 'm_' + k, kwargs[k])
-
-
-class IBCommInfo(CommInfoBase):
-    '''
-    Commissions are calculated by ib, but the trades calculations in the
-    ```Strategy`` rely on the order carrying a CommInfo object attached for the
-    calculation of the operation cost and value.
-
-    These are non-critical informations, but removing them from the trade could
-    break existing usage and it is better to provide a CommInfo objet which
-    enables those calculations even if with approvimate values.
-
-    The margin calculation is not a known in advance information with IB
-    (margin impact can be gotten from OrderState objects) and therefore it is
-    left as future exercise to get it'''
-
-    def getvaluesize(self, size, price):
-        # In real life the margin approaches the price
-        return abs(size) * price
-
-    def getoperationcost(self, size, price):
-        '''Returns the needed amount of cash an operation would cost'''
-        # Same reasoning as above
-        return abs(size) * price
-
-
-class MetaIBBroker(BrokerBase.__class__):
+class MetaSingletonIBBroker(BrokerBase.__class__):
     def __init__(cls, name, bases, dct):
         '''Class has already been created ... register'''
         # Initialize the class
-        super(MetaIBBroker, cls).__init__(name, bases, dct)
-        ibstore.IBStore.BrokerCls = cls
+        super(MetaSingletonIBBroker, cls).__init__(name, bases, dct)
+        #ibstore.IBStore.BrokerCls = cls
+        ibstore_insync.IBStoreInsync.BrokerCls = cls
+        cls._singleton = None
 
+    def __call__(cls, *args, **kwargs):
+        if cls._singleton is None:
+            cls._singleton = (
+                super(MetaSingletonIBBroker, cls).__call__(*args, **kwargs))
 
-class IBBroker(with_metaclass(MetaIBBroker, BrokerBase)):
+        return cls._singleton
+
+class IBBroker(with_metaclass(MetaSingletonIBBroker, BrokerBase)):
     '''Broker implementation for Interactive Brokers.
 
     This class maps the orders/positions from Interactive Brokers to the
@@ -260,156 +76,1040 @@ class IBBroker(with_metaclass(MetaIBBroker, BrokerBase)):
         loss would also be calculated locally), but could be considered to be
         defeating the purpose of working with a live broker
     '''
-    params = ()
+    params = (
+        ('cash', 10000.0),
+        ('checksubmit', True), 
+        ('filler', None),
+        # slippage options 滑点
+        ('slip_perc', 0.0),
+        ('slip_fixed', 0.0),
+        ('slip_open', False),
+        ('slip_match', True),
+        ('slip_limit', True),
+        ('slip_out', False),
+        ('coc', False),
+        ('coo', False),
+        ('int2pnl', True),
+        ('shortcash', True),
+        ('fundstartval', 100.0),
+        ('fundmode', False),
+        ('runmode', None),
+    )
 
     def __init__(self, **kwargs):
         super(IBBroker, self).__init__()
+        self._userhist = []
+        self._fundhist = []
+        # share_value, net asset value
+        self._fhistlast = [float('NaN'), float('NaN')]
+        self.ib = ibstore_insync.IBStoreInsync()
+        if self.p.runmode:
+            self.runmode = self.p.runmode
+        else:
+            self.runmode = self.ib.runmode
 
-        self.ib = ibstore.IBStore(**kwargs)
+    def init(self):
+        '''
+        init会在super().__init__中调用,
+        因此init的执行是在__init__中的第一句被调用,__init__中初始化的代码都init()后执行
 
-        self.startingcash = self.cash = 0.0
+        init会被重复调用,在init和broker.start()中都会被调用
+        '''
+        super(IBBroker, self).init()
+        self.startingcash = self.cash = self.validcash = self.p.cash
         self.startingvalue = self.value = 0.0
+
+        self._value = self.cash
+        self._valuemkt = 0.0  # no open position
+
+        self._valuelever = 0.0  # no open position
+        self._valuemktlever = 0.0  # no open position
+
+        self.orders = list()  # will only be appending
+        self.pending = collections.deque()  # popleft and append(right)
+        self._toactivate = collections.deque()  # to activate in next cycle
+
+        self.positions = collections.defaultdict(Position)
+        self.d_credit = collections.defaultdict(float)  # credit per data
+        self.notifs = collections.deque()
+        
+        self.submitted = collections.deque()
+
+        # to keep dependent orders if needed
+        self._pchildren = collections.defaultdict(collections.deque)
+
+        self._ocos = dict()
+        self._ocol = collections.defaultdict(list) 
+
+        self._fundval = self.p.fundstartval
+        self._fundshares = self.p.cash / self._fundval
+        self._cash_addition = collections.deque()
 
         self._lock_orders = threading.Lock()  # control access
         self.orderbyid = dict()  # orders by order id
         self.executions = dict()  # notified executions
         self.ordstatus = collections.defaultdict(dict)
-        self.notifs = queue.Queue()  # holds orders which are notified
         self.tonotify = collections.deque()  # hold oids to be notified
         self.positions = self.ib.positions
 
     def start(self):
-        super(IBBroker, self).start()
-        self.ib.start(broker=self)
+        super().init()
+        if not self.checkorder:
+            for data in self.ib.datas:
+                if self.positions[data] is None:
+                    position = self.ib.getposition(data=data, clone=True)
+                    self.positions[data] = Position()
+                    self.positions[data].price = \
+                        position.avgCost/abs(position.position)
+                    self.positions[data].size = position.position
 
-        if self.ib.connected():
-            self.ib.reqAccountUpdates()
-            self.startingcash = self.cash = self.ib.get_acc_cash()
-            self.startingvalue = self.value = self.ib.get_acc_value()
-        else:
-            self.startingcash = self.cash = 0.0
-            self.startingvalue = self.value = 0.0
+    @property
+    def checkorder(self):
+        #True: 本地检查，事件驱动
+        #False: 平台检查，平台回调驱动，本地仅保存状态
+        return self.runmode == 'backtest'
+        
+    def get_notification(self):
+        try:
+            return self.notifs.popleft()
+        except IndexError:
+            pass
 
-    def stop(self):
-        super(IBBroker, self).stop()
-        self.ib.stop()
+        return None  
+    
+    def set_fundmode(self, fundmode, fundstartval=None):
+        '''Set the actual fundmode (True or False)
 
-    def getcash(self):
+        If the argument fundstartval is not ``None``, it will used
+        '''
+        self.p.fundmode = fundmode
+        if fundstartval is not None:
+            self.set_fundstartval(fundstartval)
+
+    def get_fundmode(self):
+        '''Returns the actual fundmode (True or False)'''
+        return self.p.fundmode
+
+    fundmode = property(get_fundmode, set_fundmode)
+
+    def set_fundstartval(self, fundstartval):
+        '''Set the starting value of the fund-like performance tracker'''
+        self.p.fundstartval = fundstartval
+
+    def set_int2pnl(self, int2pnl):
+        '''Configure assignment of interest to profit and loss'''
+        self.p.int2pnl = int2pnl
+
+    def set_coc(self, coc):
+        '''Configure the Cheat-On-Close method to buy the close on order bar'''
+        self.p.coc = coc
+
+    def set_coo(self, coo):
+        '''Configure the Cheat-On-Open method to buy the close on order bar'''
+        self.p.coo = coo
+
+    def set_shortcash(self, shortcash):
+        '''Configure the shortcash parameters'''
+        self.p.shortcash = shortcash
+
+    def set_slippage_perc(self, perc,
+                          slip_open=True, slip_limit=True,
+                          slip_match=True, slip_out=False):
+        '''Configure slippage to be percentage based'''
+        self.p.slip_perc = perc
+        self.p.slip_fixed = 0.0
+        self.p.slip_open = slip_open
+        self.p.slip_limit = slip_limit
+        self.p.slip_match = slip_match
+        self.p.slip_out = slip_out
+
+    def set_slippage_fixed(self, fixed,
+                           slip_open=True, slip_limit=True,
+                           slip_match=True, slip_out=False):
+        '''Configure slippage to be fixed points based'''
+        self.p.slip_perc = 0.0
+        self.p.slip_fixed = fixed
+        self.p.slip_open = slip_open
+        self.p.slip_limit = slip_limit
+        self.p.slip_match = slip_match
+        self.p.slip_out = slip_out
+
+    def set_filler(self, filler):
+        '''Sets a volume filler for volume filling execution'''
+        self.p.filler = filler
+
+    def set_checksubmit(self, checksubmit):
+        '''Sets the checksubmit parameter'''
+        self.p.checksubmit = checksubmit
+
+    def get_cash(self):
         # This call cannot block if no answer is available from ib
-        self.cash = self.ib.get_acc_cash()
-        return self.cash
+        if self.checkorder:
+            return self.cash
+        else:
+            self.cash = self.ib.get_acc_cash()
+            return self.cash
+    getcash = get_cash
 
-    def getvalue(self, datas=None):
-        self.value = self.ib.get_acc_value()
-        return self.value
+    def get_validcash(self):
+        # This call cannot block if no answer is available from ib
+        if self.checkorder:
+            return self.validcash
+        else:
+            self.validcash = self.ib.get_acc_validcash()
+            return self.self.validcash
+
+    def set_cash(self, cash):
+        '''Sets the cash parameter (alias: ``setcash``)'''
+        if self.checkorder:
+            self.startingcash = self.cash = self.p.cash = cash
+            self._value = cash
+
+    setcash = set_cash
+
+    def add_cash(self, cash):
+        '''Add/Remove cash to the system (use a negative value to remove)'''
+        self._cash_addition.append(cash)
+
+    def get_fundshares(self):
+        '''Returns the current number of shares in the fund-like mode'''
+        return self._fundshares
+
+    fundshares = property(get_fundshares)
+
+    def get_fundvalue(self):
+        '''Returns the Fund-like share value'''
+        return self._fundval
+
+    fundvalue = property(get_fundvalue)
+
+    def cancel(self, order, bracket=False):
+        if self.checkorder:
+            try:
+                self.pending.remove(order)
+            except ValueError:
+                # If the list didn't have the element we didn't cancel anything
+                return False
+
+            order.cancel()
+            self.notify(order)
+            self._ococheck(order)
+            if not bracket:
+                self._bracketize(order, cancel=True)
+            return True
+        else:
+            try:
+                o = self.orderbyid[order.orderId]
+            except (ValueError, KeyError):
+                return  # not found ... not cancellable
+
+            if order.status == Order.Cancelled:  # already cancelled
+                return
+
+            self.ib.cancelOrder(order.orderId)
+
+    def get_value(self, datas=None, mkt=False, lever=False):
+        '''Returns the portfolio value of the given datas (if datas is ``None``, then
+        the total portfolio value will be returned (alias: ``getvalue``)
+        '''
+        if self.checkorder:
+            if datas is None:
+                if mkt:
+                    return self._valuemkt if not lever else self._valuemktlever
+
+                return self._value if not lever else self._valuelever
+
+            return self._get_value(datas=datas, lever=lever)
+        else:
+            self.value = self.ib.get_acc_value()
+            return self.value
+    getvalue = get_value
+
+    def _get_value(self, datas=None, lever=False):
+        pos_value = 0.0
+        pos_value_unlever = 0.0
+        unrealized = 0.0
+
+        while self._cash_addition:
+            c = self._cash_addition.popleft()
+            self._fundshares += c / self._fundval
+            self.cash += c
+
+        for data in datas or self.positions:
+            comminfo = self.getcommissioninfo(data)
+            position = self.positions[data]
+            # use valuesize:  returns raw value, rather than negative adj val
+            if not self.p.shortcash:
+                dvalue = comminfo.getvalue(position, data.close[0])
+            else:
+                dvalue = comminfo.getvaluesize(position.size, data.close[0])
+
+            dunrealized = comminfo.profitandloss(position.size, position.price,
+                                                 data.close[0])
+            if datas and len(datas) == 1:
+                if lever and dvalue > 0:
+                    dvalue -= dunrealized
+                    return (dvalue / comminfo.get_leverage()) + dunrealized
+                return dvalue  # raw data value requested, short selling is neg
+
+            if not self.p.shortcash:
+                dvalue = abs(dvalue)  # short selling adds value in this case
+
+            pos_value += dvalue
+            unrealized += dunrealized
+
+            if dvalue > 0:  # long position - unlever
+                dvalue -= dunrealized
+                pos_value_unlever += (dvalue / comminfo.get_leverage())
+                pos_value_unlever += dunrealized
+            else:
+                pos_value_unlever += dvalue
+
+        if not self._fundhist:
+            self._value = v = self.cash + pos_value_unlever
+            self._fundval = self._value / self._fundshares  # update fundvalue
+        else:
+            # Try to fetch a value
+            fval, fvalue = self._process_fund_history()
+
+            self._value = fvalue
+            self.cash = fvalue - pos_value_unlever
+            self._fundval = fval
+            self._fundshares = fvalue / fval
+            lev = pos_value / (pos_value_unlever or 1.0)
+
+            # update the calculated values above to the historical values
+            pos_value_unlever = fvalue
+            pos_value = fvalue * lev
+
+        self._valuemkt = pos_value_unlever
+
+        self._valuelever = self.cash + pos_value
+        self._valuemktlever = pos_value
+
+        self._leverage = pos_value / (pos_value_unlever or 1.0)
+        self._unrealized = unrealized
+
+        return self._value if not lever else self._valuelever
 
     def getposition(self, data, clone=True):
-        return self.ib.getposition(data.tradecontract, clone=clone)
+        if self.checkorder:
+            return self.positions[data]
+        else:
+            return self.positions[data]
 
-    def cancel(self, order):
-        try:
-            o = self.orderbyid[order.m_orderId]
-        except (ValueError, KeyError):
-            return  # not found ... not cancellable
-
-        if order.status == Order.Cancelled:  # already cancelled
-            return
-
-        self.ib.cancelOrder(order.m_orderId)
 
     def orderstatus(self, order):
         try:
-            o = self.orderbyid[order.m_orderId]
-        except (ValueError, KeyError):
+            o = self.orders.index(order)
+        except ValueError:
             o = order
 
         return o.status
 
-    def submit(self, order):
-        order.submit(self)
+    def _take_children(self, order):
+        oref = order.ref
+        pref = getattr(order.parent, 'ref', oref)  # parent ref or self
 
-        # ocoize if needed
-        if order.oco is None:  # Generate a UniqueId
-            order.m_ocaGroup = bytes(uuid.uuid4())
-        else:
-            order.m_ocaGroup = self.orderbyid[order.oco.m_orderId].m_ocaGroup
+        if oref != pref:
+            if pref not in self._pchildren:
+                order.reject()  # parent not there - may have been rejected
+                self.notify(order)  # reject child, notify
+                return None
 
-        self.orderbyid[order.m_orderId] = order
-        self.ib.placeOrder(order.m_orderId, order.data.tradecontract, order)
-        self.notify(order)
+        return pref
+
+    def submit(self, order, check=True):
+        pref = self._take_children(order)
+        if pref is None:  # order has not been taken
+            return order
+
+        pc = self._pchildren[pref]
+        pc.append(order)  # store in parent/children queue
+
+        if order.transmit:  # if single order, sent and queue cleared
+            # if parent-child, the parent will be sent, the other kept
+            rets = [self.transmit(x, check=check) for x in pc]
+            return rets[-1]  # last one is the one triggering transmission
 
         return order
 
-    def getcommissioninfo(self, data):
-        contract = data.tradecontract
-        try:
-            mult = float(contract.m_multiplier)
-        except (ValueError, TypeError):
-            mult = 1.0
+    def transmit(self, order, check=True):
+        if check and self.p.checksubmit:
+            order.submit()
+            self.submitted.append(order)
+            self.orders.append(order)
+            self.notify(order)
+        else:
+            self.submit_accept(order)
 
-        stocklike = contract.m_secType not in ('FUT', 'OPT', 'FOP',)
+        return order
 
-        return IBCommInfo(mult=mult, stocklike=stocklike)
+    def check_submitted(self):
+        cash = self.cash
+        positions = dict()
 
-    def _makeorder(self, action, owner, data,
-                   size, price=None, plimit=None,
-                   exectype=None, valid=None,
-                   tradeid=0, **kwargs):
+        while self.submitted:
+            order = self.submitted.popleft()
 
-        order = IBOrder(action, owner=owner, data=data,
-                        size=size, price=price, pricelimit=plimit,
-                        exectype=exectype, valid=valid,
-                        tradeid=tradeid,
-                        m_clientId=self.ib.clientId,
-                        m_orderId=self.ib.nextOrderId(),
-                        **kwargs)
+            if self._take_children(order) is None:  # children not taken
+                continue
+
+            comminfo = self.getcommissioninfo(order.data)
+
+            position = positions.setdefault(
+                order.data, self.positions[order.data].clone())
+
+            # pseudo-execute the order to get the remaining cash after exec
+            cash = self._execute(order, cash=cash, position=position)
+
+            if cash >= 0.0:
+                self.submit_accept(order)
+                continue
+
+            order.margin()
+            self.notify(order)
+            self._ococheck(order)
+            self._bracketize(order, cancel=True)
+
+    def submit_accept(self, order):
+        order.pannotated = None
+        order.submit()
+        order.accept()
+        self.pending.append(order)
+        self.notify(order)
+
+    def _bracketize(self, order, cancel=False):
+        oref = order.ref
+        pref = getattr(order.parent, 'ref', oref)
+        parent = oref == pref
+
+        pc = self._pchildren[pref]  # defdict - guaranteed
+        if cancel or not parent:  # cancel left or child exec -> cancel other
+            while pc:
+                self.cancel(pc.popleft(), bracket=True)  # idempotent
+
+            del self._pchildren[pref]  # defdict guaranteed
+
+        else:  # not cancel -> parent exec'd
+            pc.popleft()  # remove parent
+            for o in pc:  # activate childnre
+                self._toactivate.append(o)
+
+    def _ococheck(self, order):
+        # ocoref = self._ocos[order.ref] or order.ref  # a parent or self
+        parentref = self._ocos[order.ref]
+        ocoref = self._ocos.get(parentref, None)
+        ocol = self._ocol.pop(ocoref, None)
+        if ocol:
+            for i in range(len(self.pending) - 1, -1, -1):
+                o = self.pending[i]
+                if o is not None and o.ref in ocol:
+                    del self.pending[i]
+                    o.cancel()
+                    self.notify(o)
+
+    def _ocoize(self, order, oco):
+        oref = order.ref
+        if oco is None:
+            self._ocos[oref] = oref  # current order is parent
+            self._ocol[oref].append(oref)  # create ocogroup
+        else:
+            ocoref = self._ocos[oco.ref]  # ref to group leader
+            self._ocos[oref] = ocoref  # ref to group leader
+            self._ocol[ocoref].append(oref)  # add to group
+
+    def _makeorder(self, action, owner, data, size,**kwargs):
+        '''
+        开仓必须使用BKT bracketOrder 套利单
+        平仓必须使用LMT limitOrder 限价单
+        '''
+        order = IBOrder(action=action, 
+                    owner=owner, 
+                    data=data, 
+                    size=size,
+                    **kwargs)
 
         order.addcomminfo(self.getcommissioninfo(data))
         return order
+            
+    def buy(self, owner, data, size, **kwargs):  
+        action = kwargs.pop('action', 'BUY')
+        if self.checkorder:
+            order = IBOrder(owner=owner, data=data, size=size, action=action, **kwargs)
+            oco = kwargs.get('oco', None)
+            order.addinfo(**kwargs)
+            self._ocoize(order, oco)
+            return self.submit(order)
+        else:
+            order = self._makeorder('BUY', owner, data, size, **kwargs)
+            return self.ib.placeOrder(order.data.tradecontract, order)
+  
 
-    def buy(self, owner, data,
-            size, price=None, plimit=None,
-            exectype=None, valid=None, tradeid=0,
-            **kwargs):
+    def sell(self, owner, data, size, **kwargs):
+        action = kwargs.pop('action', 'SELL')
+        if self.checkorder:
+            order = IBOrder(owner=owner, data=data, size=size, action=action, **kwargs)
+            oco = kwargs.get('oco', None)      
+            order.addinfo(**kwargs)
+            self._ocoize(order, oco)
+            return self.submit(order)
+        else:
+            order = self._makeorder('SELL', owner, data, size,**kwargs)
+            return self.ib.placeOrder(order.data.tradecontract, order)
+    
+    
+    def _execute(self, order, ago=None, price=None, cash=None, position=None,
+                 dtcoc=None):
+        # ago = None is used a flag for pseudo execution
+        if ago is not None and price is None:
+            return  # no psuedo exec no price - no execution
 
-        order = self._makeorder(
-            'BUY',
-            owner, data, size, price, plimit, exectype, valid, tradeid,
-            **kwargs)
+        if self.p.filler is None or ago is None:
+            # Order gets full size or pseudo-execution
+            size = order.executed.remsize
+        else:
+            # Execution depends on volume filler
+            size = self.p.filler(order, price, ago)
+            if not order.isbuy():
+                size = -size
 
-        return self.submit(order)
+        # Get comminfo object for the data
+        comminfo = self.getcommissioninfo(order.data)
 
-    def sell(self, owner, data,
-             size, price=None, plimit=None,
-             exectype=None, valid=None, tradeid=0,
-             **kwargs):
+        # Check if something has to be compensated
+        if order.data._compensate is not None:
+            data = order.data._compensate
+            cinfocomp = self.getcommissioninfo(data)  # for actual commission
+        else:
+            data = order.data
+            cinfocomp = comminfo
 
-        order = self._makeorder(
-            'SELL',
-            owner, data, size, price, plimit, exectype, valid, tradeid,
-            **kwargs)
+        # Adjust position with operation size
+        if ago is not None:
+            # Real execution with date
+            position = self.positions[data]
+            pprice_orig = position.price
 
-        return self.submit(order)
+            psize, pprice, opened, closed = position.pseudoupdate(size, price)
+
+            # if part/all of a position has been closed, then there has been
+            # a profitandloss ... record it
+            pnl = comminfo.profitandloss(-closed, pprice_orig, price)
+            cash = self.cash
+        else:
+            pnl = 0
+            if not self.p.coo:
+                price = pprice_orig = order.created.price
+            else:
+                # When doing cheat on open, the price to be considered for a
+                # market order is the opening price and not the default closing
+                # price with which the order was created
+                if order.exectype == Order.Market:
+                    price = pprice_orig = order.data.open[0]
+                else:
+                    price = pprice_orig = order.created.price
+
+            psize, pprice, opened, closed = position.update(size, price)
+
+        # "Closing" totally or partially is possible. Cash may be re-injected
+        if closed:
+            # Adjust to returned value for closed items & acquired opened items
+            if self.p.shortcash:
+                closedvalue = comminfo.getvaluesize(-closed, pprice_orig)
+            else:
+                closedvalue = comminfo.getoperationcost(closed, pprice_orig)
+
+            closecash = closedvalue
+            if closedvalue > 0:  # long position closed
+                closecash /= comminfo.get_leverage()  # inc cash with lever
+
+            cash += closecash + pnl * comminfo.stocklike
+            # Calculate and substract commission
+            closedcomm = comminfo.getcommission(closed, price)
+            cash -= closedcomm
+
+            if ago is not None:
+                # Cashadjust closed contracts: prev close vs exec price
+                # The operation can inject or take cash out
+                cash += comminfo.cashadjust(-closed,
+                                            position.adjbase,
+                                            price)
+
+                # Update system cash
+                self.cash = cash
+        else:
+            closedvalue = closedcomm = 0.0
+
+        popened = opened
+        if opened:
+            if self.p.shortcash:
+                openedvalue = comminfo.getvaluesize(opened, price)
+            else:
+                openedvalue = comminfo.getoperationcost(opened, price)
+
+            opencash = openedvalue
+            if openedvalue > 0:  # long position being opened
+                opencash /= comminfo.get_leverage()  # dec cash with level
+
+            cash -= opencash  # original behavior
+
+            openedcomm = cinfocomp.getcommission(opened, price)
+            cash -= openedcomm
+
+            if cash < 0.0:
+                # execution is not possible - nullify
+                opened = 0
+                openedvalue = openedcomm = 0.0
+
+            elif ago is not None:  # real execution
+                if abs(psize) > abs(opened):
+                    # some futures were opened - adjust the cash of the
+                    # previously existing futures to the operation price and
+                    # use that as new adjustment base, because it already is
+                    # for the new futures At the end of the cycle the
+                    # adjustment to the close price will be done for all open
+                    # futures from a common base price with regards to the
+                    # close price
+                    adjsize = psize - opened
+                    cash += comminfo.cashadjust(adjsize,
+                                                position.adjbase, price)
+
+                # record adjust price base for end of bar cash adjustment
+                position.adjbase = price
+
+                # update system cash - checking if opened is still != 0
+                self.cash = cash
+        else:
+            openedvalue = openedcomm = 0.0
+
+        if ago is None:
+            # return cash from pseudo-execution
+            return cash
+
+        execsize = closed + opened
+
+        if execsize:
+            # Confimrm the operation to the comminfo object
+            comminfo.confirmexec(execsize, price)
+
+            # do a real position update if something was executed
+            position.update(execsize, price, data.datetime.datetime())
+
+            if closed and self.p.int2pnl:  # Assign accumulated interest data
+                closedcomm += self.d_credit.pop(data, 0.0)
+
+            # Execute and notify the order
+            order.execute(dtcoc or data.datetime[ago],
+                          execsize, price,
+                          closed, closedvalue, closedcomm,
+                          opened, openedvalue, openedcomm,
+                          comminfo.margin, pnl,
+                          psize, pprice)
+
+            order.addcomminfo(comminfo)
+
+            self.notify(order)
+            self._ococheck(order)
+
+        if popened and not opened:
+            # opened was not executed - not enough cash
+            order.margin()
+            self.notify(order)
+            self._ococheck(order)
+            self._bracketize(order, cancel=True)
 
     def notify(self, order):
-        self.notifs.put(order.clone())
+        self.notifs.append(order.clone())
 
-    def get_notification(self):
-        try:
-            return self.notifs.get(False)
-        except queue.Empty:
+    
+    def _try_exec_historical(self, order):
+        self._execute(order, ago=0, price=order.created.price)
+
+    def _try_exec_market(self, order, popen, phigh, plow):
+        ago = 0
+        if self.p.coc and order.info.get('coc', True):
+            dtcoc = order.created.dt
+            exprice = order.created.pclose
+        else:
+            if not self.p.coo and order.data.datetime[0] <= order.created.dt:
+                return    # can only execute after creation time
+
+            dtcoc = None
+            exprice = popen
+
+        if order.isbuy():
+            p = self._slip_up(phigh, exprice, doslip=self.p.slip_open)
+        else:
+            p = self._slip_down(plow, exprice, doslip=self.p.slip_open)
+
+        self._execute(order, ago=0, price=p, dtcoc=dtcoc)
+
+    def _try_exec_close(self, order, pclose):
+        # pannotated allows to keep track of the closing bar if there is no
+        # information which lets us know that the current bar is the closing
+        # bar (like matching end of session bar)
+        # The actual matching will be done one bar afterwards but using the
+        # information from the actual closing bar
+
+        dt0 = order.data.datetime[0]
+        # don't use "len" -> in replay the close can be reached with same len
+        if dt0 > order.created.dt:  # can only execute after creation time
+            # or (self.p.eosbar and dt0 == order.dteos):
+            if dt0 >= order.dteos:
+                # past the end of session or right at it and eosbar is True
+                if order.pannotated and dt0 > order.dteos:
+                    ago = -1
+                    execprice = order.pannotated
+                else:
+                    ago = 0
+                    execprice = pclose
+
+                self._execute(order, ago=ago, price=execprice)
+                return
+
+        # If no exexcution has taken place ... annotate the closing price
+        order.pannotated = pclose
+
+    def _try_exec_limit(self, order, popen, phigh, plow, plimit):
+        if order.isbuy():
+            if plimit >= popen:
+                # open smaller/equal than requested - buy cheaper
+                pmax = min(phigh, plimit)
+                p = self._slip_up(pmax, popen, doslip=self.p.slip_open,
+                                  lim=True)
+                self._execute(order, ago=0, price=p)
+            elif plimit >= plow:
+                # day low below req price ... match limit price
+                self._execute(order, ago=0, price=plimit)
+
+        else:  # Sell
+            if plimit <= popen:
+                # open greater/equal than requested - sell more expensive
+                pmin = max(plow, plimit)
+                p = self._slip_down(plimit, popen, doslip=self.p.slip_open,
+                                    lim=True)
+                self._execute(order, ago=0, price=p)
+            elif plimit <= phigh:
+                # day high above req price ... match limit price
+                self._execute(order, ago=0, price=plimit)
+
+    def _try_exec_stop(self, order, popen, phigh, plow, pcreated, pclose):
+        if order.isbuy():
+            if popen >= pcreated:
+                # price penetrated with an open gap - use open
+                p = self._slip_up(phigh, popen, doslip=self.p.slip_open)
+                self._execute(order, ago=0, price=p)
+            elif phigh >= pcreated:
+                # price penetrated during the session - use trigger price
+                p = self._slip_up(phigh, pcreated)
+                self._execute(order, ago=0, price=p)
+
+        else:  # Sell
+            if popen <= pcreated:
+                # price penetrated with an open gap - use open
+                p = self._slip_down(plow, popen, doslip=self.p.slip_open)
+                self._execute(order, ago=0, price=p)
+            elif plow <= pcreated:
+                # price penetrated during the session - use trigger price
+                p = self._slip_down(plow, pcreated)
+                self._execute(order, ago=0, price=p)
+
+        # not (completely) executed and trailing stop
+        if order.alive() and order.exectype == Order.StopTrail:
+            order.trailadjust(pclose)
+
+    def _try_exec_stoplimit(self, order,
+                            popen, phigh, plow, pclose,
+                            pcreated, plimit):
+        if order.isbuy():
+            if popen >= pcreated:
+                order.triggered = True
+                self._try_exec_limit(order, popen, phigh, plow, plimit)
+
+            elif phigh >= pcreated:
+                # price penetrated upwards during the session
+                order.triggered = True
+                # can calculate execution for a few cases - datetime is fixed
+                if popen > pclose:
+                    if plimit >= pcreated:  # limit above stop trigger
+                        p = self._slip_up(phigh, pcreated, lim=True)
+                        self._execute(order, ago=0, price=p)
+                    elif plimit >= pclose:
+                        self._execute(order, ago=0, price=plimit)
+                else:  # popen < pclose
+                    if plimit >= pcreated:
+                        p = self._slip_up(phigh, pcreated, lim=True)
+                        self._execute(order, ago=0, price=p)
+        else:  # Sell
+            if popen <= pcreated:
+                # price penetrated downwards with an open gap
+                order.triggered = True
+                self._try_exec_limit(order, popen, phigh, plow, plimit)
+
+            elif plow <= pcreated:
+                # price penetrated downwards during the session
+                order.triggered = True
+                # can calculate execution for a few cases - datetime is fixed
+                if popen <= pclose:
+                    if plimit <= pcreated:
+                        p = self._slip_down(plow, pcreated, lim=True)
+                        self._execute(order, ago=0, price=p)
+                    elif plimit <= pclose:
+                        self._execute(order, ago=0, price=plimit)
+                else:
+                    # popen > pclose
+                    if plimit <= pcreated:
+                        p = self._slip_down(plow, pcreated, lim=True)
+                        self._execute(order, ago=0, price=p)
+
+        # not (completely) executed and trailing stop
+        if order.alive() and order.exectype == Order.StopTrailLimit:
+            order.trailadjust(pclose)
+
+    def _slip_up(self, pmax, price, doslip=True, lim=False):
+        if not doslip:
+            return price
+
+        slip_perc = self.p.slip_perc
+        slip_fixed = self.p.slip_fixed
+        if slip_perc:
+            pslip = price * (1 + slip_perc)
+        elif slip_fixed:
+            pslip = price + slip_fixed
+        else:
+            return price
+
+        if pslip <= pmax:  # slipping can return price
+            return pslip
+        elif self.p.slip_match or (lim and self.p.slip_limit):
+            if not self.p.slip_out:
+                return pmax
+
+            return pslip  # non existent price
+
+        return None  # no price can be returned
+
+    def _slip_down(self, pmin, price, doslip=True, lim=False):
+        if not doslip:
+            return price
+
+        slip_perc = self.p.slip_perc
+        slip_fixed = self.p.slip_fixed
+        if slip_perc:
+            pslip = price * (1 - slip_perc)
+        elif slip_fixed:
+            pslip = price - slip_fixed
+        else:
+            return price
+
+        if pslip >= pmin:  # slipping can return price
+            return pslip
+        elif self.p.slip_match or (lim and self.p.slip_limit):
+            if not self.p.slip_out:
+                return pmin
+
+            return pslip  # non existent price
+
+        return None  # no price can be returned
+
+    def _try_exec(self, order):
+        data = order.data
+
+        popen = getattr(data, 'tick_open', None)
+        if popen is None:
+            popen = data.open[0]
+        phigh = getattr(data, 'tick_high', None)
+        if phigh is None:
+            phigh = data.high[0]
+        plow = getattr(data, 'tick_low', None)
+        if plow is None:
+            plow = data.low[0]
+        pclose = getattr(data, 'tick_close', None)
+        if pclose is None:
+            pclose = data.close[0]
+
+        pcreated = order.created.price
+        plimit = order.created.pricelimit
+
+        if order.exectype == Order.Market:
+            self._try_exec_market(order, popen, phigh, plow)
+
+        elif order.exectype == Order.Close:
+            self._try_exec_close(order, pclose)
+
+        elif order.exectype == Order.Limit:
+            self._try_exec_limit(order, popen, phigh, plow, pcreated)
+
+        elif (order.triggered and
+              order.exectype in [Order.StopLimit, Order.StopTrailLimit]):
+            self._try_exec_limit(order, popen, phigh, plow, plimit)
+
+        elif order.exectype in [Order.Stop, Order.StopTrail]:
+            self._try_exec_stop(order, popen, phigh, plow, pcreated, pclose)
+
+        elif order.exectype in [Order.StopLimit, Order.StopTrailLimit]:
+            self._try_exec_stoplimit(order,
+                                     popen, phigh, plow, pclose,
+                                     pcreated, plimit)
+
+        elif order.exectype == Order.Historical:
+            self._try_exec_historical(order)
+
+    def _process_fund_history(self):
+        fhist = self._fundhist  # [last element, iterator]
+        f, funds = fhist
+        if not f:
+            return self._fhistlast
+
+        dt = f[0]  # date/datetime instance
+        if isinstance(dt, string_types):
+            dtfmt = '%Y-%m-%d'
+            if 'T' in dt:
+                dtfmt += 'T%H:%M:%S'
+                if '.' in dt:
+                    dtfmt += '.%f'
+            dt = datetime.datetime.strptime(dt, dtfmt)
+            f[0] = dt  # update value
+
+        elif isinstance(dt, datetime.datetime):
             pass
+        elif isinstance(dt, datetime.date):
+            dt = datetime.datetime(year=dt.year, month=dt.month, day=dt.day)
+            f[0] = dt  # Update the value
 
-        return None
+        # Synchronization with the strategy is not possible because the broker
+        # is called before the strategy advances. The 2 lines below would do it
+        # if possible
+        # st0 = self.cerebro.runningstrats[0]
+        # if dt <= st0.datetime.datetime():
+        if dt <= self.cerebro._dtmaster:
+            self._fhistlast = f[1:]
+            fhist[0] = list(next(funds, []))
+
+        return self._fhistlast
+
+    def _process_order_history(self):
+        for uhist in self._userhist:
+            uhorder, uhorders, uhnotify = uhist
+            while uhorder is not None:
+                uhorder = list(uhorder)  # to support assignment (if tuple)
+                try:
+                    dataidx = uhorder[3]  # 2nd field
+                except IndexError:
+                    dataidx = None  # Field not present, use default
+
+                if dataidx is None:
+                    d = self.cerebro.datas[0]
+                elif isinstance(dataidx, integer_types):
+                    d = self.cerebro.datas[dataidx]
+                else:  # assume string
+                    d = self.cerebro.datasbyname[dataidx]
+
+                if not len(d):
+                    break  # may start later as oter data feeds
+
+                dt = uhorder[0]  # date/datetime instance
+                if isinstance(dt, string_types):
+                    dtfmt = '%Y-%m-%d'
+                    if 'T' in dt:
+                        dtfmt += 'T%H:%M:%S'
+                        if '.' in dt:
+                            dtfmt += '.%f'
+                    dt = datetime.datetime.strptime(dt, dtfmt)
+                    uhorder[0] = dt
+                elif isinstance(dt, datetime.datetime):
+                    pass
+                elif isinstance(dt, datetime.date):
+                    dt = datetime.datetime(year=dt.year,
+                                           month=dt.month,
+                                           day=dt.day)
+                    uhorder[0] = dt
+
+                if dt > d.datetime.datetime():
+                    break  # cannot execute yet 1st in queue, stop processing
+
+                size = uhorder[1]
+                price = uhorder[2]
+                owner = self.cerebro.runningstrats[0]
+                if size > 0:
+                    o = self.buy(owner=owner, data=d,
+                                 size=size, price=price,
+                                 exectype=Order.Historical,
+                                 histnotify=uhnotify,
+                                 _checksubmit=False)
+
+                elif size < 0:
+                    o = self.sell(owner=owner, data=d,
+                                  size=abs(size), price=price,
+                                  exectype=Order.Historical,
+                                  histnotify=uhnotify,
+                                  _checksubmit=False)
+
+                # update to next potential order
+                uhist[0] = uhorder = next(uhorders, None)
 
     def next(self):
-        self.notifs.put(None)  # mark notificatino boundary
+        if self.checkorder:
+            while self._toactivate:
+                self._toactivate.popleft().activate()
 
-    # Order statuses in msg
-    (SUBMITTED, FILLED, CANCELLED, INACTIVE,
-     PENDINGSUBMIT, PENDINGCANCEL, PRESUBMITTED) = (
-        'Submitted', 'Filled', 'Cancelled', 'Inactive',
-         'PendingSubmit', 'PendingCancel', 'PreSubmitted',)
+            if self.p.checksubmit:
+                self.check_submitted()
+
+            # Discount any cash for positions hold
+            credit = 0.0
+            for data, pos in self.positions.items():
+                if pos:
+                    comminfo = self.getcommissioninfo(data)
+                    dt0 = data.datetime.datetime()
+                    dcredit = comminfo.get_credit_interest(data, pos, dt0)
+                    self.d_credit[data] += dcredit
+                    credit += dcredit
+                    pos.datetime = dt0  # mark last credit operation
+
+            self.cash -= credit
+
+            self._process_order_history()
+
+            # Iterate once over all elements of the pending queue
+            self.pending.append(None)
+            while True:
+                order = self.pending.popleft()
+                if order is None:
+                    break
+
+                if order.expire():
+                    self.notify(order)
+                    self._ococheck(order)
+                    self._bracketize(order, cancel=True)
+
+                elif not order.active():     #只针对子订单
+                    self.pending.append(order)  # cannot yet be processed
+
+                else:
+                    self._try_exec(order)
+
+                    if order.alive():
+                        self.pending.append(order)
+
+                    elif order.status == Order.Completed:
+                        # a bracket parent order may have been executed
+                        self._bracketize(order)
+
+            # Operations have been executed ... adjust cash end of bar
+            for data, pos in self.positions.items():
+                # futures change cash every bar
+                if pos:
+                    comminfo = self.getcommissioninfo(data)
+                    self.cash += comminfo.cashadjust(pos.size,
+                                                    pos.adjbase,
+                                                    data.close[0])
+                
+                    # record the last adjustment price
+                    pos.adjbase = data.close[0]
+
+            self._get_value()  # update value
 
     def push_orderstatus(self, msg):
         # Cancelled and Submitted with Filled = 0 can be pushed immediately
@@ -476,59 +1176,69 @@ class IBBroker(with_metaclass(MetaIBBroker, BrokerBase)):
             pass
 
     def push_execution(self, ex):
-        self.executions[ex.m_execId] = ex
+        self.executions[ex.execId] = ex
 
     def push_commissionreport(self, cr):
         with self._lock_orders:
-            ex = self.executions.pop(cr.m_execId)
-            oid = ex.m_orderId
-            order = self.orderbyid[oid]
-            ostatus = self.ordstatus[oid].pop(ex.m_cumQty)
-
-            position = self.getposition(order.data, clone=False)
-            pprice_orig = position.price
-            size = ex.m_shares if ex.m_side[0] == 'B' else -ex.m_shares
-            price = ex.m_price
-            # use pseudoupdate and let the updateportfolio do the real update?
-            psize, pprice, opened, closed = position.update(size, price)
-
-            # split commission between closed and opened
-            comm = cr.m_commission
-            closedcomm = comm * closed / size
-            openedcomm = comm - closedcomm
-
-            comminfo = order.comminfo
-            closedvalue = comminfo.getoperationcost(closed, pprice_orig)
-            openedvalue = comminfo.getoperationcost(opened, price)
-
-            # default in m_pnl is MAXFLOAT
-            pnl = cr.m_realizedPNL if closed else 0.0
-
-            # The internal broker calc should yield the same result
-            # pnl = comminfo.profitandloss(-closed, pprice_orig, price)
-
-            # Use the actual time provided by the execution object
-            # The report from TWS is in actual local time, not the data's tz
-            dt = date2num(datetime.strptime(ex.m_time, '%Y%m%d  %H:%M:%S'))
-
-            # Need to simulate a margin, but it plays no role, because it is
-            # controlled by a real broker. Let's set the price of the item
-            margin = order.data.close[0]
-
-            order.execute(dt, size, price,
-                          closed, closedvalue, closedcomm,
+            try:
+                ex = self.executions.pop(cr.execId)
+                oid = ex.orderId
+                order = self.orderbyid[oid]
+                ostatus = self.ordstatus[oid].pop(ex.cumQty)
+                
+                position = self.getposition(contract=order.data, clone=False)
+                pprice_orig = position.price
+                size = ex.shares if ex.side[0] == 'B' else -ex.shares
+                price = ex.price
+                # use pseudoupdate and let the updateportfolio do the real update?
+                psize, pprice, opened, closed = position.update(float(size), price)
+                
+                # split commission between closed and opened
+                comm = cr.commission
+                closedcomm = comm *  float(closed) / float(size)
+                openedcomm = comm - closedcomm
+                
+                comminfo = order.comminfo
+                closedvalue = comminfo.getoperationcost(closed, pprice_orig)
+                openedvalue = comminfo.getoperationcost(opened, price)
+                
+                # default in m_pnl is MAXFLOAT
+                pnl = cr.realizedPNL if closed else 0.0
+				
+				# The internal broker calc should yield the same result
+				# pnl = comminfo.profitandloss(-closed, pprice_orig, price)
+				
+				# Use the actual time provided by the execution object
+				# The report from TWS is in actual local time, not the data's tz
+				#dt = date2num(datetime.strptime(ex.time, '%Y%m%d  %H:%M:%S'))
+                dt_array = [] if ex.time == None else ex.time.split(" ")
+                if dt_array and len(dt_array) > 1:
+                    dt_array.pop()
+                    ex_time = " ".join(dt_array)
+                    dt = date2num(datetime.strptime(ex_time, '%Y%m%d %H:%M:%S'))
+                else:
+                    dt = date2num(datetime.strptime(ex.time, '%Y%m%d %H:%M:%S %A'))															 
+					
+				# Need to simulate a margin, but it plays no role, because it is
+				# controlled by a real broker. Let's set the price of the item
+                margin = order.data.close[0]
+                
+                order.execute(dt, float(size),  price,
+                          float(closed), closedvalue, closedcomm,
                           opened, openedvalue, openedcomm,
                           margin, pnl,
-                          psize, pprice)
-
-            if ostatus.status == self.FILLED:
-                order.completed()
-                self.ordstatus.pop(oid)  # nothing left to be reported
-            else:
-                order.partial()
-
-            if oid not in self.tonotify:  # Lock needed
-                self.tonotify.append(oid)
+                          float(psize), pprice)
+                
+                if ostatus.status == self.FILLED:
+                    order.completed()
+                    self.ordstatus.pop(oid)  # nothing left to be reported
+                else:
+                    order.partial()
+                
+                if oid not in self.tonotify:  # Lock needed
+                    self.tonotify.append(oid)
+            except Exception as e:
+                self.ib._logger.exception(f"Exception: {e}")						  
 
     def push_portupdate(self):
         # If the IBStore receives a Portfolio update, then this method will be
@@ -570,7 +1280,7 @@ class IBBroker(with_metaclass(MetaIBBroker, BrokerBase)):
             except (KeyError, AttributeError):
                 return  # no order or no id in error
 
-            if msg.orderState.m_status in ['PendingCancel', 'Cancelled',
+            if msg.orderState.status in ['PendingCancel', 'Cancelled',
                                            'Canceled']:
                 # This is most likely due to an expiration]
                 order._willexpire = True

@@ -203,7 +203,8 @@ class SharpeRatio(Analyzer):
 
             self.ratio = ratio
 
-        self.rets['sharperatio'] = self.ratio
+
+            self.rets['sharperatio'] = round(self.ratio, 4) if self.ratio else self.ratio
 
     def optimize(self):
         '''Optimizies the object if optreturn is in effect'''

@@ -109,6 +109,8 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
     )
 
     def __init__(self, data):
+        #Downsampling only. Upsampling is not implemented
+        assert(data._timeframe <= self.p.timeframe)
         self.subdays = TimeFrame.Ticks < self.p.timeframe < TimeFrame.Days
         self.subweeks = self.p.timeframe < TimeFrame.Weeks
         self.componly = (not self.subdays and
@@ -129,8 +131,8 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
         # Modify data information according to own parameters
         data.resampling = 1
         data.replaying = self.replaying
-        data._timeframe = self.p.timeframe
-        data._compression = self.p.compression
+        data._timeframe = data.p.timeframe = self.p.timeframe
+        data._compression = data.p.compression = self.p.compression
 
         self.data = data
 

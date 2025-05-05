@@ -48,6 +48,10 @@ class St(bt.Strategy):
             order.getstatusname()))
 
         if order.status == order.Completed:
+            print('{}: Order ref: {} / Type {} / Status {}'.format(
+                self.data.datetime.date(0),
+                order.ref, 'Buy' * order.isbuy() or 'Sell',
+                order.getstatusname()))
             self.holdstart = len(self)
 
         if not order.alive() and order.ref in self.orefs:
@@ -144,6 +148,7 @@ def runstrat(args=None):
 
     # Broker
     cerebro.broker = bt.brokers.BackBroker(**eval('dict(' + args.broker + ')'))
+    cerebro.broker.setcommission(commission=0.005)
 
     # Sizer
     cerebro.addsizer(bt.sizers.FixedSize, **eval('dict(' + args.sizer + ')'))

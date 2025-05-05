@@ -66,7 +66,44 @@ class TradeAnalyzer(Analyzer):
           also reachable with dot notation dictname.total.total
     '''
     def create_analysis(self):
-        self.rets = AutoOrderedDict()
+        self.rets = AutoOrderedDict(
+        	{
+                'total': AutoOrderedDict({'total': 0, 'open': 0, 'closed': 0}),
+                'streak': AutoOrderedDict({'won': AutoOrderedDict({'current': 0, 'longest': 0}), 'lost': AutoOrderedDict({'current': 0, 'longest': 0})}),
+                'pnl': AutoOrderedDict({'gross': AutoOrderedDict({'total': 0, 'average': 0}), 'net': AutoOrderedDict({'total': 0, 'average': 0})}),
+                'won': AutoOrderedDict({'total': 0, 'pnl': AutoOrderedDict({'total': 0, 'average': 0, 'max': 0})}),
+                'lost': AutoOrderedDict({'total': 0, 'pnl': AutoOrderedDict({'total': 0, 'average': 0, 'max': 0})}),
+                'long': AutoOrderedDict({'total': 0, 
+								 'pnl': AutoOrderedDict({'total': 0, 'average': 0, 'won': AutoOrderedDict({'total': 0, 'average': 0, 'max': 0}),'lost': AutoOrderedDict({'total': 0, 'average': 0, 'max': 0})}), 
+								 'won': 0, 
+								 'lost': 0}),
+                'short': AutoOrderedDict({'total': 0, 
+								  'pnl': AutoOrderedDict({'total': 0, 'average': 0, 'won': AutoOrderedDict({'total':0 , 'average': 0, 'max': 0}), 'lost': AutoOrderedDict({'total':0 , 'average':0 , 'max': 0})}), 
+								  'won': 0, 
+								  'lost': 0}),
+                'len': AutoOrderedDict({'total': 0, 
+								'average': 0, 
+								'max': 0, 
+								'min': 0, 
+								'won': AutoOrderedDict({'total': 0, 'average': 0, 'max': 0}), 
+								'lost': AutoOrderedDict({'total': 0, 'average': 0, 'max': 0, 'min': 0}), 
+								'long': AutoOrderedDict({'total': 0, 
+														 'average': 0, 
+														 'max': 0, 
+														 'min': 0, 
+														 'won': AutoOrderedDict({'total': 0, 'average': 0, 'max': 0, 'min': 0}), 
+														 'lost': AutoOrderedDict({'total': 0, 'average': 0, 'max': 0, 'min': 0})
+														 }), 
+								'short': AutoOrderedDict({'total': 0, 
+														  'average': 0.0, 
+														  'max': 0, 
+														  'min': 0, 
+														  'won': AutoOrderedDict({'total': 0, 'average': 0.0, 'max': 0, 'min': 0}), 
+														  'lost': AutoOrderedDict({'total': 0, 'average': 0.0, 'max': 0, 'min': 0})
+														  })
+							})
+	            }
+            )
         self.rets.total.total = 0
 
     def stop(self):
@@ -106,9 +143,11 @@ class TradeAnalyzer(Analyzer):
 
             trpnl = trades.pnl
             trpnl.gross.total += trade.pnl
-            trpnl.gross.average = trades.pnl.gross.total / trades.total.closed
+            trpnl.gross.total = round(trpnl.gross.total, 2)
+            trpnl.gross.average = round(trades.pnl.gross.total / trades.total.closed, 2)
             trpnl.net.total += trade.pnlcomm
-            trpnl.net.average = trades.pnl.net.total / trades.total.closed
+            trpnl.net.total = round(trpnl.net.total, 2)
+            trpnl.net.average = round(trades.pnl.net.total / trades.total.closed, 2)
 
             # Won/Lost statistics
             for wlname in ['won', 'lost']:
@@ -121,11 +160,12 @@ class TradeAnalyzer(Analyzer):
                 pnlcomm = trade.pnlcomm * wl
 
                 trwlpnl.total += pnlcomm
-                trwlpnl.average = trwlpnl.total / (trwl.total or 1.0)
+                trwlpnl.total = round(trwlpnl.total, 2)
+                trwlpnl.average = round(trwlpnl.total / (trwl.total or 1.0), 2)
 
                 wm = trwlpnl.max or 0.0
                 func = max if wlname == 'won' else min
-                trwlpnl.max = func(wm, pnlcomm)
+                trwlpnl.max = round(func(wm, pnlcomm), 2)
 
             # Long/Short statistics
             for tname in ['long', 'short']:
@@ -133,8 +173,10 @@ class TradeAnalyzer(Analyzer):
                 ls = res['t' + tname]
 
                 trls.total += ls  # long.total / short.total
+                trls.total = round(trls.total, 2)
                 trls.pnl.total += trade.pnlcomm * ls
-                trls.pnl.average = trls.pnl.total / (trls.total or 1.0)
+                trls.pnl.total = round(trls.pnl.total, 2)
+                trls.pnl.average = round(trls.pnl.total / (trls.total or 1.0), 2)
 
                 for wlname in ['won', 'lost']:
                     wl = res[wlname]
@@ -143,16 +185,17 @@ class TradeAnalyzer(Analyzer):
                     trls[wlname] += wl * ls  # long.won / short.won
 
                     trls.pnl[wlname].total += pnlcomm
+                    trls.pnl[wlname].total = round(trls.pnl[wlname].total, 2)
                     trls.pnl[wlname].average = \
-                        trls.pnl[wlname].total / (trls[wlname] or 1.0)
+                        round(trls.pnl[wlname].total / (trls[wlname] or 1.0), 2)
 
                     wm = trls.pnl[wlname].max or 0.0
                     func = max if wlname == 'won' else min
-                    trls.pnl[wlname].max = func(wm, pnlcomm)
+                    trls.pnl[wlname].max = round(func(wm, pnlcomm), 2)
 
             # Length
             trades.len.total += trade.barlen
-            trades.len.average = trades.len.total / trades.total.closed
+            trades.len.average = round(trades.len.total / trades.total.closed, 6)
             ml = trades.len.max or 0
             trades.len.max = max(ml, trade.barlen)
 
@@ -164,14 +207,15 @@ class TradeAnalyzer(Analyzer):
                 trwl = trades.len[wlname]
                 wl = res[wlname]
 
-                trwl.total += trade.barlen * wl
-                trwl.average = trwl.total / (trades[wlname].total or 1.0)
+                trwl.total += trade.barlen
+                trwl.total = round(trwl.total, 6)
+                trwl.average = round(trwl.total / (trades[wlname].total or 1.0), 6)
 
                 m = trwl.max or 0
                 trwl.max = max(m, trade.barlen * wl)
                 if trade.barlen * wl:
                     m = trwl.min or MAXINT
-                    trwl.min = min(m, trade.barlen * wl)
+                    trwl.min = round(min(m, trade.barlen * wl), 6)
 
             # Length Long/Short
             for lsname in ['long', 'short']:
@@ -181,14 +225,15 @@ class TradeAnalyzer(Analyzer):
                 barlen = trade.barlen * ls
 
                 trls.total += barlen  # trades.len.long.total
+                trls.total = round(trls.total, 6)
                 total_ls = trades[lsname].total   # trades.long.total
-                trls.average = trls.total / (total_ls or 1.0)
+                trls.average = round(trls.total / (total_ls or 1.0), 6)
 
                 # max/min
                 m = trls.max or 0
-                trls.max = max(m, barlen)
+                trls.max = round(max(m, barlen), 6)
                 m = trls.min or MAXINT
-                trls.min = min(m, barlen or m)
+                trls.min = round(min(m, barlen or m), 6)
 
                 for wlname in ['won', 'lost']:
                     wl = res[wlname]  # won/lost
@@ -197,12 +242,13 @@ class TradeAnalyzer(Analyzer):
 
                     trls_wl = trls[wlname]  # trades.len.long.won
                     trls_wl.total += barlen2  # trades.len.long.won.total
+                    trls_wl.total = round(trls_wl.total, 6)
 
                     trls_wl.average = \
-                        trls_wl.total / (trades[lsname][wlname] or 1.0)
+                        round(trls_wl.total / (trades[lsname][wlname] or 1.0), 6)
 
                     # max/min
                     m = trls_wl.max or 0
-                    trls_wl.max = max(m, barlen2)
+                    trls_wl.max = round(max(m, barlen2), 6)
                     m = trls_wl.min or MAXINT
-                    trls_wl.min = min(m, barlen2 or m)
+                    trls_wl.min = round(min(m, barlen2 or m), 6)

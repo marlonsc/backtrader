@@ -138,7 +138,7 @@ class TimeReturn(TimeFrameAnalyzerBase):
     def next(self):
         # Calculate the return
         super(TimeReturn, self).next()
-        self.rets[self.dtkey] = (self._value / self._value_start) - 1.0
+        self.rets[self.dtkey] = round(((self._value / self._value_start) - 1.0), 6)
         self._lastvalue = self._value  # keep last value
 
     def optimize(self):

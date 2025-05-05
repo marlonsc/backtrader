@@ -136,5 +136,5 @@ class LogReturnsRolling(bt.TimeFrameAnalyzerBase):
     def next(self):
         # Calculate the return
         super(LogReturnsRolling, self).next()
-        self.rets[self.dtkey] = math.log(self._value / self._values[0])
+        self.rets[self.dtkey] = round(math.log(self._value / self._values[0]), 6)
         self._lastvalue = self._value  # keep last value

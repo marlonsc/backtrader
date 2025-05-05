@@ -127,8 +127,8 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
         ('name', ''),
         ('compression', 1),
         ('timeframe', TimeFrame.Days),
-        ('fromdate', None),
-        ('todate', None),
+        ('fromdate', ''), #保持与ib的兼容，使用''表示不指定具体日期
+        ('todate', ''),
         ('sessionstart', None),
         ('sessionend', None),
         ('filters', []),
@@ -177,12 +177,12 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
         self._tzinput = bt.utils.date.Localizer(self._gettzinput())
 
         # Convert user input times to the output timezone (or min/max)
-        if self.p.fromdate is None:
+        if self.p.fromdate == '':
             self.fromdate = float('-inf')
         else:
             self.fromdate = self.date2num(self.p.fromdate)
 
-        if self.p.todate is None:
+        if self.p.todate == '':
             self.todate = float('inf')
         else:
             self.todate = self.date2num(self.p.todate)
@@ -497,6 +497,8 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
 
             # Get a reference to current loaded time
             dt = self.lines.datetime[0]
+            dtime = num2date(dt)
+            print(f"load data: {dtime}")
 
             # A bar has been loaded, adapt the time
             if self._tzinput:
