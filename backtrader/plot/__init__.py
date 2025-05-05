@@ -39,5 +39,8 @@ else:
         pass
 
 
-from .plot import Plot, Plot_OldSync
+# from .plot import Plot, Plot_OldSync
+# from .plot import Plot_OldSync,CustomPlot
+from .plot import  Plot_OldSync
+
 from .scheme import PlotScheme

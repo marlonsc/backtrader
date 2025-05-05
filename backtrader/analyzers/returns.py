@@ -145,6 +145,7 @@ class Returns(TimeFrameAnalyzerBase):
             tann = self._TANN.get(self.data._timeframe, 1.0)  # assign default
 
         if ravg > float('-inf'):
+
             self.rets['rnorm'] = rnorm = math.expm1(ravg * tann)
         else:
             self.rets['rnorm'] = rnorm = ravg

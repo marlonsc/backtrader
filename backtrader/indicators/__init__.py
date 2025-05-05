@@ -88,3 +88,7 @@ from .ichimoku import *
 from .hurst import *
 from .ols import *
 from .hadelta import *
+
+from .spread import *
+
+

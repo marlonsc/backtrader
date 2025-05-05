@@ -36,6 +36,9 @@ import matplotlib.font_manager as mfontmgr
 import matplotlib.legend as mlegend
 import matplotlib.ticker as mticker
 
+from ..analyzers import CAGRAnalyzer
+# from matplotlib.gridspec import GridSpec
+
 from ..utils.py3 import range, with_metaclass, string_types, integer_types
 from .. import AutoInfoClass, MetaParams, TimeFrame, date2num
 
@@ -95,11 +98,19 @@ class PInfo(object):
 
 
 class Plot_OldSync(with_metaclass(MetaParams, object)):
-    params = (('scheme', PlotScheme()),)
+    params = (('scheme', PlotScheme()),
+            ('spread', False),  # 添加spread参数
+                      )
 
     def __init__(self, **kwargs):
+
+
+        if 'spread' in kwargs:
+            self.p.spread = kwargs.pop('spread')  # 使用self.p.spread而不是self.spread
+            
         for pname, pvalue in kwargs.items():
             setattr(self.p.scheme, pname, pvalue)
+            
         if not hasattr(self.p.scheme, 'locbg'):
             setattr(self.p.scheme, 'locbg', 'white')
             setattr(self.p.scheme, 'locbgother', 'white')
@@ -134,8 +145,30 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
         self.mpyplot = mpyplot
 
         self.pinf = PInfo(self.p.scheme)
-        self.sortdataindicators(strategy)
-        self.calcrows(strategy)
+        if self.p.spread:
+            # 备份原始数据
+            original_datas = strategy.datas
+            
+            try:
+                # 创建只包含spread的临时列表
+                spread_data = [data for data in strategy.datas if data._name == 'spread']
+                if not spread_data:
+                    raise ValueError("No spread data found")
+                
+                # 替换datas列表
+                strategy.datas = spread_data
+                
+                # 执行排序和计算
+                self.sortdataindicators(strategy)
+                self.calcrows(strategy)
+                
+            finally:
+                # 恢复原始数据
+                strategy.datas = original_datas
+        else:
+            # 正常模式
+            self.sortdataindicators(strategy)
+            self.calcrows(strategy)
 
         st_dtime = strategy.lines.datetime.plot()
         if start is None:
@@ -194,6 +227,11 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
             # Create the rest on a per data basis
             dt0, dt1 = self.pinf.xreal[0], self.pinf.xreal[-1]
             for data in strategy.datas:
+
+                # spread 模式下只绘制spread
+                if self.p.spread and data._name != 'spread':
+                    continue
+
                 if not data.plotinfo.plot:
                     continue
 
@@ -212,6 +250,9 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
                     self.pinf.xstart = bisect.bisect_left(dts, xtemp[0])
                     self.pinf.xend = bisect.bisect_right(dts, xtemp[-1])
 
+
+                self.plotdata(data, self.dplotsover[data])
+
                 for ind in self.dplotsup[data]:
                     self.plotind(
                         data,
@@ -220,15 +261,8 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
                         upinds=self.dplotsup[ind],
                         downinds=self.dplotsdown[ind])
 
-                self.plotdata(data, self.dplotsover[data])
 
-                for ind in self.dplotsdown[data]:
-                    self.plotind(
-                        data,
-                        ind,
-                        subinds=self.dplotsover[ind],
-                        upinds=self.dplotsup[ind],
-                        downinds=self.dplotsdown[ind])
+
 
             cursor = MultiCursor(
                 fig.canvas, list(self.pinf.daxis.values()),
@@ -465,6 +499,7 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
 
             pltmethod = getattr(ax, lineplotinfo._get('_method', 'plot'))
 
+
             xdata, lplotarray = self.pinf.xdata, lplot
             if lineplotinfo._get('_skipnan', False):
                 # Get the full array and a mask to skipnan
@@ -474,6 +509,8 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
                 # Get both the axis and the data masked
                 lplotarray = lplotarray[lplotmask]
                 xdata = np.array(xdata)[lplotmask]
+
+  
 
             plottedline = pltmethod(xdata, lplotarray, **plotkwargs)
             try:
@@ -758,7 +795,9 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
                     ax.set_ylim(axbot, axtop)
 
         for ind in indicators:
+
             self.plotind(data, ind, subinds=self.dplotsover[ind], masterax=ax)
+
 
         handles, labels = ax.get_legend_handles_labels()
         a = axdatamaster or ax
@@ -883,4 +922,157 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
                 self.dplotsover[key].append(x)
 
 
-Plot = Plot_OldSync
+# class CustomPlot(Plot_OldSync):
+#     def plot(self, strategy, figid=0, numfigs=1, iplot=True, start=None, end=None, **kwargs):
+#         # 1) 调用父类的 plot 方法，先画出原版图像
+#         super().plot(strategy, figid=figid, numfigs=numfigs,
+#                      iplot=iplot, start=start, end=end, **kwargs)
+        
+#         # 2) 获取当前 Figure
+#         fig = self.mpyplot.figure(figid)
+#         axes = fig.get_axes()
+#         if not axes:
+#             return  # 没有子图就不继续
+#         # 自定义 Gridspec, 1行2列, 比例比如[3,1]代表第一列占3份, 第二列占1份
+#         gs = GridSpec(1, 2, figure=fig, width_ratios=[3, 1])
+
+        
+#         # 3) 在右侧新增一个子图，用于显示 Spread
+#         ax_spread = fig.add_subplot(1, 2, 2, sharex=axes[0])  # 1行2列，右边第2个
+#         ax_spread.set_ylabel('Spread')
+
+#         # 4) OldSync 模式下，需要使用 self.pinf 中的 pstart / psize 来获取可见区间
+#         pstart = self.pinf.pstart
+#         psize = self.pinf.psize
+#         pstop = pstart + psize  # 可见区间结束
+
+#         # 5) 获取时间轴 self.pinf.x，长度为 psize
+#         #    self.pinf.x 通常是 range(pstart, pstop) => 做了映射
+#         xvals = self.pinf.x  # xvals的长度应是 psize
+
+#         # ============== 绘制 Spread (Indicator) ==============
+#         # 假设你的策略里有 strategy.spread = SomeIndicator(...)
+#         # 并且 lines.spread 里存放了价差数据
+#         spread_line = strategy.spread.lines.spread
+
+#         # 创建一个同等长度的数组来存放 y 值
+#         spread_data = [np.nan] * psize
+
+#         # OldSync 的“倒序”取值方式:
+#         #   最新 bar => line[0]
+#         #   往前 1 根 => line[-1], 往前 n 根 => line[-n]
+#         #   i 从 pstart .. pstop-1，ago = pstop - 1 - i
+#         for i in range(pstart, pstop):
+#             ago = (pstop - 1) - i
+#             if ago < len(spread_line):
+#                 spread_data[i - pstart] = spread_line[-(ago + 1)]
+
+#         # 用 matplotlib 画出这条 spread 曲线
+#         ax_spread.plot(xvals, spread_data, label='Spread', color='blue')
+
+#         # ============== 绘制买卖信号 (若仍是 Indicator) ==============
+#         # 如果 strategy.buy_signal / strategy.sell_signal 也是 Indicator lines
+#         # 则同理用倒序索引来取布尔值(或数值)
+#         # 下面只是一个示例，如果 buy_signal/sell_signal 不是这样实现，请自行修改
+
+#         # -- 买点 --
+#         if hasattr(strategy, 'buy_signal'):
+#             buy_line = strategy.buy_signal.lines[0]  # 假设是单线
+#             buy_idx = []  # 保存在可见区间内为 True 的索引
+#             for i in range(pstart, pstop):
+#                 ago = (pstop - 1) - i
+#                 if ago < len(buy_line):
+#                     if buy_line[-(ago + 1)]:
+#                         buy_idx.append(i - pstart)
+
+#             # 在 buy_idx 对应的 xvals/yvals 处画 '^'
+#             # yvals 就用 spread_data 对应的值
+#             bx = [xvals[idx] for idx in buy_idx]
+#             by = [spread_data[idx] for idx in buy_idx]
+#             ax_spread.plot(bx, by, 'g^', markersize=8, label='Buy')
+
+#         # -- 卖点 --
+#         if hasattr(strategy, 'sell_signal'):
+#             sell_line = strategy.sell_signal.lines[0]
+#             sell_idx = []
+#             for i in range(pstart, pstop):
+#                 ago = (pstop - 1) - i
+#                 if ago < len(sell_line):
+#                     if sell_line[-(ago + 1)]:
+#                         sell_idx.append(i - pstart)
+
+#             sx = [xvals[idx] for idx in sell_idx]
+#             sy = [spread_data[idx] for idx in sell_idx]
+#             ax_spread.plot(sx, sy, 'rv', markersize=8, label='Sell')
+
+#         ax_spread.legend(loc='best')
+
+#         # 6) 同步 x 轴
+#         ax_spread.set_xlim(axes[0].get_xlim())
+#         fig.subplots_adjust(wspace=0.2)  # 调整子图之间的间距
+
+
+#         # 7) 调整布局
+#         fig.subplots_adjust(wspace=0.2)
+
+# class CustomPlot(Plot_OldSync):
+#     def __init__(self, ** kwargs):
+#         super().__init__(**kwargs)
+#         # 新增独立绘图标识
+#         self.cumulative_ax = None
+#
+#     def calcrows(self, strategy):
+#         super().calcrows(strategy)
+#         # 强制为累计收益保留独立行空间
+#         self.pinf.nrows += max(3, self.pinf.sch.rowsminor)  # 最小3行高度
+#
+#     def plot(self, strategy, figid=0, numfigs=1, iplot=True,  ** kwargs):
+#         # 调用父类方法绘制基础图表
+#         figs = super().plot(strategy, figid, numfigs, iplot,  ** kwargs)
+#
+#         # 获取累计收益分析器
+#         cagr_analyzer = next((a for a in strategy.analyzers
+#                               if isinstance(a, CAGRAnalyzer)), None)
+#         if not cagr_analyzer:
+#             return figs
+#
+#         for fig in figs:
+#
+#         #     # 创建独立坐标系（关键修改点）
+#             grid = (self.pinf.nrows, 1)
+#             self.pinf.row = self.pinf.nrows - self.pinf.sch.rowsminor  # 定位到最后几行
+#             ax = self.newaxis('cumulative', rowspan=self.pinf.sch.rowsminor)
+#         #
+#         # # 初始化坐标系参数
+#             self.pinf.zorder[ax] = 2.0  # 确保在其它元素上层
+#         # ax.set_ylabel('Cumulative Return', rotation=90)
+#         #
+#         # # 同步主图时间轴
+#             ax.sharex(self.pinf.sharex)
+#         #
+#         # # 转换时间戳
+#         # dates = [date2num(d) for d in cagr_analyzer.dates]
+#         #
+#             # # 绘制累计收益曲线
+#             main_line, = ax.plot(dates, cagr_analyzer.cum_returns,
+#                                  color='#2ca02c',  # 使用醒目颜色
+#                                  linewidth=2,
+#                                  label='Cumulative Return')
+#         #
+#         #     # # 添加最终数值标签
+#         #     # if len(cagr_analyzer.cum_returns) > 0:
+#         #     #     last_val = cagr_analyzer.cum_returns[-1]
+#         #     #     self.drawtag(ax, len(dates), last_val,
+#         #     #                  facecolor='#d62728',  # 红色背景
+#         #     #                  edgecolor='black',
+#         #     #                  alpha=0.9)
+#         #     #
+#         # # 强制刷新布局
+#         # figs.subplots_adjust(
+#         #     hspace=0.3,  # 增加行间距
+#         #     top=0.95 - (0.05 * self.pinf.sch.rowsminor)  # 动态调整顶部间距
+#         # )
+#
+#         return figs
+plot=Plot_OldSync
+# plot=CustomPlot

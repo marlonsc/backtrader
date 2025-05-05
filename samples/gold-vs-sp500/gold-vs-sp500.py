@@ -31,7 +31,6 @@ import scipy.stats
 
 import backtrader as bt
 
-
 class PearsonR(bt.ind.PeriodN):
     _mindatas = 2  # hint to the platform
 

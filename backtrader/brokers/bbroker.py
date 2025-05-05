@@ -475,7 +475,7 @@ class BackBroker(bt.BrokerBase):
             # update the calculated values above to the historical values
             pos_value_unlever = fvalue
             pos_value = fvalue * lev
-
+        # print(self.cash,pos_value_unlever,pos_value)
         self._valuemkt = pos_value_unlever
 
         self._valuelever = self.cash + pos_value

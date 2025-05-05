@@ -47,6 +47,8 @@ from .tradingcal import (TradingCalendarBase, TradingCalendar,
                          PandasMarketCalendar)
 from .timer import Timer
 
+
+
 # Defined here to make it pickable. Ideally it could be defined inside Cerebro
 
 
@@ -977,10 +979,12 @@ class Cerebro(with_metaclass(MetaParams, object)):
 
         if not plotter:
             from . import plot
-            if self.p.oldsync:
-                plotter = plot.Plot_OldSync(**kwargs)
-            else:
-                plotter = plot.Plot(**kwargs)
+            # if self.p.oldsync:
+            #     plotter = plot.Plot_OldSync(**kwargs)
+            # else:
+            #     plotter = plot.Plot(**kwargs)
+            plotter = plot.Plot_OldSync(**kwargs)
+            # plotter = plot.CustomPlot(**kwargs)
 
         # pfillers = {self.datas[i]: self._plotfillers[i]
         # for i, x in enumerate(self._plotfillers)}

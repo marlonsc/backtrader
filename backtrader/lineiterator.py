@@ -69,8 +69,11 @@ class MetaLineIterator(LineSeries.__class__):
 
         # If no datas have been passed to an indicator ... use the
         # main datas of the owner, easing up adding "self.data" ...
+        # if not _obj.datas and isinstance(_obj, (IndicatorBase, ObserverBase)):
+        #     _obj.datas = _obj._owner.datas[0:mindatas]
         if not _obj.datas and isinstance(_obj, (IndicatorBase, ObserverBase)):
-            _obj.datas = _obj._owner.datas[0:mindatas]
+            # _obj.datas = _obj._owner.datas[0:mindatas]
+            _obj.datas = _obj._owner.datas
 
         # Create a dictionary to be able to check for presence
         # lists in python use "==" operator when testing for presence with "in"
