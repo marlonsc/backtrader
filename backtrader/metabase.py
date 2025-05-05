@@ -96,6 +96,10 @@ class AutoInfoClass(object):
     _getrecurse = classmethod(lambda cls: False)
 
     @classmethod
+    def _derive_inst(cls, name, info, otherbases, recurse=False):
+        return cls._derive(name, info, otherbases, recurse)()
+
+    @classmethod
     def _derive(cls, name, info, otherbases, recurse=False):
         # collect the 3 set of infos
         # info = OrderedDict(info)
@@ -148,6 +152,8 @@ class AutoInfoClass(object):
                                              [])
 
             setattr(newcls, infoname, infoval)
+
+        setattr(newcls, '__reduce__', lambda x: (cls._derive_inst, (name, info, otherbases, recurse), x.__dict__))
 
         return newcls
 

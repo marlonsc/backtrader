@@ -47,9 +47,13 @@ FROMDATE = datetime.datetime(2006, 1, 1)
 TODATE = datetime.datetime(2006, 12, 31)
 
 
+def getdatadir(filename):
+    return os.path.join(modpath, dataspath, filename)
+    
+
 def getdata(index, fromdate=FROMDATE, todate=TODATE):
 
-    datapath = os.path.join(modpath, dataspath, datafiles[index])
+    datapath = getdatadir(datafiles[index])
     data = DATAFEED(
         dataname=datapath,
         fromdate=fromdate,

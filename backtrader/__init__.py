@@ -54,6 +54,7 @@ from .observer import *
 from .sizer import *
 from .sizers import SizerFix  # old sizer for compatibility
 from .strategy import *
+from .listener import *
 
 from .writer import *
 
@@ -82,6 +83,7 @@ from . import sizers as sizers
 from . import stores as stores
 from . import brokers as brokers
 from . import timer as timer
+from . import listeners as listeners
 
 from . import talib as talib
 

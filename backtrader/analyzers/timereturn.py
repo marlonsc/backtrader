@@ -140,3 +140,9 @@ class TimeReturn(TimeFrameAnalyzerBase):
         super(TimeReturn, self).next()
         self.rets[self.dtkey] = (self._value / self._value_start) - 1.0
         self._lastvalue = self._value  # keep last value
+
+    def optimize(self):
+        '''Optimizies the object if optreturn is in effect'''
+        super().optimize()
+
+        self.strategy = None

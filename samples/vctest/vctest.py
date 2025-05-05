@@ -30,7 +30,7 @@ from backtrader.utils import flushfile  # win32 quick stdout flushing
 from backtrader.utils.py3 import string_types
 
 
-class TestStrategy(bt.Strategy):
+class BtTestStrategy(bt.Strategy):
     params = dict(
         smaperiod=5,
         trade=False,

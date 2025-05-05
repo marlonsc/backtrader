@@ -285,6 +285,15 @@ class Analyzer(with_metaclass(MetaAnalyzer, object)):
         '''
         pp.pprint(self.get_analysis(), *args, **kwargs)
 
+    def optimize(self):
+        '''Optimizies the object if optreturn is in effect'''
+        for attrname in dir(self):
+            if attrname.startswith('data'):
+                setattr(self, attrname, None)
+
+        for c in self._children:
+            c.optimize()
+
 
 class MetaTimeFrameAnalyzerBase(Analyzer.__class__):
     def __new__(meta, name, bases, dct):

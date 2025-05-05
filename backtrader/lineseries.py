@@ -97,6 +97,10 @@ class Lines(object):
     _getlinesextrabase = classmethod(lambda cls: 0)
 
     @classmethod
+    def _derive_inst(cls, name, lines, extralines, otherbases, linesoverride=False, lalias=None):
+        return cls._derive(name, lines, extralines, otherbases, linesoverride, lalias)()
+
+    @classmethod
     def _derive(cls, name, lines, extralines, otherbases, linesoverride=False,
                 lalias=None):
         '''
@@ -175,6 +179,8 @@ class Lines(object):
 
                 for ename in extranames:
                     setattr(newcls, ename, desc)
+
+        setattr(newcls, '__reduce__', lambda x: (cls._derive_inst, (name, lines, extralines, otherbases, linesoverride, lalias), x.__dict__))
 
         return newcls
 

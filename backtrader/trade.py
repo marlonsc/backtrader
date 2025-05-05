@@ -174,6 +174,8 @@ class Trade(object):
         self.commission = commission
 
         self.pnl = 0.0
+        self._pnlentrysum = 0.0
+        self.pnlpct = 0.0
         self.pnlcomm = 0.0
 
         self.justopened = False
@@ -290,6 +292,7 @@ class Trade(object):
             # update the average price
             self.price = (oldsize * self.price + size * price) / self.size
             pnl = 0.0
+            self._pnlentrysum += self.price * abs(self.size)
 
         else:  # abs(self.size) < abs(oldsize)
             # position reduced/closed
@@ -297,6 +300,7 @@ class Trade(object):
 
         self.pnl += pnl
         self.pnlcomm = self.pnl - self.commission
+        self.pnlpct = self.pnl / self._pnlentrysum
 
         self.value = comminfo.getvaluesize(self.size, self.price)
 

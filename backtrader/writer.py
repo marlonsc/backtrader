@@ -210,7 +210,7 @@ class WriterFile(WriterBase):
                     self.writelineseparator(level=level)
                 self.writeline(kline)
                 self.writedict(val, level=level + 1, recurse=True)
-            elif isinstance(val, (list, tuple, collectionsAbc.Iterable)):  # Для разных версий Python будут вызываться разные функции
+            elif isinstance(val, (list, tuple, collectionsAbc.abc.Iterable)):  # Для разных версий Python будут вызываться разные функции
                 line = ', '.join(map(str, val))
                 self.writeline(kline + ' ' + line)
             else:

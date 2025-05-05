@@ -57,6 +57,10 @@ class BuySell(Observer):
         ('bardist', 0.015),  # distance to max/min in absolute perc
     )
 
+    @staticmethod
+    def _get_bar_dist(data, bardist):
+        return abs(data.low[0] - data.high[0]) * (1 + bardist)
+
     def next(self):
         buy = list()
         sell = list()
@@ -88,7 +92,7 @@ class BuySell(Observer):
         if not self.p.barplot:
             self.lines.buy[0] = value
         elif value == value:  # Not NaN
-            pbuy = self.data.low[0] * (1 - self.p.bardist)
+            pbuy = self.data.low[0] - self._get_bar_dist(self.data, self.p.bardist)
             self.lines.buy[0] = pbuy
 
         # Update buylen values
@@ -110,7 +114,7 @@ class BuySell(Observer):
         if not self.p.barplot:
             self.lines.sell[0] = value
         elif value == value:  # Not NaN
-            psell = self.data.high[0] * (1 + self.p.bardist)
+            psell = self.data.high[0] + self._get_bar_dist(self.data, self.p.bardist)
             self.lines.sell[0] = psell
 
         # Update selllen values

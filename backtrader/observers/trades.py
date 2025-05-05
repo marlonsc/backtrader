@@ -115,7 +115,9 @@ class MetaDataTrades(Observer.__class__):
             lnames = tuple('data{}'.format(x) for x in range(len(_obj.datas)))
 
         # Generate a new lines class
-        linescls = cls.lines._derive(uuid.uuid4().hex, lnames, 0, ())
+        linescls_params = (uuid.uuid4().hex, lnames, 0, ())
+        linescls = cls.lines._derive(*linescls_params)
+        setattr(_obj, 'linescls_params', linescls_params)
 
         # Instantiate lines
         _obj.lines = linescls()
@@ -134,8 +136,9 @@ class MetaDataTrades(Observer.__class__):
             plines[lname] = d = basedict.copy()
             d.update(marker=marker, color=color)
 
-        plotlines = cls.plotlines._derive(
-            uuid.uuid4().hex, plines, [], recurse=True)
+        plotlinescls_params = (uuid.uuid4().hex, plines, [], True)
+        plotlines = cls.plotlines._derive(*plotlinescls_params)
+        setattr(_obj, 'plotlinescls_params', plotlinescls_params)
         _obj.plotlines = plotlines()
 
         return _obj, args, kwargs  # return the instantiated object and args

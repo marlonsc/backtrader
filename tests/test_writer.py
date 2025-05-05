@@ -32,7 +32,7 @@ import backtrader.indicators as btind
 chkdatas = 1
 
 
-class TestStrategy(bt.Strategy):
+class BtTestStrategy(bt.Strategy):
     params = dict(main=False)
 
     def __init__(self):
@@ -42,7 +42,7 @@ class TestStrategy(bt.Strategy):
 def test_run(main=False):
     datas = [testcommon.getdata(i) for i in range(chkdatas)]
     cerebros = testcommon.runtest(datas,
-                                  TestStrategy,
+                                  BtTestStrategy,
                                   main=main,
                                   plot=main,
                                   writer=(bt.WriterStringIO, dict(csv=True)))

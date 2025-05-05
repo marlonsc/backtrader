@@ -167,7 +167,11 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
                     plotyticks=[],
                     plothlines=[],
                     plotforce=False,
-                    plotmaster=None,)
+                    plotmaster=None,
+                    plotid=None,
+                    plotaspectratio=None,
+                    tradingdomain=None,
+                    )
 
     def _periodrecalc(self):
         # last check in case not all lineiterators were assigned to

@@ -115,9 +115,12 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
                          data._timeframe == self.p.timeframe and
                          not (self.p.compression % data._compression))
 
-        self.bar = _Bar(maxdate=True)  # bar holder
-        self.compcount = 0  # count of produced bars to control compression
-        self._firstbar = True
+        # initialize state
+        self.bar = None  # bar holder
+        self.compcount = None  # count of produced bars to control compression
+        self._firstbar = None
+        self.reset()
+
         self.doadjusttime = (self.p.bar2edge and self.p.adjbartime and
                              self.subweeks)
 
@@ -131,6 +134,12 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
 
         self.data = data
 
+    def reset(self):
+        self.bar = _Bar(maxdate=True)
+        self.compcount = 0
+        self._firstbar = True
+        self._nexteos = None
+
     def _latedata(self, data):
         # new data at position 0, still untouched from stream
         if not self.subdays:
@@ -142,19 +151,33 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
     def _checkbarover(self, data, fromcheck=False, forcedata=None):
         chkdata = DTFaker(data, forcedata) if fromcheck else data
 
-        isover = False
-        if not self.componly and not self._barover(chkdata):
-            return isover
+        # scenarios:
+        # 1 Tick -> 5 Ticks     componly=t subdays=f
+        # 2 Ticks -> 5 Ticks    componly=f sbudays=f
+        # 1 Tick -> 1 Day       componly=f subdays=f
+        # 1 Tick -> 1 Minute    componly=f subdays=t
+        # 1 Minute -> 5 Minute  componly=f subdays=t
 
+        # if bar is not over only return False when also timeframe is changed
+        # componly also involves checking for odd compressions like 2 -> 5. is this relevant?
+        #
+        # componly can ONLY be true for timeframe Ticks and >= Days !!
+        if not self.componly and not self._barover(chkdata):
+            return False
+
+        # subdays: Ticks < (target-)timeframe < Days
+        # subdays handled compressions itself in _barover?
         if self.subdays and self.p.bar2edge:
-            isover = True
-        elif not fromcheck:  # fromcheck doesn't increase compcount
+            return True
+        elif not self.componly or not fromcheck:  # fromcheck doesn't increase compcount
             self.compcount += 1
             if not (self.compcount % self.p.compression):
                 # boundary crossed and enough bars for compression ... proceed
-                isover = True
-
-        return isover
+                return True
+            else:
+                return False
+        else:
+            return False
 
     def _barover(self, data):
         tframe = self.p.timeframe
@@ -183,7 +206,7 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
             self._nexteos, self._nextdteos = self.data._getnexteos()
             return
 
-    def _eoscheck(self, data, seteos=True, exact=False):
+    def _eoscheck(self, data, seteos=True, exact=False, barovercond=False):
         if seteos:
             self._eosset()
 
@@ -191,25 +214,25 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
         grter = data.datetime[0] > self._nextdteos
 
         if exact:
-            ret = equal
+            is_eos = equal
         else:
             # if the compared data goes over the endofsession
             # make sure the resampled bar is open and has something before that
             # end of session. It could be a weekend and nothing was delivered
             # until Monday
             if grter:
-                ret = (self.bar.isopen() and
-                       self.bar.datetime <= self._nextdteos)
+                is_eos = barovercond or (self.bar.isopen() and self.bar.datetime <= self._nextdteos)
             else:
-                ret = equal
+                is_eos = equal
 
-        if ret:
+        if is_eos:
+            # we reached end of session, clear session so we fetch next eos
             self._lasteos = self._nexteos
             self._lastdteos = self._nextdteos
             self._nexteos = None
             self._nextdteos = float('-inf')
 
-        return ret
+        return is_eos
 
     def _barover_days(self, data):
         return self._eoscheck(data)
@@ -520,6 +543,8 @@ class Resampler(_BaseResampler):
 
         if consumed:
             self.bar.bupdate(data)  # update new or existing bar
+            if not self.componly:
+                self._eoscheck(data, barovercond=True)  # eoscheck was possibly skipped in dataonedge so lets give it a chance here
             data.backwards()  # remove used bar
 
         # if self.bar.isopen and (onedge or (docheckover and checkbarover))
@@ -640,6 +665,10 @@ class Replayer(_BaseResampler):
             self.bar.bupdate(data)
             if takinglate:
                 self.bar.datetime = data.datetime[-1] + 0.000001
+
+            # eoscheck was possibly skipped in dataonedge
+            # so lets give it a chance here
+            self._eoscheck(data)
 
         # if onedge or (checkbarover and self._checkbarover)
         cond = onedge

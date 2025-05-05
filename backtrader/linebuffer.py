@@ -271,6 +271,8 @@ class LineBuffer(LineSingle):
             self.array.pop()
 
     def rewind(self, size=1):
+        assert self.idx >= 0
+
         self.idx -= size
         self.lencount -= size
 

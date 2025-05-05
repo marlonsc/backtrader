@@ -21,7 +21,7 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-from . import Indicator, And, If, MovAv, ATR
+from . import Indicator, And, If, MovAv, ATR, DivByZero
 
 
 class UpMove(Indicator):
@@ -76,7 +76,7 @@ class _DirectionalIndicator(Indicator):
     what to calculate) but doesn't assign them to lines. This is left for
     sublcases of this class.
     '''
-    params = (('period', 14), ('movav', MovAv.Smoothed))
+    params = (('period', 14), ('movav', MovAv.Smoothed), ('safediv', False), ('safezero', 0.0))
 
     plotlines = dict(plusDI=dict(_name='+DI'), minusDI=dict(_name='-DI'))
 
@@ -96,14 +96,20 @@ class _DirectionalIndicator(Indicator):
             plusDM = If(plus, upmove, 0.0)
             plusDMav = self.p.movav(plusDM, period=self.p.period)
 
-            self.DIplus = 100.0 * plusDMav / atr
+            if self.p.safediv:
+                self.DIplus = DivByZero(100.0 * plusDMav, atr, self.p.safezero)
+            else:
+                self.DIplus = 100.0 * plusDMav / atr
 
         if _minus:
             minus = And(downmove > upmove, downmove > 0.0)
             minusDM = If(minus, downmove, 0.0)
             minusDMav = self.p.movav(minusDM, period=self.p.period)
 
-            self.DIminus = 100.0 * minusDMav / atr
+            if self.p.safediv:
+                self.DIminus = DivByZero(100.0 * minusDMav, atr, self.p.safezero)
+            else:
+                self.DIminus = 100.0 * minusDMav / atr
 
         super(_DirectionalIndicator, self).__init__()
 
@@ -263,7 +269,10 @@ class AverageDirectionalMovementIndex(_DirectionalIndicator):
     def __init__(self):
         super(AverageDirectionalMovementIndex, self).__init__()
 
-        dx = abs(self.DIplus - self.DIminus) / (self.DIplus + self.DIminus)
+        if self.p.safediv:
+            dx = DivByZero(abs(self.DIplus - self.DIminus), self.DIplus + self.DIminus, zero=self.p.safezero)
+        else:
+            dx = abs(self.DIplus - self.DIminus) / (self.DIplus + self.DIminus)
         self.lines.adx = 100.0 * self.p.movav(dx, period=self.p.period)
 
 

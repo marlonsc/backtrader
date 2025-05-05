@@ -231,7 +231,6 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
             # returns times in utc
             _, nexteos = self._calendar.schedule(dtime, self._tz)
             nextdteos = date2num(nexteos)  # nextos is already utc
-
         return nexteos, nextdteos
 
     def _gettzinput(self):
@@ -303,6 +302,12 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
         self._barstack = collections.deque()
         self._barstash = collections.deque()
         self._laststatus = self.CONNECTED
+
+        # some filters have a state so give them a chance to reset
+        # (e.g. resampler filter needs to clear state when running optimization)
+        for ff, _, _ in self._filters:
+            if hasattr(ff, 'reset'):
+                ff.reset()
 
     def stop(self):
         pass

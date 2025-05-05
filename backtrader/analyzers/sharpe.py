@@ -205,6 +205,12 @@ class SharpeRatio(Analyzer):
 
         self.rets['sharperatio'] = self.ratio
 
+    def optimize(self):
+        '''Optimizies the object if optreturn is in effect'''
+        super().optimize()
+
+        self.timereturn.optimize()
+
 
 class SharpeRatio_A(SharpeRatio):
     '''Extension of the SharpeRatio which returns the Sharpe Ratio directly in
