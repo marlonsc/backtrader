@@ -79,9 +79,4 @@ datas/*.py
 # PyCharm dirs:
 .idea/
 
-backtrader_try.ipynb
-backtrader_live_test.ipynb
-live_backtrader.zip
-readme.md
-samples/1/stock_data/*
-datas/
+turtle/data/*
