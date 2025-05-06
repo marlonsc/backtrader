@@ -8,7 +8,7 @@ import pandas as pd
 # functions/classes
 
 if __name__ == "__main__":
-    # Beispiel-Daten: Erstelle ein DataFrame mit OHLC-Daten
+    # Example data: Create a DataFrame with OHLC data
     data = {
         "High": [1.2, 1.3, 1.4, 1.5, 1.3],
         "Low": [1.1, 1.2, 1.3, 1.4, 1.2],
@@ -16,22 +16,22 @@ if __name__ == "__main__":
     }
     df = pd.DataFrame(data)
 
-    # Berechnung der True Range (TR)
+    # Calculation of True Range (TR)
     df["Prev Close"] = df["Close"].shift(1)  #
     df["High-Low"] = df["High"] - df["Low"]  # High - Low
     df["High-Prev Close"] = abs(df["High"] - df["Prev Close"])
     df["Low-Prev Close"] = abs(df["Low"] - df["Prev Close"])
 
-    # True Range ist das Maximum der oben genannten Werte
+    # True Range is the maximum of the above values
     df["True Range"] = df[["High-Low", "High-Prev Close", "Low-Prev Close"]].max(
         axis=1
-    )  # Maximum der drei Werte je Tag
+    )  # Maximum of the three values per day
 
-    # Berechnung des Average True Range (ATR)
-    period = 3  # Beispielzeitraum
+    # Calculation of Average True Range (ATR)
+    period = 3  # Example period
     df["ATR"] = df["True Range"].rolling(window=period).mean()
 
-    # Ausgabe des DataFrames
+    # Output of the DataFrame
     print(
         df[
             [

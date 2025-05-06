@@ -1,8 +1,8 @@
 # Copyright (c) 2025 backtrader contributors
 """
-Grid search para estratégia CUSUM em pares J/JM. Inclui cálculo de spread com
-rolling beta, estratégia CUSUM, otimização de parâmetros e visualização dos
-resultados.
+Grid search for CUSUM strategy on J/JM pairs. Includes spread calculation with
+rolling beta, CUSUM strategy, parameter optimization and visualization of the
+results.
 """
 import datetime
 import backtrader as bt
@@ -14,11 +14,11 @@ import matplotlib.pyplot as plt
 
 def calculate_rolling_spread(df0, df1, window=30):
     """
-    Calcula o spread entre df0 e df1 usando beta dinâmico (rolling window).
-    :param df0: DataFrame do ativo 0 (J)
-    :param df1: DataFrame do ativo 1 (JM)
-    :param window: Tamanho da janela rolling para beta
-    :return: DataFrame com spread e beta
+    Calculates the spread between df0 and df1 using dynamic beta (rolling window).
+    :param df0: DataFrame of asset 0 (J)
+    :param df1: DataFrame of asset 1 (JM)
+    :param window: Size of rolling window for beta
+    :return: DataFrame with spread and beta
     """
     df = (
         df0.set_index("date")[["close"]].rename(columns={"close": "close0"})
@@ -119,7 +119,7 @@ class CUSUMPairStrategy(bt.Strategy):
 
 def run_grid_search():
     """
-    Executa grid search para otimização dos parâmetros do CUSUM em J/JM.
+    Executes grid search for optimization of CUSUM parameters in J/JM.
     """
     output_file = "D:\\FutureData\\ricequant\\1d_2017to2024_noadjust.h5"
     df0 = pd.read_hdf(output_file, key="/J").reset_index()
@@ -146,12 +146,12 @@ def run_grid_search():
                     )
     results = []
     total_combinations = len(param_combinations)
-    print(f"Iniciando grid search com {total_combinations} combinações...")
+    print(f"Starting grid search with {total_combinations} combinations...")
     for i, (
         data0, data1, data2, win, k_coeff, h_coeff, spread_window
     ) in enumerate(param_combinations):
         print(
-            f"Testando {i + 1}/{total_combinations}: win={win}, k_coeff={k_coeff},"
+            f"Testing {i + 1}/{total_combinations}: win={win}, k_coeff={k_coeff},"
             f" h_coeff={h_coeff}, spread_window={spread_window}"
         )
         try:
@@ -168,9 +168,9 @@ def run_grid_search():
             )
             cerebro.broker.setcash(100000)
             cerebro.broker.set_shortcash(False)
-            # Adicione analisadores conforme necessário
+            # Add analyzers as needed
             strats = cerebro.run()
-            # Exemplo: resultado fictício
+            # Example: fictional result
             results.append(
                 {
                     "win": win,

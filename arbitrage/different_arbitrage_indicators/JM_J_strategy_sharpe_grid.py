@@ -7,81 +7,81 @@ import pandas as pd
 import seaborn as sns  # pylint: disable=import-error
 
 
-# 夏普差值布林带策略
+# Sharpe Difference Bollinger Band Strategy
 class SharpeDiffStrategy(bt.Strategy):
-    """ """
+    """Strategy based on the difference of Sharpe ratios between two assets with Bollinger Bands"""
 
     params = (
-        ("return_period", 15),  # 计算收益率的周期（15日收益率）
-        ("ma_period", 10),  # 计算移动平均的周期（20日移动平均线）
-        ("entry_std_multiplier", 0.3),  # 开仓标准差乘数
-        ("max_hold_days", 15),  # 最大持仓天数
+        ("return_period", 15),  # Period for calculating returns (15-day returns)
+        ("ma_period", 10),  # Period for calculating moving average (20-day moving average)
+        ("entry_std_multiplier", 0.3),  # Entry standard deviation multiplier
+        ("max_hold_days", 15),  # Maximum holding days
         ("printlog", False),
     )
 
     def __init__(self):
-        """ """
-        # 存储夏普比率序列用于绘图
+        """Initialize the strategy variables"""
+        # Store Sharpe ratio series for plotting
         self.sharpe_j_values = []
         self.sharpe_jm_values = []
         self.delta_sharpe_values = []
         self.dates = []
 
-        # 布林带数据
-        self.delta_sharpe_ma = []  # 移动平均
-        self.delta_sharpe_std = []  # 标准差
-        self.upper_band = []  # 上轨
-        self.lower_band = []  # 下轨
+        # Bollinger Bands data
+        self.delta_sharpe_ma = []  # Moving average
+        self.delta_sharpe_std = []  # Standard deviation
+        self.upper_band = []  # Upper band
+        self.lower_band = []  # Lower band
 
-        # 存储J和JM的收益率序列
+        # Store J and JM return series
         self.returns_j = []
         self.returns_jm = []
 
-        # 初始化交易相关变量
+        # Initialize trade-related variables
         self.order = None
         self.position_type = None
         self.entry_day = 0
 
-        # 存储历史价格数据
+        # Store historical price data
         self.j_prices = []
         self.jm_prices = []
 
     def next(self):
-        """ """
+        """Main strategy logic executed on each bar"""
         if self.order:
             return
 
-        # 添加日期到列表
+        # Add date to list
         self.dates.append(self.data0.datetime.date())
 
-        # 保存最新价格
+        # Save latest prices
         self.j_prices.append(self.data0.close[0])
         self.jm_prices.append(self.data1.close[0])
 
-        # 当价格数据不足时，跳过
+        # Skip when price data is insufficient
         if len(self.j_prices) < self.p.return_period + 1:
             return
 
-        # 计算15日收益率
+        # Calculate 15-day returns
         j_ret_15d = (self.j_prices[-1] / self.j_prices[-self.p.return_period - 1]) - 1
         jm_ret_15d = (
             self.jm_prices[-1] / self.jm_prices[-self.p.return_period - 1]
         ) - 1
 
-        # 保存每日收益率用于计算波动率
-        if len(self) > 1:  # 确保有前一个价格
+        # Save daily returns for volatility calculation
+        if len(self) > 1:  # Ensure there's a previous price
             ret_j = (self.data0.close[0] / self.data0.close[-1]) - 1
             ret_jm = (self.data1.close[0] / self.data1.close[-1]) - 1
             self.returns_j.append(ret_j)
             self.returns_jm.append(ret_jm)
         else:
-            return  # 第一个bar没有前一天价格，跳过
+            return  # First bar has no previous day price, skip
 
-        # 当收益率数据不足时，跳过
+        # Skip when return data is insufficient
         if len(self.returns_j) < self.p.return_period:
             return
 
-        # 计算15日波动率
+        # Calculate 15-day volatility
         j_vol_15d = np.std(self.returns_j[-self.p.return_period:]) * np.sqrt(
             self.p.return_period
         )
@@ -89,29 +89,29 @@ class SharpeDiffStrategy(bt.Strategy):
             self.p.return_period
         )
 
-        # 计算夏普比率
+        # Calculate Sharpe ratio
         sharpe_j = j_ret_15d / j_vol_15d if j_vol_15d > 0 else 0
         sharpe_jm = jm_ret_15d / jm_vol_15d if jm_vol_15d > 0 else 0
 
-        # 存储夏普比率用于绘图
+        # Store Sharpe ratios for plotting
         self.sharpe_j_values.append(sharpe_j)
         self.sharpe_jm_values.append(sharpe_jm)
 
-        # 计算夏普差值 ΔSharpe = μJ/σJ - μJM/σJM
+        # Calculate Sharpe difference ΔSharpe = μJ/σJ - μJM/σJM
         delta_sharpe = sharpe_j - sharpe_jm
         self.delta_sharpe_values.append(delta_sharpe)
 
-        # 计算20日移动平均和标准差
+        # Calculate 20-day moving average and standard deviation
         if len(self.delta_sharpe_values) >= self.p.ma_period:
-            # 计算20日移动平均 MA(ΔSharpe) = MA20(ΔSharpe)
+            # Calculate 20-day moving average MA(ΔSharpe) = MA20(ΔSharpe)
             ma_delta = np.mean(self.delta_sharpe_values[-self.p.ma_period:])
             self.delta_sharpe_ma.append(ma_delta)
 
-            # 计算20日标准差 σΔSharpe = Std20(ΔSharpe)
+            # Calculate 20-day standard deviation σΔSharpe = Std20(ΔSharpe)
             std_delta = np.std(self.delta_sharpe_values[-self.p.ma_period:])
             self.delta_sharpe_std.append(std_delta)
 
-            # 计算布林带上下轨
+            # Calculate Bollinger Bands upper and lower bands
             # Upper Band = MAΔSharpe + 2 × σΔSharpe
             upper = ma_delta + self.p.entry_std_multiplier * std_delta
             self.upper_band.append(upper)
@@ -120,15 +120,15 @@ class SharpeDiffStrategy(bt.Strategy):
             lower = ma_delta - self.p.entry_std_multiplier * std_delta
             self.lower_band.append(lower)
         else:
-            # 数据不足以计算移动平均和标准差时，跳过
+            # Skip when data is insufficient to calculate moving average and standard deviation
             return
 
-        # 交易逻辑 - 基于夏普差值与布林带的关系
+        # Trading logic - based on Sharpe difference and Bollinger Bands relationship
 
         if self.position_type is not None:
             days_in_trade = len(self) - self.entry_day
 
-            # 根据持仓方向和夏普差值决定是否平仓
+            # Decide whether to close positions based on position direction and Sharpe difference
             if (
                 self.position_type == "long_j_short_jm" and delta_sharpe >= ma_delta
             ) or days_in_trade >= self.p.max_hold_days:
@@ -137,8 +137,8 @@ class SharpeDiffStrategy(bt.Strategy):
                 self.position_type = None
                 if self.p.printlog:
                     print(
-                        f"平仓: J-JM夏普差={delta_sharpe:.4f},"
-                        f" 持仓天数={days_in_trade}, 均值={ma_delta:.4f}"
+                        f"Close position: J-JM Sharpe diff={delta_sharpe:.4f},"
+                        f" Days held={days_in_trade}, Mean={ma_delta:.4f}"
                     )
 
             elif (
@@ -149,178 +149,188 @@ class SharpeDiffStrategy(bt.Strategy):
                 self.position_type = None
                 if self.p.printlog:
                     print(
-                        f"平仓: J-JM夏普差={delta_sharpe:.4f},"
-                        f" 持仓天数={days_in_trade}, 均值={ma_delta:.4f}"
+                        f"Close position: J-JM Sharpe diff={delta_sharpe:.4f},"
+                        f" Days held={days_in_trade}, Mean={ma_delta:.4f}"
                     )
 
         else:
-            # 开仓逻辑
+            # Entry logic
             if delta_sharpe >= upper:
-                # 夏普差值突破上轨，做多J，做空JM
+                # Sharpe difference breaks upper band, go long J, short JM
                 self.order = self.buy(data=self.data0, size=10)
                 self.order = self.sell(data=self.data1, size=14)
                 self.entry_day = len(self)
                 self.position_type = "long_j_short_jm"
                 if self.p.printlog:
                     print(
-                        f"开仓: 做多J，做空JM, 夏普差={delta_sharpe:.4f},"
-                        f" 上轨={upper:.4f}"
+                        f"Open position: Long J, Short JM, Sharpe diff={delta_sharpe:.4f},"
+                        f" Upper band={upper:.4f}"
                     )
 
             elif delta_sharpe <= lower:
-                # 夏普差值突破下轨，做空J，做多JM
+                # Sharpe difference breaks lower band, go short J, long JM
                 self.order = self.sell(data=self.data0, size=10)
                 self.order = self.buy(data=self.data1, size=14)
                 self.entry_day = len(self)
                 self.position_type = "short_j_long_jm"
                 if self.p.printlog:
                     print(
-                        f"开仓: 做空J，做多JM, 夏普差={delta_sharpe:.4f},"
-                        f" 下轨={lower:.4f}"
+                        f"Open position: Short J, Long JM, Sharpe diff={delta_sharpe:.4f},"
+                        f" Lower band={lower:.4f}"
                     )
 
     def notify_order(self, order):
         """
+        Called when order status changes
 
-        :param order:
-
+        Args:
+            order: The order that has changed status
         """
         if order.status in [order.Completed]:
             if self.p.printlog:
                 if order.isbuy():
                     print(
-                        f"买入执行: 价格={order.executed.price:.2f},"
-                        f" 成本={order.executed.value:.2f},"
-                        f" 手续费={order.executed.comm:.2f}"
+                        f"Buy executed: Price={order.executed.price:.2f},"
+                        f" Cost={order.executed.value:.2f},"
+                        f" Commission={order.executed.comm:.2f}"
                     )
                 else:
                     print(
-                        f"卖出执行: 价格={order.executed.price:.2f},"
-                        f" 成本={order.executed.value:.2f},"
-                        f" 手续费={order.executed.comm:.2f}"
+                        f"Sell executed: Price={order.executed.price:.2f},"
+                        f" Cost={order.executed.value:.2f},"
+                        f" Commission={order.executed.comm:.2f}"
                     )
 
         elif order.status in [order.Canceled, order.Margin, order.Rejected]:
-            print("订单被取消/拒绝")
+            print("Order canceled/rejected")
 
         self.order = None
 
 
-# 数据加载函数，处理索引问题
+# Data loading function, handling index issues
 def load_data(symbol1, symbol2, fromdate, todate):
     """
-
-    :param symbol1:
-    :param symbol2:
-    :param fromdate:
-    :param todate:
-
+    Load data for two symbols from HDF5 file
+    
+    Args:
+        symbol1: First symbol to load
+        symbol2: Second symbol to load
+        fromdate: Start date for data
+        todate: End date for data
+        
+    Returns:
+        Tuple of two backtrader data feeds
     """
     output_file = "D:\\FutureData\\ricequant\\1d_2017to2024_noadjust.h5"
 
     try:
-        # 加载数据时不保留原有索引结构
+        # Load data without preserving original index structure
         df0 = pd.read_hdf(output_file, key=symbol1).reset_index()
         df1 = pd.read_hdf(output_file, key=symbol2).reset_index()
 
-        # 查找日期列（兼容不同命名）
+        # Find date column (compatible with different naming)
         date_col = [col for col in df0.columns if "date" in col.lower()]
         if not date_col:
-            raise ValueError("数据集中未找到日期列")
+            raise ValueError("Date column not found in dataset")
 
-        # 设置日期索引
+        # Set date index
         df0 = df0.set_index(pd.to_datetime(df0[date_col[0]]))
         df1 = df1.set_index(pd.to_datetime(df1[date_col[0]]))
         df0 = df0.sort_index().loc[fromdate:todate]
         df1 = df1.sort_index().loc[fromdate:todate]
 
-        # 创建数据feed
+        # Create data feeds
         data0 = bt.feeds.PandasData(dataframe=df0)
         data1 = bt.feeds.PandasData(dataframe=df1)
         return data0, data1
     except Exception as e:
-        print(f"加载数据时出错: {e}")
+        print(f"Error loading data: {e}")
         return None, None
 
 
-# 运行网格回测并绘制热力图
+# Run grid search backtest and plot heatmap
 def run_grid_search():
-    """ """
-    # 定义参数网格
-    ma_periods = [5, 10, 15, 20, 25, 30, 35, 40]  # 移动平均周期
-    entry_multipliers = [0.1, 0.2, 0.3, 0.4, 0.5, 0.8, 1.0, 1.5]  # 标准差乘数
+    """
+    Run a grid search to optimize strategy parameters and visualize results
+    
+    Returns:
+        Tuple containing results array, ma_periods list, and entry_multipliers list
+    """
+    # Define parameter grid
+    ma_periods = [5, 10, 15, 20, 25, 30, 35, 40]  # Moving average periods
+    entry_multipliers = [0.1, 0.2, 0.3, 0.4, 0.5, 0.8, 1.0, 1.5]  # Standard deviation multipliers
 
-    # 存储结果
+    # Store results
     results = np.zeros((len(ma_periods), len(entry_multipliers)))
 
-    # 设置初始日期
+    # Set initial dates
     fromdate = datetime.datetime(2017, 1, 1)
     todate = datetime.datetime(2025, 1, 1)
 
-    # 加载数据一次（这些数据可以重复使用）
+    # Load data once (can be reused)
     data0, data1 = load_data("/J", "/JM", fromdate, todate)
 
     if data0 is None or data1 is None:
-        print("无法加载数据，请检查文件路径和数据格式")
+        print("Unable to load data, please check file path and data format")
         return
 
-    print("开始网格回测...")
+    print("Starting grid search...")
     print(
-        f"测试参数组合: {len(ma_periods)} x {len(entry_multipliers)} ="
-        f" {len(ma_periods) * len(entry_multipliers)}个组合"
+        f"Testing parameter combinations: {len(ma_periods)} x {len(entry_multipliers)} ="
+        f" {len(ma_periods) * len(entry_multipliers)} combinations"
     )
 
-    # 进行网格回测
+    # Perform grid search
     for i, ma_period in enumerate(ma_periods):
         for j, entry_multiplier in enumerate(entry_multipliers):
             print(
-                f"测试参数: ma_period={ma_period},"
+                f"Testing parameters: ma_period={ma_period},"
                 f" entry_std_multiplier={entry_multiplier}"
             )
 
             try:
-                # 创建一个新的cerebro实例
+                # Create a new cerebro instance
                 cerebro = bt.Cerebro()
 
-                # 添加相同的数据
+                # Add the same data
                 cerebro.adddata(data0, name="J")
                 cerebro.adddata(data1, name="JM")
 
-                # 添加策略，使用当前测试的参数
+                # Add strategy with current test parameters
                 cerebro.addstrategy(
                     SharpeDiffStrategy,
                     ma_period=ma_period,
                     entry_std_multiplier=entry_multiplier,
                     printlog=False,
-                )  # 关闭日志，减少输出
+                )  # Turn off logging to reduce output
 
-                # 设置资金和佣金
+                # Set funds and commission
                 cerebro.broker.setcash(100000)
                 cerebro.broker.setcommission(commission=0.0003)
                 cerebro.broker.set_shortcash(False)
 
-                # 运行回测
+                # Run backtest
                 strats = cerebro.run()  # pylint: disable=no-member
 
-                # 获取夏普比率 - 安全处理None值
+                # Get Sharpe ratio - safely handle None values
                 sharpe_analysis = strats[0].analyzers.sharperatio.get_analysis()
                 sharpe = sharpe_analysis.get("sharperatio", 0) if sharpe_analysis else 0
 
-                # 存储结果
+                # Store results
                 results[i, j] = sharpe
 
-                print(f"夏普比率: {sharpe:.2f}")
+                print(f"Sharpe ratio: {sharpe:.2f}")
             except Exception as e:
                 print(
-                    f"参数组合 ma_period={ma_period},"
-                    f" entry_std_multiplier={entry_multiplier} 执行出错: {e}"
+                    f"Parameter combination ma_period={ma_period},"
+                    f" entry_std_multiplier={entry_multiplier} execution error: {e}"
                 )
-                results[i, j] = -99  # 使用一个明显的负值标记出错项
+                results[i, j] = -99  # Use a clearly negative value to mark error items
 
-    # 绘制热力图
+    # Plot heatmap
     plt.figure(figsize=(12, 8))
 
-    # 使用Seaborn的热力图
+    # Use Seaborn's heatmap
     ax = sns.heatmap(
         results,
         annot=True,
@@ -330,23 +340,23 @@ def run_grid_search():
         yticklabels=ma_periods,
     )
 
-    # 设置标题和标签
-    plt.title("sharpe_ratio_heatmap - ma_period vs entry_std_multiplier")
+    # Set title and labels
+    plt.title("Sharpe Ratio Heatmap - ma_period vs entry_std_multiplier")
     plt.xlabel("entry_std_multiplier")
     plt.ylabel("ma_period")
 
-    # 显示图形
+    # Display figure
     plt.tight_layout()
     plt.savefig("sharpe_ratio_heatmap.png")
     plt.show()
 
-    print("热力图已保存为 'sharpe_ratio_heatmap.png'")
+    print("Heatmap saved as 'sharpe_ratio_heatmap.png'")
 
-    # 清除无效值(出错的回测结果)
+    # Clear invalid values (failed backtest results)
     results_clean = np.copy(results)
     results_clean[results_clean == -99] = np.nan
 
-    # 找出最佳参数组合（排除无效值）
+    # Find best parameter combination (excluding invalid values)
     if np.any(~np.isnan(results_clean)):
         max_i, max_j = np.unravel_index(
             np.nanargmax(results_clean), results_clean.shape
@@ -355,16 +365,16 @@ def run_grid_search():
         best_entry_multiplier = entry_multipliers[max_j]
         best_sharpe = results_clean[max_i, max_j]
 
-        print("\n最佳参数组合:")
+        print("\nBest parameter combination:")
         print(f"ma_period: {best_ma_period}")
         print(f"entry_std_multiplier: {best_entry_multiplier}")
-        print(f"夏普比率: {best_sharpe:.4f}")
+        print(f"Sharpe ratio: {best_sharpe:.4f}")
     else:
-        print("\n所有参数组合都出现错误，无法确定最佳参数")
+        print("\nAll parameter combinations had errors, unable to determine best parameters")
 
     return results, ma_periods, entry_multipliers
 
 
-# 修改主函数，调用网格搜索
+# Modified main function to call grid search
 if __name__ == "__main__":
     run_grid_search()
