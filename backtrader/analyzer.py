@@ -445,7 +445,7 @@ class TimeFrameAnalyzerBase(with_metaclass(MetaTimeFrameAnalyzerBase, Analyzer))
             self.data = None
 
     def _start(self):
-        """Inicializa atributos de timeframe e compressão."""
+        """Initializes timeframe and compression attributes."""
         # Ensure self.p and self.data are set before use
         if self.p is None:
             # Convert params tuple to an object with attributes, defaulting to None
@@ -503,7 +503,7 @@ class TimeFrameAnalyzerBase(with_metaclass(MetaTimeFrameAnalyzerBase, Analyzer))
         """ """
 
     def _dt_over(self):
-        """Verifica se houve avanço de período temporal."""
+        """Checks if there was a time period advancement."""
         if self.timeframe == TimeFrame.NoTimeFrame:
             dtcmp, dtkey = MAXINT, datetime.datetime.max
         else:
@@ -552,7 +552,7 @@ class TimeFrameAnalyzerBase(with_metaclass(MetaTimeFrameAnalyzerBase, Analyzer))
         return dtcmp, dtkey
 
     def _get_subday_cmpkey(self, dt):
-        """Calcula chave de comparação para subperíodos do dia."""
+        """Calculates comparison key for day sub-periods."""
         # Calculate intraday position
         ph = 0
         pm = 0
