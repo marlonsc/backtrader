@@ -1,4 +1,7 @@
-import argparse
+"""JM_J_strategy_CUSUM copy.py module.
+
+Description of the module functionality."""
+
 import datetime
 
 import backtrader as bt
@@ -89,7 +92,9 @@ spread_x = price0_x - β_{t-1} * price1_x"""
 
 
 # 创建自定义数据类以支持beta列
-class SpreadData(bt.feeds.PandasData):
+"""SpreadData class.
+
+Description of the class functionality."""
     lines = ("beta",)  # 添加beta线
 
     params = (
@@ -100,14 +105,20 @@ class SpreadData(bt.feeds.PandasData):
     )
 
 
-class DynamicSpreadCUSUMStrategy(bt.Strategy):
+"""DynamicSpreadCUSUMStrategy class.
+
+Description of the class functionality."""
     params = (
         ("win", 30),  # rolling 窗口
         ("k_coeff", 0.6),  # κ = k_coeff * σ
         ("h_coeff", 3.0),  # h = h_coeff * σ
     )
 
-    def __init__(self):
+"""__init__ function.
+
+Returns:
+    Description of return value
+"""
         # 保存两条累积和
         self.g_pos, self.g_neg = 0.0, 0.0  # CUSUM state
         # 方便读取最近 win 根价差
@@ -119,7 +130,14 @@ class DynamicSpreadCUSUMStrategy(bt.Strategy):
         self.prev_portfolio_value = self.broker.getvalue()
 
     # ---------- 交易辅助（沿用原有逻辑） ----------
-    def _open_position(self, short):
+"""_open_position function.
+
+Args:
+    short: Description of short
+
+Returns:
+    Description of return value
+"""
         if not hasattr(self, "size0"):
             self.size0 = 10
             self.size1 = round(self.data2.beta[0] * 10)
@@ -130,12 +148,20 @@ class DynamicSpreadCUSUMStrategy(bt.Strategy):
             self.buy(data=self.data0, size=self.size0)
             self.sell(data=self.data1, size=self.size1)
 
-    def _close_positions(self):
+"""_close_positions function.
+
+Returns:
+    Description of return value
+"""
         self.close(data=self.data0)
         self.close(data=self.data1)
 
     # ---------- 主循环 ----------
-    def next(self):
+"""next function.
+
+Returns:
+    Description of return value
+"""
         # 记录当前日期
         current_date = self.data0.datetime.date(0)
 
@@ -209,7 +235,14 @@ class DynamicSpreadCUSUMStrategy(bt.Strategy):
             elif position_size < 0 and abs(s_t) < kappa:
                 self._close_positions()
 
-    def notify_trade(self, trade):
+"""notify_trade function.
+
+Args:
+    trade: Description of trade
+
+Returns:
+    Description of return value
+"""
         if trade.isclosed:
             print(
                 "TRADE %s CLOSED %s, PROFIT: GROSS %.2f, NET %.2f, PRICE %d"
@@ -237,7 +270,11 @@ class DynamicSpreadCUSUMStrategy(bt.Strategy):
         return pd.DataFrame(self.record_data)
 
 
-def main():
+"""main function.
+
+Returns:
+    Description of return value
+"""
     # 解析命令行参数
     args = parse_args()
     print(f"解析参数: {args}")

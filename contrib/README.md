@@ -1,27 +1,17 @@
 # contrib
 
-Contains contributed code. Contains various files.
+This directory contains contributions from the Backtrader community, including additional tools, utilities, sample strategies, and data sources that extend the core functionality of the Backtrader framework.
 
 ## Navigation
 
-* [🏠 Root Directory](../README.md)
+* [🏠 Root Directory](/contrib/..README.md)
 
 ### Subdirectories
 
-* [datas](datas/README.md) - Contains data files
-* [samples](samples/README.md) - Contains sample code and examples
-* [utils](utils/README.md) - Contains utility functions and helper code
-
-## Files
-
-### README.md
-
-File with .md extension.
-
+* [datas](datas/README.md) - This directory contains various files including 2 csv files, 1 md file
+* [samples](samples/README.md) - This directory contains various files including 1 md file
+* [utils](utils/README.md) - This directory contains various files including 2 py files, 1 md file
 ## Directory Summary
 
-This directory contains 1 files and 3 subdirectories.
+This directory contains 0 files and 3 subdirectories.
 
-### File Types
-
-* .md: 1 files

@@ -51,7 +51,12 @@ similar to collections.OrderedDict."""
 
     __keys: List[Any]
 
-    def __init__(
+"""__init__ function.
+
+Args:
+    data: Description of data
+
+"""
         self,
         data: Optional[
             Union[Mapping[_Key, _Value], Iterable[Tuple[_Key, _Value]]]
@@ -63,29 +68,55 @@ similar to collections.OrderedDict."""
         self.update(data)
         self.update(kwargs)
 
-    def __new__(
+"""__new__ function.
+
+Args:
+    cls: Description of cls
+
+Returns:
+    Description of return value
+"""
         cls: Type["SON[_Key, _Value]"], *args: Any, **kwargs: Any
     ) -> "SON[_Key, _Value]":
         instance = super(SON, cls).__new__(cls, *args, **kwargs)
         instance.__keys = []
         return instance
 
-    def __repr__(self):
+"""__repr__ function.
+
+Returns:
+    Description of return value
+"""
         result = []
         for key in self.__keys:
             result.append("(%r, %r)" % (key, self[key]))
         return "SON([%s])" % ", ".join(result)
 
-    def __setitem__(self, key: _Key, value: _Value) -> None:
+"""__setitem__ function.
+
+Args:
+    key: Description of key
+    value: Description of value
+
+"""
         if key not in self.__keys:
             self.__keys.append(key)
         dict.__setitem__(self, key, value)
 
-    def __delitem__(self, key: _Key) -> None:
+"""__delitem__ function.
+
+Args:
+    key: Description of key
+
+"""
         self.__keys.remove(key)
         dict.__delitem__(self, key)
 
-    def copy(self) -> "SON[_Key, _Value]":
+"""copy function.
+
+Returns:
+    Description of return value
+"""
         other: SON[_Key, _Value] = SON()
         other.update(self)
         return other
@@ -93,37 +124,77 @@ similar to collections.OrderedDict."""
     # TODO this is all from UserDict.DictMixin. it could probably be made more
     # efficient.
     # second level definitions support higher levels
-    def __iter__(self) -> Iterator[_Key]:
+"""__iter__ function.
+
+Returns:
+    Description of return value
+"""
         for k in self.__keys:
             yield k
 
-    def has_key(self, key: _Key) -> bool:
+"""has_key function.
+
+Args:
+    key: Description of key
+
+Returns:
+    Description of return value
+"""
         return key in self.__keys
 
-    def iterkeys(self) -> Iterator[_Key]:
+"""iterkeys function.
+
+Returns:
+    Description of return value
+"""
         return self.__iter__()
 
     # fourth level uses definitions from lower levels
-    def itervalues(self) -> Iterator[_Value]:
+"""itervalues function.
+
+Returns:
+    Description of return value
+"""
         for _, v in self.items():
             yield v
 
-    def values(self) -> List[_Value]:  # type: ignore[override]
+"""values function.
+
+Returns:
+    Description of return value
+"""
         return [v for _, v in self.items()]
 
-    def clear(self) -> None:
+"""clear function.
+
+"""
         self.__keys = []
         super(SON, self).clear()
 
     # type: ignore[override]
-    def setdefault(self, key: _Key, default: _Value) -> _Value:
+"""setdefault function.
+
+Args:
+    key: Description of key
+    default: Description of default
+
+Returns:
+    Description of return value
+"""
         try:
             return self[key]
         except KeyError:
             self[key] = default
         return default
 
-    def pop(self, key: _Key, *args: Union[_Value, _T]) -> Union[_Value, _T]:
+"""pop function.
+
+Args:
+    key: Description of key
+
+Returns:
+    Description of return value
+"""
         if len(args) > 1:
             raise TypeError(
                 "pop expected at most 2 arguments, got " + repr(1 + len(args))
@@ -137,7 +208,11 @@ similar to collections.OrderedDict."""
         del self[key]
         return value
 
-    def popitem(self) -> Tuple[_Key, _Value]:
+"""popitem function.
+
+Returns:
+    Description of return value
+"""
         try:
             k, v = next(iter(self.items()))
         except StopIteration:
@@ -146,7 +221,12 @@ similar to collections.OrderedDict."""
         return (k, v)
 
     # type: ignore[override]
-    def update(self, other: Optional[Any] = None, **kwargs: _Value) -> None:
+"""update function.
+
+Args:
+    other: Description of other
+
+"""
         # Make progressively weaker assumptions about "other"
         if other is None:
             pass
@@ -163,7 +243,15 @@ similar to collections.OrderedDict."""
             self.update(kwargs)
 
     # type: ignore[override]
-    def get(
+"""get function.
+
+Args:
+    key: Description of key
+    default: Description of default
+
+Returns:
+    Description of return value
+"""
         self, key: _Key, default: Optional[Union[_Value, _T]] = None
     ) -> Union[_Value, _T, None]:
         try:
@@ -172,17 +260,28 @@ similar to collections.OrderedDict."""
             return default
 
     def __eq__(self, other: Any) -> bool:
-        """Comparison to another SON is order-sensitive while comparison to a
-        regular dictionary is order-insensitive.
+"""Comparison to another SON is order-sensitive while comparison to a
+        regular dictionary is order-insensitive."""
         """
         if isinstance(other, SON):
             return len(self) == len(other) and list(self.items()) == list(other.items())
         return self.to_dict() == other
 
-    def __ne__(self, other: Any) -> bool:
+"""__ne__ function.
+
+Args:
+    other: Description of other
+
+Returns:
+    Description of return value
+"""
         return not self == other
 
-    def __len__(self) -> int:
+"""__len__ function.
+
+Returns:
+    Description of return value
+"""
         return len(self.__keys)
 
     def to_dict(self) -> Dict[_Key, _Value]:
@@ -190,7 +289,14 @@ similar to collections.OrderedDict."""
 This is trickier than just *dict(...)* because it needs to be
 recursive."""
 
-        def transform_value(value: Any) -> Any:
+"""transform_value function.
+
+Args:
+    value: Description of value
+
+Returns:
+    Description of return value
+"""
             if isinstance(value, list):
                 return [transform_value(v) for v in value]
             elif isinstance(value, _Mapping):
@@ -200,7 +306,14 @@ recursive."""
 
         return transform_value(dict(self))
 
-    def __deepcopy__(self, memo: Dict[int, "SON[_Key, _Value]"]) -> "SON[_Key, _Value]":
+"""__deepcopy__ function.
+
+Args:
+    memo: Description of memo
+
+Returns:
+    Description of return value
+"""
         out: SON[_Key, _Value] = SON()
         val_id = id(self)
         if val_id in memo:

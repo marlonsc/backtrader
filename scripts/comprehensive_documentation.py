@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Comprehensive Documentation Generator for Backtrader Repository
+"""Comprehensive Documentation Generator for Backtrader Repository
 
 This script creates comprehensive documentation for the Backtrader repository,
 including detailed README.md files for each directory and improved docstrings
@@ -9,7 +8,7 @@ for Python files.
 Usage:
     python comprehensive_documentation.py
 
-Author: OpenHands AI
+Author: OpenHands AI"""
 """
 
 import os
@@ -80,14 +79,13 @@ DIR_DESCRIPTIONS = {
 }
 
 def translate_to_english(text: str) -> str:
-    """
-    Translate non-English text to English.
+"""Translate non-English text to English.
     
-    Args:
+Args::
         text: Text to translate
         
-    Returns:
-        Translated text
+Returns::
+        Translated text"""
     """
     # Portuguese to English translations
     pt_to_en = {
@@ -156,14 +154,13 @@ def translate_to_english(text: str) -> str:
     return translated
 
 def get_directory_description(directory: str) -> str:
-    """
-    Get a description for a directory based on its name.
+"""Get a description for a directory based on its name.
     
-    Args:
+Args::
         directory: Path to the directory
         
-    Returns:
-        A string describing the directory's purpose
+Returns::
+        A string describing the directory's purpose"""
     """
     dir_name = os.path.basename(directory)
     
@@ -181,14 +178,13 @@ def get_directory_description(directory: str) -> str:
     return f"Directory containing {dir_name} related files"
 
 def analyze_python_file(file_path: str) -> Dict:
-    """
-    Analyze a Python file to extract classes, functions, and docstrings.
+"""Analyze a Python file to extract classes, functions, and docstrings.
     
-    Args:
+Args::
         file_path: Path to the Python file
         
-    Returns:
-        Dictionary containing file information
+Returns::
+        Dictionary containing file information"""
     """
     try:
         with open(file_path, 'r', encoding='utf-8', errors='replace') as f:
@@ -244,14 +240,13 @@ def analyze_python_file(file_path: str) -> Dict:
         }
 
 def get_file_description(file_path: str) -> str:
-    """
-    Get a description for a file based on its content.
+"""Get a description for a file based on its content.
     
-    Args:
+Args::
         file_path: Path to the file
         
-    Returns:
-        A string describing the file's purpose
+Returns::
+        A string describing the file's purpose"""
     """
     file_name = os.path.basename(file_path)
     ext = os.path.splitext(file_name)[1].lower()
@@ -330,11 +325,10 @@ def get_file_description(file_path: str) -> str:
         return f"Could not analyze file: {str(e)}"
 
 def create_comprehensive_readme(directory: str) -> None:
-    """
-    Create a comprehensive README.md file for a directory.
+"""Create a comprehensive README.md file for a directory.
     
-    Args:
-        directory: Path to the directory
+Args::
+        directory: Path to the directory"""
     """
     readme_path = os.path.join(directory, "README.md")
     
@@ -473,11 +467,10 @@ def create_comprehensive_readme(directory: str) -> None:
     print(f"Created comprehensive README.md for {directory}")
 
 def enhance_python_docstrings(file_path: str) -> None:
-    """
-    Enhance docstrings in a Python file to follow Google style.
+"""Enhance docstrings in a Python file to follow Google style.
     
-    Args:
-        file_path: Path to the Python file
+Args::
+        file_path: Path to the Python file"""
     """
     try:
         with open(file_path, 'r', encoding='utf-8', errors='replace') as f:
@@ -541,15 +534,14 @@ def enhance_python_docstrings(file_path: str) -> None:
         print(f"Error enhancing docstrings in {file_path}: {str(e)}")
 
 def enhance_docstring(docstring: str, translate: bool = False) -> str:
-    """
-    Enhance a docstring to follow Google style.
+"""Enhance a docstring to follow Google style.
     
-    Args:
+Args::
         docstring: Original docstring
         translate: Whether to translate non-English content
         
-    Returns:
-        Enhanced docstring
+Returns::
+        Enhanced docstring"""
     """
     # Remove leading/trailing whitespace
     docstring = docstring.strip()
@@ -610,11 +602,10 @@ def enhance_docstring(docstring: str, translate: bool = False) -> str:
     return '\n'.join(enhanced_lines).strip()
 
 def process_directory(directory: str) -> None:
-    """
-    Process a directory to enhance documentation.
+"""Process a directory to enhance documentation.
     
-    Args:
-        directory: Path to the directory
+Args::
+        directory: Path to the directory"""
     """
     # Skip excluded directories
     if os.path.basename(directory) in EXCLUDE_DIRS:

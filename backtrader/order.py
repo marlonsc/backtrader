@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""order.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -69,7 +72,7 @@ Member Attributes:
         psize=0,
         pprice=0.0,
     ):
-        """Args:
+"""Args::
     dt: (Default value = None)
     size: (Default value = 0)
     price: (Default value = 0.0)
@@ -81,6 +84,7 @@ Member Attributes:
     openedcomm: (Default value = 0.0)
     pnl: (Default value = 0.0)
     psize: (Default value = 0)
+    pprice: (Default value = 0.0)"""
     pprice: (Default value = 0.0)"""
 
         self.dt = dt
@@ -146,7 +150,7 @@ price at the time or order creation will be used as reference
         trailamount=0.0,
         trailpercent=0.0,
     ):
-        """Args:
+"""Args::
     dt: (Default value = None)
     size: (Default value = 0)
     price: (Default value = 0.0)
@@ -154,6 +158,7 @@ price at the time or order creation will be used as reference
     remsize: (Default value = 0)
     pclose: (Default value = 0.0)
     trailamount: (Default value = 0.0)
+    trailpercent: (Default value = 0.0)"""
     trailpercent: (Default value = 0.0)"""
 
         self.pclose = pclose
@@ -187,41 +192,13 @@ price at the time or order creation will be used as reference
         self.pprice = 0
 
     def _getplimit(self):
-        """ """
-        return self._plimit
-
-    def _setplimit(self, val):
-        """Args:
+""""""
+"""Args::
     val:"""
-        self._plimit = val
-
-    plimit = property(_getplimit, _setplimit)
-
-    def __len__(self):
-        """ """
-        return len(self.exbits)
-
-    def __getitem__(self, key):
-        """Args:
+""""""
+"""Args::
     key:"""
-        return self.exbits[key]
-
-    def add(
-        self,
-        dt,
-        size,
-        price,
-        closed=0,
-        closedvalue=0.0,
-        closedcomm=0.0,
-        opened=0,
-        openedvalue=0.0,
-        openedcomm=0.0,
-        pnl=0.0,
-        psize=0,
-        pprice=0.0,
-    ):
-        """Args:
+"""Args::
     dt: 
     size: 
     price: 
@@ -233,6 +210,7 @@ price at the time or order creation will be used as reference
     openedcomm: (Default value = 0.0)
     pnl: (Default value = 0.0)
     psize: (Default value = 0)
+    pprice: (Default value = 0.0)"""
     pprice: (Default value = 0.0)"""
 
         self.addbit(
@@ -253,47 +231,14 @@ price at the time or order creation will be used as reference
         )
 
     def addbit(self, exbit):
-        """Args:
+"""Args::
     exbit:"""
-        # Stores an ExecutionBit and recalculates own values from ExBit
-        self.exbits.append(exbit)
-
-        self.remsize -= exbit.size
-
-        self.dt = exbit.dt
-        oldvalue = self.size * self.price
-        newvalue = exbit.size * exbit.price
-        self.size += exbit.size
-        self.price = (oldvalue + newvalue) / self.size
-        self.value += exbit.value
-        self.comm += exbit.comm
-        self.pnl += exbit.pnl
-        self.psize = exbit.psize
-        self.pprice = exbit.pprice
-
-    def getpending(self):
-        """ """
-        return list(self.iterpending())
-
-    def iterpending(self):
-        """ """
-        return itertools.islice(self.exbits, self.p1, self.p2)
-
-    def markpending(self):
-        """ """
-        # rebuild the indices to mark which exbits are pending in clone
-        self.p1, self.p2 = self.p2, len(self.exbits)
-
-    def clone(self):
-        """ """
-        self.markpending()
-        obj = copy(self)
-        return obj
-
-
-class OrderBase(with_metaclass(MetaParams, object)):
-    """Base class for all order types in Backtrader. All docstrings and comments
-    must be line-wrapped at 90 characters or less.
+""""""
+""""""
+""""""
+""""""
+"""Base class for all order types in Backtrader. All docstrings and comments
+    must be line-wrapped at 90 characters or less."""
     """
 
     params = (
@@ -378,25 +323,14 @@ class OrderBase(with_metaclass(MetaParams, object)):
     refbasis = itertools.count(1)  # for a unique identifier per order
 
     def _getplimit(self):
-        """ """
-        return self._plimit
-
-    def _setplimit(self, val):
-        """Args:
+""""""
+"""Args::
     val:"""
-        self._plimit = val
-
-    plimit = property(_getplimit, _setplimit)
-
-    def __getattr__(self, name):
-        """Args:
+"""Args::
     name:"""
-        # Return attr from params if not found in order
-        return getattr(self.params, name)
-
-    def __setattr__(self, name, value):
-        """Args:
+"""Args::
     name: 
+    value:"""
     value:"""
         if hasattr(self.params, name):
             setattr(self.params, name, value)
@@ -404,169 +338,40 @@ class OrderBase(with_metaclass(MetaParams, object)):
             super(OrderBase, self).__setattr__(name, value)
 
     def __str__(self):
-        """ """
-        tojoin = list()
-        tojoin.append("Ref: {}".format(self.ref))
-        tojoin.append("OrdType: {}".format(self.ordtype))
-        tojoin.append("OrdType: {}".format(self.ordtypename()))
-        tojoin.append("Status: {}".format(self.status))
-        tojoin.append("Status: {}".format(self.getstatusname()))
-        tojoin.append("Size: {}".format(self.size))
-        tojoin.append("Price: {}".format(self.price))
-        tojoin.append("Price Limit: {}".format(self.pricelimit))
-        tojoin.append("TrailAmount: {}".format(self.trailamount))
-        tojoin.append("TrailPercent: {}".format(self.trailpercent))
-        tojoin.append("ExecType: {}".format(self.exectype))
-        tojoin.append("ExecType: {}".format(self.getordername()))
-        tojoin.append("CommInfo: {}".format(self.comminfo))
-        tojoin.append("End of Session: {}".format(self.dteos))
-        tojoin.append("Info: {}".format(self.info))
-        tojoin.append("Broker: {}".format(self.broker))
-        tojoin.append("Alive: {}".format(self.alive()))
+""""""
+""""""
+""""""
+"""Returns the name for a given status or the one of the order
 
-        return "\n".join(tojoin)
-
-    def __init__(self):
-        """ """
-        self.exectype = None
-        self.valid = None
-        self.ref = next(self.refbasis)
-        self.broker = None
-        self.info = AutoOrderedDict()
-        self.comminfo = None
-        self.triggered = False
-
-        self._active = self.parent is None
-        self.status = Order.Created
-
-        self.plimit = self.p.pricelimit  # alias via property
-
-        if self.exectype is None:
-            self.exectype = Order.Market
-
-        if not self.isbuy():
-            self.size = -self.size
-
-        # Set a reference price if price is not set using
-        # the close price
-        pclose = self.data.close[0] if not self.p.simulated else self.price
-        price = pclose if not self.price and not self.pricelimit else self.price
-
-        dcreated = self.data.datetime[0] if not self.p.simulated else 0.0
-        self.created = OrderData(
-            dt=dcreated,
-            size=self.size,
-            price=price,
-            pricelimit=self.pricelimit,
-            pclose=pclose,
-            trailamount=self.trailamount,
-            trailpercent=self.trailpercent,
-        )
-
-        # Adjust price in case a trailing limit is wished
-        if self.exectype in [Order.StopTrail, Order.StopTrailLimit]:
-            self._limitoffset = self.created.price - self.created.pricelimit
-            price = self.created.price
-            self.created.price = float("inf" * self.isbuy() or "-inf")
-            self.trailadjust(price)
-        else:
-            self._limitoffset = 0.0
-
-        self.executed = OrderData(remsize=self.size)
-        self.position = 0
-
-        if isinstance(self.valid, datetime.date):
-            # comparison will later be done against the raw datetime[0] value
-            self.valid = self.data.date2num(self.valid)
-        elif isinstance(self.valid, datetime.timedelta):
-            # offset with regards to now ... get utcnow + offset
-            # when reading with date2num ... it will be automatically localized
-            if self.valid == self.DAY:
-                valid = datetime.datetime.combine(
-                    self.data.datetime.date(), datetime.time(23, 59, 59, 9999)
-                )
-            else:
-                valid = self.data.datetime.datetime() + self.valid
-
-            self.valid = self.data.date2num(valid)
-
-        elif self.valid is not None:
-            if not self.valid:  # avoid comparing None and 0
-                valid = datetime.datetime.combine(
-                    self.data.datetime.date(), datetime.time(23, 59, 59, 9999)
-                )
-            else:  # assume float
-                valid = self.data.datetime[0] + self.valid
-
-        if not self.p.simulated:
-            # provisional end-of-session
-            # get next session end
-            dtime = self.data.datetime.datetime(0)
-            session = self.data.p.sessionend
-            dteos = dtime.replace(
-                hour=session.hour,
-                minute=session.minute,
-                second=session.second,
-                microsecond=session.microsecond,
-            )
-
-            if dteos < dtime:
-                # eos before current time ... no ... must be at least next day
-                dteos += datetime.timedelta(days=1)
-
-            self.dteos = self.data.date2num(dteos)
-        else:
-            self.dteos = 0.0
-
-    def clone(self):
-        """ """
-        # status, triggered and executed are the only moving parts in order
-        # status and triggered are covered by copy
-        # executed has to be replaced with an intelligent clone of itself
-        obj = copy(self)
-        obj.executed = self.executed.clone()
-        return obj  # status could change in next to completed
-
-    def getstatusname(self, status=None):
-        """Returns the name for a given status or the one of the order
-
-Args:
+Args::
+    status: (Default value = None)"""
     status: (Default value = None)"""
         return self.Status[self.status if status is None else status]
 
     def getordername(self, exectype=None):
-        """Returns the name for a given exectype or the one of the order
+"""Returns the name for a given exectype or the one of the order
 
-Args:
+Args::
+    exectype: (Default value = None)"""
     exectype: (Default value = None)"""
         return self.ExecTypes[self.exectype if exectype is None else exectype]
 
     @classmethod
     def ExecType(cls, exectype):
-        """Args:
+"""Args::
     exectype:"""
-        return getattr(cls, exectype)
+"""Returns the name for a given ordtype or the one of the order
 
-    def ordtypename(self, ordtype=None):
-        """Returns the name for a given ordtype or the one of the order
-
-Args:
+Args::
+    ordtype: (Default value = None)"""
     ordtype: (Default value = None)"""
         return self.OrdTypes[self.ordtype if ordtype is None else ordtype]
 
     def active(self):
-        """ """
-        return self._active
-
-    def activate(self):
-        """ """
-        self._active = True
-
-    def alive(self):
-        """Returns True if the order is in a status in which it can still be
-        executed
-
-
+""""""
+""""""
+"""Returns True if the order is in a status in which it can still be
+        executed"""
         """
         return self.status in [
             Order.Created,
@@ -576,9 +381,10 @@ Args:
         ]
 
     def addcomminfo(self, comminfo):
-        """Stores a CommInfo scheme associated with the asset
+"""Stores a CommInfo scheme associated with the asset
 
-Args:
+Args::
+    comminfo:"""
     comminfo:"""
         self.comminfo = comminfo
 
@@ -589,16 +395,10 @@ hold custom information in the order"""
             self.info[key] = val
 
     def __eq__(self, other):
-        """Args:
+"""Args::
     other:"""
-        return other is not None and self.ref == other.ref
-
-    def __ne__(self, other):
-        """Args:
+"""Args::
     other:"""
-        return self.ref != other.ref
-
-    def isbuy(self):
         """Returns True if the order is a Buy order"""
         return self.ordtype == self.Buy
 
@@ -607,26 +407,29 @@ hold custom information in the order"""
         return self.ordtype == self.Sell
 
     def setposition(self, position):
-        """Receives the current position for the asset and stotres it
+"""Receives the current position for the asset and stotres it
 
-Args:
+Args::
+    position:"""
     position:"""
         self.position = position
 
     def submit(self, broker=None):
-        """Marks an order as submitted and stores the broker to which it was
+"""Marks an order as submitted and stores the broker to which it was
 submitted
 
-Args:
+Args::
+    broker: (Default value = None)"""
     broker: (Default value = None)"""
         self.status = Order.Submitted
         self.broker = broker
         self.plen = len(self.data)
 
     def accept(self, broker=None):
-        """Marks an order as accepted
+"""Marks an order as accepted
 
-Args:
+Args::
+    broker: (Default value = None)"""
     broker: (Default value = None)"""
         self.status = Order.Accepted
         self.broker = broker
@@ -640,9 +443,10 @@ Defaults to last known status if no broker is associated"""
         return self.status
 
     def reject(self, broker=None):
-        """Marks an order as rejected
+"""Marks an order as rejected
 
-Args:
+Args::
+    broker: (Default value = None)"""
     broker: (Default value = None)"""
         if self.status == Order.Rejected:
             return False
@@ -689,9 +493,9 @@ Args:
         psize,
         pprice,
     ):
-        """Receives data execution input and stores it
+"""Receives data execution input and stores it
 
-Args:
+Args::
     dt: 
     size: 
     price: 
@@ -704,6 +508,7 @@ Args:
     margin: 
     pnl: 
     psize: 
+    pprice:"""
     pprice:"""
         if not size:
             return
@@ -731,12 +536,8 @@ Args:
         return True
 
     def trailadjust(self, price):
-        """Args:
+"""Args::
     price:"""
-        pass  # generic interface
-
-
-class Order(OrderBase):
     """Concrete order class for Backtrader. All docstrings and comments must be
 line-wrapped at 90 characters or less.
 The order may have the following status:
@@ -781,7 +582,7 @@ User Methods:
         psize,
         pprice,
     ):
-        """Args:
+"""Args::
     dt: 
     size: 
     price: 
@@ -794,6 +595,7 @@ User Methods:
     margin: 
     pnl: 
     psize: 
+    pprice:"""
     pprice:"""
 
         super(Order, self).execute(
@@ -820,79 +622,43 @@ User Methods:
         # self.comminfo = None
 
     def expire(self):
-        """ """
-        if self.exectype == Order.Market:
-            return False  # will be executed yes or yes
-
-        if self.valid and self.data.datetime[0] > self.valid:
-            self.status = Order.Expired
-            self.executed.dt = self.data.datetime[0]
-            return True
-
-        return False
-
-    def trailadjust(self, price):
-        """Args:
+""""""
+"""Args::
     price:"""
-        if self.trailamount:
-            pamount = self.trailamount
-        elif self.trailpercent:
-            pamount = price * self.trailpercent
-        else:
-            pamount = 0.0
-
-        # Stop sell is below (-), stop buy is above, move only if needed
-        if self.isbuy():
-            price += pamount
-            if price < self.created.price:
-                self.created.price = price
-                if self.exectype == Order.StopTrailLimit:
-                    self.created.pricelimit = price - self._limitoffset
-        else:
-            price -= pamount
-            if price > self.created.price:
-                self.created.price = price
-                if self.exectype == Order.StopTrailLimit:
-                    # limitoffset is negative when pricelimit was greater
-                    # the - allows increasing the price limit if stop increases
-                    self.created.pricelimit = price - self._limitoffset
-
-
-class BuyOrder(Order):
-    """Concrete buy order class for Backtrader. All docstrings and comments must be
-    line-wrapped at 90 characters or less.
+"""Concrete buy order class for Backtrader. All docstrings and comments must be
+    line-wrapped at 90 characters or less."""
     """
 
     ordtype = Order.Buy
 
 
 class StopBuyOrder(BuyOrder):
-    """Stop buy order class for Backtrader. All docstrings and comments must be
-    line-wrapped at 90 characters or less.
+"""Stop buy order class for Backtrader. All docstrings and comments must be
+    line-wrapped at 90 characters or less."""
     """
 
 
 class StopLimitBuyOrder(BuyOrder):
-    """Stop limit buy order class for Backtrader. All docstrings and comments must be
-    line-wrapped at 90 characters or less.
+"""Stop limit buy order class for Backtrader. All docstrings and comments must be
+    line-wrapped at 90 characters or less."""
     """
 
 
 class SellOrder(Order):
-    """Concrete sell order class for Backtrader. All docstrings and comments must be
-    line-wrapped at 90 characters or less.
+"""Concrete sell order class for Backtrader. All docstrings and comments must be
+    line-wrapped at 90 characters or less."""
     """
 
     ordtype = Order.Sell
 
 
 class StopSellOrder(SellOrder):
-    """Stop sell order class for Backtrader. All docstrings and comments must be
-    line-wrapped at 90 characters or less.
+"""Stop sell order class for Backtrader. All docstrings and comments must be
+    line-wrapped at 90 characters or less."""
     """
 
 
 class StopLimitSellOrder(SellOrder):
-    """Stop limit sell order class for Backtrader. All docstrings and comments must be
-    line-wrapped at 90 characters or less.
+"""Stop limit sell order class for Backtrader. All docstrings and comments must be
+    line-wrapped at 90 characters or less."""
     """

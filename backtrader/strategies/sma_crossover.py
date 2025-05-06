@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""sma_crossover.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -56,14 +59,8 @@ Order Execution Type:
     )
 
     def __init__(self):
-        """ """
-        sma_fast = self.p._movav(period=self.p.fast)
-        sma_slow = self.p._movav(period=self.p.slow)
-
-        self.buysig = btind.CrossOver(sma_fast, sma_slow)
-
-    def next(self):
-        """ """
+""""""
+""""""
         if self.position.size:
             if self.buysig < 0:
                 self.sell()

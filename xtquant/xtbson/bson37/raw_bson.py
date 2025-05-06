@@ -56,16 +56,17 @@ from .son import SON
 def _inflate_bson(
     bson_bytes: bytes, codec_options: CodecOptions, raw_array: bool = False
 ) -> Mapping[Any, Any]:
-    """Inflates the top level fields of a BSON document.
+"""Inflates the top level fields of a BSON document.
 :Parameters:
 - `bson_bytes`: the BSON bytes that compose this document
 - `codec_options`: An instance of
 :class:`~bson.codec_options.CodecOptions` whose ``document_class``
 must be :class:`RawBSONDocument`.
 
-Args:
+Args::
     bson_bytes: 
     codec_options: 
+    raw_array: (Default value = False)"""
     raw_array: (Default value = False)"""
     # Use SON to preserve ordering of elements.
     return _raw_to_dict(
@@ -90,7 +91,7 @@ RawBSONDocument decode its bytes."""
     def __init__(
         self, bson_bytes: bytes, codec_options: Optional[CodecOptions] = None
     ) -> None:
-        """Create a new :class:`RawBSONDocument`
+"""Create a new :class:`RawBSONDocument`
 :class:`RawBSONDocument` is a representation of a BSON document that
 provides access to the underlying raw BSON bytes. Only when a field is
 accessed or modified within the document does RawBSONDocument decode
@@ -111,8 +112,9 @@ passed in represent a single bson document.
 If a :class:`~bson.codec_options.CodecOptions` is passed in, its
 `document_class` must be :class:`RawBSONDocument`.
 
-Args:
+Args::
     bson_bytes: 
+    codec_options: (Default value = None)"""
     codec_options: (Default value = None)"""
         self.__raw = bson_bytes
         self.__inflated_doc: Optional[Mapping[str, Any]] = None
@@ -142,11 +144,7 @@ Args:
 
     @property
     def __inflated(self) -> Mapping[str, Any]:
-        """
-
-
-        :rtype: Mapping[str,Any]
-
+""":rtype: Mapping[str,Any]"""
         """
         if self.__inflated_doc is None:
             # We already validated the object's size when this document was
@@ -159,59 +157,37 @@ Args:
     def _inflate_bson(
         bson_bytes: bytes, codec_options: CodecOptions
     ) -> Mapping[Any, Any]:
-        """Args:
+"""Args::
     bson_bytes: 
+    codec_options:"""
     codec_options:"""
         return _inflate_bson(bson_bytes, codec_options)
 
     def __getitem__(self, item: str) -> Any:
-        """Args:
+"""Args::
     item:"""
-        return self.__inflated[item]
-
-    def __iter__(self) -> Iterator[str]:
-        """
-
-
-        :rtype: Iterator[str]
-
+""":rtype: Iterator[str]"""
         """
         return iter(self.__inflated)
 
     def __len__(self) -> int:
-        """
-
-
-        :rtype: int
-
+""":rtype: int"""
         """
         return len(self.__inflated)
 
     def __eq__(self, other: Any) -> bool:
-        """Args:
+"""Args::
     other:"""
-        if isinstance(other, RawBSONDocument):
-            return self.__raw == other.raw
-        return NotImplemented
-
-    def __repr__(self):
-        """ """
-        return "%s(%r, codec_options=%r)" % (
-            self.__class__.__name__,
-            self.raw,
-            self.__codec_options,
-        )
-
-
-class _RawArrayBSONDocument(RawBSONDocument):
+""""""
     """A RawBSONDocument that only expands sub-documents and arrays when accessed."""
 
     @staticmethod
     def _inflate_bson(
         bson_bytes: bytes, codec_options: CodecOptions
     ) -> Mapping[Any, Any]:
-        """Args:
+"""Args::
     bson_bytes: 
+    codec_options:"""
     codec_options:"""
         return _inflate_bson(bson_bytes, codec_options, raw_array=True)
 

@@ -1,10 +1,14 @@
-# coding: utf-8
+"""__init__.py module.
+
+Description of the module functionality."""
+
 
 __version__ = "xtquant"
 
 
 def check_for_update(package_name):
-    """Args:
+"""Args::
+    package_name:"""
     package_name:"""
     import requests
     from pkg_resources import get_distribution

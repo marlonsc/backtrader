@@ -1,4 +1,7 @@
-# Copyright 2009-present MongoDB, Inc.
+"""binary.py module.
+
+Description of the module functionality."""
+
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -57,9 +60,7 @@ by :mod:`bson` using this subtype when using
 
 
 class UuidRepresentation:
-    """ """
-
-    UNSPECIFIED = 0
+""""""
     """An unspecified UUID representation.
 
     When configured, :class:`uuid.UUID` instances will **not** be
@@ -208,8 +209,9 @@ Support any bytes-like type that implements the buffer protocol."""
     _type_marker = 5
 
     def __new__(cls, data, subtype=BINARY_SUBTYPE):
-        """Args:
+"""Args::
     data: 
+    subtype: (Default value = BINARY_SUBTYPE)"""
     subtype: (Default value = BINARY_SUBTYPE)"""
         if not isinstance(subtype, int):
             raise TypeError("subtype must be an instance of int")
@@ -222,7 +224,7 @@ Support any bytes-like type that implements the buffer protocol."""
 
     @classmethod
     def from_uuid(cls, uuid, uuid_representation=UuidRepresentation.STANDARD):
-        """Create a BSON Binary object from a Python UUID.
+"""Create a BSON Binary object from a Python UUID.
 Creates a :class:`~bson.binary.Binary` object from a
 :class:`uuid.UUID` instance. Assumes that the native
 :class:`uuid.UUID` instance uses the byte-order implied by the
@@ -237,8 +239,9 @@ Raises :exc:`TypeError` if `uuid` is not an instance of
 See :ref:`handling-uuid-data-example` for details.
 .. versionadded:: 3.11
 
-Args:
+Args::
     uuid: 
+    uuid_representation: (Default value = UuidRepresentation.STANDARD)"""
     uuid_representation: (Default value = UuidRepresentation.STANDARD)"""
         if not isinstance(uuid, UUID):
             raise TypeError("uuid must be an instance of uuid.UUID")
@@ -274,7 +277,7 @@ Args:
         return cls(payload, subtype)
 
     def as_uuid(self, uuid_representation=UuidRepresentation.STANDARD):
-        """Create a Python UUID from this BSON Binary object.
+"""Create a Python UUID from this BSON Binary object.
 Decodes this binary object as a native :class:`uuid.UUID` instance
 with the provided ``uuid_representation``.
 Raises :exc:`ValueError` if this :class:`~bson.binary.Binary` instance
@@ -286,7 +289,8 @@ does not contain a UUID.
 See :ref:`handling-uuid-data-example` for details.
 .. versionadded:: 3.11
 
-Args:
+Args::
+    uuid_representation: (Default value = UuidRepresentation.STANDARD)"""
     uuid_representation: (Default value = UuidRepresentation.STANDARD)"""
         if self.subtype not in ALL_UUID_SUBTYPES:
             raise ValueError("cannot decode subtype %s as a uuid" % (self.subtype,))
@@ -324,35 +328,11 @@ Args:
         return self.__subtype
 
     def __getnewargs__(self):
-        """ """
-        # Work around http://bugs.python.org/issue7382
-        data = super(Binary, self).__getnewargs__()[0]
-        if not isinstance(data, bytes):
-            data = data.encode("latin-1")
-        return data, self.__subtype
-
-    def __eq__(self, other):
-        """Args:
+""""""
+"""Args::
     other:"""
-        if isinstance(other, Binary):
-            return (self.__subtype, bytes(self)) == (
-                other.subtype,
-                bytes(other),
-            )
-        # We don't return NotImplemented here because if we did then
-        # Binary("foo") == "foo" would return True, since Binary is a
-        # subclass of str...
-        return False
-
-    def __hash__(self):
-        """ """
-        return super(Binary, self).__hash__() ^ hash(self.__subtype)
-
-    def __ne__(self, other):
-        """Args:
+""""""
+"""Args::
     other:"""
-        return not self == other
-
-    def __repr__(self):
-        """ """
+""""""
         return "Binary(%s, %s)" % (bytes.__repr__(self), self.__subtype)

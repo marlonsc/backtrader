@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""metabase.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -33,8 +36,9 @@ from .utils.py3 import string_types, with_metaclass, zip
 
 
 def findbases(kls, topclass):
-    """Args:
+"""Args::
     kls: 
+    topclass:"""
     topclass:"""
     retval = list()
     for base in kls.__bases__:
@@ -46,9 +50,10 @@ def findbases(kls, topclass):
 
 
 def findowner(owned, cls, startlevel=2, skip=None):
-    """Args:
+"""Args::
     owned: 
     startlevel: (Default value = 2)
+    skip: (Default value = None)"""
     skip: (Default value = None)"""
     # skip this frame and the caller's -> start at 2
     for framelevel in itertools.count(startlevel):
@@ -74,8 +79,8 @@ def findowner(owned, cls, startlevel=2, skip=None):
 
 
 class MetaBase(type):
-    """Base metaclass for Backtrader objects. Handles custom instantiation logic.
-    All docstrings and comments must be line-wrapped at 90 characters or less.
+"""Base metaclass for Backtrader objects. Handles custom instantiation logic.
+    All docstrings and comments must be line-wrapped at 90 characters or less."""
     """
 
     def doprenew(cls, *args, **kwargs):
@@ -88,22 +93,12 @@ class MetaBase(type):
         return _obj, args, kwargs
 
     def dopreinit(cls, _obj, *args, **kwargs):
-        """Args:
+"""Args::
     _obj:"""
-        return _obj, args, kwargs
-
-    def doinit(cls, _obj, *args, **kwargs):
-        """Args:
+"""Args::
     _obj:"""
-        _obj.__init__(*args, **kwargs)
-        return _obj, args, kwargs
-
-    def dopostinit(cls, _obj, *args, **kwargs):
-        """Args:
+"""Args::
     _obj:"""
-        return _obj, args, kwargs
-
-    def __call__(cls, *args, **kwargs):
         """"""
         cls, args, kwargs = cls.doprenew(*args, **kwargs)
         _obj, args, kwargs = cls.donew(*args, **kwargs)
@@ -114,8 +109,8 @@ class MetaBase(type):
 
 
 class AutoInfoClass(object):
-    """Base class for auto-generated info classes (e.g., plotinfo, plotlines).
-    All docstrings and comments must be line-wrapped at 90 characters or less.
+"""Base class for auto-generated info classes (e.g., plotinfo, plotlines).
+    All docstrings and comments must be line-wrapped at 90 characters or less."""
     """
 
     _getpairsbase = classmethod(lambda cls: OrderedDict())
@@ -124,19 +119,21 @@ class AutoInfoClass(object):
 
     @classmethod
     def _derive_inst(cls, name, info, otherbases, recurse=False):
-        """Args:
+"""Args::
     name: 
     info: 
     otherbases: 
+    recurse: (Default value = False)"""
     recurse: (Default value = False)"""
         return cls._derive(name, info, otherbases, recurse)()
 
     @classmethod
     def _derive(cls, name, info, otherbases, recurse=False):
-        """Args:
+"""Args::
     name: 
     info: 
     otherbases: 
+    recurse: (Default value = False)"""
     recurse: (Default value = False)"""
         # collect the 3 set of infos
         # info = OrderedDict(info)
@@ -200,61 +197,26 @@ class AutoInfoClass(object):
         return newcls
 
     def isdefault(self, pname):
-        """Args:
+"""Args::
     pname:"""
-        return self._get(pname) == self._getkwargsdefault()[pname]
-
-    def notdefault(self, pname):
-        """Args:
+"""Args::
     pname:"""
-        return self._get(pname) != self._getkwargsdefault()[pname]
-
-    def _get(self, name, default=None):
-        """Args:
+"""Args::
     name: 
+    default: (Default value = None)"""
     default: (Default value = None)"""
         return getattr(self, name, default)
 
     @classmethod
     def _getkwargsdefault(cls):
-        """ """
-        return cls._getpairs()
-
-    @classmethod
-    def _getkeys(cls):
-        """ """
-        return cls._getpairs().keys()
-
-    @classmethod
-    def _getdefaults(cls):
-        """ """
-        return list(cls._getpairs().values())
-
-    @classmethod
-    def _getitems(cls):
-        """ """
-        return cls._getpairs().items()
-
-    @classmethod
-    def _gettuple(cls):
-        """ """
-        return tuple(cls._getpairs().items())
-
-    def _getkwargs(self, skip_=False):
-        """Args:
+""""""
+""""""
+""""""
+""""""
+""""""
+"""Args::
     skip_: (Default value = False)"""
-        l = [
-            (x, getattr(self, x))
-            for x in self._getkeys()
-            if not skip_ or not x.startswith("_")
-        ]
-        return OrderedDict(l)
-
-    def _getvalues(self):
-        """ """
-        return [getattr(self, x) for x in self._getkeys()]
-
-    def __new__(cls, *args, **kwargs):
+""""""
         """"""
         obj = super(AutoInfoClass, cls).__new__(cls, *args, **kwargs)
 
@@ -267,16 +229,17 @@ class AutoInfoClass(object):
 
 
 class MetaParams(MetaBase):
-    """Metaclass for parameterized Backtrader objects. Handles parameter
+"""Metaclass for parameterized Backtrader objects. Handles parameter
     management and inheritance. All docstrings and comments must be line-wrapped
-    at 90 characters or less.
+    at 90 characters or less."""
     """
 
     def __new__(meta, name, bases, dct):
-        """Args:
+"""Args::
     meta: 
     name: 
     bases: 
+    dct:"""
     dct:"""
         # Remove params from class definition to avoid inheritance
         # (and hence "repetition")
@@ -371,30 +334,24 @@ class MetaParams(MetaBase):
 
 
 class ParamsBase(with_metaclass(MetaParams, object)):
-    """Base class for objects with parameters in Backtrader. All docstrings and
-    comments must be line-wrapped at 90 characters or less.
+"""Base class for objects with parameters in Backtrader. All docstrings and
+    comments must be line-wrapped at 90 characters or less."""
     """
 
     pass  # stub to allow easy subclassing without metaclasses
 
 
 class ItemCollection(object):
-    """Collection class for Backtrader items (e.g., analyzers, observers).
-    All docstrings and comments must be line-wrapped at 90 characters or less.
+"""Collection class for Backtrader items (e.g., analyzers, observers).
+    All docstrings and comments must be line-wrapped at 90 characters or less."""
     """
 
     def __init__(self):
-        """ """
-        self._items = list()
-        self._names = list()
-
-    def __len__(self):
-        """ """
-        return len(self._items)
-
-    def append(self, item, name=None):
-        """Args:
+""""""
+""""""
+"""Args::
     item: 
+    name: (Default value = None)"""
     name: (Default value = None)"""
         setattr(self, name, item)
         self._items.append(item)
@@ -402,20 +359,12 @@ class ItemCollection(object):
             self._names.append(name)
 
     def __getitem__(self, key):
-        """Args:
+"""Args::
     key:"""
-        return self._items[key]
-
-    def getnames(self):
-        """ """
-        return self._names
-
-    def getitems(self):
-        """ """
-        return zip(self._names, self._items)
-
-    def getbyname(self, name):
-        """Args:
+""""""
+""""""
+"""Args::
+    name:"""
     name:"""
         idx = self._names.index(name)
         return self._items[idx]

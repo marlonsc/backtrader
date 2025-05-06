@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""ultimateoscillator.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -54,17 +57,8 @@ See:
     )
 
     def _plotinit(self):
-        """ """
-        baseticks = [10.0, 50.0, 90.0]
-        hlines = [self.p.upperband, self.p.lowerband]
-
-        # Plot lines at 0 & 100 to make the scale complete + upper/lower/bands
-        self.plotinfo.plotyhlines = hlines
-        # Plot ticks at "baseticks" + the user specified upper/lower bands
-        self.plotinfo.plotyticks = baseticks + hlines
-
-    def __init__(self):
-        """ """
+""""""
+""""""
         bp = self.data.close - TrueLow(self.data)
         tr = TrueRange(self.data)
 

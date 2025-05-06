@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""buysell.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -31,11 +34,9 @@ from ..observer import Observer
 
 
 class BuySell(Observer):
-    """This observer keeps track of the individual buy/sell orders (individual
+"""This observer keeps track of the individual buy/sell orders (individual
     executions) and will plot them on the chart along the data around the
-    execution price level
-
-
+    execution price level"""
     """
 
     lines = (
@@ -56,13 +57,14 @@ class BuySell(Observer):
 
     @staticmethod
     def _get_bar_dist(data, bardist):
-        """Args:
+"""Args::
     data: 
+    bardist:"""
     bardist:"""
         return abs(data.low[0] - data.high[0]) * (1 + bardist)
 
     def next(self):
-        """ """
+""""""
         buy = list()
         sell = list()
 

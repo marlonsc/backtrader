@@ -1,6 +1,7 @@
-class Test:
-    """ """
+"""test.py module.
 
-    def print1(self):
-        """ """
+Description of the module functionality."""
+
+""""""
+""""""
         print("test2")

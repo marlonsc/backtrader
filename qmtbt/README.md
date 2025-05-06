@@ -1,32 +1,37 @@
 # qmtbt
 
-Directory containing qmtbt related files. Primarily contains Python code and includes test files.
+This directory contains various files including 5 py files, 1 md file.
 
 ## Navigation
 
-* [🏠 Root Directory](../README.md)
+* [🏠 Root Directory](/qmtbt/..README.md)
 
 ## Files
 
-### README.md
-
-File with .md extension.
-
 ### __init__.py
+
+__init__.py module.
 
 ### qmtbroker.py
 
+qmtbroker.py module.
+
 ### qmtfeed.py
+
+qmtfeed.py module.
 
 ### qmtstore.py
 
+qmtstore.py module.
+
 ### test.py
+
+test.py module.
 
 ## Directory Summary
 
-This directory contains 6 files and 0 subdirectories.
+This directory contains 5 files and 0 subdirectories.
 
 ### File Types
 
 * .py: 5 files
-* .md: 1 files

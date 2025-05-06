@@ -34,7 +34,7 @@ class Timestamp(object):
     _type_marker = 17
 
     def __init__(self, time: Union[datetime.datetime, int], inc: int) -> None:
-        """Create a new :class:`Timestamp`.
+"""Create a new :class:`Timestamp`.
 This class is only for use with the MongoDB opLog. If you need
 to store a regular timestamp, please use a
 :class:`~datetime.datetime`.
@@ -48,8 +48,9 @@ an instance of :class:`int`. Raises :class:`ValueError` if
 :class:`~datetime.datetime`
 - `inc`: the incrementing counter
 
-Args:
+Args::
     time: 
+    inc:"""
     inc:"""
         if isinstance(time, datetime.datetime):
             offset = time.utcoffset()
@@ -81,60 +82,25 @@ Args:
         return self.__inc
 
     def __eq__(self, other: Any) -> bool:
-        """Args:
+"""Args::
     other:"""
-        if isinstance(other, Timestamp):
-            return self.__time == other.time and self.__inc == other.inc
-        else:
-            return NotImplemented
-
-    def __hash__(self) -> int:
-        """
-
-
-        :rtype: int
-
+""":rtype: int"""
         """
         return hash(self.time) ^ hash(self.inc)
 
     def __ne__(self, other: Any) -> bool:
-        """Args:
+"""Args::
     other:"""
-        return not self == other
-
-    def __lt__(self, other: Any) -> bool:
-        """Args:
+"""Args::
     other:"""
-        if isinstance(other, Timestamp):
-            return (self.time, self.inc) < (other.time, other.inc)
-        return NotImplemented
-
-    def __le__(self, other: Any) -> bool:
-        """Args:
+"""Args::
     other:"""
-        if isinstance(other, Timestamp):
-            return (self.time, self.inc) <= (other.time, other.inc)
-        return NotImplemented
-
-    def __gt__(self, other: Any) -> bool:
-        """Args:
+"""Args::
     other:"""
-        if isinstance(other, Timestamp):
-            return (self.time, self.inc) > (other.time, other.inc)
-        return NotImplemented
-
-    def __ge__(self, other: Any) -> bool:
-        """Args:
+"""Args::
     other:"""
-        if isinstance(other, Timestamp):
-            return (self.time, self.inc) >= (other.time, other.inc)
-        return NotImplemented
-
-    def __repr__(self):
-        """ """
-        return "Timestamp(%s, %s)" % (self.__time, self.__inc)
-
-    def as_datetime(self) -> datetime.datetime:
-        """Returns:
+""""""
+"""Returns::
+    to the time portion of this :class:`Timestamp`."""
     to the time portion of this :class:`Timestamp`."""
         return datetime.datetime.fromtimestamp(self.__time, utc)

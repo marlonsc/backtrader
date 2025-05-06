@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""test_position.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -29,7 +32,8 @@ from backtrader import position
 
 
 def test_run(main=False):
-    """Args:
+"""Args::
+    main: (Default value = False)"""
     main: (Default value = False)"""
     size = 10
     price = 10.0

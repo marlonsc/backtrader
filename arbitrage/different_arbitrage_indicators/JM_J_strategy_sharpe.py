@@ -1,7 +1,6 @@
 # Copyright (c) 2025 backtrader contributors
-"""
-Sharpe difference Bollinger Band strategy for J/JM futures. Includes data loading,
-strategy logic, and result analysis with plotting.
+"""Sharpe difference Bollinger Band strategy for J/JM futures. Includes data loading,
+strategy logic, and result analysis with plotting."""
 """
 import datetime
 
@@ -21,254 +20,16 @@ from backtrader.analyzers.timereturn import TimeReturn
 
 # 夏普差值布林带策略
 class SharpeDiffStrategy(bt.Strategy):
-    """ """
-
-    params = (
-        ("return_period", 15),  # 计算收益率的周期（15日收益率）
-        ("ma_period", 10),  # 计算移动平均的周期（20日移动平均线）
-        ("entry_std_multiplier", 0.3),  # 开仓标准差乘数
-        ("max_hold_days", 15),  # 最大持仓天数
-        ("printlog", False),
-    )
-
-    def __init__(self):
-        """ """
-        # Initialize all instance variables to avoid access before definition
-        self.order = None
-        self.position_type = None
-        self.entry_day = 0
-        extra_vars = {
-            "j_prices": [],
-            "jm_prices": [],
-            "sharpe_j_values": [],
-            "sharpe_jm_values": [],
-            "delta_sharpe_values": [],
-            "delta_sharpe_ma": [],
-            "delta_sharpe_std": [],
-            "upper_band": [],
-            "lower_band": [],
-            "returns_j": [],
-            "returns_jm": [],
-            "dates": [],
-        }
-        init_common_vars(self, extra_vars)
-
-    def next(self):
-        """ """
-        if self.order:
-            return
-
-        # 添加日期到列表
-        self.dates.append(self.data0.datetime.date())
-
-        # 保存最新价格
-        self.j_prices.append(self.data0.close[0])
-        self.jm_prices.append(self.data1.close[0])
-
-        # 当价格数据不足时，跳过
-        if len(self.j_prices) < self.p.return_period + 1:
-            return
-
-        # 计算15日收益率
-        j_ret_15d = (self.j_prices[-1] / self.j_prices[-self.p.return_period - 1]) - 1
-        jm_ret_15d = (
-            self.jm_prices[-1] / self.jm_prices[-self.p.return_period - 1]
-        ) - 1
-
-        # 保存每日收益率用于计算波动率
-        if len(self.returns_j) < self.p.return_period:
-            return
-
-        # 计算15日波动率
-        j_vol_15d = np.std(self.returns_j[-self.p.return_period :]) * np.sqrt(
-            self.p.return_period
-        )
-        jm_vol_15d = np.std(self.returns_jm[-self.p.return_period :]) * np.sqrt(
-            self.p.return_period
-        )
-
-        # 计算夏普比率
-        sharpe_j = j_ret_15d / j_vol_15d if j_vol_15d > 0 else 0
-        sharpe_jm = jm_ret_15d / jm_vol_15d if jm_vol_15d > 0 else 0
-
-        # 存储夏普比率用于绘图
-        self.sharpe_j_values.append(sharpe_j)
-        self.sharpe_jm_values.append(sharpe_jm)
-
-        # 计算夏普差值 ΔSharpe = μJ/σJ - μJM/σJM
-        delta_sharpe = sharpe_j - sharpe_jm
-        self.delta_sharpe_values.append(delta_sharpe)
-
-        # 计算20日移动平均和标准差
-        if len(self.delta_sharpe_values) >= self.p.ma_period:
-            # 计算20日移动平均 MA(ΔSharpe) = MA20(ΔSharpe)
-            ma_delta = np.mean(self.delta_sharpe_values[-self.p.ma_period :])
-            self.delta_sharpe_ma.append(ma_delta)
-
-            # 计算20日标准差 σΔSharpe = Std20(ΔSharpe)
-            std_delta = np.std(self.delta_sharpe_values[-self.p.ma_period :])
-            self.delta_sharpe_std.append(std_delta)
-
-            # 计算布林带上下轨
-            # Upper Band = MAΔSharpe + 2 × σΔSharpe
-            upper = ma_delta + self.p.entry_std_multiplier * std_delta
-            self.upper_band.append(upper)
-
-            # Lower Band = MAΔSharpe - 2 × σΔSharpe
-            lower = ma_delta - self.p.entry_std_multiplier * std_delta
-            self.lower_band.append(lower)
-        else:
-            # 数据不足以计算移动平均和标准差时，跳过
-            return
-
-        # 交易逻辑 - 基于夏普差值与布林带的关系
-
-        if self.position:
-            days_in_trade = len(self) - self.entry_day
-
-            # 根据持仓方向和夏普差值决定是否平仓
-            if (
-                self.position_type == "long_j_short_jm" and delta_sharpe >= ma_delta
-            ) or days_in_trade >= self.p.max_hold_days:
-                self.close(data=self.data0)
-                self.close(data=self.data1)
-                self.position_type = None
-                if self.p.printlog:
-                    print(
-                        f"平仓: J-JM夏普差={delta_sharpe:.4f},"
-                        f" 持仓天数={days_in_trade}, 均值={ma_delta:.4f}"
-                    )
-
-            elif (
-                self.position_type == "short_j_long_jm" and delta_sharpe <= ma_delta
-            ) or days_in_trade >= self.p.max_hold_days:
-                self.close(data=self.data0)
-                self.close(data=self.data1)
-                self.position_type = None
-                if self.p.printlog:
-                    print(
-                        f"平仓: J-JM夏普差={delta_sharpe:.4f},"
-                        f" 持仓天数={days_in_trade}, 均值={ma_delta:.4f}"
-                    )
-
-        else:
-            # 开仓逻辑
-            if delta_sharpe >= upper:
-                # 夏普差值突破上轨，做多J，做空JM
-                self.order = self.buy(data=self.data0, size=10)
-                self.order = self.sell(data=self.data1, size=14)
-                self.entry_day = len(self)
-                self.position_type = "long_j_short_jm"
-                if self.p.printlog:
-                    print(
-                        f"开仓: 做多J，做空JM, 夏普差={delta_sharpe:.4f},"
-                        f" 上轨={upper:.4f}"
-                    )
-
-            elif delta_sharpe <= lower:
-                # 夏普差值突破下轨，做空J，做多JM
-                self.order = self.sell(data=self.data0, size=10)
-                self.order = self.buy(data=self.data1, size=14)
-                self.entry_day = len(self)
-                self.position_type = "short_j_long_jm"
-                if self.p.printlog:
-                    print(
-                        f"开仓: 做空J，做多JM, 夏普差={delta_sharpe:.4f},"
-                        f" 下轨={lower:.4f}"
-                    )
-
-    def notify_order(self, order):
-        notify_order_default(self, order)
-
-    def notify_trade(self, trade):
-        notify_trade_default(self, trade)
-
-    def stop(self):
-        """ """
-        # 策略结束时绘制夏普比率图形
-        if len(self.delta_sharpe_values) > 0:
-            self.plot_sharpe_ratio()
-
-    def plot_sharpe_ratio(self):
-        """ """
-        # 创建绘图的数据索引
-        if len(self.delta_sharpe_ma) > 0:  # 确保有布林带数据
-            # 使用有布林带数据的时间段
-            band_length = len(self.delta_sharpe_ma)
-            dates = self.dates[-band_length:]
-            delta_values = self.delta_sharpe_values[-band_length:]
-            sharpe_j = self.sharpe_j_values[-band_length:]
-            sharpe_jm = self.sharpe_jm_values[-band_length:]
-
-            # 创建一个新的图形
-            plt.figure(figsize=(12, 10))
-
-            # 绘制J和JM的夏普比率
-            plt.subplot(3, 1, 1)
-            plt.plot(dates, sharpe_j, label="J Sharpe Ratio", color="blue")
-            plt.plot(dates, sharpe_jm, label="JM Sharpe Ratio", color="red")
-            plt.title("Sharpe Ratio of J and JM Contracts (15-day)")
-            plt.legend()
-            plt.grid(True)
-
-            # 绘制夏普差值和布林带
-            plt.subplot(3, 1, 2)
-            plt.plot(
-                dates,
-                delta_values,
-                label="Sharpe Difference (J-JM)",
-                color="green",
-            )
-            plt.plot(dates, self.delta_sharpe_ma, label="20-day MA", color="black")
-            plt.plot(
-                dates,
-                self.upper_band,
-                label=f"Upper Band (MA + {self.p.entry_std_multiplier}σ)",
-                color="red",
-                linestyle="--",
-            )
-            plt.plot(
-                dates,
-                self.lower_band,
-                label=f"Lower Band (MA - {self.p.entry_std_multiplier}σ)",
-                color="red",
-                linestyle="--",
-            )
-
-            plt.title("Sharpe Ratio Difference (J-JM) with Bollinger Bands")
-            plt.legend()
-            plt.grid(True)
-
-            # 绘制价格
-            plt.subplot(3, 1, 3)
-            plt.plot(
-                dates,
-                [self.j_prices[-(i + 1)] for i in range(len(dates) - 1, -1, -1)],
-                label="J Price",
-                color="blue",
-            )
-            plt.plot(
-                dates,
-                [self.jm_prices[-(i + 1)] for i in range(len(dates) - 1, -1, -1)],
-                label="JM Price",
-                color="red",
-            )
-            plt.title("Price of J and JM Contracts")
-            plt.legend()
-            plt.grid(True)
-
-            plt.tight_layout()
-            plt.savefig("sharpe_ratio_plot.png")
-            plt.show()
-            print("夏普比率图表已保存为 'sharpe_ratio_plot.png'")
-
-
-# 数据加载函数，处理索引问题
-def load_data(symbol1, symbol2, fromdate, todate):
-    """Args:
+""""""
+""""""
+""""""
+""""""
+""""""
+"""Args::
     symbol1: 
     symbol2: 
     fromdate: 
+    todate:"""
     todate:"""
     output_file = "D:\\FutureData\\ricequant\\1d_2017to2024_noadjust.h5"
 
@@ -324,7 +85,8 @@ def configure_cerebro(**kwargs):
 
 
 def analyze_results(results):
-    """Args:
+"""Args::
+    results:"""
     results:"""
     if not results:
         print("没有回测结果可分析")

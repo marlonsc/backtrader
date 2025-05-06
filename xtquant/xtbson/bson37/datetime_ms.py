@@ -36,7 +36,7 @@ class DatetimeMS:
     __slots__ = ("_value",)
 
     def __init__(self, value: Union[int, datetime.datetime]):
-        """Represents a BSON UTC datetime.
+"""Represents a BSON UTC datetime.
 BSON UTC datetimes are defined as an int64 of milliseconds since the
 Unix epoch. The principal use of DatetimeMS is to represent
 datetimes outside the range of the Python builtin
@@ -51,7 +51,8 @@ details.
 represented as milliseconds since the Unix epoch, or int of
 milliseconds since the Unix epoch.
 
-Args:
+Args::
+    value:"""
     value:"""
         if isinstance(value, int):
             if not (-(2**63) <= value <= 2**63 - 1):
@@ -63,79 +64,42 @@ Args:
             raise TypeError(f"{type(value)} is not a valid type for DatetimeMS")
 
     def __hash__(self) -> int:
-        """
-
-
-        :rtype: int
-
+""":rtype: int"""
         """
         return hash(self._value)
 
     def __repr__(self) -> str:
-        """
-
-
-        :rtype: str
-
+""":rtype: str"""
         """
         return type(self).__name__ + "(" + str(self._value) + ")"
 
     def __lt__(self, other: Union["DatetimeMS", int]) -> bool:
-        """Args:
+"""Args::
     other:"""
-        return self._value < other
-
-    def __le__(self, other: Union["DatetimeMS", int]) -> bool:
-        """Args:
+"""Args::
     other:"""
-        return self._value <= other
-
-    def __eq__(self, other: Any) -> bool:
-        """Args:
+"""Args::
     other:"""
-        if isinstance(other, DatetimeMS):
-            return self._value == other._value
-        return False
-
-    def __ne__(self, other: Any) -> bool:
-        """Args:
+"""Args::
     other:"""
-        if isinstance(other, DatetimeMS):
-            return self._value != other._value
-        return True
-
-    def __gt__(self, other: Union["DatetimeMS", int]) -> bool:
-        """Args:
+"""Args::
     other:"""
-        return self._value > other
-
-    def __ge__(self, other: Union["DatetimeMS", int]) -> bool:
-        """Args:
+"""Args::
     other:"""
-        return self._value >= other
-
-    _type_marker = 9
-
-    def as_datetime(
-        self, codec_options: CodecOptions = DEFAULT_CODEC_OPTIONS
-    ) -> datetime.datetime:
-        """Create a Python :class:`~datetime.datetime` from this DatetimeMS object.
+"""Create a Python :class:`~datetime.datetime` from this DatetimeMS object.
 :Parameters:
 - `codec_options`: A CodecOptions instance for specifying how the
 resulting DatetimeMS object will be formatted using ``tz_aware``
 and ``tz_info``. Defaults to
 :const:`~bson.codec_options.DEFAULT_CODEC_OPTIONS`.
 
-Args:
+Args::
+    codec_options: (Default value = DEFAULT_CODEC_OPTIONS)"""
     codec_options: (Default value = DEFAULT_CODEC_OPTIONS)"""
         return cast(datetime.datetime, _millis_to_datetime(self._value, codec_options))
 
     def __int__(self) -> int:
-        """
-
-
-        :rtype: int
-
+""":rtype: int"""
         """
         return self._value
 
@@ -145,25 +109,15 @@ Args:
 # and therefore there are more than 24 possible timezones.
 @functools.lru_cache(maxsize=None)
 def _min_datetime_ms(tz=datetime.timezone.utc):
-    """Args:
+"""Args::
     tz: (Default value = datetime.timezone.utc)"""
-    return _datetime_to_millis(datetime.datetime.min.replace(tzinfo=tz))
-
-
-@functools.lru_cache(maxsize=None)
-def _max_datetime_ms(tz=datetime.timezone.utc):
-    """Args:
+"""Args::
     tz: (Default value = datetime.timezone.utc)"""
-    return _datetime_to_millis(datetime.datetime.max.replace(tzinfo=tz))
+"""Convert milliseconds since epoch UTC to datetime.
 
-
-def _millis_to_datetime(
-    millis: int, opts: CodecOptions
-) -> Union[datetime.datetime, DatetimeMS]:
-    """Convert milliseconds since epoch UTC to datetime.
-
-Args:
+Args::
     millis: 
+    opts:"""
     opts:"""
     if (
         opts.datetime_conversion == DatetimeConversion.DATETIME
@@ -197,9 +151,10 @@ Args:
 
 
 def _datetime_to_millis(dtm: datetime.datetime) -> int:
-    """Convert datetime to milliseconds since epoch UTC.
+"""Convert datetime to milliseconds since epoch UTC.
 
-Args:
+Args::
+    dtm:"""
     dtm:"""
     if dtm.utcoffset() is not None:
         dtm = dtm - dtm.utcoffset()  # type: ignore

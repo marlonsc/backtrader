@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""future-spot.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -33,74 +36,16 @@ import backtrader as bt
 
 # The filter which changes the close price
 def close_changer(data, *args, **kwargs):
-    """Args:
+"""Args::
     data:"""
-    data.close[0] += 50.0 * random.randint(-1, 1)
-    return False  # length of stream is unchanged
-
-
-# override the standard markers
-class BuySellArrows(bt.observers.BuySell):
-    """ """
-
-    plotlines = dict(
-        buy=dict(marker="$\u21e7$", markersize=12.0),
-        sell=dict(marker="$\u21e9$", markersize=12.0),
-    )
-
-
-class St(bt.Strategy):
-    """ """
-
-    def __init__(self):
-        """ """
-        bt.obs.BuySell(self.data0, barplot=True)  # done here for
-        BuySellArrows(self.data1, barplot=True)  # different markers per data
-
-    def next(self):
-        """ """
-        if not self.position:
-            if random.randint(0, 1):
-                self.buy(data=self.data0)
-                self.entered = len(self)
-
-        else:  # in the market
-            if (len(self) - self.entered) >= 10:
-                self.sell(data=self.data1)
-
-
-def runstrat(args=None):
-    """Args:
+""""""
+""""""
+""""""
+""""""
+"""Args::
     args: (Default value = None)"""
-    args = parse_args(args)
-    cerebro = bt.Cerebro()
-
-    dataname = "../../datas/2006-day-001.txt"  # data feed
-
-    data0 = bt.feeds.BacktraderCSVData(dataname=dataname, name="data0")
-    cerebro.adddata(data0)
-
-    data1 = bt.feeds.BacktraderCSVData(dataname=dataname, name="data1")
-    data1.addfilter(close_changer)
-    if not args.no_comp:
-        data1.compensate(data0)
-    data1.plotinfo.plotmaster = data0
-    if args.sameaxis:
-        data1.plotinfo.sameaxis = True
-    cerebro.adddata(data1)
-
-    cerebro.addstrategy(St)  # sample strategy
-
-    cerebro.addobserver(bt.obs.Broker)  # removed below with stdstats=False
-    cerebro.addobserver(bt.obs.Trades)  # removed below with stdstats=False
-
-    cerebro.broker.set_coc(True)
-    cerebro.run(stdstats=False)  # execute
-    cerebro.plot(volume=False)  # and plot
-
-
-def parse_args(pargs=None):
-    """Args:
+"""Args::
+    pargs: (Default value = None)"""
     pargs: (Default value = None)"""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

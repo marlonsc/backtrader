@@ -1,7 +1,6 @@
 # Copyright (c) 2025 backtrader contributors
-"""
-Utilities for calendar and timezone manipulation in backtrader.
-All functions and docstrings should be line-wrapped ≤ 90 characters.
+"""Utilities for calendar and timezone manipulation in backtrader.
+All functions and docstrings should be line-wrapped ≤ 90 characters."""
 """
 
 from ..tradingcal import PandasMarketCalendar, TradingCalendarBase
@@ -9,13 +8,14 @@ from ..utils.py3 import string_types
 
 
 def addcalendar(cal):
-    """Instantiates and returns a global trading calendar from different
+"""Instantiates and returns a global trading calendar from different
 input types (string, instance, class, etc).
 
-Args:
+Args::
     cal: String, instance or calendar class
 
-Returns:
+Returns::
+    Calendar instance"""
     Calendar instance"""
     if isinstance(cal, string_types):
         calobj = PandasMarketCalendar()
@@ -35,9 +35,10 @@ Returns:
 
 
 def addtz(params, tz):
-    """Sets the global timezone in system parameters.
+"""Sets the global timezone in system parameters.
 
-Args:
+Args::
     params: Parameters object
+    tz: Timezone (None, string, int, pytz)"""
     tz: Timezone (None, string, int, pytz)"""
     params.tz = tz

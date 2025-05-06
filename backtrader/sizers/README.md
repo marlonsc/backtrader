@@ -1,29 +1,30 @@
 # sizers
 
-Contains position sizing implementations. Primarily contains Python code.
+This directory contains various files including 3 py files, 1 md file.
 
 ## Navigation
 
-* [🏠 Root Directory](../../README.md)
+* [🏠 Root Directory](/backtrader/sizers/../backtrader/sizers/..README.md)
 * [⬆️ Parent Directory (backtrader)](../README.md)
 
 ## Files
 
-### README.md
-
-File with .md extension.
-
 ### __init__.py
+
+__init__.py module.
 
 ### fixedsize.py
 
+fixedsize.py module.
+
 ### percents_sizer.py
+
+percents_sizer.py module.
 
 ## Directory Summary
 
-This directory contains 4 files and 0 subdirectories.
+This directory contains 3 files and 0 subdirectories.
 
 ### File Types
 
 * .py: 3 files
-* .md: 1 files

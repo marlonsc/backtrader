@@ -1,4 +1,7 @@
-#!/usr/bin389/env python
+"""signalstrategy.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -49,20 +52,8 @@ try:
 except ImportError:
 
     class MetaSigStrategy(type):
-        """ """
-        pass
-
-
-try:
-    from .strategy import Strategy
-except ImportError:
-
-    class Strategy:
-        """ """
-        pass
-
-
-class SignalStrategy(with_metaclass(MetaSigStrategy, Strategy)):
+""""""
+""""""
     """This subclass of ``Strategy`` is meant to to auto-operate using
 **signals**.
 *Signals* are usually indicators and the expected output values:
@@ -105,19 +96,17 @@ Canceled*)"""
     )
 
     def _start(self):
-        """ """
-        self._sentinel = None  # sentinel for order concurrency
-        super(SignalStrategy, self)._start()
-
-    def signal_add(self, sigtype, signal):
-        """Args:
+""""""
+"""Args::
     sigtype: 
+    signal:"""
     signal:"""
         self._signals[sigtype].append(signal)
 
     def _notify(self, qorders=[], qtrades=[]):
-        """Args:
+"""Args::
     qorders: (Default value = [])
+    qtrades: (Default value = [])"""
     qtrades: (Default value = [])"""
         # Nullify the sentinel if done
         procorders = qorders or self._orderspending
@@ -130,13 +119,8 @@ Canceled*)"""
         super(SignalStrategy, self)._notify(qorders=qorders, qtrades=qtrades)
 
     def _next_catch(self):
-        """ """
-        self._next_signal()
-        if hasattr(self, "_next_custom"):
-            self._next_custom()
-
-    def _next_signal(self):
-        """ """
+""""""
+""""""
         if self._sentinel is not None and not self.p._concurrent:
             return  # order active and more than 1 not allowed
 

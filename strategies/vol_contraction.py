@@ -136,53 +136,8 @@ Lines:
     )
 
     def __init__(self):
-        """ """
-        # Add each indicator separately rather than trying to combine them
-
-        # Short-range volatility
-        self.short_high = bt.indicators.Highest(
-            self.data.high, period=self.p.period_short
-        )
-        self.short_low = bt.indicators.Lowest(self.data.low, period=self.p.period_short)
-        self.short_range = self.short_high - self.short_low
-
-        # Long-range volatility
-        self.long_high = bt.indicators.Highest(
-            self.data.high, period=self.p.period_long
-        )
-        self.long_low = bt.indicators.Lowest(self.data.low, period=self.p.period_long)
-        self.long_range = self.long_high - self.long_low
-
-        # Highest close
-        self.highest_close = bt.indicators.Highest(
-            self.data.close, period=self.p.highest_close
-        )
-
-        # Volume average
-        self.avg_volume = bt.indicators.SimpleMovingAverage(
-            self.data.volume, period=self.p.mean_vol
-        )
-
-    def next(self):
-        """ """
-        # Volatility contraction
-        vol_contraction = self.short_range[0] < (
-            self.long_range[0] * self.p.period_long_discount
-        )
-
-        # Near highest price
-        near_high = self.data.close[0] > (self.highest_close[0] * 0.85)
-
-        # Volume less than average
-        vol_less_than_avg = self.data.volume[0] < self.avg_volume[0]
-
-        # Set the VCP line based on all conditions
-        self.lines.vcp[0] = (
-            1.0 if (vol_contraction and near_high and vol_less_than_avg) else 0.0
-        )
-
-
-class VCPStrategy(bt.Strategy, TradeThrottling):
+""""""
+""""""
     """Volatility Contraction Pattern (VCP) Strategy
 This strategy seeks to identify and trade volatility contraction patterns,
 which often precede significant price breakouts. It combines technical indicators
@@ -228,70 +183,23 @@ Best Market Conditions:
     )
 
     def log(self, txt, dt=None, doprint=False):
-        """Logging function for the strategy
+"""Logging function for the strategy
 
-Args:
+Args::
     txt: 
     dt: (Default value = None)
+    doprint: (Default value = False)"""
     doprint: (Default value = False)"""
         if self.p.print_log or doprint:
             dt = dt or self.datas[0].datetime.date(0)
             print(f"{dt.isoformat()}: {txt}")
 
     def __init__(self):
-        """ """
-        # Keep references to price and volume data
-        self.dataclose = self.datas[0].close
-        self.datahigh = self.datas[0].high
-        self.datalow = self.datas[0].low
-        self.datavolume = self.datas[0].volume
+""""""
+"""Process order notifications
 
-        # Order and position tracking
-        self.order = None
-        self.buyprice = None
-        self.buycomm = None
-        self.stop_price = None
-        self.trail_price = None
-
-        # Initialize indicators
-        # Custom VCP indicator
-        self.vcp = VCPPattern(
-            self.datas[0],
-            period_short=self.p.period_short,
-            period_long=self.p.period_long,
-            period_long_discount=self.p.period_long_discount,
-            highest_close=self.p.highest_close,
-            mean_vol=self.p.mean_vol,
-        )
-
-        # Moving averages for trend identification
-        self.sma_long = bt.indicators.SimpleMovingAverage(
-            self.datas[0], period=self.p.sma_long
-        )
-
-        self.sma_short = bt.indicators.SimpleMovingAverage(
-            self.datas[0], period=self.p.sma_short
-        )
-
-        # ATR for volatility and stop loss calculation
-        self.atr = bt.indicators.ATR(self.datas[0], period=14)
-
-        # Recent price levels for channel detection
-        self.recent_high = bt.indicators.Highest(
-            self.datas[0].high, period=self.p.recent_price_period
-        )
-
-        self.recent_low = bt.indicators.Lowest(
-            self.datas[0].low, period=self.p.recent_price_period
-        )
-
-        # For trade throttling
-        self.last_trade_date = None
-
-    def notify_order(self, order):
-        """Process order notifications
-
-Args:
+Args::
+    order:"""
     order:"""
         if order.status in [order.Submitted, order.Accepted]:
             return
@@ -340,9 +248,10 @@ Args:
         self.order = None
 
     def notify_trade(self, trade):
-        """Process trade notifications
+"""Process trade notifications
 
-Args:
+Args::
+    trade:"""
     trade:"""
         if not trade.isclosed:
             return

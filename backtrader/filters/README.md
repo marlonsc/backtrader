@@ -1,41 +1,54 @@
 # filters
 
-Contains data filtering implementations. Primarily contains Python code.
+This directory contains various files including 9 py files, 1 md file.
 
 ## Navigation
 
-* [🏠 Root Directory](../../README.md)
+* [🏠 Root Directory](/backtrader/filters/../backtrader/filters/..README.md)
 * [⬆️ Parent Directory (backtrader)](../README.md)
 
 ## Files
 
-### README.md
-
-File with .md extension.
-
 ### __init__.py
+
+__init__.py module.
 
 ### bsplitter.py
 
+bsplitter.py module.
+
 ### calendardays.py
+
+calendardays.py module.
 
 ### datafiller.py
 
+datafiller.py module.
+
 ### datafilter.py
+
+datafilter.py module.
 
 ### daysteps.py
 
+daysteps.py module.
+
 ### heikinashi.py
+
+heikinashi.py module.
 
 ### renko.py
 
+renko.py module.
+
 ### session.py
+
+session.py module.
 
 ## Directory Summary
 
-This directory contains 10 files and 0 subdirectories.
+This directory contains 9 files and 0 subdirectories.
 
 ### File Types
 
 * .py: 9 files
-* .md: 1 files

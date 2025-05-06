@@ -1,30 +1,27 @@
 # xtbson
 
-Directory containing xtbson related files. Primarily contains Python code.
+This directory contains various files including 1 md file, 1 py file.
 
 ## Navigation
 
-* [🏠 Root Directory](../../README.md)
+* [🏠 Root Directory](/xtquant/xtbson/../xtquant/xtbson/..README.md)
 * [⬆️ Parent Directory (xtquant)](../README.md)
 
 ### Subdirectories
 
-* [bson36](bson36/README.md) - Directory containing bson36 related files
-* [bson37](bson37/README.md) - Directory containing bson37 related files
+* [bson36](bson36/README.md) - This directory contains various files including 18 py files, 1 md file
+* [bson37](bson37/README.md) - This directory contains various files including 19 py files, 1 pyi file, 1 md file, 1 typed file
 
 ## Files
 
-### README.md
-
-File with .md extension.
-
 ### __init__.py
+
+__init__.py module.
 
 ## Directory Summary
 
-This directory contains 2 files and 2 subdirectories.
+This directory contains 1 files and 2 subdirectories.
 
 ### File Types
 
-* .md: 1 files
 * .py: 1 files

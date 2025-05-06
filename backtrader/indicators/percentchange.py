@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""percentchange.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -31,10 +34,8 @@ __all__ = ["PercentChange", "PctChange"]
 
 
 class PercentChange(Indicator):
-    """Measures the perccentage change of the current value with respect to that
-    of period bars ago
-
-
+"""Measures the perccentage change of the current value with respect to that
+    of period bars ago"""
     """
 
     alias = ("PctChange",)
@@ -47,6 +48,6 @@ class PercentChange(Indicator):
     params = (("period", 30),)
 
     def __init__(self):
-        """ """
+""""""
         self.lines.pctchange = self.data / self.data(-self.p.period) - 1.0
         super(PercentChange, self).__init__()

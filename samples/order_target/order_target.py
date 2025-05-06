@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""order_target.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -52,116 +55,14 @@ than the current"""
     )
 
     def notify_order(self, order):
-        """Args:
+"""Args::
     order:"""
-        if order.status == order.Completed:
-            pass
-
-        if not order.alive():
-            self.order = None  # indicate no order is pending
-
-    def start(self):
-        """ """
-        self.order = None  # sentinel to avoid operrations on pending order
-
-    def next(self):
-        """ """
-        dt = self.data.datetime.date()
-
-        portfolio_value = self.broker.get_value()
-        print(
-            "%04d - %s - Position Size:     %02d - Value %.2f"
-            % (len(self), dt.isoformat(), self.position.size, portfolio_value)
-        )
-
-        data_value = self.broker.get_value([self.data])
-
-        if self.p.use_target_value:
-            print(
-                "%04d - %s - data value %.2f" % (len(self), dt.isoformat(), data_value)
-            )
-
-        elif self.p.use_target_percent:
-            port_perc = data_value / portfolio_value
-            print(
-                "%04d - %s - data percent %.2f" % (len(self), dt.isoformat(), port_perc)
-            )
-
-        if self.order:
-            return  # pending order execution
-
-        size = dt.day
-        if (dt.month % 2) == 0:
-            size = 31 - size
-
-        if self.p.use_target_size:
-            print(
-                "%04d - %s - Order Target Size: %02d"
-                % (len(self), dt.isoformat(), size)
-            )
-
-            self.order = self.order_target_size(target=size)
-
-        elif self.p.use_target_value:
-            value = size * 1000
-
-            print(
-                "%04d - %s - Order Target Value: %.2f"
-                % (len(self), dt.isoformat(), value)
-            )
-
-            self.order = self.order_target_value(target=value)
-
-        elif self.p.use_target_percent:
-            percent = size / 100.0
-
-            print(
-                "%04d - %s - Order Target Percent: %.2f"
-                % (len(self), dt.isoformat(), percent)
-            )
-
-            self.order = self.order_target_percent(target=percent)
-
-
-def runstrat(args=None):
-    """Args:
+""""""
+""""""
+"""Args::
     args: (Default value = None)"""
-    args = parse_args(args)
-
-    cerebro = bt.Cerebro()
-    cerebro.broker.setcash(args.cash)
-
-    dkwargs = dict()
-    if args.fromdate is not None:
-        dkwargs["fromdate"] = datetime.strptime(args.fromdate, "%Y-%m-%d")
-    if args.todate is not None:
-        dkwargs["todate"] = datetime.strptime(args.todate, "%Y-%m-%d")
-
-    # data
-    data = bt.feeds.YahooFinanceCSVData(dataname=args.data, **dkwargs)
-    cerebro.adddata(data)
-
-    # strategy
-    cerebro.addstrategy(
-        TheStrategy,
-        use_target_size=args.target_size,
-        use_target_value=args.target_value,
-        use_target_percent=args.target_percent,
-    )
-
-    cerebro.run()
-
-    if args.plot:
-        pkwargs = dict(style="bar")
-        if args.plot is not True:  # evals to True but is not True
-            npkwargs = eval("dict(" + args.plot + ")")  # args were passed
-            pkwargs.update(npkwargs)
-
-        cerebro.plot(**pkwargs)
-
-
-def parse_args(pargs=None):
-    """Args:
+"""Args::
+    pargs: (Default value = None)"""
     pargs: (Default value = None)"""
 
     parser = argparse.ArgumentParser(

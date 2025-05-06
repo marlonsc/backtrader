@@ -1,4 +1,7 @@
-import copy
+"""recorder.py module.
+
+Description of the module functionality."""
+
 import logging
 from typing import Optional
 
@@ -9,22 +12,13 @@ _logger = logging.getLogger(__name__)
 
 
 class RecorderListener(ListenerBase):
-    """ """
-
-    def __init__(self):
-        """ """
-        self._cerebro: Optional[bt.cerebro.Cerebro] = None
-        self.nexts = []
-
-    def start(self, cerebro):
-        """Args:
+""""""
+""""""
+"""Args::
     cerebro:"""
-        self._cerebro = cerebro
-
-    @staticmethod
-    def print_line_snapshot(name, snapshot):
-        """Args:
+"""Args::
     name: 
+    snapshot:"""
     snapshot:"""
         line = snapshot["array"]
         if name == "datetime":
@@ -36,8 +30,9 @@ class RecorderListener(ListenerBase):
 
     @staticmethod
     def print_next(idx, next):
-        """Args:
+"""Args::
     idx: 
+    next:"""
     next:"""
         _logger.debug(f"--- Next: {next['prenext']} - #{idx}")
         RecorderListener.print_line_snapshot("datetime", next["strategy"]["datetime"])
@@ -59,31 +54,13 @@ class RecorderListener(ListenerBase):
 
     @staticmethod
     def print_nexts(nexts):
-        """Args:
+"""Args::
     nexts:"""
-        for i, n in enumerate(nexts):
-            RecorderListener.print_next(i, n)
-
-    @staticmethod
-    def _copy_lines(data):
-        """Args:
+"""Args::
     data:"""
-        lines = {}
-
-        for lineidx in range(data.lines.size()):
-            line = data.lines[lineidx]
-            linealias = data.lines._getlinealias(lineidx)
-            lines[linealias] = {
-                "idx": line.idx,
-                "lencount": line.lencount,
-                "array": copy.deepcopy(line.array),
-            }
-
-        return lines
-
-    def _record_data(self, strat, is_prenext=False):
-        """Args:
+"""Args::
     strat: 
+    is_prenext: (Default value = False)"""
     is_prenext: (Default value = False)"""
         curbars = []
         for i, d in enumerate(strat.datas):
@@ -112,7 +89,7 @@ class RecorderListener(ListenerBase):
         _logger.info("------------------- next-end")
 
     def next(self):
-        """ """
+""""""
         for s in self._cerebro.runningstrats:
             # minper = s._getminperstatus()
             # if minper > 0:

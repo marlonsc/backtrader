@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""vchartfile.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -34,14 +37,13 @@ from backtrader import date2num  # avoid dict lookups
 
 
 class MetaVChartFile(bt.DataBase.__class__):
-    """ """
+""""""
+"""Class has already been created ... register
 
-    def __init__(cls, name, bases, dct):
-        """Class has already been created ... register
-
-Args:
+Args::
     name: 
     bases: 
+    dct:"""
     dct:"""
         # Initialize the class
         super(MetaVChartFile, cls).__init__(name, bases, dct)
@@ -58,52 +60,9 @@ Note:
 EuroStoxx 50 continuous future"""
 
     def start(self):
-        """ """
-        super(VChartFile, self).start()
-        if self._store is None:
-            self._store = bt.stores.VChartFileStore()
-            self._store.start()
-
-        self._store.start(data=self)
-
-        # Choose extension and extraction/calculation parameters
-        if self.p.timeframe < bt.TimeFrame.Minutes:
-            ext = ".tck"  # seconds will still need resampling
-            # FIXME: find reference to tick counter for format
-        elif self.p.timeframe < bt.TimeFrame.Days:
-            ext = ".min"
-            self._dtsize = 2
-            self._barsize = 32
-            self._barfmt = "IIffffII"
-        else:
-            ext = ".fd"
-            self._barsize = 28
-            self._dtsize = 1
-            self._barfmt = "IffffII"
-
-        # Construct full path
-        basepath = self._store.get_datapath()
-
-        # Example: 01 + 0 + 015ES + .fd -> 010015ES.fd
-        dataname = "01" + "0" + self.p.dataname + ext
-        # 015ES -> 0 + 015 -> 0015
-        mktcode = "0" + self.p.dataname[0:3]
-
-        # basepath/0015/010015ES.fd
-        path = os.path.join(basepath, mktcode, dataname)
-        try:
-            self.f = open(path, "rb")
-        except IOError:
-            self.f = None
-
-    def stop(self):
-        """ """
-        if self.f is not None:
-            self.f.close()
-            self.f = None
-
-    def _load(self):
-        """ """
+""""""
+""""""
+""""""
         if self.f is None:
             return False  # cannot load more
 

@@ -1,4 +1,7 @@
-import datetime
+"""JM_J_strategy_sharpe_grid.py module.
+
+Description of the module functionality."""
+
 
 import backtrader as bt
 import matplotlib.pyplot as plt
@@ -180,11 +183,10 @@ class SharpeDiffStrategy(bt.Strategy):
                     )
 
     def notify_order(self, order):
-        """
-        Called when order status changes
+"""Called when order status changes
 
-        Args:
-            order: The order that has changed status
+Args::
+            order: The order that has changed status"""
         """
         if order.status in [order.Completed]:
             if self.p.printlog:
@@ -209,17 +211,16 @@ class SharpeDiffStrategy(bt.Strategy):
 
 # Data loading function, handling index issues
 def load_data(symbol1, symbol2, fromdate, todate):
-    """
-    Load data for two symbols from HDF5 file
+"""Load data for two symbols from HDF5 file
 
-    Args:
+Args::
         symbol1: First symbol to load
         symbol2: Second symbol to load
         fromdate: Start date for data
         todate: End date for data
 
-    Returns:
-        Tuple of two backtrader data feeds
+Returns::
+        Tuple of two backtrader data feeds"""
     """
     output_file = "D:\\FutureData\\ricequant\\1d_2017to2024_noadjust.h5"
 
@@ -252,11 +253,10 @@ def load_data(symbol1, symbol2, fromdate, todate):
 
 # Run grid search backtest and plot heatmap
 def run_grid_search():
-    """
-    Run a grid search to optimize strategy parameters and visualize results
+"""Run a grid search to optimize strategy parameters and visualize results
 
-    Returns:
-        Tuple containing results array, ma_periods list, and entry_multipliers list
+Returns::
+        Tuple containing results array, ma_periods list, and entry_multipliers list"""
     """
     # Define parameter grid
     ma_periods = [5, 10, 15, 20, 25, 30, 35, 40]  # Moving average periods

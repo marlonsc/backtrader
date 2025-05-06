@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""test_order.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -30,62 +33,51 @@ from backtrader import Position
 
 
 class FakeCommInfo(object):
-    """ """
-
-    def getvaluesize(self, size, price):
-        """Args:
+""""""
+"""Args::
     size: 
+    price:"""
     price:"""
         return 0
 
     def profitandloss(self, size, price, newprice):
-        """Args:
+"""Args::
     size: 
     price: 
+    newprice:"""
     newprice:"""
         return 0
 
     def getoperationcost(self, size, price):
-        """Args:
+"""Args::
     size: 
+    price:"""
     price:"""
         return 0.0
 
     def getcommission(self, size, price):
-        """Args:
+"""Args::
     size: 
+    price:"""
     price:"""
         return 0.0
 
 
 class FakeData(object):
-    """Minimal interface to avoid errors when trade tries to get information from
-    the data during the test
-
-
+"""Minimal interface to avoid errors when trade tries to get information from
+    the data during the test"""
     """
 
     def __len__(self):
-        """ """
-        return 0
-
-    @property
-    def datetime(self):
-        """ """
-        return [0.0]
-
-    @property
-    def close(self):
-        """ """
-        return [0.0]
-
-
-def _execute(position, order, size, price, partial):
-    """Args:
+""""""
+""""""
+""""""
+"""Args::
     position: 
     order: 
     size: 
     price: 
+    partial:"""
     partial:"""
     # Find position and do a real update - accounting happens here
     pprice_orig = position.price
@@ -124,7 +116,8 @@ def _execute(position, order, size, price, partial):
 
 
 def test_run(main=False):
-    """Args:
+"""Args::
+    main: (Default value = False)"""
     main: (Default value = False)"""
     position = Position()
     comminfo = FakeCommInfo()

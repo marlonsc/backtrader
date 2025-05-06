@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""ksignal.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -32,78 +35,14 @@ import backtrader as bt
 
 
 class TheStrategy(bt.SignalStrategy):
-    """ """
-
-    params = dict(rsi_per=14, rsi_upper=65.0, rsi_lower=35.0, rsi_out=50.0, warmup=35)
-
-    def notify_order(self, order):
-        """Args:
+""""""
+"""Args::
     order:"""
-        super(TheStrategy, self).notify_order(order)
-        if order.status == order.Completed:
-            print(
-                "%s: Size: %d @ Price %f"
-                % (
-                    "buy" if order.isbuy() else "sell",
-                    order.executed.size,
-                    order.executed.price,
-                )
-            )
-
-            d = order.data
-            print("Close[-1]: %f - Open[0]: %f" % (d.close[-1], d.open[0]))
-
-    def __init__(self):
-        """ """
-        # Original code needs artificial warmup phase - hidden sma to replic
-        if self.p.warmup:
-            bt.indicators.SMA(period=self.p.warmup, plot=False)
-
-        rsi = bt.indicators.RSI(
-            period=self.p.rsi_per,
-            upperband=self.p.rsi_upper,
-            lowerband=self.p.rsi_lower,
-        )
-
-        crossup = bt.ind.CrossUp(rsi, self.p.rsi_lower)
-        self.signal_add(bt.SIGNAL_LONG, crossup)
-        self.signal_add(bt.SIGNAL_LONGEXIT, -(rsi > self.p.rsi_out))
-
-        crossdown = bt.ind.CrossDown(rsi, self.p.rsi_upper)
-        self.signal_add(bt.SIGNAL_SHORT, -crossdown)
-        self.signal_add(bt.SIGNAL_SHORTEXIT, rsi < self.p.rsi_out)
-
-
-def runstrat(pargs=None):
-    """Args:
+""""""
+"""Args::
     pargs: (Default value = None)"""
-    args = parse_args(pargs)
-
-    cerebro = bt.Cerebro()
-    cerebro.broker.set_cash(args.cash)
-    cerebro.broker.set_coc(args.coc)
-    data0 = bt.feeds.YahooFinanceData(
-        dataname=args.data,
-        fromdate=datetime.datetime.strptime(args.fromdate, "%Y-%m-%d"),
-        todate=datetime.datetime.strptime(args.todate, "%Y-%m-%d"),
-        round=False,
-    )
-
-    cerebro.adddata(data0)
-
-    cerebro.addsizer(bt.sizers.FixedSize, stake=args.stake)
-    cerebro.addstrategy(TheStrategy, **(eval("dict(" + args.strat + ")")))
-    cerebro.addobserver(bt.observers.Value)
-    cerebro.addobserver(bt.observers.Trades)
-    cerebro.addobserver(bt.observers.BuySell, barplot=True)
-
-    cerebro.run(stdstats=False)
-    if args.plot:
-        cerebro.plot(**(eval("dict(" + args.plot + ")")))
-
-
-def parse_args(pargs=None):
-    """Args:
+"""Args::
+    pargs: (Default value = None)"""
     pargs: (Default value = None)"""
 
     parser = argparse.ArgumentParser(

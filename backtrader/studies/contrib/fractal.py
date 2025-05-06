@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""fractal.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 
 ###############################################################################
@@ -27,10 +30,8 @@ __all__ = ["Fractal"]
 
 
 class Fractal(bt.ind.PeriodN):
-    """References:
-    [Ref 1] http://www.investopedia.com/articles/trading/06/fractals.asp
-
-
+"""References:
+    [Ref 1] http://www.investopedia.com/articles/trading/06/fractals.asp"""
     """
 
     lines = ("fractal_bearish", "fractal_bullish")
@@ -60,7 +61,7 @@ class Fractal(bt.ind.PeriodN):
     )
 
     def next(self):
-        """ """
+""""""
         # A bearish turning point occurs when there is a pattern with the
         # highest high in the middle and two lower highs on each side. [Ref 1]
 

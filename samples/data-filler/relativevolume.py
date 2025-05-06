@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""relativevolume.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -29,18 +32,8 @@ import backtrader as bt
 
 
 class RelativeVolume(bt.Indicator):
-    """ """
-
-    csv = True  # show up in csv output (default for indicators is False)
-
-    lines = ("relvol",)
-    params = (
-        ("period", 20),
-        ("volisnan", True),
-    )
-
-    def __init__(self):
-        """ """
+""""""
+""""""
         if self.p.volisnan:
             # if missing volume will be NaN, do a simple division
             # the end result for missing volumes will also be NaN

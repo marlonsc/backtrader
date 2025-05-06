@@ -257,11 +257,12 @@ Additional filters include RSI overbought/oversold levels and moving average tre
         self.trailing_stop = None
 
     def log(self, txt, dt=None, level="info"):
-        """Logging function for this strategy
+"""Logging function for this strategy
 
-Args:
+Args::
     txt: 
     dt: (Default value = None)
+    level: (Default value = "info")"""
     level: (Default value = "info")"""
         if level == "debug" and self.p.log_level != "debug":
             return
@@ -270,9 +271,10 @@ Args:
         print(f"{dt.isoformat()}: {txt}")
 
     def notify_order(self, order):
-        """Called when an order is placed, filled, or canceled.
+"""Called when an order is placed, filled, or canceled.
 
-Args:
+Args::
+    order:"""
     order:"""
         # Skip if order is not completed
         if order.status in [order.Submitted, order.Accepted]:
@@ -320,9 +322,10 @@ Args:
             self.take_profit = None
 
     def notify_trade(self, trade):
-        """Called when a trade is completed.
+"""Called when a trade is completed.
 
-Args:
+Args::
+    trade:"""
     trade:"""
         if not trade.isclosed:
             return
@@ -342,10 +345,11 @@ Args:
             self.current_consecutive_losses = 0
 
     def set_exit_orders(self, entry_price, is_buy=True):
-        """Set stop loss and take profit orders with improved trailing stop
+"""Set stop loss and take profit orders with improved trailing stop
 
-Args:
+Args::
     entry_price: 
+    is_buy: (Default value = True)"""
     is_buy: (Default value = True)"""
         # Cancel existing exit orders
         self.cancel_exit_orders()
@@ -470,10 +474,11 @@ Args:
             self.trailing_stop = None
 
     def calculate_position_size(self, entry_price, stop_price):
-        """Conservative position sizing with absolute limits to prevent excessive risk
+"""Conservative position sizing with absolute limits to prevent excessive risk
 
-Args:
+Args::
     entry_price: 
+    stop_price:"""
     stop_price:"""
         # Set an absolute hard maximum number of shares (no matter what)
         absolute_max_shares = 100  # Never trade more than this many shares
@@ -548,9 +553,10 @@ Args:
         return int(size)
 
     def get_safe_price_value(self, idx=0):
-        """Safely get price values without risk of index errors
+"""Safely get price values without risk of index errors
 
-Args:
+Args::
+    idx: (Default value = 0)"""
     idx: (Default value = 0)"""
         try:
             return self.data.close[idx]
@@ -558,9 +564,10 @@ Args:
             return None
 
     def get_safe_rsi_value(self, idx=0):
-        """Safely get RSI values without risk of index errors
+"""Safely get RSI values without risk of index errors
 
-Args:
+Args::
+    idx: (Default value = 0)"""
     idx: (Default value = 0)"""
         try:
             return self.rsi[idx]

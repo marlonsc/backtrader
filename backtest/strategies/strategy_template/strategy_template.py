@@ -1,20 +1,19 @@
-import backtrader as bt  # Import Backtrader
+"""strategy_template.py module.
+
+Description of the module functionality."""
+
 import backtrader.indicators as btind  # Import strategy indicator module
 from backtest.feeds.datafeeds import StockCsvData
 
 
 # Create strategy
 class StrategyTemplate(bt.Strategy):
-    """ """
+""""""
+"""Optional, build a function to print strategy logs: can be used to print order or trade records, etc.
 
-    # Optional, set backtest parameters: e.g., moving average period
-    params = ((..., ...),)  # It is best not to delete the last comma!
-
-    def log(self, txt, dt=None):
-        """Optional, build a function to print strategy logs: can be used to print order or trade records, etc.
-
-Args:
+Args::
     txt: 
+    dt: (Default value = None)"""
     dt: (Default value = None)"""
         dt = dt or self.datas[0].datetime.date(0)
         print("%s, %s" % (dt.isoformat(), txt))
@@ -45,43 +44,47 @@ Args:
         sma = btind.SimpleMovingAverage(...)  # Calculate moving average
 
     def notify_order(self, order):
-        """Optional, print order information
+"""Optional, print order information
 
-Args:
+Args::
+    order:"""
     order:"""
 
     def notify_trade(self, trade):
-        """Optional, print trade information
+"""Optional, print trade information
 
-Args:
+Args::
+    trade:"""
     trade:"""
 
     def notify_cashvalue(self, cash, value):
-        """Notify current cash and total asset value
+"""Notify current cash and total asset value
 
-Args:
+Args::
     cash: 
+    value:"""
     value:"""
 
     def notify_fund(self, cash, value, fundvalue, shares):
-        """Args:
+"""Args::
     cash: 
     value: 
     fundvalue: 
     shares:"""
+    shares:"""
 
     def notify_store(self, msg, *args, **kwargs):
-        """Args:
+"""Args::
     msg:"""
-
-    def notify_data(self, data, status, *args, **kwargs):
-        """Args:
+"""Args::
     data: 
+    status:"""
     status:"""
 
     def notify_timer(self, timer, when, *args, **kwargs):
-        """Args:
+"""Args::
     timer: 
+    when:"""
     when:"""
         # Timers can be added via add_time()
 

@@ -1,8 +1,7 @@
 # Copyright (c) 2025 backtrader contributors
-"""
-Grid search for CUSUM strategy on J/JM pairs. Includes spread calculation with
+"""Grid search for CUSUM strategy on J/JM pairs. Includes spread calculation with
 rolling beta, CUSUM strategy, parameter optimization and visualization of the
-results.
+results."""
 """
 
 import datetime
@@ -19,14 +18,15 @@ from backtrader.analyzers.tradeanalyzer import TradeAnalyzer
 
 
 def calculate_rolling_spread(df0, df1, window=30):
-    """Calculates the spread between df0 and df1 using dynamic beta (rolling window).
+"""Calculates the spread between df0 and df1 using dynamic beta (rolling window).
 
-Args:
+Args::
     df0: DataFrame of asset 0 (J)
     df1: DataFrame of asset 1 (JM)
     window: Size of rolling window for beta
 
-Returns:
+Returns::
+    DataFrame with spread and beta"""
     DataFrame with spread and beta"""
     df = (
         df0.set_index("date")[["close"]]
@@ -55,100 +55,16 @@ Returns:
 
 
 class SpreadData(bt.feeds.PandasData):
-    """ """
-    lines = ("beta",)
-    params = (
-        ("datetime", "date"),
-        ("close", "close"),
-        ("beta", "beta"),
-        ("nocase", True),
-    )
-
-
-class CUSUMPairStrategy(bt.Strategy):
-    """ """
-    params = (
-        ("win", 20),
-        ("k_coeff", 0.5),
-        ("h_coeff", 5.0),
-        ("verbose", False),
-    )
-
-    def __init__(self):
-        """ """
-        self.g_pos, self.g_neg = 0.0, 0.0
-        self.spread_series = self.data2.close
-
-    def _open_position(self, short):
-        """Args:
+""""""
+""""""
+""""""
+"""Args::
     short:"""
-        if not hasattr(self, "size0"):
-            self.size0 = 10
-            self.size1 = round(self.data2.beta[0] * 10)
-        if short:
-            self.sell(data=self.data0, size=self.size0)
-            self.buy(data=self.data1, size=self.size1)
-        else:
-            self.buy(data=self.data0, size=self.size0)
-            self.sell(data=self.data1, size=self.size1)
-
-    def _close_positions(self):
-        """ """
-        self.close(data=self.data0)
-        self.close(data=self.data1)
-
-    def next(self):
-        """ """
-        if len(self.spread_series) < self.p.win + 2:
-            return
-        hist = self.spread_series.get(size=self.p.win + 1)[:-1]
-        sigma = np.std(hist, ddof=1)
-        if np.isnan(sigma) or sigma == 0:
-            return
-        kappa = self.p.k_coeff * sigma
-        h = self.p.h_coeff * sigma
-        s_t = self.spread_series[0]
-        self.g_pos = max(0, self.g_pos + s_t - kappa)
-        self.g_neg = max(0, self.g_neg - s_t - kappa)
-        position_size = self.getposition(self.data0).size
-        if position_size == 0:
-            beta_now = self.data2.beta[0]
-            if pd.isna(beta_now) or beta_now <= 0:
-                return
-            self.size0 = 10
-            self.size1 = round(beta_now * 10)
-            if self.g_pos > h:
-                self._open_position(short=True)
-                self.g_pos = self.g_neg = 0
-            elif self.g_neg > h:
-                self._open_position(short=False)
-                self.g_pos = self.g_neg = 0
-        else:
-            if (position_size > 0 and abs(s_t) < kappa) or (
-                position_size < 0 and abs(s_t) < kappa
-            ):
-                self._close_positions()
-
-    def notify_trade(self, trade):
-        """Args:
+""""""
+""""""
+"""Args::
     trade:"""
-        if not self.p.verbose:
-            return
-        if trade.isclosed:
-            print(
-                f"TRADE {trade.ref} CLOSED, PROFIT: GROSS {trade.pnl:.2f}, NET"
-                f" {trade.pnlcomm:.2f}"
-            )
-        elif trade.justopened:
-            print(
-                f"TRADE {trade.ref} OPENED, SIZE {trade.size:2d}, PRICE"
-                f" {trade.price:.2f}"
-            )
-
-
-def run_grid_search():
-    """
-    Executes grid search for optimization of CUSUM parameters in J/JM.
+"""Executes grid search for optimization of CUSUM parameters in J/JM."""
     """
     output_file = "D:\\FutureData\\ricequant\\1d_2017to2024_noadjust.h5"
     df0 = pd.read_hdf(output_file, key="/J").reset_index()

@@ -1,25 +1,22 @@
 # test_strategy
 
-Contains test files and test utilities. Primarily contains Python code and includes test files.
+This directory contains various files including 1 md file, 1 py file.
 
 ## Navigation
 
-* [🏠 Root Directory](../../../README.md)
+* [🏠 Root Directory](/backtest/strategies/test_strategy/../backtest/strategies/test_strategy/../backtest/strategies/test_strategy/..README.md)
 * [⬆️ Parent Directory (strategies)](../README.md)
 
 ## Files
 
-### README.md
-
-File with .md extension.
-
 ### test_strategy.py
+
+test_strategy.py module.
 
 ## Directory Summary
 
-This directory contains 2 files and 0 subdirectories.
+This directory contains 1 files and 0 subdirectories.
 
 ### File Types
 
-* .md: 1 files
 * .py: 1 files

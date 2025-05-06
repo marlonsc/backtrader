@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""multi-copy.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -50,93 +53,11 @@ crossovers"""
     )
 
     def notify_order(self, order):
-        """Args:
+"""Args::
     order:"""
-        if not order.alive():
-            if not order.isbuy():  # going flat
-                self.order = 0
-
-            if order.status == order.Completed:
-                tfields = [
-                    self.p.myname,
-                    len(self),
-                    order.data.datetime.date(),
-                    order.data._name,
-                    "BUY" * order.isbuy() or "SELL",
-                    order.executed.size,
-                    order.executed.price,
-                ]
-
-                print(",".join(str(x) for x in tfields))
-
-    def __init__(self):
-        """ """
-        # Choose data to buy from
-        self.dtarget = self.getdatabyname(self.p.dtarget)
-
-        # Create indicators
-        sma1 = bt.ind.SMA(self.dtarget, period=self.p.sma1)
-        sma2 = bt.ind.SMA(self.dtarget, period=self.p.sma2)
-        self.smasig = bt.ind.CrossOver(sma1, sma2)
-
-        macd = bt.ind.MACD(
-            self.dtarget,
-            period_me1=self.p.macd1,
-            period_me2=self.p.macd2,
-            period_signal=self.p.macdsig,
-        )
-
-        # Cross of macd.macd and macd.signal
-        self.macdsig = bt.ind.CrossOver(macd.macd, macd.signal)
-
-    def start(self):
-        """ """
-        self.order = 0  # sentinel to avoid operrations on pending order
-
-        tfields = [
-            "Name",
-            "Length",
-            "Datetime",
-            "Operation/Names",
-            "Position1.Size",
-            "Position2.Size",
-        ]
-        print(",".join(str(x) for x in tfields))
-
-    def next(self):
-        """ """
-        tfields = [
-            self.p.myname,
-            len(self),
-            self.data.datetime.date(),
-            self.getposition(self.data0).size,
-        ]
-        if len(self.datas) > 1:
-            tfields.append(self.getposition(self.data1).size)
-
-        print(",".join(str(x) for x in tfields))
-
-        buysize = self.p.stake // 2  # let each signal buy half
-        if self.macdsig[0] > 0.0:
-            self.buy(data=self.dtarget, size=buysize)
-
-        if self.smasig[0] > 0.0:
-            self.buy(data=self.dtarget, size=buysize)
-
-        size = self.getposition(self.dtarget).size
-
-        # if 2x in the market, let each potential close ... close 1/2
-        if size == self.p.stake:
-            size //= 2
-
-        if self.macdsig[0] < 0.0:
-            self.close(data=self.dtarget, size=size)
-
-        if self.smasig[0] < 0.0:
-            self.close(data=self.dtarget, size=size)
-
-
-class TheStrategy2(TheStrategy):
+""""""
+""""""
+""""""
     """Subclass of TheStrategy to simply change the parameters"""
 
     params = (
@@ -150,61 +71,10 @@ class TheStrategy2(TheStrategy):
 
 
 def runstrat(args=None):
-    """Args:
+"""Args::
     args: (Default value = None)"""
-    args = parse_args(args)
-
-    cerebro = bt.Cerebro()
-    cerebro.broker.set_cash(args.cash)
-
-    dkwargs = dict()
-    if args.fromdate is not None:
-        fromdate = datetime.datetime.strptime(args.fromdate, "%Y-%m-%d")
-        dkwargs["fromdate"] = fromdate
-
-    if args.todate is not None:
-        todate = datetime.datetime.strptime(args.todate, "%Y-%m-%d")
-        dkwargs["todate"] = todate
-
-    # if dataset is None, args.data has been given
-    data0 = bt.feeds.YahooFinanceCSVData(dataname=args.data0, **dkwargs)
-    cerebro.adddata(data0, name="MyData0")
-
-    st0kwargs = dict()
-    if args.st0 is not None:
-        tmpdict = eval("dict(" + args.st0 + ")")  # args were passed
-        st0kwargs.update(tmpdict)
-
-    cerebro.addstrategy(TheStrategy, myname="St1", dtarget="MyData0", **st0kwargs)
-
-    if args.copydata:
-        data1 = data0.copyas("MyData1")
-        cerebro.adddata(data1)
-        dtarget = "MyData1"
-
-    else:  # use same target
-        dtarget = "MyData0"
-
-    st1kwargs = dict()
-    if args.st1 is not None:
-        tmpdict = eval("dict(" + args.st1 + ")")  # args were passed
-        st1kwargs.update(tmpdict)
-
-    cerebro.addstrategy(TheStrategy2, myname="St2", dtarget=dtarget, **st1kwargs)
-
-    cerebro.run()
-
-    if args.plot:
-        pkwargs = dict(style="bar")
-        if args.plot is not True:  # evals to True but is not True
-            npkwargs = eval("dict(" + args.plot + ")")  # args were passed
-            pkwargs.update(npkwargs)
-
-        cerebro.plot(**pkwargs)
-
-
-def parse_args(pargs=None):
-    """Args:
+"""Args::
+    pargs: (Default value = None)"""
     pargs: (Default value = None)"""
 
     parser = argparse.ArgumentParser(

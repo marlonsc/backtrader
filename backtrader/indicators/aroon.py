@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""aroon.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -48,33 +51,9 @@ further calculations"""
     plotinfo = dict(plotymargin=0.05, plotyhlines=[0, 100])
 
     def _plotlabel(self):
-        """ """
-        plabels = [self.p.period]
-        return plabels
-
-    def _plotinit(self):
-        """ """
-        self.plotinfo.plotyhlines += [self.p.lowerband, self.p.upperband]
-
-    def __init__(self):
-        """ """
-        # Look backwards period + 1 for current data because the formula mus
-        # produce values between 0 and 100 and can only do that if the
-        # calculated hhidx/llidx go from 0 to period (hence period + 1 values)
-        idxperiod = self.p.period + 1
-
-        if self._up:
-            hhidx = FindFirstIndexHighest(self.data.high, period=idxperiod)
-            self.up = (100.0 / self.p.period) * (self.p.period - hhidx)
-
-        if self._down:
-            llidx = FindFirstIndexLowest(self.data.low, period=idxperiod)
-            self.down = (100.0 / self.p.period) * (self.p.period - llidx)
-
-        super(_AroonBase, self).__init__()
-
-
-class AroonUp(_AroonBase):
+""""""
+""""""
+""""""
     """This is the AroonUp from the indicator AroonUpDown developed by Tushar
 Chande in 1995.
 Formula:
@@ -94,13 +73,7 @@ See:
     lines = ("aroonup",)
 
     def __init__(self):
-        """ """
-        super(AroonUp, self).__init__()
-
-        self.lines.aroonup = self.up
-
-
-class AroonDown(_AroonBase):
+""""""
     """This is the AroonDown from the indicator AroonUpDown developed by Tushar
 Chande in 1995.
 Formula:
@@ -120,13 +93,7 @@ See:
     lines = ("aroondown",)
 
     def __init__(self):
-        """ """
-        super(AroonDown, self).__init__()
-
-        self.lines.aroondown = self.down
-
-
-class AroonUpDown(AroonUp, AroonDown):
+""""""
     """Developed by Tushar Chande in 1995.
 It tries to determine if a trend exists or not by calculating how far away
 within a given period the last highs/lows are (AroonUp/AroonDown)
@@ -164,20 +131,8 @@ See:
     lines = ("aroonosc",)
 
     def _plotinit(self):
-        """ """
-        super(AroonOscillator, self)._plotinit()
-
-        for yhline in self.plotinfo.plotyhlines[:]:
-            self.plotinfo.plotyhlines.append(-yhline)
-
-    def __init__(self):
-        """ """
-        super(AroonOscillator, self).__init__()
-
-        self.lines.aroonosc = self.up - self.down
-
-
-class AroonUpDownOscillator(AroonUpDown, AroonOscillator):
+""""""
+""""""
     """Presents together the indicators AroonUpDown and AroonOsc
 Formula:
 (None, uses the aforementioned indicators)

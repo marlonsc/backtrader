@@ -1,31 +1,20 @@
-import backtrader as bt
+"""sma.py module.
+
+Description of the module functionality."""
+
 
 debug = False
 win_prob = 0
 
 
 class SmaCross(bt.SignalStrategy):
-    """ """
+""""""
+""""""
+"""Logging function for this strategy
 
-    params = dict(sma1=5, sma2=10, hold_days=5)  # 添加持有天数参数
-
-    def __init__(self):
-        """ """
-        self.sma1 = bt.ind.SMA(period=self.params.sma1)
-        self.sma2 = bt.ind.SMA(period=self.params.sma2)
-        self.crossover = bt.ind.CrossOver(self.sma1, self.sma2)  # 计算均线交叉
-        self.bar_executed = []
-
-        self.signal_add(bt.SIGNAL_LONG, self.crossover)
-        self.order = None
-        self.win = 0
-        self.loss = 0
-
-    def log(self, txt, dt=None):
-        """Logging function for this strategy
-
-Args:
+Args::
     txt: 
+    dt: (Default value = None)"""
     dt: (Default value = None)"""
         if debug:
             dt = dt or self.datas[0].datetime.date(0)
@@ -54,9 +43,10 @@ Args:
             self.sell()
 
     def notify_order(self, order):
-        """监听订单状态变化
+"""监听订单状态变化
 
-Args:
+Args::
+    order:"""
     order:"""
         # self.log(f"🤖 订单状态变更：{bt.Order.Status[order.status]}")
         if order.status in [order.Submitted, order.Accepted]:
@@ -68,9 +58,10 @@ Args:
             )
 
     def notify_trade(self, trade):
-        """监听交易完成，输出盈亏
+"""监听交易完成，输出盈亏
 
-Args:
+Args::
+    trade:"""
     trade:"""
         if trade.isclosed:
             self.log(
@@ -100,31 +91,12 @@ Args:
 
 
 def parse_args(pargs=None):
-    """Args:
+"""Args::
     pargs: (Default value = None)"""
-    import argparse
-
-    parser = argparse.ArgumentParser(
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        description="sigsmacross",
-    )
-    parser.add_argument(
-        "--strat",
-        required=False,
-        action="store",
-        default="",
-        help="Arguments for the strategy",
-    )
-    parser.add_argument(
-        "--feed", required=False, action="store", default="", help="Input data"
-    )
-    return parser.parse_args(pargs)
-
-
-def runstrat(data, plot=False, args={}):
-    """Args:
+"""Args::
     data: 
     plot: (Default value = False)
+    args: (Default value = {})"""
     args: (Default value = {})"""
     cerebro = bt.Cerebro()
     data0 = bt.feeds.PandasData(

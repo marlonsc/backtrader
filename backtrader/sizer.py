@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""sizer.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -44,30 +47,37 @@ value, .."""
     strategy = None
     broker = None
 
-    def __init__(self):
+"""__init__ function.
+
+Returns:
+    Description of return value
+"""
         super().__init__()
 
     def getsizing(self, data, isbuy):
-        """Args:
+"""Args::
     data: 
+    isbuy:"""
     isbuy:"""
         comminfo = self.broker.getcommissioninfo(data)
         return self._getsizing(comminfo, self.broker.getcash(), data, isbuy)
 
     def _getsizing(self, comminfo, cash, data, isbuy):
-        """This method has to be overriden by subclasses of Sizer to provide
+"""This method has to be overriden by subclasses of Sizer to provide
 the sizing functionality
 
-Args:
+Args::
     comminfo: The CommissionInfo instance that contains
     cash: current available cash in the
     data: target of the operation
     isbuy: will be"""
+    isbuy: will be"""
         raise NotImplementedError
 
     def set(self, strategy, broker):
-        """Args:
+"""Args::
     strategy: 
+    broker:"""
     broker:"""
         self.strategy = strategy
         self.broker = broker

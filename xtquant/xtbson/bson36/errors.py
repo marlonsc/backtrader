@@ -19,16 +19,7 @@ class BSONError(Exception):
 
 
 class InvalidBSON(BSONError):
-    """ """
-
-
-class InvalidStringData(BSONError):
-    """ """
-
-
-class InvalidDocument(BSONError):
-    """ """
-
-
-class InvalidId(BSONError):
-    """ """
+""""""
+""""""
+""""""
+""""""

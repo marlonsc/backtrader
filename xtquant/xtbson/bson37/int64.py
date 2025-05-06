@@ -29,14 +29,11 @@ but Int64 numbers will always be encoded to BSON int64.
     _type_marker = 18
 
     def __getstate__(self) -> Any:
-        """
-
-
-        :rtype: Any
-
+""":rtype: Any"""
         """
         return {}
 
     def __setstate__(self, state: Any) -> None:
-        """Args:
+"""Args::
+    state:"""
     state:"""

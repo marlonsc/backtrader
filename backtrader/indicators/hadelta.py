@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""hadelta.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -62,7 +65,7 @@ Formula:
     )
 
     def __init__(self):
-        """ """
+""""""
         d = bt.ind.HeikinAshi(self.data) if self.p.autoheikin else self.data
 
         self.lines.haDelta = hd = d.close - d.open

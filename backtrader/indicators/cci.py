@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""cci.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -54,17 +57,9 @@ See:
     )
 
     def _plotlabel(self):
-        """ """
-        plabels = [self.p.period, self.p.factor]
-        plabels += [self.p.movav] * self.p.notdefault("movav")
-        return plabels
-
-    def _plotinit(self):
-        """ """
-        self.plotinfo.plotyhlines = [0.0, self.p.upperband, self.p.lowerband]
-
-    def __init__(self):
-        """ """
+""""""
+""""""
+""""""
         tp = (self.data.high + self.data.low + self.data.close) / 3.0
         tpmean = self.p.movav(tp, period=self.p.period)
 

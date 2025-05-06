@@ -16,8 +16,7 @@ from backtrader.indicators.sma import MovingAverageSimple as SMA
 
 
 class ATRArbitrageStrategy(bt.Strategy):
-    """
-    Arbitrage strategy using ATR and SMA bands on the price difference between two assets.
+"""Arbitrage strategy using ATR and SMA bands on the price difference between two assets."""
     """
 
     params = (
@@ -27,9 +26,8 @@ class ATRArbitrageStrategy(bt.Strategy):
     )
 
     def __init__(self):
-        """
-        Initialize the ATRArbitrageStrategy. Computes the price difference, ATR, SMA bands,
-        and sets up trading state variables.
+"""Initialize the ATRArbitrageStrategy. Computes the price difference, ATR, SMA bands,
+        and sets up trading state variables."""
         """
         super().__init__()
         # Compute price difference
@@ -50,9 +48,8 @@ class ATRArbitrageStrategy(bt.Strategy):
         self.position_type = None
 
     def next(self):
-        """
-        Main strategy logic for each bar. Handles entry and exit conditions based on ATR
-        and SMA bands.
+"""Main strategy logic for each bar. Handles entry and exit conditions based on ATR
+        and SMA bands."""
         """
         if self.order:
             return
@@ -103,8 +100,7 @@ class ATRArbitrageStrategy(bt.Strategy):
                     )
 
     def notify_order(self, order):
-        """
-        Handle order notifications and print execution details if logging is enabled.
+"""Handle order notifications and print execution details if logging is enabled."""
         """
         if order.status in [order.Completed]:
             if self.p.printlog:
@@ -122,17 +118,16 @@ class ATRArbitrageStrategy(bt.Strategy):
 
 
 def load_data(symbol1, symbol2, fromdate, todate):
-    """
-    Load two symbols from HDF5 and return as Backtrader PandasData feeds.
+"""Load two symbols from HDF5 and return as Backtrader PandasData feeds.
 
-    Args:
+Args::
         symbol1 (str): Key for the first symbol in the HDF5 file.
         symbol2 (str): Key for the second symbol in the HDF5 file.
         fromdate (datetime): Start date for the data.
         todate (datetime): End date for the data.
 
-    Returns:
-        tuple: (data0, data1) as Backtrader PandasData feeds.
+Returns::
+        tuple: (data0, data1) as Backtrader PandasData feeds."""
     """
     output_file = "D:\\FutureData\\ricequant\\1d_2017to2024_noadjust.h5"
     df0 = pd.read_hdf(output_file, key=symbol1).reset_index()
@@ -150,8 +145,7 @@ def load_data(symbol1, symbol2, fromdate, todate):
 
 
 def run_strategy():
-    """
-    Run the ATR arbitrage backtest, print results, and plot the equity curve.
+"""Run the ATR arbitrage backtest, print results, and plot the equity curve."""
     """
     # Create backtest engine
     cerebro = bt.Cerebro()

@@ -1,5 +1,4 @@
-"""
-Utility functions for Backtrader strategies
+"""Utility functions for Backtrader strategies"""
 """
 
 import backtrader as bt
@@ -8,12 +7,13 @@ import psycopg2
 
 
 def print_performance_metrics(cerebro, results, fromdate=None, todate=None):
-    """Print standardized performance metrics from Backtrader's analyzers
+"""Print standardized performance metrics from Backtrader's analyzers
 
-Args:
+Args::
     cerebro: The Cerebro instance
     results: The results returned from cerebro
     fromdate: Start date for the backtest (Default value = None)
+    todate: End date for the backtest (Default value = None)"""
     todate: End date for the backtest (Default value = None)"""
     strat = results[0]
 
@@ -324,9 +324,9 @@ Args:
 
 
 def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate, interval="1h"):
-    """Fetch historical price data from PostgreSQL database
+"""Fetch historical price data from PostgreSQL database
 
-Args:
+Args::
     symbol: The symbol to fetch data for
     dbuser: PostgreSQL username
     dbpass: PostgreSQL password
@@ -335,7 +335,8 @@ Args:
     todate: End date as datetime object
     interval: Time interval for data (Default value = "1h")
 
-Returns:
+Returns::
+    DataFrame with OHLCV data"""
     DataFrame with OHLCV data"""
     # Format dates for database query
     from_str = fromdate.strftime("%Y-%m-%d %H:%M:%S")
@@ -452,9 +453,10 @@ Usage in next method:
 if not self.can_trade_now():"""
 
     def can_trade_now(self):
-        """Check if enough days have passed since the last trade for throttling
+"""Check if enough days have passed since the last trade for throttling
 
-Returns:
+Returns::
+    True if a new trade can be entered, False otherwise"""
     True if a new trade can be entered, False otherwise"""
         # If throttling is disabled or no previous trade, allow trading
         if (
@@ -476,9 +478,10 @@ Returns:
 
 # Standard Backtrader analyzer setup
 def add_standard_analyzers(cerebro):
-    """Add the standard set of analyzers to a Cerebro instance
+"""Add the standard set of analyzers to a Cerebro instance
 
-Args:
+Args::
+    cerebro: The Cerebro instance to add analyzers to"""
     cerebro: The Cerebro instance to add analyzers to"""
     cerebro.addanalyzer(bt.analyzers.SharpeRatio, _name="sharperatio")
     cerebro.addanalyzer(bt.analyzers.Returns, _name="returns")

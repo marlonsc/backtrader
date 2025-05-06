@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""resample-tickdata.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -32,58 +35,8 @@ import backtrader.feeds as btfeeds
 
 
 def runstrat():
-    """ """
-    args = parse_args()
-
-    # Create a cerebro entity
-    cerebro = bt.Cerebro(stdstats=False)
-
-    # Add a strategy
-    cerebro.addstrategy(bt.Strategy)
-
-    # Load the Data
-    datapath = args.dataname or "../../datas/ticksample.csv"
-
-    data = btfeeds.GenericCSVData(
-        dataname=datapath,
-        dtformat="%Y-%m-%dT%H:%M:%S.%f",
-        timeframe=bt.TimeFrame.Ticks,
-    )
-
-    # Handy dictionary for the argument timeframe conversion
-    tframes = dict(
-        ticks=bt.TimeFrame.Ticks,
-        microseconds=bt.TimeFrame.MicroSeconds,
-        seconds=bt.TimeFrame.Seconds,
-        minutes=bt.TimeFrame.Minutes,
-        daily=bt.TimeFrame.Days,
-        weekly=bt.TimeFrame.Weeks,
-        monthly=bt.TimeFrame.Months,
-    )
-
-    # Resample the data
-    cerebro.resampledata(
-        data,
-        timeframe=tframes[args.timeframe],
-        compression=args.compression,
-        bar2edge=not args.nobar2edge,
-        adjbartime=not args.noadjbartime,
-        rightedge=args.rightedge,
-    )
-
-    if args.writer:
-        # add a writer
-        cerebro.addwriter(bt.WriterFile, csv=args.wrcsv)
-
-    # Run over everything
-    cerebro.run()
-
-    # Plot the result
-    cerebro.plot(style="bar")
-
-
-def parse_args():
-    """ """
+""""""
+""""""
     parser = argparse.ArgumentParser(description="Resampling script down to tick data")
 
     parser.add_argument(

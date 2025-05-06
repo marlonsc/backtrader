@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""errors.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -37,19 +40,11 @@ class StrategySkipError(BacktraderError):
 
 
 class ModuleImportError(BacktraderError):
-    """ """
-
-    def __init__(self, message, *args):
-        """Args:
+""""""
+"""Args::
     message: Error message string."""
-        super(ModuleImportError, self).__init__(message)
-        self.args = args
-
-
-class FromModuleImportError(ModuleImportError):
-    """ """
-
-    def __init__(self, message, *args):
-        """Args:
+""""""
+"""Args::
+    message: Error message string."""
     message: Error message string."""
         super(FromModuleImportError, self).__init__(message, *args)

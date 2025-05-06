@@ -1,23 +1,12 @@
-import backtrader as bt
+"""order_observer.py module.
+
+Description of the module functionality."""
+
 
 
 class OrderObserver(bt.observer.Observer):
-    """ """
-
-    lines = (
-        "created",
-        "expired",
-    )
-
-    plotinfo = dict(plot=True, subplot=True, plotlinelabels=True)
-
-    plotlines = dict(
-        created=dict(marker="*", markersize=8.0, color="lime", fillstyle="full"),
-        expired=dict(marker="s", markersize=8.0, color="red", fillstyle="full"),
-    )
-
-    def next(self):
-        """ """
+""""""
+""""""
         for order in self._owner._orderspending:
             if order.data is not self.data:
                 continue

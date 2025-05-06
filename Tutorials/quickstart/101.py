@@ -1,4 +1,7 @@
-# -*- coding: UTF-8 -*-
+"""101.py module.
+
+Description of the module functionality."""
+
 # Source: https://www.backtrader.com/docu/quickstart/quickstart/#basic-setup
 # In this example:
 #   - backtrader will be imported

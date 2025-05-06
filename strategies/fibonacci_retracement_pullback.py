@@ -156,35 +156,8 @@ class FibonacciLevels(bt.Indicator):
     params = (("period", 50),)
 
     def __init__(self):
-        """ """
-        super(FibonacciLevels, self).__init__()
-        # Set minimum period
-        self.addminperiod(self.p.period)
-
-    def next(self):
-        """ """
-        # Get available bars
-        high_array = self.data.high.get(size=self.p.period)
-        low_array = self.data.low.get(size=self.p.period)
-
-        # Check if we have enough data
-        if len(high_array) > 0 and len(low_array) > 0:
-            high = max(high_array)
-            low = min(low_array)
-            range_ = high - low
-
-            # Calculate Fibonacci levels
-            self.lines.fib382[0] = high - (range_ * 0.382)
-            self.lines.fib500[0] = high - (range_ * 0.500)
-            self.lines.fib618[0] = high - (range_ * 0.618)
-        else:
-            # Not enough data, set to current price
-            self.lines.fib382[0] = self.data.close[0]
-            self.lines.fib500[0] = self.data.close[0]
-            self.lines.fib618[0] = self.data.close[0]
-
-
-class FibonacciPullbackStrategy(bt.Strategy, TradeThrottling):
+""""""
+""""""
     """Fibonacci Retracement Pullback Strategy
 This strategy identifies strong uptrends and enters long positions when price
 pulls back to key Fibonacci retracement levels. It uses RSI to confirm trend
@@ -224,38 +197,13 @@ It will struggle in bear markets or during major corrections."""
     )
 
     def __init__(self):
-        """ """
-        self.dataclose = self.datas[0].close
-        self.datahigh = self.datas[0].high
-        self.datalow = self.datas[0].low
-        self.datavolume = self.datas[0].volume
+""""""
+"""Logging function
 
-        # Initialize indicators
-        self.rsi = bt.indicators.RSI(period=self.p.rsi_period)
-        self.fib = FibonacciLevels(period=self.p.swing_lookback)
-        self.sma = bt.indicators.SMA(period=self.p.trend_period)
-        self.atr = bt.indicators.ATR(period=self.p.trend_period)
-
-        # Trading state variables
-        self.order = None
-        self.buyprice = None
-        self.buycomm = None
-        self.stop_loss = None
-        self.take_profit = None
-        self.trailing_stop = None
-
-        # Track highest price since entry
-        self.highest_price = 0
-
-        # For trade throttling
-        self.last_trade_date = None
-
-    def log(self, txt, dt=None, level="info"):
-        """Logging function
-
-Args:
+Args::
     txt: 
     dt: (Default value = None)
+    level: (Default value = "info")"""
     level: (Default value = "info")"""
         if level == "debug" and self.p.log_level != "debug":
             return
@@ -264,49 +212,10 @@ Args:
         print(f"{dt.isoformat()}: {txt}")
 
     def notify_order(self, order):
-        """Args:
+"""Args::
     order:"""
-        if order.status in [order.Submitted, order.Accepted]:
-            return
-
-        if order.status in [order.Completed]:
-            if order.isbuy():
-                self.log(
-                    f"BUY EXECUTED: Price: {order.executed.price:.2f}, "
-                    f"Size: {order.executed.size}, Cost: {order.executed.value:.2f}, "
-                    f"Comm: {order.executed.comm:.2f}"
-                )
-                self.buyprice = order.executed.price
-                self.buycomm = order.executed.comm
-
-                # Set stop loss and take profit
-                self.stop_loss = self.buyprice * (1 - self.p.stop_pct / 100)
-                self.take_profit = self.buyprice * (1 + self.p.target_pct / 100)
-                self.highest_price = self.buyprice
-
-            else:
-                self.log(
-                    f"SELL EXECUTED: Price: {order.executed.price:.2f}, "
-                    f"Size: {order.executed.size}, Cost: {order.executed.value:.2f}, "
-                    f"Comm: {order.executed.comm:.2f}"
-                )
-
-        elif order.status in [order.Canceled, order.Margin, order.Rejected]:
-            self.log("Order Canceled/Margin/Rejected")
-
-        self.order = None
-
-    def notify_trade(self, trade):
-        """Args:
+"""Args::
     trade:"""
-        if not trade.isclosed:
-            return
-
-        self.log(
-            f"TRADE COMPLETED: PnL: Gross: {trade.pnl:.2f}, Net: {trade.pnlcomm:.2f}"
-        )
-
-    def is_uptrend(self):
         """Check if we're in an uptrend"""
         # Ensure we have enough data
         if len(self) < self.p.trend_period:
@@ -411,45 +320,7 @@ Args:
         return False
 
     def next(self):
-        """ """
-        # Check if an order is pending
-        if self.order:
-            return
-
-        # Debug info
-        if len(self) % 10 == 0:
-            self.log(
-                f"Close: {self.dataclose[0]:.2f}, RSI: {self.rsi[0]:.2f}, "
-                f"Fib382: {self.fib.fib382[0]:.2f}, Fib618: {self.fib.fib618[0]:.2f}",
-                level="debug",
-            )
-
-        # Check if we are in the market
-        if not self.position:
-            # Check if we can trade now (throttling)
-            if not self.can_trade_now():
-                return
-
-            # Check for entry conditions
-            if self.is_uptrend() and self.is_pullback():
-                size = self.calculate_position_size()
-                if size > 0:
-                    self.log(
-                        f"BUY SIGNAL: Price: {self.dataclose[0]:.2f}, Pullback to"
-                        " Fibonacci level"
-                    )
-                    self.order = self.buy(size=size)
-
-                    # Update last trade date for throttling
-                    self.last_trade_date = self.datas[0].datetime.date(0)
-
-        else:
-            # Check for exit conditions
-            if self.should_exit_trade():
-                self.log(f"SELL SIGNAL: Price: {self.dataclose[0]:.2f}")
-                self.order = self.sell(size=self.position.size)
-
-    def stop(self):
+""""""
         """Called when backtest is complete"""
         self.log("Fibonacci Retracement Pullback Strategy completed")
         self.log(f"Final Portfolio Value: {self.broker.getvalue():.2f}")

@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""store.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -35,9 +38,10 @@ class MetaSingleton(MetaParams):
     """Metaclass to make a metaclassed class a singleton."""
 
     def __init__(self, name, bases, dct):
-        """Args:
+"""Args::
     name: 
     bases: 
+    dct:"""
     dct:"""
         super().__init__(name, bases, dct)
         self._singleton = None
@@ -81,8 +85,9 @@ class Store(with_metaclass(MetaSingleton, object)):
     DataCls = None  # data class will auto register
 
     def start(self, data=None, broker=None):
-        """Args:
+"""Args::
     data: (Default value = None)
+    broker: (Default value = None)"""
     broker: (Default value = None)"""
         if not self._started:
             self._started = True
@@ -102,14 +107,9 @@ class Store(with_metaclass(MetaSingleton, object)):
             self.broker = broker
 
     def stop(self):
-        """ """
-
-    def put_notification(self, msg, *args, **kwargs):
-        """Args:
+""""""
+"""Args::
     msg:"""
-        self.notifs.append((msg, args, kwargs))
-
-    def get_notifications(self):
-        """ """
+""""""
         self.notifs.append(None)  # put a mark / threads could still append
         return [x for x in iter(self.notifs.popleft, None)]

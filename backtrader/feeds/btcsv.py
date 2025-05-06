@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""btcsv.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -40,37 +43,9 @@ Specific parameters:
 - ``dataname``: The filename to parse or a file-like object"""
 
     def _loadline(self, linetokens):
-        """Args:
+"""Args::
     linetokens:"""
-        itoken = iter(linetokens)
-
-        dttxt = next(itoken)  # Format is YYYY-MM-DD - skip char 4 and 7
-        dt = date(int(dttxt[0:4]), int(dttxt[5:7]), int(dttxt[8:10]))
-
-        if len(linetokens) == 8:
-            tmtxt = next(itoken)  # Format if present HH:MM:SS, skip 3 and 6
-            tm = time(int(tmtxt[0:2]), int(tmtxt[3:5]), int(tmtxt[6:8]))
-        else:
-            tm = self.p.sessionend  # end of the session parameter
-
-        self.lines.datetime[0] = date2num(datetime.combine(dt, tm))
-        self.lines.open[0] = float(next(itoken))
-        self.lines.high[0] = float(next(itoken))
-        self.lines.low[0] = float(next(itoken))
-        self.lines.close[0] = float(next(itoken))
-        self.lines.volume[0] = float(next(itoken))
-        self.lines.openinterest[0] = float(next(itoken))
-
-        return True
-
-
-class BacktraderCSV(feed.CSVFeedBase):
-    """ """
-
-    DataCls = BacktraderCSVData
-
-
-class IBCSVData(feed.CSVDataBase):
+""""""
     """Parses a self-defined CSV Data used for testing.
 Specific parameters:
 - ``dataname``: The filename to parse or a file-like object"""
@@ -103,29 +78,13 @@ Specific parameters:
         self.pretradecontract = self.parsecontract(self.p.tradeinfo)
 
     def _loadline(self, linetokens):
-        """Args:
+"""Args::
     linetokens:"""
-        itoken = iter(linetokens)
-
-        dttxt = next(itoken)  # Format is YYYY-MM-DD - skip char 4 and 7
-        format_str = "%Y-%m-%d %H:%M:%S%z"
-        dt_obj = datetime.strptime(dttxt, format_str)
-
-        self.lines.datetime[0] = date2num(dt_obj)
-        self.lines.open[0] = float(next(itoken))
-        self.lines.high[0] = float(next(itoken))
-        self.lines.low[0] = float(next(itoken))
-        self.lines.close[0] = float(next(itoken))
-        self.lines.volume[0] = float(next(itoken))
-        self.lines.openinterest[0] = float(next(itoken))
-
-        return True
-
-    def setenvironment(self, env):
-        """Receives an environment (cerebro) and passes it over to the store it
+"""Receives an environment (cerebro) and passes it over to the store it
 belongs to
 
-Args:
+Args::
+    env:"""
     env:"""
         super(IBCSVData, self).setenvironment(env)
         env.addstore(self.ib)
@@ -151,66 +110,10 @@ Args:
     ]
 
     def parsecontract(self, dataname):
-        """Args:
+"""Args::
     dataname:"""
-        # Set defaults for optional tokens in the ticker string
-        if dataname is None:
-            return None
-
-        # Make the initial contract
-        precon = self.ib.makecontract()
-
-        # split the ticker string
-        tokens = iter(dataname.split("-"))
-
-        # Symbol and security type are compulsory
-        sectype = next(tokens)
-
-        assert sectype in self.CONTRACT_TYPE
-
-        if sectype in ["CUSIP", "FIGI", "ISIN"]:
-            precon.secIdType = self.p.secType = sectype
-            precon.secId = next(tokens)
-            precon.exchange = self.p.exchange = next(tokens)
-        else:
-            precon.secType = self.p.secType = sectype
-            if sectype == "IOPT":
-                precon.localsymbol = self.p.localsymbol = next(tokens)
-            else:
-                precon.symbol = self.p.symbol = next(tokens)
-            precon.currency = self.p.currency = next(tokens)
-            precon.exchange = self.p.exchange = next(tokens)
-
-            if sectype == "STK":
-                try:
-                    precon.primaryExchange = self.p.primaryExchange = next(tokens)
-                except StopIteration:
-                    pass
-            elif sectype in ["FUT", "FOP", "OPT", "WAR"]:
-                expiry = next(tokens)
-                multiplier = next(tokens)
-                strike = next(tokens)
-                if sectype == "FUT":
-                    precon.lastTradeDateOrContractMonth = self.p.expiry = expiry
-                    precon.IncludeExpired = self.p.IncludeExpired = bool(
-                        strike
-                    )  # 只是同一位置，变量名与实际变更不一致
-                    if multiplier != "None":
-                        precon.multiplier = self.p.multiplier = multiplier
-                else:
-                    precon.lastTradeDateOrContractMonth = self.p.expiry = expiry
-                    precon.multiplier = self.p.multiplier = multiplier
-                    precon.strike = self.p.strike = int(strike)
-                    precon.right = self.p.right = next(tokens)
-
-        print(f"precon= {precon}")
-        return precon
-
-    def start(self):
-        """Starts the IB connecction and gets the real contract and
-        contractdetails if it exists
-
-
+"""Starts the IB connecction and gets the real contract and
+        contractdetails if it exists"""
         """
         super(IBCSVData, self).start()
 
@@ -274,37 +177,14 @@ Args:
 
 
 class IBCSV(feed.CSVFeedBase):
-    """ """
-
-    DataCls = IBCSVData
-
-
-class IBCSVOnlyData(feed.CSVDataBase):
+""""""
     """Parses a self-defined CSV Data used for testing.
 Specific parameters:
 - ``dataname``: The filename to parse or a file-like object"""
 
     def _loadline(self, linetokens):
-        """Args:
+"""Args::
     linetokens:"""
-        itoken = iter(linetokens)
-
-        dttxt = next(itoken)  # Format is YYYY-MM-DD - skip char 4 and 7
-
-        dt_obj = dateutil.parser.parse(dttxt)
-
-        self.lines.datetime[0] = date2num(dt_obj)
-        self.lines.open[0] = float(next(itoken))
-        self.lines.high[0] = float(next(itoken))
-        self.lines.low[0] = float(next(itoken))
-        self.lines.close[0] = float(next(itoken))
-        self.lines.volume[0] = float(next(itoken))
-        self.lines.openinterest[0] = float(next(itoken))
-
-        return True
-
-
-class IBCSVOnly(feed.CSVFeedBase):
-    """ """
+""""""
 
     DataCls = IBCSVOnlyData

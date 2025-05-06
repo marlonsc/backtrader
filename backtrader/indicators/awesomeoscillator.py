@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""awesomeoscillator.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -55,7 +58,7 @@ See:
     plotlines = dict(ao=dict(_method="bar", alpha=0.50, width=1.0))
 
     def __init__(self):
-        """ """
+""""""
         median_price = (self.data.high + self.data.low) / 2.0
         sma1 = self.p.movav(median_price, period=self.p.fast)
         sma2 = self.p.movav(median_price, period=self.p.slow)

@@ -201,86 +201,28 @@ For introducing a delay, never use time.sleep() but use
     TimezoneTWS: str = ""
 
     def __init__(self):
-        """ """
-        self._createEvents()
-        self.wrapper = Wrapper(self)
-        self.client = Client(self.wrapper)
-        self.errorEvent += self._onError
-        self.client.apiEnd += self.disconnectedEvent
-        self._logger = logging.getLogger("ib_insync.ib")
-
-    def _createEvents(self):
-        """ """
-        self.connectedEvent = Event("connectedEvent")
-        self.disconnectedEvent = Event("disconnectedEvent")
-        self.updateEvent = Event("updateEvent")
-        self.pendingTickersEvent = Event("pendingTickersEvent")
-        self.barUpdateEvent = Event("barUpdateEvent")
-        self.newOrderEvent = Event("newOrderEvent")
-        self.orderModifyEvent = Event("orderModifyEvent")
-        self.cancelOrderEvent = Event("cancelOrderEvent")
-        self.openOrderEvent = Event("openOrderEvent")
-        self.orderStatusEvent = Event("orderStatusEvent")
-        self.execDetailsEvent = Event("execDetailsEvent")
-        self.commissionReportEvent = Event("commissionReportEvent")
-        self.updatePortfolioEvent = Event("updatePortfolioEvent")
-        self.positionEvent = Event("positionEvent")
-        self.accountValueEvent = Event("accountValueEvent")
-        self.accountSummaryEvent = Event("accountSummaryEvent")
-        self.pnlEvent = Event("pnlEvent")
-        self.pnlSingleEvent = Event("pnlSingleEvent")
-        self.scannerDataEvent = Event("scannerDataEvent")
-        self.tickNewsEvent = Event("tickNewsEvent")
-        self.newsBulletinEvent = Event("newsBulletinEvent")
-        self.wshMetaEvent = Event("wshMetaEvent")
-        self.wshEvent = Event("wshEvent")
-        self.errorEvent = Event("errorEvent")
-        self.timeoutEvent = Event("timeoutEvent")
-
-    def __del__(self):
-        """ """
-        self.disconnect()
-
-    def __enter__(self):
-        """ """
-        return self
-
-    def __exit__(self, *_exc):
+""""""
+""""""
+""""""
+""""""
         """"""
         self.disconnect()
 
     def __repr__(self):
-        """ """
-        conn = (
-            f"connected to {self.client.host}:"
-            f"{self.client.port} clientId={self.client.clientId}"
-            if self.client.isConnected()
-            else "not connected"
-        )
-        return f"<{self.__class__.__qualname__} {conn}>"
-
-    def connect(
-        self,
-        host: str = "127.0.0.1",
-        port: int = 7497,
-        clientId: int = 1,
-        timeout: float = 4,
-        readonly: bool = False,
-        account: str = "",
-        raiseSyncErrors: bool = False,
-    ):
-        """Connect to a running TWS or IB gateway application.
+""""""
+"""Connect to a running TWS or IB gateway application.
 After the connection is made the client is fully synchronized
 and ready to serve requests.
 This method is blocking.
 
-Args:
+Args::
     host: Host name or IP address. (Default value = "127.0.0.1")
     port: Port number. (Default value = 7497)
     clientId: ID number to use for this client; must be unique per
     timeout: If establishing the connection takes longer than
     readonly: Set to ``True`` when API is in read-only mode. (Default value = False)
     account: Main account to receive updates for. (Default value = "")
+    raiseSyncErrors: When ``True`` this will cause an initial"""
     raiseSyncErrors: When ``True`` this will cause an initial"""
         return self._run(
             self.connectAsync(
@@ -295,10 +237,8 @@ Args:
         )
 
     def disconnect(self):
-        """Disconnect from a TWS or IB gateway application.
-        This will clear all session state.
-
-
+"""Disconnect from a TWS or IB gateway application.
+        This will clear all session state."""
         """
         if not self.client.isConnected():
             return
@@ -320,10 +260,11 @@ Args:
         return self.client.isReady()
 
     def _onError(self, reqId, errorCode, errorString, contract):
-        """Args:
+"""Args::
     reqId: 
     errorCode: 
     errorString: 
+    contract:"""
     contract:"""
         if errorCode == 1102:
             # "Connectivity between IB and Trader Workstation has been
@@ -342,12 +283,13 @@ Args:
         return util.run(*awaitables, timeout=self.RequestTimeout)
 
     def waitOnUpdate(self, timeout: float = 0) -> bool:
-        """Wait on any new update to arrive from the network.
+"""Wait on any new update to arrive from the network.
 
-Args:
+Args::
     timeout: Maximum time in seconds to wait.
 
-Returns:
+Returns::
+    ``True`` if not timed-out, ``False`` otherwise."""
     ``True`` if not timed-out, ``False`` otherwise."""
         if timeout:
             try:
@@ -359,11 +301,12 @@ Returns:
         return True
 
     def loopUntil(self, condition=None, timeout: float = 0) -> Iterator[object]:
-        """Iterate until condition is met, with optional timeout in seconds.
+"""Iterate until condition is met, with optional timeout in seconds.
 The yielded value is that of the condition or False when timed out.
 
-Args:
+Args::
     condition: Predicate function that is tested after every network
+    timeout: Maximum time in seconds to wait."""
     timeout: Maximum time in seconds to wait."""
         endTime = time.time() + timeout
         while True:
@@ -379,12 +322,13 @@ Args:
             self.waitOnUpdate(endTime - time.time() if timeout else 0)
 
     def setTimeout(self, timeout: float = 60):
-        """Set a timeout for receiving messages from TWS/IBG, emitting
+"""Set a timeout for receiving messages from TWS/IBG, emitting
 ``timeoutEvent`` if there is no incoming data for too long.
 The timeout fires once per connected session but can be set again
 after firing or after a reconnect.
 
-Args:
+Args::
+    timeout: Timeout in seconds. (Default value = 60)"""
     timeout: Timeout in seconds. (Default value = 60)"""
         self.wrapper.setTimeout(timeout)
 
@@ -397,10 +341,11 @@ Args:
         return self.managed_accounts
 
     def accountValues(self, account: str = "") -> List[AccountValue]:
-        """List of account values for the given account,
+"""List of account values for the given account,
 or of all accounts if account is left blank.
 
-Args:
+Args::
+    account: If specified, filter for this account name. (Default value = "")"""
     account: If specified, filter for this account name. (Default value = "")"""
         if account:
             return [
@@ -410,19 +355,21 @@ Args:
             return list(self.wrapper.accountValues.values())
 
     def accountSummary(self, account: str = "") -> List[AccountValue]:
-        """List of account values for the given account,
+"""List of account values for the given account,
 or of all accounts if account is left blank.
 This method is blocking on first run, non-blocking after that.
 
-Args:
+Args::
+    account: If specified, filter for this account name. (Default value = "")"""
     account: If specified, filter for this account name. (Default value = "")"""
         return self._run(self.accountSummaryAsync(account))
 
     def portfolio(self, account: str = "") -> List[PortfolioItem]:
-        """List of portfolio items for the given account,
+"""List of portfolio items for the given account,
 or of all retrieved portfolio items if account is left blank.
 
-Args:
+Args::
+    account: If specified, filter for this account name. (Default value = "")"""
     account: If specified, filter for this account name. (Default value = "")"""
         if account:
             return list(self.wrapper.portfolio[account].values())
@@ -430,10 +377,11 @@ Args:
             return [v for d in self.wrapper.portfolio.values() for v in d.values()]
 
     def positions(self, account: str = "") -> List[Position]:
-        """List of positions for the given account,
+"""List of positions for the given account,
 or of all accounts if account is left blank.
 
-Args:
+Args::
+    account: If specified, filter for this account name. (Default value = "")"""
     account: If specified, filter for this account name. (Default value = "")"""
         if account:
             return list(self.wrapper.positions[account].values())
@@ -441,12 +389,13 @@ Args:
             return [v for d in self.wrapper.positions.values() for v in d.values()]
 
     def pnl(self, account="", modelCode="") -> List[PnL]:
-        """List of subscribed :class:`.PnL` objects (profit and loss),
+"""List of subscribed :class:`.PnL` objects (profit and loss),
 optionally filtered by account and/or modelCode.
 The :class:`.PnL` objects are kept live updated.
 
-Args:
+Args::
     account: If specified, filter for this account name. (Default value = "")
+    modelCode: If specified, filter for this account model. (Default value = "")"""
     modelCode: If specified, filter for this account model. (Default value = "")"""
         return [
             v
@@ -458,13 +407,14 @@ Args:
     def pnlSingle(
         self, account: str = "", modelCode: str = "", conId: int = 0
     ) -> List[PnLSingle]:
-        """List of subscribed :class:`.PnLSingle` objects (profit and loss for
+"""List of subscribed :class:`.PnLSingle` objects (profit and loss for
 single positions).
 The :class:`.PnLSingle` objects are kept live updated.
 
-Args:
+Args::
     account: If specified, filter for this account name. (Default value = "")
     modelCode: If specified, filter for this account model. (Default value = "")
+    conId: If specified, filter for this contract ID. (Default value = 0)"""
     conId: If specified, filter for this contract ID. (Default value = 0)"""
         return [
             v
@@ -513,11 +463,12 @@ Args:
         return list(fill.execution for fill in self.wrapper.fills.values())
 
     def ticker(self, contract: Contract) -> Optional[Ticker]:
-        """Get ticker of the given contract. It must have been requested before
+"""Get ticker of the given contract. It must have been requested before
 with reqMktData with the same contract object. The ticker may not be
 ready yet if called directly after :meth:`.reqMktData`.
 
-Args:
+Args::
+    contract: Contract to get ticker for."""
     contract: Contract to get ticker for."""
         return self.wrapper.tickers.get(id(contract))
 
@@ -551,11 +502,12 @@ The article itself can be retrieved with :meth:`.reqNewsArticle`.
     def reqTickers(
         self, *contracts: Contract, regulatorySnapshot: bool = False
     ) -> List[Ticker]:
-        """Request and return a list of snapshot tickers.
+"""Request and return a list of snapshot tickers.
 The list is returned when all tickers are ready.
 This method is blocking.
 
-Args:
+Args::
+    regulatorySnapshot: Request NBBO snapshots (may incur a fee). (Default value = False)"""
     regulatorySnapshot: Request NBBO snapshots (may incur a fee). (Default value = False)"""
         return self._run(
             self.reqTickersAsync(*contracts, regulatorySnapshot=regulatorySnapshot)
@@ -577,18 +529,19 @@ This method is blocking."""
         stopLossPrice: float,
         **kwargs,
     ) -> BracketOrder:
-        """Create a limit order that is bracketed by a take-profit order and
+"""Create a limit order that is bracketed by a take-profit order and
 a stop-loss order. Submit the bracket like:
 .. code-block:: python
 for o in bracket:
 ib.placeOrder(contract, o)
 https://interactivebrokers.github.io/tws-api/bracket_order.html
 
-Args:
+Args::
     action: 'BUY' or 'SELL'.
     quantity: Size of order.
     limitPrice: Limit price of entry order.
     takeProfitPrice: Limit price of profit order.
+    stopLossPrice: Stop price of loss order."""
     stopLossPrice: Stop price of loss order."""
         assert action in ("BUY", "SELL")
         reverseAction = "BUY" if action == "SELL" else "SELL"
@@ -622,12 +575,13 @@ Args:
 
     @staticmethod
     def oneCancelsAll(orders: List[Order], ocaGroup: str, ocaType: int) -> List[Order]:
-        """Place the trades in the same One Cancels All (OCA) group.
+"""Place the trades in the same One Cancels All (OCA) group.
 https://interactivebrokers.github.io/tws-api/oca.html
 
-Args:
+Args::
     orders: The orders that are to be placed together.
     ocaGroup: 
+    ocaType:"""
     ocaType:"""
         for o in orders:
             o.ocaGroup = ocaGroup
@@ -635,22 +589,24 @@ Args:
         return orders
 
     def whatIfOrder(self, contract: Contract, order: Order) -> OrderState:
-        """Retrieve commission and margin impact without actually
+"""Retrieve commission and margin impact without actually
 placing the order. The given order will not be modified in any way.
 This method is blocking.
 
-Args:
+Args::
     contract: Contract to test.
+    order: Order to test."""
     order: Order to test."""
         return self._run(self.whatIfOrderAsync(contract, order))
 
     def placeOrder(self, contract: Contract, order: Order) -> Trade:
-        """Place a new order or modify an existing order.
+"""Place a new order or modify an existing order.
 Returns a Trade that is kept live updated with
 status changes, fills, etc.
 
-Args:
+Args::
     contract: Contract to use for order.
+    order: The order to be placed."""
     order: The order to be placed."""
         orderId = order.orderId or self.client.getReqId()
         self.client.placeOrder(orderId, contract, order)
@@ -680,10 +636,11 @@ Args:
     def cancelOrder(
         self, order: Order, manualCancelOrderTime: str = ""
     ) -> Optional[Trade]:
-        """Cancel the order and return the Trade it belongs to.
+"""Cancel the order and return the Trade it belongs to.
 
-Args:
+Args::
     order: The order to be canceled.
+    manualCancelOrderTime: For audit trail. (Default value = "")"""
     manualCancelOrderTime: For audit trail. (Default value = "")"""
         self.client.cancelOrder(order.orderId, manualCancelOrderTime)
         now = datetime.datetime.now(datetime.timezone.utc)
@@ -715,10 +672,8 @@ Args:
         return trade
 
     def reqGlobalCancel(self):
-        """Cancel all active trades including those placed by other
-        clients or TWS/IB gateway.
-
-
+"""Cancel all active trades including those placed by other
+        clients or TWS/IB gateway."""
         """
         self.client.reqGlobalCancel()
         self._logger.info("reqGlobalCancel")
@@ -730,23 +685,25 @@ This method is blocking.
         return self._run(self.reqCurrentTimeAsync())
 
     def reqAccountUpdates(self, account: str = ""):
-        """This is called at startup - no need to call again.
+"""This is called at startup - no need to call again.
 Request account and portfolio values of the account
 and keep updated. Returns when both account values and portfolio
 are filled.
 This method is blocking.
 
-Args:
+Args::
+    account: If specified, filter for this account name. (Default value = "")"""
     account: If specified, filter for this account name. (Default value = "")"""
         self._run(self.reqAccountUpdatesAsync(account))
 
     def reqAccountUpdatesMulti(self, account: str = "", modelCode: str = ""):
-        """It is recommended to use :meth:`.accountValues` instead.
+"""It is recommended to use :meth:`.accountValues` instead.
 Request account values of multiple accounts and keep updated.
 This method is blocking.
 
-Args:
+Args::
     account: If specified, filter for this account name. (Default value = "")
+    modelCode: If specified, filter for this account model. (Default value = "")"""
     modelCode: If specified, filter for this account model. (Default value = "")"""
         self._run(self.reqAccountUpdatesMultiAsync(account, modelCode))
 
@@ -758,14 +715,15 @@ This method is blocking."""
         self._run(self.reqAccountSummaryAsync())
 
     def reqAutoOpenOrders(self, autoBind: bool = True):
-        """Bind manual TWS orders so that they can be managed from this client.
+"""Bind manual TWS orders so that they can be managed from this client.
 The clientId must be 0 and the TWS API setting "Use negative numbers
 to bind automatic orders" must be checked.
 This request is automatically called when clientId=0.
 https://interactivebrokers.github.io/tws-api/open_orders.html
 https://interactivebrokers.github.io/tws-api/modifying_orders.html
 
-Args:
+Args::
+    autoBind: Set binding on or off. (Default value = True)"""
     autoBind: Set binding on or off. (Default value = True)"""
         self.client.reqAutoOpenOrders(autoBind)
 
@@ -788,19 +746,21 @@ client's orders that are kept in sync.
         return self._run(self.reqAllOpenOrdersAsync())
 
     def reqCompletedOrders(self, apiOnly: bool) -> List[Trade]:
-        """Request and return a list of completed trades.
+"""Request and return a list of completed trades.
 
-Args:
+Args::
+    apiOnly: Request only API orders (not manually placed TWS orders)."""
     apiOnly: Request only API orders (not manually placed TWS orders)."""
         return self._run(self.reqCompletedOrdersAsync(apiOnly))
 
     def reqExecutions(self, execFilter: Optional[ExecutionFilter] = None) -> List[Fill]:
-        """It is recommended to use :meth:`.fills`  or
+"""It is recommended to use :meth:`.fills`  or
 :meth:`.executions` instead.
 Request and return a list of fills.
 This method is blocking.
 
-Args:
+Args::
+    execFilter: If specified, return executions that match the filter. (Default value = None)"""
     execFilter: If specified, return executions that match the filter. (Default value = None)"""
         return self._run(self.reqExecutionsAsync(execFilter))
 
@@ -812,13 +772,14 @@ This method is blocking.
         return self._run(self.reqPositionsAsync())
 
     def reqPnL(self, account: str, modelCode: str = "") -> PnL:
-        """Start a subscription for profit and loss events.
+"""Start a subscription for profit and loss events.
 Returns a :class:`.PnL` object that is kept live updated.
 The result can also be queried from :meth:`.pnl`.
 https://interactivebrokers.github.io/tws-api/pnl.html
 
-Args:
+Args::
     account: Subscribe to this account.
+    modelCode: If specified, filter for this account model. (Default value = "")"""
     modelCode: If specified, filter for this account model. (Default value = "")"""
         key = (account, modelCode)
         assert key not in self.wrapper.pnlKey2ReqId
@@ -830,10 +791,11 @@ Args:
         return pnl
 
     def cancelPnL(self, account, modelCode: str = ""):
-        """Cancel PnL subscription.
+"""Cancel PnL subscription.
 
-Args:
+Args::
     account: Cancel for this account.
+    modelCode: If specified, cancel for this account model. (Default value = "")"""
     modelCode: If specified, cancel for this account model. (Default value = "")"""
         key = (account, modelCode)
         reqId = self.wrapper.pnlKey2ReqId.pop(key, None)
@@ -847,14 +809,15 @@ Args:
             )
 
     def reqPnLSingle(self, account: str, modelCode: str, conId: int) -> PnLSingle:
-        """Start a subscription for profit and loss events for single positions.
+"""Start a subscription for profit and loss events for single positions.
 Returns a :class:`.PnLSingle` object that is kept live updated.
 The result can also be queried from :meth:`.pnlSingle`.
 https://interactivebrokers.github.io/tws-api/pnl.html
 
-Args:
+Args::
     account: Subscribe to this account.
     modelCode: Filter for this account model.
+    conId: Filter for this contract ID."""
     conId: Filter for this contract ID."""
         key = (account, modelCode, conId)
         assert key not in self.wrapper.pnlSingleKey2ReqId
@@ -866,12 +829,13 @@ Args:
         return pnlSingle
 
     def cancelPnLSingle(self, account: str, modelCode: str, conId: int):
-        """Cancel PnLSingle subscription for the given account, modelCode
+"""Cancel PnLSingle subscription for the given account, modelCode
 and conId.
 
-Args:
+Args::
     account: Cancel for this account name.
     modelCode: Cancel for this account model.
+    conId: Cancel for this contract ID."""
     conId: Cancel for this contract ID."""
         key = (account, modelCode, conId)
         reqId = self.wrapper.pnlSingleKey2ReqId.pop(key, None)
@@ -885,7 +849,7 @@ Args:
             )
 
     def reqContractDetails(self, contract: Contract) -> List[ContractDetails]:
-        """Get a list of contract details that match the given contract.
+"""Get a list of contract details that match the given contract.
 If the returned list is empty then the contract is not known;
 If the list has multiple values then the contract is ambiguous.
 The fully qualified contract is available in the the
@@ -893,24 +857,27 @@ ContractDetails.contract attribute.
 This method is blocking.
 https://interactivebrokers.github.io/tws-api/contract_details.html
 
-Args:
+Args::
+    contract: The contract to get details for."""
     contract: The contract to get details for."""
         return self._run(self.reqContractDetailsAsync(contract))
 
     def reqMatchingSymbols(self, pattern: str) -> List[ContractDescription]:
-        """Request contract descriptions of contracts that match a pattern.
+"""Request contract descriptions of contracts that match a pattern.
 This method is blocking.
 https://interactivebrokers.github.io/tws-api/matching_symbols.html
 
-Args:
+Args::
+    pattern: The first few letters of the ticker symbol, or for"""
     pattern: The first few letters of the ticker symbol, or for"""
         return self._run(self.reqMatchingSymbolsAsync(pattern))
 
     def reqMarketRule(self, marketRuleId: int) -> PriceIncrement:
-        """Request price increments rule.
+"""Request price increments rule.
 https://interactivebrokers.github.io/tws-api/minimum_increment.html
 
-Args:
+Args::
+    marketRuleId: ID of market rule."""
     marketRuleId: ID of market rule."""
         return self._run(self.reqMarketRuleAsync(marketRuleId))
 
@@ -922,14 +889,15 @@ Args:
         useRTH: bool,
         realTimeBarsOptions: List[TagValue] = [],
     ) -> RealTimeBarList:
-        """Request realtime 5 second bars.
+"""Request realtime 5 second bars.
 https://interactivebrokers.github.io/tws-api/realtime_bars.html
 
-Args:
+Args::
     contract: Contract of interest.
     barSize: Must be 5.
     whatToShow: Specifies the source for constructing bars.
     useRTH: If True then only show data from within Regular
+    realTimeBarsOptions: Unknown. (Default value = [])"""
     realTimeBarsOptions: Unknown. (Default value = [])"""
         reqId = self.client.getReqId()
         bars = RealTimeBarList()
@@ -946,9 +914,10 @@ Args:
         return bars
 
     def cancelRealTimeBars(self, bars: RealTimeBarList):
-        """Cancel the realtime bars subscription.
+"""Cancel the realtime bars subscription.
 
-Args:
+Args::
+    bars: The bar list that was obtained from ``reqRealTimeBars``."""
     bars: The bar list that was obtained from ``reqRealTimeBars``."""
         self.client.cancelRealTimeBars(bars.reqId)
         self.wrapper.endSubscription(bars)
@@ -966,11 +935,11 @@ Args:
         chartOptions: List[TagValue] = [],
         timeout: float = 60,
     ) -> BarDataList:
-        """Request historical bar data.
+"""Request historical bar data.
 This method is blocking.
 https://interactivebrokers.github.io/tws-api/historical_bars.html
 
-Args:
+Args::
     contract: Contract of interest.
     endDateTime: Can be set to '' to indicate the current time,
     durationStr: Time span of all the bars. Examples:
@@ -980,6 +949,7 @@ Args:
     formatDate: For an intraday request setting to 2 will cause
     keepUpToDate: If True then a realtime subscription is started
     chartOptions: Unknown. (Default value = [])
+    timeout: Timeout in seconds after which to cancel the request"""
     timeout: Timeout in seconds after which to cancel the request"""
         return self._run(
             self.reqHistoricalDataAsync(
@@ -997,9 +967,10 @@ Args:
         )
 
     def cancelHistoricalData(self, bars: BarDataList):
-        """Cancel the update subscription for the historical bars.
+"""Cancel the update subscription for the historical bars.
 
-Args:
+Args::
+    bars: The bar list that was obtained from ``reqHistoricalData``"""
     bars: The bar list that was obtained from ``reqHistoricalData``"""
         self.client.cancelHistoricalData(bars.reqId)
         self.wrapper.endSubscription(bars)
@@ -1011,13 +982,14 @@ Args:
         endDateTime: Union[datetime.datetime, datetime.date, str, None] = "",
         useRTH: bool = True,
     ) -> HistoricalSchedule:
-        """Request historical schedule.
+"""Request historical schedule.
 This method is blocking.
 
-Args:
+Args::
     contract: Contract of interest.
     numDays: Number of days.
     endDateTime: Can be set to '' to indicate the current time,
+    useRTH: If True then show schedule for Regular Trading Hours,"""
     useRTH: If True then show schedule for Regular Trading Hours,"""
         return self._run(
             self.reqHistoricalScheduleAsync(contract, numDays, endDateTime, useRTH)
@@ -1034,12 +1006,12 @@ Args:
         ignoreSize: bool = False,
         miscOptions: List[TagValue] = [],
     ) -> List:
-        """Request historical ticks. The time resolution of the ticks
+"""Request historical ticks. The time resolution of the ticks
 is one second.
 This method is blocking.
 https://interactivebrokers.github.io/tws-api/historical_time_and_sales.html
 
-Args:
+Args::
     contract: Contract to query.
     startDateTime: Can be given as a datetime.date or
     endDateTime: One of ``startDateTime`` or ``endDateTime`` can
@@ -1047,6 +1019,7 @@ Args:
     whatToShow: One of 'Bid_Ask', 'Midpoint' or 'Trades'.
     useRth: 
     ignoreSize: Ignore bid/ask ticks that only update the size. (Default value = False)
+    miscOptions: Unknown. (Default value = [])"""
     miscOptions: Unknown. (Default value = [])"""
         return self._run(
             self.reqHistoricalTicksAsync(
@@ -1062,9 +1035,10 @@ Args:
         )
 
     def reqMarketDataType(self, marketDataType: int):
-        """Set the market data type used for :meth:`.reqMktData`.
+"""Set the market data type used for :meth:`.reqMktData`.
 
-Args:
+Args::
+    marketDataType: One of:"""
     marketDataType: One of:"""
         self.client.reqMarketDataType(marketDataType)
 
@@ -1075,13 +1049,14 @@ Args:
         useRTH: bool,
         formatDate: int = 1,
     ) -> datetime.datetime:
-        """Get the datetime of earliest available historical data
+"""Get the datetime of earliest available historical data
 for the contract.
 
-Args:
+Args::
     contract: Contract of interest.
     whatToShow: 
     useRTH: If True then only show data from within Regular
+    formatDate: If set to 2 then the result is returned as a"""
     formatDate: If set to 2 then the result is returned as a"""
         return self._run(
             self.reqHeadTimeStampAsync(contract, whatToShow, useRTH, formatDate)
@@ -1095,17 +1070,18 @@ Args:
         regulatorySnapshot: bool = False,
         mktDataOptions: List[TagValue] = [],
     ) -> Ticker:
-        """Subscribe to tick data or request a snapshot.
+"""Subscribe to tick data or request a snapshot.
 Returns the Ticker that holds the market data. The ticker will
 initially be empty and gradually (after a couple of seconds)
 be filled.
 https://interactivebrokers.github.io/tws-api/md_request.html
 
-Args:
+Args::
     contract: Contract of interest.
     genericTickList: Comma separated IDs of desired
     snapshot: If True then request a one-time snapshot, otherwise
     regulatorySnapshot: Request NBBO snapshot (may incur a fee). (Default value = False)
+    mktDataOptions: Unknown (Default value = [])"""
     mktDataOptions: Unknown (Default value = [])"""
         reqId = self.client.getReqId()
         ticker = self.wrapper.startTicker(reqId, contract, "mktData")
@@ -1120,9 +1096,10 @@ Args:
         return ticker
 
     def cancelMktData(self, contract: Contract):
-        """Unsubscribe from realtime streaming tick data.
+"""Unsubscribe from realtime streaming tick data.
 
-Args:
+Args::
+    contract: The exact contract object that was used to"""
     contract: The exact contract object that was used to"""
         ticker = self.ticker(contract)
         reqId = self.wrapper.endTicker(ticker, "mktData") if ticker else 0
@@ -1138,14 +1115,15 @@ Args:
         numberOfTicks: int = 0,
         ignoreSize: bool = False,
     ) -> Ticker:
-        """Subscribe to tick-by-tick data and return the Ticker that
+"""Subscribe to tick-by-tick data and return the Ticker that
 holds the ticks in ticker.tickByTicks.
 https://interactivebrokers.github.io/tws-api/tick_data.html
 
-Args:
+Args::
     contract: Contract of interest.
     tickType: One of  'Last', 'AllLast', 'BidAsk' or 'MidPoint'.
     numberOfTicks: Number of ticks or 0 for unlimited. (Default value = 0)
+    ignoreSize: Ignore bid/ask ticks that only update the size. (Default value = False)"""
     ignoreSize: Ignore bid/ask ticks that only update the size. (Default value = False)"""
         reqId = self.client.getReqId()
         ticker = self.wrapper.startTicker(reqId, contract, tickType)
@@ -1155,10 +1133,11 @@ Args:
         return ticker
 
     def cancelTickByTickData(self, contract: Contract, tickType: str):
-        """Unsubscribe from tick-by-tick data
+"""Unsubscribe from tick-by-tick data
 
-Args:
+Args::
     contract: The exact contract object that was used to
+    tickType:"""
     tickType:"""
         ticker = self.ticker(contract)
         reqId = self.wrapper.endTicker(ticker, tickType) if ticker else 0
@@ -1168,11 +1147,13 @@ Args:
             self._logger.error(f"cancelMktData: No reqId found for contract {contract}")
 
     def reqSmartComponents(self, bboExchange: str) -> List[SmartComponent]:
-        """Obtain mapping from single letter codes to exchange names.
-Note: The exchanges must be open when using this request, otherwise an
+"""Obtain mapping from single letter codes to exchange names.
+
+Note: The exchanges must be open when using this request, otherwise an:
 empty list is returned.
 
-Args:
+Args::
+    bboExchange:"""
     bboExchange:"""
         return self._run(self.reqSmartComponentsAsync(bboExchange))
 
@@ -1189,16 +1170,17 @@ Args:
         isSmartDepth: bool = False,
         mktDepthOptions=None,
     ) -> Ticker:
-        """Subscribe to market depth data (a.k.a. DOM, L2 or order book).
+"""Subscribe to market depth data (a.k.a. DOM, L2 or order book).
 https://interactivebrokers.github.io/tws-api/market_depth.html
 
-Args:
+Args::
     contract: Contract of interest.
     numRows: Number of depth level on each side of the order book
     isSmartDepth: Consolidate the order book across exchanges. (Default value = False)
     mktDepthOptions: Unknown. (Default value = None)
 
-Returns:
+Returns::
+    The Ticker that holds the market depth in ``ticker.domBids``"""
     The Ticker that holds the market depth in ``ticker.domBids``"""
         reqId = self.client.getReqId()
         ticker = self.wrapper.startTicker(reqId, contract, "mktDepth")
@@ -1208,10 +1190,11 @@ Returns:
         return ticker
 
     def cancelMktDepth(self, contract: Contract, isSmartDepth=False):
-        """Unsubscribe from market depth data.
+"""Unsubscribe from market depth data.
 
-Args:
+Args::
     contract: The exact contract object that was used to
+    isSmartDepth: (Default value = False)"""
     isSmartDepth: (Default value = False)"""
         ticker = self.ticker(contract)
         reqId = self.wrapper.endTicker(ticker, "mktDepth") if ticker else 0
@@ -1225,13 +1208,14 @@ Args:
     def reqHistogramData(
         self, contract: Contract, useRTH: bool, period: str
     ) -> List[HistogramData]:
-        """Request histogram data.
+"""Request histogram data.
 This method is blocking.
 https://interactivebrokers.github.io/tws-api/histograms.html
 
-Args:
+Args::
     contract: Contract to query.
     useRTH: If True then only show data from within Regular
+    period: Period of which data is being requested, for example"""
     period: Period of which data is being requested, for example"""
         return self._run(self.reqHistogramDataAsync(contract, useRTH, period))
 
@@ -1241,13 +1225,14 @@ Args:
         reportType: str,
         fundamentalDataOptions: List[TagValue] = [],
     ) -> str:
-        """Get fundamental data of a contract in XML format.
+"""Get fundamental data of a contract in XML format.
 This method is blocking.
 https://interactivebrokers.github.io/tws-api/fundamentals.html
 
-Args:
+Args::
     contract: Contract to query.
     reportType: * 'ReportsFinSummary': Financial summary
+    fundamentalDataOptions: Unknown (Default value = [])"""
     fundamentalDataOptions: Unknown (Default value = [])"""
         return self._run(
             self.reqFundamentalDataAsync(contract, reportType, fundamentalDataOptions)
@@ -1259,14 +1244,15 @@ Args:
         scannerSubscriptionOptions: List[TagValue] = [],
         scannerSubscriptionFilterOptions: List[TagValue] = [],
     ) -> ScanDataList:
-        """Do a blocking market scan by starting a subscription and canceling it
+"""Do a blocking market scan by starting a subscription and canceling it
 after the initial list of results are in.
 This method is blocking.
 https://interactivebrokers.github.io/tws-api/market_scanners.html
 
-Args:
+Args::
     subscription: Basic filters.
     scannerSubscriptionOptions: Unknown. (Default value = [])
+    scannerSubscriptionFilterOptions: Advanced generic filters. (Default value = [])"""
     scannerSubscriptionFilterOptions: Advanced generic filters. (Default value = [])"""
         return self._run(
             self.reqScannerDataAsync(
@@ -1282,12 +1268,13 @@ Args:
         scannerSubscriptionOptions: List[TagValue] = [],
         scannerSubscriptionFilterOptions: List[TagValue] = [],
     ) -> ScanDataList:
-        """Subscribe to market scan data.
+"""Subscribe to market scan data.
 https://interactivebrokers.github.io/tws-api/market_scanners.html
 
-Args:
+Args::
     subscription: What to scan for.
     scannerSubscriptionOptions: Unknown. (Default value = [])
+    scannerSubscriptionFilterOptions: Unknown. (Default value = [])"""
     scannerSubscriptionFilterOptions: Unknown. (Default value = [])"""
         reqId = self.client.getReqId()
         dataList = ScanDataList()
@@ -1307,10 +1294,11 @@ Args:
         return dataList
 
     def cancelScannerSubscription(self, dataList: ScanDataList):
-        """Cancel market data subscription.
+"""Cancel market data subscription.
 https://interactivebrokers.github.io/tws-api/market_scanners.html
 
-Args:
+Args::
+    dataList: The scan data list that was obtained from"""
     dataList: The scan data list that was obtained from"""
         self.client.cancelScannerSubscription(dataList.reqId)
         self.wrapper.endSubscription(dataList)
@@ -1328,14 +1316,15 @@ This method is blocking.
         underPrice: float,
         implVolOptions: List[TagValue] = [],
     ) -> OptionComputation:
-        """Calculate the volatility given the option price.
+"""Calculate the volatility given the option price.
 This method is blocking.
 https://interactivebrokers.github.io/tws-api/option_computations.html
 
-Args:
+Args::
     contract: Option contract.
     optionPrice: Option price to use in calculation.
     underPrice: Price of the underlier to use in calculation
+    implVolOptions: Unknown (Default value = [])"""
     implVolOptions: Unknown (Default value = [])"""
         return self._run(
             self.calculateImpliedVolatilityAsync(
@@ -1350,14 +1339,15 @@ Args:
         underPrice: float,
         optPrcOptions: List[TagValue] = [],
     ) -> OptionComputation:
-        """Calculate the option price given the volatility.
+"""Calculate the option price given the volatility.
 This method is blocking.
 https://interactivebrokers.github.io/tws-api/option_computations.html
 
-Args:
+Args::
     contract: Option contract.
     volatility: Option volatility to use in calculation.
     underPrice: Price of the underlier to use in calculation
+    optPrcOptions: (Default value = [])"""
     optPrcOptions: (Default value = [])"""
         return self._run(
             self.calculateOptionPriceAsync(
@@ -1372,14 +1362,15 @@ Args:
         underlyingSecType: str,
         underlyingConId: int,
     ) -> List[OptionChain]:
-        """Get the option chain.
+"""Get the option chain.
 This method is blocking.
 https://interactivebrokers.github.io/tws-api/options.html
 
-Args:
+Args::
     underlyingSymbol: Symbol of underlier contract.
     futFopExchange: Exchange (only for ``FuturesOption``, otherwise
     underlyingSecType: The type of the underlying security, like
+    underlyingConId: conId of the underlying contract."""
     underlyingConId: conId of the underlying contract."""
         return self._run(
             self.reqSecDefOptParamsAsync(
@@ -1398,14 +1389,15 @@ Args:
         account: str,
         override: int,
     ):
-        """Exercise an options contract.
+"""Exercise an options contract.
 https://interactivebrokers.github.io/tws-api/options.html
 
-Args:
+Args::
     contract: The option contract to be exercised.
     exerciseAction: * 1 = exercise the option
     exerciseQuantity: Number of contracts to be exercised.
     account: Destination account.
+    override: * 0 = no override"""
     override: * 0 = no override"""
         reqId = self.client.getReqId()
         self.client.exerciseOptions(
@@ -1424,13 +1416,14 @@ This method is blocking.
         articleId: str,
         newsArticleOptions: List[TagValue] = [],
     ) -> NewsArticle:
-        """Get the body of a news article.
+"""Get the body of a news article.
 This method is blocking.
 https://interactivebrokers.github.io/tws-api/news.html
 
-Args:
+Args::
     providerCode: Code indicating news provider, like 'BZ' or 'FLY'.
     articleId: ID of the specific article.
+    newsArticleOptions: Unknown. (Default value = [])"""
     newsArticleOptions: Unknown. (Default value = [])"""
         return self._run(
             self.reqNewsArticleAsync(providerCode, articleId, newsArticleOptions)
@@ -1445,16 +1438,17 @@ Args:
         totalResults: int,
         historicalNewsOptions: List[TagValue] = [],
     ) -> HistoricalNews:
-        """Get historical news headline.
+"""Get historical news headline.
 https://interactivebrokers.github.io/tws-api/news.html
 This method is blocking.
 
-Args:
+Args::
     conId: Search news articles for contract with this conId.
     providerCodes: A '+'-separated list of provider codes, like
     startDateTime: The (exclusive) start of the date range.
     endDateTime: The (inclusive) end of the date range.
     totalResults: Maximum number of headlines to fetch (300 max).
+    historicalNewsOptions: Unknown. (Default value = [])"""
     historicalNewsOptions: Unknown. (Default value = [])"""
         return self._run(
             self.reqHistoricalNewsAsync(
@@ -1468,10 +1462,11 @@ Args:
         )
 
     def reqNewsBulletins(self, allMessages: bool):
-        """Subscribe to IB news bulletins.
+"""Subscribe to IB news bulletins.
 https://interactivebrokers.github.io/tws-api/news.html
 
-Args:
+Args::
+    allMessages: If True then fetch all messages for the day."""
     allMessages: If True then fetch all messages for the day."""
         self.client.reqNewsBulletins(allMessages)
 
@@ -1480,18 +1475,20 @@ Args:
         self.client.cancelNewsBulletins()
 
     def requestFA(self, faDataType: int):
-        """Requests to change the FA configuration.
+"""Requests to change the FA configuration.
 This method is blocking.
 
-Args:
+Args::
+    faDataType: * 1 = Groups: Offer traders a way to create a group of"""
     faDataType: * 1 = Groups: Offer traders a way to create a group of"""
         return self._run(self.requestFAAsync(faDataType))
 
     def replaceFA(self, faDataType: int, xml: str):
-        """Replaces Financial Advisor's settings.
+"""Replaces Financial Advisor's settings.
 
-Args:
+Args::
     faDataType: See :meth:`.requestFA`.
+    xml: The XML-formatted configuration string."""
     xml: The XML-formatted configuration string."""
         reqId = self.client.getReqId()
         self.client.replaceFA(reqId, faDataType, xml)
@@ -1516,11 +1513,12 @@ https://interactivebrokers.github.io/tws-api/fundamentals.html"""
             self.wrapper.wshMetaReqId = 0
 
     def reqWshEventData(self, data: WshEventData):
-        """Request Wall Street Horizon event data.
+"""Request Wall Street Horizon event data.
 :meth:`.reqWshMetaData` must have been called first before using this
 method.
 
-Args:
+Args::
+    data: Filters for selecting the corporate event data."""
     data: Filters for selecting the corporate event data."""
         if self.wrapper.wshEventReqId:
             self._logger.warning("reqWshEventData already active")
@@ -1552,7 +1550,7 @@ print(meta)
         return self._run(self.getWshMetaDataAsync())
 
     def getWshEventData(self, data: WshEventData) -> str:
-        """Blocking convenience method that returns the WSH event data as
+"""Blocking convenience method that returns the WSH event data as
 a JSON string.
 :meth:`.getWshMetaData` must have been called first before using this
 method.
@@ -1575,7 +1573,8 @@ filter = '''{
 events = ib.getWshEventData(data)
 print(events)
 
-Args:
+Args::
+    data:"""
     data:"""
         return self._run(self.getWshEventDataAsync(data))
 
@@ -1737,8 +1736,9 @@ Args:
     def whatIfOrderAsync(
         self, contract: Contract, order: Order
     ) -> Awaitable[OrderState]:
-        """Args:
+"""Args::
     contract: 
+    order:"""
     order:"""
         whatIfOrder = copy.copy(order)
         whatIfOrder.whatIf = True
@@ -1748,28 +1748,18 @@ Args:
         return future
 
     def reqCurrentTimeAsync(self) -> Awaitable[datetime.datetime]:
-        """
-
-
-        :rtype: Awaitable[datetime.datetime]
-
+""":rtype: Awaitable[datetime.datetime]"""
         """
         future = self.wrapper.startReq("currentTime")
         self.client.reqCurrentTime()
         return future
 
     def reqAccountUpdatesAsync(self, account: str) -> Awaitable[None]:
-        """Args:
+"""Args::
     account:"""
-        future = self.wrapper.startReq("accountValues")
-        self.client.reqAccountUpdates(True, account)
-        return future
-
-    def reqAccountUpdatesMultiAsync(
-        self, account: str, modelCode: str = ""
-    ) -> Awaitable[None]:
-        """Args:
+"""Args::
     account: 
+    modelCode: (Default value = "")"""
     modelCode: (Default value = "")"""
         reqId = self.client.getReqId()
         future = self.wrapper.startReq(reqId)
@@ -1795,11 +1785,7 @@ Args:
             return list(self.wrapper.acctSummary.values())
 
     def reqAccountSummaryAsync(self) -> Awaitable[None]:
-        """
-
-
-        :rtype: Awaitable[None]
-
+""":rtype: Awaitable[None]"""
         """
         reqId = self.client.getReqId()
         future = self.wrapper.startReq(reqId)
@@ -1820,51 +1806,25 @@ Args:
         return future
 
     def reqOpenOrdersAsync(self) -> Awaitable[List[Trade]]:
-        """
-
-
-        :rtype: Awaitable[List[Trade]]
-
+""":rtype: Awaitable[List[Trade]]"""
         """
         future = self.wrapper.startReq("openOrders")
         self.client.reqOpenOrders()
         return future
 
     def reqAllOpenOrdersAsync(self) -> Awaitable[List[Trade]]:
-        """
-
-
-        :rtype: Awaitable[List[Trade]]
-
+""":rtype: Awaitable[List[Trade]]"""
         """
         future = self.wrapper.startReq("openOrders")
         self.client.reqAllOpenOrders()
         return future
 
     def reqCompletedOrdersAsync(self, apiOnly: bool) -> Awaitable[List[Trade]]:
-        """Args:
+"""Args::
     apiOnly:"""
-        future = self.wrapper.startReq("completedOrders")
-        self.client.reqCompletedOrders(apiOnly)
-        return future
-
-    def reqExecutionsAsync(
-        self, execFilter: Optional[ExecutionFilter] = None
-    ) -> Awaitable[List[Fill]]:
-        """Args:
+"""Args::
     execFilter: (Default value = None)"""
-        execFilter = execFilter or ExecutionFilter()
-        reqId = self.client.getReqId()
-        future = self.wrapper.startReq(reqId)
-        self.client.reqExecutions(reqId, execFilter)
-        return future
-
-    def reqPositionsAsync(self) -> Awaitable[List[Position]]:
-        """
-
-
-        :rtype: Awaitable[List[Position]]
-
+""":rtype: Awaitable[List[Position]]"""
         """
         future = self.wrapper.startReq("positions")
         self.client.reqPositions()
@@ -1873,16 +1833,8 @@ Args:
     def reqContractDetailsAsync(
         self, contract: Contract
     ) -> Awaitable[List[ContractDetails]]:
-        """Args:
+"""Args::
     contract:"""
-        reqId = self.client.getReqId()
-        future = self.wrapper.startReq(reqId, contract)
-        self.client.reqContractDetails(reqId, contract)
-        return future
-
-    async def reqMatchingSymbolsAsync(
-        self, pattern: str
-    ) -> Optional[List[ContractDescription]]:
         """
 
         :param pattern:
@@ -2001,10 +1953,11 @@ Args:
         endDateTime: Union[datetime.datetime, datetime.date, str, None] = "",
         useRTH: bool = True,
     ) -> Awaitable[HistoricalSchedule]:
-        """Args:
+"""Args::
     contract: 
     numDays: 
     endDateTime: (Default value = "")
+    useRTH: (Default value = True)"""
     useRTH: (Default value = True)"""
         reqId = self.client.getReqId()
         future = self.wrapper.startReq(reqId, contract)
@@ -2034,7 +1987,7 @@ Args:
         ignoreSize: bool = False,
         miscOptions: List[TagValue] = [],
     ) -> Awaitable[List]:
-        """Args:
+"""Args::
     contract: 
     startDateTime: 
     endDateTime: 
@@ -2042,6 +1995,7 @@ Args:
     whatToShow: 
     useRth: 
     ignoreSize: (Default value = False)
+    miscOptions: (Default value = [])"""
     miscOptions: (Default value = [])"""
         reqId = self.client.getReqId()
         future = self.wrapper.startReq(reqId, contract)
@@ -2084,21 +2038,9 @@ Args:
         return future.result()
 
     def reqSmartComponentsAsync(self, bboExchange):
-        """Args:
+"""Args::
     bboExchange:"""
-        reqId = self.client.getReqId()
-        future = self.wrapper.startReq(reqId)
-        self.client.reqSmartComponents(reqId, bboExchange)
-        return future
-
-    def reqMktDepthExchangesAsync(
-        self,
-    ) -> Awaitable[List[DepthMktDataDescription]]:
-        """
-
-
-        :rtype: Awaitable[List[DepthMktDataDescription]]
-
+""":rtype: Awaitable[List[DepthMktDataDescription]]"""
         """
         future = self.wrapper.startReq("mktDepthExchanges")
         self.client.reqMktDepthExchanges()
@@ -2107,9 +2049,10 @@ Args:
     def reqHistogramDataAsync(
         self, contract: Contract, useRTH: bool, period: str
     ) -> Awaitable[List[HistogramData]]:
-        """Args:
+"""Args::
     contract: 
     useRTH: 
+    period:"""
     period:"""
         reqId = self.client.getReqId()
         future = self.wrapper.startReq(reqId, contract)
@@ -2122,9 +2065,10 @@ Args:
         reportType: str,
         fundamentalDataOptions: List[TagValue] = [],
     ) -> Awaitable[str]:
-        """Args:
+"""Args::
     contract: 
     reportType: 
+    fundamentalDataOptions: (Default value = [])"""
     fundamentalDataOptions: (Default value = [])"""
         reqId = self.client.getReqId()
         future = self.wrapper.startReq(reqId, contract)
@@ -2161,11 +2105,7 @@ Args:
         return future.result()
 
     def reqScannerParametersAsync(self) -> Awaitable[str]:
-        """
-
-
-        :rtype: Awaitable[str]
-
+""":rtype: Awaitable[str]"""
         """
         future = self.wrapper.startReq("scannerParams")
         self.client.reqScannerParameters()
@@ -2246,10 +2186,11 @@ Args:
         underlyingSecType: str,
         underlyingConId: int,
     ) -> Awaitable[List[OptionChain]]:
-        """Args:
+"""Args::
     underlyingSymbol: 
     futFopExchange: 
     underlyingSecType: 
+    underlyingConId:"""
     underlyingConId:"""
         reqId = self.client.getReqId()
         future = self.wrapper.startReq(reqId)
@@ -2263,11 +2204,7 @@ Args:
         return future
 
     def reqNewsProvidersAsync(self) -> Awaitable[List[NewsProvider]]:
-        """
-
-
-        :rtype: Awaitable[List[NewsProvider]]
-
+""":rtype: Awaitable[List[NewsProvider]]"""
         """
         future = self.wrapper.startReq("newsProviders")
         self.client.reqNewsProviders()
@@ -2279,9 +2216,10 @@ Args:
         articleId: str,
         newsArticleOptions: List[TagValue] = [],
     ) -> Awaitable[NewsArticle]:
-        """Args:
+"""Args::
     providerCode: 
     articleId: 
+    newsArticleOptions: (Default value = [])"""
     newsArticleOptions: (Default value = [])"""
         reqId = self.client.getReqId()
         future = self.wrapper.startReq(reqId)
@@ -2380,7 +2318,7 @@ Args:
         return future.result()
 
     def reqUserInfoAsync(self):
-        """ """
+""""""
         reqId = self.client.getReqId()
         future = self.wrapper.startReq(reqId)
         self.client.reqUserInfo(reqId)

@@ -1,4 +1,7 @@
-# coding:utf-8
+"""get_bson.py module.
+
+Description of the module functionality."""
+
 from collections import OrderedDict
 
 from .meta_config import (
@@ -13,9 +16,10 @@ from .meta_config import (
 
 
 def parse_request_from_fields(fields):
-    """根据字段解析metaid和field
+"""根据字段解析metaid和field
 
-Args:
+Args::
+    fields:"""
     fields:"""
     table_field = OrderedDict()  # {metaid: {key}}
     key2field = OrderedDict()  # {metaid: {key: field}}
@@ -69,13 +73,14 @@ def _get_tabular_data_single_ori(
     count: int = -1,
     **kwargs,
 ):
-    """Args:
+"""Args::
     codes: 
     metaid: 
     keys: 
     int_period: 
     start_time: 
     end_time: 
+    count: (Default value = -1)"""
     count: (Default value = -1)"""
     import os
 
@@ -90,110 +95,15 @@ def _get_tabular_data_single_ori(
     client = xtdata.get_client()
 
     def read_single():
-        """ """
-        nonlocal \
-            codes, \
-            metaid, \
-            int_period, \
-            scan_whole, \
-            scan_whole_filters, \
-            client, \
-            keys, \
-            ret_datas
-        if not codes:
-            scan_whole = True
-            return
-
-        data_path_dict = xtdata._get_data_file_path(codes, (metaid, int_period))
-        print(data_path_dict)
-        for code, file_path in data_path_dict.items():
-            if not file_path:
-                continue
-
-            if not os.path.exists(file_path):  # 如果file_path不存在
-                if code == "XXXXXX.XX":  # 不处理代码为XXXXXX.XX的情况
-                    continue
-
-                if not _check_metatable_key(
-                    metaid, CONSTKEY_CODE
-                ):  # 不处理不含S字段的表
-                    continue
-
-                if CONSTKEY_CODE not in scan_whole_filters:
-                    scan_whole_filters[CONSTKEY_CODE] = []
-                    scan_whole = True
-                scan_whole_filters[CONSTKEY_CODE].append(code)
-                continue
-
-            bson_datas = client.read_local_data(file_path, start_time, end_time, count)
-
-            for data in bson_datas:
-                idata = xtbson.decode(data)
-                ndata = {k: idata[k] for k in keys if k in idata}
-                ret_datas.append(ndata)
-
-    def read_whole():
-        """ """
-        nonlocal \
-            scan_whole, \
-            scan_whole_filters, \
-            metaid, \
-            int_period, \
-            client, \
-            keys, \
-            ret_datas
-        if not scan_whole:
-            return
-
-        data_path_dict = xtdata._get_data_file_path(["XXXXXX.XX"], (metaid, int_period))
-        if "XXXXXX.XX" not in data_path_dict:
-            return
-        file_path = data_path_dict["XXXXXX.XX"]
-        if not os.path.exists(file_path):
-            return
-
-        bson_datas = client.read_local_data(file_path, start_time, end_time, -1)
-        data_c = count
-        for data in bson_datas:
-            idata = xtbson.decode(data)
-
-            valid = True
-            for k, v in scan_whole_filters.items():
-                if idata.get(k, None) not in v:
-                    valid = False
-                    break
-
-            if not valid:
-                continue
-
-            ndata = {k: idata[k] for k in keys if k in idata}
-            ret_datas.append(ndata)
-
-            data_c -= 1
-            if data_c == 0:
-                break
-
-    read_single()
-    read_whole()
-
-    return ret_datas
-
-
-def get_tabular_data(
-    codes: list,
-    fields: list,
-    period: str,
-    start_time: str,
-    end_time: str,
-    count: int = -1,
-    **kwargs,
-):
-    """Args:
+""""""
+""""""
+"""Args::
     codes: 
     fields: 
     period: 
     start_time: 
     end_time: 
+    count: (Default value = -1)"""
     count: (Default value = -1)"""
     import pandas as pd
 
@@ -250,9 +160,10 @@ def get_tabular_data(
 
 
 def get_tabular_bson_head(fields: list):
-    """根据字段解析表头
+"""根据字段解析表头
 
-Args:
+Args::
+    fields:"""
     fields:"""
     ret = {"modelName": "", "tableNameCn": "", "fields": []}
 
@@ -313,12 +224,13 @@ def get_tabular_bson(
     count: int = -1,
     **kwargs,
 ):
-    """Args:
+"""Args::
     codes: 
     fields: 
     period: 
     start_time: 
     end_time: 
+    count: (Default value = -1)"""
     count: (Default value = -1)"""
     from .. import xtbson
 

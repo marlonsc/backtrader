@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""trade.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -31,7 +34,9 @@ try:
     from .utils import AutoOrderedDict
 except ImportError:
 
-    class AutoOrderedDict(dict):
+"""AutoOrderedDict class.
+
+Description of the class functionality."""
         pass
 
 
@@ -56,9 +61,9 @@ This object is a dictionary which allows '.' notation"""
         tz,
         event=None,
     ):
-        """Initializes the object to the current status of the Trade
+"""Initializes the object to the current status of the Trade
 
-Args:
+Args::
     status: 
     dt: 
     barlen: 
@@ -68,6 +73,7 @@ Args:
     pnl: 
     pnlcomm: 
     tz: 
+    event: (Default value = None)"""
     event: (Default value = None)"""
         super(TradeHistory, self).__init__()
         self.status.status = status
@@ -83,30 +89,14 @@ Args:
             self.event = event
 
     def __reduce__(self):
-        """ """
-        return (
-            self.__class__,
-            (
-                self.status.status,
-                self.status.dt,
-                self.status.barlen,
-                self.status.size,
-                self.status.price,
-                self.status.value,
-                self.status.pnl,
-                self.status.pnlcomm,
-                self.status.tz,
-                self.event,
-            ),
-        )
+""""""
+"""Used to fill the ``update`` part of the history entry
 
-    def doupdate(self, order, size, price, commission):
-        """Used to fill the ``update`` part of the history entry
-
-Args:
+Args::
     order: 
     size: 
     price: 
+    commission:"""
     commission:"""
         self.event.order = order
         self.event.size = size
@@ -117,10 +107,11 @@ Args:
         self._close()
 
     def datetime(self, tz=None, naive=True):
-        """Returns a datetime for the time the update event happened
+"""Returns a datetime for the time the update event happened
 
-Args:
+Args::
     tz: (Default value = None)
+    naive: (Default value = True)"""
     naive: (Default value = True)"""
         return num2date(self.status.dt, tz or self.status.tz, naive)
 
@@ -171,49 +162,15 @@ The last entry in the history is the Closing Event"""
     Created, Open, Closed = range(3)
 
     def __str__(self):
-        """ """
-        toprint = (
-            "ref",
-            "data",
-            "tradeid",
-            "size",
-            "price",
-            "value",
-            "commission",
-            "pnl",
-            "pnlcomm",
-            "justopened",
-            "isopen",
-            "isclosed",
-            "baropen",
-            "dtopen",
-            "barclose",
-            "dtclose",
-            "barlen",
-            "historyon",
-            "history",
-            "status",
-        )
-
-        return "\n".join((":".join((x, str(getattr(self, x)))) for x in toprint))
-
-    def __init__(
-        self,
-        data=None,
-        tradeid=0,
-        historyon=False,
-        size=0,
-        price=0.0,
-        value=0.0,
-        commission=0.0,
-    ):
-        """Args:
+""""""
+"""Args::
     data: (Default value = None)
     tradeid: (Default value = 0)
     historyon: (Default value = False)
     size: (Default value = 0)
     price: (Default value = 0.0)
     value: (Default value = 0.0)
+    commission: (Default value = 0.0)"""
     commission: (Default value = 0.0)"""
 
         self.ref = next(self.refbasis)
@@ -259,25 +216,27 @@ The last entry in the history is the Closing Event"""
         return self.data._name
 
     def open_datetime(self, tz=None, naive=True):
-        """Returns a datetime.datetime object with the datetime in which
+"""Returns a datetime.datetime object with the datetime in which
 the trade was opened
 
-Args:
+Args::
     tz: (Default value = None)
+    naive: (Default value = True)"""
     naive: (Default value = True)"""
         return self.data.num2date(self.dtopen, tz=tz, naive=naive)
 
     def close_datetime(self, tz=None, naive=True):
-        """Returns a datetime.datetime object with the datetime in which
+"""Returns a datetime.datetime object with the datetime in which
 the trade was closed
 
-Args:
+Args::
     tz: (Default value = None)
+    naive: (Default value = True)"""
     naive: (Default value = True)"""
         return self.data.num2date(self.dtclose, tz=tz, naive=naive)
 
     def update(self, order, size, price, value, commission, pnl, comminfo):
-        """Updates the current trade. The logic does not check if the
+"""Updates the current trade. The logic does not check if the
 trade is reversed, which is not conceptually supported by the
 object.
 If an update sets the size attribute to 0, "closed" will be
@@ -286,13 +245,14 @@ Updates may be received twice for each order, once for the existing
 size which has been closed (sell undoing a buy) and a second time for
 the the opening part (sell reversing a buy)
 
-Args:
+Args::
     order: the order object which has (completely or partially)
     size: amount to update the order
     price: always be positive to ensure consistency
     value: (unused) cost incurred in new size/price op
     commission: incurred commission in the new size/price op
     pnl: (unused) generated by the executed part
+    comminfo:"""
     comminfo:"""
         if not size:
             return  # empty update, skip all other calculations

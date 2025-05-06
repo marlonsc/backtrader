@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""periodstats.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -45,15 +48,8 @@ class PeriodStats(bt.Analyzer):
     )
 
     def __init__(self):
-        """ """
-        self._tr = TimeReturn(
-            timeframe=self.p.timeframe,
-            compression=self.p.compression,
-            fund=self.p.fund,
-        )
-
-    def stop(self):
-        """ """
+""""""
+""""""
         trets = self._tr.get_analysis()  # dict key = date, value = ret
         pos = nul = neg = 0
         trets = list(itervalues(trets))

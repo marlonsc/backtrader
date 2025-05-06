@@ -15,10 +15,8 @@ from ib_insync.ib import IB
 
 @dataclass
 class IBC:
-    r"""Programmatic control over starting and stopping TWS/Gateway
-    using IBC (https://github.com/IbcAlpha/IBC).
-
-
+"""Programmatic control over starting and stopping TWS/Gateway
+    using IBC (https://github.com/IbcAlpha/IBC)."""
     """
 
     IbcLogLevel: ClassVar = logging.DEBUG
@@ -38,20 +36,8 @@ class IBC:
     on2fatimeout: str = ""
 
     def __post_init__(self):
-        """ """
-        self._isWindows = sys.platform == "win32"
-        if not self.ibcPath:
-            self.ibcPath = "/opt/ibc" if not self._isWindows else "C:\\IBC"
-        self._proc = None
-        self._monitor = None
-        self._logger = logging.getLogger("ib_insync.IBC")
-
-    def __enter__(self):
-        """ """
-        self.start()
-        return self
-
-    def __exit__(self, *_exc):
+""""""
+""""""
         """"""
         self.terminate()
 
@@ -171,56 +157,25 @@ Watchdog unless you understand what it does and doesn't do."""
     probeTimeout: float = 4
 
     def __post_init__(self):
-        """ """
-        self.startingEvent = Event("startingEvent")
-        self.startedEvent = Event("startedEvent")
-        self.stoppingEvent = Event("stoppingEvent")
-        self.stoppedEvent = Event("stoppedEvent")
-        self.softTimeoutEvent = Event("softTimeoutEvent")
-        self.hardTimeoutEvent = Event("hardTimeoutEvent")
-        if not self.controller:
-            raise ValueError("No controller supplied")
-        if not self.ib:
-            raise ValueError("No IB instance supplied")
-        if self.ib.isConnected():
-            raise ValueError("IB instance must not be connected")
-        self._runner = None
-        self._logger = logging.getLogger("ib_insync.Watchdog")
-
-    def start(self):
-        """ """
-        self._logger.info("Starting")
-        self.startingEvent.emit(self)
-        self._runner = asyncio.ensure_future(self.runAsync())
-        return self._runner
-
-    def stop(self):
-        """ """
-        self._logger.info("Stopping")
-        self.stoppingEvent.emit(self)
-        self.ib.disconnect()
-        self._runner = None
-
-    async def runAsync(self):
+""""""
+""""""
+""""""
         """ """
 
         def onTimeout(idlePeriod):
-            """Args:
+"""Args::
     idlePeriod:"""
-            if not waiter.done():
-                waiter.set_result(None)
-
-        def onError(reqId, errorCode, errorString, contract):
-            """Args:
+"""Args::
     reqId: 
     errorCode: 
     errorString: 
+    contract:"""
     contract:"""
             if errorCode in {100, 1100} and not waiter.done():
                 waiter.set_exception(Warning(f"Error {errorCode}"))
 
         def onDisconnected():
-            """ """
+""""""
             if not waiter.done():
                 waiter.set_exception(Warning("Disconnected"))
 

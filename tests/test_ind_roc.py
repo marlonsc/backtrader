@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""test_ind_roc.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -38,7 +41,8 @@ chkind = btind.ROC
 
 
 def test_run(main=False):
-    """Args:
+"""Args::
+    main: (Default value = False)"""
     main: (Default value = False)"""
     datas = [testcommon.getdata(i) for i in range(chkdatas)]
     testcommon.runtest(

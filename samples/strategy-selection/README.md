@@ -1,25 +1,22 @@
 # strategy-selection
 
-Directory containing strategy-selection related files. Primarily contains Python code.
+This directory contains various files including 1 py file, 1 md file.
 
 ## Navigation
 
-* [🏠 Root Directory](../../README.md)
+* [🏠 Root Directory](/samples/strategy-selection/../samples/strategy-selection/..README.md)
 * [⬆️ Parent Directory (samples)](../README.md)
 
 ## Files
 
-### README.md
-
-File with .md extension.
-
 ### strategy-selection.py
+
+strategy-selection.py module.
 
 ## Directory Summary
 
-This directory contains 2 files and 0 subdirectories.
+This directory contains 1 files and 0 subdirectories.
 
 ### File Types
 
-* .md: 1 files
 * .py: 1 files

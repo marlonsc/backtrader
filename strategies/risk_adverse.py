@@ -198,22 +198,7 @@ Lines:
     params = dict(period=20)
 
     def __init__(self):
-        """ """
-        # Calculate daily percentage change
-        self.pct_change = (
-            100.0 * (self.data.close(-1) - self.data.close(-2)) / self.data.close(-2)
-        )
-
-        # Calculate the absolute value of the percentage change
-        self.abs_change = abs(self.pct_change)
-
-        # Use simple moving average to get the average volatility
-        self.lines.avg_volatility = bt.indicators.SimpleMovingAverage(
-            self.abs_change, period=self.params.period
-        )
-
-
-class RecentHigh(bt.Indicator):
+""""""
     """Recent High Indicator
 Detects if the current price is a new high within a specified lookback period.
 Lines:
@@ -223,17 +208,7 @@ Lines:
     params = dict(lookback=20)
 
     def __init__(self):
-        """ """
-        # Compare current high with highest high in lookback period
-        self.highest = bt.indicators.Highest(
-            self.data.high, period=self.params.lookback
-        )
-
-        # Set new_high to 1 if current high is greater than or equal to highest
-        self.lines.new_high = self.data.high >= self.highest
-
-
-class DiffHighLow(bt.Indicator):
+""""""
     """Difference High Low Indicator
 Calculates the ratio of the difference between the highest high and lowest low
 to the average price over a specified period.
@@ -244,19 +219,7 @@ Lines:
     params = dict(period=60)
 
     def __init__(self):
-        """ """
-        # Find highest high and lowest low in period
-        self.highest = bt.indicators.Highest(self.data.high, period=self.params.period)
-        self.lowest = bt.indicators.Lowest(self.data.low, period=self.params.period)
-
-        # Calculate the average price for normalization
-        self.avg_price = (self.highest + self.lowest) / 2.0
-
-        # Calculate the normalized difference
-        self.lines.diff = (self.highest - self.lowest) / self.avg_price
-
-
-class RiskAverseStrategy(bt.Strategy, TradeThrottling):
+""""""
     """Risk Averse Strategy
 This strategy seeks to buy stocks with low volatility, recent new highs, high volume,
 and small differences between high and low prices. It exits positions when multiple
@@ -305,11 +268,12 @@ Best Market Conditions:
     )
 
     def log(self, txt, dt=None, level="info"):
-        """Logging function for the strategy
+"""Logging function for the strategy
 
-Args:
+Args::
     txt: 
     dt: (Default value = None)
+    level: (Default value = "info")"""
     level: (Default value = "info")"""
         if level == "debug" and self.params.log_level != "debug":
             return
@@ -318,62 +282,11 @@ Args:
         print(f"{dt.isoformat()}: {txt}")
 
     def __init__(self):
-        """ """
-        super(RiskAverseStrategy, self).__init__()
+""""""
+"""Calculate how many shares to buy based on position sizing rules
 
-        # Used to keep track of pending orders
-        self.order = None
-
-        # Initialize price indicators
-        self.dataclose = self.datas[0].close
-        self.datahigh = self.datas[0].high
-        self.datalow = self.datas[0].low
-        self.datavolume = self.datas[0].volume
-
-        # Initialize indicators
-        self.volatility = AverageVolatility(
-            self.data, period=self.params.volatility_period
-        )
-        self.new_high = RecentHigh(self.data, lookback=self.params.high_low_period)
-        self.high_low_diff = DiffHighLow(self.data, period=self.params.high_low_period)
-        self.volume_ma = bt.indicators.SimpleMovingAverage(
-            self.datavolume, period=self.params.vol_period
-        )
-
-        # Initialize trade management variables
-        self.stop_price = None
-        self.trail_price = None
-        self.highest_price = None
-
-        # Initialize trade tracking variables
-        self.trade_count = 0
-        self.winning_trades = 0
-        self.losing_trades = 0
-
-        # Initialize last trade date for trade throttling
-        self.last_trade_date = None
-
-        # Log the strategy initialization
-        self.log(
-            "Strategy initialized with volatility threshold:"
-            f" {self.params.volatility_threshold}%"
-        )
-        self.log(
-            f"Using stop loss: {self.params.use_stop_loss}, Stop loss percentage:"
-            f" {self.params.stop_pct}%"
-        )
-        self.log(
-            f"Using trailing stop: {self.params.use_trailing_stop}, Trailing stop"
-            f" percentage: {self.params.trail_pct}%"
-        )
-        self.log(
-            f"Trade throttling: {self.params.trade_throttle_days} days between trades"
-        )
-
-    def calculate_position_size(self, price):
-        """Calculate how many shares to buy based on position sizing rules
-
-Args:
+Args::
+    price:"""
     price:"""
         available_cash = self.broker.get_cash()
         value = self.broker.getvalue()
@@ -421,146 +334,7 @@ Args:
         return size
 
     def next(self):
-        """ """
-        # If an order is pending, we cannot send a new one
-        if self.order:
-            return
-
-        # Check if we are in the market
-        if not self.position:
-            # BUY LOGIC
-
-            # Check if we're allowed to trade based on the throttling rules
-            if not self.can_trade_now():
-                return
-
-            # Check all entry conditions
-
-            # Condition 1: Low volatility
-            cond_1 = (
-                self.volatility.avg_volatility[0] < self.params.volatility_threshold
-            )
-
-            # Condition 2: Recent new high
-            cond_2 = self.new_high.new_high[0] > 0
-
-            # Condition 3: High volume
-            cond_3 = self.datavolume[0] > self.params.vol_threshold
-
-            # Condition 4: Small high-low difference
-            cond_4 = self.high_low_diff.diff[0] < self.params.high_low_threshold
-
-            # Print debug information every 10 bars
-            if len(self) % 10 == 0:
-                self.log(
-                    f"DEBUG - Close: {self.dataclose[0]:.2f}, Volatility:"
-                    f" {self.volatility.avg_volatility[0]:.2f}%, "
-                    + f"New High: {'Yes' if cond_2 else 'No'}, "
-                    + f"Volume: {self.datavolume[0]:.0f}, High-Low Diff:"
-                    f" {self.high_low_diff.diff[0]:.3f}",
-                    level="debug",
-                )
-
-            # All conditions must be met for entry
-            if cond_1 and cond_2 and cond_3 and cond_4:
-                # Calculate position size
-                price = self.dataclose[0]
-                size = self.calculate_position_size(price)
-
-                if size <= 0:
-                    self.log(
-                        "Position size calculation resulted in zero or negative size",
-                        level="warning",
-                    )
-                    return
-
-                self.log(
-                    "BUY SIGNAL: Volatility:"
-                    f" {self.volatility.avg_volatility[0]:.2f}%, "
-                    + f"New High: Yes, Volume: {self.datavolume[0]:.0f}, High-Low Diff:"
-                    f" {self.high_low_diff.diff[0]:.3f}"
-                )
-                self.log(f"BUY CREATE: {self.dataclose[0]:.2f}, Size: {size}")
-
-                # Set stop loss if enabled
-                if self.params.use_stop_loss:
-                    self.stop_price = price * (1.0 - self.params.stop_pct / 100.0)
-                    self.log(f"Stop loss set at {self.stop_price:.2f}")
-
-                # Set trailing stop if enabled
-                if self.params.use_trailing_stop:
-                    self.highest_price = price
-                    self.trail_price = price * (1.0 - self.params.trail_pct / 100.0)
-                    self.log(f"Initial trailing stop set at {self.trail_price:.2f}")
-
-                # Create the buy order
-                self.order = self.buy(size=size)
-
-                # Update the last trade date for throttling
-                self.last_trade_date = self.datas[0].datetime.date(0)
-
-        else:
-            # SELL LOGIC - We are in the market, check for exit conditions
-
-            # Check for stop loss hit
-            if self.params.use_stop_loss and self.stop_price is not None:
-                if self.datalow[0] <= self.stop_price:
-                    self.log(f"SELL CREATE (Stop Loss): {self.dataclose[0]:.2f}")
-                    self.order = self.sell()
-                    return
-
-            # Update trailing stop if enabled
-            if self.params.use_trailing_stop and self.trail_price is not None:
-                # Update the highest price seen
-                if self.datahigh[0] > self.highest_price:
-                    self.highest_price = self.datahigh[0]
-                    # Calculate new trail price
-                    new_trail = self.highest_price * (
-                        1.0 - self.params.trail_pct / 100.0
-                    )
-                    # Only update if the new trail price is higher
-                    if new_trail > self.trail_price:
-                        self.trail_price = new_trail
-                        self.log(
-                            f"Trailing stop updated to {self.trail_price:.2f}",
-                            level="debug",
-                        )
-
-                # Check if trailing stop is hit
-                if self.datalow[0] <= self.trail_price:
-                    self.log(f"SELL CREATE (Trailing Stop): {self.datalow[0]:.2f}")
-                    self.order = self.sell()
-                    return
-
-            # Check for exit conditions based on strategy logic
-            # Count how many exit conditions are met
-            exit_count = 0
-
-            # Exit condition 1: Volatility is high
-            if self.volatility.avg_volatility[0] >= self.params.volatility_threshold:
-                exit_count += 1
-
-            # Exit condition 2: No new high recently
-            if self.new_high.new_high[0] == 0:
-                exit_count += 1
-
-            # Exit condition 3: Volume is low
-            if self.datavolume[0] <= self.params.vol_threshold:
-                exit_count += 1
-
-            # Exit condition 4: High-low difference is large
-            if self.high_low_diff.diff[0] >= self.params.high_low_threshold:
-                exit_count += 1
-
-            # Exit if enough conditions are met
-            if exit_count >= self.params.exit_count:
-                self.log(
-                    f"SELL CREATE (Strategy Exit): {exit_count} exit conditions met"
-                )
-                self.order = self.sell()
-                return
-
-    def stop(self):
+""""""
         """Called when backtest is finished"""
         self.log(f"Final Portfolio Value: {self.broker.getvalue():.2f}")
 
@@ -583,9 +357,10 @@ Args:
         )
 
     def notify_order(self, order):
-        """Handle order notifications
+"""Handle order notifications
 
-Args:
+Args::
+    order:"""
     order:"""
         if order.status in [order.Submitted, order.Accepted]:
             # Order pending, do nothing
@@ -613,9 +388,10 @@ Args:
         self.order = None
 
     def notify_trade(self, trade):
-        """Track completed trades
+"""Track completed trades
 
-Args:
+Args::
+    trade:"""
     trade:"""
         if not trade.isclosed:
             return

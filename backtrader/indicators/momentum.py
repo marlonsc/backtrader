@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""momentum.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -41,12 +44,7 @@ See:
     plotinfo = dict(plothlines=[0.0])
 
     def __init__(self):
-        """ """
-        self.l.momentum = self.data - self.data(-self.p.period)
-        super(Momentum, self).__init__()
-
-
-class MomentumOscillator(Indicator):
+""""""
     """Measures the ratio of change in prices over a period
 Formula:
 - mosc = 100 * (data / data_period)
@@ -62,21 +60,9 @@ See:
     params = (("period", 12), ("band", 100.0))
 
     def _plotlabel(self):
-        """ """
-        plabels = [self.p.period]
-        return plabels
-
-    def _plotinit(self):
-        """ """
-        self.plotinfo.plothlines = [self.p.band]
-
-    def __init__(self):
-        """ """
-        self.l.momosc = 100.0 * (self.data / self.data(-self.p.period))
-        super(MomentumOscillator, self).__init__()
-
-
-class RateOfChange(Indicator):
+""""""
+""""""
+""""""
     """Measures the ratio of change in prices over a period
 Formula:
 - roc = (data - data_period) / data_period
@@ -92,13 +78,7 @@ See:
     params = (("period", 12),)
 
     def __init__(self):
-        """ """
-        dperiod = self.data(-self.p.period)
-        self.l.roc = (self.data - dperiod) / dperiod
-        super(RateOfChange, self).__init__()
-
-
-class RateOfChange100(Indicator):
+""""""
     """Measures the ratio of change in prices over a period with base 100
 This is for example how ROC is defined in stockcharts
 Formula:
@@ -115,6 +95,6 @@ See:
     params = (("period", 12),)
 
     def __init__(self):
-        """ """
+""""""
         self.l.roc100 = 100.0 * ROC(self.data, period=self.p.period)
         super(RateOfChange100, self).__init__()

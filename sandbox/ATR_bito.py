@@ -1,4 +1,7 @@
-# -*- coding: UTF-8 -*-
+"""ATR_bito.py module.
+
+Description of the module functionality."""
+
 
 # import
 import pandas as pd

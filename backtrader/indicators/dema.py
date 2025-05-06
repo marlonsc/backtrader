@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""dema.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -47,15 +50,7 @@ See:
     params = (("_movav", MovAv.EMA),)
 
     def __init__(self):
-        """ """
-        ema = self.p._movav(self.data, period=self.p.period)
-        ema2 = self.p._movav(ema, period=self.p.period)
-        self.lines.dema = 2.0 * ema - ema2
-
-        super(DoubleExponentialMovingAverage, self).__init__()
-
-
-class TripleExponentialMovingAverage(MovingAverageBase):
+""""""
     """TEMA was first time introduced in 1994, in the article "Smoothing Data with
 Faster Moving Averages" by Patrick G. Mulloy in "Technical Analysis of
 Stocks & Commodities" magazine.
@@ -77,7 +72,7 @@ See:
     params = (("_movav", MovAv.EMA),)
 
     def __init__(self):
-        """ """
+""""""
         ema1 = self.p._movav(self.data, period=self.p.period)
         ema2 = self.p._movav(ema1, period=self.p.period)
         ema3 = self.p._movav(ema2, period=self.p.period)

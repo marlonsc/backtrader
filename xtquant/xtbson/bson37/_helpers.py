@@ -12,22 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Setstate and getstate functions for objects with __slots__, allowing
-compatibility with default pickling protocol
+compatibility with default pickling protocol"""
 """
 
 from typing import Any, Mapping
 
 
 def _setstate_slots(self: Any, state: Any) -> None:
-    """Args:
+"""Args::
     state:"""
-    for slot, value in state.items():
-        setattr(self, slot, value)
-
-
-def _mangle_name(name: str, prefix: str) -> str:
-    """Args:
+"""Args::
     name: 
+    prefix:"""
     prefix:"""
     if name.startswith("__"):
         prefix = "_" + prefix
@@ -37,11 +33,7 @@ def _mangle_name(name: str, prefix: str) -> str:
 
 
 def _getstate_slots(self: Any) -> Mapping[Any, Any]:
-    """
-
-
-    :rtype: Mapping[Any,Any]
-
+""":rtype: Mapping[Any,Any]"""
     """
     prefix = self.__class__.__name__
     ret = dict()

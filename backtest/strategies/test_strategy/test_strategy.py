@@ -1,4 +1,7 @@
-import datetime
+"""test_strategy.py module.
+
+Description of the module functionality."""
+
 import os
 import sys
 
@@ -17,10 +20,11 @@ class TestStrategy(bt.Strategy):
     params = (("maperiod", 15),)
 
     def log(self, txt, dt=None):
-        """Print strategy logs (order/trade records, etc.).
+"""Print strategy logs (order/trade records, etc.).
 
-Args:
+Args::
     txt: Log message.
+    dt: Date for the log. Defaults to None."""
     dt: Date for the log. Defaults to None."""
         dt = dt or self.datas[0].datetime.date(0)
         print(f"{dt.isoformat()}, {txt}")
@@ -39,9 +43,10 @@ Args:
         bt.indicators.ATR(self.datas[0])
 
     def notify_order(self, order):
-        """Print order information.
+"""Print order information.
 
-Args:
+Args::
+    order: Order object."""
     order: Order object."""
         if order.status in [order.Submitted, order.Accepted]:
             return
@@ -64,9 +69,10 @@ Args:
         self.order = None
 
     def notify_trade(self, trade):
-        """Print trade information.
+"""Print trade information.
 
-Args:
+Args::
+    trade: Trade object."""
     trade: Trade object."""
         if not trade.isclosed:
             return

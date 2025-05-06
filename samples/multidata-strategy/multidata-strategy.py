@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""multidata-strategy.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -49,8 +52,9 @@ The strategy is a long-only strategy"""
     )
 
     def log(self, txt, dt=None):
-        """Args:
+"""Args::
     txt: 
+    dt: (Default value = None)"""
     dt: (Default value = None)"""
         if self.p.printout:
             dt = dt or self.data.datetime[0]
@@ -58,120 +62,13 @@ The strategy is a long-only strategy"""
             print("%s, %s" % (dt.isoformat(), txt))
 
     def notify_order(self, order):
-        """Args:
+"""Args::
     order:"""
-        if order.status in [bt.Order.Submitted, bt.Order.Accepted]:
-            return  # Await further notifications
-
-        if order.status == order.Completed:
-            if order.isbuy():
-                buytxt = "BUY COMPLETE, %.2f" % order.executed.price
-                self.log(buytxt, order.executed.dt)
-            else:
-                selltxt = "SELL COMPLETE, %.2f" % order.executed.price
-                self.log(selltxt, order.executed.dt)
-
-        elif order.status in [order.Expired, order.Canceled, order.Margin]:
-            self.log("%s ," % order.Status[order.status])
-            pass  # Simply log
-
-        # Allow new orders
-        self.orderid = None
-
-    def __init__(self):
-        """ """
-        # To control operation entries
-        self.orderid = None
-
-        # Create SMA on 2nd data
-        sma = btind.MovAv.SMA(self.data1, period=self.p.period)
-        # Create a CrossOver Signal from close an moving average
-        self.signal = btind.CrossOver(self.data1.close, sma)
-
-    def next(self):
-        """ """
-        if self.orderid:
-            return  # if an order is active, no new orders are allowed
-
-        if self.p.printout:
-            print("Self  len:", len(self))
-            print("Data0 len:", len(self.data0))
-            print("Data1 len:", len(self.data1))
-            print("Data0 len == Data1 len:", len(self.data0) == len(self.data1))
-
-            print("Data0 dt:", self.data0.datetime.datetime())
-            print("Data1 dt:", self.data1.datetime.datetime())
-
-        if not self.position:  # not yet in market
-            if self.signal > 0.0:  # cross upwards
-                self.log("BUY CREATE , %.2f" % self.data1.close[0])
-                self.buy(size=self.p.stake)
-                self.buy(data=self.data1, size=self.p.stake)
-
-        else:  # in the market
-            if self.signal < 0.0:  # crosss downwards
-                self.log("SELL CREATE , %.2f" % self.data1.close[0])
-                self.sell(size=self.p.stake)
-                self.sell(data=self.data1, size=self.p.stake)
-
-    def stop(self):
-        """ """
-        print("==================================================")
-        print("Starting Value - %.2f" % self.broker.startingcash)
-        print("Ending   Value - %.2f" % self.broker.getvalue())
-        print("==================================================")
-
-
-def runstrategy():
-    """ """
-    args = parse_args()
-
-    # Create a cerebro
-    cerebro = bt.Cerebro()
-
-    # Get the dates from the args
-    fromdate = datetime.datetime.strptime(args.fromdate, "%Y-%m-%d")
-    todate = datetime.datetime.strptime(args.todate, "%Y-%m-%d")
-
-    # Create the 1st data
-    data0 = btfeeds.YahooFinanceCSVData(
-        dataname=args.data0, fromdate=fromdate, todate=todate
-    )
-
-    # Add the 1st data to cerebro
-    cerebro.adddata(data0)
-
-    # Create the 2nd data
-    data1 = btfeeds.YahooFinanceCSVData(
-        dataname=args.data1, fromdate=fromdate, todate=todate
-    )
-
-    # Add the 2nd data to cerebro
-    cerebro.adddata(data1)
-
-    # Add the strategy
-    cerebro.addstrategy(MultiDataStrategy, period=args.period, stake=args.stake)
-
-    # Add the commission - only stocks like a for each operation
-    cerebro.broker.setcash(args.cash)
-
-    # Add the commission - only stocks like a for each operation
-    cerebro.broker.setcommission(commission=args.commperc)
-
-    # And run it
-    cerebro.run(
-        runonce=not args.runnext,
-        preload=not args.nopreload,
-        oldsync=args.oldsync,
-    )
-
-    # Plot if requested
-    if args.plot:
-        cerebro.plot(numfigs=args.numfigs, volume=False, zdown=False)
-
-
-def parse_args():
-    """ """
+""""""
+""""""
+""""""
+""""""
+""""""
     parser = argparse.ArgumentParser(description="MultiData Strategy")
 
     parser.add_argument(

@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""blaze.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -61,14 +64,8 @@ it is"""
     ]
 
     def start(self):
-        """ """
-        super(BlazeData, self).start()
-
-        # reset the iterator on each start
-        self._rows = iter(self.p.dataname)
-
-    def _load(self):
-        """ """
+""""""
+""""""
         try:
             row = next(self._rows)
         except StopIteration:

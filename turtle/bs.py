@@ -1,4 +1,7 @@
-import baostock as bs
+"""bs.py module.
+
+Description of the module functionality."""
+
 import pandas as pd
 
 # 登陆系统

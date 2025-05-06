@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""quandl.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -70,64 +73,9 @@ Number of decimals to round to"""
     )
 
     def start(self):
-        """ """
-        super(QuandlCSV, self).start()
-
-        if not self.params.reverse:
-            return
-        elif self._online:
-            return  # revers is True but also online, managed with order=asc
-
-        # Quandl data can be in reverse order -> reverse
-        dq = collections.deque()
-        for line in self.f:
-            dq.appendleft(line)
-
-        f = io.StringIO(newline=None)
-        f.writelines(dq)
-        f.seek(0)
-        self.f.close()
-        self.f = f
-
-    def _loadline(self, linetokens):
-        """Args:
+""""""
+"""Args::
     linetokens:"""
-        i = itertools.count(0)
-
-        dttxt = linetokens[next(i)]  # YYYY-MM-DD
-        dt = date(int(dttxt[0:4]), int(dttxt[5:7]), int(dttxt[8:10]))
-        dtnum = date2num(datetime.combine(dt, self.p.sessionend))
-
-        self.lines.datetime[0] = dtnum
-        if self.p.adjclose:
-            for _ in range(7):
-                next(i)  # skip ohlcv, ex-dividend, split ratio
-
-        o = float(linetokens[next(i)])
-        h = float(linetokens[next(i)])
-        l = float(linetokens[next(i)])
-        c = float(linetokens[next(i)])
-        v = float(linetokens[next(i)])
-        self.lines.openinterest[0] = 0.0
-
-        if self.p.round:
-            decimals = self.p.decimals
-            o = round(o, decimals)
-            h = round(h, decimals)
-            l = round(l, decimals)
-            c = round(c, decimals)
-            v = round(v, decimals)
-
-        self.lines.open[0] = o
-        self.lines.high[0] = h
-        self.lines.low[0] = l
-        self.lines.close[0] = c
-        self.lines.volume[0] = v
-
-        return True
-
-
-class Quandl(QuandlCSV):
     """Executes a direct download of data from Quandl servers for the given time
 range.
 Specific parameters (or specific meaning):
@@ -166,7 +114,7 @@ string identifying the dataset to query. Defaults to ``WIKI``"""
     )
 
     def start(self):
-        """ """
+""""""
         self.error = None
 
         url = "{}/{}/{}.csv".format(

@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""plot.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -50,34 +53,13 @@ from .utils import tag_box_style
 
 
 class PInfo(object):
-    """ """
-
-    def __init__(self, sch):
-        """Args:
+""""""
+"""Args::
     sch:"""
-        self.sch = sch
-        self.nrows = 0
-        self.row = 0
-        self.clock = None
-        self.x = None
-        self.xlen = 0
-        self.sharex = None
-        self.figs = list()
-        self.cursors = list()
-        self.daxis = collections.OrderedDict()
-        self.vaxis = list()
-        self.zorder = dict()
-        self.coloridx = collections.defaultdict(lambda: -1)
-        self.handles = collections.defaultdict(list)
-        self.labels = collections.defaultdict(list)
-        self.legpos = collections.defaultdict(int)
-
-        self.prop = mfontmgr.FontProperties(size=self.sch.subtxtsize)
-
-    def newfig(self, figid, numfig, mpyplot):
-        """Args:
+"""Args::
     figid: 
     numfig: 
+    mpyplot:"""
     mpyplot:"""
         fig = mpyplot.figure(figid + numfig)
         self.figs.append(fig)
@@ -88,39 +70,15 @@ class PInfo(object):
         return fig
 
     def nextcolor(self, ax):
-        """Args:
+"""Args::
     ax:"""
-        self.coloridx[ax] += 1
-        return self.coloridx[ax]
-
-    def color(self, ax):
-        """Args:
+"""Args::
     ax:"""
-        return self.sch.color(self.coloridx[ax])
-
-    def zordernext(self, ax):
-        """Args:
+"""Args::
     ax:"""
-        z = self.zorder[ax]
-        if self.sch.zdown:
-            return z * 0.9999
-        return z * 1.0001
-
-    def zordercur(self, ax):
-        """Args:
+"""Args::
     ax:"""
-        return self.zorder[ax]
-
-
-class Plot_OldSync(with_metaclass(MetaParams, object)):
-    """ """
-
-    params = (
-        ("scheme", PlotScheme()),
-        ("spread", False),  # 添加spread参数
-    )
-
-    def __init__(self, **kwargs):
+""""""
         """"""
 
         if "spread" in kwargs:
@@ -135,12 +93,13 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
             setattr(self.p.scheme, "locbgother", "white")
 
     def drawtag(self, ax, x, y, facecolor, edgecolor, alpha=0.9, **kwargs):
-        """Args:
+"""Args::
     ax: 
     x: 
     y: 
     facecolor: 
     edgecolor: 
+    alpha: (Default value = 0.9)"""
     alpha: (Default value = 0.9)"""
 
         txt = ax.text(
@@ -171,12 +130,13 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
         end=None,
         **kwargs,
     ):
-        """Args:
+"""Args::
     strategy: 
     figid: (Default value = 0)
     numfigs: (Default value = 1)
     iplot: (Default value = True)
     start: (Default value = None)
+    end: (Default value = None)"""
     end: (Default value = None)"""
         # pfillers={}):
         if not strategy.datas:
@@ -372,97 +332,13 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
         return figs
 
     def setlocators(self, ax):
-        """Args:
+"""Args::
     ax:"""
-        clock = sorted(
-            self.pinf.clock.datas, key=lambda x: (x._timeframe, x._compression)
-        )[0]
-
-        getattr(clock, "_compression", 1)
-        tframe = getattr(clock, "_timeframe", TimeFrame.Days)
-
-        if self.pinf.sch.fmt_x_data is None:
-            if tframe == TimeFrame.Years:
-                fmtdata = "%Y"
-            elif tframe == TimeFrame.Months:
-                fmtdata = "%Y-%m"
-            elif tframe == TimeFrame.Weeks:
-                fmtdata = "%Y-%m-%d"
-            elif tframe == TimeFrame.Days:
-                fmtdata = "%Y-%m-%d"
-            elif tframe == TimeFrame.Minutes:
-                fmtdata = "%Y-%m-%d %H:%M"
-            elif tframe == TimeFrame.Seconds:
-                fmtdata = "%Y-%m-%d %H:%M:%S"
-            elif tframe == TimeFrame.MicroSeconds:
-                fmtdata = "%Y-%m-%d %H:%M:%S.%f"
-            elif tframe == TimeFrame.Ticks:
-                fmtdata = "%Y-%m-%d %H:%M:%S.%f"
-        else:
-            fmtdata = self.pinf.sch.fmt_x_data
-
-        fordata = MyDateFormatter(self.pinf.xreal, fmt=fmtdata)
-        for dax in self.pinf.daxis.values():
-            dax.fmt_xdata = fordata
-
-        # Major locator / formatter
-        locmajor = loc.AutoDateLocator(self.pinf.xreal)
-        ax.xaxis.set_major_locator(locmajor)
-        if self.pinf.sch.fmt_x_ticks is None:
-            autofmt = loc.AutoDateFormatter(self.pinf.xreal, locmajor)
-        else:
-            autofmt = MyDateFormatter(self.pinf.xreal, fmt=self.pinf.sch.fmt_x_ticks)
-        ax.xaxis.set_major_formatter(autofmt)
-
-    def calcrows(self, strategy):
-        """Args:
+"""Args::
     strategy:"""
-        # Calculate the total number of rows
-        rowsmajor = self.pinf.sch.rowsmajor
-        rowsminor = self.pinf.sch.rowsminor
-        nrows = 0
-
-        datasnoplot = 0
-        for data in strategy.datas:
-            if not data.plotinfo.plot:
-                # neither data nor indicators nor volume add rows
-                datasnoplot += 1
-                self.dplotsup.pop(data, None)
-                self.dplotsdown.pop(data, None)
-                self.dplotsover.pop(data, None)
-
-            else:
-                pmaster = data.plotinfo.plotmaster
-                if pmaster is data:
-                    pmaster = None
-                if pmaster is not None:
-                    # data doesn't add a row, but volume may
-                    if self.pinf.sch.volume:
-                        nrows += rowsminor
-                else:
-                    # data adds rows, volume may
-                    nrows += rowsmajor
-                    if self.pinf.sch.volume and not self.pinf.sch.voloverlay:
-                        nrows += rowsminor
-
-        if False:
-            # Datas and volumes
-            nrows += (len(strategy.datas) - datasnoplot) * rowsmajor
-            if self.pinf.sch.volume and not self.pinf.sch.voloverlay:
-                nrows += (len(strategy.datas) - datasnoplot) * rowsminor
-
-        # top indicators/observers
-        nrows += len(self.dplotstop) * rowsminor
-
-        # indicators above datas
-        nrows += sum(len(v) for v in self.dplotsup.values())
-        nrows += sum(len(v) for v in self.dplotsdown.values())
-
-        self.pinf.nrows = nrows
-
-    def newaxis(self, obj, rowspan):
-        """Args:
+"""Args::
     obj: 
+    rowspan:"""
     rowspan:"""
         ax = self.mpyplot.subplot2grid(
             (self.pinf.nrows, 1),
@@ -490,12 +366,13 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
     def plotind(
         self, iref, ind, subinds=None, upinds=None, downinds=None, masterax=None
     ):
-        """Args:
+"""Args::
     iref: 
     ind: 
     subinds: (Default value = None)
     upinds: (Default value = None)
     downinds: (Default value = None)
+    masterax: (Default value = None)"""
     masterax: (Default value = None)"""
 
         self.p.scheme
@@ -707,13 +584,14 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
             self.plotind(iref, downind)
 
     def plotvolume(self, data, opens, highs, lows, closes, volumes, label):
-        """Args:
+"""Args::
     data: 
     opens: 
     highs: 
     lows: 
     closes: 
     volumes: 
+    label:"""
     label:"""
         pmaster = data.plotinfo.plotmaster
         if pmaster is data:
@@ -788,8 +666,9 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
         return volplot
 
     def plotdata(self, data, indicators):
-        """Args:
+"""Args::
     data: 
+    indicators:"""
     indicators:"""
         for ind in indicators:
             upinds = self.dplotsup[ind]
@@ -1000,23 +879,22 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
             a.set_yscale("log")
 
     def show(self):
-        """ """
-        self.mpyplot.show()
-
-    def savefig(self, fig, filename, width=16, height=9, dpi=300, tight=True):
-        """Args:
+""""""
+"""Args::
     fig: 
     filename: 
     width: (Default value = 16)
     height: (Default value = 9)
     dpi: (Default value = 300)
     tight: (Default value = True)"""
+    tight: (Default value = True)"""
         fig.set_size_inches(width, height)
         bbox_inches = "tight" * tight or None
         fig.savefig(filename, dpi=dpi, bbox_inches=bbox_inches)
 
     def sortdataindicators(self, strategy):
-        """Args:
+"""Args::
+    strategy:"""
     strategy:"""
         # These lists/dictionaries hold the subplots that go above each data
         self.dplotstop = list()

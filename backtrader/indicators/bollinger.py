@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""bollinger.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -59,30 +62,14 @@ See:
     )
 
     def _plotlabel(self):
-        """ """
-        plabels = [self.p.period, self.p.devfactor]
-        plabels += [self.p.movav] * self.p.notdefault("movav")
-        return plabels
-
-    def __init__(self):
-        """ """
-        self.lines.mid = ma = self.p.movav(self.data, period=self.p.period)
-        stddev = self.p.devfactor * StdDev(
-            self.data, ma, period=self.p.period, movav=self.p.movav
-        )
-        self.lines.top = ma + stddev
-        self.lines.bot = ma - stddev
-
-        super(BollingerBands, self).__init__()
-
-
-class BollingerBandsPct(BollingerBands):
+""""""
+""""""
     """Extends the Bollinger Bands with a Percentage line"""
 
     lines = ("pctb",)
     plotlines = dict(pctb=dict(_name="%B"))  # display the line as %B on chart
 
     def __init__(self):
-        """ """
+""""""
         super(BollingerBandsPct, self).__init__()
         self.l.pctb = (self.data - self.l.bot) / (self.l.top - self.l.bot)

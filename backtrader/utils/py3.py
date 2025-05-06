@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""py3.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -57,120 +60,56 @@ if PY2:
     bstr = bytes
 
     def iterkeys(d):
-        """Args:
+"""Args::
     d:"""
-        return d.iterkeys()
-
-    def itervalues(d):
-        """Args:
+"""Args::
     d:"""
-        return d.itervalues()
-
-    def iteritems(d):
-        """Args:
+"""Args::
     d:"""
-        return d.iteritems()
-
-    def keys(d):
-        """Args:
+"""Args::
     d:"""
-        return d.keys()
-
-    def values(d):
-        """Args:
+"""Args::
     d:"""
-        return d.values()
-
-    def items(d):
-        """Args:
+"""Args::
     d:"""
-        return d.items()
-
-else:
-    try:
-        import winreg
-    except ImportError:
-        winreg = None
-
-    MAXINT = sys.maxsize
-    MININT = -sys.maxsize - 1
-
-    MAXFLOAT = sys.float_info.max
-    MINFLOAT = sys.float_info.min
-
-    string_types = (str,)
-    integer_types = (int,)
-
-    filter = filter
-    map = map
-    range = range
-    zip = zip
-    long = int
-
-    def cmp(a, b):
-        """Args:
+"""Args::
     a: 
+    b:"""
     b:"""
         return (a > b) - (a < b)
 
     def bytes(x):
-        """Args:
+"""Args::
     x:"""
-        return x.encode("utf-8")
-
-    def bstr(x):
-        """Args:
+"""Args::
     x:"""
-        return str(x)
-
-    def iterkeys(d):
-        """Args:
+"""Args::
     d:"""
-        return iter(d.keys())
-
-    def itervalues(d):
-        """Args:
+"""Args::
     d:"""
-        return iter(d.values())
-
-    def iteritems(d):
-        """Args:
+"""Args::
     d:"""
-        return iter(d.items())
-
-    def keys(d):
-        """Args:
+"""Args::
     d:"""
-        return list(d.keys())
-
-    def values(d):
-        """Args:
+"""Args::
     d:"""
-        return list(d.values())
-
-    def items(d):
-        """Args:
+"""Args::
     d:"""
-        return list(d.items())
+"""Create a base class with a metaclass.
 
-
-# This is from Armin Ronacher from Flash simplified later by six
-def with_metaclass(meta, *bases):
-    """Create a base class with a metaclass.
-
-Args:
+Args::
+    meta:"""
     meta:"""
 
     # This requires a bit of explanation: the basic idea is to make a dummy
     # metaclass for one level of class instantiation that replaces itself with
     # the actual metaclass.
     class metaclass(meta):
-        """ """
-
-        def __new__(cls, name, this_bases, d):
-            """Args:
+""""""
+"""Args::
     name: 
     this_bases: 
+    d:"""
     d:"""
             return meta(name, bases, d)
 

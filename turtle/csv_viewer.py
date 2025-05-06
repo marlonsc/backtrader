@@ -1,9 +1,12 @@
-import pandas as pd
+"""csv_viewer.py module.
+
+Description of the module functionality."""
+
 import streamlit as st
 
 
 def main():
-    """ """
+""""""
     st.title("CSV 文件查看器")
 
     # 上传 CSV 文件

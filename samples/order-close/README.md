@@ -1,27 +1,26 @@
 # order-close
 
-Directory containing order-close related files. Primarily contains Python code.
+This directory contains various files including 2 py files, 1 md file.
 
 ## Navigation
 
-* [🏠 Root Directory](../../README.md)
+* [🏠 Root Directory](/samples/order-close/../samples/order-close/..README.md)
 * [⬆️ Parent Directory (samples)](../README.md)
 
 ## Files
 
-### README.md
-
-File with .md extension.
-
 ### close-daily.py
+
+close-daily.py module.
 
 ### close-minute.py
 
+close-minute.py module.
+
 ## Directory Summary
 
-This directory contains 3 files and 0 subdirectories.
+This directory contains 2 files and 0 subdirectories.
 
 ### File Types
 
 * .py: 2 files
-* .md: 1 files

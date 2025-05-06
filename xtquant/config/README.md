@@ -1,15 +1,15 @@
 # config
 
-Contains configuration files. Primarily contains .ini files code, includes documentation, and includes configuration files.
+This directory contains various files including 8 ini files, 7 lua files, 1 txt file, 1 log4cxx file, 1 json file, 1 md file, 1 xml file.
 
 ## Navigation
 
-* [🏠 Root Directory](../../README.md)
+* [🏠 Root Directory](/xtquant/config/../xtquant/config/..README.md)
 * [⬆️ Parent Directory (xtquant)](../README.md)
 
 ### Subdirectories
 
-* [user](user/README.md) - Directory containing user related files
+* [user](user/README.md) - This directory contains various files including 1 md file
 
 ## Files
 
@@ -17,13 +17,9 @@ Contains configuration files. Primarily contains .ini files code, includes docum
 
 Configuration file
 
-### README.md
-
-File with .md extension.
-
 ### StockInfo.lua
 
-File with .lua extension
+Lua source file
 
 ### captial_structure_1.ini
 
@@ -35,15 +31,15 @@ Configuration file
 
 ### config.lua
 
-Configuration file
+Lua source file
 
 ### configHelper.lua
 
-Configuration file
+][^\\/]-$") .. "/"
 
 ### env.lua
 
-File with .lua extension
+Lua source file
 
 ### metaInfo.json
 
@@ -67,7 +63,7 @@ Configuration file
 
 ### table2json.lua
 
-File with .lua extension (Contains non-English content that should be translated)
+Lua source file
 
 ### top10holder_new_1.ini
 
@@ -75,33 +71,32 @@ Configuration file
 
 ### tradeTime.txt
 
-Documentation file
+Text file
 
 ### xtquantservice.log4cxx
 
-Binary or data file
+Text file
 
 ### xtquantservice.lua
 
-File with .lua extension
+Lua source file
 
 ### xtquoterconfig.xml
 
-Binary or data file
+Configuration file
 
 ### xtstocktype.lua
 
-File with .lua extension (Contains non-English content that should be translated)
+Lua source file
 
 ## Directory Summary
 
-This directory contains 20 files and 1 subdirectories.
+This directory contains 19 files and 1 subdirectories.
 
 ### File Types
 
 * .ini: 8 files
 * .lua: 7 files
-* .md: 1 files
 * .json: 1 files
 * .txt: 1 files
 * .log4cxx: 1 files

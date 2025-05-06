@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""ib-cash-bid-ask.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -37,29 +40,11 @@ import backtrader as bt
 
 
 class St(bt.Strategy):
-    """ """
-
-    def logdata(self):
-        """ """
-        txt = []
-        txt.append("{}".format(len(self)))
-        txt.append("{}".format(self.data.datetime.datetime(0).isoformat()))
-        txt.append(" open BID: " + "{}".format(self.datas[0].open[0]))
-        txt.append(" open ASK: " + "{}".format(self.datas[1].open[0]))
-        txt.append(" high BID: " + "{}".format(self.datas[0].high[0]))
-        txt.append(" high ASK: " + "{}".format(self.datas[1].high[0]))
-        txt.append(" low BID: " + "{}".format(self.datas[0].low[0]))
-        txt.append(" low ASK: " + "{}".format(self.datas[1].low[0]))
-        txt.append(" close BID: " + "{}".format(self.datas[0].close[0]))
-        txt.append(" close ASK: " + "{}".format(self.datas[1].close[0]))
-        txt.append(" volume: " + "{:.2f}".format(self.data.volume[0]))
-        print(",".join(txt))
-
-    data_live = False
-
-    def notify_data(self, data, status, *args, **kwargs):
-        """Args:
+""""""
+""""""
+"""Args::
     data: 
+    status:"""
     status:"""
         print("*" * 5, "DATA NOTIF:", data._getstatusname(status), *args)
         if (
@@ -79,25 +64,9 @@ class St(bt.Strategy):
     # sold = 0
 
     def next(self):
-        """ """
-        self.logdata()
-        if not self.data_live:
-            return
-
-        # if not self.bought:
-        #     self.bought = len(self)  # keep entry bar
-        #     self.buy()
-        # elif not self.sold:
-        #     if len(self) == (self.bought + 3):
-        #         self.sell()
-
-
-ib_symbol = "EUR.USD-CASH-IDEALPRO"
-compression = 5
-
-
-def run(args=None):
-    """Args:
+""""""
+"""Args::
+    args: (Default value = None)"""
     args: (Default value = None)"""
     cerebro = bt.Cerebro(stdstats=False)
     store = bt.stores.IBStore(

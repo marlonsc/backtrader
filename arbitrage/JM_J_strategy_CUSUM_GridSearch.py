@@ -1,4 +1,7 @@
-import argparse
+"""JM_J_strategy_CUSUM_GridSearch.py module.
+
+Description of the module functionality."""
+
 import datetime
 
 import backtrader as bt
@@ -12,8 +15,7 @@ def calculate_rolling_spread(
     window: int = 30,
     fields=("open", "high", "low", "close"),
 ) -> pd.DataFrame:
-    """
-    Calculate rolling β, and generate spread (spread_x = price0_x - β_{t-1} * price1_x) for specified price fields:
+"""Calculate rolling β, and generate spread (spread_x = price0_x - β_{t-1} * price1_x) for specified price fields:"""
     """
     # 1) Align using close prices (β estimated using close)
     df = (
@@ -58,7 +60,9 @@ def calculate_rolling_spread(
 # Create custom data class to support beta column
 
 
-class SpreadData(bt.feeds.PandasData):
+"""SpreadData class.
+
+Description of the class functionality."""
     lines = ("beta",)  # Add beta line
 
     params = (
@@ -69,7 +73,9 @@ class SpreadData(bt.feeds.PandasData):
     )
 
 
-class DynamicSpreadCUSUMStrategy(bt.Strategy):
+"""DynamicSpreadCUSUMStrategy class.
+
+Description of the class functionality."""
     params = (
         ("win", 20),  # Rolling window
         ("k_coeff", 0.5),  # κ = k_coeff * σ
@@ -79,7 +85,11 @@ class DynamicSpreadCUSUMStrategy(bt.Strategy):
         ("verbose", False),  # Whether to print detailed information
     )
 
-    def __init__(self):
+"""__init__ function.
+
+Returns:
+    Description of return value
+"""
         super().__init__()
         self.size0 = 10
         self.size1 = 10
@@ -99,7 +109,15 @@ class DynamicSpreadCUSUMStrategy(bt.Strategy):
         self.trade_start_date = None
 
     # ---------- Transaction helper (keep original logic) ----------
-    def _open_position(self, short, signal_strength):
+"""_open_position function.
+
+Args:
+    short: Description of short
+    signal_strength: Description of signal_strength
+
+Returns:
+    Description of return value
+"""
         if short:  # Short spread
             self.sell(data=self.data0, size=self.size0)
             self.buy(data=self.data1, size=self.size1)
@@ -120,7 +138,11 @@ class DynamicSpreadCUSUMStrategy(bt.Strategy):
         self.total_trades += 1
         self.trade_start_date = self.datetime.date()
 
-    def _close_positions(self):
+"""_close_positions function.
+
+Returns:
+    Description of return value
+"""
         self.close(data=self.data0)
         self.close(data=self.data1)
         self.in_position = False
@@ -135,7 +157,11 @@ class DynamicSpreadCUSUMStrategy(bt.Strategy):
                 f"from {self.trade_start_date} to {self.datetime.date()}"
             )
 
-    def next(self):
+"""next function.
+
+Returns:
+    Description of return value
+"""
         # ---------- Main loop ----------
         ########### Modified: Calculate dynamic mean μ ###########
         # Take previous win spread series (excluding current day)
@@ -194,7 +220,14 @@ class DynamicSpreadCUSUMStrategy(bt.Strategy):
                         )
                     self._close_positions()
 
-    def notify_trade(self, trade):
+"""notify_trade function.
+
+Args:
+    trade: Description of trade
+
+Returns:
+    Description of return value
+"""
         if not self.p.verbose:
             return
 

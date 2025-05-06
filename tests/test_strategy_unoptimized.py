@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""test_strategy_unoptimized.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -96,19 +99,11 @@ SELLEXEC = [
 
 
 class BtTestStrategy(bt.Strategy):
-    """ """
-
-    params = (
-        ("period", 15),
-        ("printdata", True),
-        ("printops", True),
-        ("stocklike", True),
-    )
-
-    def log(self, txt, dt=None, nodate=False):
-        """Args:
+""""""
+"""Args::
     txt: 
     dt: (Default value = None)
+    nodate: (Default value = False)"""
     nodate: (Default value = False)"""
         if not nodate:
             dt = dt or self.data.datetime[0]
@@ -118,133 +113,14 @@ class BtTestStrategy(bt.Strategy):
             print("---------- %s" % (txt))
 
     def notify_order(self, order):
-        """Args:
+"""Args::
     order:"""
-        if order.status in [bt.Order.Submitted, bt.Order.Accepted]:
-            return  # Await further notifications
-
-        if order.status == order.Completed:
-            if isinstance(order, bt.BuyOrder):
-                if self.p.printops:
-                    txt = "BUY, %.2f" % order.executed.price
-                    self.log(txt, order.executed.dt)
-                chkprice = "%.2f" % order.executed.price
-                self.buyexec.append(chkprice)
-            else:  # elif isinstance(order, SellOrder):
-                if self.p.printops:
-                    txt = "SELL, %.2f" % order.executed.price
-                    self.log(txt, order.executed.dt)
-
-                chkprice = "%.2f" % order.executed.price
-                self.sellexec.append(chkprice)
-
-        elif order.status in [order.Expired, order.Canceled, order.Margin]:
-            if self.p.printops:
-                self.log("%s ," % order.Status[order.status])
-
-        # Allow new orders
-        self.orderid = None
-
-    def __init__(self):
-        """ """
-        # Flag to allow new orders in the system or not
-        self.orderid = None
-
-        self.sma = btind.SMA(self.data, period=self.p.period)
-        self.cross = btind.CrossOver(self.data.close, self.sma, plot=True)
-
-    def start(self):
-        """ """
-        if not self.p.stocklike:
-            self.broker.setcommission(commission=2.0, mult=10.0, margin=1000.0)
-
-        if self.p.printdata:
-            self.log("-------------------------", nodate=True)
-            self.log(
-                "Starting portfolio value: %.2f" % self.broker.getvalue(),
-                nodate=True,
-            )
-
-        self.tstart = time_clock()
-
-        self.buycreate = list()
-        self.sellcreate = list()
-        self.buyexec = list()
-        self.sellexec = list()
-
-    def stop(self):
-        """ """
-        tused = time_clock() - self.tstart
-        if self.p.printdata:
-            self.log("Time used: %s" % str(tused))
-            self.log("Final portfolio value: %.2f" % self.broker.getvalue())
-            self.log("Final cash value: %.2f" % self.broker.getcash())
-            self.log("-------------------------")
-
-            print("buycreate")
-            print(self.buycreate)
-            print("sellcreate")
-            print(self.sellcreate)
-            print("buyexec")
-            print(self.buyexec)
-            print("sellexec")
-            print(self.sellexec)
-
-        else:
-            if not self.p.stocklike:
-                assert "%.2f" % self.broker.getvalue() == "12795.00"
-                assert "%.2f" % self.broker.getcash() == "11795.00"
-            else:
-                assert "%.2f" % self.broker.getvalue() == "10284.10"
-                assert "%.2f" % self.broker.getcash() == "6164.16"
-
-            assert self.buycreate == BUYCREATE
-            assert self.sellcreate == SELLCREATE
-            assert self.buyexec == BUYEXEC
-            assert self.sellexec == SELLEXEC
-
-    def next(self):
-        """ """
-        if self.p.printdata:
-            self.log(
-                "Open, High, Low, Close, %.2f, %.2f, %.2f, %.2f, Sma, %f"
-                % (
-                    self.data.open[0],
-                    self.data.high[0],
-                    self.data.low[0],
-                    self.data.close[0],
-                    self.sma[0],
-                )
-            )
-            self.log("Close %.2f - Sma %.2f" % (self.data.close[0], self.sma[0]))
-
-        if self.orderid:
-            # if an order is active, no new orders are allowed
-            return
-
-        if not self.position.size:
-            if self.cross > 0.0:
-                if self.p.printops:
-                    self.log("BUY CREATE , %.2f" % self.data.close[0])
-
-                self.orderid = self.buy()
-                chkprice = "%.2f" % self.data.close[0]
-                self.buycreate.append(chkprice)
-
-        elif self.cross < 0.0:
-            if self.p.printops:
-                self.log("SELL CREATE , %.2f" % self.data.close[0])
-
-            self.orderid = self.close()
-            chkprice = "%.2f" % self.data.close[0]
-            self.sellcreate.append(chkprice)
-
-
-chkdatas = 1
-
-
-def test_run(main=False):
-    """Args:
+""""""
+""""""
+""""""
+""""""
+"""Args::
+    main: (Default value = False)"""
     main: (Default value = False)"""
     for stlike in [False, True]:
         datas = [testcommon.getdata(i) for i in range(chkdatas)]

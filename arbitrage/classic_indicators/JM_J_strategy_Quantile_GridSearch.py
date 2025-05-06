@@ -1,4 +1,7 @@
-import datetime
+"""JM_J_strategy_Quantile_GridSearch.py module.
+
+Description of the module functionality."""
+
 
 import backtrader as bt
 import numpy as np
@@ -53,7 +56,9 @@ spread_x = price0_x - β_{t-1} * price1_x"""
 
 
 # Create quantile indicator (custom)
-class QuantileIndicator(bt.Indicator):
+"""QuantileIndicator class.
+
+Description of the class functionality."""
     lines = ("upper", "lower", "mid")
     params = (
         ("period", 30),
@@ -61,11 +66,19 @@ class QuantileIndicator(bt.Indicator):
         ("lower_quantile", 0.1),  # Lower band quantile
     )
 
-    def __init__(self):
+"""__init__ function.
+
+Returns:
+    Description of return value
+"""
         self.addminperiod(self.p.period)
         self.spread_data = []
 
-    def next(self):
+"""next function.
+
+Returns:
+    Description of return value
+"""
         self.spread_data.append(self.data[0])
         if len(self.spread_data) > self.p.period:
             self.spread_data.pop(0)  # Maintain fixed length
@@ -81,7 +94,9 @@ class QuantileIndicator(bt.Indicator):
             self.lines.mid[0] = self.data[0]
 
 
-class DynamicSpreadQuantileStrategy(bt.Strategy):
+"""DynamicSpreadQuantileStrategy class.
+
+Description of the class functionality."""
     params = (
         ("lookback_period", 60),  # Lookback period
         ("upper_quantile", 0.9),  # Upper band quantile
@@ -91,7 +106,11 @@ class DynamicSpreadQuantileStrategy(bt.Strategy):
         ("verbose", True),  # Whether to print detailed information
     )
 
-    def __init__(self):
+"""__init__ function.
+
+Returns:
+    Description of return value
+"""
         # Calculate quantile indicators for the spread
         self.quantile = QuantileIndicator(
             self.data2.close,
@@ -109,7 +128,11 @@ class DynamicSpreadQuantileStrategy(bt.Strategy):
         self.order = None
         self.entry_price = 0
 
-    def next(self):
+"""next function.
+
+Returns:
+    Description of return value
+"""
         if self.order:
             return
 
@@ -237,12 +260,23 @@ class DynamicSpreadQuantileStrategy(bt.Strategy):
             self.buy(data=self.data1, size=add_size1)
         self.position_layers += 1
 
-    def _close_positions(self):
+"""_close_positions function.
+
+Returns:
+    Description of return value
+"""
         self.close(data=self.data0)
         self.close(data=self.data1)
         self.position_layers = 0  # Reset position layers after closing
 
-    def notify_trade(self, trade):
+"""notify_trade function.
+
+Args:
+    trade: Description of trade
+
+Returns:
+    Description of return value
+"""
         if not self.p.verbose:
             return
 
@@ -467,7 +501,9 @@ def grid_search():
 
 
 # 创建自定义数据类以支持beta列
-class SpreadData(bt.feeds.PandasData):
+"""SpreadData class.
+
+Description of the class functionality."""
     lines = ("beta",)  # 添加beta线
 
     params = (

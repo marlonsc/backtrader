@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""prettygoodoscillator.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -56,7 +59,7 @@ See also:
     )
 
     def __init__(self):
-        """ """
+""""""
         movav = self.p._movav(self.data, period=self.p.period)
         atr = ATR(self.data, period=self.p.period)
 

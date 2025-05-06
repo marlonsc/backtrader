@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""pyfolio.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -32,7 +35,7 @@ from . import GrossLeverage, PositionsValue, TimeReturn, Transactions
 
 
 class PyFolio(bt.Analyzer):
-    """This analyzer uses 4 children analyzers to collect data and transforms it
+"""This analyzer uses 4 children analyzers to collect data and transforms it
 in to a data set compatible with ``pyfolio``
 Children Analyzer
 - ``TimeReturn``
@@ -46,29 +49,15 @@ the ``headers`` parameter to ``True``
 - ``GrossLeverage``
 Keeps track of the gross leverage (how much the strategy is invested)
 
-Returns:
+Returns::
+    each return as keys"""
     each return as keys"""
 
     params = (("timeframe", bt.TimeFrame.Days), ("compression", 1))
 
     def __init__(self):
-        """ """
-        dtfcomp = dict(timeframe=self.p.timeframe, compression=self.p.compression)
-
-        self._returns = TimeReturn(**dtfcomp)
-        self._positions = PositionsValue(headers=True, cash=True)
-        self._transactions = Transactions(headers=True)
-        self._gross_lev = GrossLeverage()
-
-    def stop(self):
-        """ """
-        super(PyFolio, self).stop()
-        self.rets["returns"] = self._returns.get_analysis()
-        self.rets["positions"] = self._positions.get_analysis()
-        self.rets["transactions"] = self._transactions.get_analysis()
-        self.rets["gross_lev"] = self._gross_lev.get_analysis()
-
-    def get_pf_items(self):
+""""""
+""""""
         """Returns a tuple of 4 elements which can be used for further processing with
 ``pyfolio``
 returns, positions, transactions, gross_leverage

@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""oandabroker.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -40,34 +43,33 @@ from backtrader.utils.py3 import with_metaclass
 
 
 class OandaCommInfo(CommInfoBase):
-    """ """
-
-    def getvaluesize(self, size, price):
-        """Args:
+""""""
+"""Args::
     size: 
+    price:"""
     price:"""
         # In real life the margin approaches the price
         return abs(size) * price
 
     def getoperationcost(self, size, price):
-        """Returns the needed amount of cash an operation would cost
+"""Returns the needed amount of cash an operation would cost
 
-Args:
+Args::
     size: 
+    price:"""
     price:"""
         # Same reasoning as above
         return abs(size) * price
 
 
 class MetaOandaBroker(BrokerBase.__class__):
-    """ """
+""""""
+"""Class has already been created ... register
 
-    def __init__(cls, name, bases, dct):
-        """Class has already been created ... register
-
-Args:
+Args::
     name: 
     bases: 
+    dct:"""
     dct:"""
         # Initialize the class
         super(MetaOandaBroker, cls).__init__(name, bases, dct)
@@ -101,105 +103,16 @@ internal API of ``backtrader``."""
         self.positions = collections.defaultdict(Position)
 
     def start(self):
-        """ """
-        super(OandaBroker, self).start()
-        self.o.start(broker=self)
-        self.startingcash = self.cash = cash = self.o.get_cash()
-        self.startingvalue = self.value = self.o.get_value()
-
-        if self.p.use_positions:
-            for p in self.o.get_positions():
-                print("position for instrument:", p["instrument"])
-                is_sell = p["side"] == "sell"
-                size = p["units"]
-                if is_sell:
-                    size = -size
-                price = p["avgPrice"]
-                self.positions[p["instrument"]] = Position(size, price)
-
-    def data_started(self, data):
-        """Args:
+""""""
+"""Args::
     data:"""
-        pos = self.getposition(data)
-
-        if pos.size < 0:
-            order = SellOrder(
-                data=data,
-                size=pos.size,
-                price=pos.price,
-                exectype=Order.Market,
-                simulated=True,
-            )
-
-            order.addcomminfo(self.getcommissioninfo(data))
-            order.execute(
-                0,
-                pos.size,
-                pos.price,
-                0,
-                0.0,
-                0.0,
-                pos.size,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                pos.size,
-                pos.price,
-            )
-
-            order.completed()
-            self.notify(order)
-
-        elif pos.size > 0:
-            order = BuyOrder(
-                data=data,
-                size=pos.size,
-                price=pos.price,
-                exectype=Order.Market,
-                simulated=True,
-            )
-
-            order.addcomminfo(self.getcommissioninfo(data))
-            order.execute(
-                0,
-                pos.size,
-                pos.price,
-                0,
-                0.0,
-                0.0,
-                pos.size,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                pos.size,
-                pos.price,
-            )
-
-            order.completed()
-            self.notify(order)
-
-    def stop(self):
-        """ """
-        super(OandaBroker, self).stop()
-        self.o.stop()
-
-    def getcash(self):
-        """ """
-        # This call cannot block if no answer is available from oanda
-        self.cash = cash = self.o.get_cash()
-        return cash
-
-    def getvalue(self, datas=None):
-        """Args:
+""""""
+""""""
+"""Args::
     datas: (Default value = None)"""
-        self.value = self.o.get_value()
-        return self.value
-
-    def getposition(self, data, clone=True):
-        """Args:
+"""Args::
     data: 
+    clone: (Default value = True)"""
     clone: (Default value = True)"""
         # return self.o.getposition(data._dataname, clone=clone)
         pos = self.positions[data._dataname]
@@ -209,65 +122,23 @@ internal API of ``backtrader``."""
         return pos
 
     def orderstatus(self, order):
-        """Args:
+"""Args::
     order:"""
-        o = self.orders[order.ref]
-        return o.status
-
-    def _submit(self, oref):
-        """Args:
+"""Args::
     oref:"""
-        order = self.orders[oref]
-        order.submit(self)
-        self.notify(order)
-        for o in self._bracketnotif(order):
-            o.submit(self)
-            self.notify(o)
-
-    def _reject(self, oref):
-        """Args:
+"""Args::
     oref:"""
-        order = self.orders[oref]
-        order.reject(self)
-        self.notify(order)
-        self._bracketize(order, cancel=True)
-
-    def _accept(self, oref):
-        """Args:
+"""Args::
     oref:"""
-        order = self.orders[oref]
-        order.accept()
-        self.notify(order)
-        for o in self._bracketnotif(order):
-            o.accept(self)
-            self.notify(o)
-
-    def _cancel(self, oref):
-        """Args:
+"""Args::
     oref:"""
-        order = self.orders[oref]
-        order.cancel()
-        self.notify(order)
-        self._bracketize(order, cancel=True)
-
-    def _expire(self, oref):
-        """Args:
+"""Args::
     oref:"""
-        order = self.orders[oref]
-        order.expire()
-        self.notify(order)
-        self._bracketize(order, cancel=True)
-
-    def _bracketnotif(self, order):
-        """Args:
+"""Args::
     order:"""
-        pref = getattr(order.parent, "ref", order.ref)  # parent ref or self
-        br = self.brackets.get(pref, None)  # to avoid recursion
-        return br[-2:] if br is not None else []
-
-    def _bracketize(self, order, cancel=False):
-        """Args:
+"""Args::
     order: 
+    cancel: (Default value = False)"""
     cancel: (Default value = False)"""
         pref = getattr(order.parent, "ref", order.ref)  # parent ref or self
         br = self.brackets.pop(pref, None)  # to avoid recursion
@@ -291,10 +162,11 @@ internal API of ``backtrader``."""
                     self._cancel(o.ref)
 
     def _fill(self, oref, size, price, ttype, **kwargs):
-        """Args:
+"""Args::
     oref: 
     size: 
     price: 
+    ttype:"""
     ttype:"""
         order = self.orders[oref]
 
@@ -360,50 +232,9 @@ internal API of ``backtrader``."""
             self._bracketize(order)
 
     def _transmit(self, order):
-        """Args:
+"""Args::
     order:"""
-        oref = order.ref
-        pref = getattr(order.parent, "ref", oref)  # parent ref or self
-
-        if order.transmit:
-            if oref != pref:  # children order
-                # Put parent in orders dict, but add stopside and takeside
-                # to order creation. Return the takeside order, to have 3s
-                takeside = order  # alias for clarity
-                parent, stopside = self.opending.pop(pref)
-                for o in parent, stopside, takeside:
-                    self.orders[o.ref] = o  # write them down
-
-                self.brackets[pref] = [parent, stopside, takeside]
-                self.o.order_create(parent, stopside, takeside)
-                return takeside  # parent was already returned
-
-            else:  # Parent order, which is not being transmitted
-                self.orders[order.ref] = order
-                return self.o.order_create(order)
-
-        # Not transmitting
-        self.opending[pref].append(order)
-        return order
-
-    def buy(
-        self,
-        owner,
-        data,
-        size,
-        price=None,
-        plimit=None,
-        exectype=None,
-        valid=None,
-        tradeid=0,
-        oco=None,
-        trailamount=None,
-        trailpercent=None,
-        parent=None,
-        transmit=True,
-        **kwargs,
-    ):
-        """Args:
+"""Args::
     owner: 
     data: 
     size: 
@@ -416,6 +247,7 @@ internal API of ``backtrader``."""
     trailamount: (Default value = None)
     trailpercent: (Default value = None)
     parent: (Default value = None)
+    transmit: (Default value = True)"""
     transmit: (Default value = True)"""
 
         order = BuyOrder(
@@ -454,7 +286,7 @@ internal API of ``backtrader``."""
         transmit=True,
         **kwargs,
     ):
-        """Args:
+"""Args::
     owner: 
     data: 
     size: 
@@ -467,6 +299,7 @@ internal API of ``backtrader``."""
     trailamount: (Default value = None)
     trailpercent: (Default value = None)
     parent: (Default value = None)
+    transmit: (Default value = True)"""
     transmit: (Default value = True)"""
 
         order = SellOrder(
@@ -489,26 +322,10 @@ internal API of ``backtrader``."""
         return self._transmit(order)
 
     def cancel(self, order):
-        """Args:
+"""Args::
     order:"""
-        self.orders[order.ref]
-        if order.status == Order.Cancelled:  # already cancelled
-            return
-
-        return self.o.order_cancel(order)
-
-    def notify(self, order):
-        """Args:
+"""Args::
     order:"""
-        self.notifs.append(order.clone())
-
-    def get_notification(self):
-        """ """
-        if not self.notifs:
-            return None
-
-        return self.notifs.popleft()
-
-    def next(self):
-        """ """
+""""""
+""""""
         self.notifs.append(None)  # mark notification boundary

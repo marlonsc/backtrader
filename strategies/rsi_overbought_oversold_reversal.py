@@ -199,11 +199,12 @@ premature exits, and poor overall performance."""
     )
 
     def log(self, txt, dt=None, level="info"):
-        """Logging function
+"""Logging function
 
-Args:
+Args::
     txt: 
     dt: (Default value = None)
+    level: (Default value = "info")"""
     level: (Default value = "info")"""
         if level == "debug" and self.p.logging_level != "debug":
             return
@@ -212,47 +213,11 @@ Args:
         print(f"{dt.isoformat()}: {txt}")
 
     def __init__(self):
-        """ """
-        # Keep track of price data
-        self.dataclose = self.datas[0].close
-        self.datahigh = self.datas[0].high
-        self.datalow = self.datas[0].low
+""""""
+"""Handle order notifications
 
-        # Create RSI indicator
-        self.rsi = bt.indicators.RSI(
-            self.dataclose, period=self.p.rsi_period, plotname="RSI"
-        )
-
-        # Create Stochastic indicator if enabled
-        if self.p.use_stoch:
-            self.stoch = bt.indicators.Stochastic(
-                self.data,
-                period=self.p.stoch_period,
-                period_dfast=self.p.stoch_smooth,
-                plotname="Stochastic",
-            )
-
-        # Trading state variables
-        self.order = None
-        self.buyprice = None
-        self.buycomm = None
-        self.stop_price = None
-        self.take_profit_price = None
-        self.trail_price = None
-        self.highest_price = None
-
-        # Confirmation state variables
-        self.buy_signal_count = 0
-        self.sell_signal_count = 0
-        self.last_rsi = None
-
-        # For trade throttling
-        self.last_trade_date = None
-
-    def notify_order(self, order):
-        """Handle order notifications
-
-Args:
+Args::
+    order:"""
     order:"""
         if order.status in [order.Submitted, order.Accepted]:
             return
@@ -309,9 +274,10 @@ Args:
         self.order = None
 
     def notify_trade(self, trade):
-        """Track completed trades
+"""Track completed trades
 
-Args:
+Args::
+    trade:"""
     trade:"""
         if not trade.isclosed:
             return
@@ -497,64 +463,7 @@ Args:
         return False
 
     def next(self):
-        """ """
-        # If an order is pending, we cannot send a new one
-        if self.order:
-            return
-
-        # Store the current RSI value for reference
-        if self.is_rsi_valid():
-            self.last_rsi = self.rsi[0]
-
-        # Debug info every 5 bars
-        if len(self) % 5 == 0:
-            rsi_msg = (
-                f"RSI: {self.rsi[0]:.2f}"
-                if self.is_rsi_valid()
-                else "RSI: Initializing"
-            )
-            self.log(
-                f"Close: {self.dataclose[0]:.2f}, {rsi_msg}",
-                level="debug",
-            )
-            if self.p.use_stoch and self.is_stoch_valid():
-                self.log(
-                    f"Stochastic K: {self.stoch.lines.percK[0]:.2f}, "
-                    f"D: {self.stoch.lines.percD[0]:.2f}",
-                    level="debug",
-                )
-
-        # Check if we are in the market
-        if not self.position:
-            # Check for buy signal
-            if self.should_buy():
-                # Check if we can trade now (trade throttling)
-                if not self.can_trade_now():
-                    self.log(
-                        "TRADE THROTTLED: Need to wait"
-                        f" {self.p.trade_throttle_days} days between trades",
-                        level="debug",
-                    )
-                    return
-
-                size = self.calculate_position_size()
-                if size > 0:
-                    self.log(
-                        f"BUY CREATE: Price: {self.dataclose[0]:.2f}, Size: {size},"
-                        f" RSI: {self.rsi[0]:.2f}"
-                    )
-                    self.order = self.buy(size=size)
-
-        else:
-            # Check for sell signal
-            if self.should_sell():
-                self.log(
-                    f"SELL CREATE: Price: {self.dataclose[0]:.2f}, RSI:"
-                    f" {self.rsi[0]:.2f}"
-                )
-                self.order = self.sell(size=self.position.size)
-
-    def stop(self):
+""""""
         """Called when backtest is complete"""
         self.log("RSI Overbought/Oversold Reversal Strategy completed")
         self.log(f"Final Portfolio Value: {self.broker.getvalue():.2f}")

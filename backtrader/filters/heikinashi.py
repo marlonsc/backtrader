@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""heikinashi.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -36,11 +39,10 @@ See:
 - http://stockcharts.com/school/doku.php?id=chart_school:chart_analysis:heikin_ashi"""
 
     def __init__(self, data):
-        """Args:
+"""Args::
     data:"""
-
-    def __call__(self, data):
-        """Args:
+"""Args::
+    data:"""
     data:"""
         o, h, l, c = data.open[0], data.high[0], data.low[0], data.close[0]
 

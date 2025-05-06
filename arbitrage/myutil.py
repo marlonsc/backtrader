@@ -1,4 +1,7 @@
-import numpy as np
+"""myutil.py module.
+
+Description of the module functionality."""
+
 import pandas as pd
 import statsmodels.api as sm
 
@@ -11,14 +14,15 @@ Kalman filter, and cointegration ratio for financial time series analysis.
 
 # 1. 首先确认两个DataFrame的index是否相同
 def check_and_align_data(df1, df2, date_column="date"):
-    """Check and align two DataFrames by date index.
+"""Check and align two DataFrames by date index.
 
-Args:
+Args::
     df1: First DataFrame
     df2: Second DataFrame
     date_column: Name of the date column (default: "date")
 
-Returns:
+Returns::
+    Tuple of aligned DataFrames"""
     Tuple of aligned DataFrames"""
     # Ensure the date column is set as index
     if date_column in df1.columns:
@@ -53,16 +57,17 @@ def calculate_spread(
     factor2=1,
     columns=["open", "high", "low", "close", "volume"],
 ):
-    """计算两个DataFrame之间的价差
+"""计算两个DataFrame之间的价差
 
-Args:
+Args::
     df1: 第一个DataFrame
     df2: 第二个DataFrame
     factor1: (Default value = 5)
     factor2: (Default value = 1)
     columns: 需要计算价差的列 (Default value = ["open","high","low","close","volume"])
 
-Returns:
+Returns::
+    包含价差的DataFrame"""
     包含价差的DataFrame"""
     # 对齐数据
     df1_aligned, df2_aligned = check_and_align_data(df1, df2)
@@ -81,15 +86,16 @@ Returns:
 
 
 def calculate_volatility_ratio(price_c, price_d, mc, md):
-    """波动率匹配持仓比例（整数版）
+"""波动率匹配持仓比例（整数版）
 
-Args:
+Args::
     price_c: 品种C价格序列（pd.Series）
     price_d: 品种D价格序列（pd.Series）
     mc: 品种C合约乘数
     md: 品种D合约乘数
 
-Returns:
+Returns::
+    整数配比 (Nc, Nd)"""
     整数配比 (Nc, Nd)"""
     # 对齐数据
     merged = pd.concat([price_c, price_d], axis=1).dropna()
@@ -110,13 +116,14 @@ Returns:
 
 
 def simplify_ratio(ratio, max_denominator=10):
-    """将浮点比例转换为最简整数比
+"""将浮点比例转换为最简整数比
 
-Args:
+Args::
     ratio: 浮点比例值
     max_denominator: 最大允许的分母值 (Default value = 10)
 
-Returns:
+Returns::
+    分子, 分母) 的元组"""
     分子, 分母) 的元组"""
     from fractions import Fraction
 
@@ -125,37 +132,18 @@ Returns:
 
 
 class KalmanFilter:
-    """ """
-
-    def __init__(self):
-        """ """
-        self.x = np.array([1.0])  # 初始系数（假设1:1配比）
-        self.P = np.eye(1)  # 状态协方差
-        self.Q = 0.01  # 过程噪声
-        self.R = 0.1  # 观测噪声
-
-    def update(self, z):
-        """Args:
+""""""
+""""""
+"""Args::
     z:"""
-        # 预测步骤
-        x_pred = self.x
-        P_pred = self.P + self.Q
+"""Calculate Kalman filter ratio and spread for two series.
 
-        # 更新步骤
-        K = P_pred / (P_pred + self.R)
-        self.x = x_pred + K * (z - x_pred)
-        self.P = (1 - K) * P_pred
-        return self.x[0]
-
-
-def kalman_ratio(df1, df2):
-    """Calculate Kalman filter ratio and spread for two series.
-
-Args:
+Args::
     df1: First series
     df2: Second series
 
-Returns:
+Returns::
+    Tuple of (integer ratio, spread array)"""
     Tuple of (integer ratio, spread array)"""
     kf = KalmanFilter()
     spreads = []
@@ -172,13 +160,14 @@ Returns:
 
 
 def cointegration_ratio(df1, df2):
-    """Calculate cointegration regression ratio and spread.
+"""Calculate cointegration regression ratio and spread.
 
-Args:
+Args::
     df1: First series
     df2: Second series
 
-Returns:
+Returns::
+    Tuple of (integer ratio, spread array)"""
     Tuple of (integer ratio, spread array)"""
     # Cointegration regression
     X = sm.add_constant(df2)

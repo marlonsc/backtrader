@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""macd.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -55,22 +58,8 @@ See:
     plotlines = dict(signal=dict(ls="--"))
 
     def _plotlabel(self):
-        """ """
-        plabels = super(MACD, self)._plotlabel()
-        if self.p.isdefault("movav"):
-            plabels.remove(self.p.movav)
-        return plabels
-
-    def __init__(self):
-        """ """
-        super(MACD, self).__init__()
-        me1 = self.p.movav(self.data, period=self.p.period_me1)
-        me2 = self.p.movav(self.data, period=self.p.period_me2)
-        self.lines.macd = me1 - me2
-        self.lines.signal = self.p.movav(self.lines.macd, period=self.p.period_signal)
-
-
-class MACDHisto(MACD):
+""""""
+""""""
     """Subclass of MACD which adds a "histogram" of the difference between the
 macd and signal lines
 Formula:
@@ -84,6 +73,6 @@ See:
     plotlines = dict(histo=dict(_method="bar", alpha=0.50, width=1.0))
 
     def __init__(self):
-        """ """
+""""""
         super(MACDHisto, self).__init__()
         self.lines.histo = self.lines.macd - self.lines.signal

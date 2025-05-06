@@ -1,75 +1,70 @@
 # lua
 
-Directory containing lua related files. Primarily contains .lua files code.
+This directory contains various files including 13 lua files, 1 md file.
 
 ## Navigation
 
-* [🏠 Root Directory](../../../../../README.md)
+* [🏠 Root Directory](/xtquant/config/user/root2/lua/../xtquant/config/user/root2/lua/../xtquant/config/user/root2/lua/../xtquant/config/user/root2/lua/../xtquant/config/user/root2/lua/..README.md)
 * [⬆️ Parent Directory (root2)](../README.md)
 
 ## Files
 
 ### ConstFunc.lua
 
-File with .lua extension
+Lua source file
 
 ### FunIndex.lua
 
-File with .lua extension (Contains non-English content that should be translated)
+Lua source file
 
 ### FunLogic.lua
 
-File with .lua extension (Contains non-English content that should be translated)
+Lua source file
 
 ### FunMath.lua
 
-File with .lua extension (Contains non-English content that should be translated)
+Lua source file
 
 ### FunOther.lua
 
-File with .lua extension (Contains non-English content that should be translated)
+Lua source file
 
 ### FunRef.lua
 
-File with .lua extension (Contains non-English content that should be translated)
+Lua source file
 
 ### FunStatistic.lua
 
-File with .lua extension (Contains non-English content that should be translated)
+Lua source file
 
 ### FunString.lua
 
-File with .lua extension (Contains non-English content that should be translated)
+Lua source file
 
 ### FunSystem.lua
 
-File with .lua extension (Contains non-English content that should be translated)
+Lua source file
 
 ### FunTrader.lua
 
-File with .lua extension (Contains non-English content that should be translated)
+Lua source file
 
 ### MetaType.lua
 
-File with .lua extension (Contains non-English content that should be translated)
-
-### README.md
-
-File with .md extension.
+Lua source file
 
 ### config.lua
 
-Configuration file
+script/systemlua"
 
 ### util.lua
 
-File with .lua extension (Contains non-English content that should be translated)
+Lua source file
 
 ## Directory Summary
 
-This directory contains 14 files and 0 subdirectories.
+This directory contains 13 files and 0 subdirectories.
 
 ### File Types
 
 * .lua: 13 files
-* .md: 1 files

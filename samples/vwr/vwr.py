@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""vwr.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -39,77 +42,10 @@ TFRAMES = dict(
 
 
 def runstrat(pargs=None):
-    """Args:
+"""Args::
     pargs: (Default value = None)"""
-    args = parse_args(pargs)
-
-    # Create a cerebro
-    cerebro = bt.Cerebro()
-
-    if args.cash is not None:
-        cerebro.broker.set_cash(args.cash)
-
-    dkwargs = dict()
-    # Get the dates from the args
-    if args.fromdate is not None:
-        fromdate = datetime.datetime.strptime(args.fromdate, "%Y-%m-%d")
-        dkwargs["fromdate"] = fromdate
-    if args.todate is not None:
-        todate = datetime.datetime.strptime(args.todate, "%Y-%m-%d")
-        dkwargs["todate"] = todate
-
-    # Create the 1st data
-    data = bt.feeds.BacktraderCSVData(dataname=args.data, **dkwargs)
-    cerebro.adddata(data)  # Add the data to cerebro
-
-    cerebro.addstrategy(bt.strategies.SMA_CrossOver)  # Add the strategy
-
-    lrkwargs = dict()
-    if args.tframe is not None:
-        lrkwargs["timeframe"] = TFRAMES[args.tframe]
-
-    if args.tann is not None:
-        lrkwargs["tann"] = args.tann
-
-    cerebro.addanalyzer(bt.analyzers.Returns, **lrkwargs)  # Returns
-
-    vwrkwargs = dict()
-    if args.tframe is not None:
-        vwrkwargs["timeframe"] = TFRAMES[args.tframe]
-
-    if args.tann is not None:
-        vwrkwargs["tann"] = args.tann
-
-    if args.sigma_max is not None:
-        vwrkwargs["sigma_max"] = args.sigma_max
-
-    if args.tau is not None:
-        vwrkwargs["tau"] = args.tau
-
-    cerebro.addanalyzer(bt.analyzers.SQN)  # VWR Analyzer
-    cerebro.addanalyzer(bt.analyzers.SharpeRatio_A)  # VWR Analyzer
-    cerebro.addanalyzer(bt.analyzers.VWR, **vwrkwargs)  # VWR Analyzer
-    # Sample time return analyzers
-    cerebro.addanalyzer(bt.analyzers.TimeReturn, timeframe=bt.TimeFrame.Months)
-    cerebro.addanalyzer(bt.analyzers.TimeReturn, timeframe=bt.TimeFrame.Years)
-
-    # Add a writer to get output
-    cerebro.addwriter(bt.WriterFile, csv=args.writercsv, rounding=4)
-
-    cerebro.run()  # And run it
-
-    # Plot if requested
-    if args.plot:
-        pkwargs = dict(style="bar")
-        if args.plot is not True:  # evals to True but is not True
-            npkwargs = eval("dict(" + args.plot + ")")  # args were passed
-            pkwargs.update(npkwargs)
-
-        cerebro.plot(**pkwargs)
-
-
-def parse_args(pargs=None):
-    """Args:
+"""Args::
+    pargs: (Default value = None)"""
     pargs: (Default value = None)"""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""dpo.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -54,13 +57,8 @@ See:
 
     # Indicator information after the name (in brackets)
     def _plotlabel(self):
-        """ """
-        plabels = [self.p.period]
-        plabels += [self.p.movav] * self.p.notdefault("movav")
-        return plabels
-
-    def __init__(self):
-        """ """
+""""""
+""""""
         # Create the Moving Average
         ma = self.p.movav(self.data, period=self.p.period)
 

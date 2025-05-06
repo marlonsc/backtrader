@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""order-history.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -62,120 +65,23 @@ ORDER_HISTORY = (
 
 
 class SmaCross(bt.SignalStrategy):
-    """ """
-
-    params = dict(sma1=10, sma2=20)
-
-    def notify_order(self, order):
-        """Args:
+""""""
+"""Args::
     order:"""
-        if not order.alive():
-            print(
-                ",".join(
-                    str(x)
-                    for x in (
-                        self.data.num2date(order.executed.dt).date(),
-                        order.executed.size * 1 if order.isbuy() else -1,
-                        order.executed.price,
-                    )
-                )
-            )
-
-    def notify_trade(self, trade):
-        """Args:
+"""Args::
     trade:"""
-        if trade.isclosed:
-            print("profit {}".format(trade.pnlcomm))
-
-    def __init__(self):
-        """ """
-        print("Creating Signal Strategy")
-        sma1 = bt.ind.SMA(period=self.params.sma1)
-        sma2 = bt.ind.SMA(period=self.params.sma2)
-        crossover = bt.ind.CrossOver(sma1, sma2)
-        self.signal_add(bt.SIGNAL_LONG, crossover)
-
-
-class St(bt.Strategy):
-    """ """
-
-    params = dict()
-
-    def notify_order(self, order):
-        """Args:
+""""""
+""""""
+"""Args::
     order:"""
-        if not order.alive():
-            print(
-                ",".join(
-                    str(x)
-                    for x in (
-                        self.data.num2date(order.executed.dt).date(),
-                        order.executed.size * 1 if order.isbuy() else -1,
-                        order.executed.price,
-                    )
-                )
-            )
-
-    def notify_trade(self, trade):
-        """Args:
+"""Args::
     trade:"""
-        if trade.isclosed:
-            print("profit {}".format(trade.pnlcomm))
-
-    def __init__(self):
-        """ """
-        print("Creating Empty Strategy")
-
-    def next(self):
-        """ """
-
-
-def runstrat(args=None):
-    """Args:
+""""""
+""""""
+"""Args::
     args: (Default value = None)"""
-    args = parse_args(args)
-
-    cerebro = bt.Cerebro()
-
-    # Data feed kwargs
-    kwargs = dict()
-
-    # Parse from/to-date
-    dtfmt, tmfmt = "%Y-%m-%d", "T%H:%M:%S"
-    for a, d in ((getattr(args, x), x) for x in ["fromdate", "todate"]):
-        if a:
-            strpfmt = dtfmt + tmfmt * ("T" in a)
-            kwargs[d] = datetime.datetime.strptime(a, strpfmt)
-
-    data0 = bt.feeds.BacktraderCSVData(dataname=args.data0, **kwargs)
-    cerebro.adddata(data0)
-
-    # Broker
-    cerebro.broker = bt.brokers.BackBroker(**eval("dict(" + args.broker + ")"))
-
-    # Sizer
-    cerebro.addsizer(bt.sizers.FixedSize, **eval("dict(" + args.sizer + ")"))
-
-    # Strategy
-    if not args.order_history:
-        cerebro.addstrategy(SmaCross, **eval("dict(" + args.strat + ")"))
-    else:
-        cerebro.addstrategy(St, **eval("dict(" + args.strat + ")"))
-        cerebro.add_order_history(ORDER_HISTORY, notify=True)
-
-    cerebro.addanalyzer(bt.analyzers.TimeReturn, timeframe=bt.TimeFrame.Months)
-    cerebro.addanalyzer(bt.analyzers.TimeReturn, timeframe=bt.TimeFrame.Years)
-    cerebro.addanalyzer(bt.analyzers.TradeAnalyzer)
-
-    # Execute
-    cerebro.run(**eval("dict(" + args.cerebro + ")"))
-
-    if args.plot:  # Plot if requested to
-        cerebro.plot(**eval("dict(" + args.plot + ")"))
-
-
-def parse_args(pargs=None):
-    """Args:
+"""Args::
+    pargs: (Default value = None)"""
     pargs: (Default value = None)"""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""ichimoku.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -67,7 +70,7 @@ See:
     )
 
     def __init__(self):
-        """ """
+""""""
         hi_tenkan = Highest(self.data.high, period=self.p.tenkan)
         lo_tenkan = Lowest(self.data.low, period=self.p.tenkan)
         self.l.tenkan_sen = (hi_tenkan + lo_tenkan) / 2.0

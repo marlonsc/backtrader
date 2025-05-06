@@ -28,14 +28,13 @@ EXCLUDE_FILES = {
 }
 
 def translate_to_english(text: str) -> str:
-    """
-    Translate non-English text to English.
+"""Translate non-English text to English.
     
-    Args:
+Args::
         text: Text to translate
         
-    Returns:
-        Translated text
+Returns::
+        Translated text"""
     """
     # Portuguese to English translations
     pt_to_en = {
@@ -104,14 +103,13 @@ def translate_to_english(text: str) -> str:
     return translated
 
 def analyze_python_file(file_path: str) -> Dict:
-    """
-    Analyze a Python file to extract classes, functions, and docstrings.
+"""Analyze a Python file to extract classes, functions, and docstrings.
     
-    Args:
+Args::
         file_path: Path to the Python file
         
-    Returns:
-        Dictionary containing file information
+Returns::
+        Dictionary containing file information"""
     """
     try:
         with open(file_path, 'r', encoding='utf-8', errors='replace') as f:
@@ -167,11 +165,10 @@ def analyze_python_file(file_path: str) -> Dict:
         }
 
 def enhance_readme(directory: str) -> None:
-    """
-    Enhance the README.md file for the specified directory.
+"""Enhance the README.md file for the specified directory.
     
-    Args:
-        directory: Path to the directory
+Args::
+        directory: Path to the directory"""
     """
     readme_path = os.path.join(directory, "README.md")
     
@@ -338,11 +335,10 @@ def enhance_readme(directory: str) -> None:
     print(f"Enhanced README.md for {directory}")
 
 def enhance_python_docstrings(file_path: str) -> None:
-    """
-    Enhance docstrings in a Python file to follow Google style.
+"""Enhance docstrings in a Python file to follow Google style.
     
-    Args:
-        file_path: Path to the Python file
+Args::
+        file_path: Path to the Python file"""
     """
     try:
         with open(file_path, 'r', encoding='utf-8', errors='replace') as f:
@@ -403,14 +399,13 @@ def enhance_python_docstrings(file_path: str) -> None:
         print(f"Error enhancing docstrings in {file_path}: {str(e)}")
 
 def enhance_docstring(docstring: str) -> str:
-    """
-    Enhance a docstring to follow Google style.
+"""Enhance a docstring to follow Google style.
     
-    Args:
+Args::
         docstring: Original docstring
         
-    Returns:
-        Enhanced docstring
+Returns::
+        Enhanced docstring"""
     """
     # Remove leading/trailing whitespace
     docstring = docstring.strip()
@@ -467,11 +462,10 @@ def enhance_docstring(docstring: str) -> str:
     return '\n'.join(enhanced_lines).strip()
 
 def process_directory(directory: str) -> None:
-    """
-    Process a directory to enhance documentation.
+"""Process a directory to enhance documentation.
     
-    Args:
-        directory: Path to the directory
+Args::
+        directory: Path to the directory"""
     """
     # Skip excluded directories
     if os.path.basename(directory) in EXCLUDE_DIRS:
@@ -492,11 +486,10 @@ def process_directory(directory: str) -> None:
             process_directory(item_path)
 
 def create_missing_readme(directory: str) -> None:
-    """
-    Create README.md for directories that don't have one.
+"""Create README.md for directories that don't have one.
     
-    Args:
-        directory: Path to the directory
+Args::
+        directory: Path to the directory"""
     """
     readme_path = os.path.join(directory, "README.md")
     

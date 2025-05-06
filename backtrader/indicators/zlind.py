@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""zlind.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -61,21 +64,9 @@ See also:
     )
 
     def _plotlabel(self):
-        """ """
-        plabels = [self.p.period, self.p.gainlimit]
-        plabels += [self.p._movav] * self.p.notdefault("_movav")
-        return plabels
-
-    def __init__(self):
-        """ """
-        self.ema = MovAv.EMA(period=self.p.period)
-        self.limits = [-self.p.gainlimit, self.p.gainlimit + 1]
-
-        # To make mixins work - super at the end for cooperative inheritance
-        super(ZeroLagIndicator, self).__init__()
-
-    def next(self):
-        """ """
+""""""
+""""""
+""""""
         leasterror = MAXINT  # 1000000 in original code
         bestec = ema = self.ema[0]  # seed value 1st time for ec
         price = self.data[0]

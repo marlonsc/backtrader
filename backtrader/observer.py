@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""observer.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -32,25 +35,37 @@ from .utils.py3 import with_metaclass
 class MetaObserver(type):
     """Metaclass for ObserverBase to handle instantiation and pre-initialization."""
 
-    def __new__(mcs, name, bases, dct):
+"""__new__ function.
+
+Args:
+    mcs: Description of mcs
+    name: Description of name
+    bases: Description of bases
+    dct: Description of dct
+
+Returns:
+    Description of return value
+"""
         return super().__new__(mcs, name, bases, dct)
 
     def donew(cls, *args, **kwargs):
-        """Instantiates a new Observer object and initializes analyzers list.
+"""Instantiates a new Observer object and initializes analyzers list.
 
-Returns:
+Returns::
+    tuple of (object, args, kwargs)"""
     tuple of (object, args, kwargs)"""
         _obj = object.__new__(cls)
         _obj._analyzers = list()  # keep children analyzers
         return _obj, args, kwargs
 
     def dopreinit(cls, _obj, *args, **kwargs):
-        """Pre-initialization for Observer, sets clock if strategy-wide observer.
+"""Pre-initialization for Observer, sets clock if strategy-wide observer.
 
-Args:
+Args::
     _obj: 
 
-Returns:
+Returns::
+    tuple of (object, args, kwargs)"""
     tuple of (object, args, kwargs)"""
         # No super().dopreinit, as base type does not have it
         if getattr(_obj, "_stclock", False):
@@ -59,31 +74,9 @@ Returns:
 
 
 class Observer(with_metaclass(MetaObserver, ObserverBase)):
-    """ """
-
-    _stclock = False
-
-    _OwnerCls = StrategyBase
-    _ltype = LineIterator.ObsType
-
-    csv = True
-
-    plotinfo = dict(plot=False, subplot=True)
-
-    # An Observer is ideally always observing and that' why prenext calls
-    # next. The behaviour can be overriden by subclasses
-    def prenext(self):
-        """ """
-        self.next()
-
-    def _register_analyzer(self, analyzer):
-        """Args:
+""""""
+""""""
+"""Args::
     analyzer:"""
-        self._analyzers.append(analyzer)
-
-    def _start(self):
-        """ """
-        self.start()
-
-    def start(self):
-        """ """
+""""""
+""""""

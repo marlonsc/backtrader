@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""transactions.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -32,13 +35,14 @@ from backtrader import Order, Position
 
 
 class Transactions(bt.Analyzer):
-    """This analyzer reports the transactions occurred with each an every data in
+"""This analyzer reports the transactions occurred with each an every data in
 the system
 It looks at the order execution bits to create a ``Position`` starting from
 0 during each ``next`` cycle.
 The result is used during next to record the transactions
 
-Returns:
+Returns::
+    each return as keys"""
     each return as keys"""
 
     params = (
@@ -47,35 +51,10 @@ Returns:
     )
 
     def start(self):
-        """ """
-        super(Transactions, self).start()
-        if self.p.headers:
-            self.rets[self.p._pfheaders[0]] = [list(self.p._pfheaders[1:])]
-
-        self._positions = collections.defaultdict(Position)
-        self._idnames = list(enumerate(self.strategy.getdatanames()))
-
-    def notify_order(self, order):
-        """Args:
+""""""
+"""Args::
     order:"""
-        # An order could have several partial executions per cycle (unlikely
-        # but possible) and therefore: collect each new execution notification
-        # and let the work for next
-
-        # We use a fresh Position object for each round to get summary of what
-        # the execution bits have done in that round
-        if order.status not in [Order.Partial, Order.Completed]:
-            return  # It's not an execution
-
-        pos = self._positions[order.data._name]
-        for exbit in order.executed.iterpending():
-            if exbit is None:
-                break  # end of pending reached
-
-            pos.update(exbit.size, exbit.price)
-
-    def next(self):
-        """ """
+""""""
         # super(Transactions, self).next()  # let dtkey update
         entries = []
         for i, dname in self._idnames:

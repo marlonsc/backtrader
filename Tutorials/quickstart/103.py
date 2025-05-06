@@ -1,4 +1,7 @@
-# -*- coding: UTF-8 -*-
+"""103.py module.
+
+Description of the module functionality."""
+
 # https://www.backtrader.com/docu/quickstart/quickstart/#adding-a-data-feed
 
 # import
@@ -13,35 +16,20 @@ import backtrader as bt
 # functions
 # Create a Strategy
 class TestStrategy(bt.Strategy):
-    """ """
+""""""
+"""Logging function for this strategy
 
-    def log(self, txt, dt=None):
-        """Logging function for this strategy
-
-Args:
+Args::
     txt: 
+    dt: (Default value = None)"""
     dt: (Default value = None)"""
         dt = dt or self.datas[0].datetime.date(0)
         print(f"{dt.isoformat()} {txt}")
 
     def __init__(self):
-        """ """
-        # Keep a reference to the "close" line in the data[0] data series
-        self.dataclose = self.datas[0].close
-
-    def next(self):
-        """ """
-        # Log the closing price of the series from the reference
-        self.log(f"Close {self.dataclose[0]:,.2f}")
-
-        # Check if there is are three day close decrease
-        if self.dataclose[0] < self.dataclose[-1] < self.dataclose[-2]:
-            # BUY, BUY, BUY!!! (with all possible default parameters)
-            self.log(f"\tBUY CREATE {self.dataclose[0]:,.2f}")
-            self.buy()
-
-    def next_simple(self):
-        """ """
+""""""
+""""""
+""""""
         # Simply log the closing price of the series from the reference
         # Index [0] is the most recent price
         # Index [-1] is the previous price

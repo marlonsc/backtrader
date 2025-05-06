@@ -1,8 +1,7 @@
 # Copyright (c) 2025 backtrader contributors
-"""
-Dynamic spread trading strategy for JM/J using Backtrader. This module demonstrates
+"""Dynamic spread trading strategy for JM/J using Backtrader. This module demonstrates
 how to set up a pair trading strategy with dynamic ratio adjustment and built-in
-analyzers.
+analyzers."""
 """
 
 import datetime
@@ -20,11 +19,12 @@ from backtrader.analyzers.tradeanalyzer import TradeAnalyzer
 
 
 def calculate_rolling_spread(df0, df1, window: int = 90):
-    """Calculate rolling β and spread
+"""Calculate rolling β and spread
 
-Args:
+Args::
     df0: 
     df1: 
+    window: (Default value = 90)"""
     window: (Default value = 90)"""
     # 1. Align and merge prices
     df = (
@@ -76,38 +76,8 @@ todate = datetime.datetime(2025, 1, 1)
 
 
 class SpreadData(bt.feeds.PandasData):
-    """ """
-
-    lines = ("beta",)  # Add beta line
-
-    params = (
-        ("datetime", "date"),  # Date column
-        ("close", "close"),  # Spread column as close
-        ("beta", "beta"),  # Beta column
-        ("nocase", True),  # Column names are case-insensitive
-    )
-
-
-# Filter dataframes by date before passing to Backtrader
-df0_bt = df0[(df0["date"] >= fromdate) & (df0["date"] <= todate)]
-df1_bt = df1[(df1["date"] >= fromdate) & (df1["date"] <= todate)]
-df_spread_bt = df_spread[
-    (df_spread["date"] >= fromdate) & (df_spread["date"] <= todate)
-]
-data0 = bt.feeds.PandasData(dataname=df0_bt)
-data1 = bt.feeds.PandasData(dataname=df1_bt)
-data2 = SpreadData(dataname=df_spread_bt)
-
-
-class DynamicSpreadStrategy(bt.Strategy):
-    """ """
-
-    params = (
-        ("period", 30),
-        ("devfactor", 2),
-    )
-
-    def __init__(self):
+""""""
+""""""
         """Initialize the strategy and indicators."""
         super().__init__()
         self.boll_mid = SimpleMovingAverage(self.data2.close, period=self.p.period)
@@ -118,47 +88,11 @@ class DynamicSpreadStrategy(bt.Strategy):
         self.entry_price = 0
 
     def next(self):
-        """ """
-        if self.order:
-            return
+""""""
+"""Place order with dynamic ratio
 
-        # Get current beta value
-        current_beta = self.data2.beta[0]
-
-        # Handle missing beta cases
-        if pd.isna(current_beta) or current_beta <= 0:
-            return
-
-        # Dynamically set trade size
-        self.size0 = 10  # Fixed J size
-        self.size1 = round(current_beta * 10)  # Adjust JM size based on beta
-
-        # Print debug information
-        if len(self) % 20 == 0:  # Print every 20 bars to reduce output
-            print(
-                f"{self.datetime.date()}: beta={current_beta}, J:{self.size0} lots,"
-                f" JM:{self.size1} lots"
-            )
-
-        # Use passed spread data
-        spread = self.data2.close[0]
-        mid = self.boll_mid[0]
-        pos = self.getposition(self.data0).size
-
-        # Open/close position logic
-        if pos == 0:
-            if spread > self.boll_top[0]:
-                self._open_position(short=True)
-            elif spread < self.boll_bot[0]:
-                self._open_position(short=False)
-        else:
-            if (spread <= mid and pos < 0) or (spread >= mid and pos > 0):
-                self._close_positions()
-
-    def _open_position(self, short):
-        """Place order with dynamic ratio
-
-Args:
+Args::
+    short:"""
     short:"""
         # Confirm trade size is valid
         if not hasattr(self, "size0") or not hasattr(self, "size1"):
@@ -180,12 +114,9 @@ Args:
         self.entry_price = self.data2.close[0]
 
     def _close_positions(self):
-        """ """
-        self.close(data=self.data0)
-        self.close(data=self.data1)
-
-    def notify_trade(self, trade):
-        """Args:
+""""""
+"""Args::
+    trade:"""
     trade:"""
         if trade.isclosed:
             print(

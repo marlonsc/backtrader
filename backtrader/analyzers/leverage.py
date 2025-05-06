@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""leverage.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -29,26 +32,22 @@ import backtrader as bt
 
 
 class GrossLeverage(bt.Analyzer):
-    """This analyzer calculates the Gross Leverage of the current strategy
+"""This analyzer calculates the Gross Leverage of the current strategy
 on a timeframe basis
 
-Returns:
+Returns::
+    each return as keys"""
     each return as keys"""
 
     params = (("fund", None),)
 
     def start(self):
-        """ """
-        if self.p.fund is None:
-            self._fundmode = self.strategy.broker.fundmode
-        else:
-            self._fundmode = self.p.fund
-
-    def notify_fund(self, cash, value, fundvalue, shares):
-        """Args:
+""""""
+"""Args::
     cash: 
     value: 
     fundvalue: 
+    shares:"""
     shares:"""
         self._cash = cash
         if not self._fundmode:
@@ -57,7 +56,7 @@ Returns:
             self._value = fundvalue
 
     def next(self):
-        """ """
+""""""
         # Updates the leverage for "dtkey" (see base class) for each cycle
         # 0.0 if 100% in cash, 1.0 if no short selling and fully invested
         lev = (self._value - self._cash) / self._value

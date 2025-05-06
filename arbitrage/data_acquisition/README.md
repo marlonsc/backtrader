@@ -1,31 +1,26 @@
 # data_acquisition
 
-Contains data files. Primarily contains .ipynb files code.
+This directory contains various files including 2 ipynb files, 1 md file.
 
 ## Navigation
 
-* [🏠 Root Directory](../../README.md)
+* [🏠 Root Directory](/arbitrage/data_acquisition/../arbitrage/data_acquisition/..README.md)
 * [⬆️ Parent Directory (arbitrage)](../README.md)
 
 ## Files
 
-### README.md
-
-File with .md extension.
-
 ### data_rice_fetch.ipynb
 
-Binary or data file
+Jupyter notebook
 
 ### show_data.ipynb
 
-Binary or data file
+Jupyter notebook
 
 ## Directory Summary
 
-This directory contains 3 files and 0 subdirectories.
+This directory contains 2 files and 0 subdirectories.
 
 ### File Types
 
 * .ipynb: 2 files
-* .md: 1 files

@@ -1,7 +1,6 @@
 # Copyright (c) 2025 backtrader contributors
-"""
-Execution logic and orchestration of the main backtrader loop.
-All functions and docstrings should be line-wrapped ≤ 90 characters.
+"""Execution logic and orchestration of the main backtrader loop.
+All functions and docstrings should be line-wrapped ≤ 90 characters."""
 """
 
 import itertools
@@ -14,9 +13,10 @@ from backtrader.utils.optreturn import OptReturn
 
 
 def startrun(cerebro):
-    """Starts the execution of strategies, including optimization if necessary.
+"""Starts the execution of strategies, including optimization if necessary.
 
-Args:
+Args::
+    cerebro: Cerebro instance"""
     cerebro: Cerebro instance"""
     iterstrats = itertools.product(*cerebro.strats)
     dooptimize = getattr(cerebro, "_dooptimize", False)
@@ -55,9 +55,10 @@ Args:
 
 
 def finishrun(cerebro):
-    """Finalizes the execution of strategies, returning the results.
+"""Finalizes the execution of strategies, returning the results.
 
-Args:
+Args::
+    cerebro: Cerebro instance"""
     cerebro: Cerebro instance"""
     dooptimize = getattr(cerebro, "_dooptimize", False)
     if not dooptimize:
@@ -67,11 +68,12 @@ Args:
 
 
 def runstrategies(cerebro, iterstrat, predata=False):
-    """Executes the main loop of strategies.
+"""Executes the main loop of strategies.
 
-Args:
+Args::
     cerebro: Cerebro instance
     iterstrat: Strategy iterator
+    predata: Pre-loading flag"""
     predata: Pre-loading flag"""
     cerebro._init_stcount()
     cerebro.runningstrats = runstrats = list()
@@ -207,11 +209,12 @@ Args:
 
 
 def prerunstrategies(cerebro, iterstrat, predata=False):
-    """Executes the pre-processing of strategies before the main loop.
+"""Executes the pre-processing of strategies before the main loop.
 
-Args:
+Args::
     cerebro: Cerebro instance
     iterstrat: Strategy iterator
+    predata: Pre-loading flag"""
     predata: Pre-loading flag"""
     cerebro._init_stcount()
     cerebro.runningstrats = runstrats = list()
@@ -282,19 +285,21 @@ Args:
 
 
 def runstrategieskenel(cerebro):
-    """Executes the main kernel of strategies (placeholder for future extensions).
+"""Executes the main kernel of strategies (placeholder for future extensions).
 
-Args:
+Args::
+    cerebro: Cerebro instance"""
     cerebro: Cerebro instance"""
     # Placeholder: implement specific logic if needed
     pass
 
 
 def _runnext(cerebro, runstrats):
-    """Executes the "next" execution loop for strategies.
+"""Executes the "next" execution loop for strategies.
 
-Args:
+Args::
     cerebro: Cerebro instance
+    runstrats: List of running strategies"""
     runstrats: List of running strategies"""
     # Implementation extracted from cerebro.py
     for strat in runstrats:
@@ -303,10 +308,11 @@ Args:
 
 
 def _runonce(cerebro, runstrats):
-    """Executes the "runonce" execution loop for strategies.
+"""Executes the "runonce" execution loop for strategies.
 
-Args:
+Args::
     cerebro: Cerebro instance
+    runstrats: List of running strategies"""
     runstrats: List of running strategies"""
     # Implementation extracted from cerebro.py
     for strat in runstrats:

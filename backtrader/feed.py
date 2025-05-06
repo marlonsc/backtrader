@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""feed.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -47,7 +50,16 @@ class MetaAbstractDataBase(type):
 
     _indcol = dict()
 
-    def __init__(self, name, bases, dct):
+"""__init__ function.
+
+Args:
+    name: Description of name
+    bases: Description of bases
+    dct: Description of dct
+
+Returns:
+    Description of return value
+"""
         super().__init__(name, bases, dct)
         if (
             not getattr(self, "aliased", False)
@@ -56,14 +68,28 @@ class MetaAbstractDataBase(type):
         ):
             self._indcol[name] = self
 
-    def dopreinit(self, _obj, *args, **kwargs):
+"""dopreinit function.
+
+Args:
+    _obj: Description of _obj
+
+Returns:
+    Description of return value
+"""
         _obj._feed = metabase.findowner(_obj, FeedBase)
         _obj.notifs = collections.deque()  # store notifications for cerebro
         _obj._dataname = _obj.p.dataname
         _obj._name = ""
         return _obj, args, kwargs
 
-    def dopostinit(self, _obj, *args, **kwargs):
+"""dopostinit function.
+
+Args:
+    _obj: Description of _obj
+
+Returns:
+    Description of return value
+"""
         _obj._name = _obj._name or _obj.p.name
         if not _obj._name and isinstance(_obj.p.dataname, string_types):
             _obj._name = _obj.p.dataname
@@ -143,69 +169,11 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
 
     @classmethod
     def _getstatusname(cls, status):
-        """Args:
+"""Args::
     status:"""
-        return cls._NOTIFNAMES[status]
-
-    _compensate = None
-    _feed = None
-    _store = None
-
-    _clone = False
-    _qcheck = 0.0
-
-    _tmoffset = datetime.timedelta()
-
-    # Set to non 0 if resampling/replaying
-    resampling = 0
-    replaying = 0
-
-    _started = False
-
-    def _start_finish(self):
-        """ """
-        self._tz = self._gettz()
-        # Ensure self.lines is the correct object type before accessing .datetime
-        if hasattr(self.lines, "datetime") and hasattr(self.lines.datetime, "_settz"):
-            self.lines.datetime._settz(self._tz)
-        # This should probably be also called from an override-able method
-        self._tzinput = Localizer(self._gettzinput())
-
-        # Convert user input times to the output timezone (or min/max)
-        if self.p.fromdate == "":
-            self.fromdate = float("-inf")
-        else:
-            self.fromdate = self.date2num(self.p.fromdate)
-
-        if self.p.todate == "":
-            self.todate = float("inf")
-        else:
-            self.todate = self.date2num(self.p.todate)
-
-        # FIXME: These two are never used and could be removed
-        self.sessionstart = time2num(self.p.sessionstart)
-        self.sessionend = time2num(self.p.sessionend)
-
-        self._calendar = cal = self.p.calendar
-        if cal is None:
-            self._calendar = self._env._tradingcal
-        elif isinstance(cal, string_types):
-            self._calendar = PandasMarketCalendar(calendar=cal)
-
-        self._started = True
-
-    def _start(self):
-        """ """
-        self.start()
-
-        if not self._started:
-            self._start_finish()
-
-    def _timeoffset(self):
-        """ """
-        return self._tmoffset
-
-    def _getnexteos(self):
+""""""
+""""""
+""""""
         """Returns the next eos using a trading calendar if available"""
         if self._clone:
             return self.data._getnexteos()
@@ -237,25 +205,18 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
         return tzparse(self.p.tzinput)
 
     def _gettz(self):
-        """To be overriden by subclasses which may auto-calculate the
-        timezone
-
-
+"""To be overriden by subclasses which may auto-calculate the
+        timezone"""
         """
         return tzparse(self.p.tz)
 
     def date2num(self, dt):
-        """Args:
+"""Args::
     dt:"""
-        if self._tz is not None:
-            return date2num(self._tz.localize(dt))
-
-        return date2num(dt)
-
-    def num2date(self, dt=None, tz=None, naive=True):
-        """Args:
+"""Args::
     dt: (Default value = None)
     tz: (Default value = None)
+    naive: (Default value = True)"""
     naive: (Default value = True)"""
         if dt is None:
             if hasattr(self.lines, "datetime"):
@@ -264,12 +225,10 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
         return num2date(dt, tz or self._tz, naive)
 
     def haslivedata(self):
-        """ """
-        return False  # must be overriden for those that can
-
-    def do_qcheck(self, onoff, qlapse):
-        """Args:
+""""""
+"""Args::
     onoff: 
+    qlapse:"""
     qlapse:"""
         # if onoff is True the data will wait p.qcheck for incoming live data
         # on its queue.
@@ -278,44 +237,28 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
         self._qcheck = qwait
 
     def islive(self):
-        """If this returns True, ``Cerebro`` will deactivate ``preload`` and
+"""If this returns True, ``Cerebro`` will deactivate ``preload`` and
         ``runonce`` because a live data source must be fetched tick by tick (or
-        bar by bar)
-
-
+        bar by bar)"""
         """
         return False
 
     def put_notification(self, status, *args, **kwargs):
-        """Add arguments to notification queue
+"""Add arguments to notification queue
 
-Args:
+Args::
+    status:"""
     status:"""
         if self._laststatus != status:
             self.notifs.append((status, args, kwargs))
             self._laststatus = status
 
     def get_notifications(self):
-        """ """
-        # The background thread could keep on adding notifications. The None
-        # mark allows to identify which is the last notification to deliver
-        self.notifs.append(None)  # put a mark
-        notifs = list()
-        while True:
-            notif = self.notifs.popleft()
-            if notif is None:  # mark is reached
-                break
-            notifs.append(notif)
-
-        return notifs
-
-    def getfeed(self):
-        """ """
-        return self._feed
-
-    def qbuffer(self, savemem=0, replaying=False):
-        """Args:
+""""""
+""""""
+"""Args::
     savemem: (Default value = 0)
+    replaying: (Default value = False)"""
     replaying: (Default value = False)"""
         extrasize = self.resampling or replaying
         # Ensure self.lines is iterable and its elements have qbuffer
@@ -324,110 +267,47 @@ Args:
                 line.qbuffer(savemem=savemem, extrasize=extrasize)
 
     def start(self):
-        """ """
-        self._barstack = collections.deque()
-        self._barstash = collections.deque()
-        self._laststatus = self.CONNECTED
-
-        # some filters have a state so give them a chance to reset
-        # (e.g. resampler filter needs to clear state when running optimization)
-        for ff, _, _ in self._filters:
-            if hasattr(ff, "reset"):
-                ff.reset()
-
-    def stop(self):
-        """ """
-
-    def clone(self, **kwargs):
+""""""
+""""""
         """"""
         # Remove 'dataname' from kwargs if present
         kwargs.pop("dataname", None)
         return DataClone(**kwargs)
 
     def copyas(self, _dataname, **kwargs):
-        """Args:
+"""Args::
     _dataname:"""
-        # Remove 'dataname' from kwargs if present
-        kwargs.pop("dataname", None)
-        d = DataClone(**kwargs)
-        d._dataname = _dataname
-        d._name = _dataname
-        return d
+"""Keep a reference to the environment
 
-    def setenvironment(self, env):
-        """Keep a reference to the environment
-
-Args:
+Args::
+    env:"""
     env:"""
         self._env = env
 
     def getenvironment(self):
-        """ """
-        return self._env
-
-    def addfilter_simple(self, f, *args, **kwargs):
-        """Args:
+""""""
+"""Args::
     f:"""
-        fp = SimpleFilterWrapper(self, f, *args, **kwargs)
-        self._filters.append((fp, fp.args, fp.kwargs))
-
-    def addfilter(self, p, *args, **kwargs):
-        """Args:
+"""Args::
     p:"""
-        if inspect.isclass(p):
-            pobj = p(self, *args, **kwargs)
-            self._filters.append((pobj, [], {}))
-
-            if hasattr(pobj, "last"):
-                self._ffilters.append((pobj, [], {}))
-
-        else:
-            self._filters.append((p, args, kwargs))
-
-    def compensate(self, other):
-        """Call it to let the broker know that actions on this asset will
+"""Call it to let the broker know that actions on this asset will
 compensate open positions in another
 
-Args:
+Args::
+    other:"""
     other:"""
 
         self._compensate = other
 
     def _tick_nullify(self):
-        """ """
-        # These are the updating prices in case the new bar is "updated"
-        # and the length doesn't change like if a replay is happening or
-        # a real-time data feed is in use and 1 minutes bars are being
-        # constructed with 5 seconds updates
-        for lalias in self.getlinealiases():
-            if lalias != "datetime":
-                setattr(self, "tick_" + lalias, None)
-
-        self.tick_last = None
-
-    def _tick_fill(self, force=False):
-        """Args:
+""""""
+"""Args::
     force: (Default value = False)"""
-        # If nothing filled the tick_xxx attributes, the bar is the tick
-        alias0 = self._getlinealias(0)
-        if force or getattr(self, "tick_" + alias0, None) is None:
-            for lalias in self.getlinealiases():
-                if lalias != "datetime":
-                    setattr(self, "tick_" + lalias, getattr(self.lines, lalias)[0])
-
-            self.tick_last = getattr(self.lines, alias0)[0]
-
-    def advance_peek(self):
-        """ """
-        if len(self) < self.buflen():
-            return self.lines.datetime[1]  # return the future
-
-        return float("inf")  # max date else
-
-    def advance(self, size=1, datamaster=None, ticks=True):
-        """Args:
+""""""
+"""Args::
     size: (Default value = 1)
     datamaster: (Default value = None)
+    ticks: (Default value = True)"""
     ticks: (Default value = True)"""
         if ticks:
             self._tick_nullify()
@@ -454,8 +334,9 @@ Args:
                 self._tick_fill()
 
     def next(self, datamaster=None, ticks=True):
-        """Args:
+"""Args::
     datamaster: (Default value = None)
+    ticks: (Default value = True)"""
     ticks: (Default value = True)"""
 
         if len(self) >= self.buflen():
@@ -495,121 +376,18 @@ Args:
         return True
 
     def preload(self):
-        """ """
-        while self.load():
-            pass
-
-        self._last()
-        self.home()
-
-    def _last(self, datamaster=None):
-        """Args:
+""""""
+"""Args::
     datamaster: (Default value = None)"""
-        # Last chance for filters to deliver something
-        ret = 0
-        for ff, fargs, fkwargs in self._ffilters:
-            ret += ff.last(self, *fargs, **fkwargs)
-
-        doticks = False
-        if datamaster is not None and self._barstack:
-            doticks = True
-
-        while self._fromstack(forward=True):
-            # consume bar(s) produced by "last"s - adding room
-            pass
-
-        if doticks:
-            self._tick_fill()
-
-        return bool(ret)
-
-    def _check(self, forcedata=None):
-        """Args:
+"""Args::
     forcedata: (Default value = None)"""
-        for ff, fargs, fkwargs in self._filters:
-            if not hasattr(ff, "check"):
-                continue
-            ff.check(self, _forcedata=forcedata, *fargs, **fkwargs)
+""""""
+""""""
+"""Saves given bar (list of values) to the stack for later retrieval
 
-    def load(self):
-        """ """
-        while True:
-            # move data pointer forward for new bar
-            self.forward()
-
-            if self._fromstack():  # bar is available
-                return True
-
-            if not self._fromstack(stash=True):
-                _loadret = self._load()
-                if not _loadret:  # no bar use force to make sure in exactbars
-                    # the pointer is undone this covers especially (but not
-                    # uniquely) the case in which the last bar has been seen
-                    # and a backwards would ruin pointer accounting in the
-                    # "stop" method of the strategy
-                    self.backwards(force=True)  # undo data pointer
-
-                    # return the actual returned value which may be None to
-                    # signal no bar is available, but the data feed is not
-                    # done. False means game over
-                    return _loadret
-
-            # Get a reference to current loaded time
-            dt = self.lines.datetime[0]
-            dtime = num2date(dt)
-            print(f"load data: {dtime}")
-
-            # A bar has been loaded, adapt the time
-            if self._tzinput:
-                # Input has been converted at face value but it's not UTC in
-                # the input stream
-                dtime = num2date(dt)  # get it in a naive datetime
-                # localize it
-                dtime = self._tzinput.localize(dtime)  # pytz compatible-ized
-                self.lines.datetime[0] = dt = date2num(dtime)  # keep UTC val
-
-            # Check standard date from/to filters
-            if dt < self.fromdate:
-                # discard loaded bar and carry on
-                self.backwards()
-                continue
-            if dt > self.todate:
-                # discard loaded bar and break out
-                self.backwards(force=True)
-                break
-
-            # Pass through filters
-            retff = False
-            for ff, fargs, fkwargs in self._filters:
-                # previous filter may have put things onto the stack
-                if self._barstack:
-                    for i in range(len(self._barstack)):
-                        self._fromstack(forward=True)
-                        retff = ff(self, *fargs, **fkwargs)
-                else:
-                    retff = ff(self, *fargs, **fkwargs)
-
-                if retff:  # bar removed from systemn
-                    break  # out of the inner loop
-
-            if retff:  # bar removed from system - loop to get new bar
-                continue  # in the greater loop
-
-            # Checks let the bar through ... notify it
-            return True
-
-        # Out of the loop ... no more bars or past todate
-        return False
-
-    def _load(self):
-        """ """
-        return False
-
-    def _add2stack(self, bar, stash=False):
-        """Saves given bar (list of values) to the stack for later retrieval
-
-Args:
+Args::
     bar: 
+    stash: (Default value = False)"""
     stash: (Default value = False)"""
         if not stash:
             self._barstack.append(bar)
@@ -617,12 +395,13 @@ Args:
             self._barstash.append(bar)
 
     def _save2stack(self, erase=False, force=False, stash=False):
-        """Saves current bar to the bar stack for later retrieval
+"""Saves current bar to the bar stack for later retrieval
 Parameter ``erase`` determines removal from the data stream
 
-Args:
+Args::
     erase: (Default value = False)
     force: (Default value = False)
+    stash: (Default value = False)"""
     stash: (Default value = False)"""
         bar = [line[0] for line in self.itersize()]
         if not stash:
@@ -634,12 +413,13 @@ Args:
             self.backwards(force=force)
 
     def _updatebar(self, bar, forward=False, ago=0):
-        """Load a value from the stack onto the lines to form the new bar
+"""Load a value from the stack onto the lines to form the new bar
 Returns True if values are present, False otherwise
 
-Args:
+Args::
     bar: 
     forward: (Default value = False)
+    ago: (Default value = 0)"""
     ago: (Default value = 0)"""
         if forward:
             self.forward()
@@ -648,11 +428,12 @@ Args:
             line[0 + ago] = val
 
     def _fromstack(self, forward=False, stash=False):
-        """Load a value from the stack onto the lines to form the new bar
+"""Load a value from the stack onto the lines to form the new bar
 Returns True if values are present, False otherwise
 
-Args:
+Args::
     forward: (Default value = False)
+    stash: (Default value = False)"""
     stash: (Default value = False)"""
 
         coll = self._barstack if not stash else self._barstash
@@ -678,27 +459,44 @@ Args:
 
 
 class DataBase(AbstractDataBase):
-    """ """
-
-
-class FeedBase(object):
+""""""
     """Base class for all feed containers."""
 
     params = getattr(DataBase.params, "_gettuple", lambda: DataBase.params)()
     DataCls = None  # Ensure DataCls is always present
 
-    def __init__(self):
+"""__init__ function.
+
+Returns:
+    Description of return value
+"""
         self.datas = list()
 
-    def start(self):
+"""start function.
+
+Returns:
+    Description of return value
+"""
         for data in self.datas:
             data.start()
 
-    def stop(self):
+"""stop function.
+
+Returns:
+    Description of return value
+"""
         for data in self.datas:
             data.stop()
 
-    def getdata(self, dataname, name=None, **kwargs):
+"""getdata function.
+
+Args:
+    dataname: Description of dataname
+    name: Description of name
+
+Returns:
+    Description of return value
+"""
         # Only access self.p if it exists
         if hasattr(self, "p"):
             for pname, pvalue in self.p._getitems():
@@ -710,7 +508,14 @@ class FeedBase(object):
             self.datas.append(data)
         return data
 
-    def _getdata(self, dataname, **kwargs):
+"""_getdata function.
+
+Args:
+    dataname: Description of dataname
+
+Returns:
+    Description of return value
+"""
         if hasattr(self, "p"):
             for pname, pvalue in self.p._getitems():
                 kwargs.setdefault(pname, getattr(self.p, pname))
@@ -723,7 +528,15 @@ class FeedBase(object):
 class MetaCSVDataBase(type):
     """Metaclass for CSVDataBase."""
 
-    def dopostinit(cls, _obj, *args, **kwargs):
+"""dopostinit function.
+
+Args:
+    cls: Description of cls
+    _obj: Description of _obj
+
+Returns:
+    Description of return value
+"""
         if not _obj.p.name and not _obj._name:
             _obj._name, _ = os.path.splitext(os.path.basename(_obj.p.dataname))
         # No super().dopostinit, as base type does not have it
@@ -740,79 +553,25 @@ class CSVDataBase(with_metaclass(MetaCSVDataBase, DataBase)):
     )
 
     def start(self):
-        """ """
-        super(CSVDataBase, self).start()
-
-        if self.f is None:
-            if hasattr(self.p.dataname, "readline"):
-                self.f = self.p.dataname
-            else:
-                # Let an exception propagate to let the caller know
-                self.f = io.open(self.p.dataname, "r")
-
-        if self.p.headers:
-            self.f.readline(5_000_000)  # skip the headers
-
-        self.separator = self.p.separator
-
-    def stop(self):
-        """ """
-        super(CSVDataBase, self).stop()
-        if self.f is not None:
-            self.f.close()
-            self.f = None
-
-    def preload(self):
-        """ """
-        while self.load():
-            pass
-
-        self._last()
-        self.home()
-
-        # preloaded - no need to keep the object around - breaks multip in 3.x
-        self.f.close()
-        self.f = None
-
-    def _load(self):
-        """ """
-        if self.f is None:
-            return False
-
-        # Let an exception propagate to let the caller know
-        line = self.f.readline()
-
-        if not line:
-            return False
-
-        line = line.rstrip("\n")
-        linetokens = line.split(self.separator)
-        return self._loadline(linetokens)
-
-    def _getnextline(self):
-        """ """
-        if self.f is None:
-            return None
-
-        # Let an exception propagate to let the caller know
-        line = self.f.readline()
-
-        if not line:
-            return None
-
-        line = line.rstrip("\n")
-        linetokens = line.split(self.separator)
-        return linetokens
-
-
-class CSVFeedBase(FeedBase):
+""""""
+""""""
+""""""
+""""""
+""""""
     """Base class for CSV feed containers."""
 
     params = ("basepath", "") + tuple(
         getattr(CSVDataBase.params, "_gettuple", lambda: CSVDataBase.params)()
     )
 
-    def _getdata(self, dataname, **kwargs):
+"""_getdata function.
+
+Args:
+    dataname: Description of dataname
+
+Returns:
+    Description of return value
+"""
         return (
             self.DataCls(dataname=self.p.basepath + dataname, **self.p._getkwargs())
             if hasattr(self, "DataCls") and hasattr(self, "p")
@@ -821,92 +580,16 @@ class CSVFeedBase(FeedBase):
 
 
 class DataClone(AbstractDataBase):
-    """ """
-
-    _clone = True
-
-    def __init__(self):
-        """ """
-        self.data = self.p.dataname
-        self._dataname = self.data._dataname
-
-        # Copy date/session parameters
-        self.p.fromdate = self.p.fromdate
-        self.p.todate = self.p.todate
-        self.p.sessionstart = self.data.p.sessionstart
-        self.p.sessionend = self.data.p.sessionend
-
-        self.p.timeframe = self.data.p.timeframe
-        self.p.compression = self.data.p.compression
-
-    def _start(self):
-        """ """
-        # redefine to copy data bits from guest data
-        self.start()
-
-        # Copy tz infos
-        self._tz = self.data._tz
-        if hasattr(self.lines, "datetime") and hasattr(self.lines.datetime, "_settz"):
-            self.lines.datetime._settz(self._tz)
-
-        self._calendar = self.data._calendar
-
-        # input has already been converted by guest data
-        self._tzinput = None  # no need to further converr
-
-        # Copy dates/session infos
-        self.fromdate = self.data.fromdate
-        self.todate = self.data.todate
-
-        # FIXME: if removed from guest, remove here too
-        self.sessionstart = self.data.sessionstart
-        self.sessionend = self.data.sessionend
-
-    def start(self):
-        """ """
-        super(DataClone, self).start()
-        self._dlen = 0
-        self._preloading = False
-
-    def preload(self):
-        """ """
-        self._preloading = True
-        super(DataClone, self).preload()
-        self.data.home()  # preloading data was pushed forward
-        self._preloading = False
-
-    def _load(self):
-        """ """
-        # assumption: the data is in the system
-        # simply copy the lines
-        if self._preloading:
-            # data is preloaded, we are preloading too, can move
-            # forward until have full bar or data source is exhausted
-            self.data.advance()
-            if len(self.data) > self.data.buflen():
-                return False
-
-            for line, dline in zip(self.lines, self.data.lines):
-                line[0] = dline[0]
-
-            return True
-
-        # Not preloading
-        if not (len(self.data) > self._dlen):
-            # Data not beyond last seen bar
-            return False
-
-        self._dlen += 1
-
-        for line, dline in zip(self.lines, self.data.lines):
-            line[0] = dline[0]
-
-        return True
-
-    def advance(self, size=1, datamaster=None, ticks=True):
-        """Args:
+""""""
+""""""
+""""""
+""""""
+""""""
+""""""
+"""Args::
     size: (Default value = 1)
     datamaster: (Default value = None)
+    ticks: (Default value = True)"""
     ticks: (Default value = True)"""
         self._dlen += size
         super(DataClone, self).advance(size, datamaster, ticks=ticks)

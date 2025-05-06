@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""calmar-test.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -32,66 +35,13 @@ import backtrader as bt
 
 
 class St(bt.SignalStrategy):
-    """ """
-
-    params = ()
-
-    def __init__(self):
-        """ """
-        (
-            ma1,
-            ma2,
-        ) = bt.ind.SMA(period=15), bt.ind.SMA(period=50)
-        self.signal_add(bt.signal.SIGNAL_LONG, bt.ind.CrossOver(ma1, ma2))
-
-    def next2(self):
-        """ """
-
-
-def runstrat(args=None):
-    """Args:
+""""""
+""""""
+""""""
+"""Args::
     args: (Default value = None)"""
-    args = parse_args(args)
-
-    cerebro = bt.Cerebro()
-
-    # Data feed kwargs
-    kwargs = dict()
-
-    # Parse from/to-date
-    dtfmt, tmfmt = "%Y-%m-%d", "T%H:%M:%S"
-    for a, d in ((getattr(args, x), x) for x in ["fromdate", "todate"]):
-        if a:
-            strpfmt = dtfmt + tmfmt * ("T" in a)
-            kwargs[d] = datetime.datetime.strptime(a, strpfmt)
-
-    # Data feed
-    data0 = bt.feeds.YahooFinanceCSVData(dataname=args.data0, **kwargs)
-    cerebro.adddata(data0)
-
-    # Broker
-    cerebro.broker = bt.brokers.BackBroker(**eval("dict(" + args.broker + ")"))
-
-    cerebro.addanalyzer(bt.analyzers.Calmar)
-    # Sizer
-    cerebro.addsizer(bt.sizers.FixedSize, **eval("dict(" + args.sizer + ")"))
-
-    # Strategy
-    cerebro.addstrategy(St, **eval("dict(" + args.strat + ")"))
-
-    # Execute
-    st0 = cerebro.run(**eval("dict(" + args.cerebro + ")"))[0]
-    i = 1
-    for k, v in st0.analyzers.calmar.get_analysis().items():
-        print(i, ": ".join((str(k), str(v))))
-        i += 1
-
-    if args.plot:  # Plot if requested to
-        cerebro.plot(**eval("dict(" + args.plot + ")"))
-
-
-def parse_args(pargs=None):
-    """Args:
+"""Args::
+    pargs: (Default value = None)"""
     pargs: (Default value = None)"""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

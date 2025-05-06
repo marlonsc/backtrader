@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""ppsample.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -33,48 +36,11 @@ import backtrader.utils.flushfile
 
 
 class St(bt.Strategy):
-    """ """
-
-    params = (("usepp1", False), ("plot_on_daily", False))
-
-    def __init__(self):
-        """ """
-        autoplot = self.p.plot_on_daily
-        self.pp = pp = bt.ind.PivotPoint(self.data1, _autoplot=autoplot)
-
-    def next(self):
-        """ """
-        txt = ",".join(
-            [
-                "%04d" % len(self),
-                "%04d" % len(self.data0),
-                "%04d" % len(self.data1),
-                self.data.datetime.date(0).isoformat(),
-                "%04d" % len(self.pp),
-                "%.2f" % self.pp[0],
-            ]
-        )
-
-        print(txt)
-
-
-def runstrat():
-    """ """
-    args = parse_args()
-
-    cerebro = bt.Cerebro()
-    data = btfeeds.BacktraderCSVData(dataname=args.data)
-    cerebro.adddata(data)
-    cerebro.resampledata(data, timeframe=bt.TimeFrame.Months)
-
-    cerebro.addstrategy(St, usepp1=args.usepp1, plot_on_daily=args.plot_on_daily)
-    cerebro.run(runonce=False)
-    if args.plot:
-        cerebro.plot(style="bar")
-
-
-def parse_args():
-    """ """
+""""""
+""""""
+""""""
+""""""
+""""""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Sample for pivot point and cross plotting",

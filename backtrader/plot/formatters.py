@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""formatters.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -32,25 +35,12 @@ from ..utils import num2date
 
 
 class MyVolFormatter(mplticker.Formatter):
-    """ """
-
-    Suffixes = ["", "K", "M", "G", "T", "P"]
-
-    def __init__(self, volmax):
-        """Args:
+""""""
+"""Args::
     volmax:"""
-        self.volmax = volmax
-        magnitude = 0
-        self.divisor = 1.0
-        while abs(volmax / self.divisor) >= 1000:
-            magnitude += 1
-            self.divisor *= 1000.0
-
-        self.suffix = self.Suffixes[magnitude]
-
-    def __call__(self, y, pos=0):
-        """Args:
+"""Args::
     y: 
+    pos: (Default value = 0)"""
     pos: (Default value = 0)"""
 
         if y > self.volmax * 1.20:
@@ -61,19 +51,19 @@ class MyVolFormatter(mplticker.Formatter):
 
 
 class MyDateFormatter(mplticker.Formatter):
-    """ """
-
-    def __init__(self, dates, fmt="%Y-%m-%d"):
-        """Args:
+""""""
+"""Args::
     dates: 
+    fmt: (Default value = "%Y-%m-%d")"""
     fmt: (Default value = "%Y-%m-%d")"""
         self.dates = dates
         self.lendates = len(dates)
         self.fmt = fmt
 
     def __call__(self, x, pos=0):
-        """Args:
+"""Args::
     x: 
+    pos: (Default value = 0)"""
     pos: (Default value = 0)"""
         ind = int(round(x))
         if ind >= self.lendates:
@@ -86,46 +76,23 @@ class MyDateFormatter(mplticker.Formatter):
 
 
 def patch_locator(locator, xdates):
-    """Args:
+"""Args::
     locator: 
+    xdates:"""
     xdates:"""
 
     def _patched_datalim_to_dt(self):
-        """ """
-        dmin, dmax = self.axis.get_data_interval()
-
-        # proxy access to xdates
-        dmin, dmax = xdates[int(dmin)], xdates[min(int(dmax), len(xdates) - 1)]
-
-        a, b = num2date(dmin, self.tz), num2date(dmax, self.tz)
-        return a, b
-
-    def _patched_viewlim_to_dt(self):
-        """ """
-        vmin, vmax = self.axis.get_view_interval()
-
-        # proxy access to xdates
-        vmin, vmax = xdates[int(vmin)], xdates[min(int(vmax), len(xdates) - 1)]
-        a, b = num2date(vmin, self.tz), num2date(vmax, self.tz)
-        return a, b
-
-    # patch the instance with a bound method
-    bound_datalim = _patched_datalim_to_dt.__get__(locator, locator.__class__)
-    locator.datalim_to_dt = bound_datalim
-
-    # patch the instance with a bound method
-    bound_viewlim = _patched_viewlim_to_dt.__get__(locator, locator.__class__)
-    locator.viewlim_to_dt = bound_viewlim
-
-
-def patch_formatter(formatter, xdates):
-    """Args:
+""""""
+""""""
+"""Args::
     formatter: 
+    xdates:"""
     xdates:"""
 
     def newcall(self, x, pos=0):
-        """Args:
+"""Args::
     x: 
+    pos: (Default value = 0)"""
     pos: (Default value = 0)"""
         if False and x < 0:
             raise ValueError(
@@ -144,9 +111,10 @@ def patch_formatter(formatter, xdates):
 
 
 def getlocator(xdates, numticks=5, tz=None):
-    """Args:
+"""Args::
     xdates: 
     numticks: (Default value = 5)
+    tz: (Default value = None)"""
     tz: (Default value = None)"""
     span = xdates[-1] - xdates[0]
 

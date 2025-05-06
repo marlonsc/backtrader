@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""finance.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -35,38 +38,8 @@ from .utils import shade_color
 
 
 class CandlestickPlotHandler(object):
-    """ """
-
-    legend_opens = [0.50, 0.50, 0.50]
-    legend_highs = [1.00, 1.00, 1.00]
-    legend_lows = [0.00, 0.00, 0.00]
-    legend_closes = [0.80, 0.00, 1.00]
-
-    def __init__(
-        self,
-        ax,
-        x,
-        opens,
-        highs,
-        lows,
-        closes,
-        colorup="k",
-        colordown="r",
-        edgeup=None,
-        edgedown=None,
-        tickup=None,
-        tickdown=None,
-        width=1,
-        tickwidth=1,
-        edgeadjust=0.05,
-        edgeshading=-10,
-        alpha=1.0,
-        label="_nolegend",
-        fillup=True,
-        filldown=True,
-        **kwargs,
-    ):
-        """Args:
+""""""
+"""Args::
     ax: 
     x: 
     opens: 
@@ -86,6 +59,7 @@ class CandlestickPlotHandler(object):
     alpha: (Default value = 1.0)
     label: (Default value = "_nolegend")
     fillup: (Default value = True)
+    filldown: (Default value = True)"""
     filldown: (Default value = True)"""
 
         # Manager up/down bar colors
@@ -146,10 +120,11 @@ class CandlestickPlotHandler(object):
         mlegend.Legend.update_default_handler_map({self.barcol: self})
 
     def legend_artist(self, legend, orig_handle, fontsize, handlebox):
-        """Args:
+"""Args::
     legend: 
     orig_handle: 
     fontsize: 
+    handlebox:"""
     handlebox:"""
         x0 = handlebox.xdescent
         y0 = handlebox.ydescent
@@ -195,7 +170,7 @@ class CandlestickPlotHandler(object):
         filldown=True,
         **kwargs,
     ):
-        """Args:
+"""Args::
     xs: 
     opens: 
     highs: 
@@ -209,37 +184,17 @@ class CandlestickPlotHandler(object):
     bot: (Default value = 0)
     fillup: (Default value = True)
     filldown: (Default value = True)"""
+    filldown: (Default value = True)"""
 
         # Prepack different zips of the series values
         def oc():
-            """ """
-            return zip(opens, closes)  # NOQA: E731
-
-        def xoc():
-            """ """
-            return zip(xs, opens, closes)  # NOQA: E731
-
-        def iohlc():
-            """ """
-            return zip(xs, opens, highs, lows, closes)  # NOQA: E731
-
-        colorup = self.colorup if fillup else "None"
-        colordown = self.colordown if filldown else "None"
-        colord = {True: colorup, False: colordown}
-        colors = [colord[o < c] for o, c in oc()]
-
-        edgecolord = {True: self.edgeup, False: self.edgedown}
-        edgecolors = [edgecolord[o < c] for o, c in oc()]
-
-        tickcolord = {True: self.tickup, False: self.tickdown}
-        tickcolors = [tickcolord[o < c] for o, c in oc()]
-
-        delta = width / 2 - edgeadjust
-
-        def barbox(i, open, close):
-            """Args:
+""""""
+""""""
+""""""
+"""Args::
     i: 
     open: 
+    close:"""
     close:"""
             # delta seen as closure
             left, right = i - delta, i + delta
@@ -250,10 +205,11 @@ class CandlestickPlotHandler(object):
         barareas = [barbox(i, o, c) for i, o, c in xoc()]
 
         def tup(i, open, high, close):
-            """Args:
+"""Args::
     i: 
     open: 
     high: 
+    close:"""
     close:"""
             high = high * scaling + bot
             open = open * scaling + bot
@@ -264,10 +220,11 @@ class CandlestickPlotHandler(object):
         tickrangesup = [tup(i, o, h, c) for i, o, h, l, c in iohlc()]
 
         def tdown(i, open, low, close):
-            """Args:
+"""Args::
     i: 
     open: 
     low: 
+    close:"""
     close:"""
             low = low * scaling + bot
             open = open * scaling + bot
@@ -334,7 +291,7 @@ def plot_candlestick(
     filldown=True,
     **kwargs,
 ):
-    """Args:
+"""Args::
     ax: 
     x: 
     opens: 
@@ -354,6 +311,7 @@ def plot_candlestick(
     alpha: (Default value = 1.0)
     label: (Default value = "_nolegend")
     fillup: (Default value = True)
+    filldown: (Default value = True)"""
     filldown: (Default value = True)"""
 
     chandler = CandlestickPlotHandler(
@@ -386,30 +344,8 @@ def plot_candlestick(
 
 
 class VolumePlotHandler(object):
-    """ """
-
-    legend_vols = [0.5, 1.0, 0.75]
-    legend_opens = [0, 1, 0]
-    legend_closes = [1, 0, 1]
-
-    def __init__(
-        self,
-        ax,
-        x,
-        opens,
-        closes,
-        volumes,
-        colorup="k",
-        colordown="r",
-        edgeup=None,
-        edgedown=None,
-        edgeshading=-5,
-        edgeadjust=0.05,
-        width=1,
-        alpha=1.0,
-        **kwargs,
-    ):
-        """Args:
+""""""
+"""Args::
     ax: 
     x: 
     opens: 
@@ -422,6 +358,7 @@ class VolumePlotHandler(object):
     edgeshading: (Default value = -5)
     edgeadjust: (Default value = 0.05)
     width: (Default value = 1)
+    alpha: (Default value = 1.0)"""
     alpha: (Default value = 1.0)"""
 
         # Manage the up/down colors
@@ -464,10 +401,11 @@ class VolumePlotHandler(object):
         mlegend.Legend.update_default_handler_map({self.barcol: self})
 
     def legend_artist(self, legend, orig_handle, fontsize, handlebox):
-        """Args:
+"""Args::
     legend: 
     orig_handle: 
     fontsize: 
+    handlebox:"""
     handlebox:"""
         x0 = handlebox.xdescent
         y0 = handlebox.ydescent
@@ -504,7 +442,7 @@ class VolumePlotHandler(object):
         vbot=0,
         **kwargs,
     ):
-        """Args:
+"""Args::
     x: 
     opens: 
     closes: 
@@ -513,25 +451,14 @@ class VolumePlotHandler(object):
     edgeadjust: (Default value = 0)
     vscaling: (Default value = 1.0)
     vbot: (Default value = 0)"""
+    vbot: (Default value = 0)"""
 
         # Prepare the data
         def openclose():
-            """ """
-            return zip(opens, closes)  # NOQA: E731
-
-        # Calculate bars colors
-        colord = {True: self.colorup, False: self.colordown}
-        colors = [colord[open < close] for open, close in openclose()]
-        edgecolord = {True: self.edgeup, False: self.edgedown}
-        edgecolors = [edgecolord[open < close] for open, close in openclose()]
-
-        # bar width to the sides
-        delta = width / 2 - edgeadjust
-
-        # small auxiliary func to return the bar coordinates
-        def volbar(i, v):
-            """Args:
+""""""
+"""Args::
     i: 
+    v:"""
     v:"""
             left, right = i - delta, i + delta
             v = vbot + v * vscaling
@@ -566,7 +493,7 @@ def plot_volume(
     alpha=1.0,
     **kwargs,
 ):
-    """Args:
+"""Args::
     ax: 
     x: 
     opens: 
@@ -579,6 +506,7 @@ def plot_volume(
     edgeshading: (Default value = -5)
     edgeadjust: (Default value = 0.05)
     width: (Default value = 1)
+    alpha: (Default value = 1.0)"""
     alpha: (Default value = 1.0)"""
 
     vhandler = VolumePlotHandler(
@@ -602,30 +530,8 @@ def plot_volume(
 
 
 class OHLCPlotHandler(object):
-    """ """
-
-    legend_opens = [0.50, 0.50, 0.50]
-    legend_highs = [1.00, 1.00, 1.00]
-    legend_lows = [0.00, 0.00, 0.00]
-    legend_closes = [0.80, 0.20, 0.90]
-
-    def __init__(
-        self,
-        ax,
-        x,
-        opens,
-        highs,
-        lows,
-        closes,
-        colorup="k",
-        colordown="r",
-        width=1,
-        tickwidth=0.5,
-        alpha=1.0,
-        label="_nolegend",
-        **kwargs,
-    ):
-        """Args:
+""""""
+"""Args::
     ax: 
     x: 
     opens: 
@@ -637,6 +543,7 @@ class OHLCPlotHandler(object):
     width: (Default value = 1)
     tickwidth: (Default value = 0.5)
     alpha: (Default value = 1.0)
+    label: (Default value = "_nolegend")"""
     label: (Default value = "_nolegend")"""
 
         # Manager up/down bar colors
@@ -674,10 +581,11 @@ class OHLCPlotHandler(object):
         mlegend.Legend.update_default_handler_map({self.barcol: self})
 
     def legend_artist(self, legend, orig_handle, fontsize, handlebox):
-        """Args:
+"""Args::
     legend: 
     orig_handle: 
     fontsize: 
+    handlebox:"""
     handlebox:"""
         x0 = handlebox.xdescent
         y0 = handlebox.ydescent
@@ -722,7 +630,7 @@ class OHLCPlotHandler(object):
         bot=0,
         **kwargs,
     ):
-        """Args:
+"""Args::
     xs: 
     opens: 
     highs: 
@@ -733,37 +641,18 @@ class OHLCPlotHandler(object):
     label: (Default value = "_nolegend")
     scaling: (Default value = 1.0)
     bot: (Default value = 0)"""
+    bot: (Default value = 0)"""
 
         # Prepack different zips of the series values
         def ihighlow():
-            """ """
-            return zip(xs, highs, lows)  # NOQA: E731
-
-        def iopen():
-            """ """
-            return zip(xs, opens)  # NOQA: E731
-
-        def iclose():
-            """ """
-            return zip(xs, closes)  # NOQA: E731
-
-        def openclose():
-            """ """
-            return zip(opens, closes)  # NOQA: E731
-
-        colord = {True: self.colorup, False: self.colordown}
-        colors = [colord[open < close] for open, close in openclose()]
-
-        # Extra variables for the collections
-        useaa = (0,)
-        lw = (width,)
-        tlw = (tickwidth,)
-
-        # Calculate the barranges
-        def barrange(i, high, low):
-            """Args:
+""""""
+""""""
+""""""
+""""""
+"""Args::
     i: 
     high: 
+    low:"""
     low:"""
             return (i, low * scaling + bot), (i, high * scaling + bot)
 
@@ -779,8 +668,9 @@ class OHLCPlotHandler(object):
         )
 
         def tickopen(i, open):
-            """Args:
+"""Args::
     i: 
+    open:"""
     open:"""
             open = open * scaling + bot
             return (i - tickwidth, open), (i, open)
@@ -796,8 +686,9 @@ class OHLCPlotHandler(object):
         )
 
         def tickclose(i, close):
-            """Args:
+"""Args::
     i: 
+    close:"""
     close:"""
             close = close * scaling + bot
             return (i, close), (i + tickwidth, close)
@@ -831,7 +722,7 @@ def plot_ohlc(
     label="_nolegend",
     **kwargs,
 ):
-    """Args:
+"""Args::
     ax: 
     x: 
     opens: 
@@ -843,6 +734,7 @@ def plot_ohlc(
     width: (Default value = 1.5)
     tickwidth: (Default value = 0.5)
     alpha: (Default value = 1.0)
+    label: (Default value = "_nolegend")"""
     label: (Default value = "_nolegend")"""
 
     handler = OHLCPlotHandler(
@@ -865,28 +757,15 @@ def plot_ohlc(
 
 
 class LineOnClosePlotHandler(object):
-    """ """
-
-    legend_closes = [0.00, 0.66, 0.33, 1.00]
-
-    def __init__(
-        self,
-        ax,
-        x,
-        closes,
-        color="k",
-        width=1,
-        alpha=1.0,
-        label="_nolegend",
-        **kwargs,
-    ):
-        """Args:
+""""""
+"""Args::
     ax: 
     x: 
     closes: 
     color: (Default value = "k")
     width: (Default value = 1)
     alpha: (Default value = 1.0)
+    label: (Default value = "_nolegend")"""
     label: (Default value = "_nolegend")"""
 
         self.color = color
@@ -905,10 +784,11 @@ class LineOnClosePlotHandler(object):
         mlegend.Legend.update_default_handler_map({self.loc: self})
 
     def legend_artist(self, legend, orig_handle, fontsize, handlebox):
-        """Args:
+"""Args::
     legend: 
     orig_handle: 
     fontsize: 
+    handlebox:"""
     handlebox:"""
         x0 = handlebox.xdescent
         y0 = handlebox.ydescent
@@ -930,12 +810,13 @@ class LineOnClosePlotHandler(object):
     def barcollection(
         self, xs, closes, width, label="_nolegend", scaling=1.0, bot=0, **kwargs
     ):
-        """Args:
+"""Args::
     xs: 
     closes: 
     width: 
     label: (Default value = "_nolegend")
     scaling: (Default value = 1.0)
+    bot: (Default value = 0)"""
     bot: (Default value = 0)"""
 
         # Prepack different zips of the series values
@@ -957,13 +838,14 @@ class LineOnClosePlotHandler(object):
 def plot_lineonclose(
     ax, x, closes, color="k", width=1.5, alpha=1.0, label="_nolegend", **kwargs
 ):
-    """Args:
+"""Args::
     ax: 
     x: 
     closes: 
     color: (Default value = "k")
     width: (Default value = 1.5)
     alpha: (Default value = 1.0)
+    label: (Default value = "_nolegend")"""
     label: (Default value = "_nolegend")"""
 
     handler = LineOnClosePlotHandler(

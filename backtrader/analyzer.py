@@ -18,9 +18,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-"""
-Analyzer module for Backtrader. Provides base classes and metaclasses for analyzers,
-which are used to compute and report statistics and results from strategies.
+"""Analyzer module for Backtrader. Provides base classes and metaclasses for analyzers,
+which are used to compute and report statistics and results from strategies."""
 """
 
 from __future__ import (
@@ -44,9 +43,9 @@ from .writer import WriterFile
 
 
 class MetaAnalyzer(MetaParams):
-    """Metaclass for Analyzer. Handles analyzer instantiation and parent/child
+"""Metaclass for Analyzer. Handles analyzer instantiation and parent/child
     registration. All docstrings and comments must be line-wrapped at 90 characters
-    or less.
+    or less."""
     """
 
     def donew(cls, *args, **kwargs):
@@ -91,18 +90,8 @@ class MetaAnalyzer(MetaParams):
         return _obj, args, kwargs
 
     def dopostinit(cls, _obj, *args, **kwargs):
-        """Args:
+"""Args::
     _obj:"""
-        _obj, args, kwargs = super(MetaAnalyzer, cls).dopostinit(_obj, *args, **kwargs)
-
-        if _obj._parent is not None:
-            _obj._parent._register(_obj)
-
-        # Return to the normal chain
-        return _obj, args, kwargs
-
-
-class Analyzer(with_metaclass(MetaAnalyzer, object)):
     """Analyzer base class. All analyzers are subclass of this one.
 Provides hooks for strategy notifications and analysis reporting.
 All docstrings and comments must be line-wrapped at 90 characters or less.
@@ -137,7 +126,11 @@ implementation dependent)"""
 
     csv = True
 
-    def __init__(self, *args, **kwargs):
+"""__init__ function.
+
+Returns:
+    Description of return value
+"""
         self.p = None  # Garante que self.p exista antes de qualquer acesso
         self._children = []
         self.strategy = None
@@ -148,28 +141,18 @@ implementation dependent)"""
         super().__init__(*args, **kwargs)
 
     def __len__(self):
-        """Support for invoking ``len`` on analyzers by actually returning the
-        current length of the strategy the analyzer operates on
-
-
+"""Support for invoking ``len`` on analyzers by actually returning the
+        current length of the strategy the analyzer operates on"""
         """
         return len(self.strategy)
 
     def _register(self, child):
-        """Args:
+"""Args::
     child:"""
-        self._children.append(child)
-
-    def _prenext(self):
-        """ """
-        for child in self._children:
-            child._prenext()
-
-        self.prenext()
-
-    def _notify_cashvalue(self, cash, value):
-        """Args:
+""""""
+"""Args::
     cash: 
+    value:"""
     value:"""
         for child in self._children:
             child._notify_cashvalue(cash, value)
@@ -177,10 +160,11 @@ implementation dependent)"""
         self.notify_cashvalue(cash, value)
 
     def _notify_fund(self, cash, value, fundvalue, shares):
-        """Args:
+"""Args::
     cash: 
     value: 
     fundvalue: 
+    shares:"""
     shares:"""
         for child in self._children:
             child._notify_fund(cash, value, fundvalue, shares)
@@ -188,82 +172,48 @@ implementation dependent)"""
         self.notify_fund(cash, value, fundvalue, shares)
 
     def _notify_trade(self, trade):
-        """Args:
+"""Args::
     trade:"""
-        for child in self._children:
-            child._notify_trade(trade)
-
-        self.notify_trade(trade)
-
-    def _notify_order(self, order):
-        """Args:
+"""Args::
     order:"""
-        for child in self._children:
-            child._notify_order(order)
+""""""
+""""""
+""""""
+""""""
+"""Receives the cash/value notification before each next cycle
 
-        self.notify_order(order)
-
-    def _nextstart(self):
-        """ """
-        for child in self._children:
-            child._nextstart()
-
-        self.nextstart()
-
-    def _next(self):
-        """ """
-        for child in self._children:
-            child._next()
-
-        self.next()
-
-    def _start(self):
-        """ """
-        for child in self._children:
-            child._start()
-
-        self.start()
-
-    def _stop(self):
-        """ """
-        for child in self._children:
-            child._stop()
-
-        self.stop()
-
-    def notify_cashvalue(self, cash, value):
-        """Receives the cash/value notification before each next cycle
-
-Args:
+Args::
     cash: 
+    value:"""
     value:"""
 
     def notify_fund(self, cash, value, fundvalue, shares):
-        """Receives the current cash, value, fundvalue and fund shares
+"""Receives the current cash, value, fundvalue and fund shares
 
-Args:
+Args::
     cash: 
     value: 
     fundvalue: 
     shares:"""
+    shares:"""
 
     def notify_order(self, order):
-        """Receives order notifications before each next cycle
+"""Receives order notifications before each next cycle
 
-Args:
+Args::
+    order:"""
     order:"""
 
     def notify_trade(self, trade):
-        """Receives trade notifications before each next cycle
+"""Receives trade notifications before each next cycle
 
-Args:
+Args::
+    trade:"""
     trade:"""
 
     def next(self):
-        """Invoked for each next invocation of the strategy, once the minum
-        preiod of the strategy has been reached
-
-
+"""Invoked for each next invocation of the strategy, once the minum
+        preiod of the strategy has been reached"""
         """
 
     def prenext(self):
@@ -273,25 +223,19 @@ The default behavior for an analyzer is to invoke ``next``"""
         self.next()
 
     def nextstart(self):
-        """Invoked exactly once for the nextstart invocation of the strategy,
-        when the minimum period has been first reached
-
-
+"""Invoked exactly once for the nextstart invocation of the strategy,
+        when the minimum period has been first reached"""
         """
         self.next()
 
     def start(self):
-        """Invoked to indicate the start of operations, giving the analyzer
-        time to setup up needed things
-
-
+"""Invoked to indicate the start of operations, giving the analyzer
+        time to setup up needed things"""
         """
 
     def stop(self):
-        """Invoked to indicate the end of operations, giving the analyzer
-        time to shut down needed things
-
-
+"""Invoked to indicate the end of operations, giving the analyzer
+        time to shut down needed things"""
         """
 
     def create_analysis(self):
@@ -337,18 +281,19 @@ print Python module (*pprint*)"""
 
 
 class MetaTimeFrameAnalyzerBase(Analyzer.__class__):
-    """Metaclass for TimeFrameAnalyzerBase. Handles class creation for analyzers
+"""Metaclass for TimeFrameAnalyzerBase. Handles class creation for analyzers
     that operate on specific timeframes. All docstrings and comments must be
-    line-wrapped at 90 characters or less.
+    line-wrapped at 90 characters or less."""
     """
 
     def __new__(mcs, name, bases, dct):
-        """Metaclass __new__ method for MetaTimeFrameAnalyzerBase.
+"""Metaclass __new__ method for MetaTimeFrameAnalyzerBase.
 
-Args:
+Args::
     mcs: Metaclass
     name: Class name
     bases: Base classes
+    dct: Class dict"""
     dct: Class dict"""
         # Hack to support original method name
         if "_on_dt_over" in dct:
@@ -358,8 +303,8 @@ Args:
 
 
 class TimeFrameAnalyzerBase(with_metaclass(MetaTimeFrameAnalyzerBase, Analyzer)):
-    """Base class for analyzers that operate on specific timeframes. All docstrings
-    and comments must be line-wrapped at 90 characters or less.
+"""Base class for analyzers that operate on specific timeframes. All docstrings
+    and comments must be line-wrapped at 90 characters or less."""
     """
 
     params = (
@@ -368,7 +313,11 @@ class TimeFrameAnalyzerBase(with_metaclass(MetaTimeFrameAnalyzerBase, Analyzer))
         ("_doprenext", True),
     )
 
-    def __init__(self, *args, **kwargs):
+"""__init__ function.
+
+Returns:
+    Description of return value
+"""
         super().__init__(*args, **kwargs)
         if not hasattr(self, "p") or self.p is None:
             param_dict = dict((k, v) for k, v in getattr(self, "params", []))
@@ -404,42 +353,10 @@ class TimeFrameAnalyzerBase(with_metaclass(MetaTimeFrameAnalyzerBase, Analyzer))
         super(TimeFrameAnalyzerBase, self)._start()
 
     def _prenext(self):
-        """ """
-        for child in self._children:
-            child._prenext()
-
-        if self._dt_over():
-            self.on_dt_over()
-
-        if getattr(self.p, "_doprenext", True):
-            self.prenext()
-
-    def _nextstart(self):
-        """ """
-        for child in self._children:
-            child._nextstart()
-
-        if self._dt_over() or not getattr(
-            self.p, "_doprenext", True
-        ):  # exec if no prenext
-            self.on_dt_over()
-
-        self.nextstart()
-
-    def _next(self):
-        """ """
-        for child in self._children:
-            child._next()
-
-        if self._dt_over():
-            self.on_dt_over()
-
-        self.next()
-
-    def on_dt_over(self):
-        """ """
-
-    def _dt_over(self):
+""""""
+""""""
+""""""
+""""""
         """Checks if there was a time period advancement."""
         if self.timeframe == TimeFrame.NoTimeFrame:
             dtcmp, dtkey = MAXINT, datetime.datetime.max
@@ -456,36 +373,8 @@ class TimeFrameAnalyzerBase(with_metaclass(MetaTimeFrameAnalyzerBase, Analyzer))
         return False
 
     def _get_dt_cmpkey(self, dt):
-        """Args:
+"""Args::
     dt:"""
-        if self.timeframe == TimeFrame.NoTimeFrame:
-            return None, None
-
-        if self.timeframe == TimeFrame.Years:
-            dtcmp = dt.year
-            dtkey = datetime.date(dt.year, 12, 31)
-
-        elif self.timeframe == TimeFrame.Months:
-            dtcmp = dt.year * 100 + dt.month
-            _, lastday = calendar.monthrange(dt.year, dt.month)
-            dtkey = datetime.datetime(dt.year, dt.month, lastday)
-
-        elif self.timeframe == TimeFrame.Weeks:
-            isoyear, isoweek, isoweekday = dt.isocalendar()
-            dtcmp = isoyear * 100 + isoweek
-            sunday = dt + datetime.timedelta(days=7 - isoweekday)
-            dtkey = datetime.datetime(sunday.year, sunday.month, sunday.day)
-
-        elif self.timeframe == TimeFrame.Days:
-            dtcmp = dt.year * 10000 + dt.month * 100 + dt.day
-            dtkey = datetime.datetime(dt.year, dt.month, dt.day)
-
-        else:
-            dtcmp, dtkey = self._get_subday_cmpkey(dt)
-
-        return dtcmp, dtkey
-
-    def _get_subday_cmpkey(self, dt):
         """Calculates comparison key for day sub-periods."""
         # Calculate intraday position
         ph = 0

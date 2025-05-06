@@ -1,4 +1,7 @@
-import argparse
+"""macd_divergence.py module.
+
+Description of the module functionality."""
+
 import os
 import sys
 
@@ -48,61 +51,18 @@ Best Market Conditions:
     )
 
     def log(self, txt, dt=None):
-        """Logging function
+"""Logging function
 
-Args:
+Args::
     txt: 
+    dt: (Default value = None)"""
     dt: (Default value = None)"""
         dt = dt or self.datas[0].datetime.date(0)
         print(f"{dt.isoformat()}: {txt}")
 
     def __init__(self):
-        """ """
-        # Initialize indicators
-        self.dataclose = self.datas[0].close
-        self.dataopen = self.datas[0].open
-        self.datahigh = self.datas[0].high
-        self.datalow = self.datas[0].low
-
-        # MACD
-        self.macd = bt.indicators.MACD(
-            self.dataclose,
-            period_me1=self.params.fast_ema,
-            period_me2=self.params.slow_ema,
-            period_signal=self.params.signal_period,
-        )
-        self.macd_line = self.macd.macd
-        self.signal_line = self.macd.signal
-
-        # MACD cross signals
-        self.macd_cross_above = bt.indicators.CrossOver(
-            self.macd_line, self.signal_line
-        )
-        self.macd_cross_below = bt.indicators.CrossOver(
-            self.signal_line, self.macd_line
-        )
-
-        # For confirmation
-        self.rsi = bt.indicators.RSI(period=self.params.rsi_period)
-
-        # Order and position tracking
-        self.order = None
-        self.trade_history = []
-
-        # Initialize last trade date for trade throttling
-        self.last_trade_date = None
-
-        # For tracking price and MACD values for divergence detection
-        self.price_lows = []
-        self.price_highs = []
-        self.macd_lows = []
-        self.macd_highs = []
-
-    def prenext(self):
-        """ """
-        self.next()
-
-    def detect_bullish_divergence(self):
+""""""
+""""""
         """Detect bullish divergence: price makes lower lows while MACD makes higher lows
 Bullish divergence occurs when price makes a lower low but the MACD
 makes a higher low, indicating potential upward momentum reversal."""
@@ -181,9 +141,10 @@ makes a lower high, indicating potential downward momentum reversal."""
         return False
 
     def calculate_position_size(self, stop_price):
-        """Calculate position size based on risk percentage
+"""Calculate position size based on risk percentage
 
-Args:
+Args::
+    stop_price:"""
     stop_price:"""
         account_value = self.broker.getvalue()
         risk_amount = account_value * self.params.risk_pct
@@ -196,157 +157,11 @@ Args:
         return int(position_size)
 
     def next(self):
-        """ """
-        # Skip if an order is pending
-        if self.order:
-            return
+""""""
+"""Handle order status updates
 
-        # Check if we can trade (throttling)
-        if not self.can_trade_now():
-            return
-
-        # Update our history lists for divergence detection
-        # New local minimum in price
-        if (
-            len(self.data) >= 3
-            and self.datalow[-1] < self.datalow[-2]
-            and self.datalow[-1] < self.datalow[0]
-        ):
-            self.price_lows.append(self.datalow[-1])
-            self.macd_lows.append(self.macd_line[-1])
-
-            # Keep only the last few values
-            if len(self.price_lows) > self.params.divergence_window:
-                self.price_lows.pop(0)
-                self.macd_lows.pop(0)
-
-        # New local maximum in price
-        if (
-            len(self.data) >= 3
-            and self.datahigh[-1] > self.datahigh[-2]
-            and self.datahigh[-1] > self.datahigh[0]
-        ):
-            self.price_highs.append(self.datahigh[-1])
-            self.macd_highs.append(self.macd_line[-1])
-
-            # Keep only the last few values
-            if len(self.price_highs) > self.params.divergence_window:
-                self.price_highs.pop(0)
-                self.macd_highs.pop(0)
-
-        # Log current indicators periodically
-        if len(self) % 20 == 0:
-            self.log(
-                f"Close: {self.dataclose[0]:.2f}, MACD: {self.macd_line[0]:.4f}, "
-                f"Signal: {self.signal_line[0]:.4f}, RSI: {self.rsi[0]:.2f}"
-            )
-
-        # Check if we are in a position
-        if not self.position:
-            # ENTRY LOGIC
-
-            # Check for bullish divergence and buy signal
-            bullish_div = self.detect_bullish_divergence()
-
-            # Only enter when MACD crosses above signal line (momentum
-            # confirmation)
-            macd_signal = self.macd_cross_above > 0
-
-            if bullish_div and macd_signal:
-                self.log("BULLISH DIVERGENCE DETECTED - BUY SIGNAL")
-
-                # Calculate stop loss price - tighter stop loss for divergence trades
-                # Use recent low or a percentage-based stop, whichever is
-                # closer
-                percent_stop = self.dataclose[0] * (1 - self.params.stop_loss_pct)
-                swing_stop = (
-                    min(self.datalow[0], self.datalow[-1], self.datalow[-2]) * 0.99
-                )
-                stop_price = max(
-                    percent_stop, swing_stop
-                )  # Use the higher (closer) stop price
-
-                # Calculate position size based on risk
-                size = self.calculate_position_size(stop_price)
-
-                if size > 0:
-                    self.log(f"BUY ORDER - Size: {size}, Stop: {stop_price:.2f}")
-                    self.order = self.buy(size=size)
-
-                    # Set stop loss and take profit orders
-                    self.sell(exectype=bt.Order.Stop, price=stop_price, size=size)
-
-                    # Set take profit at 2:1 reward-to-risk ratio
-                    risk_amount = self.dataclose[0] - stop_price
-                    take_profit_price = self.dataclose[0] + (risk_amount * 2)
-
-                    self.sell(
-                        exectype=bt.Order.Limit,
-                        price=take_profit_price,
-                        size=size,
-                    )
-
-                    # Update last trade date for throttling
-                    self.last_trade_date = self.datas[0].datetime.date(0)
-
-            # Check for bearish divergence and sell signal
-            bearish_div = self.detect_bearish_divergence()
-
-            # Only enter when MACD crosses below signal line (momentum
-            # confirmation)
-            macd_signal = self.macd_cross_below < 0
-
-            if bearish_div and macd_signal:
-                self.log("BEARISH DIVERGENCE DETECTED - SELL SIGNAL")
-
-                # Calculate stop loss price - use recent high or
-                # percentage-based stop
-                percent_stop = self.dataclose[0] * (1 + self.params.stop_loss_pct)
-                swing_stop = (
-                    max(self.datahigh[0], self.datahigh[-1], self.datahigh[-2]) * 1.01
-                )
-                stop_price = min(
-                    percent_stop, swing_stop
-                )  # Use the lower (closer) stop price
-
-                # Calculate position size based on risk
-                size = self.calculate_position_size(stop_price)
-
-                if size > 0:
-                    self.log(f"SELL ORDER - Size: {size}, Stop: {stop_price:.2f}")
-                    self.order = self.sell(size=size)
-
-                    # Set stop loss and take profit orders
-                    self.buy(exectype=bt.Order.Stop, price=stop_price, size=size)
-
-                    # Set take profit at 2:1 reward-to-risk ratio
-                    risk_amount = stop_price - self.dataclose[0]
-                    take_profit_price = self.dataclose[0] - (risk_amount * 2)
-
-                    self.buy(
-                        exectype=bt.Order.Limit,
-                        price=take_profit_price,
-                        size=size,
-                    )
-
-                    # Update last trade date for throttling
-                    self.last_trade_date = self.datas[0].datetime.date(0)
-        else:
-            # EXIT LOGIC - Already handled by stop loss and take profit orders
-            # Additional exit logic could be added here if needed
-
-            # Example: Exit if MACD crosses in opposite direction of the trade
-            if self.position.size > 0 and self.macd_cross_below < 0:
-                self.log("MACD REVERSED - EXIT LONG POSITION")
-                self.order = self.close()
-            elif self.position.size < 0 and self.macd_cross_above > 0:
-                self.log("MACD REVERSED - EXIT SHORT POSITION")
-                self.order = self.close()
-
-    def notify_order(self, order):
-        """Handle order status updates
-
-Args:
+Args::
+    order:"""
     order:"""
         if order.status in [order.Submitted, order.Accepted]:
             # Order submitted/accepted - nothing to do
@@ -374,9 +189,10 @@ Args:
         self.order = None
 
     def notify_trade(self, trade):
-        """Log trade information when a trade is closed
+"""Log trade information when a trade is closed
 
-Args:
+Args::
+    trade:"""
     trade:"""
         if not trade.isclosed:
             return
@@ -405,15 +221,16 @@ Args:
 def run_backtest(
     ticker="SPY", start_date="2018-01-01", end_date="2023-01-01", plot=True
 ):
-    """Run a backtest for the MACD Divergence Strategy.
+"""Run a backtest for the MACD Divergence Strategy.
 
-Args:
+Args::
     ticker: The ticker symbol to backtest (Default value = "SPY")
     start_date: Start date in YYYY-MM-DD format (Default value = "2018-01-01")
     end_date: End date in YYYY-MM-DD format (Default value = "2023-01-01")
     plot: Whether to plot the results (Default value = True)
 
-Returns:
+Returns::
+    The results of the backtest"""
     The results of the backtest"""
     # Create a backtest cerebro entity
     cerebro = bt.Cerebro()

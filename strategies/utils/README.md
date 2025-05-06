@@ -1,25 +1,22 @@
 # utils
 
-Contains utility functions and helper code. Primarily contains Python code.
+This directory contains various files including 1 md file, 1 py file.
 
 ## Navigation
 
-* [🏠 Root Directory](../../README.md)
+* [🏠 Root Directory](/strategies/utils/../strategies/utils/..README.md)
 * [⬆️ Parent Directory (strategies)](../README.md)
 
 ## Files
 
-### README.md
-
-File with .md extension.
-
 ### __init__.py
+
+Utility functions for Backtrader strategies
 
 ## Directory Summary
 
-This directory contains 2 files and 0 subdirectories.
+This directory contains 1 files and 0 subdirectories.
 
 ### File Types
 
-* .md: 1 files
 * .py: 1 files

@@ -1,4 +1,7 @@
-from datetime import datetime
+"""try.py module.
+
+Description of the module functionality."""
+
 
 import backtrader as bt
 import optuna
@@ -16,9 +19,9 @@ def finetune(
     todate=datetime(2020, 4, 1),
     count=1,
 ):
-    """Optimize independent parameters for each stock
+"""Optimize independent parameters for each stock
 
-    Args:
+Args::
         Strategy: Strategy class to optimize
         method: Optimization method, either "Sko" or "Optuna" (Default value = "Sko")
         stocks: List of stock symbols to optimize (Default value = ["000001.SZ"])
@@ -27,8 +30,8 @@ def finetune(
         todate: End date for optimization (Default value = datetime(2020, 4, 1))
         count: Number of optimization iterations (Default value = 1)
 
-    Returns:
-        Dictionary of optimized parameters for each stock
+Returns::
+        Dictionary of optimized parameters for each stock"""
     """
     store = QMTStore()
     optimized_params = {}
@@ -43,14 +46,13 @@ def finetune(
 
     # Single stock optimization function
     def optimize_single_stock(stock):
-        """
-        Optimize parameters for a single stock
+"""Optimize parameters for a single stock
 
-        Args:
+Args::
             stock: Stock symbol to optimize
 
-        Returns:
-            Dictionary of optimized parameters
+Returns::
+            Dictionary of optimized parameters"""
         """
         # Load single stock data
         data = store.getdata(
@@ -68,14 +70,13 @@ def finetune(
             ub = [50] * n_dim  # Upper bounds
 
             def backtest(p):
-                """
-                Run backtest with given parameters
+"""Run backtest with given parameters
 
-                Args:
+Args::
                     p: Parameter values to test
 
-                Returns:
-                    Negative portfolio value (for minimization)
+Returns::
+                    Negative portfolio value (for minimization)"""
                 """
                 param_dict = {
                     name: int(round(value)) for name, value in zip(param_names, p)
@@ -104,48 +105,18 @@ def finetune(
         elif method == "Optuna":
 
             def objective(trial):
-                """Args:
+"""Args::
     trial:"""
-                params = {name: trial.suggest_int(name, 1, 50) for name in param_names}
-                cerebro = bt.Cerebro()
-                cerebro.adddata(data)
-                cerebro.addstrategy(Strategy, **params)
-                cerebro.broker.setcash(1000000)
-                cerebro.broker.setcommission(0.00025)
-                cerebro.run()
-                return cerebro.broker.getvalue()
+"""多股票独立参数回测
 
-            study = optuna.create_study(direction="maximize")
-            study.optimize(objective, n_trials=count)
-            return study.best_params
-
-    # 为每个股票独立优化
-    for stock in stocks:
-        print(f"\n开始优化股票 {stock}")
-        optimized_params[stock] = optimize_single_stock(stock)
-        print(f"优化完成，参数：{optimized_params[stock]}")
-
-    return optimized_params
-
-
-def back_test(
-    selected_strategy,
-    optimized_params,
-    use_real_trading=False,
-    live=False,
-    stocks=["000001.SZ"],
-    fromdate=datetime(2020, 1, 1),
-    todate=datetime(2020, 4, 1),
-):
-    """多股票独立参数回测
-
-Args:
+Args::
     selected_strategy: 
     optimized_params: 
     use_real_trading: (Default value = False)
     live: (Default value = False)
     stocks: (Default value = ["000001.SZ"])
     fromdate: (Default value = datetime(2020, 1, 1))
+    todate: (Default value = datetime(2020, 4, 1))"""
     todate: (Default value = datetime(2020, 4, 1))"""
 
     store = QMTStore()

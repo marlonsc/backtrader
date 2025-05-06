@@ -1,7 +1,6 @@
 # Copyright (c) 2025 backtrader contributors
-"""
-Grid search for CUSUM/Z-Score pair trading strategy for J/JM futures. Includes
-rolling beta spread calculation, parameter optimization, and result visualization.
+"""Grid search for CUSUM/Z-Score pair trading strategy for J/JM futures. Includes
+rolling beta spread calculation, parameter optimization, and result visualization."""
 """
 import datetime
 import matplotlib.pyplot as plt
@@ -65,7 +64,9 @@ spread_x = price0_x - β_{t-1} * price1_x"""
 
 
 # 创建自定义数据类以支持beta列
-class SpreadData(bt.feeds.PandasData):
+"""SpreadData class.
+
+Description of the class functionality."""
     lines = ("beta",)  # 添加beta线
 
     params = (
@@ -76,7 +77,9 @@ class SpreadData(bt.feeds.PandasData):
     )
 
 
-class DynamicSpreadZScoreStrategy(bt.Strategy):
+"""DynamicSpreadZScoreStrategy class.
+
+Description of the class functionality."""
     params = (
         ("win", 20),  # 计算均值和标准差的窗口
         ("entry_zscore", 2.0),  # 入场Z-Score阈值
@@ -84,7 +87,11 @@ class DynamicSpreadZScoreStrategy(bt.Strategy):
         ("verbose", False),  # 是否打印详细信息
     )
 
-    def __init__(self):
+"""__init__ function.
+
+Returns:
+    Description of return value
+"""
         # 方便读取最近 win 根价差
         self.spread_series = self.data2.close
         # 计算价差的滚动均值和标准差
@@ -92,7 +99,14 @@ class DynamicSpreadZScoreStrategy(bt.Strategy):
         self.stddev = bt.indicators.StdDev(self.spread_series, period=self.p.win)
 
     # ---------- 交易辅助（沿用原有逻辑） ----------
-    def _open_position(self, short):
+"""_open_position function.
+
+Args:
+    short: Description of short
+
+Returns:
+    Description of return value
+"""
         if not hasattr(self, "size0"):
             self.size0 = 10
             self.size1 = round(self.data2.beta[0] * 10)
@@ -103,12 +117,20 @@ class DynamicSpreadZScoreStrategy(bt.Strategy):
             self.buy(data=self.data0, size=self.size0)
             self.sell(data=self.data1, size=self.size1)
 
-    def _close_positions(self):
+"""_close_positions function.
+
+Returns:
+    Description of return value
+"""
         self.close(data=self.data0)
         self.close(data=self.data1)
 
     # ---------- 主循环 ----------
-    def next(self):
+"""next function.
+
+Returns:
+    Description of return value
+"""
         # 1) 确保有足够历史用于计算均值和标准差
         if len(self.spread_series) < self.p.win + 2:
             return
@@ -148,7 +170,14 @@ class DynamicSpreadZScoreStrategy(bt.Strategy):
             ):  # 做空价差的平仓条件
                 self._close_positions()
 
-    def notify_trade(self, trade):
+"""notify_trade function.
+
+Args:
+    trade: Description of trade
+
+Returns:
+    Description of return value
+"""
         if not self.p.verbose:
             return
 

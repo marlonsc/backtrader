@@ -1,6 +1,15 @@
-# strategies
+# Trading Strategies
 
-Contains trading strategy implementations. Primarily contains Python code.
+This directory contains implementations of trading strategies that can be used with the Backtrader framework. Trading strategies define the logic for entering and exiting positions based on market conditions and technical indicators.
+
+## Overview
+
+The strategies in this directory include:
+- Base strategy classes that provide core functionality
+- Example strategies like SMA crossover
+- Utility functions for strategy development
+
+Each strategy is implemented as a Python class that inherits from the Strategy base class, making it easy to customize and extend.
 
 ## Navigation
 
@@ -9,25 +18,22 @@ Contains trading strategy implementations. Primarily contains Python code.
 
 ## Files
 
-### README.md
-
-File with .md extension.
-
 ### __init__.py
+
+__init__.py module.
 
 ### nullstrategy.py
 
-**Classes:**
-
-* `NullStrategy`: Dummy strategy that does nothing. Really nothing.
+nullstrategy.py module.
 
 ### sma_crossover.py
 
+sma_crossover.py module.
+
 ## Directory Summary
 
-This directory contains 4 files and 0 subdirectories.
+This directory contains 3 files and 0 subdirectories.
 
 ### File Types
 
 * .py: 3 files
-* .md: 1 files

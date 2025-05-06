@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""data-resample.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -32,54 +35,8 @@ import backtrader.feeds as btfeeds
 
 
 def runstrat():
-    """ """
-    args = parse_args()
-
-    # Create a cerebro entity
-    cerebro = bt.Cerebro(stdstats=False)
-
-    # Add a strategy
-    cerebro.addstrategy(bt.Strategy)
-
-    # Load the Data
-    datapath = args.dataname or "../../datas/2006-day-001.txt"
-    data = btfeeds.BacktraderCSVData(dataname=datapath)
-
-    # Handy dictionary for the argument timeframe conversion
-    tframes = dict(
-        daily=bt.TimeFrame.Days,
-        weekly=bt.TimeFrame.Weeks,
-        monthly=bt.TimeFrame.Months,
-    )
-
-    # Resample the data
-    if args.oldrs:
-        # Old resampler, fully deprecated
-        data = bt.DataResampler(
-            dataname=data,
-            timeframe=tframes[args.timeframe],
-            compression=args.compression,
-        )
-
-        # Add the resample data instead of the original
-        cerebro.adddata(data)
-    else:
-        # New resampler
-        cerebro.resampledata(
-            data,
-            timeframe=tframes[args.timeframe],
-            compression=args.compression,
-        )
-
-    # Run over everything
-    cerebro.run()
-
-    # Plot the result
-    cerebro.plot(style="bar")
-
-
-def parse_args():
-    """ """
+""""""
+""""""
     parser = argparse.ArgumentParser(description="Resample down to minutes")
 
     parser.add_argument(

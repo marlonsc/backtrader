@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""functions.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -34,19 +37,15 @@ from .utils.py3 import cmp, range
 
 # Generate a List equivalent which uses "is" for contains
 class List(list):
-    """List subclass using 'is' for contains. All docstrings and comments must be
-    line-wrapped at 90 characters or less.
+"""List subclass using 'is' for contains. All docstrings and comments must be
+    line-wrapped at 90 characters or less."""
     """
 
     def __contains__(self, other):
-        """Args:
+"""Args::
     other:"""
-        return any(x.__hash__() == other.__hash__() for x in self)
-
-
-class Logic(LineActions):
-    """Base class for logic operations on line objects. All docstrings and comments
-    must be line-wrapped at 90 characters or less.
+"""Base class for logic operations on line objects. All docstrings and comments
+    must be line-wrapped at 90 characters or less."""
     """
 
     def __init__(self, *args):
@@ -56,17 +55,16 @@ class Logic(LineActions):
 
 
 class DivByZero(Logic):
-    """This operation is a Lines object and fills it values by executing a
+"""This operation is a Lines object and fills it values by executing a
     division on the numerator / denominator arguments and avoiding a division
-    by zero exception by checking the denominator
-
-
+    by zero exception by checking the denominator"""
     """
 
     def __init__(self, a, b, zero=0.0):
-        """Args:
+"""Args::
     a: 
     b: 
+    zero: (Default value = 0.0)"""
     zero: (Default value = 0.0)"""
         super(DivByZero, self).__init__(a, b)
         self.a = a
@@ -74,13 +72,10 @@ class DivByZero(Logic):
         self.zero = zero
 
     def next(self):
-        """ """
-        b = self.b[0]
-        self[0] = self.a[0] / b if b else self.zero
-
-    def once(self, start, end):
-        """Args:
+""""""
+"""Args::
     start: 
+    end:"""
     end:"""
         # cache python dictionary lookups
         dst = self.array
@@ -94,19 +89,18 @@ class DivByZero(Logic):
 
 
 class DivZeroByZero(Logic):
-    """This operation is a Lines object and fills it values by executing a
+"""This operation is a Lines object and fills it values by executing a
     division on the numerator / denominator arguments and avoiding a division
     by zero exception or an indetermination by checking the
-    denominator/numerator pair
-
-
+    denominator/numerator pair"""
     """
 
     def __init__(self, a, b, single=float("inf"), dual=0.0):
-        """Args:
+"""Args::
     a: 
     b: 
     single: (Default value = float("inf"))
+    dual: (Default value = 0.0)"""
     dual: (Default value = 0.0)"""
         super(DivZeroByZero, self).__init__(a, b)
         self.a = a
@@ -115,17 +109,10 @@ class DivZeroByZero(Logic):
         self.dual = dual
 
     def next(self):
-        """ """
-        b = self.b[0]
-        a = self.a[0]
-        if b == 0.0:
-            self[0] = self.dual if a == 0.0 else self.single
-        else:
-            self[0] = self.a[0] / b
-
-    def once(self, start, end):
-        """Args:
+""""""
+"""Args::
     start: 
+    end:"""
     end:"""
         # cache python dictionary lookups
         dst = self.array
@@ -144,25 +131,24 @@ class DivZeroByZero(Logic):
 
 
 class Cmp(Logic):
-    """Compares two line objects element-wise. All docstrings and comments must be
-    line-wrapped at 90 characters or less.
+"""Compares two line objects element-wise. All docstrings and comments must be
+    line-wrapped at 90 characters or less."""
     """
 
     def __init__(self, a, b):
-        """Args:
+"""Args::
     a: 
+    b:"""
     b:"""
         super(Cmp, self).__init__(a, b)
         self.a = self.args[0]
         self.b = self.args[1]
 
     def next(self):
-        """ """
-        self[0] = cmp(self.a[0], self.b[0])
-
-    def once(self, start, end):
-        """Args:
+""""""
+"""Args::
     start: 
+    end:"""
     end:"""
         # cache python dictionary lookups
         dst = self.array
@@ -174,16 +160,17 @@ class Cmp(Logic):
 
 
 class CmpEx(Logic):
-    """Extended comparison logic for line objects. All docstrings and comments must
-    be line-wrapped at 90 characters or less.
+"""Extended comparison logic for line objects. All docstrings and comments must
+    be line-wrapped at 90 characters or less."""
     """
 
     def __init__(self, a, b, r1, r2, r3):
-        """Args:
+"""Args::
     a: 
     b: 
     r1: 
     r2: 
+    r3:"""
     r3:"""
         super(CmpEx, self).__init__(a, b, r1, r2, r3)
         self.a = self.args[0]
@@ -193,12 +180,10 @@ class CmpEx(Logic):
         self.r3 = self.args[4]
 
     def next(self):
-        """ """
-        self[0] = cmp(self.a[0], self.b[0])
-
-    def once(self, start, end):
-        """Args:
+""""""
+"""Args::
     start: 
+    end:"""
     end:"""
         # cache python dictionary lookups
         dst = self.array
@@ -221,14 +206,15 @@ class CmpEx(Logic):
 
 
 class If(Logic):
-    """Implements conditional logic for line objects. All docstrings and comments
-    must be line-wrapped at 90 characters or less.
+"""Implements conditional logic for line objects. All docstrings and comments
+    must be line-wrapped at 90 characters or less."""
     """
 
     def __init__(self, cond, a, b):
-        """Args:
+"""Args::
     cond: 
     a: 
+    b:"""
     b:"""
         super(If, self).__init__(a, b)
         self.a = self.args[0]
@@ -236,12 +222,10 @@ class If(Logic):
         self.cond = self.arrayize(cond)
 
     def next(self):
-        """ """
-        self[0] = self.a[0] if self.cond[0] else self.b[0]
-
-    def once(self, start, end):
-        """Args:
+""""""
+"""Args::
     start: 
+    end:"""
     end:"""
         # cache python dictionary lookups
         dst = self.array
@@ -254,24 +238,17 @@ class If(Logic):
 
 
 class MultiLogic(Logic):
-    """Base class for multi-argument logic operations. All docstrings and comments
-    must be line-wrapped at 90 characters or less.
+"""Base class for multi-argument logic operations. All docstrings and comments
+    must be line-wrapped at 90 characters or less."""
     """
 
     flogic = None
 
     def next(self):
-        """ """
-        flogic = type(self).flogic
-        if flogic is None or not callable(flogic):
-            raise NotImplementedError(
-                "flogic must be defined in subclass and callable."
-            )
-        self[0] = flogic(*[arg[0] for arg in self.args])
-
-    def once(self, start, end):
-        """Args:
+""""""
+"""Args::
     start: 
+    end:"""
     end:"""
         # cache python dictionary lookups
         dst = self.array
@@ -286,24 +263,17 @@ class MultiLogic(Logic):
 
 
 class SingleLogic(Logic):
-    """Base class for single-argument logic operations. All docstrings and comments
-    must be line-wrapped at 90 characters or less.
+"""Base class for single-argument logic operations. All docstrings and comments
+    must be line-wrapped at 90 characters or less."""
     """
 
     flogic = None
 
     def next(self):
-        """ """
-        flogic = type(self).flogic
-        if flogic is None or not callable(flogic):
-            raise NotImplementedError(
-                "flogic must be defined in subclass and callable."
-            )
-        self[0] = flogic(self.args[0][0])
-
-    def once(self, start, end):
-        """Args:
+""""""
+"""Args::
     start: 
+    end:"""
     end:"""
         # cache python dictionary lookups
         dst = self.array
@@ -317,8 +287,8 @@ class SingleLogic(Logic):
 
 
 class MultiLogicReduce(MultiLogic):
-    """Base class for multi-argument logic operations with reduction. All docstrings
-    and comments must be line-wrapped at 90 characters or less.
+"""Base class for multi-argument logic operations with reduction. All docstrings
+    and comments must be line-wrapped at 90 characters or less."""
     """
 
     def __init__(self, *args, **kwargs):
@@ -333,136 +303,151 @@ class MultiLogicReduce(MultiLogic):
 
 
 class Reduce(MultiLogicReduce):
-    """Reduces multiple arguments using a specified logic function. All docstrings
-    and comments must be line-wrapped at 90 characters or less.
+"""Reduces multiple arguments using a specified logic function. All docstrings
+    and comments must be line-wrapped at 90 characters or less."""
     """
 
     def __init__(self, flogic, *args, **kwargs):
-        """Args:
+"""Args::
     flogic:"""
-        self.flogic = flogic
-        super(Reduce, self).__init__(*args, **kwargs)
-
-
-# The _xxxlogic functions are defined at module scope to make them
-# pickable and therefore compatible with multiprocessing
-def _andlogic(x, y):
-    """Args:
+"""Args::
     x: 
+    y:"""
     y:"""
     return bool(x and y)
 
 
 class And(MultiLogicReduce):
-    """Logical AND reduction for multiple arguments. All docstrings and comments must
-    be line-wrapped at 90 characters or less.
+"""Logical AND reduction for multiple arguments. All docstrings and comments must
+    be line-wrapped at 90 characters or less."""
     """
 
     flogic = _andlogic
 
 
 def _orlogic(x, y):
-    """Args:
+"""Args::
     x: 
+    y:"""
     y:"""
     return bool(x or y)
 
 
 class Or(MultiLogicReduce):
-    """Logical OR reduction for multiple arguments. All docstrings and comments must
-    be line-wrapped at 90 characters or less.
+"""Logical OR reduction for multiple arguments. All docstrings and comments must
+    be line-wrapped at 90 characters or less."""
     """
 
     flogic = _orlogic
 
 
-def _maxlogic(*args):
+"""_maxlogic function.
+
+Returns:
+    Description of return value
+"""
     return max(args)
 
 
-def _minlogic(*args):
+"""_minlogic function.
+
+Returns:
+    Description of return value
+"""
     return min(args)
 
 
-def _sumlogic(*args):
+"""_sumlogic function.
+
+Returns:
+    Description of return value
+"""
     return math.fsum(args)
 
 
-def _anylogic(*args):
+"""_anylogic function.
+
+Returns:
+    Description of return value
+"""
     return any(args)
 
 
-def _alllogic(*args):
+"""_alllogic function.
+
+Returns:
+    Description of return value
+"""
     return all(args)
 
 
 class Max(MultiLogic):
-    """Element-wise maximum for multiple arguments. All docstrings and comments must
-    be line-wrapped at 90 characters or less.
+"""Element-wise maximum for multiple arguments. All docstrings and comments must
+    be line-wrapped at 90 characters or less."""
     """
 
     flogic = _maxlogic
 
 
 class Min(MultiLogic):
-    """Element-wise minimum for multiple arguments. All docstrings and comments must
-    be line-wrapped at 90 characters or less.
+"""Element-wise minimum for multiple arguments. All docstrings and comments must
+    be line-wrapped at 90 characters or less."""
     """
 
     flogic = _minlogic
 
 
 class Sum(MultiLogic):
-    """Element-wise sum for multiple arguments. All docstrings and comments must be
-    line-wrapped at 90 characters or less.
+"""Element-wise sum for multiple arguments. All docstrings and comments must be
+    line-wrapped at 90 characters or less."""
     """
 
     flogic = _sumlogic
 
 
 class Any(MultiLogic):
-    """Element-wise any() for multiple arguments. All docstrings and comments must be
-    line-wrapped at 90 characters or less.
+"""Element-wise any() for multiple arguments. All docstrings and comments must be
+    line-wrapped at 90 characters or less."""
     """
 
     flogic = _anylogic
 
 
 class All(MultiLogic):
-    """Element-wise all() for multiple arguments. All docstrings and comments must be
-    line-wrapped at 90 characters or less.
+"""Element-wise all() for multiple arguments. All docstrings and comments must be
+    line-wrapped at 90 characters or less."""
     """
 
     flogic = _alllogic
 
 
 class Log(SingleLogic):
-    """Element-wise log10 for a single argument. All docstrings and comments must be
-    line-wrapped at 90 characters or less.
+"""Element-wise log10 for a single argument. All docstrings and comments must be
+    line-wrapped at 90 characters or less."""
     """
 
     flogic = math.log10
 
 
 class Ceiling(SingleLogic):
-    """Element-wise ceiling for a single argument. All docstrings and comments must
-    be line-wrapped at 90 characters or less.
+"""Element-wise ceiling for a single argument. All docstrings and comments must
+    be line-wrapped at 90 characters or less."""
     """
 
     flogic = math.ceil
 
 
 class Floor(SingleLogic):
-    """Element-wise floor for a single argument. All docstrings and comments must be
-    line-wrapped at 90 characters or less.
+"""Element-wise floor for a single argument. All docstrings and comments must be
+    line-wrapped at 90 characters or less."""
     """
 
     flogic = math.floor
 
 
 class Abs(SingleLogic):
-    """Element-wise absolute value for a single argument. All docstrings and comments
-    must be line-wrapped at 90 characters or less.
+"""Element-wise absolute value for a single argument. All docstrings and comments
+    must be line-wrapped at 90 characters or less."""
     """
 
     flogic = math.fabs

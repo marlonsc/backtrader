@@ -177,11 +177,12 @@ Best Market Conditions:
     )
 
     def log(self, txt, dt=None, level="info"):
-        """Logging function for the strategy
+"""Logging function for the strategy
 
-Args:
+Args::
     txt: 
     dt: (Default value = None)
+    level: (Default value = "info")"""
     level: (Default value = "info")"""
         if level == "debug" and self.p.log_level != "debug":
             return
@@ -190,53 +191,11 @@ Args:
         print(f"{dt.isoformat()}: {txt}")
 
     def __init__(self):
-        """ """
-        # Store the close price reference
-        self.dataclose = self.datas[0].close
+""""""
+"""Calculate how many shares to buy based on risk-based position sizing
 
-        # Track order and position state
-        self.order = None
-        self.entry_price = None
-        self.stop_price = None
-        self.buysell = None  # 'buy' or 'sell' to track position type
-
-        # Initialize trade tracking
-        self.trade_count = 0
-        self.winning_trades = 0
-        self.losing_trades = 0
-
-        # Initialize last trade date for trade throttling
-        self.last_trade_date = None
-
-        # Calculate indicators
-        # Bollinger Bands
-        self.bbands = bt.indicators.BollingerBands(
-            self.datas[0],
-            period=self.p.bbands_period,
-            devfactor=self.p.bbands_dev,
-        )
-
-        # Extract individual Bollinger Band components
-        self.upper_band = self.bbands.top
-        self.middle_band = self.bbands.mid
-        self.lower_band = self.bbands.bot
-
-        # RSI indicator
-        self.rsi = bt.indicators.RSI(self.datas[0], period=self.p.rsi_period)
-
-        # Crossover indicators for entry and exit conditions
-        self.price_cross_lower = bt.indicators.CrossDown(
-            self.dataclose, self.lower_band
-        )
-        self.price_cross_upper = bt.indicators.CrossUp(self.dataclose, self.upper_band)
-        self.price_cross_middle = bt.indicators.CrossUp(
-            self.dataclose, self.middle_band
-        )
-
-    def calculate_position_size(self, price):
-        """Calculate how many shares to buy based on risk-based position sizing
-
-Args:
+Args::
+    price:"""
     price:"""
         available_cash = self.broker.get_cash()
         value = self.broker.getvalue()
@@ -282,126 +241,7 @@ Args:
         return size
 
     def next(self):
-        """ """
-        # If an order is pending, we cannot send a new one
-        if self.order:
-            return
-
-        # Calculate Bollinger Band percentage (simpler approach)
-        # 1.0 = at upper band, 0.5 = at middle band, 0.0 = at lower band
-        bb_range = self.upper_band[0] - self.lower_band[0]
-        if bb_range != 0:  # Avoid division by zero
-            bb_pct = (self.dataclose[0] - self.lower_band[0]) / bb_range
-        else:
-            bb_pct = 0.5  # Middle band position if bands are identical (rare)
-
-        # Print debug information every 10 bars
-        if len(self) % 10 == 0:
-            self.log(
-                f"DEBUG - Close: {self.dataclose[0]:.2f}, BB Upper:"
-                f" {self.upper_band[0]:.2f}, "
-                + f"BB Middle: {self.middle_band[0]:.2f}, BB Lower:"
-                f" {self.lower_band[0]:.2f}, "
-                + f"RSI: {self.rsi[0]:.2f}, BB%: {bb_pct:.2f}"
-            )
-
-            # Check if we're near entry conditions
-            if bb_pct <= 0.2:
-                self.log(
-                    f"CLOSE TO ENTRY - Price near lower band (BB%: {bb_pct:.2f}), RSI:"
-                    f" {self.rsi[0]:.2f}"
-                )
-
-            # Check if we're near exit conditions
-            if bb_pct >= 0.8:
-                self.log(
-                    f"CLOSE TO EXIT - Price near upper band (BB%: {bb_pct:.2f}), RSI:"
-                    f" {self.rsi[0]:.2f}"
-                )
-
-        # Log current market conditions
-        self.log(
-            f"Close: {self.dataclose[0]:.2f}, BB Upper: {self.upper_band[0]:.2f}, "
-            + f"BB Middle: {self.middle_band[0]:.2f}, BB Lower:"
-            f" {self.lower_band[0]:.2f}, "
-            + f"RSI: {self.rsi[0]:.2f}, BB%: {bb_pct:.2f}",
-            level="debug",
-        )
-
-        # Check for stop loss if we have a position and stop loss is enabled
-        if self.position and self.p.use_stop_loss and self.stop_price is not None:
-            if (self.buysell == "buy" and self.dataclose[0] < self.stop_price) or (
-                self.buysell == "sell" and self.dataclose[0] > self.stop_price
-            ):
-                self.log(
-                    f"STOP LOSS TRIGGERED: Close Price: {self.dataclose[0]:.2f}, Stop"
-                    f" Price: {self.stop_price:.2f}"
-                )
-                self.order = self.close()
-                return
-
-        # Check for exit on middle band cross if enabled
-        if self.position and self.p.exit_middle:
-            if (self.buysell == "buy" and self.price_cross_middle[0]) or (
-                self.buysell == "sell" and self.price_cross_middle[0]
-            ):
-                self.log(
-                    f"EXIT ON MIDDLE BAND: Close Price: {self.dataclose[0]:.2f}, Middle"
-                    f" Band: {self.middle_band[0]:.2f}"
-                )
-                self.order = self.close()
-                return
-
-        # If we are in a position, check for exit conditions
-        if self.position:
-            # For long positions, exit when price touches or crosses upper band
-            # and RSI > threshold
-            if (
-                self.buysell == "buy"
-                and bb_pct >= 0.8
-                and self.rsi[0] > self.p.rsi_sell_threshold
-            ):
-                self.log(
-                    f"SELL SIGNAL: Close Price: {self.dataclose[0]:.2f}, Upper Band:"
-                    f" {self.upper_band[0]:.2f}, RSI: {self.rsi[0]:.2f}"
-                )
-                self.order = self.close()
-                return
-
-        # If we are not in the market, look for entry conditions
-        else:
-            # Check if we're allowed to trade based on the throttling rules
-            if not self.can_trade_now():
-                return
-
-            # For long entries, check if price is below lower band and RSI <
-            # threshold
-            if bb_pct <= 0.2 and self.rsi[0] < self.p.rsi_buy_threshold:
-                # Calculate position size based on current portfolio value
-                price = self.dataclose[0]
-                size = self.calculate_position_size(price)
-
-                self.log(
-                    f"BUY SIGNAL: Close Price: {price:.2f}, Lower Band:"
-                    f" {self.lower_band[0]:.2f}, RSI: {self.rsi[0]:.2f}"
-                )
-
-                # Keep track of the executed price
-                self.entry_price = price
-
-                # Set stop loss price if enabled
-                if self.p.use_stop_loss:
-                    self.stop_price = price * (1.0 - self.p.stop_loss_pct / 100.0)
-                    self.log(f"Stop loss set at {self.stop_price:.2f}")
-
-                # Enter long position
-                self.buysell = "buy"
-                self.order = self.buy(size=size)
-
-                # Update the last trade date for throttling
-                self.last_trade_date = self.datas[0].datetime.date(0)
-
-    def stop(self):
+""""""
         """Called when backtest is finished"""
         self.log(f"Final Portfolio Value: {self.broker.getvalue():.2f}")
 
@@ -415,9 +255,10 @@ Args:
             self.log("No trades executed during the backtest period")
 
     def notify_order(self, order):
-        """Handle order notifications
+"""Handle order notifications
 
-Args:
+Args::
+    order:"""
     order:"""
         if order.status in [order.Submitted, order.Accepted]:
             # Order pending, do nothing
@@ -445,9 +286,10 @@ Args:
         self.order = None
 
     def notify_trade(self, trade):
-        """Track completed trades
+"""Track completed trades
 
-Args:
+Args::
+    trade:"""
     trade:"""
         if not trade.isclosed:
             return

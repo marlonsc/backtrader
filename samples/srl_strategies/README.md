@@ -1,31 +1,34 @@
 # srl_strategies
 
-Contains trading strategy implementations. Primarily contains Python code.
+This directory contains various files including 4 py files, 1 md file.
 
 ## Navigation
 
-* [🏠 Root Directory](../../README.md)
+* [🏠 Root Directory](/samples/srl_strategies/../samples/srl_strategies/..README.md)
 * [⬆️ Parent Directory (samples)](../README.md)
 
 ## Files
 
-### README.md
-
-File with .md extension.
-
 ### __init__.py
+
+__init__.py module.
 
 ### buy_and_hold_simple.py
 
+buy_and_hold_simple.py module.
+
 ### cost_average.py
+
+cost_average.py module.
 
 ### momentum.py
 
+momentum.py module.
+
 ## Directory Summary
 
-This directory contains 5 files and 0 subdirectories.
+This directory contains 4 files and 0 subdirectories.
 
 ### File Types
 
 * .py: 4 files
-* .md: 1 files

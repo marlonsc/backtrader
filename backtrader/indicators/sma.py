@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""sma.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -42,7 +45,7 @@ See also:
     lines = ("sma",)
 
     def __init__(self):
-        """ """
+""""""
         # Before super to ensure mixins (right-hand side in subclassing)
         # can see the assignment operation and operate on the line
         self.lines[0] = Average(self.data, period=self.p.period)

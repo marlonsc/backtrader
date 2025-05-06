@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""bbroker.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -89,61 +92,15 @@ and ``setbroker`` methods of ``Cerebro``"""
     )
 
     def __init__(self):
-        """ """
-        super(BackBroker, self).__init__()
-        self._userhist = []
-        self._fundhist = []
-        # share_value, net asset value
-        self._fhistlast = [float("NaN"), float("NaN")]
-
-    def init(self):
-        """ """
-        super(BackBroker, self).init()
-        self.startingcash = self.cash = self.p.cash
-        self._value = self.cash
-        self._valuemkt = 0.0  # no open position
-
-        self._valuelever = 0.0  # no open position
-        self._valuemktlever = 0.0  # no open position
-
-        self._leverage = 1.0  # initially nothing is open
-        self._unrealized = 0.0  # no open position
-
-        self.orders = list()  # will only be appending
-        self.pending = collections.deque()  # popleft and append(right)
-        self._toactivate = collections.deque()  # to activate in next cycle
-
-        self.positions = collections.defaultdict(Position)
-        self.d_credit = collections.defaultdict(float)  # credit per data
-        self.notifs = collections.deque()
-
-        self.submitted = collections.deque()
-
-        # to keep dependent orders if needed
-        self._pchildren = collections.defaultdict(collections.deque)
-
-        self._ocos = dict()
-        self._ocol = collections.defaultdict(list)
-
-        self._fundval = self.p.fundstartval
-        self._fundshares = self.p.cash / self._fundval
-        self._cash_addition = collections.deque()
-
-    def get_notification(self):
-        """ """
-        try:
-            return self.notifs.popleft()
-        except IndexError:
-            pass
-
-        return None
-
-    def set_fundmode(self, fundmode, fundstartval=None):
-        """Set the actual fundmode (True or False)
+""""""
+""""""
+""""""
+"""Set the actual fundmode (True or False)
 If the argument fundstartval is not ``None``, it will used
 
-Args:
+Args::
     fundmode: 
+    fundstartval: (Default value = None)"""
     fundstartval: (Default value = None)"""
         self.p.fundmode = fundmode
         if fundstartval is not None:
@@ -156,37 +113,42 @@ Args:
     fundmode = property(get_fundmode, set_fundmode)
 
     def set_fundstartval(self, fundstartval):
-        """Set the starting value of the fund-like performance tracker
+"""Set the starting value of the fund-like performance tracker
 
-Args:
+Args::
+    fundstartval:"""
     fundstartval:"""
         self.p.fundstartval = fundstartval
 
     def set_int2pnl(self, int2pnl):
-        """Configure assignment of interest to profit and loss
+"""Configure assignment of interest to profit and loss
 
-Args:
+Args::
+    int2pnl:"""
     int2pnl:"""
         self.p.int2pnl = int2pnl
 
     def set_coc(self, coc):
-        """Configure the Cheat-On-Close method to buy the close on order bar
+"""Configure the Cheat-On-Close method to buy the close on order bar
 
-Args:
+Args::
+    coc:"""
     coc:"""
         self.p.coc = coc
 
     def set_coo(self, coo):
-        """Configure the Cheat-On-Open method to buy the close on order bar
+"""Configure the Cheat-On-Open method to buy the close on order bar
 
-Args:
+Args::
+    coo:"""
     coo:"""
         self.p.coo = coo
 
     def set_shortcash(self, shortcash):
-        """Configure the shortcash parameters
+"""Configure the shortcash parameters
 
-Args:
+Args::
+    shortcash:"""
     shortcash:"""
         self.p.shortcash = shortcash
 
@@ -198,13 +160,14 @@ Args:
         slip_match=True,
         slip_out=False,
     ):
-        """Configure slippage to be percentage based
+"""Configure slippage to be percentage based
 
-Args:
+Args::
     perc: 
     slip_open: (Default value = True)
     slip_limit: (Default value = True)
     slip_match: (Default value = True)
+    slip_out: (Default value = False)"""
     slip_out: (Default value = False)"""
         self.p.slip_perc = perc
         self.p.slip_fixed = 0.0
@@ -221,13 +184,14 @@ Args:
         slip_match=True,
         slip_out=False,
     ):
-        """Configure slippage to be fixed points based
+"""Configure slippage to be fixed points based
 
-Args:
+Args::
     fixed: 
     slip_open: (Default value = True)
     slip_limit: (Default value = True)
     slip_match: (Default value = True)
+    slip_out: (Default value = False)"""
     slip_out: (Default value = False)"""
         self.p.slip_perc = 0.0
         self.p.slip_fixed = fixed
@@ -237,23 +201,26 @@ Args:
         self.p.slip_out = slip_out
 
     def set_filler(self, filler):
-        """Sets a volume filler for volume filling execution
+"""Sets a volume filler for volume filling execution
 
-Args:
+Args::
+    filler:"""
     filler:"""
         self.p.filler = filler
 
     def set_checksubmit(self, checksubmit):
-        """Sets the checksubmit parameter
+"""Sets the checksubmit parameter
 
-Args:
+Args::
+    checksubmit:"""
     checksubmit:"""
         self.p.checksubmit = checksubmit
 
     def set_eosbar(self, eosbar):
-        """Sets the eosbar parameter (alias: ``seteosbar``
+"""Sets the eosbar parameter (alias: ``seteosbar``
 
-Args:
+Args::
+    eosbar:"""
     eosbar:"""
         self.p.eosbar = eosbar
 
@@ -266,9 +233,10 @@ Args:
     getcash = get_cash
 
     def set_cash(self, cash):
-        """Sets the cash parameter (alias: ``setcash``)
+"""Sets the cash parameter (alias: ``setcash``)
 
-Args:
+Args::
+    cash:"""
     cash:"""
         self.startingcash = self.cash = self.p.cash = cash
         self._value = cash
@@ -276,9 +244,10 @@ Args:
     setcash = set_cash
 
     def add_cash(self, cash):
-        """Add/Remove cash to the system (use a negative value to remove)
+"""Add/Remove cash to the system (use a negative value to remove)
 
-Args:
+Args::
+    cash:"""
     cash:"""
         self._cash_addition.append(cash)
 
@@ -295,8 +264,9 @@ Args:
     fundvalue = property(get_fundvalue)
 
     def cancel(self, order, bracket=False):
-        """Args:
+"""Args::
     order: 
+    bracket: (Default value = False)"""
     bracket: (Default value = False)"""
         try:
             self.pending.remove(order)
@@ -312,12 +282,13 @@ Args:
         return True
 
     def get_value(self, datas=None, mkt=False, lever=False):
-        """Returns the portfolio value of the given datas (if datas is ``None``, then
+"""Returns the portfolio value of the given datas (if datas is ``None``, then
 the total portfolio value will be returned (alias: ``getvalue``)
 
-Args:
+Args::
     datas: (Default value = None)
     mkt: (Default value = False)
+    lever: (Default value = False)"""
     lever: (Default value = False)"""
         if datas is None:
             if mkt:
@@ -330,14 +301,16 @@ Args:
     getvalue = get_value
 
     def get_value_lever(self, datas=None, mkt=False):
-        """Args:
+"""Args::
     datas: (Default value = None)
+    mkt: (Default value = False)"""
     mkt: (Default value = False)"""
         return self.get_value(datas=datas, mkt=mkt)
 
     def _get_value(self, datas=None, lever=False):
-        """Args:
+"""Args::
     datas: (Default value = None)
+    lever: (Default value = False)"""
     lever: (Default value = False)"""
         pos_value = 0.0
         pos_value_unlever = 0.0
@@ -407,16 +380,14 @@ Args:
         return self._value if not lever else self._valuelever
 
     def get_leverage(self):
-        """ """
-        return self._leverage
-
-    def get_orders_open(self, safe=False):
-        """Returns an iterable with the orders which are still open (either not
+""""""
+"""Returns an iterable with the orders which are still open (either not
 executed or partially executed
 The orders returned must not be touched.
 If order manipulation is needed, set the parameter ``safe`` to True
 
-Args:
+Args::
+    safe: (Default value = False)"""
     safe: (Default value = False)"""
         if safe:
             os = [x.clone() for x in self.pending]
@@ -426,40 +397,22 @@ Args:
         return os
 
     def getposition(self, data):
-        """Returns the current position status (a ``Position`` instance) for
+"""Returns the current position status (a ``Position`` instance) for
 the given ``data``
 
-Args:
+Args::
+    data:"""
     data:"""
         return self.positions[data]
 
     def orderstatus(self, order):
-        """Args:
+"""Args::
     order:"""
-        try:
-            o = self.orders.index(order)
-        except ValueError:
-            o = order
-
-        return o.status
-
-    def _take_children(self, order):
-        """Args:
+"""Args::
     order:"""
-        oref = order.ref
-        pref = getattr(order.parent, "ref", oref)  # parent ref or self
-
-        if oref != pref:
-            if pref not in self._pchildren:
-                order.reject()  # parent not there - may have been rejected
-                self.notify(order)  # reject child, notify
-                return None
-
-        return pref
-
-    def submit(self, order, check=True):
-        """Args:
+"""Args::
     order: 
+    check: (Default value = True)"""
     check: (Default value = True)"""
         pref = self._take_children(order)
         if pref is None:  # order has not been taken
@@ -476,8 +429,9 @@ Args:
         return order
 
     def transmit(self, order, check=True):
-        """Args:
+"""Args::
     order: 
+    check: (Default value = True)"""
     check: (Default value = True)"""
         if check and self.p.checksubmit:
             order.submit()
@@ -490,46 +444,12 @@ Args:
         return order
 
     def check_submitted(self):
-        """ """
-        cash = self.cash
-        positions = dict()
-
-        while self.submitted:
-            order = self.submitted.popleft()
-
-            if self._take_children(order) is None:  # children not taken
-                continue
-
-            self.getcommissioninfo(order.data)
-
-            position = positions.setdefault(
-                order.data, self.positions[order.data].clone()
-            )
-
-            # pseudo-execute the order to get the remaining cash after exec
-            cash = self._execute(order, cash=cash, position=position)
-
-            if cash >= 0.0:
-                self.submit_accept(order)
-                continue
-
-            order.margin()
-            self.notify(order)
-            self._ococheck(order)
-            self._bracketize(order, cancel=True)
-
-    def submit_accept(self, order):
-        """Args:
+""""""
+"""Args::
     order:"""
-        order.pannotated = None
-        order.submit()
-        order.accept()
-        self.pending.append(order)
-        self.notify(order)
-
-    def _bracketize(self, order, cancel=False):
-        """Args:
+"""Args::
     order: 
+    cancel: (Default value = False)"""
     cancel: (Default value = False)"""
         oref = order.ref
         pref = getattr(order.parent, "ref", oref)
@@ -548,23 +468,11 @@ Args:
                 self._toactivate.append(o)
 
     def _ococheck(self, order):
-        """Args:
+"""Args::
     order:"""
-        # ocoref = self._ocos[order.ref] or order.ref  # a parent or self
-        parentref = self._ocos[order.ref]
-        ocoref = self._ocos.get(parentref, None)
-        ocol = self._ocol.pop(ocoref, None)
-        if ocol:
-            for i in range(len(self.pending) - 1, -1, -1):
-                o = self.pending[i]
-                if o is not None and o.ref in ocol:
-                    del self.pending[i]
-                    o.cancel()
-                    self.notify(o)
-
-    def _ocoize(self, order, oco):
-        """Args:
+"""Args::
     order: 
+    oco:"""
     oco:"""
         oref = order.ref
         if oco is None:
@@ -576,45 +484,18 @@ Args:
             self._ocol[ocoref].append(oref)  # add to group
 
     def add_order_history(self, orders, notify=True):
-        """Args:
+"""Args::
     orders: 
+    notify: (Default value = True)"""
     notify: (Default value = True)"""
         oiter = iter(orders)
         o = next(oiter, None)
         self._userhist.append([o, oiter, notify])
 
     def set_fund_history(self, fund):
-        """Args:
+"""Args::
     fund:"""
-        # iterable with the following pro item
-        # [datetime, share_value, net asset value]
-        fiter = iter(fund)
-        f = list(next(fiter))  # must not be empty
-        self._fundhist = [f, fiter]
-        # self._fhistlast = f[1:]
-
-        self.set_cash(float(f[2]))
-
-    def buy(
-        self,
-        owner,
-        data,
-        size,
-        price=None,
-        plimit=None,
-        exectype=None,
-        valid=None,
-        tradeid=0,
-        oco=None,
-        trailamount=None,
-        trailpercent=None,
-        parent=None,
-        transmit=True,
-        histnotify=False,
-        _checksubmit=True,
-        **kwargs,
-    ):
-        """Args:
+"""Args::
     owner: 
     data: 
     size: 
@@ -629,6 +510,7 @@ Args:
     parent: (Default value = None)
     transmit: (Default value = True)
     histnotify: (Default value = False)
+    _checksubmit: (Default value = True)"""
     _checksubmit: (Default value = True)"""
 
         order = BuyOrder(
@@ -671,7 +553,7 @@ Args:
         _checksubmit=True,
         **kwargs,
     ):
-        """Args:
+"""Args::
     owner: 
     data: 
     size: 
@@ -686,6 +568,7 @@ Args:
     parent: (Default value = None)
     transmit: (Default value = True)
     histnotify: (Default value = False)
+    _checksubmit: (Default value = True)"""
     _checksubmit: (Default value = True)"""
 
         order = SellOrder(
@@ -712,12 +595,13 @@ Args:
     def _execute(
         self, order, ago=None, price=None, cash=None, position=None, dtcoc=None
     ):
-        """Args:
+"""Args::
     order: 
     ago: (Default value = None)
     price: (Default value = None)
     cash: (Default value = None)
     position: (Default value = None)
+    dtcoc: (Default value = None)"""
     dtcoc: (Default value = None)"""
         # ago = None is used a flag for pseudo execution
         if ago is not None and price is None:
@@ -884,20 +768,15 @@ Args:
             self._bracketize(order, cancel=True)
 
     def notify(self, order):
-        """Args:
+"""Args::
     order:"""
-        self.notifs.append(order.clone())
-
-    def _try_exec_historical(self, order):
-        """Args:
+"""Args::
     order:"""
-        self._execute(order, ago=0, price=order.created.price)
-
-    def _try_exec_market(self, order, popen, phigh, plow):
-        """Args:
+"""Args::
     order: 
     popen: 
     phigh: 
+    plow:"""
     plow:"""
         if self.p.coc and order.info.get("coc", True):
             dtcoc = order.created.dt
@@ -917,8 +796,9 @@ Args:
         self._execute(order, ago=0, price=p, dtcoc=dtcoc)
 
     def _try_exec_close(self, order, pclose):
-        """Args:
+"""Args::
     order: 
+    pclose:"""
     pclose:"""
         # pannotated allows to keep track of the closing bar if there is no
         # information which lets us know that the current bar is the closing
@@ -946,11 +826,12 @@ Args:
         order.pannotated = pclose
 
     def _try_exec_limit(self, order, popen, phigh, plow, plimit):
-        """Args:
+"""Args::
     order: 
     popen: 
     phigh: 
     plow: 
+    plimit:"""
     plimit:"""
         if order.isbuy():
             if plimit >= popen:
@@ -973,12 +854,13 @@ Args:
                 self._execute(order, ago=0, price=plimit)
 
     def _try_exec_stop(self, order, popen, phigh, plow, pcreated, pclose):
-        """Args:
+"""Args::
     order: 
     popen: 
     phigh: 
     plow: 
     pcreated: 
+    pclose:"""
     pclose:"""
         if order.isbuy():
             if popen >= pcreated:
@@ -1005,13 +887,14 @@ Args:
             order.trailadjust(pclose)
 
     def _try_exec_stoplimit(self, order, popen, phigh, plow, pclose, pcreated, plimit):
-        """Args:
+"""Args::
     order: 
     popen: 
     phigh: 
     plow: 
     pclose: 
     pcreated: 
+    plimit:"""
     plimit:"""
         if order.isbuy():
             if popen >= pcreated:
@@ -1059,10 +942,11 @@ Args:
             order.trailadjust(pclose)
 
     def _slip_up(self, pmax, price, doslip=True, lim=False):
-        """Args:
+"""Args::
     pmax: 
     price: 
     doslip: (Default value = True)
+    lim: (Default value = False)"""
     lim: (Default value = False)"""
         if not doslip:
             return price
@@ -1087,10 +971,11 @@ Args:
         return None  # no price can be returned
 
     def _slip_down(self, pmin, price, doslip=True, lim=False):
-        """Args:
+"""Args::
     pmin: 
     price: 
     doslip: (Default value = True)
+    lim: (Default value = False)"""
     lim: (Default value = False)"""
         if not doslip:
             return price
@@ -1115,155 +1000,11 @@ Args:
         return None  # no price can be returned
 
     def _try_exec(self, order):
-        """Args:
+"""Args::
     order:"""
-        data = order.data
-
-        popen = getattr(data, "tick_open", None)
-        if popen is None:
-            popen = data.open[0]
-        phigh = getattr(data, "tick_high", None)
-        if phigh is None:
-            phigh = data.high[0]
-        plow = getattr(data, "tick_low", None)
-        if plow is None:
-            plow = data.low[0]
-        pclose = getattr(data, "tick_close", None)
-        if pclose is None:
-            pclose = data.close[0]
-
-        pcreated = order.created.price
-        plimit = order.created.pricelimit
-
-        if order.exectype == Order.Market:
-            self._try_exec_market(order, popen, phigh, plow)
-
-        elif order.exectype == Order.Close:
-            self._try_exec_close(order, pclose)
-
-        elif order.exectype == Order.Limit:
-            self._try_exec_limit(order, popen, phigh, plow, pcreated)
-
-        elif order.triggered and order.exectype in [
-            Order.StopLimit,
-            Order.StopTrailLimit,
-        ]:
-            self._try_exec_limit(order, popen, phigh, plow, plimit)
-
-        elif order.exectype in [Order.Stop, Order.StopTrail]:
-            self._try_exec_stop(order, popen, phigh, plow, pcreated, pclose)
-
-        elif order.exectype in [Order.StopLimit, Order.StopTrailLimit]:
-            self._try_exec_stoplimit(
-                order, popen, phigh, plow, pclose, pcreated, plimit
-            )
-
-        elif order.exectype == Order.Historical:
-            self._try_exec_historical(order)
-
-    def _process_fund_history(self):
-        """ """
-        fhist = self._fundhist  # [last element, iterator]
-        f, funds = fhist
-        if not f:
-            return self._fhistlast
-
-        dt = f[0]  # date/datetime instance
-        if isinstance(dt, string_types):
-            dtfmt = "%Y-%m-%d"
-            if "T" in dt:
-                dtfmt += "T%H:%M:%S"
-                if "." in dt:
-                    dtfmt += ".%f"
-            dt = datetime.datetime.strptime(dt, dtfmt)
-            f[0] = dt  # update value
-
-        elif isinstance(dt, datetime.datetime):
-            pass
-        elif isinstance(dt, datetime.date):
-            dt = datetime.datetime(year=dt.year, month=dt.month, day=dt.day)
-            f[0] = dt  # Update the value
-
-        # Synchronization with the strategy is not possible because the broker
-        # is called before the strategy advances. The 2 lines below would do it
-        # if possible
-        # st0 = self.cerebro.runningstrats[0]
-        # if dt <= st0.datetime.datetime():
-        if dt <= self.cerebro._dtmaster:
-            self._fhistlast = f[1:]
-            fhist[0] = list(next(funds, []))
-
-        return self._fhistlast
-
-    def _process_order_history(self):
-        """ """
-        for uhist in self._userhist:
-            uhorder, uhorders, uhnotify = uhist
-            while uhorder is not None:
-                uhorder = list(uhorder)  # to support assignment (if tuple)
-                try:
-                    dataidx = uhorder[3]  # 2nd field
-                except IndexError:
-                    dataidx = None  # Field not present, use default
-
-                if dataidx is None:
-                    d = self.cerebro.datas[0]
-                elif isinstance(dataidx, integer_types):
-                    d = self.cerebro.datas[dataidx]
-                else:  # assume string
-                    d = self.cerebro.datasbyname[dataidx]
-
-                if not len(d):
-                    break  # may start later as oter data feeds
-
-                dt = uhorder[0]  # date/datetime instance
-                if isinstance(dt, string_types):
-                    dtfmt = "%Y-%m-%d"
-                    if "T" in dt:
-                        dtfmt += "T%H:%M:%S"
-                        if "." in dt:
-                            dtfmt += ".%f"
-                    dt = datetime.datetime.strptime(dt, dtfmt)
-                    uhorder[0] = dt
-                elif isinstance(dt, datetime.datetime):
-                    pass
-                elif isinstance(dt, datetime.date):
-                    dt = datetime.datetime(year=dt.year, month=dt.month, day=dt.day)
-                    uhorder[0] = dt
-
-                if dt > d.datetime.datetime():
-                    break  # cannot execute yet 1st in queue, stop processing
-
-                size = uhorder[1]
-                price = uhorder[2]
-                owner = self.cerebro.runningstrats[0]
-                if size > 0:
-                    o = self.buy(
-                        owner=owner,
-                        data=d,
-                        size=size,
-                        price=price,
-                        exectype=Order.Historical,
-                        histnotify=uhnotify,
-                        _checksubmit=False,
-                    )
-
-                elif size < 0:
-                    o = self.sell(
-                        owner=owner,
-                        data=d,
-                        size=abs(size),
-                        price=price,
-                        exectype=Order.Historical,
-                        histnotify=uhnotify,
-                        _checksubmit=False,
-                    )
-
-                # update to next potential order
-                uhist[0] = uhorder = next(uhorders, None)
-
-    def next(self):
-        """ """
+""""""
+""""""
+""""""
         while self._toactivate:
             self._toactivate.popleft().activate()
 

@@ -9,9 +9,8 @@ import pandas as pd
 
 
 class RSIArbitrageStrategy(bt.Strategy):
-    """
-    Arbitrage strategy using a manually calculated RSI on the price difference between
-    two assets.
+"""Arbitrage strategy using a manually calculated RSI on the price difference between
+    two assets."""
     """
     params = (
         ("rsi_period", 14),  # RSI period
@@ -21,9 +20,8 @@ class RSIArbitrageStrategy(bt.Strategy):
     )
 
     def __init__(self):
-        """
-        Initialize the RSIArbitrageStrategy. Computes the price difference, RSI, and sets
-        up trading state variables.
+"""Initialize the RSIArbitrageStrategy. Computes the price difference, RSI, and sets
+        up trading state variables."""
         """
         self.price_diff = self.data0.close - 1.4 * self.data1.close
         self.price_diff_rsi = ManualRSI(self.price_diff, period=self.p.rsi_period)
@@ -31,9 +29,8 @@ class RSIArbitrageStrategy(bt.Strategy):
         self.position_type = None
 
     def next(self):
-        """
-        Main strategy logic for each bar. Handles entry and exit conditions based on RSI
-        levels.
+"""Main strategy logic for each bar. Handles entry and exit conditions based on RSI
+        levels."""
         """
         if self.order:
             return
@@ -87,8 +84,7 @@ class RSIArbitrageStrategy(bt.Strategy):
                     )
 
     def notify_order(self, order):
-        """
-        Handle order notifications and print execution details if logging is enabled.
+"""Handle order notifications and print execution details if logging is enabled."""
         """
         if order.status in [order.Completed]:
             if self.p.printlog:
@@ -109,17 +105,16 @@ class RSIArbitrageStrategy(bt.Strategy):
         self.order = None
 
 def load_data(symbol1, symbol2, fromdate, todate):
-    """
-    Load two symbols from HDF5 and return as Backtrader PandasData feeds.
+"""Load two symbols from HDF5 and return as Backtrader PandasData feeds.
 
-    Args:
+Args::
         symbol1 (str): Key for the first symbol in the HDF5 file.
         symbol2 (str): Key for the second symbol in the HDF5 file.
         fromdate (datetime): Start date for the data.
         todate (datetime): End date for the data.
 
-    Returns:
-        tuple: (data0, data1) as Backtrader PandasData feeds.
+Returns::
+        tuple: (data0, data1) as Backtrader PandasData feeds."""
     """
     output_file = "D:\\FutureData\\ricequant\\1d_2017to2024_noadjust.h5"
     try:
@@ -140,8 +135,7 @@ def load_data(symbol1, symbol2, fromdate, todate):
         return None, None
 
 def run_strategy():
-    """
-    Run the RSI arbitrage backtest, print results, and plot the equity curve.
+"""Run the RSI arbitrage backtest, print results, and plot the equity curve."""
     """
     cerebro = bt.Cerebro()
     cerebro.broker.setcash(100000)
@@ -173,14 +167,17 @@ if __name__ == "__main__":
 
 # Implement manual RSI calculation if bt.indicators.RSI does not exist
 class ManualRSI(bt.Indicator):
-    """
-    Manual implementation of the RSI indicator for use in the strategy if
-    bt.indicators.RSI is not available.
+"""Manual implementation of the RSI indicator for use in the strategy if
+    bt.indicators.RSI is not available."""
     """
     lines = ("rsi",)
     params = (("period", 14),)
 
-    def __init__(self):
+"""__init__ function.
+
+Returns:
+    Description of return value
+"""
         diff = self.data - self.data(-1)
         up = bt.If(diff > 0, diff, 0.0)
         down = bt.If(diff < 0, -diff, 0.0)

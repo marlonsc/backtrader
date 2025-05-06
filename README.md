@@ -1,6 +1,6 @@
 # backtrader
 
-Directory containing backtrader related files. Primarily contains Python code, includes test files, includes documentation, and includes configuration files.
+Backtrader is a Python framework for backtesting and trading strategy development. It allows you to focus on writing reusable trading strategies, indicators and analyzers instead of having to spend time building infrastructure.
 
 ## Navigation
 
@@ -9,154 +9,179 @@ Directory containing backtrader related files. Primarily contains Python code, i
 
 ### Subdirectories
 
-* [Tutorials](Tutorials/README.md) - Contains tutorial code and examples
-* [arbitrage](arbitrage/README.md) - Contains arbitrage strategy implementations
-* [backtest](backtest/README.md) - Contains backtesting functionality
-* [backtrader](backtrader/README.md) - Directory containing backtrader related files
-* [contrib](contrib/README.md) - Contains contributed code
-* [datas](datas/README.md) - Contains data files
-* [logs](logs/README.md) - Contains log files
-* [outcome](outcome/README.md) - Directory containing outcome related files
-* [prompts](prompts/README.md) - Directory containing prompts related files
-* [qmtbt](qmtbt/README.md) - Directory containing qmtbt related files
-* [reference](reference/README.md) - Directory containing reference related files
-* [samples](samples/README.md) - Contains sample code and examples
-* [sandbox](sandbox/README.md) - Contains experimental or sandbox code
-* [scripts](scripts/README.md) - This directory contains files related to scripts
-* [src](src/README.md) - Contains source code
-* [strategies](strategies/README.md) - Contains trading strategy implementations
-* [tests](tests/README.md) - Contains test files and test utilities
-* [tools](tools/README.md) - Contains tools and utilities
-* [turtle](turtle/README.md) - Directory containing turtle related files
-* [xtquant](xtquant/README.md) - Directory containing xtquant related files
+* [Tutorials](Tutorials/README.md) - This directory contains various files including 1 md file, 1 py file
+* [arbitrage](arbitrage/README.md) - This directory contains various files including 17 py files, 1 txt file, 2 ipynb files, 1 md file
+* [backtest](backtest/README.md) - This directory contains various files including 1 txt file, 1 md file, 1 py file
+* [backtrader](backtrader/README.md) - This directory contains various files including 36 py files, 1 md file
+* [contrib](contrib/README.md) - This directory contains contributions from the Backtrader community, including additional tools, ...
+* [datas](datas/README.md) - This directory contains various files including 20 txt files, 4 csv files, 1 md file
+* [logs](logs/README.md) - This directory contains various files including 2 csv files, 1 md file
+* [outcome](outcome/README.md) - This directory contains various files including 7 csv files, 1 md file, 1 ipynb file
+* [prompts](prompts/README.md) - This directory contains various files including 3 md files
+* [qmtbt](qmtbt/README.md) - This directory contains various files including 5 py files, 1 md file
+* [reference](reference/README.md) - This directory contains various files including 1 txt file, 1 md file
+* [samples](samples/README.md) - This directory contains various files including 1 md file
+* [sandbox](sandbox/README.md) - This directory contains various files including 6 py files, 1 md file
+* [scripts](scripts/README.md) - This directory contains various files including 3 py files, 1 md file
+* [src](src/README.md) - This directory contains various files including 1 md file
+* [strategies](strategies/README.md) - This directory contains various files including 16 py files, 1 md file
+* [tests](tests/README.md) - This directory contains various files including 94 py files, 1 md file
+* [tools](tools/README.md) - This directory contains various files including 4 py files, 1 md file
+* [turtle](turtle/README.md) - This directory contains various files including 8 py files, 1 md file
+* [xtquant](xtquant/README.md) - This directory contains various files including 13 py files, 5 dll files, 1 md file, 1 ini file, ...
 
 ## Files
 
 ### BackTrader_Multifactors_Backtesting_Framework.ipynb
 
-Binary or data file
+Jupyter notebook
 
 ### ENV.sh
 
-Shell script
+Create Python virtual environment if it doesn't exist
 
 ### LICENSE
 
-Binary or data file
+License file
 
 ### PLAN.md
 
-Documentation file
+Markdown documentation
 
 ### PLANNING.md
 
-Documentation file
-
-### README.md
-
-File with .md extension.
+Markdown documentation
 
 ### README.rst
 
-Binary or data file
+reStructuredText documentation
 
 ### __init__.py
 
+__init__.py module.
+
 ### agent.py
+
+agent.py module.
 
 ### changelog.txt
 
-Documentation file
+Change log file
+
+### create_readme_files.py
+
+Script to create README.md files for all directories in the repository.
 
 ### demo.ipynb
 
-Binary or data file
+Jupyter notebook
 
 ### demo_origin.ipynb
 
-Binary or data file
+Jupyter notebook
+
+### enhance_documentation.py
+
+Documentation Enhancement Script
 
 ### live_backtrader.py
 
+live_backtrader.py module.
+
 ### my_backtrader.code-workspace
 
-Binary or data file
+Text file
+
+### poetry.lock
+
+Text file
 
 ### pylint_head.txt
 
-Documentation file
+Text file
 
 ### pylint_report.txt
 
-Large file (2.2 MB)
+Text file
 
 ### pypi.sh
 
-Shell script
+Generate pypi wheels universal package and upload
 
 ### pyproject.toml
 
-Configuration file
+Python project configuration file
 
 ### requirements-test.txt
 
-Test file
+Text file
 
 ### rez
 
-Binary or data file
+Text file
 
 ### rsi_arbitrage_plot.png
 
-Binary or data file
+Binary file (png format)
 
 ### sharpe_parameter_heatmap.png
 
-Binary or data file
+Binary file (png format)
 
 ### sharpe_ratio_heatmap.png
 
-Binary or data file
+Binary file (png format)
 
 ### sharpe_ratio_plot.png
 
-Binary or data file
+Binary file (png format)
 
 ### skewness_plot.png
 
-Binary or data file
+Binary file (png format)
 
 ### strategies.py
 
+strategies.py module.
+
 ### test_feed.ipynb
 
-Binary or data file
+Jupyter notebook
 
 ### the_backtradersold_setup.py
 
+the_backtradersold_setup.py module.
+
 ### tox.ini
 
-Configuration file
+Tox configuration file for Python testing
 
 ### try.py
 
+try.py module.
+
+### update_readme.py
+
+README.md Generator Script
+
 ### zscore_heatmap.png
 
-Binary or data file
+Binary file (png format)
 
 ## Directory Summary
 
-This directory contains 31 files and 20 subdirectories.
+This directory contains 34 files and 20 subdirectories.
 
 ### File Types
 
-* .py: 6 files
+* .py: 9 files
 * .png: 6 files
 * .ipynb: 4 files
 * .txt: 4 files
-* .md: 3 files
 * .sh: 2 files
+* .md: 2 files
 * .rst: 1 files
 * .code-workspace: 1 files
+* .lock: 1 files
 * .toml: 1 files
 * .ini: 1 files

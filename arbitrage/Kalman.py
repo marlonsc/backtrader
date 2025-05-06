@@ -1,7 +1,6 @@
 # Copyright (c) 2025 backtrader contributors
-"""
-Kalman filter-based pairs trading strategy for J/JM futures. Includes dynamic hedge
-ratio calculation, cointegration check, and backtest with analyzers.
+"""Kalman filter-based pairs trading strategy for J/JM futures. Includes dynamic hedge
+ratio calculation, cointegration check, and backtest with analyzers."""
 """
 import datetime
 
@@ -21,10 +20,20 @@ from backtrader.analyzers.tradeanalyzer import TradeAnalyzer
 try:
     from pykalman import KalmanFilter
 except ImportError:
-    class KalmanFilter:
-        def __init__(self, *args, **kwargs):
+"""KalmanFilter class.
+
+Description of the class functionality."""
+"""__init__ function.
+
+Returns:
+    Description of return value
+"""
             raise NotImplementedError("pykalman is not installed.")
-        def filter(self, *args, **kwargs):
+"""filter function.
+
+Returns:
+    Description of return value
+"""
             raise NotImplementedError("pykalman is not installed.")
 
 output_file = "D:\\FutureData\\ricequant\\1d_2017to2024_noadjust.h5"
@@ -42,8 +51,9 @@ close: float, close price
 
 # Function to calculate hedge ratio using Kalman Filter
 def calculate_dynamic_hedge_ratio(y, x):
-    """Args:
+"""Args::
     y: 
+    x:"""
     x:"""
     delta = 1e-5
     trans_cov = delta / (1 - delta) * np.eye(2)
@@ -69,22 +79,11 @@ def calculate_dynamic_hedge_ratio(y, x):
 
 # Calculate half-life of mean reversion
 def calculate_half_life(spread):
-    """Args:
+"""Args::
     spread:"""
-    spread_lag = spread.shift(1).dropna()
-    spread = spread.iloc[1:]
-
-    model = OLS(spread, spread_lag).fit()
-    beta = model.params[0]
-
-    half_life = -np.log(2) / beta if beta < 0 else 100
-    return max(1, int(half_life))
-
-
-# Check cointegration using ADF test
-def check_cointegration(series_y, series_x):
-    """Args:
+"""Args::
     series_y: 
+    series_x:"""
     series_x:"""
     model = OLS(series_y, series_x).fit()
     hedge_ratio = model.params[0]
@@ -98,77 +97,12 @@ def check_cointegration(series_y, series_x):
 
 # Custom data feed for spread
 class SpreadData(bt.feeds.PandasData):
-    """ """
-
-    lines = ("hedge_ratio", "spread")
-    params = (
-        ("hedge_ratio", -1),
-        ("spread", -1),
-    )
-
-
-# Kalman Pairs Trading Strategy
-class KalmanPairTradingStrategy(bt.Strategy):
-    """ """
-
-    params = (
-        ("z_entry", 1),  # Z-score threshold for entry
-        ("z_exit", 0.0),  # Z-score threshold for exit
-        ("lookback", 15),  # Default lookback period (updated with half-life)
-        ("size0", 10),  # Size for first asset
-        ("size1", 14),  # Size for second asset (dynamically adjusted)
-    )
-
-    def __init__(self):
-        """ """
-        self.data0 = self.datas[0]  # J futures
-        self.data1 = self.datas[1]  # JM futures
-        self.spread_data = self.datas[2]  # Spread data
-
-        # Z-score calculation
-        self.ma = bt.indicators.SMA(self.spread_data.spread, period=self.p.lookback)
-        self.std = StandardDeviation(self.spread_data.spread, period=self.p.lookback)
-        self.z_score = (self.spread_data.spread - self.ma) / self.std
-
-        self.position_type = None
-
-    def next(self):
-        """ """
-        if len(self) < self.p.lookback:
-            return
-
-        z = self.z_score[0]
-        hedge_ratio = self.spread_data.hedge_ratio[0]
-
-        # Dynamic position sizing based on hedge ratio
-        self.p.size1 = round(self.p.size0 * abs(hedge_ratio))
-
-        pos0 = self.getposition(self.data0).size
-        pos1 = self.getposition(self.data1).size
-
-        # Entry logic
-        if not pos0 and not pos1:  # No open positions
-            if z < -self.p.z_entry:  # Spread is below mean (buy spread)
-                self.position_type = "long"
-                self.buy(data=self.data0, size=self.p.size0)  # Buy J
-                self.sell(data=self.data1, size=self.p.size1)  # Sell JM
-
-            elif z > self.p.z_entry:  # Spread is above mean (sell spread)
-                self.position_type = "short"
-                self.sell(data=self.data0, size=self.p.size0)  # Sell J
-                self.buy(data=self.data1, size=self.p.size1)  # Buy JM
-
-        # Exit logic
-        elif self.position_type is not None:
-            if (self.position_type == "long" and z >= self.p.z_exit) or (
-                self.position_type == "short" and z <= self.p.z_exit
-            ):
-                self.close(data=self.data0)
-                self.close(data=self.data1)
-                self.position_type = None
-
-    def notify_trade(self, trade):
-        """Args:
+""""""
+""""""
+""""""
+""""""
+"""Args::
+    trade:"""
     trade:"""
         if trade.isclosed:
             print(

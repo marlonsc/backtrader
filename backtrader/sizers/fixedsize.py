@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""fixedsize.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -29,21 +32,20 @@ import backtrader as bt
 
 
 class FixedSize(bt.Sizer):
-    """This sizer simply returns a fixed size for any operation.
+"""This sizer simply returns a fixed size for any operation.
     Size can be controlled by number of tranches that a system
     wishes to use to scale into trades by specifying the ``tranches``
-    parameter.
-
-
+    parameter."""
     """
 
     params = (("stake", 1), ("tranches", 1))
 
     def _getsizing(self, comminfo, cash, data, isbuy):
-        """Args:
+"""Args::
     comminfo: 
     cash: 
     data: 
+    isbuy:"""
     isbuy:"""
         if self.p.tranches > 1:
             return abs(int(self.p.stake / self.p.tranches))
@@ -51,18 +53,8 @@ class FixedSize(bt.Sizer):
             return self.p.stake
 
     def setsizing(self, stake):
-        """Args:
+"""Args::
     stake:"""
-        if self.p.tranches > 1:
-            self.p.stake = abs(int(self.p.stake / self.p.tranches))
-        else:
-            self.p.stake = stake  # OLD METHOD FOR SAMPLE COMPATIBILITY
-
-
-SizerFix = FixedSize
-
-
-class FixedReverser(bt.Sizer):
     """This sizer returns the needes fixed size to reverse an open position or
 the fixed size to open one
 - To open a position: return the param ``stake``
@@ -71,10 +63,11 @@ the fixed size to open one
     params = (("stake", 1),)
 
     def _getsizing(self, comminfo, cash, data, isbuy):
-        """Args:
+"""Args::
     comminfo: 
     cash: 
     data: 
+    isbuy:"""
     isbuy:"""
         position = self.strategy.getposition(data)
         size = self.p.stake * (1 + (position.size != 0))
@@ -82,22 +75,21 @@ the fixed size to open one
 
 
 class FixedSizeTarget(bt.Sizer):
-    """This sizer simply returns a fixed target size, useful when coupled
+"""This sizer simply returns a fixed target size, useful when coupled
     with Target Orders and specifically ``cerebro.target_order_size()``.
     Size can be controlled by number of tranches that a system
     wishes to use to scale into trades by specifying the ``tranches``
-    parameter.
-
-
+    parameter."""
     """
 
     params = (("stake", 1), ("tranches", 1))
 
     def _getsizing(self, comminfo, cash, data, isbuy):
-        """Args:
+"""Args::
     comminfo: 
     cash: 
     data: 
+    isbuy:"""
     isbuy:"""
         if self.p.tranches > 1:
             size = abs(int(self.p.stake / self.p.tranches))
@@ -106,7 +98,8 @@ class FixedSizeTarget(bt.Sizer):
             return self.p.stake
 
     def setsizing(self, stake):
-        """Args:
+"""Args::
+    stake:"""
     stake:"""
         if self.p.tranches > 1:
             size = abs(int(self.p.stake / self.p.tranches))

@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""bsplitter.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -52,12 +55,10 @@ tick. The rest will be assigned to the ``OHLX`` tick.
     # replaying = True
 
     def __init__(self, data):
-        """Args:
+"""Args::
     data:"""
-        self.lastdt = None
-
-    def __call__(self, data):
-        """Args:
+"""Args::
+    data:"""
     data:"""
         # Make a copy of the new bar and remove it from stream
         datadt = data.datetime.date()  # keep the date

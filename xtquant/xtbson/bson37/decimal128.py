@@ -64,11 +64,12 @@ for working with IEEE-754 128-bit decimal floating point values.
 
 
 def _decimal_to_128(value: _VALUE_OPTIONS) -> Tuple[int, int]:
-    """Converts a decimal.Decimal to BID (high bits, low bits).
+"""Converts a decimal.Decimal to BID (high bits, low bits).
 :Parameters:
 - `value`: An instance of decimal.Decimal
 
-Args:
+Args::
+    value:"""
     value:"""
     with decimal.localcontext(_DEC128_CTX) as ctx:
         value = ctx.create_decimal(value)
@@ -198,22 +199,8 @@ False"""
     _type_marker = 19
 
     def __init__(self, value: _VALUE_OPTIONS) -> None:
-        """Args:
+"""Args::
     value:"""
-        if isinstance(value, (str, decimal.Decimal)):
-            self.__high, self.__low = _decimal_to_128(value)
-        elif isinstance(value, (list, tuple)):
-            if len(value) != 2:
-                raise ValueError(
-                    "Invalid size for creation of Decimal128 "
-                    "from list or tuple. Must have exactly 2 "
-                    "elements."
-                )
-            self.__high, self.__low = value  # type: ignore
-        else:
-            raise TypeError("Cannot convert %r to Decimal128" % (value,))
-
-    def to_decimal(self) -> decimal.Decimal:
         """Returns an instance of :class:`decimal.Decimal` for this
 :class:`Decimal128`.
 :rtype: decimal.Decimal"""
@@ -256,13 +243,14 @@ False"""
 
     @classmethod
     def from_bid(cls: Type["Decimal128"], value: bytes) -> "Decimal128":
-        """Create an instance of :class:`Decimal128` from Binary Integer
+"""Create an instance of :class:`Decimal128` from Binary Integer
 Decimal string.
 :Parameters:
 - `value`: 16 byte string (128-bit IEEE 754-2008 decimal floating
 point in Binary Integer Decimal (BID) format).
 
-Args:
+Args::
+    value:"""
     value:"""
         if not isinstance(value, bytes):
             raise TypeError("value must be an instance of bytes")
@@ -277,11 +265,7 @@ Args:
         return _PACK_64(self.__low) + _PACK_64(self.__high)
 
     def __str__(self) -> str:
-        """
-
-
-        :rtype: str
-
+""":rtype: str"""
         """
         dec = self.to_decimal()
         if dec.is_nan():
@@ -290,31 +274,17 @@ Args:
         return str(dec)
 
     def __repr__(self):
-        """ """
-        return "Decimal128('%s')" % (str(self),)
-
-    def __setstate__(self, value: Tuple[int, int]) -> None:
-        """Args:
+""""""
+"""Args::
     value:"""
-        self.__high, self.__low = value
-
-    def __getstate__(self) -> Tuple[int, int]:
-        """
-
-
-        :rtype: Tuple[int,int]
-
+""":rtype: Tuple[int,int]"""
         """
         return self.__high, self.__low
 
     def __eq__(self, other: Any) -> bool:
-        """Args:
+"""Args::
     other:"""
-        if isinstance(other, Decimal128):
-            return self.bid == other.bid
-        return NotImplemented
-
-    def __ne__(self, other: Any) -> bool:
-        """Args:
+"""Args::
+    other:"""
     other:"""
         return not self == other

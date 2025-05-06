@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""credit-interest.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -33,116 +36,19 @@ import backtrader as bt
 
 
 class SMACrossOver(bt.Signal):
-    """ """
-
-    params = (
-        ("p1", 10),
-        ("p2", 30),
-    )
-
-    def __init__(self):
-        """ """
-        sma1 = bt.indicators.SMA(period=self.p.p1)
-        sma2 = bt.indicators.SMA(period=self.p.p2)
-        self.lines.signal = bt.indicators.CrossOver(sma1, sma2)
-
-
-class NoExit(bt.Signal):
-    """ """
-
-    def next(self):
-        """ """
-        self.lines.signal[0] = 0.0
-
-
-class St(bt.SignalStrategy):
-    """ """
-
-    opcounter = itertools.count(1)
-
-    def notify_order(self, order):
-        """Args:
+""""""
+""""""
+""""""
+""""""
+""""""
+"""Args::
     order:"""
-        if order.status == bt.Order.Completed:
-            t = ""
-            t += "{:02d}".format(next(self.opcounter))
-            t += " {}".format(order.data.datetime.datetime())
-            t += " BUY " * order.isbuy() or " SELL"
-            t += " Size: {:+d} / Price: {:.2f}"
-            print(t.format(order.executed.size, order.executed.price))
-
-    def notify_trade(self, trade):
-        """Args:
+"""Args::
     trade:"""
-        if trade.isclosed:
-            print(
-                "Trade closed with P&L: Gross {} Net {}".format(
-                    trade.pnl, trade.pnlcomm
-                )
-            )
-
-
-def runstrat(args=None):
-    """Args:
+"""Args::
     args: (Default value = None)"""
-    args = parse_args(args)
-
-    cerebro = bt.Cerebro()
-    cerebro.broker.set_cash(args.cash)
-    cerebro.broker.set_int2pnl(args.no_int2pnl)
-
-    dkwargs = dict()
-    if args.fromdate is not None:
-        fromdate = datetime.datetime.strptime(args.fromdate, "%Y-%m-%d")
-        dkwargs["fromdate"] = fromdate
-
-    if args.todate is not None:
-        todate = datetime.datetime.strptime(args.todate, "%Y-%m-%d")
-        dkwargs["todate"] = todate
-
-    # if dataset is None, args.data has been given
-    data = bt.feeds.BacktraderCSVData(dataname=args.data, **dkwargs)
-    cerebro.adddata(data)
-
-    cerebro.signal_strategy(St)
-    cerebro.addsizer(bt.sizers.FixedSize, stake=args.stake)
-
-    sigtype = bt.signal.SIGNAL_LONGSHORT
-    if args.long:
-        sigtype = bt.signal.SIGNAL_LONG
-    elif args.short:
-        sigtype = bt.signal.SIGNAL_SHORT
-
-    cerebro.add_signal(sigtype, SMACrossOver, p1=args.period1, p2=args.period2)
-
-    if args.no_exit:
-        if args.long:
-            cerebro.add_signal(bt.signal.SIGNAL_LONGEXIT, NoExit)
-        elif args.short:
-            cerebro.add_signal(bt.signal.SIGNAL_SHORTEXIT, NoExit)
-
-    comminfo = bt.CommissionInfo(
-        mult=args.mult,
-        margin=args.margin,
-        stocklike=args.stocklike,
-        interest=args.interest,
-        interest_long=args.interest_long,
-    )
-
-    cerebro.broker.addcommissioninfo(comminfo)
-
-    cerebro.run()
-    if args.plot:
-        pkwargs = dict(style="bar")
-        if args.plot is not True:  # evals to True but is not True
-            npkwargs = eval("dict(" + args.plot + ")")  # args were passed
-            pkwargs.update(npkwargs)
-
-        cerebro.plot(**pkwargs)
-
-
-def parse_args(pargs=None):
-    """Args:
+"""Args::
+    pargs: (Default value = None)"""
     pargs: (Default value = None)"""
 
     parser = argparse.ArgumentParser(

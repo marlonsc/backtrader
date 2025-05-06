@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""testcommon.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -51,15 +54,12 @@ TODATE = datetime.datetime(2006, 12, 31)
 
 
 def getdatadir(filename):
-    """Args:
+"""Args::
     filename:"""
-    return os.path.join(modpath, dataspath, filename)
-
-
-def getdata(index, fromdate=FROMDATE, todate=TODATE):
-    """Args:
+"""Args::
     index: 
     fromdate: (Default value = FROMDATE)
+    todate: (Default value = TODATE)"""
     todate: (Default value = TODATE)"""
 
     datapath = getdatadir(datafiles[index])
@@ -81,7 +81,7 @@ def runtest(
     analyzer=None,
     **kwargs,
 ):
-    """Args:
+"""Args::
     datas: 
     strategy: 
     runonce: (Default value = None)
@@ -91,6 +91,7 @@ def runtest(
     optimize: (Default value = False)
     maxcpus: (Default value = 1)
     writer: (Default value = None)
+    analyzer: (Default value = None)"""
     analyzer: (Default value = None)"""
 
     runonces = [True, False] if runonce is None else [runonce]
@@ -142,135 +143,20 @@ def runtest(
 
 
 class TestStrategy(bt.Strategy):
-    """ """
-
-    params = dict(
-        main=False,
-        chkind=[],
-        inddata=[],
-        chkmin=1,
-        chknext=0,
-        chkvals=None,
-        chkargs=dict(),
-    )
-
-    def __init__(self):
-        """ """
-        try:
-            ind = self.p.chkind[0]
-        except TypeError:
-            chkind = [self.p.chkind]
-        else:
-            chkind = self.p.chkind
-
-        if len(self.p.inddata):
-            self.ind = chkind[0](*self.p.inddata, **self.p.chkargs)
-        else:
-            self.ind = chkind[0](self.data, **self.p.chkargs)
-
-        for ind in chkind[1:]:
-            ind(self.data)
-
-        for data in self.datas[1:]:
-            chkind[0](data, **self.p.chkargs)
-
-            for ind in chkind[1:]:
-                ind(data)
-
-    def prenext(self):
-        """ """
-
-    def nextstart(self):
-        """ """
-        self.chkmin = len(self)
-        super(TestStrategy, self).nextstart()
-
-    def next(self):
-        """ """
-        self.nextcalls += 1
-
-        if self.p.main:
-            dtstr = self.data.datetime.date(0).strftime("%Y-%m-%d")
-            print("%s - %d - %f" % (dtstr, len(self), self.ind[0]))
-            pstr = ", ".join(
-                str(x)
-                for x in [
-                    self.data.open[0],
-                    self.data.high[0],
-                    self.data.low[0],
-                    self.data.close[0],
-                ]
-            )
-            print("%s - %d, %s" % (dtstr, len(self), pstr))
-
-    def start(self):
-        """ """
-        self.nextcalls = 0
-
-    def stop(self):
-        """ """
-        l = len(self.ind)
-        mp = self.chkmin
-        chkpts = [0, -l + mp, (-l + mp) // 2]
-
-        if self.p.main:
-            print("----------------------------------------")
-            print("len ind %d == %d len self" % (l, len(self)))
-            print("minperiod %d" % self.chkmin)
-            print("self.p.chknext %d nextcalls %d" % (self.p.chknext, self.nextcalls))
-
-            print("chkpts are", chkpts)
-            for chkpt in chkpts:
-                dtstr = self.data.datetime.date(chkpt).strftime("%Y-%m-%d")
-                print("chkpt %d -> %s" % (chkpt, dtstr))
-
-            for lidx in range(self.ind.size()):
-                chkvals = list()
-                outtxt = "    ["
-                for chkpt in chkpts:
-                    valtxt = "'%f'" % self.ind.lines[lidx][chkpt]
-                    outtxt += "'%s'," % valtxt
-                    chkvals.append(valtxt)
-
-                    outtxt = "    [" + ", ".join(chkvals) + "],"
-
-                if lidx == self.ind.size() - 1:
-                    outtxt = outtxt.rstrip(",")
-
-                print(outtxt)
-
-            print("vs expected")
-
-            for chkval in self.p.chkvals:
-                print(chkval)
-
-        else:
-            assert l == len(self)
-            if self.p.chknext:
-                assert self.p.chknext == self.nextcalls
-            assert mp == self.p.chkmin
-            for lidx, linevals in enumerate(self.p.chkvals):
-                for i, chkpt in enumerate(chkpts):
-                    chkval = "%f" % self.ind.lines[lidx][chkpt]
-                    if not isinstance(linevals[i], tuple):
-                        assert chkval == linevals[i]
-                    else:
-                        try:
-                            assert chkval == linevals[i][0]
-                        except AssertionError:
-                            assert chkval == linevals[i][1]
-
-
-class SampleParamsHolder(ParamsBase):
-    """This class is used as base for tests that check the proper
+""""""
+""""""
+""""""
+""""""
+""""""
+""""""
+""""""
+"""This class is used as base for tests that check the proper
     handling of meta parameters like `frompackages`, `packages`, `params`, `lines`
-    in inherited classes
-
-
+    in inherited classes"""
     """
 
     frompackages = (("math", "factorial"),)
 
     def __init__(self):
-        """ """
+""""""
         self.range = factorial(10)

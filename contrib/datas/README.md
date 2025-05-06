@@ -1,31 +1,26 @@
 # datas
 
-Contains data files. Primarily contains .csv files code.
+This directory contains various files including 2 csv files, 1 md file.
 
 ## Navigation
 
-* [🏠 Root Directory](../../README.md)
+* [🏠 Root Directory](/contrib/datas/../contrib/datas/..README.md)
 * [⬆️ Parent Directory (contrib)](../README.md)
 
 ## Files
 
-### README.md
-
-File with .md extension.
-
 ### daily-KO.csv
 
-Binary or data file
+CSV data file
 
 ### daily-PEP.csv
 
-Binary or data file
+CSV data file
 
 ## Directory Summary
 
-This directory contains 3 files and 0 subdirectories.
+This directory contains 2 files and 0 subdirectories.
 
 ### File Types
 
 * .csv: 2 files
-* .md: 1 files

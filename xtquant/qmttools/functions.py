@@ -1,4 +1,7 @@
-# coding:utf-8
+"""functions.py module.
+
+Description of the module functionality."""
+
 
 import datetime as _DT_
 
@@ -7,11 +10,12 @@ from xtquant import xtdata
 
 
 def datetime_to_timetag(timelabel, format=""):
-    """timelabel: str '20221231' '20221231235959'
+"""timelabel: str '20221231' '20221231235959'
 format: str '%Y%m%d' '%Y%m%d%H%M%S'
 
-Args:
+Args::
     timelabel: 
+    format: (Default value = "")"""
     format: (Default value = "")"""
     if not format:
         format = "%Y%m%d" if len(timelabel) == 8 else "%Y%m%d%H%M%S"
@@ -19,11 +23,12 @@ Args:
 
 
 def timetag_to_datetime(timetag, format=""):
-    """timetag: int 1672502399000
+"""timetag: int 1672502399000
 format: str '%Y%m%d' '%Y%m%d%H%M%S'
 
-Args:
+Args::
     timetag: 
+    format: (Default value = "")"""
     format: (Default value = "")"""
     if not format:
         format = "%Y%m%d" if timetag % 86400000 == 57600000 else "%Y%m%d%H%M%S"
@@ -31,56 +36,30 @@ Args:
 
 
 def fetch_ContextInfo():
-    """ """
-    import sys
-
-    frame = sys._getframe()
-    while frame:
-        loc = list(frame.f_locals.values())
-        for val in loc:
-            if type(val).__name__ == "ContextInfo":
-                return val
-        frame = frame.f_back
-    return None
-
-
-def subscribe_quote(
-    stock_code, period, dividend_type, count=0, result_type="", callback=None
-):
-    """Args:
+""""""
+"""Args::
     stock_code: 
     period: 
     dividend_type: 
     count: (Default value = 0)
     result_type: (Default value = "")
     callback: (Default value = None)"""
+    callback: (Default value = None)"""
     return xtdata.subscribe_quote(stock_code, period, "", "", count, callback)
 
 
 def subscribe_whole_quote(code_list, callback=None):
-    """Args:
+"""Args::
     code_list: 
+    callback: (Default value = None)"""
     callback: (Default value = None)"""
     return xtdata.subscribe_whole_quote(code_list, callback)
 
 
 def unsubscribe_quote(subscribe_id):
-    """Args:
+"""Args::
     subscribe_id:"""
-    return xtdata.unsubscribe_quote(subscribe_id)
-
-
-def get_market_data(
-    fields=[],
-    stock_code=[],
-    start_time="",
-    end_time="",
-    skip_paused=True,
-    period="",
-    dividend_type="",
-    count=-1,
-):
-    """Args:
+"""Args::
     fields: (Default value = [])
     stock_code: (Default value = [])
     start_time: (Default value = "")
@@ -88,6 +67,7 @@ def get_market_data(
     skip_paused: (Default value = True)
     period: (Default value = "")
     dividend_type: (Default value = "")
+    count: (Default value = -1)"""
     count: (Default value = -1)"""
     res = {}
     if period == "tick":
@@ -266,7 +246,7 @@ def get_market_data_ex(
     fill_data=True,
     subscribe=True,
 ):
-    """Args:
+"""Args::
     fields: (Default value = [])
     stock_code: (Default value = [])
     period: (Default value = "")
@@ -275,6 +255,7 @@ def get_market_data_ex(
     count: (Default value = -1)
     dividend_type: (Default value = "")
     fill_data: (Default value = True)
+    subscribe: (Default value = True)"""
     subscribe: (Default value = True)"""
     res = xtdata.get_market_data_ex(
         field_list=fields,
@@ -292,14 +273,11 @@ def get_market_data_ex(
 
 
 def get_full_tick(stock_code):
-    """Args:
+"""Args::
     stock_code:"""
-    return xtdata.get_full_tick(stock_code)
-
-
-def get_divid_factors(stock_code, date=None):
-    """Args:
+"""Args::
     stock_code: 
+    date: (Default value = None)"""
     date: (Default value = None)"""
     client = xtdata.get_client()
     if date:
@@ -314,10 +292,11 @@ def get_divid_factors(stock_code, date=None):
 
 
 def download_history_data(stockcode, period, startTime, endTime):
-    """Args:
+"""Args::
     stockcode: 
     period: 
     startTime: 
+    endTime:"""
     endTime:"""
     return xtdata.download_history_data(stockcode, period, startTime, endTime)
 
@@ -325,11 +304,12 @@ def download_history_data(stockcode, period, startTime, endTime):
 def get_raw_financial_data(
     field_list, stock_list, start_date, end_date, report_type="announce_time"
 ):
-    """Args:
+"""Args::
     field_list: 
     stock_list: 
     start_date: 
     end_date: 
+    report_type: (Default value = "announce_time")"""
     report_type: (Default value = "announce_time")"""
     client = xtdata.get_client()
     data = client.get_financial_data(
@@ -369,8 +349,9 @@ def get_raw_financial_data(
 
 
 def get_instrument_detail(stock_code, iscomplete=False):
-    """Args:
+"""Args::
     stock_code: 
+    iscomplete: (Default value = False)"""
     iscomplete: (Default value = False)"""
     return xtdata.get_instrument_detail(stock_code, iscomplete)
 
@@ -380,11 +361,12 @@ def get_instrument_detail(stock_code, iscomplete=False):
 
 
 def get_trading_dates(stock_code, start_date, end_date, count=-1, period="1d"):
-    """Args:
+"""Args::
     stock_code: 
     start_date: 
     end_date: 
     count: (Default value = -1)
+    period: (Default value = "1d")"""
     period: (Default value = "1d")"""
     if period != "1d":
         return []
@@ -398,43 +380,12 @@ def get_trading_dates(stock_code, start_date, end_date, count=-1, period="1d"):
 
 
 def get_stock_list_in_sector(sector_name):
-    """Args:
+"""Args::
     sector_name:"""
-    return xtdata.get_stock_list_in_sector(sector_name)
-
-
-def download_sector_data():
-    """ """
-    return xtdata.download_sector_data()
-
-
-download_sector_weight = download_sector_data  # compat
-
-
-def get_his_st_data(stock_code):
-    """Args:
+""""""
+"""Args::
     stock_code:"""
-    return xtdata.get_his_st_data(stock_code)
-
-
-def _passorder_impl(
-    optype,
-    ordertype,
-    accountid,
-    ordercode,
-    prtype,
-    modelprice,
-    volume,
-    strategyName,
-    quickTrade,
-    userOrderId,
-    barpos,
-    bartime,
-    func,
-    algoName,
-    requestid,
-):
-    """Args:
+"""Args::
     optype: 
     ordertype: 
     accountid: 
@@ -449,6 +400,7 @@ def _passorder_impl(
     bartime: 
     func: 
     algoName: 
+    requestid:"""
     requestid:"""
     data = {}
 
@@ -485,7 +437,7 @@ def passorder(
     userOrderId,
     C,
 ):
-    """Args:
+"""Args::
     opType: 
     orderType: 
     accountid: 
@@ -496,6 +448,7 @@ def passorder(
     strategyName: 
     quickTrade: 
     userOrderId: 
+    C:"""
     C:"""
     return C.passorder(
         opType,
@@ -512,10 +465,11 @@ def passorder(
 
 
 def get_trade_detail_data(accountid, accounttype, datatype, strategyname=""):
-    """Args:
+"""Args::
     accountid: 
     accounttype: 
     datatype: 
+    strategyname: (Default value = "")"""
     strategyname: (Default value = "")"""
     data = {}
 
@@ -536,35 +490,22 @@ def get_trade_detail_data(accountid, accounttype, datatype, strategyname=""):
     result = _BSON_.BSON.decode(result_bson)
 
     class DetailData(object):
-        """ """
-
-        def __init__(self, _obj):
-            """Args:
+""""""
+"""Args::
     _obj:"""
-            if _obj:
-                self.__dict__.update(_obj)
-
-    out = []
-    if not result:
-        return out
-
-    for item in result.get("result"):
-        out.append(DetailData(item))
-    return out
-
-
-def register_external_resp_callback(reqid, callback):
-    """Args:
+"""Args::
     reqid: 
+    callback:"""
     callback:"""
     client = xtdata.get_client()
 
     status = [False, 0, 1, ""]
 
     def on_callback(type, data, error):
-        """Args:
+"""Args::
     type: 
     data: 
+    error:"""
     error:"""
         try:
             result = _BSON_.BSON.decode(data)
@@ -579,8 +520,9 @@ def register_external_resp_callback(reqid, callback):
 
 
 def _set_auto_trade_callback_impl(enable, requestid):
-    """Args:
+"""Args::
     enable: 
+    requestid:"""
     requestid:"""
     data = {}
     data["enable"] = enable
@@ -591,15 +533,17 @@ def _set_auto_trade_callback_impl(enable, requestid):
 
 
 def set_auto_trade_callback(C, enable):
-    """Args:
+"""Args::
     C: 
+    enable:"""
     enable:"""
     return C.set_auto_trade_callback(enable)
 
 
 def set_account(accountid, requestid):
-    """Args:
+"""Args::
     accountid: 
+    requestid:"""
     requestid:"""
     data = {}
     data["accountid"] = accountid
@@ -610,8 +554,9 @@ def set_account(accountid, requestid):
 
 
 def _get_callback_cache_impl(type, requestid):
-    """Args:
+"""Args::
     type: 
+    requestid:"""
     requestid:"""
     data = {}
 
@@ -625,69 +570,68 @@ def _get_callback_cache_impl(type, requestid):
 
 
 def get_account_callback_cache(data, C):
-    """Args:
+"""Args::
     data: 
+    C:"""
     C:"""
     C.get_callback_cache("account").get("")
     return
 
 
 def get_order_callback_cache(data, C):
-    """Args:
+"""Args::
     data: 
+    C:"""
     C:"""
     C.get_callback_cache("order")
     return
 
 
 def get_deal_callback_cache(data, C):
-    """Args:
+"""Args::
     data: 
+    C:"""
     C:"""
     C.get_callback_cache("deal")
     return
 
 
 def get_position_callback_cache(data, C):
-    """Args:
+"""Args::
     data: 
+    C:"""
     C:"""
     C.get_callback_cache("position")
     return
 
 
 def get_ordererror_callback_cache(data, C):
-    """Args:
+"""Args::
     data: 
+    C:"""
     C:"""
     C.get_callback_cache("ordererror")
     return
 
 
 def get_option_detail_data(stock_code):
-    """Args:
+"""Args::
     stock_code:"""
-    return xtdata.get_option_detail_data(stock_code)
-
-
-def get_option_undl_data(undl_code_ref):
-    """Args:
+"""Args::
     undl_code_ref:"""
-    return xtdata.get_option_undl_data(undl_code_ref)
-
-
-def get_option_list(undl_code, dedate, opttype="", isavailavle=False):
-    """Args:
+"""Args::
     undl_code: 
     dedate: 
     opttype: (Default value = "")
+    isavailavle: (Default value = False)"""
     isavailavle: (Default value = False)"""
     return xtdata.get_option_list(undl_code, dedate, opttype, isavailavle)
 
 
 def get_opt_iv(opt_code, requestid):
-    """Args:
+"""Args::
     opt_code: 
+    requestid:"""
     requestid:"""
     data = {}
     data["code"] = opt_code
@@ -710,7 +654,7 @@ def calc_bsm_price(
     dividend,
     requestid,
 ):
-    """Args:
+"""Args::
     optionType: 
     strikePrice: 
     targetPrice: 
@@ -718,6 +662,7 @@ def calc_bsm_price(
     sigma: 
     days: 
     dividend: 
+    requestid:"""
     requestid:"""
     data = {}
     data["optiontype"] = optionType
@@ -748,7 +693,7 @@ def calc_bsm_iv(
     dividend,
     requestid,
 ):
-    """Args:
+"""Args::
     optionType: 
     strikePrice: 
     targetPrice: 
@@ -756,6 +701,7 @@ def calc_bsm_iv(
     riskFree: 
     days: 
     dividend: 
+    requestid:"""
     requestid:"""
     data = {}
     data["optiontype"] = optionType
@@ -775,15 +721,17 @@ def calc_bsm_iv(
 
 
 def get_ipo_info(start_time, end_time):
-    """Args:
+"""Args::
     start_time: 
+    end_time:"""
     end_time:"""
     return xtdata.get_ipo_info(start_time, end_time)
 
 
 def get_backtest_index(requestid, path):
-    """Args:
+"""Args::
     requestid: 
+    path:"""
     path:"""
     import os
 
@@ -798,9 +746,10 @@ def get_backtest_index(requestid, path):
 
 
 def get_group_result(requestid, path, fields):
-    """Args:
+"""Args::
     requestid: 
     path: 
+    fields:"""
     fields:"""
     import os
 
@@ -825,7 +774,7 @@ def subscribe_formula(
     extend_params={},
     callback=None,
 ):
-    """Args:
+"""Args::
     formula_name: 
     stock_code: 
     period: 
@@ -834,6 +783,7 @@ def subscribe_formula(
     count: (Default value = -1)
     dividend_type: (Default value = "none")
     extend_params: (Default value = {})
+    callback: (Default value = None)"""
     callback: (Default value = None)"""
     return xtdata.subscribe_formula(
         formula_name,
@@ -858,7 +808,7 @@ def call_formula_batch(
     dividend_type="none",
     extend_params=[],
 ):
-    """Args:
+"""Args::
     formula_names: 
     stock_codes: 
     period: 
@@ -866,6 +816,7 @@ def call_formula_batch(
     end_time: (Default value = "")
     count: (Default value = -1)
     dividend_type: (Default value = "none")
+    extend_params: (Default value = [])"""
     extend_params: (Default value = [])"""
     import copy
 
@@ -901,9 +852,10 @@ def call_formula_batch(
 
 
 def is_suspended_stock(stock_code, period, timetag):
-    """Args:
+"""Args::
     stock_code: 
     period: 
+    timetag:"""
     timetag:"""
     client = xtdata.get_client()
 

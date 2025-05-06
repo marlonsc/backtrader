@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""mathsupport.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -29,25 +32,27 @@ import math
 
 
 def average(x, bessel=False):
-    """Compute the average of the elements in x.
+"""Compute the average of the elements in x.
 
-Args:
+Args::
     x: Iterable with len
     bessel: (Default value = False). If True, use Bessel's correction (N-1).
 
-Returns:
+Returns::
+    A float with the average of the elements of x."""
     A float with the average of the elements of x."""
     return math.fsum(x) / (len(x) - bessel)
 
 
 def variance(x, avgx=None):
-    """Compute the variance for each element of x.
+"""Compute the variance for each element of x.
 
-Args:
+Args::
     x: Iterable with len
     avgx: (Default value = None). Precomputed average of x.
 
-Returns:
+Returns::
+    A list with the variance for each element of x."""
     A list with the variance for each element of x."""
     if avgx is None:
         avgx = average(x)
@@ -55,13 +60,14 @@ Returns:
 
 
 def standarddev(x, avgx=None, bessel=False):
-    """Compute the standard deviation of the elements in x.
+"""Compute the standard deviation of the elements in x.
 
-Args:
+Args::
     x: Iterable with len
     avgx: (Default value = None). Precomputed average of x.
     bessel: (Default value = False). If True, use Bessel's correction (N-1).
 
-Returns:
+Returns::
+    A float with the standard deviation of the elements of x."""
     A float with the standard deviation of the elements of x."""
     return math.sqrt(average(variance(x, avgx), bessel=bessel))

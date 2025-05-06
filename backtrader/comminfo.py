@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""comminfo.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -101,52 +104,17 @@ Amount of leverage for the asset with regards to the needed cash"""
     )
 
     def __init__(self):
-        """ """
-        super(CommInfoBase, self).__init__()
-
-        self._stocklike = self.p.stocklike
-        self._commtype = self.p.commtype
-
-        # The intial block checks for the behavior of the original
-        # CommissionInfo in which the commission scheme (perc/fixed) was
-        # determined by parameter "margin" evaluating to False/True
-        # If the parameter "commtype" is None, this behavior is emulated
-        # else, the parameter values are used
-
-        if self._commtype is None:  # original CommissionInfo behavior applies
-            if self.p.margin:
-                self._stocklike = False
-                self._commtype = self.COMM_FIXED
-            else:
-                self._stocklike = True
-                self._commtype = self.COMM_PERC
-
-        if not self._stocklike and not self.p.margin:
-            self.p.margin = 1.0  # avoid having None/0
-
-        if self._commtype == self.COMM_PERC and not self.p.percabs:
-            self.p.commission /= 100.0
-
-        self._creditrate = self.p.interest / 365.0
-
-    @property
-    def margin(self):
-        """ """
-        return self.p.margin
-
-    @property
-    def stocklike(self):
-        """ """
-        return self._stocklike
-
-    def get_margin(self, price):
-        """Returns the actual margin/guarantees needed for a single item of the
+""""""
+""""""
+""""""
+"""Returns the actual margin/guarantees needed for a single item of the
 asset at the given price. The default implementation has this policy:
 - Use param ``margin`` if param ``automargin`` evaluates to ``False``
 - Use param ``mult`` * ``price`` if ``automargin < 0``
 - Use param ``automargin`` * ``price`` if ``automargin > 0``
 
-Args:
+Args::
+    price:"""
     price:"""
         if not self.p.automargin:
             return self.p.margin
@@ -161,10 +129,11 @@ Args:
         return self.p.leverage
 
     def getsize(self, price, cash):
-        """Returns the needed size to meet a cash operation at a given price
+"""Returns the needed size to meet a cash operation at a given price
 
-Args:
+Args::
     price: 
+    cash:"""
     cash:"""
         if not self._stocklike:
             return int(self.p.leverage * (cash // self.get_margin(price)))
@@ -172,10 +141,11 @@ Args:
         return int(self.p.leverage * (cash // price))
 
     def getoperationcost(self, size, price):
-        """Returns the needed amount of cash an operation would cost
+"""Returns the needed amount of cash an operation would cost
 
-Args:
+Args::
     size: 
+    price:"""
     price:"""
         if not self._stocklike:
             return abs(size) * self.get_margin(price)
@@ -183,11 +153,12 @@ Args:
         return abs(size) * price
 
     def getvaluesize(self, size, price):
-        """Returns the value of size for given a price. For future-like
+"""Returns the value of size for given a price. For future-like
 objects it is fixed at size * margin
 
-Args:
+Args::
     size: 
+    price:"""
     price:"""
         if not self._stocklike:
             return abs(size) * self.get_margin(price)
@@ -195,11 +166,12 @@ Args:
         return size * price
 
     def getvalue(self, position, price):
-        """Returns the value of a position given a price. For future-like
+"""Returns the value of a position given a price. For future-like
 objects it is fixed at size * margin
 
-Args:
+Args::
     position: 
+    price:"""
     price:"""
         if not self._stocklike:
             return abs(position.size) * self.get_margin(price)
@@ -214,12 +186,13 @@ Args:
         return value
 
     def _getcommission(self, size, price, pseudoexec):
-        """Calculates the commission of an operation at a given price
+"""Calculates the commission of an operation at a given price
 pseudoexec: if True the operation has not yet been executed
 
-Args:
+Args::
     size: 
     price: 
+    pseudoexec:"""
     pseudoexec:"""
         if self._commtype == self.COMM_PERC:
             return abs(size) * self.p.commission * price
@@ -227,32 +200,36 @@ Args:
         return abs(size) * self.p.commission
 
     def getcommission(self, size, price):
-        """Calculates the commission of an operation at a given price
+"""Calculates the commission of an operation at a given price
 
-Args:
+Args::
     size: 
+    price:"""
     price:"""
         return self._getcommission(size, price, pseudoexec=True)
 
     def confirmexec(self, size, price):
-        """Args:
+"""Args::
     size: 
+    price:"""
     price:"""
         return self._getcommission(size, price, pseudoexec=False)
 
     def profitandloss(self, size, price, newprice):
-        """Args:
+"""Args::
     size: 
     price: 
+    newprice:"""
     newprice:"""
         return size * (newprice - price) * self.p.mult
 
     def cashadjust(self, size, price, newprice):
-        """Calculates cash adjustment for a given price difference
+"""Calculates cash adjustment for a given price difference
 
-Args:
+Args::
     size: 
     price: 
+    newprice:"""
     newprice:"""
         if not self._stocklike:
             return size * (newprice - price) * self.p.mult
@@ -260,11 +237,12 @@ Args:
         return 0.0
 
     def get_credit_interest(self, data, pos, dt):
-        """Calculates the credit due for short selling or product specific
+"""Calculates the credit due for short selling or product specific
 
-Args:
+Args::
     data: 
     pos: 
+    dt:"""
     dt:"""
         size, price = pos.size, pos.price
 
@@ -280,19 +258,20 @@ Args:
         return self._get_credit_interest(data, size, price, (dt0 - dt1).days, dt0, dt1)
 
     def _get_credit_interest(self, data, size, price, days, dt0, dt1):
-        """This method returns  the cost in terms of credit interest charged by
+"""This method returns  the cost in terms of credit interest charged by
 the broker.
 In the case of ``size > 0`` this method will only be called if the
 parameter to the class ``interest_long`` is ``True``
 The formulat for the calculation of the credit interest rate is:
 The formula: ``days * price * abs(size) * (interest / 365)``
 
-Args:
+Args::
     data: data feed for which interest is charged
     size: current position size
     price: current position price
     days: number of days elapsed since last credit calculation
     dt0: and
+    dt1: datetime"""
     dt1: datetime"""
         return days * self._creditrate * abs(size) * price
 

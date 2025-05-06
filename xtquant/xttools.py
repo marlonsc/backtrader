@@ -1,8 +1,11 @@
-# coding:utf-8
+"""xttools.py module.
+
+Description of the module functionality."""
+
 
 
 def init_pyside2_path():
-    """ """
+""""""
     try:
         import os
 

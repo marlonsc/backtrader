@@ -54,10 +54,8 @@ _DEC128_CTX = decimal.Context(**_CTX_OPTIONS.copy())
 
 
 def create_decimal128_context():
-    """Returns an instance of :class:`decimal.Context` appropriate
-    for working with IEEE-754 128-bit decimal floating point values.
-
-
+"""Returns an instance of :class:`decimal.Context` appropriate
+    for working with IEEE-754 128-bit decimal floating point values."""
     """
     opts = _CTX_OPTIONS.copy()
     opts["traps"] = []
@@ -65,11 +63,12 @@ def create_decimal128_context():
 
 
 def _decimal_to_128(value):
-    """Converts a decimal.Decimal to BID (high bits, low bits).
+"""Converts a decimal.Decimal to BID (high bits, low bits).
 :Parameters:
 - `value`: An instance of decimal.Decimal
 
-Args:
+Args::
+    value:"""
     value:"""
     with decimal.localcontext(_DEC128_CTX) as ctx:
         value = ctx.create_decimal(value)
@@ -199,26 +198,10 @@ False"""
     _type_marker = 19
 
     def __init__(self, value):
-        """Args:
+"""Args::
     value:"""
-        if isinstance(value, (str, decimal.Decimal)):
-            self.__high, self.__low = _decimal_to_128(value)
-        elif isinstance(value, (list, tuple)):
-            if len(value) != 2:
-                raise ValueError(
-                    "Invalid size for creation of Decimal128 "
-                    "from list or tuple. Must have exactly 2 "
-                    "elements."
-                )
-            self.__high, self.__low = value
-        else:
-            raise TypeError("Cannot convert %r to Decimal128" % (value,))
-
-    def to_decimal(self):
-        """Returns an instance of :class:`decimal.Decimal` for this
-        :class:`Decimal128`.
-
-
+"""Returns an instance of :class:`decimal.Decimal` for this
+        :class:`Decimal128`."""
         """
         high = self.__high
         low = self.__low
@@ -259,13 +242,14 @@ False"""
 
     @classmethod
     def from_bid(cls, value):
-        """Create an instance of :class:`Decimal128` from Binary Integer
+"""Create an instance of :class:`Decimal128` from Binary Integer
 Decimal string.
 :Parameters:
 - `value`: 16 byte string (128-bit IEEE 754-2008 decimal floating
 point in Binary Integer Decimal (BID) format).
 
-Args:
+Args::
+    value:"""
     value:"""
         if not isinstance(value, bytes):
             raise TypeError("value must be an instance of bytes")
@@ -279,34 +263,14 @@ Args:
         return _PACK_64(self.__low) + _PACK_64(self.__high)
 
     def __str__(self):
-        """ """
-        dec = self.to_decimal()
-        if dec.is_nan():
-            # Required by the drivers spec to match MongoDB behavior.
-            return "NaN"
-        return str(dec)
-
-    def __repr__(self):
-        """ """
-        return "Decimal128('%s')" % (str(self),)
-
-    def __setstate__(self, value):
-        """Args:
+""""""
+""""""
+"""Args::
     value:"""
-        self.__high, self.__low = value
-
-    def __getstate__(self):
-        """ """
-        return self.__high, self.__low
-
-    def __eq__(self, other):
-        """Args:
+""""""
+"""Args::
     other:"""
-        if isinstance(other, Decimal128):
-            return self.bid == other.bid
-        return NotImplemented
-
-    def __ne__(self, other):
-        """Args:
+"""Args::
+    other:"""
     other:"""
         return not self == other

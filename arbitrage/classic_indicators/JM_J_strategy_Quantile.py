@@ -1,4 +1,7 @@
-import argparse
+"""JM_J_strategy_Quantile.py module.
+
+Description of the module functionality."""
+
 import datetime
 import os
 
@@ -125,7 +128,9 @@ todate = datetime.datetime(2025, 1, 1)
 
 
 # 创建自定义数据类以支持beta列
-class SpreadData(bt.feeds.PandasData):
+"""SpreadData class.
+
+Description of the class functionality."""
     lines = ("beta",)  # 添加beta线
 
     params = (
@@ -147,7 +152,9 @@ data2 = SpreadData(dataname=df_spread, fromdate=fromdate, todate=todate)
 
 
 # 创建分位数指标（自定义）
-class QuantileIndicator(bt.Indicator):
+"""QuantileIndicator class.
+
+Description of the class functionality."""
     lines = ("upper", "lower", "mid")
     params = (
         ("period", 30),
@@ -155,11 +162,19 @@ class QuantileIndicator(bt.Indicator):
         ("lower_quantile", 0.15),  # 下轨分位数
     )
 
-    def __init__(self):
+"""__init__ function.
+
+Returns:
+    Description of return value
+"""
         self.addminperiod(self.p.period)
         self.spread_data = []
 
-    def next(self):
+"""next function.
+
+Returns:
+    Description of return value
+"""
         self.spread_data.append(self.data[0])
         if len(self.spread_data) > self.p.period:
             self.spread_data.pop(0)  # 保持固定长度
@@ -175,7 +190,9 @@ class QuantileIndicator(bt.Indicator):
             self.lines.mid[0] = self.data[0]
 
 
-class DynamicSpreadQuantileStrategy(bt.Strategy):
+"""DynamicSpreadQuantileStrategy class.
+
+Description of the class functionality."""
     params = (
         ("lookback_period", 30),  # 回看周期
         ("upper_quantile", 0.8),  # 上轨分位数
@@ -185,7 +202,11 @@ class DynamicSpreadQuantileStrategy(bt.Strategy):
         ("verbose", True),  # 是否打印详细信息
     )
 
-    def __init__(self):
+"""__init__ function.
+
+Returns:
+    Description of return value
+"""
         # 计算价差的分位数指标
         self.quantile = QuantileIndicator(
             self.data2.close,
@@ -206,7 +227,11 @@ class DynamicSpreadQuantileStrategy(bt.Strategy):
         self.record_data = []
         self.prev_portfolio_value = self.broker.getvalue()
 
-    def next(self):
+"""next function.
+
+Returns:
+    Description of return value
+"""
         # 记录每日收益率数据
         current_value = self.broker.getvalue()
         daily_return = (
@@ -365,7 +390,14 @@ class DynamicSpreadQuantileStrategy(bt.Strategy):
         self.close(data=self.data1)
         self.position_layers = 0  # 平仓重置加仓层数
 
-    def notify_trade(self, trade):
+"""notify_trade function.
+
+Args:
+    trade: Description of trade
+
+Returns:
+    Description of return value
+"""
         if not self.p.verbose:
             return
 
@@ -396,7 +428,11 @@ class DynamicSpreadQuantileStrategy(bt.Strategy):
         return pd.DataFrame(self.record_data)
 
 
-def main():
+"""main function.
+
+Returns:
+    Description of return value
+"""
     # 解析命令行参数
     args = parse_args()
     print(f"解析参数: {args}")

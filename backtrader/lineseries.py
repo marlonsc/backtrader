@@ -39,7 +39,7 @@ from .utils.py3 import map, range, string_types, with_metaclass
 
 
 class LineAlias(object):
-    """Descriptor class that stores a line reference and returns that line from the
+"""Descriptor class that stores a line reference and returns that line from the
     owner. All docstrings and comments must be line-wrapped at 90 characters or less.
 
     Keyword Args:
@@ -49,28 +49,21 @@ class LineAlias(object):
     As a convenience the __set__ method of the descriptor is used not set
     the *line* reference because this is a constant along the live of the
     descriptor instance, but rather to set the value of the *line* at the
-    instant '0' (the current one)
-
-
+    instant '0' (the current one)"""
     """
 
     def __init__(self, line):
-        """Args:
+"""Args::
     line:"""
-        self.line = line
-
-    def __get__(self, obj, cls=None):
-        """Args:
+"""Args::
     obj:"""
-        return obj.lines[self.line]
-
-    def __set__(self, obj, value):
-        """A line cannot be "set" once it has been created. But the values
+"""A line cannot be "set" once it has been created. But the values
 inside the line can be "set". This is achieved by adding a binding
 to the line inside "value"
 
-Args:
+Args::
     obj: 
+    value:"""
     value:"""
         if isinstance(value, LineMultiple):
             value = value.lines[0]
@@ -109,12 +102,13 @@ in the defined order."""
         linesoverride=False,
         lalias=None,
     ):
-        """Args:
+"""Args::
     name: 
     lines: 
     extralines: 
     otherbases: 
     linesoverride: (Default value = False)
+    lalias: (Default value = None)"""
     lalias: (Default value = None)"""
         return cls._derive(name, lines, extralines, otherbases, linesoverride, lalias)()
 
@@ -128,7 +122,7 @@ in the defined order."""
         linesoverride=False,
         lalias=None,
     ):
-        """Creates a subclass of this class with the lines of this class as
+"""Creates a subclass of this class with the lines of this class as
 initial input for the subclass. It will include num "extralines" and
 lines present in "otherbases"
 "name" will be used as the suffix of the final class name
@@ -136,12 +130,13 @@ lines present in "otherbases"
 the baseclass will be the topmost class "Lines". This is intended to
 create a new hierarchy
 
-Args:
+Args::
     name: 
     lines: 
     extralines: 
     otherbases: 
     linesoverride: (Default value = False)
+    lalias: (Default value = None)"""
     lalias: (Default value = None)"""
         obaseslines = ()
         obasesextralines = 0
@@ -225,28 +220,15 @@ Args:
 
     @classmethod
     def _getlinealias(cls, i):
-        """Args:
+"""Args::
     i:"""
-        lines = cls._getlines()
-        if i >= len(lines):
-            return ""
-        linealias = lines[i]
-        return linealias
-
-    @classmethod
-    def getlinealiases(cls):
-        """ """
-        return cls._getlines()
-
-    def itersize(self):
-        """ """
-        return iter(self.lines[0 : self.size()])
-
-    def __init__(self, initlines=None):
-        """Create the lines recording during "_derive" or else use the
+""""""
+""""""
+"""Create the lines recording during "_derive" or else use the
 provided "initlines"
 
-Args:
+Args::
+    initlines: (Default value = None)"""
     initlines: (Default value = None)"""
         self.lines = list()
         for line, linealias in enumerate(self._getlines()):
@@ -265,72 +247,70 @@ Args:
         return len(self.lines[0])
 
     def size(self):
-        """ """
-        return len(self.lines) - self._getlinesextra()
+""""""
+""""""
+""""""
+"""Proxy line operation
 
-    def fullsize(self):
-        """ """
-        return len(self.lines)
-
-    def extrasize(self):
-        """ """
-        return self._getlinesextra()
-
-    def __getitem__(self, line):
-        """Proxy line operation
-
-Args:
+Args::
+    line:"""
     line:"""
         return self.lines[line]
 
     def get(self, ago=0, size=1, line=0):
-        """Proxy line operation
+"""Proxy line operation
 
-Args:
+Args::
     ago: (Default value = 0)
     size: (Default value = 1)
+    line: (Default value = 0)"""
     line: (Default value = 0)"""
         return self.lines[line].get(ago, size=size)
 
     def __setitem__(self, line, value):
-        """Proxy line operation
+"""Proxy line operation
 
-Args:
+Args::
     line: 
+    value:"""
     value:"""
         setattr(self, self._getlinealias(line), value)
 
     def forward(self, value=NAN, size=1):
-        """Proxy line operation
+"""Proxy line operation
 
-Args:
+Args::
     value: (Default value = NAN)
+    size: (Default value = 1)"""
     size: (Default value = 1)"""
         for line in self.lines:
             line.forward(value, size=size)
 
     def backwards(self, size=1, force=False):
-        """Proxy line operation
+"""Proxy line operation
 
-Args:
+Args::
     size: (Default value = 1)
+    force: (Default value = False)"""
     force: (Default value = False)"""
         for line in self.lines:
             line.backwards(size, force=force)
 
     def rewind(self, size=1):
-        """Proxy line operation
+"""Proxy line operation
 
-Args:
+Args::
+    size: (Default value = 1)"""
     size: (Default value = 1)"""
         for line in self.lines:
             line.rewind(size)
 
     def extend(self, value=NAN, size=0):
-        """Proxy line operation
+"""Proxy line operation
 
-Args:
+Args::
     value: (Default value = NAN)
+    size: (Default value = 0)"""
     size: (Default value = 0)"""
         for line in self.lines:
             line.extend(value, size)
@@ -346,17 +326,19 @@ Args:
             line.home()
 
     def advance(self, size=1):
-        """Proxy line operation
+"""Proxy line operation
 
-Args:
+Args::
+    size: (Default value = 1)"""
     size: (Default value = 1)"""
         for line in self.lines:
             line.advance(size)
 
     def buflen(self, line=0):
-        """Proxy line operation
+"""Proxy line operation
 
-Args:
+Args::
+    line: (Default value = 0)"""
     line: (Default value = 0)"""
         return self.lines[line].buflen()
 
@@ -378,14 +360,15 @@ as root class and therefore "params" defined for the class have been
 removed from kwargs at an earlier state"""
 
     def __new__(meta, name, bases, dct):
-        """Intercept class creation, identifiy lines/plotinfo/plotlines class
+"""Intercept class creation, identifiy lines/plotinfo/plotlines class
 attributes and create corresponding classes for them which take over
 the class attributes
 
-Args:
+Args::
     meta: 
     name: 
     bases: 
+    dct:"""
     dct:"""
 
         # Get the aliases - don't leave it there for subclasses
@@ -463,8 +446,7 @@ Args:
         return cls
 
     def donew(cls, *args, **kwargs):
-        """
-        Create a new instance, calling super if available.
+"""Create a new instance, calling super if available."""
         """
         if hasattr(super(MetaLineSeries, cls), "donew"):
             _obj, args, kwargs = super(MetaLineSeries, cls).donew(*args, **kwargs)
@@ -474,10 +456,10 @@ Args:
 
 
 class LineSeries(with_metaclass(MetaLineSeries, LineMultiple)):
-    """Base class for line-based series (Indicators, Observers, Strategies).
+"""Base class for line-based series (Indicators, Observers, Strategies).
     Handles data binding, minperiod calculation, and orchestration of line
     operations. All docstrings and comments must be line-wrapped at 90 characters
-    or less.
+    or less."""
     """
 
     plotinfo = dict(
@@ -490,29 +472,15 @@ class LineSeries(with_metaclass(MetaLineSeries, LineMultiple)):
 
     @property
     def array(self):
-        """ """
-        return self.lines[0].array
-
-    def __getattr__(self, name):
-        """Args:
+""""""
+"""Args::
     name:"""
-        # to refer to line by name directly if the attribute was not found
-        # in this object if we set an attribute in this object it will be
-        # found before we end up here
-        return getattr(self.lines, name)
-
-    def __len__(self):
-        """ """
-        return len(self.lines)
-
-    def __getitem__(self, key):
-        """Args:
+""""""
+"""Args::
     key:"""
-        return self.lines[0][key]
-
-    def __setitem__(self, key, value):
-        """Args:
+"""Args::
     key: 
+    value:"""
     value:"""
         setattr(self.lines, self.lines._getlinealias(key), value)
 
@@ -525,30 +493,11 @@ class LineSeries(with_metaclass(MetaLineSeries, LineMultiple)):
         super(LineSeries, self).__init__()
 
     def plotlabel(self):
-        """ """
-        name = self.plotinfo.get("plotname", "") or self.__class__.__name__
-        sublabels = self._plotlabel()
-        if sublabels:
-            for i, sublabel in enumerate(sublabels):
-                # if isinstance(sublabel, LineSeries): ## DOESN'T WORK ???
-                if hasattr(sublabel, "plotinfo"):
-                    try:
-                        s = sublabel.plotinfo.plotname
-                    except BaseException:
-                        s = ""
-
-                    sublabels[i] = s or sublabel.__name__
-
-            name += " (%s)" % ", ".join(map(str, sublabels))
-        return name
-
-    def _plotlabel(self):
-        """ """
-        return self.params._getvalues()
-
-    def _getline(self, line, minusall=False):
-        """Args:
+""""""
+""""""
+"""Args::
     line: 
+    minusall: (Default value = False)"""
     minusall: (Default value = False)"""
         if isinstance(line, string_types):
             lineobj = getattr(self.lines, line)
@@ -562,16 +511,17 @@ class LineSeries(with_metaclass(MetaLineSeries, LineMultiple)):
         return lineobj
 
     def __call__(self, ago=None, line=-1):
-        """Returns either a delayed verison of itself in the form of a
+"""Returns either a delayed verison of itself in the form of a
 LineDelay object or a timeframe adapting version with regards to a ago
 Param: ago (default: None)
 If ago is None or an instance of LineRoot (a lines object) the
 
-Args:
+Args::
     ago: (Default value = None)
     line: (Default value = -1)
 
-Returns:
+Returns::
+    If ago is anything else, it is assumed to be an int and a LineDelay"""
     If ago is anything else, it is assumed to be an int and a LineDelay"""
         from .lineiterator import LinesCoupler  # avoid circular import
 
@@ -590,43 +540,33 @@ Returns:
     # reach them using "super" which will not call __getattr__ and
     # LineSeriesStub (see below) already uses super
     def forward(self, value=NAN, size=1):
-        """Args:
+"""Args::
     value: (Default value = NAN)
+    size: (Default value = 1)"""
     size: (Default value = 1)"""
         self.lines.forward(value, size)
 
     def backwards(self, size=1, force=False):
-        """Args:
+"""Args::
     size: (Default value = 1)
+    force: (Default value = False)"""
     force: (Default value = False)"""
         self.lines.backwards(size, force=force)
 
     def rewind(self, size=1):
-        """Args:
+"""Args::
     size: (Default value = 1)"""
-        self.lines.rewind(size)
-
-    def extend(self, value=NAN, size=0):
-        """Args:
+"""Args::
     value: (Default value = NAN)
+    size: (Default value = 0)"""
     size: (Default value = 0)"""
         self.lines.extend(value, size)
 
     def reset(self):
-        """ """
-        self.lines.reset()
-
-    def home(self):
-        """ """
-        self.lines.home()
-
-    def advance(self, size=1):
-        """Args:
+""""""
+""""""
+"""Args::
     size: (Default value = 1)"""
-        self.lines.advance(size)
-
-
-class LineSeriesStub(LineSeries):
     """Simulates a LineMultiple object based on LineSeries from a single line
 The index management operations are overriden to take into account if the
 line is a slave, ie:
@@ -642,8 +582,9 @@ advances all lines it is holding
     extralines = 1
 
     def __init__(self, line, slave=False):
-        """Args:
+"""Args::
     line: 
+    slave: (Default value = False)"""
     slave: (Default value = False)"""
         self.lines = self.__class__.lines(initlines=[line])
         # give a change to find the line owner (for plotting at least)
@@ -653,63 +594,42 @@ advances all lines it is holding
 
     # Only execute the operations below if the object is not a slave
     def forward(self, value=NAN, size=1):
-        """Args:
+"""Args::
     value: (Default value = NAN)
+    size: (Default value = 1)"""
     size: (Default value = 1)"""
         if not self.slave:
             super(LineSeriesStub, self).forward(value, size)
 
     def backwards(self, size=1, force=False):
-        """Args:
+"""Args::
     size: (Default value = 1)
+    force: (Default value = False)"""
     force: (Default value = False)"""
         if not self.slave:
             super(LineSeriesStub, self).backwards(size, force=force)
 
     def rewind(self, size=1):
-        """Args:
+"""Args::
     size: (Default value = 1)"""
-        if not self.slave:
-            super(LineSeriesStub, self).rewind(size)
-
-    def extend(self, value=NAN, size=0):
-        """Args:
+"""Args::
     value: (Default value = NAN)
+    size: (Default value = 0)"""
     size: (Default value = 0)"""
         if not self.slave:
             super(LineSeriesStub, self).extend(value, size)
 
     def reset(self):
-        """ """
-        if not self.slave:
-            super(LineSeriesStub, self).reset()
-
-    def home(self):
-        """ """
-        if not self.slave:
-            super(LineSeriesStub, self).home()
-
-    def advance(self, size=1):
-        """Args:
+""""""
+""""""
+"""Args::
     size: (Default value = 1)"""
-        if not self.slave:
-            super(LineSeriesStub, self).advance(size)
-
-    def qbuffer(self):
-        """ """
-        if not self.slave:
-            super(LineSeriesStub, self).qbuffer()
-
-    def minbuffer(self, size):
-        """Args:
+""""""
+"""Args::
     size:"""
-        if not self.slave:
-            super(LineSeriesStub, self).minbuffer(size)
-
-
-def LineSeriesMaker(arg, slave=False):
-    """Args:
+"""Args::
     arg: 
+    slave: (Default value = False)"""
     slave: (Default value = False)"""
     if isinstance(arg, LineSeries):
         return arg

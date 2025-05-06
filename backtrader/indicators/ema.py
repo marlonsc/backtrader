@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""ema.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -45,7 +48,7 @@ See also:
     lines = ("ema",)
 
     def __init__(self):
-        """ """
+""""""
         # Before super to ensure mixins (right-hand side in subclassing)
         # can see the assignment operation and operate on the line
         self.lines[0] = es = ExponentialSmoothing(

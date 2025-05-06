@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""logreturns.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -45,41 +48,15 @@ class LogReturns(bt.Observer):
     )
 
     def _plotlabel(self):
-        """ """
-        return [
-            bt.TimeFrame.getname(self.p.timeframe, self.p.compression),
-            str(self.p.compression or 1),
-        ]
-
-    def __init__(self):
-        """ """
-        self.logret1 = self._owner._addanalyzer_slave(
-            bt.analyzers.LogReturnsRolling,
-            data=self.data0,
-            **self.p._getkwargs(),
-        )
-
-    def next(self):
-        """ """
-        self.lines.logret1[0] = self.logret1.rets[self.logret1.dtkey]
-
-
-class LogReturns2(LogReturns):
+""""""
+""""""
+""""""
     """Extends the observer LogReturns to show two instruments"""
 
     lines = ("logret2",)
 
     def __init__(self):
-        """ """
-        super(LogReturns2, self).__init__()
-
-        self.logret2 = self._owner._addanalyzer_slave(
-            bt.analyzers.LogReturnsRolling,
-            data=self.data1,
-            **self.p._getkwargs(),
-        )
-
-    def next(self):
-        """ """
+""""""
+""""""
         super(LogReturns2, self).next()
         self.lines.logret2[0] = self.logret2.rets[self.logret2.dtkey]

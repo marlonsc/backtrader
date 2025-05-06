@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""rmi.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -60,7 +63,7 @@ See:
     )
 
     def _plotlabel(self):
-        """ """
+""""""
         # override to always print the lookback label and do it before movav
         plabels = [self.p.period]
         plabels += [self.p.lookback]

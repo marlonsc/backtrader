@@ -1,25 +1,22 @@
 # observer-benchmark
 
-Directory containing observer-benchmark related files. Primarily contains Python code.
+This directory contains various files including 1 md file, 1 py file.
 
 ## Navigation
 
-* [🏠 Root Directory](../../README.md)
+* [🏠 Root Directory](/samples/observer-benchmark/../samples/observer-benchmark/..README.md)
 * [⬆️ Parent Directory (samples)](../README.md)
 
 ## Files
 
-### README.md
-
-File with .md extension.
-
 ### observer-benchmark.py
+
+observer-benchmark.py module.
 
 ## Directory Summary
 
-This directory contains 2 files and 0 subdirectories.
+This directory contains 1 files and 0 subdirectories.
 
 ### File Types
 
-* .md: 1 files
 * .py: 1 files

@@ -1,4 +1,7 @@
-import argparse
+"""dump-ticker.py module.
+
+Description of the module functionality."""
+
 import os
 
 import pandas as pd
@@ -7,10 +10,11 @@ from psycopg2.extras import RealDictCursor
 
 
 def main(symbol, fromdate, todate, output_dir=None):
-    """Args:
+"""Args::
     symbol: 
     fromdate: 
     todate: 
+    output_dir: (Default value = None)"""
     output_dir: (Default value = None)"""
     # Database connection parameters
     db_params = {

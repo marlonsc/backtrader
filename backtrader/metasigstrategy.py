@@ -1,4 +1,7 @@
-#!/usr/bin389/env python
+"""metasigstrategy.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -31,10 +34,14 @@ try:
     from .utils import AutoDictList, AutoOrderedDict
 except ImportError:
 
-    class AutoDictList(dict):
+"""AutoDictList class.
+
+Description of the class functionality."""
         pass
 
-    class AutoOrderedDict(dict):
+"""AutoOrderedDict class.
+
+Description of the class functionality."""
         pass
 
 
@@ -42,7 +49,9 @@ try:
     from .sizers import FixedSize
 except ImportError:
 
-    class FixedSize:
+"""FixedSize class.
+
+Description of the class functionality."""
         pass
 
 
@@ -50,7 +59,9 @@ try:
     from .order import Order
 except ImportError:
 
-    class Order:
+"""Order class.
+
+Description of the class functionality."""
         pass
 
 
@@ -58,7 +69,9 @@ try:
     from .lineroot import LineRoot
 except ImportError:
 
-    class LineRoot:
+"""LineRoot class.
+
+Description of the class functionality."""
         pass
 
 
@@ -98,7 +111,9 @@ try:
     from .strategy import Strategy
 except ImportError:
 
-    class Strategy:
+"""Strategy class.
+
+Description of the class functionality."""
         pass
 
 
@@ -113,10 +128,11 @@ class MetaSigStrategy(type):
     """Metaclass for signal strategies."""
 
     def __new__(meta, name, bases, dct):
-        """Args:
+"""Args::
     meta: 
     name: 
     bases: 
+    dct:"""
     dct:"""
         # map user defined next to custom to be able to call own method before
         if "next" in dct:
@@ -130,29 +146,10 @@ class MetaSigStrategy(type):
         return cls
 
     def dopreinit(self, _obj, *args, **kwargs):
-        """Args:
+"""Args::
     _obj:"""
-        # Use self for metaclass methods
-        if hasattr(super(MetaSigStrategy, self), "dopreinit"):
-            _obj, args, kwargs = super(MetaSigStrategy, self).dopreinit(
-                _obj, *args, **kwargs
-            )
-        _obj._signals = collections.defaultdict(list)
-        _data = getattr(_obj.p, "_data", None)
-        if _data is None:
-            _obj._dtarget = getattr(_obj, "data0", None)
-        elif isinstance(_data, integer_types):
-            _obj._dtarget = _obj.datas[_data]
-        elif isinstance(_data, string_types):
-            _obj._dtarget = _obj.getdatabyname(_data)
-        elif isinstance(_data, LineRoot):
-            _obj._dtarget = _data
-        else:
-            _obj._dtarget = getattr(_obj, "data0", None)
-        return _obj, args, kwargs
-
-    def dopostinit(self, _obj, *args, **kwargs):
-        """Args:
+"""Args::
+    _obj:"""
     _obj:"""
         if hasattr(super(MetaSigStrategy, self), "dopostinit"):
             _obj, args, kwargs = super(MetaSigStrategy, self).dopostinit(

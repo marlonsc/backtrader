@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""fillers.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -30,17 +33,17 @@ from .utils.py3 import MAXINT, with_metaclass
 
 
 class FixedSize(with_metaclass(MetaParams, object)):
-    """
-    Returns the volume in a bar. The maximum size is set with the parameter 'size'.
-    All docstrings and comments must be line-wrapped at 90 characters or less.
+"""Returns the volume in a bar. The maximum size is set with the parameter 'size'.
+    All docstrings and comments must be line-wrapped at 90 characters or less."""
     """
 
     params = (("size", None),)
 
     def __call__(self, order, price, ago):
-        """Args:
+"""Args::
     order: 
     price: 
+    ago:"""
     ago:"""
         p = getattr(self, "p", None)
         size = getattr(p, "size", None)
@@ -51,17 +54,17 @@ class FixedSize(with_metaclass(MetaParams, object)):
 
 
 class FixedBarPerc(with_metaclass(MetaParams, object)):
-    """
-    Returns the volume in a bar as a percentage set with the parameter 'perc'.
-    All docstrings and comments must be line-wrapped at 90 characters or less.
+"""Returns the volume in a bar as a percentage set with the parameter 'perc'.
+    All docstrings and comments must be line-wrapped at 90 characters or less."""
     """
 
     params = (("perc", 100.0),)
 
     def __call__(self, order, price, ago):
-        """Args:
+"""Args::
     order: 
     price: 
+    ago:"""
     ago:"""
         p = getattr(self, "p", None)
         perc = getattr(p, "perc", None)
@@ -74,11 +77,10 @@ class FixedBarPerc(with_metaclass(MetaParams, object)):
 
 
 class BarPointPerc(with_metaclass(MetaParams, object)):
-    """
-    Returns the volume distributed uniformly in the range high-low using 'minmov' to
+"""Returns the volume distributed uniformly in the range high-low using 'minmov' to
     partition. The 'perc' percentage will be used from the allocated volume for the
     given price. All docstrings and comments must be line-wrapped at 90 characters or
-    less.
+    less."""
     """
 
     params = (
@@ -87,9 +89,10 @@ class BarPointPerc(with_metaclass(MetaParams, object)):
     )
 
     def __call__(self, order, price, ago):
-        """Args:
+"""Args::
     order: 
     price: 
+    ago:"""
     ago:"""
         data = order.data
         p = getattr(self, "p", None)

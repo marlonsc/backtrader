@@ -1,4 +1,7 @@
-# LICENSE AGREEMENT FOR MATPLOTLIB 1.2.0
+"""multicursor.py module.
+
+Description of the module functionality."""
+
 # --------------------------------------
 #
 # 1. This LICENSE AGREEMENT is between John D. Hunter ("JDH"), and the
@@ -71,9 +74,10 @@ class Widget(object):
     _active = True
 
     def set_active(self, active):
-        """Set whether the widget is active.
+"""Set whether the widget is active.
 
-Args:
+Args::
+    active:"""
     active:"""
         self._active = active
 
@@ -89,10 +93,11 @@ Args:
     )
 
     def ignore(self, event):
-        """Args:
+"""Args::
     event: 
 
-Returns:
+Returns::
+    This method (or a version of it) should be called at the beginning"""
     This method (or a version of it) should be called at the beginning"""
         return not self.active
 
@@ -130,7 +135,7 @@ show()"""
         vertShared=False,
         **lineprops,
     ):
-        """Args:
+"""Args::
     canvas: 
     axes: 
     useblit: (Default value = True)
@@ -139,6 +144,7 @@ show()"""
     horizMulti: (Default value = False)
     vertMulti: (Default value = True)
     horizShared: (Default value = True)
+    vertShared: (Default value = False)"""
     vertShared: (Default value = False)"""
 
         self.canvas = canvas
@@ -195,9 +201,10 @@ show()"""
         self.canvas.mpl_disconnect(self._ciddraw)
 
     def clear(self, event):
-        """clear the cursor
+"""clear the cursor
 
-Args:
+Args::
+    event:"""
     event:"""
         if self.ignore(event):
             return
@@ -207,57 +214,10 @@ Args:
             line.set_visible(False)
 
     def onmove(self, event):
-        """Args:
+"""Args::
     event:"""
-        if self.ignore(event):
-            return
-        if event.inaxes is None:
-            return
-        if not self.canvas.widgetlock.available(self):
-            return
-        self.needclear = True
-        if not self.visible:
-            return
-        if self.vertOn:
-            for line in self.vlines:
-                visible = self.visible
-                if not self.vertMulti:
-                    visible = visible and line.axes == event.inaxes
-
-                if visible:
-                    line.set_xdata((event.xdata, event.xdata))
-                    line.set_visible(visible)
-        if self.horizOn:
-            for line in self.hlines:
-                visible = self.visible
-                if not self.horizMulti:
-                    visible = visible and line.axes == event.inaxes
-                if visible:
-                    line.set_ydata((event.ydata, event.ydata))
-                    line.set_visible(self.visible)
-        self._update(event)
-
-    def _update(self, event):
-        """Args:
+"""Args::
     event:"""
-        if self.useblit:
-            if self.background is not None:
-                self.canvas.restore_region(self.background)
-            if self.vertOn:
-                for ax, line in zip(self.axes, self.vlines):
-                    if self.vertMulti or event.inaxes == line.axes:
-                        ax.draw_artist(line)
-
-            if self.horizOn:
-                for ax, line in zip(self.axes, self.hlines):
-                    if self.horizMulti or event.inaxes == line.axes:
-                        ax.draw_artist(line)
-            self.canvas.blit(self.canvas.figure.bbox)
-        else:
-            self.canvas.draw_idle()
-
-
-class MultiCursor2(Widget):
     """Provide a vertical (default) and/or horizontal line cursor shared between
 multiple axes.
 For the cursor to remain responsive you much keep a reference to
@@ -286,11 +246,12 @@ show()"""
         vertOn=True,
         **lineprops,
     ):
-        """Args:
+"""Args::
     canvas: 
     axes: 
     useblit: (Default value = True)
     horizOn: (Default value = False)
+    vertOn: (Default value = True)"""
     vertOn: (Default value = True)"""
 
         self.canvas = canvas
@@ -337,9 +298,10 @@ show()"""
         self.canvas.mpl_disconnect(self._ciddraw)
 
     def clear(self, event):
-        """clear the cursor
+"""clear the cursor
 
-Args:
+Args::
+    event:"""
     event:"""
         if self.ignore(event):
             return
@@ -349,32 +311,10 @@ Args:
             line.set_visible(False)
 
     def onmove(self, event):
-        """Args:
+"""Args::
     event:"""
-        if self.ignore(event):
-            return
-        if event.inaxes is None:
-            return
-
-        if not self.canvas.widgetlock.available(self):
-            return
-        self.needclear = True
-        if not self.visible:
-            return
-        if self.vertOn:
-            for line in self.vlines:
-                visible = True or line.axes == event.inaxes
-                line.set_xdata((event.xdata, event.xdata))
-                line.set_visible(visible)
-        if self.horizOn:
-            for line in self.hlines:
-                visible = line.axes == event.inaxes
-                line.set_ydata((event.ydata, event.ydata))
-                line.set_visible(visible)
-        self._update(event)
-
-    def _update(self, event):
-        """Args:
+"""Args::
+    event:"""
     event:"""
         if self.useblit:
             if self.background is not None:

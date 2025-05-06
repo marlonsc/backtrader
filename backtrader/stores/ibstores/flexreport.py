@@ -13,10 +13,7 @@ _logger = logging.getLogger("ib_insync.flexreport")
 
 
 class FlexError(Exception):
-    """ """
-
-
-class FlexReport:
+""""""
     """To obtain a token:
 * Login to web portal
 * Go to Settings
@@ -27,12 +24,13 @@ class FlexReport:
     root: et.Element
 
     def __init__(self, token=None, queryId=None, path=None):
-        """Download a report by giving a valid ``token`` and ``queryId``,
+"""Download a report by giving a valid ``token`` and ``queryId``,
 or load from file by giving a valid ``path``.
 
-Args:
+Args::
     token: (Default value = None)
     queryId: (Default value = None)
+    path: (Default value = None)"""
     path: (Default value = None)"""
         if token and queryId:
             self.download(token, queryId)
@@ -44,12 +42,13 @@ Args:
         return set(node.tag for node in self.root.iter() if node.attrib)
 
     def extract(self, topic: str, parseNumbers=True) -> list:
-        """Extract items of given topic and return as list of objects.
+"""Extract items of given topic and return as list of objects.
 The topic is a string like TradeConfirm, ChangeInDividendAccrual,
 Order, etc.
 
-Args:
+Args::
     topic: 
+    parseNumbers: (Default value = True)"""
     parseNumbers: (Default value = True)"""
         cls = type(topic, (DynamicObject,), {})
         results = [cls(**node.attrib) for node in self.root.iter(topic)]
@@ -63,18 +62,20 @@ Args:
         return results
 
     def df(self, topic: str, parseNumbers=True):
-        """Same as extract but return the result as a pandas DataFrame.
+"""Same as extract but return the result as a pandas DataFrame.
 
-Args:
+Args::
     topic: 
+    parseNumbers: (Default value = True)"""
     parseNumbers: (Default value = True)"""
         return util.df(self.extract(topic, parseNumbers))
 
     def download(self, token, queryId):
-        """Download report for the given ``token`` and ``queryId``.
+"""Download report for the given ``token`` and ``queryId``.
 
-Args:
+Args::
     token: 
+    queryId:"""
     queryId:"""
         url = (
             "https://gdcdyn.interactivebrokers.com"
@@ -118,18 +119,20 @@ Args:
         _logger.info("Statement retrieved.")
 
     def load(self, path):
-        """Load report from XML file.
+"""Load report from XML file.
 
-Args:
+Args::
+    path:"""
     path:"""
         with open(path, "rb") as f:
             self.data = f.read()
             self.root = et.fromstring(self.data)
 
     def save(self, path):
-        """Save report to XML file.
+"""Save report to XML file.
 
-Args:
+Args::
+    path:"""
     path:"""
         with open(path, "wb") as f:
             f.write(self.data)

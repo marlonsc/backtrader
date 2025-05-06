@@ -30,15 +30,8 @@ _MAX_COUNTER_VALUE = 0xFFFFFF
 
 
 def _raise_invalid_id(oid: str) -> NoReturn:
-    """Args:
+"""Args::
     oid:"""
-    raise InvalidId(
-        "%r is not a valid ObjectId, it must be a 12-byte input"
-        " or a 24-character hex string" % oid
-    )
-
-
-def _random_bytes() -> bytes:
     """Get the 5-byte random field of an ObjectId.
 :rtype: bytes"""
     return os.urandom(5)
@@ -59,7 +52,7 @@ class ObjectId(object):
     _type_marker = 7
 
     def __init__(self, oid: Optional[Union[str, "ObjectId", bytes]] = None) -> None:
-        """Initialize a new ObjectId.
+"""Initialize a new ObjectId.
 An ObjectId is a 12-byte unique identifier consisting of:
 - a 4-byte value representing the seconds since the Unix epoch,
 - a 5-byte random value,
@@ -81,7 +74,8 @@ specification version 0.2
 <https://github.com/mongodb/specifications/blob/master/source/
 objectid.rst>`_.
 
-Args:
+Args::
+    oid: (Default value = None)"""
     oid: (Default value = None)"""
         if oid is None:
             self.__generate()
@@ -94,7 +88,7 @@ Args:
     def from_datetime(
         cls: Type["ObjectId"], generation_time: datetime.datetime
     ) -> "ObjectId":
-        """Create a dummy ObjectId instance with a specific generation time.
+"""Create a dummy ObjectId instance with a specific generation time.
 This method is useful for doing range queries on a field
 containing :class:`ObjectId` instances.
 .. warning::
@@ -111,7 +105,8 @@ was generated before January 1, 2010 would be:
 - `generation_time`: :class:`~datetime.datetime` to be used
 as the generation time for the resulting ObjectId.
 
-Args:
+Args::
+    generation_time:"""
     generation_time:"""
         offset = generation_time.utcoffset()
         if offset is not None:
@@ -122,12 +117,13 @@ Args:
 
     @classmethod
     def is_valid(cls: Type["ObjectId"], oid: Any) -> bool:
-        """Checks if a `oid` string is valid or not.
+"""Checks if a `oid` string is valid or not.
 :Parameters:
 - `oid`: the object id to validate
 .. versionadded:: 2.3
 
-Args:
+Args::
+    oid:"""
     oid:"""
         if not oid:
             return False
@@ -166,7 +162,7 @@ Args:
         self.__id = oid
 
     def __validate(self, oid: Any) -> None:
-        """Validate and use the given id for this ObjectId.
+"""Validate and use the given id for this ObjectId.
 Raises TypeError if id is not an instance of
 (:class:`basestring` (:class:`str` or :class:`bytes`
 in python 3), ObjectId) and InvalidId if it is not a
@@ -174,7 +170,8 @@ valid ObjectId.
 :Parameters:
 - `oid`: a valid ObjectId
 
-Args:
+Args::
+    oid:"""
     oid:"""
         if isinstance(oid, ObjectId):
             self.__id = oid.binary
@@ -210,14 +207,12 @@ second.
         return datetime.datetime.fromtimestamp(timestamp, utc)
 
     def __getstate__(self) -> bytes:
-        """Returns:
+"""Returns::
     needed explicitly because __slots__() defined."""
-        return self.__id
+"""explicit state set from pickling
 
-    def __setstate__(self, value: Any) -> None:
-        """explicit state set from pickling
-
-Args:
+Args::
+    value:"""
     value:"""
         # Provide backwards compatability with OIDs
         # pickled with pymongo-1.9 or older.
@@ -234,61 +229,24 @@ Args:
             self.__id = oid
 
     def __str__(self) -> str:
-        """
-
-
-        :rtype: str
-
+""":rtype: str"""
         """
         return binascii.hexlify(self.__id).decode()
 
     def __repr__(self):
-        """ """
-        return "ObjectId('%s')" % (str(self),)
-
-    def __eq__(self, other: Any) -> bool:
-        """Args:
+""""""
+"""Args::
     other:"""
-        if isinstance(other, ObjectId):
-            return self.__id == other.binary
-        return NotImplemented
-
-    def __ne__(self, other: Any) -> bool:
-        """Args:
+"""Args::
     other:"""
-        if isinstance(other, ObjectId):
-            return self.__id != other.binary
-        return NotImplemented
-
-    def __lt__(self, other: Any) -> bool:
-        """Args:
+"""Args::
     other:"""
-        if isinstance(other, ObjectId):
-            return self.__id < other.binary
-        return NotImplemented
-
-    def __le__(self, other: Any) -> bool:
-        """Args:
+"""Args::
     other:"""
-        if isinstance(other, ObjectId):
-            return self.__id <= other.binary
-        return NotImplemented
-
-    def __gt__(self, other: Any) -> bool:
-        """Args:
+"""Args::
     other:"""
-        if isinstance(other, ObjectId):
-            return self.__id > other.binary
-        return NotImplemented
-
-    def __ge__(self, other: Any) -> bool:
-        """Args:
+"""Args::
     other:"""
-        if isinstance(other, ObjectId):
-            return self.__id >= other.binary
-        return NotImplemented
-
-    def __hash__(self) -> int:
         """Get a hash value for this :class:`ObjectId`.
 :rtype: int"""
         return hash(self.__id)

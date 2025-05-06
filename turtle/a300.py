@@ -1,4 +1,7 @@
-# 拉取沪深300所有的股票代码
+"""a300.py module.
+
+Description of the module functionality."""
+
 import baostock as bs
 import pandas as pd
 

@@ -1,9 +1,13 @@
-# coding:utf-8
+"""stgentry.py module.
+
+Description of the module functionality."""
+
 
 
 def run_file(user_script, param={}):
-    """Args:
+"""Args::
     user_script: 
+    param: (Default value = {})"""
     param: (Default value = {})"""
     import os
     import sys
@@ -42,8 +46,9 @@ def run_file(user_script, param={}):
     _C.user_script = user_script
 
     def try_set_func(C, func_name):
-        """Args:
+"""Args::
     C: 
+    func_name:"""
     func_name:"""
         func = globals().get(func_name)
         if func:

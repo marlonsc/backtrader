@@ -1,10 +1,13 @@
-import polars as pl
+"""ATR_example_polars.py module.
+
+Description of the module functionality."""
+
 from icecream import ic
 from polars import Series as plSeries
 
 
 def calculate_true_range(high: plSeries, low: plSeries, close: plSeries) -> plSeries:
-    """The calculate_true_range function calculates the True Range (TR) for a given
+"""The calculate_true_range function calculates the True Range (TR) for a given
 set of high, low, and close prices.
 The True Range is a measure of market volatility and is used in the
 calculation of the Average True Range (ATR).
@@ -15,9 +18,10 @@ previous close.
 3. The absolute value of the difference between the current low and the
 previous close.
 
-Args:
+Args::
     high: 
     low: 
+    close:"""
     close:"""
     # Maximum difference between high and low prices
     tr1 = high - low
@@ -44,13 +48,14 @@ Args:
 def calculate_atr(
     high: plSeries, low: plSeries, close: plSeries, period: int = 5
 ) -> plSeries:
-    """Calculate the Average True Range (ATR) for a given set of high, low, and
+"""Calculate the Average True Range (ATR) for a given set of high, low, and
 close prices over a specified period.
 
-Args:
+Args::
     high: 
     low: 
     close: 
+    period: (Default value = 5)"""
     period: (Default value = 5)"""
     true_range: plSeries = calculate_true_range(high, low, close)
     atr = true_range.select(

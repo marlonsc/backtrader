@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""sortino.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -60,15 +63,8 @@ See also:
     }
 
     def __init__(self):
-        """ """
-        self.timereturn = TimeReturn(
-            timeframe=self.p.timeframe,
-            compression=self.p.compression,
-            fund=self.p.fund,
-        )
-
-    def stop(self):
-        """ """
+""""""
+""""""
         super(SortinoRatio, self).stop()
         ret_free_avg = None
         retdev = None

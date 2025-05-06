@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""accdecoscillator.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -54,7 +57,7 @@ See:
     plotlines = dict(accde=dict(_method="bar", alpha=0.50, width=1.0))
 
     def __init__(self):
-        """ """
+""""""
         ao = AwesomeOscillator()
         self.l.accde = ao - self.p.movav(ao, period=self.p.period)
         super(AccelerationDecelerationOscillator, self).__init__()

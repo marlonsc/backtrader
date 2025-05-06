@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""talib.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -74,144 +77,22 @@ else:
     # Generate all indicators as subclasses
 
     class _MetaTALibIndicator(Indicator.__class__):
-        """ """
-
-        _refname = "_taindcol"
-        _taindcol = dict()
-
-        _KNOWN_UNSTABLE = ["SAR"]
-
-        @classmethod
-        def dopostinit(cls, _obj, *args, **kwargs):
-            """Args:
+""""""
+"""Args::
     _obj:"""
-            # Go to parent
-            res = Indicator.__class__.dopostinit(cls, _obj, *args, **kwargs)
-            _obj, args, kwargs = res
-
-            # Get the minimum period by using the abstract interface and params
-            _obj._tabstract.set_function_args(**_obj.p._getkwargs())
-            _obj._lookback = lookback = _obj._tabstract.lookback + 1
-            _obj.updateminperiod(lookback)
-            if _obj._unstable:
-                _obj._lookback = 0
-
-            elif cls.__name__ in cls._KNOWN_UNSTABLE:
-                _obj._lookback = 0
-
-            findowner(_obj, Cerebro)
-            tafuncinfo = _obj._tabstract.info
-            _obj._tafunc = getattr(talib, tafuncinfo["name"], None)
-            return _obj, args, kwargs  # return the object and args
-
-    class _TALibIndicator(with_metaclass(_MetaTALibIndicator, Indicator)):
-        """ """
-
-        CANDLEOVER = 1.02  # 2% over
-        CANDLEREF = 1  # Open, High, Low, Close (0, 1, 2, 3)
-
-        @classmethod
-        def _subclass(cls, name):
-            """Args:
+""""""
+"""Args::
     name:"""
-            # Module where the class has to end (namely this one)
-            clsmodule = sys.modules[cls.__module__]
-
-            # Create an abstract interface to get lines names
-            _tabstract = talib.abstract.Function(name)
-
-            # Variables about the the info learnt from func_flags
-            iscandle = False
-            unstable = False
-
-            # Prepare plotinfo
-            plotinfo = dict()
-            fflags = _tabstract.function_flags or []
-            for fflag in fflags:
-                rfflag = R_TA_FUNC_FLAGS[fflag]
-                if rfflag == FUNC_FLAGS_SAMESCALE:
-                    plotinfo["subplot"] = False
-                elif rfflag == FUNC_FLAGS_UNSTABLE:
-                    unstable = True
-                elif rfflag == FUNC_FLAGS_CANDLESTICK:
-                    plotinfo["subplot"] = False
-                    plotinfo["plotlinelabels"] = True
-                    iscandle = True
-
-            # Prepare plotlines
-            lines = _tabstract.output_names
-            output_flags = _tabstract.output_flags
-            plotlines = dict()
-            samecolor = False
-            for lname in lines:
-                oflags = output_flags.get(lname, None)
-                pline = dict()
-                for oflag in oflags or []:
-                    orflag = R_TA_OUTPUT_FLAGS[oflag]
-                    if orflag & OUT_FLAGS_LINE:
-                        if not iscandle:
-                            pline["ls"] = "-"
-                        else:
-                            pline["_plotskip"] = True  # do not plot candles
-
-                    elif orflag & OUT_FLAGS_DASH:
-                        pline["ls"] = "--"
-                    elif orflag & OUT_FLAGS_DOTTED:
-                        pline["ls"] = ":"
-                    elif orflag & OUT_FLAGS_HISTO:
-                        pline["_method"] = "bar"
-
-                    if samecolor:
-                        pline["_samecolor"] = True
-
-                    if orflag & OUT_FLAGS_LOWER:
-                        samecolor = False
-
-                    elif orflag & OUT_FLAGS_UPPER:
-                        samecolor = True  # last: other values in loop are seen
-
-                if pline:  # the dict has something
-                    plotlines[lname] = pline
-
-            if iscandle:
-                # This is the line that will be plotted when the output of the
-                # indicator is a candle. The values of a candle (100) will be
-                # used to plot a sign above the maximum of the bar which
-                # produces the candle
-                pline = dict()
-                pline["_name"] = name  # plotted name
-                lname = "_candleplot"  # change name
-                lines.append(lname)
-                pline["ls"] = ""
-                pline["marker"] = "d"
-                pline["markersize"] = "7.0"
-                pline["fillstyle"] = "full"
-                plotlines[lname] = pline
-
-            # Prepare dictionary for subclassing
-            clsdict = {
-                "__module__": cls.__module__,
-                "__doc__": str(_tabstract),
-                "_tabstract": _tabstract,  # keep ref for lookback calcs
-                "_iscandle": iscandle,
-                "_unstable": unstable,
-                "params": _tabstract.get_parameters(),
-                "lines": tuple(lines),
-                "plotinfo": plotinfo,
-                "plotlines": plotlines,
-            }
-            newcls = type(str(name), (cls,), clsdict)  # subclass
-            setattr(clsmodule, str(name), newcls)  # add to module
-
-        def oncestart(self, start, end):
-            """Args:
+"""Args::
     start: 
+    end:"""
     end:"""
             pass  # if not ... a call with a single value to once will happen
 
         def once(self, start, end):
-            """Args:
+"""Args::
     start: 
+    end:"""
     end:"""
             import array
 
@@ -235,7 +116,7 @@ else:
                     self.lines[i].array = array.array(str("d"), o)
 
         def next(self):
-            """ """
+""""""
             # prepare the data arrays - single shot
             size = self._lookback or len(self)
             narrays = [np.array(x.lines[0].get(size=size)) for x in self.datas]

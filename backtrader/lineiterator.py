@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""lineiterator.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -41,10 +44,25 @@ except ImportError:
     class DotDict(dict):
         """Minimal DotDict fallback for linter compatibility."""
 
-        def __getattr__(self, name):
+"""__getattr__ function.
+
+Args:
+    name: Description of name
+
+Returns:
+    Description of return value
+"""
             return self[name]
 
-        def __setattr__(self, name, value):
+"""__setattr__ function.
+
+Args:
+    name: Description of name
+    value: Description of value
+
+Returns:
+    Description of return value
+"""
             self[name] = value
 
 
@@ -52,9 +70,9 @@ from .utils.py3 import range, string_types, with_metaclass, zip
 
 
 class MetaLineIterator(LineSeries.__class__):
-    """Metaclass for LineIterator, manages instantiation and data binding for
+"""Metaclass for LineIterator, manages instantiation and data binding for
     line-based objects. All docstrings and comments must be line-wrapped at
-    90 characters or less.
+    90 characters or less."""
     """
 
     def donew(cls, *args, **kwargs):
@@ -130,8 +148,7 @@ class MetaLineIterator(LineSeries.__class__):
         return _obj, newargs, kwargs
 
     def dopreinit(cls, _obj, *args, **kwargs):
-        """
-        Pre-initialization logic for MetaLineIterator. Ensures datas and clock are set.
+"""Pre-initialization logic for MetaLineIterator. Ensures datas and clock are set."""
         """
         # Only call super if it exists
         if hasattr(super(MetaLineIterator, cls), "dopreinit"):
@@ -154,8 +171,7 @@ class MetaLineIterator(LineSeries.__class__):
         return _obj, args, kwargs
 
     def dopostinit(cls, _obj, *args, **kwargs):
-        """
-        Post-initialization logic for MetaLineIterator. Ensures minperiod and registration.
+"""Post-initialization logic for MetaLineIterator. Ensures minperiod and registration."""
         """
         # Only call super if it exists
         if hasattr(super(MetaLineIterator, cls), "dopostinit"):
@@ -174,10 +190,10 @@ class MetaLineIterator(LineSeries.__class__):
 
 
 class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
-    """Base class for all line-based iterators (Indicators, Observers, Strategies).
+"""Base class for all line-based iterators (Indicators, Observers, Strategies).
     Handles data binding, minperiod calculation, and orchestration of line
     operations. All docstrings and comments must be line-wrapped at 90 characters
-    or less.
+    or less."""
     """
 
     _nextforce = False  # force cerebro to run in next mode (runonce=False)
@@ -206,73 +222,17 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
     )
 
     def _periodrecalc(self):
-        """ """
-        # last check in case not all lineiterators were assigned to
-        # lines (directly or indirectly after some operations)
-        # An example is Kaufman's Adaptive Moving Average
-        indicators = self._lineiterators[LineIterator.IndType]
-        indperiods = [ind._minperiod for ind in indicators]
-        indminperiod = max(indperiods or [self._minperiod])
-        self.updateminperiod(indminperiod)
-
-    def _stage2(self):
-        """ """
-        super(LineIterator, self)._stage2()
-
-        for data in self.datas:
-            data._stage2()
-
-        for lineiterators in self._lineiterators.values():
-            for lineiterator in lineiterators:
-                lineiterator._stage2()
-
-    def _stage1(self):
-        """ """
-        super(LineIterator, self)._stage1()
-
-        for data in self.datas:
-            data._stage1()
-
-        for lineiterators in self._lineiterators.values():
-            for lineiterator in lineiterators:
-                lineiterator._stage1()
-
-    def getindicators(self):
-        """ """
-        return self._lineiterators[LineIterator.IndType]
-
-    def getindicators_lines(self):
-        """ """
-        return [
-            x
-            for x in self._lineiterators[LineIterator.IndType]
-            if hasattr(x.lines, "getlinealiases")
-        ]
-
-    def getobservers(self):
-        """ """
-        return self._lineiterators[LineIterator.ObsType]
-
-    def addindicator(self, indicator):
-        """Args:
+""""""
+""""""
+""""""
+""""""
+""""""
+""""""
+"""Args::
     indicator:"""
-        # store in right queue
-        self._lineiterators[indicator._ltype].append(indicator)
-
-        # use getattr because line buffers don't have this attribute
-        if getattr(indicator, "_nextforce", False):
-            # the indicator needs runonce=False
-            o = self
-            while o is not None:
-                if o._ltype == LineIterator.StratType:
-                    o.cerebro._disable_runonce()
-                    break
-
-                o = o._owner  # move up the hierarchy
-
-    def bindlines(self, owner=None, own=None):
-        """Args:
+"""Args::
     owner: (Default value = None)
+    own: (Default value = None)"""
     own: (Default value = None)"""
         if not owner:
             owner = 0
@@ -310,177 +270,62 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
     bind2line = bind2lines
 
     def _next(self):
-        """ """
-        clock_len = self._clk_update()
-
-        for indicator in self._lineiterators[LineIterator.IndType]:
-            indicator._next()
-
-        self._notify()
-
-        if self._ltype == LineIterator.StratType:
-            # supporting datas with different lengths
-            minperstatus = self._getminperstatus()
-            if minperstatus < 0:
-                self.next()
-            elif minperstatus == 0:
-                self.nextstart()  # only called for the 1st value
-            else:
-                self.prenext()
-        else:
-            # assume indicators and others operate on same length datas
-            # although the above operation can be generalized
-            if clock_len > self._minperiod:
-                self.next()
-            elif clock_len == self._minperiod:
-                self.nextstart()  # only called for the 1st value
-            elif clock_len:
-                self.prenext()
-
-    def _clk_update(self):
-        """ """
-        clock_len = len(self._clock)
-        if clock_len != len(self):
-            self.forward()
-
-        return clock_len
-
-    def _once(self):
-        """ """
-        self.forward(size=self._clock.buflen())
-
-        for indicator in self._lineiterators[LineIterator.IndType]:
-            indicator._once()
-
-        for observer in self._lineiterators[LineIterator.ObsType]:
-            observer.forward(size=self.buflen())
-
-        for data in self.datas:
-            data.home()
-
-        for indicator in self._lineiterators[LineIterator.IndType]:
-            indicator.home()
-
-        for observer in self._lineiterators[LineIterator.ObsType]:
-            observer.home()
-
-        self.home()
-
-        # These 3 remain empty for a strategy and therefore play no role
-        # because a strategy will always be executed on a next basis
-        # indicators are each called with its min period
-        self.preonce(0, self._minperiod - 1)
-        self.oncestart(self._minperiod - 1, self._minperiod)
-        self.once(self._minperiod, self.buflen())
-
-        for line in self.lines:
-            line.oncebinding()
-
-    def preonce(self, start, end):
-        """Args:
+""""""
+""""""
+""""""
+"""Args::
     start: 
+    end:"""
     end:"""
 
     def oncestart(self, start, end):
-        """Args:
+"""Args::
     start: 
+    end:"""
     end:"""
         self.once(start, end)
 
     def once(self, start, end):
-        """Args:
+"""Args::
     start: 
+    end:"""
     end:"""
 
     def prenext(self):
-        """This method will be called before the minimum period of all
-        datas/indicators have been meet for the strategy to start executing
-
-
+"""This method will be called before the minimum period of all
+        datas/indicators have been meet for the strategy to start executing"""
         """
 
     def nextstart(self):
-        """This method will be called once, exactly when the minimum period for
+"""This method will be called once, exactly when the minimum period for
         all datas/indicators have been meet. The default behavior is to call
-        next
-
-
+        next"""
         """
 
         # Called once for 1st full calculation - defaults to regular next
         self.next()
 
     def next(self):
-        """This method will be called for all remaining data points when the
-        minimum period for all datas/indicators have been meet.
-
-
+"""This method will be called for all remaining data points when the
+        minimum period for all datas/indicators have been meet."""
         """
 
     def _addnotification(self, *args, **kwargs):
         """"""
 
     def _notify(self):
-        """ """
-
-    def _plotinit(self):
-        """ """
-
-    def qbuffer(self, savemem=0):
-        """Args:
+""""""
+""""""
+"""Args::
     savemem: (Default value = 0)"""
-        if savemem:
-            for line in self.lines:
-                line.qbuffer()
-
-        # If called, anything under it, must save
-        for obj in self._lineiterators[self.IndType]:
-            obj.qbuffer(savemem=1)
-
-        # Tell datas to adjust buffer to minimum period
-        for data in self.datas:
-            data.minbuffer(self._minperiod)
-
-
-# This 3 subclasses can be used for identification purposes within LineIterator
-# or even outside (like in LineObservers)
-# for the 3 subbranches without generating circular import references
-
-
-class DataAccessor(LineIterator):
-    """ """
-
-    PriceClose = DataSeries.Close
-    PriceLow = DataSeries.Low
-    PriceHigh = DataSeries.High
-    PriceOpen = DataSeries.Open
-    PriceVolume = DataSeries.Volume
-    PriceOpenInteres = DataSeries.OpenInterest
-    PriceDateTime = DataSeries.DateTime
-
-
-class IndicatorBase(DataAccessor):
-    """ """
-
-
-class ObserverBase(DataAccessor):
-    """ """
-
-
-class StrategyBase(DataAccessor):
-    """ """
-
-
-# Utility class to couple lines/lineiterators which may have different lengths
-# Will only work when runonce=False is passed to Cerebro
-
-
-class SingleCoupler(LineActions):
-    """ """
-
-    def __init__(self, cdata, clock=None):
-        """Args:
+""""""
+""""""
+""""""
+""""""
+""""""
+"""Args::
     cdata: 
+    clock: (Default value = None)"""
     clock: (Default value = None)"""
         super(SingleCoupler, self).__init__()
         # _owner may not exist if not set by metaclass; fallback to None
@@ -491,41 +336,13 @@ class SingleCoupler(LineActions):
         self.val = float("NaN")
 
     def next(self):
-        """ """
-        if len(self.cdata) > self.dlen:
-            self.val = self.cdata[0]
-            self.dlen += 1
-
-        self[0] = self.val
-
-
-class MultiCoupler(LineIterator):
-    """ """
-
-    _ltype = LineIterator.IndType
-
-    def __init__(self):
-        """ """
-        super(MultiCoupler, self).__init__()
-        self.dlen = 0
-        self.dsize = self.fullsize()  # shorcut for number of lines
-        self.dvals = [float("NaN")] * self.dsize
-
-    def next(self):
-        """ """
-        if len(self.data) > self.dlen:
-            self.dlen += 1
-
-            for i in range(self.dsize):
-                self.dvals[i] = self.data.lines[i][0]
-
-        for i in range(self.dsize):
-            self.lines[i][0] = self.dvals[i]
-
-
-def LinesCoupler(cdata, clock=None, **kwargs):
-    """Args:
+""""""
+""""""
+""""""
+""""""
+"""Args::
     cdata: 
+    clock: (Default value = None)"""
     clock: (Default value = None)"""
     if isinstance(cdata, LineSingle):
         return SingleCoupler(cdata, clock)  # return for single line

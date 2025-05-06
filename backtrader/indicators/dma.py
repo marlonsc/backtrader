@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""dma.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -60,14 +63,8 @@ See also:
     )
 
     def _plotlabel(self):
-        """ """
-        plabels = [self.p.period, self.p.gainlimit, self.p.hperiod]
-        plabels += [self.p._movav] * self.p.notdefault("_movav")
-        plabels += [self.p._hma] * self.p.notdefault("_hma")
-        return plabels
-
-    def __init__(self):
-        """ """
+""""""
+""""""
         ec = ZeroLagIndicator(
             period=self.p.period,
             gainlimit=self.p.gainlimit,

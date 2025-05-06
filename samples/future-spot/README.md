@@ -1,25 +1,22 @@
 # future-spot
 
-Directory containing future-spot related files. Primarily contains Python code.
+This directory contains various files including 1 md file, 1 py file.
 
 ## Navigation
 
-* [🏠 Root Directory](../../README.md)
+* [🏠 Root Directory](/samples/future-spot/../samples/future-spot/..README.md)
 * [⬆️ Parent Directory (samples)](../README.md)
 
 ## Files
 
-### README.md
-
-File with .md extension.
-
 ### future-spot.py
+
+future-spot.py module.
 
 ## Directory Summary
 
-This directory contains 2 files and 0 subdirectories.
+This directory contains 1 files and 0 subdirectories.
 
 ### File Types
 
-* .md: 1 files
 * .py: 1 files

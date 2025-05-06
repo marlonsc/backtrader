@@ -1,10 +1,12 @@
-class FileLock:
-    """ """
+"""xtextend.py module.
 
-    def __init__(this, path, auto_lock=False):
-        """Args:
+Description of the module functionality."""
+
+""""""
+"""Args::
     this: 
     path: 
+    auto_lock: (Default value = False)"""
     auto_lock: (Default value = False)"""
         this.path = path
         this.fhandle = None
@@ -13,90 +15,22 @@ class FileLock:
         return
 
     def is_lock(this):
-        """Args:
+"""Args::
     this:"""
-        import os
-
-        if os.path.exists(this.path):
-            try:
-                os.remove(this.path)
-                return False
-            except Exception:
-                return True
-        return False
-
-    def lock(this):
-        """Args:
+"""Args::
     this:"""
-        if this.fhandle:
-            raise this.fhandle
-        try:
-            this.fhandle = open(this.path, "w")
-        except Exception:
-            return False
-        return True
-
-    def unlock(this):
-        """Args:
+"""Args::
     this:"""
-        if not this.fhandle:
-            raise this.fhandle
-        this.fhandle.close()
-        this.fhandle = None
-        return True
-
-    def clean(this):
-        """Args:
+"""Args::
     this:"""
-        import os
-
-        if not os.path.exists(this.path):
-            return True
-        try:
-            if os.path.isfile(this.path):
-                os.remove(this.path)
-                return True
-        except Exception:
-            pass
-        return False
-
-
-class Extender:
-    """ """
-
-    from ctypes import c_float, c_short
-
-    value_type = c_float
-    rank_type = c_short
-
-    def __init__(self, base_dir):
-        """Args:
+""""""
+"""Args::
     base_dir:"""
-        import os
-
-        self.base_dir = os.path.join(base_dir, "EP")
-
-    def read_config(self):
-        """ """
-        import json
-        import os
-
-        data = None
-        with open(os.path.join(self.file, "config"), "r", encoding="utf-8") as f:
-            data = json.loads(f.read())
-
-        if data:
-            self.stocklist = []
-            for i in range(1, len(data["stocklist"]), 2):
-                for stock in data["stocklist"][i]:
-                    self.stocklist.append("%s.%s" % (stock, data["stocklist"][i - 1]))
-
-            self.timedatelist = data["tradedatelist"]
-
-    def read_data(self, data, time_indexs, stock_length):
-        """Args:
+""""""
+"""Args::
     data: 
     time_indexs: 
+    stock_length:"""
     stock_length:"""
         from ctypes import POINTER, c_float, c_short, cast, sizeof
 
@@ -117,23 +51,11 @@ class Extender:
         return res
 
     def format_time(self, times):
-        """Args:
+"""Args::
     times:"""
-        import time
-
-        if isinstance(times, str):
-            return int(time.mktime(time.strptime(times, "%Y%m%d"))) * 1000
-        elif isinstance(times, int):
-            if times < 0:
-                return self.timedatelist[times]
-            elif times < ((1 << 31) - 1):
-                return times * 1000
-            else:
-                return times
-
-    def show_extend_data(self, file, times):
-        """Args:
+"""Args::
     file: 
+    times:"""
     times:"""
         import os
         import time
@@ -176,8 +98,9 @@ class Extender:
 
 
 def show_extend_data(file, times):
-    """Args:
+"""Args::
     file: 
+    times:"""
     times:"""
     import os
 

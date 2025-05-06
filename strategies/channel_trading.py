@@ -179,14 +179,15 @@ class StockPriceData(bt.feeds.PandasData):
 
 
 def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate):
-    """Get historical price data from PostgreSQL database
+"""Get historical price data from PostgreSQL database
 
-Args:
+Args::
     symbol: 
     dbuser: 
     dbpass: 
     dbname: 
     fromdate: 
+    todate:"""
     todate:"""
     # Format dates for database query
     from_str = fromdate.strftime("%Y-%m-%d %H:%M:%S")
@@ -291,11 +292,12 @@ This strategy identifies price channels and trades on breakouts and rebounds:
     )
 
     def log(self, txt, dt=None, level="info"):
-        """Logging function for the strategy
+"""Logging function for the strategy
 
-Args:
+Args::
     txt: 
     dt: (Default value = None)
+    level: (Default value = "info")"""
     level: (Default value = "info")"""
         if level == "debug" and self.p.log_level != "debug":
             return
@@ -304,55 +306,11 @@ Args:
         print(f"{dt.isoformat()}: {txt}")
 
     def __init__(self):
-        """ """
-        # Store price references
-        self.dataclose = self.datas[0].close
-        self.datahigh = self.datas[0].high
-        self.datalow = self.datas[0].low
-        self.dataopen = self.datas[0].open
+""""""
+"""Handle order notifications
 
-        # Channel indicators
-        self.highest_high = bt.indicators.Highest(self.datahigh, period=self.p.period)
-        self.lowest_low = bt.indicators.Lowest(self.datalow, period=self.p.period)
-
-        # Apply smoothing to channel boundaries (reduces false signals)
-        self.upper_line = bt.indicators.ExponentialMovingAverage(
-            self.highest_high, period=self.p.smooth_period
-        )
-        self.lower_line = bt.indicators.ExponentialMovingAverage(
-            self.lowest_low, period=self.p.smooth_period
-        )
-
-        # Calculate channel midpoint
-        self.midpoint = (self.upper_line + self.lower_line) / 2
-
-        # Channel width
-        self.channel_width = self.upper_line - self.lower_line
-
-        # ATR for stop-loss calculation
-        self.atr = bt.indicators.ATR(self.datas[0], period=self.p.atr_period)
-
-        # Track orders, stops and positions
-        self.buy_order = None
-        self.sell_order = None
-        self.stop_loss = None
-        self.take_profit = None
-
-        # State tracking
-        self.channel_top = None
-        self.channel_bottom = None
-        self.order_price = None
-        self.position_size = 0
-
-        # Performance tracking
-        self.trade_count = 0
-        self.winning_trades = 0
-        self.losing_trades = 0
-
-    def notify_order(self, order):
-        """Handle order notifications
-
-Args:
+Args::
+    order:"""
     order:"""
         if order.status in [order.Submitted, order.Accepted]:
             # Order pending, do nothing
@@ -394,9 +352,10 @@ Args:
             self.take_profit = None
 
     def notify_trade(self, trade):
-        """Track completed trades
+"""Track completed trades
 
-Args:
+Args::
+    trade:"""
     trade:"""
         if not trade.isclosed:
             return
@@ -414,10 +373,11 @@ Args:
         )
 
     def set_exit_orders(self, entry_price, is_buy=True):
-        """Set stop loss and take profit orders
+"""Set stop loss and take profit orders
 
-Args:
+Args::
     entry_price: 
+    is_buy: (Default value = True)"""
     is_buy: (Default value = True)"""
         # Cancel existing exit orders
         self.cancel_exit_orders()
@@ -506,9 +466,10 @@ Args:
             self.take_profit = None
 
     def calculate_position_size(self, stop_price):
-        """Calculate position size based on risk percentage
+"""Calculate position size based on risk percentage
 
-Args:
+Args::
+    stop_price:"""
     stop_price:"""
         risk_amount = self.broker.getvalue() * (self.p.risk_percent / 100)
         price = self.dataclose[0]

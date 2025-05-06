@@ -1,4 +1,7 @@
-import random
+"""random_strategy.py module.
+
+Description of the module functionality."""
+
 
 import matplotlib.pyplot as plt
 

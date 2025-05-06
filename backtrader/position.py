@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""position.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -37,21 +40,10 @@ The Position instances can be tested using len(position) to see if size
 is not null."""
 
     def __str__(self):
-        """ """
-        items = list()
-        items.append("--- Position Begin")
-        items.append("- Size: {}".format(self.size))
-        items.append("- Price: {}".format(self.price))
-        items.append("- Price orig: {}".format(self.price_orig))
-        items.append("- Closed: {}".format(self.upclosed))
-        items.append("- Opened: {}".format(self.upopened))
-        items.append("- Adjbase: {}".format(self.adjbase))
-        items.append("--- Position End")
-        return "\n".join(items)
-
-    def __init__(self, size=0, price=0.0):
-        """Args:
+""""""
+"""Args::
     size: (Default value = 0)
+    price: (Default value = 0.0)"""
     price: (Default value = 0.0)"""
         self._size = size
         if size:
@@ -69,29 +61,15 @@ is not null."""
 
     @property
     def size(self):
-        """ """
-        return self._size
-
-    @size.setter
-    def size(self, value):
-        """Args:
+""""""
+"""Args::
     value:"""
-        self._size = value
-
-    @property
-    def position(self):
-        """ """
-        return self._size
-
-    @position.setter
-    def position(self, value):
-        """Args:
+""""""
+"""Args::
     value:"""
-        self._size = value
-
-    def fix(self, size, price):
-        """Args:
+"""Args::
     size: 
+    price:"""
     price:"""
         oldsize = self.size
         self.size = size
@@ -99,8 +77,9 @@ is not null."""
         return self.size == oldsize
 
     def set(self, size, price):
-        """Args:
+"""Args::
     size: 
+    price:"""
     price:"""
         if self.size > 0:
             if size > self.size:
@@ -138,35 +117,26 @@ is not null."""
         return self.size, self.price, self.upopened, self.upclosed
 
     def __len__(self):
-        """ """
-        return abs(self.size)
-
-    def __bool__(self):
-        """ """
-        return bool(self.size != 0)
-
-    __nonzero__ = __bool__
-
-    def clone(self):
-        """ """
-        return Position(size=self.size, price=self.price)
-
-    def pseudoupdate(self, size, price):
-        """Args:
+""""""
+""""""
+""""""
+"""Args::
     size: 
+    price:"""
     price:"""
         return Position(self.size, self.price).update(size, price)
 
     def update(self, size, price, dt=None):
-        """Updates the current position and returns the updated size, price and
+"""Updates the current position and returns the updated size, price and
 units used to open/close a position
 
-Args:
+Args::
     size: new position size
     price: new position price
     dt: (Default value = None)
 
-Returns:
+Returns::
+    If a position is reduced the price of the remaining size"""
     If a position is reduced the price of the remaining size"""
         self.datetime = dt  # record datetime update (datetime.datetime)
 

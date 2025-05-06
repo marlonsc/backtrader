@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""vcbroker.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -48,31 +51,32 @@ The margin calculation is not a known in advance information with IB
 left as future exercise to get it"""
 
     def getvaluesize(self, size, price):
-        """Args:
+"""Args::
     size: 
+    price:"""
     price:"""
         # In real life the margin approaches the price
         return abs(size) * price
 
     def getoperationcost(self, size, price):
-        """Returns the needed amount of cash an operation would cost
+"""Returns the needed amount of cash an operation would cost
 
-Args:
+Args::
     size: 
+    price:"""
     price:"""
         # Same reasoning as above
         return abs(size) * price
 
 
 class MetaVCBroker(BrokerBase.__class__):
-    """ """
+""""""
+"""Class has already been created ... register
 
-    def __init__(cls, name, bases, dct):
-        """Class has already been created ... register
-
-Args:
+Args::
     name: 
     bases: 
+    dct:"""
     dct:"""
         # Initialize the class
         super(MetaVCBroker, cls).__init__(name, bases, dct)
@@ -143,41 +147,18 @@ internal API of ``backtrader``."""
         )
 
     def start(self):
-        """ """
-        super(VCBroker, self).start()
-        self.store.start(broker=self)
-
-    def stop(self):
-        """ """
-        super(VCBroker, self).stop()
-        self.store.stop()
-
-    def getcash(self):
-        """ """
-        # This call cannot block if no answer is available from ib
-        return self.cash
-
-    def getvalue(self, datas=None):
-        """Args:
+""""""
+""""""
+""""""
+"""Args::
     datas: (Default value = None)"""
-        return self.value
-
-    def get_notification(self):
-        """ """
-        return self.notifs.popleft()  # at leat a None is present
-
-    def notify(self, order):
-        """Args:
+""""""
+"""Args::
     order:"""
-        self.notifs.append(order.clone())
-
-    def next(self):
-        """ """
-        self.notifs.append(None)  # mark notificatino boundary
-
-    def getposition(self, data, clone=True):
-        """Args:
+""""""
+"""Args::
     data: 
+    clone: (Default value = True)"""
     clone: (Default value = True)"""
         with self._lock_pos:
             pos = self.positions[data._tradename]
@@ -187,33 +168,9 @@ internal API of ``backtrader``."""
         return pos
 
     def getcommissioninfo(self, data):
-        """Args:
+"""Args::
     data:"""
-        if data._tradename in self.comminfo:
-            return self.comminfo[data._tradename]
-
-        comminfo = self.comminfo[None]
-        if comminfo is not None:
-            return comminfo
-
-        stocklike = data._syminfo.Type in self._futlikes
-
-        return VCCommInfo(mult=data._syminfo.PointValue, stocklike=stocklike)
-
-    def _makeorder(
-        self,
-        ordtype,
-        owner,
-        data,
-        size,
-        price=None,
-        plimit=None,
-        exectype=None,
-        valid=None,
-        tradeid=0,
-        **kwargs,
-    ):
-        """Args:
+"""Args::
     ordtype: 
     owner: 
     data: 
@@ -222,6 +179,7 @@ internal API of ``backtrader``."""
     plimit: (Default value = None)
     exectype: (Default value = None)
     valid: (Default value = None)
+    tradeid: (Default value = 0)"""
     tradeid: (Default value = 0)"""
 
         order = self.store.vcctmod.Order()
@@ -285,8 +243,9 @@ internal API of ``backtrader``."""
         return order
 
     def submit(self, order, vcorder):
-        """Args:
+"""Args::
     order: 
+    vcorder:"""
     vcorder:"""
         order.submit(self)
 
@@ -324,7 +283,7 @@ internal API of ``backtrader``."""
         tradeid=0,
         **kwargs,
     ):
-        """Args:
+"""Args::
     owner: 
     data: 
     size: 
@@ -332,6 +291,7 @@ internal API of ``backtrader``."""
     plimit: (Default value = None)
     exectype: (Default value = None)
     valid: (Default value = None)
+    tradeid: (Default value = 0)"""
     tradeid: (Default value = 0)"""
 
         order = BuyOrder(
@@ -374,7 +334,7 @@ internal API of ``backtrader``."""
         tradeid=0,
         **kwargs,
     ):
-        """Args:
+"""Args::
     owner: 
     data: 
     size: 
@@ -382,6 +342,7 @@ internal API of ``backtrader``."""
     plimit: (Default value = None)
     exectype: (Default value = None)
     valid: (Default value = None)
+    tradeid: (Default value = 0)"""
     tradeid: (Default value = 0)"""
 
         order = SellOrder(
@@ -416,65 +377,21 @@ internal API of ``backtrader``."""
     # COM Events implementation
     #
     def __call__(self, trader):
-        """Args:
+"""Args::
     trader:"""
-        # Called to start the process, call in sub-thread. only the passed
-        # trader can be used in the thread
-        self.trader = trader
-
-        for acc in trader.Accounts:
-            if self.p.account is None or self.p.account == acc.Account:
-                self.startingcash = self.cash = acc.Balance.Cash
-                self.startingvalue = self.value = acc.Balance.NetWorth
-                self._acc_name = acc.Account
-                break  # found the account
-
-        return self
-
-    def OnChangedBalance(self, Account):
-        """Args:
+"""Args::
     Account:"""
-        if self._acc_name is None or self._acc_name != Account:
-            return  # skip notifs for other accounts
-
-        for acc in self.trader.Accounts:
-            if acc.Account == Account:
-                # Update store values
-                self.cash = acc.Balance.Cash
-                self.value = acc.Balance.NetWorth
-                break
-
-    def OnModifiedOrder(self, Order):
-        """Args:
+"""Args::
     Order:"""
-        # We are not expecting this: unless backtrader starts implementing
-        # modify order method
-
-    def OnCancelledOrder(self, Order):
-        """Args:
+"""Args::
     Order:"""
-        with self._lock_orders:
-            try:
-                border = self.orderbyid[Order.OrderId]
-            except KeyError:
-                return  # possibly external order
-
-        border.cancel()
-        self.notify(border)
-
-    def OnTotalExecutedOrder(self, Order):
-        """Args:
+"""Args::
     Order:"""
-        self.OnExecutedOrder(Order, partial=False)
-
-    def OnPartialExecutedOrder(self, Order):
-        """Args:
+"""Args::
     Order:"""
-        self.OnExecutedOrder(Order, partial=True)
-
-    def OnExecutedOrder(self, Order, partial):
-        """Args:
+"""Args::
     Order: 
+    partial:"""
     partial:"""
         with self._lock_orders:
             try:
@@ -528,41 +445,17 @@ internal API of ``backtrader``."""
         self.notify(border)
 
     def OnOrderInMarket(self, Order):
-        """Args:
+"""Args::
     Order:"""
-        # Other is in ther market ... therefore "accepted"
-        with self._lock_orders:
-            try:
-                border = self.orderbyid[Order.OrderId]
-            except KeyError:
-                return  # possibly external order
-
-        border.accept()
-        self.notify(border)
-
-    def OnNewOrderLocation(self, Order):
-        """Args:
+"""Args::
     Order:"""
-        # Can be used for "submitted", but the status is set manually
-
-    def OnChangedOpenPositions(self, Account):
-        """Args:
+"""Args::
     Account:"""
-        # This would be useful if it reported a position moving back to 0. In
-        # this case the report contains a no-position and this doesn't help in
-        # the accounting. That's why the accounting is delegated to the
-        # reception of order execution
-
-    def OnNewClosedOperations(self, Account):
-        """Args:
+"""Args::
     Account:"""
-        # This call-back has not been seen
-
-    def OnServerShutDown(self):
-        """ """
-
-    def OnInternalEvent(self, p1, p2, p3):
-        """Args:
+""""""
+"""Args::
     p1: 
     p2: 
+    p3:"""
     p3:"""

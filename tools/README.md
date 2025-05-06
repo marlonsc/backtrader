@@ -1,30 +1,33 @@
 # tools
 
-Contains tools and utilities. Primarily contains Python code.
+This directory contains various files including 4 py files, 1 md file.
 
 ## Navigation
 
-* [🏠 Root Directory](../README.md)
+* [🏠 Root Directory](/tools/..README.md)
 
 ## Files
 
-### README.md
-
-File with .md extension.
-
 ### bt-run.py
+
+bt-run.py module.
 
 ### dump-ticker.py
 
+dump-ticker.py module.
+
 ### rewrite-data.py
+
+rewrite-data.py module.
 
 ### yahoodownload.py
 
+yahoodownload.py module.
+
 ## Directory Summary
 
-This directory contains 5 files and 0 subdirectories.
+This directory contains 4 files and 0 subdirectories.
 
 ### File Types
 
 * .py: 4 files
-* .md: 1 files

@@ -1,4 +1,7 @@
-from collections import OrderedDict
+"""get_arrow.py module.
+
+Description of the module functionality."""
+
 
 from .get_bson import get_tabular_bson_head
 from .meta_config import (
@@ -19,12 +22,13 @@ def _get_tabular_feather_single_ori(
     count: int = -1,
     **kwargs,
 ):
-    """Args:
+"""Args::
     codes: 
     table: 
     int_period: 
     start_timetag: 
     end_timetag: 
+    count: (Default value = -1)"""
     count: (Default value = -1)"""
     import os
 
@@ -45,199 +49,20 @@ def _get_tabular_feather_single_ori(
     fe_fields = [f.name for f in schema]
 
     def _old_arrow_filter():
-        """ """
-        from pyarrow import dataset as ds
-
-        nonlocal fe_table, fe_fields
-
-        expressions = []
-        if CONSTFIELD_TIME in fe_fields:
-            if start_timetag > 0:
-                expressions.append(ds.field(CONSTFIELD_TIME) >= start_timetag)
-
-            if end_timetag > 0:
-                expressions.append(ds.field(CONSTFIELD_TIME) <= end_timetag)
-
-        if CONSTFIELD_CODE in fe_fields and len(codes) > 0:
-            expressions.append(ds.field(CONSTFIELD_CODE).isin(codes))
-
-        if len(expressions) > 0:
-            expr = expressions[0]
-            for e in expressions[1:]:
-                expr = expr & e
-            return ds.dataset(fe_table).to_table(filter=expr)
-        else:
-            return fe_table
-
-    def _new_arrow_filter():
-        """ """
-        from pyarrow import compute as pc
-
-        nonlocal fe_table, fe_fields
-
-        expressions = []
-        if CONSTFIELD_TIME in fe_fields:
-            if start_timetag > 0:
-                expressions.append(pc.field(CONSTFIELD_TIME) >= start_timetag)
-            if end_timetag > 0:
-                expressions.append(pc.field(CONSTFIELD_TIME) <= end_timetag)
-
-        if CONSTFIELD_CODE in fe_fields and len(codes) > 0:
-            expressions.append(pc.field(CONSTFIELD_CODE).isin(codes))
-
-        if len(expressions) > 0:
-            expr = expressions[0]
-            for e in expressions[1:]:
-                expr = expr & e
-            return fe_table.filter(expr)
-        else:
-            return fe_table
-
-    def do_filter():
-        """ """
-        from distutils import version
-
-        import pyarrow as pa
-
-        nonlocal count
-        # python3.6 pyarrow-6.0.1
-        # python3.7 pyarrow-12.0.1
-        # python3.8~12 pyarrow-17.0.0
-        paver = version.LooseVersion(pa.__version__)
-        if paver <= version.LooseVersion("9.0.0"):
-            _table = _old_arrow_filter()
-        else:
-            _table = _new_arrow_filter()
-
-        if count > 0:
-            start_index = max(0, _table.num_rows - count)
-            _table = _table.slice(start_index, count)
-
-        return _table
-
-    return do_filter(), fe_fields
-
-
-def _parse_fields(fields):
-    """Args:
+""""""
+""""""
+""""""
+"""Args::
     fields:"""
-    if not __META_FIELDS__:
-        _init_metainfos()
-
-    # { table: { show_fields: list(), fe_fields: list() } }
-    tmp = OrderedDict()
-    for field in fields:
-        if field.find(".") == -1:
-            table = field
-
-            if table not in __META_TABLES__:
-                continue
-
-            if table not in tmp:
-                tmp[table] = {"show": list(), "fe": list()}
-
-            metaid = __META_TABLES__[table]
-            for key, f in __META_INFO__[metaid]["fields"].items():
-                if "G" == key:
-                    tmp[table]["fe"].append("_time")
-                elif "S" == key:
-                    tmp[table]["fe"].append("_stock")
-                else:
-                    tmp[table]["fe"].append(f["modelName"])
-
-                tmp[table]["show"].append(f["modelName"])
-
-        else:
-            table = field.split(".")[0]
-            ifield = field.split(".")[1]
-
-            if field not in __META_FIELDS__:
-                continue
-
-            metaid, key = __META_FIELDS__[field]
-
-            if table not in tmp:
-                tmp[table] = {"show": list(), "fe": list()}
-
-            if "G" == key:
-                tmp[table]["fe"].append("_time")
-            elif "S" == key:
-                tmp[table]["fe"].append("_stock")
-            else:
-                tmp[table]["fe"].append(ifield)
-
-            tmp[table]["show"].append(ifield)
-
-    return [(tb, sd["show"], sd["fe"]) for tb, sd in tmp.items()]
-
-
-def _parse_keys(fields):
-    """Args:
+"""Args::
     fields:"""
-    if not __META_FIELDS__:
-        _init_metainfos()
-
-    tmp = OrderedDict()  # { table: { show_keys: list(), fe_fields: list() } }
-    for field in fields:
-        if field.find(".") == -1:
-            table = field
-
-            if table not in __META_TABLES__:
-                continue
-
-            if table not in tmp:
-                tmp[table] = {"show": list(), "fe": list()}
-
-            metaid = __META_TABLES__[table]
-            for key, f in __META_INFO__[metaid]["fields"].items():
-                if "G" == key:
-                    tmp[table]["fe"].append("_time")
-                elif "S" == key:
-                    tmp[table]["fe"].append("_stock")
-                else:
-                    tmp[table]["fe"].append(f["modelName"])
-
-                tmp[table]["show"].append(key)
-
-        else:
-            table = field.split(".")[0]
-            ifield = field.split(".")[1]
-
-            if field not in __META_FIELDS__:
-                continue
-
-            metaid, key = __META_FIELDS__[field]
-
-            if table not in tmp:
-                tmp[table] = {"show": list(), "fe": list()}
-
-            if "G" == key:
-                tmp[table]["fe"].append("_time")
-            elif "S" == key:
-                tmp[table]["fe"].append("_stock")
-            else:
-                tmp[table]["fe"].append(ifield)
-
-            tmp[table]["show"].append(key)
-
-    return [(tb, sd["show"], sd["fe"]) for tb, sd in tmp.items()]
-
-
-def get_tabular_fe_data(
-    codes: list,
-    fields: list,
-    period: str,
-    start_time: str,
-    end_time: str,
-    count: int = -1,
-    **kwargs,
-):
-    """Args:
+"""Args::
     codes: 
     fields: 
     period: 
     start_time: 
     end_time: 
+    count: (Default value = -1)"""
     count: (Default value = -1)"""
     import pandas as pd
 
@@ -260,11 +85,12 @@ def get_tabular_fe_data(
     table_fields = _parse_fields(fields)
 
     def datetime_to_timetag(timelabel, format=""):
-        """timelabel: str '20221231' '20221231235959'
+"""timelabel: str '20221231' '20221231235959'
 format: str '%Y%m%d' '%Y%m%d%H%M%S'
 
-Args:
+Args::
     timelabel: 
+    format: (Default value = "")"""
     format: (Default value = "")"""
         import datetime as dt
 
@@ -324,12 +150,13 @@ def get_tabular_fe_bson(
     count: int = -1,
     **kwargs,
 ):
-    """Args:
+"""Args::
     codes: 
     fields: 
     period: 
     start_time: 
     end_time: 
+    count: (Default value = -1)"""
     count: (Default value = -1)"""
     from .. import xtbson
 
@@ -352,11 +179,12 @@ def get_tabular_fe_bson(
     table_fields = _parse_keys(fields)
 
     def datetime_to_timetag(timelabel, format=""):
-        """timelabel: str '20221231' '20221231235959'
+"""timelabel: str '20221231' '20221231235959'
 format: str '%Y%m%d' '%Y%m%d%H%M%S'
 
-Args:
+Args::
     timelabel: 
+    format: (Default value = "")"""
     format: (Default value = "")"""
         import datetime as dt
 
@@ -371,21 +199,11 @@ Args:
     end_timetag = datetime_to_timetag(end_time)
 
     def _get_convert():
-        """ """
-        from distutils import version
-
-        import pyarrow as pa
-
-        # python3.6 pyarrow-6.0.1
-        # python3.7 pyarrow-12.0.1
-        # python3.8~12 pyarrow-17.0.0
-        def _old_arrow_convert(table):
-            """Args:
+""""""
+"""Args::
     table:"""
-            return table.to_pandas().to_dict(orient="records")
-
-        def _new_arrow_convert(table):
-            """Args:
+"""Args::
+    table:"""
     table:"""
             return table.to_pylist()
 

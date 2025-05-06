@@ -26,8 +26,9 @@ Implementation based from the Python `standard library documentation
 Defining __getinitargs__ enables pickling / copying."""
 
     def __init__(self, offset: Union[float, timedelta], name: str) -> None:
-        """Args:
+"""Args::
     offset: 
+    name:"""
     name:"""
         if isinstance(offset, timedelta):
             self.__offset = offset
@@ -36,29 +37,15 @@ Defining __getinitargs__ enables pickling / copying."""
         self.__name = name
 
     def __getinitargs__(self) -> Tuple[timedelta, str]:
-        """
-
-
-        :rtype: Tuple[timedelta,str]
-
+""":rtype: Tuple[timedelta,str]"""
         """
         return self.__offset, self.__name
 
     def utcoffset(self, dt: Optional[datetime]) -> timedelta:
-        """Args:
+"""Args::
     dt:"""
-        return self.__offset
-
-    def tzname(self, dt: Optional[datetime]) -> str:
-        """Args:
+"""Args::
     dt:"""
-        return self.__name
-
-    def dst(self, dt: Optional[datetime]) -> timedelta:
-        """Args:
+"""Args::
     dt:"""
-        return ZERO
-
-
-utc: FixedOffset = FixedOffset(0, "UTC")
 """Fixed offset timezone representing UTC."""

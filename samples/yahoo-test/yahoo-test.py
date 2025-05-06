@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""yahoo-test.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -34,48 +37,8 @@ import yfinance as yf
 
 
 def runstrat():
-    """ """
-    args = parse_args()
-
-    # Create a cerebro entity
-    cerebro = bt.Cerebro(stdstats=False)
-
-    # Add a strategy
-    cerebro.addstrategy(bt.Strategy)
-
-    # Get the dates from the args
-    datetime.datetime.strptime(args.fromdate, "%Y-%m-%d")
-    datetime.datetime.strptime(args.todate, "%Y-%m-%d")
-
-    # data = btfeeds.YahooFinanceData(
-    #     dataname=args.data,
-    #     fromdate=fromdate,
-    #     todate=todate)
-
-    data = bt.feeds.PandasData(
-        dataname=yf.download("SPY", "2015-07-06", "2021-07-01", auto_adjust=True)
-    )
-
-    # Add the resample data instead of the original
-    cerebro.adddata(data)
-
-    # Add a simple moving average if requirested
-    cerebro.addindicator(btind.SMA, period=args.period)
-
-    # Add a writer with CSV
-    if args.writer:
-        cerebro.addwriter(bt.WriterFile, csv=args.wrcsv)
-
-    # Run over everything
-    cerebro.run()
-
-    # Plot if requested
-    if args.plot:
-        cerebro.plot(style="bar", numfigs=args.numfigs, volume=False)
-
-
-def parse_args():
-    """ """
+""""""
+""""""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Calendar Days Filter Sample",

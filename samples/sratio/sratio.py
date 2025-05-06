@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""sratio.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 from __future__ import (
@@ -19,47 +22,16 @@ if sys.version_info.major == 2:
 
 
 def average(x):
-    """Args:
+"""Args::
     x:"""
-    return math.fsum(x) / len(x)
-
-
-def variance(x):
-    """Args:
+"""Args::
     x:"""
-    avgx = average(x)
-    return list(map(lambda y: (y - avgx) ** 2, x))
-
-
-def standarddev(x):
-    """Args:
+"""Args::
     x:"""
-    return math.sqrt(average(variance(x)))
-
-
-def run(pargs=None):
-    """Args:
+"""Args::
     pargs: (Default value = None)"""
-    args = parse_args(pargs)
-
-    returns = [args.ret1, args.ret2]
-    retfree = args.riskfreerate
-
-    print("returns is:", returns, " - retfree is:", retfree)
-
-    # Directly from backtrader
-    retfree = itertools.repeat(retfree)
-    ret_free = map(operator.sub, returns, retfree)  # excess returns
-    ret_free_avg = average(list(ret_free))  # mean of the excess returns
-    print("returns excess mean:", ret_free_avg)
-    retdev = standarddev(returns)  # standard deviation
-    print("returns standard deviation:", retdev)
-    ratio = ret_free_avg / retdev  # mean excess returns  / std deviation
-    print("Sharpe Ratio is:", ratio)
-
-
-def parse_args(pargs=None):
-    """Args:
+"""Args::
+    pargs: (Default value = None)"""
     pargs: (Default value = None)"""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

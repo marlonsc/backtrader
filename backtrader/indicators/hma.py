@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""hma.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -56,7 +59,7 @@ moving average produces a non-NAN value is ``34``"""
     params = (("_movav", MovAv.WMA),)
 
     def __init__(self):
-        """ """
+""""""
         wma = self.p._movav(self.data, period=self.params.period)
         wma2 = 2.0 * self.p._movav(self.data, period=self.params.period // 2)
 

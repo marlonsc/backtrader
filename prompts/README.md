@@ -1,29 +1,25 @@
 # prompts
 
-Directory containing prompts related files. Primarily contains Documentation code and includes documentation.
+This directory contains various files including 3 md files.
 
 ## Navigation
 
-* [🏠 Root Directory](../README.md)
+* [🏠 Root Directory](/prompts/..README.md)
 
 ## Files
 
-### README.md
-
-File with .md extension.
-
 ### bb_upper_breakout.md
 
-Documentation file
+Markdown documentation
 
 ### multi_rsi_divergence.md
 
-Documentation file
+Markdown documentation
 
 ## Directory Summary
 
-This directory contains 3 files and 0 subdirectories.
+This directory contains 2 files and 0 subdirectories.
 
 ### File Types
 
-* .md: 3 files
+* .md: 2 files

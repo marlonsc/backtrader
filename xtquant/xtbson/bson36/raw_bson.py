@@ -62,7 +62,7 @@ RawBSONDocument decode its bytes."""
     _type_marker = _RAW_BSON_DOCUMENT_MARKER
 
     def __init__(self, bson_bytes, codec_options=None):
-        """Create a new :class:`RawBSONDocument`
+"""Create a new :class:`RawBSONDocument`
 :class:`RawBSONDocument` is a representation of a BSON document that
 provides access to the underlying raw BSON bytes. Only when a field is
 accessed or modified within the document does RawBSONDocument decode
@@ -83,8 +83,9 @@ passed in represent a single bson document.
 If a :class:`~bson.codec_options.CodecOptions` is passed in, its
 `document_class` must be :class:`RawBSONDocument`.
 
-Args:
+Args::
     bson_bytes: 
+    codec_options: (Default value = None)"""
     codec_options: (Default value = None)"""
         self.__raw = bson_bytes
         self.__inflated_doc = None
@@ -112,52 +113,24 @@ Args:
 
     @property
     def __inflated(self):
-        """ """
-        if self.__inflated_doc is None:
-            # We already validated the object's size when this document was
-            # created, so no need to do that again.
-            # Use SON to preserve ordering of elements.
-            self.__inflated_doc = _inflate_bson(self.__raw, self.__codec_options)
-        return self.__inflated_doc
-
-    def __getitem__(self, item):
-        """Args:
+""""""
+"""Args::
     item:"""
-        return self.__inflated[item]
-
-    def __iter__(self):
-        """ """
-        return iter(self.__inflated)
-
-    def __len__(self):
-        """ """
-        return len(self.__inflated)
-
-    def __eq__(self, other):
-        """Args:
+""""""
+""""""
+"""Args::
     other:"""
-        if isinstance(other, RawBSONDocument):
-            return self.__raw == other.raw
-        return NotImplemented
-
-    def __repr__(self):
-        """ """
-        return "RawBSONDocument(%r, codec_options=%r)" % (
-            self.raw,
-            self.__codec_options,
-        )
-
-
-def _inflate_bson(bson_bytes, codec_options):
-    """Inflates the top level fields of a BSON document.
+""""""
+"""Inflates the top level fields of a BSON document.
 :Parameters:
 - `bson_bytes`: the BSON bytes that compose this document
 - `codec_options`: An instance of
 :class:`~bson.codec_options.CodecOptions` whose ``document_class``
 must be :class:`RawBSONDocument`.
 
-Args:
+Args::
     bson_bytes: 
+    codec_options:"""
     codec_options:"""
     # Use SON to preserve ordering of elements.
     return _raw_to_dict(bson_bytes, 4, len(bson_bytes) - 1, codec_options, SON())

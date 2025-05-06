@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""btfd.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -45,198 +48,19 @@ class ValueUnlever(bt.observers.Value):
     )
 
     def next(self):
-        """ """
-        super(ValueUnlever, self).next()
-        if self.p.lever:
-            self.lines.value_lever[0] = self._owner.broker._valuelever
-
-        if len(self) == 1:
-            self.lines.asset[0] = self.p.assetstart
-        else:
-            change = self.data[0] / self.data[-1]
-            self.lines.asset[0] = change * self.lines.asset[-1]
-
-
-class St(bt.Strategy):
-    """ """
-
-    params = (
-        ("fall", -0.01),
-        ("hold", 2),
-        ("approach", "highlow"),
-        ("target", 1.0),
-        ("prorder", False),
-        ("prtrade", False),
-        ("prdata", False),
-    )
-
-    def __init__(self):
-        """ """
-        if self.p.approach == "closeclose":
-            self.pctdown = self.data.close / self.data.close(-1) - 1.0
-        elif self.p.approach == "openclose":
-            self.pctdown = self.data.close / self.data.open - 1.0
-        elif self.p.approach == "highclose":
-            self.pctdown = self.data.close / self.data.high - 1.0
-        elif self.p.approach == "highlow":
-            self.pctdown = self.data.low / self.data.high - 1.0
-
-    def next(self):
-        """ """
-        if self.position:
-            if len(self) == self.barexit:
-                self.close()
-                if self.p.prdata:
-                    print(
-                        ",".join(
-                            str(x)
-                            for x in [
-                                "DATA",
-                                "CLOSE",
-                                self.data.datetime.date().isoformat(),
-                                self.data.close[0],
-                                float("NaN"),
-                            ]
-                        )
-                    )
-        else:
-            if self.pctdown <= self.p.fall:
-                self.order_target_percent(target=self.p.target)
-                self.barexit = len(self) + self.p.hold
-
-                if self.p.prdata:
-                    print(
-                        ",".join(
-                            str(x)
-                            for x in [
-                                "DATA",
-                                "OPEN",
-                                self.data.datetime.date().isoformat(),
-                                self.data.close[0],
-                                self.pctdown[0],
-                            ]
-                        )
-                    )
-
-    def start(self):
-        """ """
-        if self.p.prtrade:
-            print(",".join(["TRADE", "Status", "Date", "Value", "PnL", "Commission"]))
-        if self.p.prorder:
-            print(",".join(["ORDER", "Type", "Date", "Price", "Size", "Commission"]))
-        if self.p.prdata:
-            print(",".join(["DATA", "Action", "Date", "Price", "PctDown"]))
-
-    def notify_order(self, order):
-        """Args:
+""""""
+""""""
+""""""
+""""""
+""""""
+"""Args::
     order:"""
-        if order.status in [order.Margin, order.Rejected, order.Canceled]:
-            print("ORDER FAILED with status:", order.getstatusname())
-        elif order.status == order.Completed:
-            if self.p.prorder:
-                print(
-                    ",".join(
-                        map(
-                            str,
-                            [
-                                "ORDER",
-                                "BUY" * order.isbuy() or "SELL",
-                                self.data.num2date(order.executed.dt)
-                                .date()
-                                .isoformat(),
-                                order.executed.price,
-                                order.executed.size,
-                                order.executed.comm,
-                            ],
-                        )
-                    )
-                )
-
-    def notify_trade(self, trade):
-        """Args:
+"""Args::
     trade:"""
-        if not self.p.prtrade:
-            return
-
-        if trade.isclosed:
-            print(
-                ",".join(
-                    map(
-                        str,
-                        [
-                            "TRADE",
-                            "CLOSE",
-                            self.data.num2date(trade.dtclose).date().isoformat(),
-                            trade.value,
-                            trade.pnl,
-                            trade.commission,
-                        ],
-                    )
-                )
-            )
-        elif trade.justopened:
-            print(
-                ",".join(
-                    map(
-                        str,
-                        [
-                            "TRADE",
-                            "OPEN",
-                            self.data.num2date(trade.dtopen).date().isoformat(),
-                            trade.value,
-                            trade.pnl,
-                            trade.commission,
-                        ],
-                    )
-                )
-            )
-
-
-def runstrat(args=None):
-    """Args:
+"""Args::
     args: (Default value = None)"""
-    args = parse_args(args)
-
-    cerebro = bt.Cerebro()
-
-    # Data feed kwargs
-    kwargs = dict()
-
-    # Parse from/to-date
-    dtfmt, tmfmt = "%Y-%m-%d", "T%H:%M:%S"
-    for a, d in ((getattr(args, x), x) for x in ["fromdate", "todate"]):
-        kwargs[d] = datetime.datetime.strptime(a, dtfmt + tmfmt * ("T" in a))
-
-    if not args.offline:
-        YahooData = bt.feeds.YahooFinanceData
-    else:
-        YahooData = bt.feeds.YahooFinanceCSVData
-
-    # Data feed - no plot - observer will do the job
-    data = YahooData(dataname=args.data, plot=False, **kwargs)
-    cerebro.adddata(data)
-
-    # Broker
-    cerebro.broker = bt.brokers.BackBroker(**eval("dict(" + args.broker + ")"))
-
-    # Add a commission
-    cerebro.broker.setcommission(**eval("dict(" + args.comminfo + ")"))
-
-    # Strategy
-    cerebro.addstrategy(St, **eval("dict(" + args.strat + ")"))
-
-    # Add specific observer
-    cerebro.addobserver(ValueUnlever, **eval("dict(" + args.valobserver + ")"))
-
-    # Execute
-    cerebro.run(**eval("dict(" + args.cerebro + ")"))
-
-    if args.plot:  # Plot if requested to
-        cerebro.plot(**eval("dict(" + args.plot + ")"))
-
-
-def parse_args(pargs=None):
-    """Args:
+"""Args::
+    pargs: (Default value = None)"""
     pargs: (Default value = None)"""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

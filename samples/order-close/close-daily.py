@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""close-daily.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -36,42 +39,11 @@ from backtrader.utils.py3 import with_metaclass
 
 
 class St(bt.Strategy):
-    """ """
-
-    def __init__(self):
-        """ """
-        self.order = None
-
-    def notify_order(self, order):
-        """Args:
+""""""
+""""""
+"""Args::
     order:"""
-        curdtstr = self.data.datetime.datetime().strftime("%a %Y-%m-%d")
-        if order.status in [order.Completed]:
-            dtstr = bt.num2date(order.executed.dt).strftime("%a %Y-%m-%d")
-            if order.isbuy():
-                print("%s: BUY  EXECUTED, on:" % curdtstr, dtstr)
-            else:  # Sell
-                print("%s: SELL EXECUTED, on:" % curdtstr, dtstr)
-
-            self.order = None
-
-    def next(self):
-        """ """
-        dtstr = self.data.datetime.datetime().strftime("%a %Y-%m-%d %H:%M:%S")
-        # print('%s: data' % dtstr)
-        if self.order:
-            return
-
-        if not random.randint(0, 5):  # roll a dice to decide entering/exit
-            if self.position:
-                print("%s: SELL CREATED" % dtstr)
-                self.order = self.close(exectype=bt.Order.Close)
-            else:  # no pending order
-                print("%s: BUY  CREATED" % dtstr)
-                self.order = self.buy(exectype=bt.Order.Close)
-
-
-class SessionEndFiller(with_metaclass(bt.metabase.MetaParams, object)):
+""""""
     """This data filter simply adds the time given in param ``endtime`` to the
 current data datetime
 It is intended for daily bars which come from sources with no time
@@ -82,10 +54,11 @@ The default value for ``endtime`` is 1 second before midnight 23:59:59"""
     params = (("endtime", datetime.time(23, 59, 59)),)
 
     def __call__(self, data):
-        """Args:
+"""Args::
     data: the data source to filter
 
-Returns:
+Returns::
+    - False (always) because this filter does not remove bars from the"""
     - False (always) because this filter does not remove bars from the"""
         # Get time of current (from data source) bar
         dtime = datetime.combine(data.datetime.date(), self.p.endtime)
@@ -94,60 +67,10 @@ Returns:
 
 
 def runstrat():
-    """ """
-    args = parse_args()
-
-    cerebro = bt.Cerebro()
-    cerebro.adddata(getdata(args))
-    cerebro.addstrategy(St)
-    if args.eosbar:
-        cerebro.broker.seteosbar(True)
-
-    cerebro.run()
-
-
-def getdata(args):
-    """Args:
+""""""
+"""Args::
     args:"""
-
-    dataformat = dict(
-        bt=btfeeds.BacktraderCSVData,
-        visualchart=btfeeds.VChartCSVData,
-        sierrachart=btfeeds.SierraChartCSVData,
-        yahoo=btfeeds.YahooFinanceCSVData,
-        yahoo_unreversed=btfeeds.YahooFinanceCSVData,
-    )
-
-    dfkwargs = dict()
-    if args.csvformat == "yahoo_unreversed":
-        dfkwargs["reverse"] = True
-
-    if args.fromdate:
-        fromdate = datetime.datetime.strptime(args.fromdate, "%Y-%m-%d")
-        dfkwargs["fromdate"] = fromdate
-
-    if args.todate:
-        fromdate = datetime.datetime.strptime(args.todate, "%Y-%m-%d")
-        dfkwargs["todate"] = todate
-
-    if args.tend is not None:
-        # internally only the "time" part is used
-        dfkwargs["sessionend"] = datetime.datetime.strptime(args.tend, "%H:%M")
-
-    dfkwargs["dataname"] = args.infile
-    dfcls = dataformat[args.csvformat]
-
-    data = dfcls(**dfkwargs)
-
-    if args.filltime is not None:
-        filltime = datetime.datetime.strptime(args.filltime, "%H:%M:%S").time()
-        data.addfilter(SessionEndFiller, endtime=filltime)
-
-    return data
-
-
-def parse_args():
-    """ """
+""""""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Sample for Close Orders with daily data",

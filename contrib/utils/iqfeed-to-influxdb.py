@@ -1,4 +1,7 @@
-#!/usr/bin/env python3
+"""iqfeed-to-influxdb.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 
 import argparse
@@ -16,65 +19,20 @@ from influxdb.exceptions import InfluxDBClientError
 
 
 class IQFeedTool(object):
-    """ """
+""""""
+""""""
+"""Encode IQFeed API messages.
 
-    def __init__(self):
-        """ """
-        timeout = 10.0
-        self._dbhost = args.dbhost if args.dbhost else "localhost"
-        self._dbport = args.dbport if args.dbport else 8086
-        self._username = args.username if args.username else None
-        self._password = args.password if args.password else None
-        self._database = args.database if args.database else "instruments"
-        self._ticker = args.ticker
-
-        self._iqhost = args.iqhost if args.iqhost else "localhost"
-        self._iqport = args.iqport if args.iqport else 9100
-        self._ticker = args.ticker
-        self._year = None
-        self._recv_buf = ""
-        self._ndf = pd.DataFrame()
-
-        # Open a streaming socket to the IQFeed daemon
-        self._sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self._sock.connect((self._iqhost, self._iqport))
-        self._sock.settimeout(timeout)
-
-        self.dfdb = dfclient(
-            self._dbhost,
-            self._dbport,
-            self._username,
-            self._password,
-            self._database,
-        )
-
-        if not args.fromdate:
-            self._start = str(dt.datetime.today().year)
-        elif len(args.fromdate) == 4 or len(args.fromdate == 10):
-            self._start = args.fromdate
-        else:
-            log.error("Starting date required in YYYY-MM-DD or YYYY format.")
-            sys.exit(-1)
-
-        if not args.todate:
-            self._stop = str(dt.datetime.today().year)
-        elif len(args.fromdate) == 4 or len(args.fromdate == 10):
-            self._stop = args.todate
-        else:
-            log.error("Starting date required in YYYY-MM-DD or YYYY format.")
-            sys.exit(-1)
-
-    def _send_cmd(self, cmd: str):
-        """Encode IQFeed API messages.
-
-Args:
+Args::
+    cmd:"""
     cmd:"""
         self._sock.sendall(cmd.encode(encoding="latin-1", errors="strict"))
 
     def iq_query(self, message: str):
-        """Send data query to IQFeed API.
+"""Send data query to IQFeed API.
 
-Args:
+Args::
+    message:"""
     message:"""
         end_msg = "!ENDMSG!"
         recv_buffer = 4096
@@ -104,9 +62,10 @@ Args:
         return data
 
     def get_historical_minute_data(self, ticker: str):
-        """Request historical 5 minute data from DTN.
+"""Request historical 5 minute data from DTN.
 
-Args:
+Args::
+    ticker:"""
     ticker:"""
         start = self._start
         stop = self._stop
@@ -133,9 +92,10 @@ Args:
             log.error("Write to database failed: %s" % err)
 
     def add_data_to_df(self, data: np.array):
-        """Build Pandas Dataframe in memory
+"""Build Pandas Dataframe in memory
 
-Args:
+Args::
+    data:"""
     data:"""
 
         col_names = ["high_p", "low_p", "open_p", "close_p", "volume", "oi"]
@@ -160,9 +120,10 @@ Args:
             self._ndf = self._ndf.append(df)
 
     def get_tickers_from_file(self, filename):
-        """Load ticker list from txt file
+"""Load ticker list from txt file
 
-Args:
+Args::
+    filename:"""
     filename:"""
         if not os.path.exists(filename):
             log.error("Ticker List file does not exist: %s", filename)

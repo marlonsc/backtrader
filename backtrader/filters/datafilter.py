@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""datafilter.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -41,21 +44,8 @@ It can be any callable
     params = (("funcfilter", None),)
 
     def preload(self):
-        """ """
-        if len(self.p.dataname) == self.p.dataname.buflen():
-            # if data is not preloaded .... do it
-            self.p.dataname.start()
-            self.p.dataname.preload()
-            self.p.dataname.home()
-
-        # Copy timeframe from data after start (some sources do autodetection)
-        self.p.timeframe = self._timeframe = self.p.dataname._timeframe
-        self.p.compression = self._compression = self.p.dataname._compression
-
-        super(DataFilter, self).preload()
-
-    def _load(self):
-        """ """
+""""""
+""""""
         if not len(self.p.dataname):
             self.p.dataname.start()  # start data if not done somewhere else
 

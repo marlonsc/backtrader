@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""zlema.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -46,7 +49,7 @@ See also:
     params = (("_movav", MovAv.EMA),)
 
     def __init__(self):
-        """ """
+""""""
         lag = (self.p.period - 1) // 2
         data = 2 * self.data - self.data(-lag)
         self.lines.zlema = self.p._movav(data, period=self.p.period)

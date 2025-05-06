@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""tsi.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -56,7 +59,7 @@ See:
     lines = ("tsi",)
 
     def __init__(self):
-        """ """
+""""""
         pc = self.data - self.data(-self.p.pchange)
 
         sm1 = self.p._movav(pc, period=self.p.period1)

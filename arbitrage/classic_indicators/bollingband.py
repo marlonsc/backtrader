@@ -11,8 +11,7 @@ from arbitrage.myutil import calculate_spread
 
 # 布林带策略
 class SpreadBollingerStrategy(bt.Strategy):
-    """
-    Pair trading strategy using Bollinger Bands on the spread between two assets.
+"""Pair trading strategy using Bollinger Bands on the spread between two assets."""
     """
 
     params = (
@@ -23,9 +22,8 @@ class SpreadBollingerStrategy(bt.Strategy):
     )
 
     def __init__(self):
-        """
-        Initialize the SpreadBollingerStrategy. Sets up Bollinger Bands on the spread and
-        trading state variables.
+"""Initialize the SpreadBollingerStrategy. Sets up Bollinger Bands on the spread and
+        trading state variables."""
         """
         # 布林带指标
         self.boll = bt.indicators.BollingerBands(
@@ -42,9 +40,8 @@ class SpreadBollingerStrategy(bt.Strategy):
         self.year_values = {}
 
     def next(self):
-        """
-        Main strategy logic for each bar. Handles entry and exit conditions based on
-        Bollinger Bands.
+"""Main strategy logic for each bar. Handles entry and exit conditions based on
+        Bollinger Bands."""
         """
         # 如果有未完成订单，跳过
         if self.order:
@@ -78,8 +75,7 @@ class SpreadBollingerStrategy(bt.Strategy):
                 self.close(data=self.data1)
 
     def notify_trade(self, trade):
-        """
-        Handle trade notifications and print execution details.
+"""Handle trade notifications and print execution details."""
         """
         if trade.isclosed:
             print(

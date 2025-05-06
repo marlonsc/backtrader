@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""rollover.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -31,14 +34,13 @@ import backtrader as bt
 
 
 class MetaRollOver(bt.DataBase.__class__):
-    """ """
+""""""
+"""Class has already been created ... register
 
-    def __init__(cls, name, bases, dct):
-        """Class has already been created ... register
-
-Args:
+Args::
     name: 
     bases: 
+    dct:"""
     dct:"""
         # Initialize the class
         super(MetaRollOver, cls).__init__(name, bases, dct)
@@ -56,9 +58,10 @@ Args:
 
 
 class RollOver(bt.with_metaclass(MetaRollOver, bt.DataBase)):
-    """Class that rolls over to the next future when a condition is met
+"""Class that rolls over to the next future when a condition is met
 
-Returns:
+Returns::
+    place."""
     place."""
 
     params = (
@@ -68,10 +71,8 @@ Returns:
     )
 
     def islive(self):
-        """Returns ``True`` to notify ``Cerebro`` that preloading and runonce
-        should be deactivated
-
-
+"""Returns ``True`` to notify ``Cerebro`` that preloading and runonce
+        should be deactivated"""
         """
         return True
 
@@ -80,37 +81,19 @@ Returns:
         self._rolls = args
 
     def start(self):
-        """ """
-        super(RollOver, self).start()
-        for d in self._rolls:
-            d.setenvironment(self._env)
-            d._start()
-
-        # put the references in a separate list to have pops
-        self._ds = list(self._rolls)
-        self._d = self._ds.pop(0) if self._ds else None
-        self._dexp = None
-        self._dts = [datetime.min for xx in self._ds]
-
-    def stop(self):
-        """ """
-        super(RollOver, self).stop()
-        for d in self._rolls:
-            d.stop()
-
-    def _gettz(self):
-        """To be overriden by subclasses which may auto-calculate the
-        timezone
-
-
+""""""
+""""""
+"""To be overriden by subclasses which may auto-calculate the
+        timezone"""
         """
         if self._rolls:
             return self._rolls[0]._gettz()
         return bt.utils.date.Localizer(self.p.tz)
 
     def _checkdate(self, dt, d):
-        """Args:
+"""Args::
     dt: 
+    d:"""
     d:"""
         if self.p.checkdate is not None:
             return self.p.checkdate(dt, d)
@@ -118,8 +101,9 @@ Returns:
         return False
 
     def _checkcondition(self, d0, d1):
-        """Args:
+"""Args::
     d0: 
+    d1:"""
     d1:"""
         if self.p.checkcondition is not None:
             return self.p.checkcondition(d0, d1)
@@ -127,7 +111,7 @@ Returns:
         return True
 
     def _load(self):
-        """ """
+""""""
         while self._d is not None:
             _next = self._d.next()
             if _next is None:  # no values yet, more will come

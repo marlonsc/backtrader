@@ -39,18 +39,12 @@ from .binary import (
 
 
 def _abstractproperty(func: Callable[..., Any]) -> property:
-    """Args:
+"""Args::
     func:"""
-    return property(abc.abstractmethod(func))
+"""Determine if a document_class is a RawBSONDocument class.
 
-
-_RAW_BSON_DOCUMENT_MARKER = 101
-
-
-def _raw_document_class(document_class: Any) -> bool:
-    """Determine if a document_class is a RawBSONDocument class.
-
-Args:
+Args::
+    document_class:"""
     document_class:"""
     marker = getattr(document_class, "_type_marker", None)
     return marker == _RAW_BSON_DOCUMENT_MARKER
@@ -70,9 +64,10 @@ See :ref:`custom-type-type-codec` documentation for an example."""
 
     @abc.abstractmethod
     def transform_python(self, value: Any) -> Any:
-        """Convert the given Python object into something serializable.
+"""Convert the given Python object into something serializable.
 
-Args:
+Args::
+    value:"""
     value:"""
 
 
@@ -90,9 +85,10 @@ See :ref:`custom-type-type-codec` documentation for an example."""
 
     @abc.abstractmethod
     def transform_bson(self, value: Any) -> Any:
-        """Convert the given BSON value into our own type.
+"""Convert the given BSON value into our own type.
 
-Args:
+Args::
+    value:"""
     value:"""
 
 
@@ -139,8 +135,9 @@ documentation for an example.
         type_codecs: Optional[Iterable[_Codec]] = None,
         fallback_encoder: Optional[_Fallback] = None,
     ) -> None:
-        """Args:
+"""Args::
     type_codecs: (Default value = None)
+    fallback_encoder: (Default value = None)"""
     fallback_encoder: (Default value = None)"""
         self.__type_codecs = list(type_codecs or [])
         self._fallback_encoder = fallback_encoder
@@ -174,39 +171,11 @@ documentation for an example.
                 )
 
     def _validate_type_encoder(self, codec: _Codec) -> None:
-        """Args:
+"""Args::
     codec:"""
-        from . import _BUILT_IN_TYPES
-
-        for pytype in _BUILT_IN_TYPES:
-            if issubclass(cast(TypeCodec, codec).python_type, pytype):
-                err_msg = (
-                    "TypeEncoders cannot change how built-in types are "
-                    "encoded (encoder %s transforms type %s)" % (codec, pytype)
-                )
-                raise TypeError(err_msg)
-
-    def __repr__(self):
-        """ """
-        return "%s(type_codecs=%r, fallback_encoder=%r)" % (
-            self.__class__.__name__,
-            self.__type_codecs,
-            self._fallback_encoder,
-        )
-
-    def __eq__(self, other: Any) -> Any:
-        """Args:
+""""""
+"""Args::
     other:"""
-        if not isinstance(other, type(self)):
-            return NotImplemented
-        return (
-            (self._decoder_map == other._decoder_map)
-            and (self._encoder_map == other._encoder_map)
-            and (self._fallback_encoder == other._fallback_encoder)
-        )
-
-
-class DatetimeConversion(int, enum.Enum):
     """Options for decoding BSON datetimes."""
 
     DATETIME = 1
@@ -242,19 +211,8 @@ class DatetimeConversion(int, enum.Enum):
 
 
 class _BaseCodecOptions(NamedTuple):
-    """ """
-
-    document_class: Type[Mapping[str, Any]]
-    tz_aware: bool
-    uuid_representation: int
-    unicode_decode_error_handler: str
-    tzinfo: Optional[datetime.tzinfo]
-    type_registry: TypeRegistry
-    datetime_conversion: Optional[DatetimeConversion]
-
-
-class CodecOptions(_BaseCodecOptions):
-    """Encapsulates options used encoding and / or decoding BSON.
+""""""
+"""Encapsulates options used encoding and / or decoding BSON.
 The `document_class` option is used to define a custom type for use
 decoding BSON documents. Access to the underlying raw BSON bytes for
 a document is available using the :class:`~bson.raw_bson.RawBSONDocument`
@@ -293,7 +251,8 @@ within BSON. Valid options include 'datetime_ms' to return as a
 DatetimeMS, 'datetime' to return as a datetime.datetime and
 raising a ValueError for out-of-range values, 'datetime_auto' to
 
-Returns:
+Returns::
+    out-of-range and 'datetime_clamp' to clamp to the minimum and"""
     out-of-range and 'datetime_clamp' to clamp to the minimum and"""
 
     def __new__(
@@ -306,13 +265,14 @@ Returns:
         type_registry: Optional[TypeRegistry] = None,
         datetime_conversion: Optional[DatetimeConversion] = DatetimeConversion.DATETIME,
     ) -> "CodecOptions":
-        """Args:
+"""Args::
     document_class: (Default value = None)
     tz_aware: (Default value = False)
     uuid_representation: (Default value = UuidRepresentation.UNSPECIFIED)
     unicode_decode_error_handler: (Default value = "strict")
     tzinfo: (Default value = None)
     type_registry: (Default value = None)
+    datetime_conversion: (Default value = DatetimeConversion.DATETIME)"""
     datetime_conversion: (Default value = DatetimeConversion.DATETIME)"""
         doc_class = document_class or dict
         # issubclass can raise TypeError for generic aliases like SON[str, Any].
@@ -404,10 +364,7 @@ Returns:
         }
 
     def __repr__(self):
-        """ """
-        return "%s(%s)" % (self.__class__.__name__, self._arguments_repr())
-
-    def with_options(self, **kwargs: Any) -> "CodecOptions":
+""""""
         """Make a copy of this CodecOptions, overriding some options::
 .. versionadded:: 3.5"""
         opts = self._options_dict()
@@ -419,9 +376,10 @@ DEFAULT_CODEC_OPTIONS = CodecOptions()
 
 
 def _parse_codec_options(options: Any) -> CodecOptions:
-    """Parse BSON codec options.
+"""Parse BSON codec options.
 
-Args:
+Args::
+    options:"""
     options:"""
     kwargs = {}
     for k in set(options) & {

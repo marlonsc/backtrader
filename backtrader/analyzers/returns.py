@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""returns.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -32,12 +35,13 @@ from backtrader import TimeFrameAnalyzerBase
 
 
 class Returns(TimeFrameAnalyzerBase):
-    """Total, Average, Compound and Annualized Returns calculated using a
+"""Total, Average, Compound and Annualized Returns calculated using a
 logarithmic approach
 See:
 - https://www.crystalbull.com/sharpe-ratio-better-with-log-returns/
 
-Returns:
+Returns::
+    each return as keys"""
     each return as keys"""
 
     params = (
@@ -53,61 +57,7 @@ Returns:
     }
 
     def start(self):
-        """ """
-        super(Returns, self).start()
-        if self.p.fund is None:
-            self._fundmode = self.strategy.broker.fundmode
-        else:
-            self._fundmode = self.p.fund
-
-        if not self._fundmode:
-            self._value_start = self.strategy.broker.getvalue()
-        else:
-            self._value_start = self.strategy.broker.fundvalue
-
-        self._tcount = 0
-
-    def stop(self):
-        """ """
-        super(Returns, self).stop()
-
-        if not self._fundmode:
-            self._value_end = self.strategy.broker.getvalue()
-        else:
-            self._value_end = self.strategy.broker.fundvalue
-
-        # Compound return
-        try:
-            nlrtot = self._value_end / self._value_start
-        except ZeroDivisionError:
-            rtot = float("-inf")
-        else:
-            if nlrtot < 0.0:
-                rtot = float("-inf")
-            else:
-                rtot = math.log(nlrtot)
-
-        self.rets["rtot"] = round(rtot, 6)
-
-        # Average return
-        try:
-            ravg = rtot / self._tcount
-        except ZeroDivisionError:
-            ravg = float("-inf")
-        self.rets["ravg"] = round(ravg, 6)
-
-        # Annualized normalized return
-        tann = self.p.tann or self._TANN.get(self.timeframe, None)
-        if tann is None:
-            tann = self._TANN.get(self.data._timeframe, 1.0)  # assign default
-
-        if ravg > float("-inf"):
-            self.rets["rnorm"] = rnorm = round(math.expm1(ravg * tann), 6)
-        else:
-            self.rets["rnorm"] = rnorm = round(ravg, 6)
-
-        self.rets["rnorm100"] = round(rnorm * 100.0, 4)  # human readable %
-
-    def _on_dt_over(self):
-        """ """
+""""""
+""""""
+""""""
         self._tcount += 1  # count the subperiod

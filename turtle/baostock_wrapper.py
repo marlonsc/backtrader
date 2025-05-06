@@ -1,27 +1,25 @@
-import baostock as bs
+"""baostock_wrapper.py module.
+
+Description of the module functionality."""
+
 import pandas as pd
 
 
 class BaoStockWrapper:
-    """ """
-
-    def __enter__(self):
-        """ """
-        bs.login()
-        # print("bs login status: ", lg.error_code, lg.error_msg)
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        """Args:
+""""""
+""""""
+"""Args::
     exc_type: 
     exc_value: 
+    traceback:"""
     traceback:"""
         bs.logout()
 
     def get_stock_data(self, code, start_date, end_date):
-        """Args:
+"""Args::
     code: 
     start_date: 
+    end_date:"""
     end_date:"""
         rs = bs.query_history_k_data_plus(
             code,

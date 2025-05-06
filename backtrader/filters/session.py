@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""session.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -55,20 +58,13 @@ and ``compression`` (used to calculate the intervening missing times)"""
     }
 
     def __init__(self, data):
-        """Args:
+"""Args::
     data:"""
-        # Calculate and save timedelta for timeframe
-        self._tdframe = self._tdeltas[data._timeframe]
-        self._tdunit = self._tdeltas[data._timeframe] * data._compression
-
-        self.seenbar = False  # control if at least one bar has been seen
-        self.sessend = self.MAXDATE  # maxdate is the control for session bar
-
-    def __call__(self, data):
-        """Args:
+"""Args::
     data: the data source to filter
 
-Returns:
+Returns::
+    - False (always) because this filter does not remove bars from the"""
     - False (always) because this filter does not remove bars from the"""
         # Get time of current (from data source) bar
         ret = False
@@ -111,13 +107,14 @@ Returns:
         return ret
 
     def _fillbars(self, data, time_start, time_end, tostack=True):
-        """Fills one by one bars as needed from time_start to time_end
+"""Fills one by one bars as needed from time_start to time_end
 Invalidates the control dtime_prev if requested
 
-Args:
+Args::
     data: 
     time_start: 
     time_end: 
+    tostack: (Default value = True)"""
     tostack: (Default value = True)"""
         # Control flag - bars added to the stack
         dirty = 0
@@ -133,8 +130,9 @@ Args:
         return bool(dirty) or not tostack
 
     def _fillbar(self, data, dtime):
-        """Args:
+"""Args::
     data: 
+    dtime:"""
     dtime:"""
         # Prepare an array of the needed size
         bar = [float("Nan")] * data.size()
@@ -172,14 +170,13 @@ Bar Management will be done by the SimpleFilterWrapper class made which is
 added durint the DataBase.addfilter_simple call"""
 
     def __init__(self, data):
-        """Args:
+"""Args::
     data:"""
-
-    def __call__(self, data):
-        """Args:
+"""Args::
     data: 
 
-Returns:
+Returns::
+    - False: nothing to filter"""
     - False: nothing to filter"""
         # Both ends of the comparison are in the session
         return not (data.p.sessionstart <= data.datetime.time(0) <= data.p.sessionend)
@@ -194,14 +191,13 @@ during init and __call__)
 It needs no "last" method because it has nothing to deliver"""
 
     def __init__(self, data):
-        """Args:
+"""Args::
     data:"""
-
-    def __call__(self, data):
-        """Args:
+"""Args::
     data: 
 
-Returns:
+Returns::
+    - False: data stream was not touched"""
     - False: data stream was not touched"""
         if data.p.sessionstart <= data.datetime.time(0) <= data.p.sessionend:
             # Both ends of the comparison are in the session

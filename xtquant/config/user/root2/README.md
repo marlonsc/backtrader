@@ -1,26 +1,16 @@
 # root2
 
-Directory containing root2 related files. Contains various files.
+This directory contains various files including 1 md file.
 
 ## Navigation
 
-* [🏠 Root Directory](../../../../README.md)
+* [🏠 Root Directory](/xtquant/config/user/root2/../xtquant/config/user/root2/../xtquant/config/user/root2/../xtquant/config/user/root2/..README.md)
 * [⬆️ Parent Directory (user)](../README.md)
 
 ### Subdirectories
 
-* [lua](lua/README.md) - Directory containing lua related files
-
-## Files
-
-### README.md
-
-File with .md extension.
-
+* [lua](lua/README.md) - This directory contains various files including 13 lua files, 1 md file
 ## Directory Summary
 
-This directory contains 1 files and 1 subdirectories.
+This directory contains 0 files and 1 subdirectories.
 
-### File Types
-
-* .md: 1 files

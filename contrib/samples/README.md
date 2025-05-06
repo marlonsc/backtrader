@@ -1,26 +1,16 @@
 # samples
 
-Contains sample code and examples. Contains various files.
+This directory contains various files including 1 md file.
 
 ## Navigation
 
-* [🏠 Root Directory](../../README.md)
+* [🏠 Root Directory](/contrib/samples/../contrib/samples/..README.md)
 * [⬆️ Parent Directory (contrib)](../README.md)
 
 ### Subdirectories
 
-* [pair-trading](pair-trading/README.md) - Directory containing pair-trading related files
-
-## Files
-
-### README.md
-
-File with .md extension.
-
+* [pair-trading](pair-trading/README.md) - This directory contains various files including 1 md file, 1 py file
 ## Directory Summary
 
-This directory contains 1 files and 1 subdirectories.
+This directory contains 0 files and 1 subdirectories.
 
-### File Types
-
-* .md: 1 files

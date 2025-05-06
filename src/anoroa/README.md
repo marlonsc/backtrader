@@ -1,37 +1,26 @@
 # anoroa
 
-Directory containing anoroa related files. Primarily contains Python code.
+This directory contains various files including 2 py files, 1 md file.
 
 ## Navigation
 
-* [🏠 Root Directory](../../README.md)
+* [🏠 Root Directory](/src/anoroa/../src/anoroa/..README.md)
 * [⬆️ Parent Directory (src)](../README.md)
 
 ## Files
 
-### README.md
-
-File with .md extension.
-
 ### __init__.py
+
+__init__.py module.
 
 ### models.py
 
-**Classes:**
-
-* `Candle`: Represents a single candlestick in a financial chart.
-* `TradeDirection`: Enum-like class for trade directions.
-* `Order`: Represents an order to be executed in the market.
-* `EntryDecision`: Represents a decision to enter a trade.
-* `ExitDecision`: Represents a decision to exit a trade.
-* `OpenPosition`: Represents an open position in the market.
-* `TradeLog`: Represents a log of a trade, including entry and exit details.
+models.py module.
 
 ## Directory Summary
 
-This directory contains 3 files and 0 subdirectories.
+This directory contains 2 files and 0 subdirectories.
 
 ### File Types
 
 * .py: 2 files
-* .md: 1 files

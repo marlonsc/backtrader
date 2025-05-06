@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""stochastic.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -29,50 +32,10 @@ from . import DivByZero, Highest, Indicator, Lowest, MovAv
 
 
 class _StochasticBase(Indicator):
-    """ """
-
-    lines = (
-        "percK",
-        "percD",
-    )
-    params = (
-        ("period", 14),
-        ("period_dfast", 3),
-        ("movav", MovAv.Simple),
-        ("upperband", 80.0),
-        ("lowerband", 20.0),
-        ("safediv", False),
-        ("safezero", 0.0),
-    )
-
-    plotlines = dict(percD=dict(_name="%D", ls="--"), percK=dict(_name="%K"))
-
-    def _plotlabel(self):
-        """ """
-        plabels = [self.p.period, self.p.period_dfast]
-        plabels += [self.p.movav] * self.p.notdefault("movav")
-        return plabels
-
-    def _plotinit(self):
-        """ """
-        self.plotinfo.plotyhlines = [self.p.upperband, self.p.lowerband]
-
-    def __init__(self):
-        """ """
-        highesthigh = Highest(self.data.high, period=self.p.period)
-        lowestlow = Lowest(self.data.low, period=self.p.period)
-        knum = self.data.close - lowestlow
-        kden = highesthigh - lowestlow
-        if self.p.safediv:
-            self.k = 100.0 * DivByZero(knum, kden, zero=self.p.safezero)
-        else:
-            self.k = 100.0 * (knum / kden)
-        self.d = self.p.movav(self.k, period=self.p.period_dfast)
-
-        super(_StochasticBase, self).__init__()
-
-
-class StochasticFast(_StochasticBase):
+""""""
+""""""
+""""""
+""""""
     """By Dr. George Lane in the 50s. It compares a closing price to the price
 range and tries to show convergence if the closing prices are close to the
 extremes
@@ -91,13 +54,7 @@ See:
 - http://en.wikipedia.org/wiki/Stochastic_oscillator"""
 
     def __init__(self):
-        """ """
-        super(StochasticFast, self).__init__()
-        self.lines.percK = self.k
-        self.lines.percD = self.d
-
-
-class Stochastic(_StochasticBase):
+""""""
     """The regular (or slow version) adds an additional moving average layer and
 thus:
 - The percD line of the StochasticFast becomes the percK line
@@ -113,19 +70,8 @@ See:
     params = (("period_dslow", 3),)
 
     def _plotlabel(self):
-        """ """
-        plabels = [self.p.period, self.p.period_dfast, self.p.period_dslow]
-        plabels += [self.p.movav] * self.p.notdefault("movav")
-        return plabels
-
-    def __init__(self):
-        """ """
-        super(Stochastic, self).__init__()
-        self.lines.percK = self.d
-        self.l.percD = self.p.movav(self.l.percK, period=self.p.period_dslow)
-
-
-class StochasticFull(_StochasticBase):
+""""""
+""""""
     """This version displays the 3 possible lines:
 - percK
 - percD
@@ -143,13 +89,8 @@ See:
     plotlines = dict(percDSlow=dict(_name="%DSlow"))
 
     def _plotlabel(self):
-        """ """
-        plabels = [self.p.period, self.p.period_dfast, self.p.period_dslow]
-        plabels += [self.p.movav] * self.p.notdefault("movav")
-        return plabels
-
-    def __init__(self):
-        """ """
+""""""
+""""""
         super(StochasticFull, self).__init__()
         self.lines.percK = self.k
         self.lines.percD = self.d

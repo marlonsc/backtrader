@@ -1,4 +1,7 @@
-import backtrader as bt
+"""hold_rb.py module.
+
+Description of the module functionality."""
+
 import pandas as pd
 
 # 设置显示选项，不使用省略号
@@ -8,59 +11,15 @@ pd.set_option("display.max_colwidth", None)  # 显示列的完整内容
 
 # 始终持有螺纹钢策略
 class AlwaysHoldRBStrategy(bt.Strategy):
-    """ """
-
-    params = (("size_rb", 1),)  # 螺纹钢交易规模
-
-    def __init__(self):
-        """ """
-
-        self.order = None
-
-    def start(self):
-        """ """
-        # Activate the fund mode and set the default value at 100
-        # self.broker.set_fundmode(fundmode=True, fundstartval=100.00)
-        self.cash_start = self.broker.get_cash()
-        # self.val_start = 100.0
-
-    def next(self):
-        """ """
-
-        if not self.position:  # 如果没有持仓，则买入
-            self.order = self.buy(
-                data=self.data0, size=self.p.size_rb, price=self.data0.close[0]
-            )  # 买1手螺纹钢
-        # print(self.broker.get_fundvalue(),self.broker.get_value(),self.position,self.order)
-        # print(self.data.datetime[1],self.data.datetime[0],self.data.datetime[-1]   )
-        if self.data.datetime[0] == 739257.0:  # 最后一天的判断
-            self.close(exectype=self.order.Close)
-
-            # print(f"下单价格: {self.data0.close[0]}, 时间: {self.data0.datetime.datetime()}, 持仓: {self.position}")
-
-    def stop(self):
-        """ """
-        # calculate the actual returns
-        self.roi = (self.broker.get_value() - self.cash_start) - 1.0
-        # self.froi = self.broker.get_fundvalue() - self.val_start
-        print("ROI:   {:.2f}%".format(self.roi))
-        # print('Fund Value: {:.2f}%'.format(self.froi))
-
-    def notify_trade(self, trade):
-        """Args:
+""""""
+""""""
+""""""
+""""""
+""""""
+"""Args::
     trade:"""
-        if trade.isclosed:
-            print(
-                f"TRADE CLOSED {self.data.datetime.date(0)}, PROFIT: GROSS {
-                    trade.pnl:.2f
-                }, NET {trade.pnlcomm:.2f}"
-            )
-
-        elif trade.justopened:
-            print(f"TRADE OPENED {self.data.datetime.date(0)}, SIZE {trade.size}")
-
-    def notify_order(self, order):
-        """Args:
+"""Args::
+    order:"""
     order:"""
         if order.status in [order.Submitted, order.Accepted]:
             # 订单状态 submitted/accepted，处于未决订单状态。

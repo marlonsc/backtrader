@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""crossover.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -40,23 +43,18 @@ Formula:
     lines = ("nzd",)
 
     def nextstart(self):
-        """ """
-        self.l.nzd[0] = self.data0[0] - self.data1[0]  # seed value
-
-    def next(self):
-        """ """
-        d = self.data0[0] - self.data1[0]
-        self.l.nzd[0] = d if d else self.l.nzd[-1]
-
-    def oncestart(self, start, end):
-        """Args:
+""""""
+""""""
+"""Args::
     start: 
+    end:"""
     end:"""
         self.line.array[start] = self.data0.array[start] - self.data1.array[start]
 
     def once(self, start, end):
-        """Args:
+"""Args::
     start: 
+    end:"""
     end:"""
         d0array = self.data0.array
         d1array = self.data1.array
@@ -69,29 +67,8 @@ Formula:
 
 
 class _CrossBase(Indicator):
-    """ """
-
-    _mindatas = 2
-
-    lines = ("cross",)
-
-    plotinfo = dict(plotymargin=0.05, plotyhlines=[0.0, 1.0])
-
-    def __init__(self):
-        """ """
-        nzd = NonZeroDifference(self.data0, self.data1)
-
-        if self._crossup:
-            before = nzd(-1) < 0.0  # data0 was below or at 0
-            after = self.data0 > self.data1
-        else:
-            before = nzd(-1) > 0.0  # data0 was above or at 0
-            after = self.data0 < self.data1
-
-        self.lines.cross = And(before, after)
-
-
-class CrossUp(_CrossBase):
+""""""
+""""""
     """This indicator gives a signal if the 1st provided data crosses over the 2nd
 indicator upwards
 It does need to look into the current time index (0) and the previous time
@@ -134,7 +111,7 @@ Formula:
     plotinfo = dict(plotymargin=0.05, plotyhlines=[-1.0, 1.0])
 
     def __init__(self):
-        """ """
+""""""
         upcross = CrossUp(self.data, self.data1)
         downcross = CrossDown(self.data, self.data1)
 

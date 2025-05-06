@@ -1,4 +1,7 @@
-# -*- coding: UTF-8 -*-
+"""strategy_tester.py module.
+
+Description of the module functionality."""
+
 # https://www.backtrader.com/docu/quickstart/quickstart/#adding-a-data-feed
 
 # import

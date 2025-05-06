@@ -1,8 +1,7 @@
 # Copyright (c) 2025 backtrader contributors
-"""
-CUSUM grid search CLI for dynamic spread trading using Backtrader. This module
+"""CUSUM grid search CLI for dynamic spread trading using Backtrader. This module
 performs parameter optimization for a pair trading strategy with CUSUM logic and
-built-in analyzers.
+built-in analyzers."""
 """
 
 import argparse
@@ -67,7 +66,9 @@ spread_x = price0_x - β_{t-1} * price1_x"""
 
 
 # Custom data class to support beta column
-class SpreadData(PandasData):
+"""SpreadData class.
+
+Description of the class functionality."""
     lines = ("beta",)  # Add beta line
 
     params = (
@@ -78,7 +79,9 @@ class SpreadData(PandasData):
     )
 
 
-class DynamicSpreadCUSUMStrategy(bt.Strategy):
+"""DynamicSpreadCUSUMStrategy class.
+
+Description of the class functionality."""
     params = (
         ("win", 20),  # rolling window
         ("k_coeff", 0.5),  # κ = k_coeff * σ
@@ -86,14 +89,25 @@ class DynamicSpreadCUSUMStrategy(bt.Strategy):
         ("verbose", False),  # Whether to print detailed info
     )
 
-    def __init__(self):
+"""__init__ function.
+
+Returns:
+    Description of return value
+"""
         # Store two cumulative sums
         self.g_pos, self.g_neg = 0.0, 0.0  # CUSUM state
         # For easy access to the last win spreads
         self.spread_series = self.data2.close
 
     # ---------- Trading helpers (same logic as before) ----------
-    def _open_position(self, short):
+"""_open_position function.
+
+Args:
+    short: Description of short
+
+Returns:
+    Description of return value
+"""
         if not hasattr(self, "size0"):
             self.size0 = 10
             self.size1 = round(self.data2.beta[0] * 10)
@@ -104,12 +118,20 @@ class DynamicSpreadCUSUMStrategy(bt.Strategy):
             self.buy(data=self.data0, size=self.size0)
             self.sell(data=self.data1, size=self.size1)
 
-    def _close_positions(self):
+"""_close_positions function.
+
+Returns:
+    Description of return value
+"""
         self.close(data=self.data0)
         self.close(data=self.data1)
 
     # ---------- Main loop ----------
-    def next(self):
+"""next function.
+
+Returns:
+    Description of return value
+"""
         # 1) Ensure enough history for σ estimation
         if len(self.spread_series) < self.p.win + 2:
             return
@@ -152,7 +174,14 @@ class DynamicSpreadCUSUMStrategy(bt.Strategy):
             elif position_size < 0 and abs(s_t) < kappa:
                 self._close_positions()
 
-    def notify_trade(self, trade):
+"""notify_trade function.
+
+Args:
+    trade: Description of trade
+
+Returns:
+    Description of return value
+"""
         if not self.p.verbose:
             return
 

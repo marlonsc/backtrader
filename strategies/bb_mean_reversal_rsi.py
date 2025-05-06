@@ -202,11 +202,12 @@ for extended periods."""
     )
 
     def log(self, txt, dt=None, level="info"):
-        """Logging function
+"""Logging function
 
-Args:
+Args::
     txt: 
     dt: (Default value = None)
+    level: (Default value = "info")"""
     level: (Default value = "info")"""
         if level == "debug" and self.p.log_level != "debug":
             return
@@ -215,64 +216,7 @@ Args:
         print(f"{dt.isoformat()}: {txt}")
 
     def __init__(self):
-        """ """
-        # Store references to price data
-        self.dataclose = self.datas[0].close
-        self.datahigh = self.datas[0].high
-        self.datalow = self.datas[0].low
-
-        # Order and position tracking
-        self.order = None
-        self.buyprice = None
-        self.buycomm = None
-        self.stop_price = None
-        self.trail_price = None
-        self.highest_price = None
-
-        # For trade throttling
-        self.last_trade_date = None
-
-        # Determine MA type for Bollinger Bands
-        if self.p.ma_type == "SMA":
-            ma_class = bt.indicators.SimpleMovingAverage
-        elif self.p.ma_type == "EMA":
-            ma_class = bt.indicators.ExponentialMovingAverage
-        elif self.p.ma_type == "WMA":
-            ma_class = bt.indicators.WeightedMovingAverage
-        elif self.p.ma_type == "SMMA":
-            ma_class = bt.indicators.SmoothedMovingAverage
-        else:
-            # Default to SMA
-            ma_class = bt.indicators.SimpleMovingAverage
-
-        # Create Bollinger Bands
-        self.bbands = bt.indicators.BollingerBands(
-            self.datas[0],
-            period=self.p.bb_length,
-            devfactor=self.p.bb_mult,
-            movav=ma_class,
-        )
-
-        # Create RSI indicator
-        self.rsi = bt.indicators.RSI(self.datas[0], period=self.p.rsi_period)
-
-        # Create crossover indicators for signal generation
-        self.price_cross_lower = bt.indicators.CrossDown(
-            self.dataclose, self.bbands.lines.bot
-        )
-
-        self.price_cross_upper = bt.indicators.CrossUp(
-            self.dataclose, self.bbands.lines.top
-        )
-
-        self.price_cross_middle = bt.indicators.CrossUp(
-            self.dataclose, self.bbands.lines.mid
-        )
-
-        # Add ATR for stop loss calculation
-        self.atr = bt.indicators.ATR(self.datas[0], period=14)
-
-    def calculate_position_size(self):
+""""""
         """Calculate position size based on risk percentage"""
         cash = self.broker.getcash()
         value = self.broker.getvalue()
@@ -293,98 +237,7 @@ Args:
         return min(size, max_size)
 
     def next(self):
-        """ """
-        # If an order is pending, we cannot send a new one
-        if self.order:
-            return
-
-        # Check for trailing stop if enabled
-        if self.position and self.p.use_trail and self.trail_price is not None:
-            # Update the trailing stop if price moves higher
-            if self.datahigh[0] > self.highest_price:
-                self.highest_price = self.datahigh[0]
-                self.trail_price = self.highest_price * (1.0 - self.p.trail_pct / 100.0)
-                self.log(
-                    f"Trailing stop updated to: {self.trail_price:.2f}",
-                    level="debug",
-                )
-
-            # Check if trailing stop is hit
-            if self.datalow[0] <= self.trail_price:
-                self.log(
-                    f"TRAILING STOP TRIGGERED: Price: {self.datalow[0]:.2f}, Stop:"
-                    f" {self.trail_price:.2f}"
-                )
-                self.order = self.sell()
-                return
-
-        # Check for stop loss if we're in the market and stop loss is enabled
-        if self.position and self.p.use_stop and self.stop_price is not None:
-            if self.datalow[0] < self.stop_price:
-                self.log(
-                    f"STOP LOSS TRIGGERED: Price: {self.datalow[0]:.2f}, Stop:"
-                    f" {self.stop_price:.2f}"
-                )
-                self.order = self.close()
-                return
-
-        # Check for price crossing middle band if exit_middle is enabled
-        if self.position and self.p.exit_middle and self.price_cross_middle[0]:
-            self.log(
-                f"MIDDLE BAND EXIT: Price: {self.dataclose[0]:.2f}, Middle Band:"
-                f" {self.bbands.lines.mid[0]:.2f}"
-            )
-            self.order = self.close()
-            return
-
-        # If we are in the market, look for a sell signal
-        if self.position:
-            # Sell if price crosses upper band and RSI > overbought threshold
-            if self.price_cross_upper[0] and self.rsi[0] > self.p.rsi_overbought:
-                self.log(
-                    f"SELL SIGNAL: Price: {self.dataclose[0]:.2f}, Upper Band:"
-                    f" {self.bbands.lines.top[0]:.2f}, RSI: {self.rsi[0]:.1f}"
-                )
-                self.order = self.close()
-
-        # If we are not in the market, look for a buy signal
-        else:
-            # Check if we can trade now (throttling)
-            if not self.can_trade_now():
-                return
-
-            # Buy if price crosses lower band and RSI < oversold threshold
-            if self.price_cross_lower[0] and self.rsi[0] < self.p.rsi_oversold:
-                # Calculate position size
-                size = self.calculate_position_size()
-
-                self.log(
-                    f"BUY SIGNAL: Price: {self.dataclose[0]:.2f}, Lower Band:"
-                    f" {self.bbands.lines.bot[0]:.2f}, RSI: {self.rsi[0]:.1f}"
-                )
-
-                if size > 0:
-                    self.order = self.buy(size=size)
-
-                    # Set stop loss price if enabled
-                    if self.p.use_stop:
-                        self.stop_price = self.dataclose[0] * (
-                            1.0 - self.p.stop_pct / 100.0
-                        )
-                        self.log(f"Stop loss set at {self.stop_price:.2f}")
-
-                    # Set trailing stop if enabled
-                    if self.p.use_trail:
-                        self.highest_price = self.dataclose[0]
-                        self.trail_price = self.dataclose[0] * (
-                            1.0 - self.p.trail_pct / 100.0
-                        )
-                        self.log(f"Initial trailing stop set at {self.trail_price:.2f}")
-
-                    # Update last trade date for throttling
-                    self.last_trade_date = self.datas[0].datetime.date(0)
-
-    def stop(self):
+""""""
         """Called when backtest is complete"""
         self.log("Bollinger Bands Mean Reversion Strategy completed")
         self.log(f"Final Portfolio Value: {self.broker.getvalue():.2f}")
@@ -403,9 +256,10 @@ Args:
         )
 
     def notify_order(self, order):
-        """Handle order notifications
+"""Handle order notifications
 
-Args:
+Args::
+    order:"""
     order:"""
         if order.status in [order.Submitted, order.Accepted]:
             # Order pending, do nothing
@@ -435,9 +289,10 @@ Args:
         self.order = None
 
     def notify_trade(self, trade):
-        """Track completed trades
+"""Track completed trades
 
-Args:
+Args::
+    trade:"""
     trade:"""
         if not trade.isclosed:
             return

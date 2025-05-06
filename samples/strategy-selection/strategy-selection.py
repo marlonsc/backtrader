@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""strategy-selection.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -31,31 +34,11 @@ import backtrader as bt
 
 
 class St0(bt.SignalStrategy):
-    """ """
-
-    def __init__(self):
-        """ """
-        sma1, sma2 = bt.ind.SMA(period=10), bt.ind.SMA(period=30)
-        crossover = bt.ind.CrossOver(sma1, sma2)
-        self.signal_add(bt.SIGNAL_LONG, crossover)
-
-
-class St1(bt.SignalStrategy):
-    """ """
-
-    def __init__(self):
-        """ """
-        sma1 = bt.ind.SMA(period=10)
-        crossover = bt.ind.CrossOver(self.data.close, sma1)
-        self.signal_add(bt.SIGNAL_LONG, crossover)
-
-
-class StFetcher(object):
-    """ """
-
-    _STRATS = [St0, St1]
-
-    def __new__(cls, *args, **kwargs):
+""""""
+""""""
+""""""
+""""""
+""""""
         """"""
         idx = kwargs.pop("idx")
 
@@ -64,30 +47,10 @@ class StFetcher(object):
 
 
 def runstrat(pargs=None):
-    """Args:
+"""Args::
     pargs: (Default value = None)"""
-    args = parse_args(pargs)
-
-    cerebro = bt.Cerebro()
-    data = bt.feeds.BacktraderCSVData(dataname=args.data)
-    cerebro.adddata(data)
-
-    cerebro.addanalyzer(bt.analyzers.Returns)
-    cerebro.optstrategy(StFetcher, idx=[0, 1])
-    results = cerebro.run(maxcpus=args.maxcpus, optreturn=args.optreturn)
-
-    strats = [x[0] for x in results]  # flatten the result
-    for i, strat in enumerate(strats):
-        rets = strat.analyzers.returns.get_analysis()
-        print(
-            "Strat {} Name {}:\n  - analyzer: {}\n".format(
-                i, strat.__class__.__name__, rets
-            )
-        )
-
-
-def parse_args(pargs=None):
-    """Args:
+"""Args::
+    pargs: (Default value = None)"""
     pargs: (Default value = None)"""
 
     parser = argparse.ArgumentParser(

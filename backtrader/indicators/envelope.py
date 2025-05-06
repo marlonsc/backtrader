@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""envelope.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -54,35 +57,9 @@ See also:
     )
 
     def __init__(self):
-        """ """
-        # Mix-in & directly from object -> does not necessarily need super
-        # super(EnvelopeMixIn, self).__init__()
-        perc = self.p.perc / 100.0
-
-        self.lines.top = self.lines[0] * (1.0 + perc)
-        self.lines.bot = self.lines[0] * (1.0 - perc)
-
-        super(EnvelopeMixIn, self).__init__()
-
-
-class _EnvelopeBase(Indicator):
-    """ """
-
-    lines = ("src",)
-
-    # plot the envelope lines along the passed source
-    plotinfo = dict(subplot=False)
-
-    # Do not replot the data line
-    plotlines = dict(src=dict(_plotskip=True))
-
-    def __init__(self):
-        """ """
-        self.lines.src = self.data
-        super(_EnvelopeBase, self).__init__()
-
-
-class Envelope(_EnvelopeBase, EnvelopeMixIn):
+""""""
+""""""
+""""""
     """It creates envelopes bands separated from the source data by a given
 percentage
 Formula:

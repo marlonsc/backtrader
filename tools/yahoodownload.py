@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""yahoodownload.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -42,18 +45,13 @@ logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
 
 
 class YahooDownload(object):
-    """ """
-
-    urlhist = "https://finance.yahoo.com/quote/{}/history"
-    urldown = "https://query1.finance.yahoo.com/v7/finance/download"
-    retries = 3
-
-    def __init__(self, ticker, fromdate, todate, period="d", reverse=False):
-        """Args:
+""""""
+"""Args::
     ticker: 
     fromdate: 
     todate: 
     period: (Default value = "d")
+    reverse: (Default value = False)"""
     reverse: (Default value = False)"""
         try:
             import requests
@@ -151,26 +149,9 @@ class YahooDownload(object):
         self.datafile = f
 
     def writetofile(self, filename):
-        """Args:
+"""Args::
     filename:"""
-        if not self.datafile:
-            return
-
-        if not hasattr(filename, "read"):
-            # It's not a file - open it
-            f = io.open(filename, "w")
-        else:
-            f = filename
-
-        self.datafile.seek(0)
-        for line in self.datafile:
-            f.write(line)
-
-        f.close()
-
-
-def parse_args():
-    """ """
+""""""
     parser = argparse.ArgumentParser(description="Download Yahoo CSV Finance Data")
 
     parser.add_argument("--ticker", required=True, help="Ticker to be downloaded")

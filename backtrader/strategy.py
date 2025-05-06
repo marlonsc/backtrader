@@ -1,4 +1,7 @@
-#!/usr/bin389/env python
+"""strategy.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -56,7 +59,9 @@ try:
     from .metastrategy import MetaStrategy
 except ImportError:
 
-    class MetaStrategy(type):
+"""MetaStrategy class.
+
+Description of the class functionality."""
         pass
 
 
@@ -71,7 +76,11 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
     # keep the latest delivered data date in the line
     lines = ("datetime",)
 
-    def __init__(self, *args, **kwargs):
+"""__init__ function.
+
+Returns:
+    Description of return value
+"""
         super(Strategy, self).__init__(*args, **kwargs)
         self._orderspending = []
         self._tradespending = []
@@ -83,7 +92,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         self._sizer = None
 
     def qbuffer(self, savemem=0, replaying=False):
-        """Enable the memory saving schemes. Possible values for ``savemem``:
+"""Enable the memory saving schemes. Possible values for ``savemem``:
 0: No savings. Each lines object keeps in memory all values
 1: All lines objects save memory, using the strictly minimum needed
 Negative values are meant to be used when plotting is required:
@@ -92,8 +101,9 @@ savings (but anything declared below it does)
 -2: Same as -1 plus activation of memory saving for any indicators
 which has declared *plotinfo.plot* as False (will not be plotted)
 
-Args:
+Args::
     savemem: (Default value = 0)
+    replaying: (Default value = False)"""
     replaying: (Default value = False)"""
         if savemem < 0:
             # Get any attribute which labels itself as Indicator
@@ -129,110 +139,40 @@ Args:
                         it.qbuffer(savemem=1)
 
     def _periodset(self):
-        """ """
-        dataids = [id(data) for data in self.datas]
-
-        _dminperiods = collections.defaultdict(list)
-        for lineiter in self._lineiterators[LineIterator.IndType]:
-            # if multiple datas are used and multiple timeframes the larger
-            # timeframe may place larger time constraints in calling next.
-            clk = getattr(lineiter, "_clock", None)
-            if clk is None:
-                clk = getattr(getattr(lineiter, "_owner", None), "_clock", None)
-                if clk is None:
-                    continue
-
-            while True:
-                if id(clk) in dataids:
-                    break  # already top-level clock (data feed)
-
-                # See if the current clock has higher level clocks
-                clk2 = getattr(clk, "_clock", None)
-                if clk2 is None:
-                    clk2 = getattr(getattr(clk, "_owner", None), "_clock", None)
-
-                if clk2 is None:
-                    break  # if no clock found, bail out
-
-                clk = clk2  # keep the ref and try to go up the hierarchy
-
-            if clk is None:
-                continue  # no clock found, go to next
-
-            # LineSeriesStup wraps a line and the clock is the wrapped line and
-            # no the wrapper itself.
-            if isinstance(clk, LineSeriesStub):
-                clk = clk.lines[0]
-
-            _dminperiods[clk].append(lineiter._minperiod)
-
-        self._minperiods = list()
-        for data in self.datas:
-            # Do not only consider the data as clock but also its lines which
-            # may have been individually passed as clock references and
-            # discovered as clocks above
-
-            # Initialize with data min period if any
-            dlminperiods = _dminperiods[data]
-
-            for l in data.lines:  # search each line for min periods
-                if l in _dminperiods:
-                    dlminperiods += _dminperiods[l]  # found, add it
-
-            # keep the reference to the line if any was found
-            _dminperiods[data] = [max(dlminperiods)] if dlminperiods else []
-
-            dminperiod = max(_dminperiods[data] or [getattr(data, "_minperiod", 0)])
-            self._minperiods.append(dminperiod)
-
-        # Set the minperiod
-        minperiods = [getattr(x, "_minperiod", 0) for x in self._lineiterators[LineIterator.IndType]]
-        self._minperiod = max(minperiods or [getattr(self, "_minperiod", 0)])
-
-    def _addwriter(self, writer):
-        """Unlike the other _addxxx functions this one receives an instance
+""""""
+"""Unlike the other _addxxx functions this one receives an instance
 because the writer works at cerebro level and is only passed to the
 strategy to simplify the logic
 
-Args:
+Args::
+    writer:"""
     writer:"""
         self.writers.append(writer)
 
     def _addindicator(self, indcls, *indargs, **indkwargs):
-        """Args:
+"""Args::
     indcls:"""
-        indcls(*indargs, **indkwargs)
-
-    def _addanalyzer_slave(self, ancls, *anargs, **ankwargs):
-        """Like _addanalyzer but meant for observers (or other entities) which
+"""Like _addanalyzer but meant for observers (or other entities) which
 rely on the output of an analyzer for the data. These analyzers have
 not been added by the user and are kept separate from the main
 analyzers
 Returns the created analyzer
 
-Args:
+Args::
+    ancls:"""
     ancls:"""
         analyzer = ancls(*anargs, **ankwargs)
         self._slave_analyzers.append(analyzer)
         return analyzer
 
     def _getanalyzer_slave(self, idx):
-        """Args:
+"""Args::
     idx:"""
-        return self._slave_analyzers.append[idx]
-
-    def _addanalyzer(self, ancls, *anargs, **ankwargs):
-        """Args:
+"""Args::
     ancls:"""
-        anname = ankwargs.pop("_name", "") or ancls.__name__.lower()
-        nsuffix = next(self._alnames[anname])
-        anname += str(nsuffix or "")  # 0 (first instance) gets no suffix
-        analyzer = ancls(*anargs, **ankwargs)
-        self.analyzers.append(analyzer, anname)
-
-    def _addobserver(self, multi, obscls, *obsargs, **obskwargs):
-        """Args:
+"""Args::
     multi: 
+    obscls:"""
     obscls:"""
         obsname = obskwargs.pop("obsname", "")
         if not obsname:
@@ -252,115 +192,19 @@ Args:
             l.append(obs)
 
     def _getminperstatus(self):
-        """ """
-        # check the min period status connected to datas
-        dlens = map(operator.sub, self._minperiods, map(len, self.datas))
-        self._minperstatus = minperstatus = max(dlens)
-        return minperstatus
-
-    def prenext_open(self):
-        """ """
-
-    def nextstart_open(self):
-        """ """
-        self.next_open()
-
-    def next_open(self):
-        """ """
-
-    def _oncepost_open(self):
-        """ """
-        minperstatus = self._minperstatus
-        if minperstatus < 0:
-            self.next_open()
-        elif minperstatus == 0:
-            self.nextstart_open()  # only called for the 1st value
-        else:
-            self.prenext_open()
-
-    def _oncepost(self, dt):
-        """Args:
+""""""
+""""""
+""""""
+""""""
+""""""
+"""Args::
     dt:"""
-        for indicator in self._lineiterators[LineIterator.IndType]:
-            if len(indicator._clock) > len(indicator):
-                indicator.advance()
-
-        if self._oldsync:
-            # Strategy has not been reset, the line is there
-            self.advance()
-        else:
-            # strategy has been reset to beginning. advance step by step
-            self.forward()
-
-        self.lines.datetime[0] = dt
-        self._notify()
-
-        minperstatus = self._getminperstatus()
-        if minperstatus < 0:
-            self.next()
-        elif minperstatus == 0:
-            self.nextstart()  # only called for the 1st value
-        else:
-            self.prenext()
-
-        self._next_analyzers(minperstatus, once=True)
-        self._next_observers(minperstatus, once=True)
-
-        self.clear()
-
-    def _clk_update(self):
-        """ """
-        if self._oldsync:
-            clk_len = super(Strategy, self)._clk_update()
-            self.lines.datetime[0] = max(
-                d.datetime[0]
-                for d in self.datas
-                if hasattr(d, "datetime")
-                and len(d)
-                and not isinstance(d.datetime, (tuple, str))
-                and hasattr(d.datetime, "__getitem__")
-            )
-            return clk_len
-
-        newdlens = [len(d) for d in self.datas]
-        if any(nl > l for l, nl in zip(self._dlens, newdlens)):
-            self.forward()
-
-        self.lines.datetime[0] = max(
-            d.datetime[0]
-            for d in self.datas
-            if hasattr(d, "datetime")
-            and len(d)
-            and not isinstance(d.datetime, (tuple, str))
-            and hasattr(d.datetime, "__getitem__")
-        )
-        self._dlens = newdlens
-
-        return len(self)
-
-    def _next_open(self):
-        """ """
-        minperstatus = self._minperstatus
-        if minperstatus < 0:
-            self.next_open()
-        elif minperstatus == 0:
-            self.nextstart_open()  # only called for the 1st value
-        else:
-            self.prenext_open()
-
-    def _next(self):
-        """ """
-        super(Strategy, self)._next()
-
-        minperstatus = self._getminperstatus()
-        self._next_analyzers(minperstatus)
-        self._next_observers(minperstatus)
-
-        self.clear()
-
-    def _next_observers(self, minperstatus, once=False):
-        """Args:
+""""""
+""""""
+""""""
+"""Args::
     minperstatus: 
+    once: (Default value = False)"""
     once: (Default value = False)"""
         for observer in self._lineiterators[LineIterator.ObsType]:
             for analyzer in observer._analyzers:
@@ -388,8 +232,9 @@ Args:
                 observer._next()
 
     def _next_analyzers(self, minperstatus, once=False):
-        """Args:
+"""Args::
     minperstatus: 
+    once: (Default value = False)"""
     once: (Default value = False)"""
         for analyzer in self.analyzers:
             if minperstatus < 0:
@@ -400,145 +245,25 @@ Args:
                 analyzer._prenext()
 
     def _settz(self, tz):
-        """Args:
+"""Args::
     tz:"""
-        self.lines.datetime._settz(tz)
-
-    def _start(self):
-        """ """
-        self._periodset()
-
-        for analyzer in itertools.chain(self.analyzers, self._slave_analyzers):
-            analyzer._start()
-
-        for obs in self.observers:
-            if not isinstance(obs, list):
-                obs = [obs]  # support of multi-data observers
-
-            for o in obs:
-                o._start()
-
-        # change operators to stage 2
-        self._stage2()
-
-        self._dlens = [len(data) for data in self.datas]
-
-        self._minperstatus = MAXINT  # start in prenext
-
-        self.start()
-
-    def start(self):
+""""""
         """Called right before the backtesting is about to be started."""
 
     def getwriterheaders(self):
-        """ """
-        self.indobscsv = [self]
-
-        indobs = itertools.chain(self.getindicators_lines(), self.getobservers())
-        self.indobscsv.extend(filter(lambda x: x.csv, indobs))
-
-        headers = list()
-
-        # prepare the indicators/observers data headers
-        for iocsv in self.indobscsv:
-            name = (
-                getattr(getattr(iocsv, "plotinfo", None), "plotname", None)
-                or iocsv.__class__.__name__
-            )
-            headers.append(name)
-            headers.append("len")
-            if hasattr(iocsv, "getlinealiases"):
-                headers.extend(iocsv.getlinealiases())
-            else:
-                headers.extend([])
-
-        return headers
-
-    def getwritervalues(self):
-        """ """
-        values = list()
-
-        for iocsv in self.indobscsv:
-            name = (
-                getattr(getattr(iocsv, "plotinfo", None), "plotname", None)
-                or iocsv.__class__.__name__
-            )
-            values.append(name)
-            lio = len(iocsv)
-            values.append(lio)
-            if (
-                lio
-                and hasattr(iocsv, "lines")
-                and not isinstance(iocsv.lines, (tuple, str))
-                and hasattr(iocsv.lines, "itersize")
-                and callable(iocsv.lines.itersize)
-            ):
-                values.extend(map(lambda l: l[0], iocsv.lines.itersize()))
-            elif hasattr(iocsv, "lines") and hasattr(iocsv.lines, "size"):
-                values.extend([""] * iocsv.lines.size())
-            else:
-                values.extend([])
-
-        return values
-
-    def getwriterinfo(self):
-        """ """
-        wrinfo = AutoOrderedDict()
-
-        wrinfo["Params"] = self.p._getkwargs()
-
-        sections = [
-            ["Indicators", self.getindicators_lines()],
-            ["Observers", self.getobservers()],
-        ]
-
-        for sectname, sectitems in sections:
-            sinfo = wrinfo[sectname]
-            for item in sectitems:
-                itname = item.__class__.__name__
-                sinfo[itname].Lines = item.lines.getlinealiases() or None
-                sinfo[itname].Params = item.p._getkwargs() or None
-
-        ainfo = wrinfo.Analyzers
-
-        # Internal Value Analyzer
-        ainfo.Value.Begin = self.broker.startingcash
-        ainfo.Value.End = self.broker.getvalue()
-
-        # no slave analyzers for writer
-        for aname, analyzer in self.analyzers.getitems():
-            ainfo[aname].Params = analyzer.p._getkwargs() or None
-            ainfo[aname].Analysis = analyzer.get_analysis()
-
-        return wrinfo
-
-    def _stop(self):
-        """ """
-        self.stop()
-
-        for analyzer in itertools.chain(self.analyzers, self._slave_analyzers):
-            analyzer._stop()
-
-        # change operators back to stage 1 - allows reuse of datas
-        self._stage1()
-
-    def stop(self):
+""""""
+""""""
+""""""
+""""""
         """Called right before the backtesting is about to be stopped"""
 
     def set_tradehistory(self, onoff=True):
-        """Args:
+"""Args::
     onoff: (Default value = True)"""
-        self._tradehistoryon = onoff
-
-    def clear(self):
-        """ """
-        self._orders.extend(self._orderspending)
-        self._orderspending = list()
-        self._tradespending = list()
-
-    def _addnotification(self, order, quicknotify=False):
-        """Args:
+""""""
+"""Args::
     order: 
+    quicknotify: (Default value = False)"""
     quicknotify: (Default value = False)"""
         if not order.p.simulated:
             self._orderspending.append(order)
@@ -627,8 +352,9 @@ Args:
             self._notify(qorders=qorders, qtrades=qtrades)
 
     def _notify(self, qorders=None, qtrades=None):
-        """Args:
+"""Args::
     qorders: (Default value = None)
+    qtrades: (Default value = None)"""
     qtrades: (Default value = None)"""
         if qorders is None:
             qorders = []
@@ -681,11 +407,11 @@ Args:
         *args,
         **kwargs,
     ):
-        """**Note**: can be called during ``__init__`` or ``start``
+"""**Note**: can be called during ``__init__`` or ``start``
 Schedules a timer to invoke either a specified callback or the
 ``notify_timer`` of one or more strategies.
 
-Args:
+Args::
     when: can be
     offset: which must be a (Default value = datetime.timedelta())
     repeat: which must be a (Default value = datetime.timedelta())
@@ -697,7 +423,8 @@ Args:
     tzdata: which can be either (Default value = None)
     cheat: default
 
-Returns:
+Returns::
+    - The created timer"""
     - The created timer"""
         if offset is None:
             offset = datetime.timedelta()
@@ -725,54 +452,61 @@ Returns:
         )
 
     def notify_timer(self, timer, when, *args, **kwargs):
-        """Receives a timer notification where ``timer`` is the timer which was
+"""Receives a timer notification where ``timer`` is the timer which was
 
-Args:
+Args::
     timer: 
     when: 
 
-Returns:
+Returns::
+    and ``kwargs`` are any additional arguments passed to ``add_timer``"""
     and ``kwargs`` are any additional arguments passed to ``add_timer``"""
 
     def notify_cashvalue(self, cash, value):
-        """Receives the current fund value, value status of the strategy's broker
+"""Receives the current fund value, value status of the strategy's broker
 
-Args:
+Args::
     cash: 
+    value:"""
     value:"""
 
     def notify_fund(self, cash, value, fundvalue, shares):
-        """Receives the current cash, value, fundvalue and fund shares
+"""Receives the current cash, value, fundvalue and fund shares
 
-Args:
+Args::
     cash: 
     value: 
     fundvalue: 
     shares:"""
+    shares:"""
 
     def notify_order(self, order):
-        """Receives an order whenever there has been a change in one
+"""Receives an order whenever there has been a change in one
 
-Args:
+Args::
+    order:"""
     order:"""
 
     def notify_trade(self, trade):
-        """Receives a trade whenever there has been a change in one
+"""Receives a trade whenever there has been a change in one
 
-Args:
+Args::
+    trade:"""
     trade:"""
 
     def notify_store(self, msg, *args, **kwargs):
-        """Receives a notification from a store provider
+"""Receives a notification from a store provider
 
-Args:
+Args::
+    msg:"""
     msg:"""
 
     def notify_data(self, data, status, *args, **kwargs):
-        """Receives a notification from data
+"""Receives a notification from data
 
-Args:
+Args::
     data: 
+    status:"""
     status:"""
 
     def getdatanames(self):
@@ -780,16 +514,18 @@ Args:
         return keys(self.env.datasbyname)
 
     def getdatabyname(self, name):
-        """Returns a given data by name using the environment (cerebro)
+"""Returns a given data by name using the environment (cerebro)
 
-Args:
+Args::
+    name:"""
     name:"""
         return self.env.datasbyname[name]
 
     def cancel(self, order):
-        """Cancels the order in the broker
+"""Cancels the order in the broker
 
-Args:
+Args::
+    order:"""
     order:"""
         self.broker.cancel(order)
 
@@ -809,7 +545,7 @@ Args:
         transmit=True,
         **kwargs,
     ):
-        """Create a buy (long) order and send it to the broker
+"""Create a buy (long) order and send it to the broker
 - ``data`` (default: ``None``)
 For which data the order has to be created. If ``None`` then the
 first data in the system, ``self.datas[0] or self.data0`` (aka
@@ -900,7 +636,7 @@ the parent and 1st set of children and activates it for the last
 children, which triggers the full placement of all bracket orders.
 - ``**kwargs``: additional broker implementations may support extra
 
-Args:
+Args::
     data: (Default value = None)
     size: (Default value = None)
     price: (Default value = None)
@@ -914,7 +650,8 @@ Args:
     parent: (Default value = None)
     transmit: (Default value = True)
 
-Returns:
+Returns::
+    - the submitted order"""
     - the submitted order"""
         if isinstance(data, string_types):
             data = self.getdatabyname(data)
@@ -958,11 +695,11 @@ Returns:
         transmit=True,
         **kwargs,
     ):
-        """To create a selll (short) order and send it to the broker
+"""To create a selll (short) order and send it to the broker
 
         See the documentation for ``buy`` for an explanation of the parameters
 
-        Returns: the submitted order
+Returns: the submitted order:
 
         :param data:  (Default value = None)
         :param size:  (Default value = None)
@@ -976,8 +713,7 @@ Returns:
         :param trailpercent:  (Default value = None)
         :param parent:  (Default value = None)
         :param transmit:  (Default value = True)
-        :param **kwargs:
-
+        :param **kwargs:"""
         """
         if isinstance(data, string_types):
             data = self.getdatabyname(data)
@@ -1006,21 +742,20 @@ Returns:
         return None
 
     def close(self, data=None, size=None, **kwargs):
-        """Counters a long/short position closing it
+"""Counters a long/short position closing it
 
         See the documentation for ``buy`` for an explanation of the parameters
 
-        Note:
+Note::
 
           - ``size``: automatically calculated from the existing position if
             not provided (default: ``None``) by the caller
 
-        Returns: the submitted order
+Returns: the submitted order:
 
         :param data:  (Default value = None)
         :param size:  (Default value = None)
-        :param **kwargs:
-
+        :param **kwargs:"""
         """
         if isinstance(data, string_types):
             data = self.getdatabyname(data)
@@ -1057,7 +792,7 @@ Returns:
         limitargs=None,
         **kwargs,
     ):
-        """Create a bracket order group (low side - buy order - high side). The
+"""Create a bracket order group (low side - buy order - high side). The
 default behavior is as follows:
 - Issue a **buy** order with execution ``Limit``
 - Issue a *low side* bracket **sell** order with execution ``Stop``
@@ -1107,7 +842,7 @@ order. Arguments from the default ``**kwargs`` will be applied on
 top of this.
 - ``**kwargs``: additional broker implementations may support extra
 
-Args:
+Args::
     data: (Default value = None)
     size: (Default value = None)
     price: (Default value = None)
@@ -1125,7 +860,8 @@ Args:
     limitexec: None (Default value = bt.Order.Limit)
     limitargs: default
 
-Returns:
+Returns::
+    - A list containing the 3 orders [order, stop side, limit side]"""
     - A list containing the 3 orders [order, stop side, limit side]"""
         if oargs is None:
             oargs = {}
@@ -1207,7 +943,7 @@ Returns:
         limitargs=None,
         **kwargs,
     ):
-        """Create a bracket order group (low side - buy order - high side). The
+"""Create a bracket order group (low side - buy order - high side). The
 default behavior is as follows:
 - Issue a **sell** order with execution ``Limit``
 - Issue a *high side* bracket **buy** order with execution ``Stop``
@@ -1217,7 +953,7 @@ High/Low Side orders can be suppressed by using:
 - ``stopexec=None`` to suppress the *high side*
 - ``limitexec=None`` to suppress the *low side*
 
-Args:
+Args::
     data: (Default value = None)
     size: (Default value = None)
     price: (Default value = None)
@@ -1235,7 +971,8 @@ Args:
     limitexec: (Default value = bt.Order.Limit)
     limitargs: (Default value = {})
 
-Returns:
+Returns::
+    - A list containing the 3 orders [order, stop side, limit side]"""
     - A list containing the 3 orders [order, stop side, limit side]"""
         if oargs is None:
             oargs = {}
@@ -1298,7 +1035,7 @@ Returns:
         return [o, ostop, olimit]
 
     def order_target_size(self, data=None, target=0, **kwargs):
-        """Place an order to rebalance a position to have final size of ``target``
+"""Place an order to rebalance a position to have final size of ``target``
 The current ``position`` size is taken into account as the start point
 to achieve ``target``
 - If ``target`` > ``pos.size`` -> buy ``target - pos.size``
@@ -1308,8 +1045,9 @@ It returns either:
 or
 - ``None`` if no order has been issued (``target == position.size``)
 
-Args:
+Args::
     data: (Default value = None)
+    target: (Default value = 0)"""
     target: (Default value = 0)"""
         if isinstance(data, string_types):
             data = self.getdatabyname(data)
@@ -1329,7 +1067,7 @@ Args:
         return None  # no execution target == possize
 
     def order_target_value(self, data=None, target=0.0, price=None, **kwargs):
-        """Place an order to rebalance a position to have final value of
+"""Place an order to rebalance a position to have final value of
 ``target``
 The current ``value`` is taken into account as the start point to
 achieve ``target``
@@ -1341,9 +1079,10 @@ It returns either:
 or
 - ``None`` if no order has been issued
 
-Args:
+Args::
     data: (Default value = None)
     target: (Default value = 0.0)
+    price: (Default value = None)"""
     price: (Default value = None)"""
 
         if isinstance(data, string_types):
@@ -1373,11 +1112,12 @@ Args:
         return None  # no execution size == possize
 
     def order_target_percent(self, data=None, target=0.0, **kwargs):
-        """Place an order to rebalance a position to have final value of
+"""Place an order to rebalance a position to have final value of
 ``target`` percentage of current portfolio ``value``
 ``target`` is expressed in decimal: ``0.05`` -> ``5%``
 It uses ``order_target_value`` to execute the order.
-Example:
+
+Example::
 - ``target=0.05`` and portfolio value is ``100``
 - The ``value`` to be reached is ``0.05 * 100 = 5``
 - ``5`` is passed as the ``target`` value to ``order_target_value``
@@ -1396,8 +1136,9 @@ It returns either:
 or
 - ``None`` if no order has been issued (``target == position.size``)
 
-Args:
+Args::
     data: (Default value = None)
+    target: (Default value = 0.0)"""
     target: (Default value = 0.0)"""
         if isinstance(data, string_types):
             data = self.getdatabyname(data)
@@ -1410,12 +1151,13 @@ Args:
         return self.order_target_value(data=data, target=target, **kwargs)
 
     def getposition(self, data=None, broker=None):
-        """Returns the current position for a given data in a given broker.
+"""Returns the current position for a given data in a given broker.
 If both are None, the main data and the default broker will be used
 A property ``position`` is also available
 
-Args:
+Args::
     data: (Default value = None)
+    broker: (Default value = None)"""
     broker: (Default value = None)"""
         data = data if data is not None else self.datas[0]
         broker = broker or self.broker
@@ -1424,12 +1166,13 @@ Args:
     position = property(getposition)
 
     def getpositionbyname(self, name=None, broker=None):
-        """Returns the current position for a given name in a given broker.
+"""Returns the current position for a given name in a given broker.
 If both are None, the main data and the default broker will be used
 A property ``positionbyname`` is also available
 
-Args:
+Args::
     name: (Default value = None)
+    broker: (Default value = None)"""
     broker: (Default value = None)"""
         data = self.datas[0] if not name else self.getdatabyname(name)
         broker = broker or self.broker
@@ -1438,11 +1181,12 @@ Args:
     positionbyname = property(getpositionbyname)
 
     def getpositions(self, broker=None):
-        """Returns the current by data positions directly from the broker
+"""Returns the current by data positions directly from the broker
 If the given ``broker`` is None, the default broker will be used
 A property ``positions`` is also available
 
-Args:
+Args::
+    broker: (Default value = None)"""
     broker: (Default value = None)"""
         broker = broker or self.broker
         return broker.positions
@@ -1450,11 +1194,12 @@ Args:
     positions = property(getpositions)
 
     def getpositionsbyname(self, broker=None):
-        """Returns the current by name positions directly from the broker
+"""Returns the current by name positions directly from the broker
 If the given ``broker`` is None, the default broker will be used
 A property ``positionsbyname`` is also available
 
-Args:
+Args::
+    broker: (Default value = None)"""
     broker: (Default value = None)"""
         broker = broker or self.broker
         positions = broker.positions
@@ -1468,17 +1213,12 @@ Args:
     positionsbyname = property(getpositionsbyname)
 
     def _addsizer(self, sizer, *args, **kwargs):
-        """Args:
+"""Args::
     sizer:"""
-        if sizer is None:
-            self.setsizer(FixedSize())
-        else:
-            self.setsizer(sizer, *args, **kwargs)
+"""Replace the default (fixed stake) sizer
 
-    def setsizer(self, sizer):
-        """Replace the default (fixed stake) sizer
-
-Args:
+Args::
+    sizer:"""
     sizer:"""
         self._sizer = sizer
         sizer.set(self, self.broker)
@@ -1493,11 +1233,12 @@ Also available as ``sizer``"""
     sizer = property(getsizer, setsizer)
 
     def getsizing(self, data=None, isbuy=True):
-        """Args:
+"""Args::
     data: (Default value = None)
     isbuy: (Default value = True)
 
-Returns:
+Returns::
+    situation"""
     situation"""
         data = data if data is not None else self.datas[0]
         return self._sizer.getsizing(data, isbuy=isbuy)

@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""hurst.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -62,23 +65,9 @@ compatibility"""
     )
 
     def _plotlabel(self):
-        """ """
-        plabels = [self.p.period]
-        plabels += [self._lag_start]
-        plabels += [self._lag_end]
-        return plabels
-
-    def __init__(self):
-        """ """
-        super(HurstExponent, self).__init__()
-        # Prepare the lags array
-        self._lag_start = lag_start = self.p.lag_start or 2
-        self._lag_end = lag_end = self.p.lag_end or (self.p.period // 2)
-        self.lags = asarray(range(lag_start, lag_end))
-        self.log10lags = log10(self.lags)
-
-    def next(self):
-        """ """
+""""""
+""""""
+""""""
         # Fetch the data
         ts = asarray(self.data.get(size=self.p.period))
 

@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""kama.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -62,7 +65,7 @@ See also:
     params = (("fast", 2), ("slow", 30))
 
     def __init__(self):
-        """ """
+""""""
         super(AdaptiveMovingAverage, self).__init__()
         direction = self.data - self.data(-self.p.period)
         volatility = SumN(abs(self.data - self.data(-1)), period=self.p.period)

@@ -164,11 +164,12 @@ Best Market Conditions:
     )
 
     def log(self, txt, dt=None, level="info"):
-        """Logging function
+"""Logging function
 
-Args:
+Args::
     txt: 
     dt: (Default value = None)
+    level: (Default value = "info")"""
     level: (Default value = "info")"""
         if level == "debug" and self.p.loglevel != "debug":
             return
@@ -177,75 +178,7 @@ Args:
         print(f"{dt.isoformat()}: {txt}")
 
     def __init__(self):
-        """ """
-        # Store references to price data
-        self.dataclose = self.datas[0].close
-        self.dataopen = self.datas[0].open
-        self.datahigh = self.datas[0].high
-        self.datalow = self.datas[0].low
-
-        # Select source data based on parameter
-        if self.p.bb_src == "open":
-            self.datasrc = self.dataopen
-        elif self.p.bb_src == "high":
-            self.datasrc = self.datahigh
-        elif self.p.bb_src == "low":
-            self.datasrc = self.datalow
-        else:  # default to close
-            self.datasrc = self.dataclose
-
-        # Order tracking
-        self.order = None
-
-        # For trade throttling
-        self.last_trade_date = None
-
-        # For trade tracking
-        self.entry_price = None
-        self.entry_size = None
-
-        # Commission tracking
-        self.total_commission = 0.0
-
-        # Determine MA type for Bollinger Bands
-        if self.p.bb_matype == "SMA":
-            ma_class = bt.indicators.SimpleMovingAverage
-        elif self.p.bb_matype == "EMA":
-            ma_class = bt.indicators.ExponentialMovingAverage
-        elif self.p.bb_matype == "SMMA (RMA)":
-            ma_class = bt.indicators.SmoothedMovingAverage
-        elif self.p.bb_matype == "WMA":
-            ma_class = bt.indicators.WeightedMovingAverage
-        elif self.p.bb_matype == "VWMA":
-            ma_class = (
-                bt.indicators.WeightedMovingAverage
-            )  # Using WMA as proxy for VWMA
-        else:
-            # Default to SMA
-            ma_class = bt.indicators.SimpleMovingAverage
-
-        # Create Bollinger Bands
-        self.bbands = bt.indicators.BollingerBands(
-            self.datasrc,
-            period=self.p.bb_period,
-            devfactor=self.p.bb_dev,
-            movav=ma_class,
-        )
-
-        # For plotting
-        self.basis = self.bbands.mid
-        self.upper = self.bbands.top
-        self.lower = self.bbands.bot
-
-        # Setup date range
-        self.start_date = datetime.datetime(
-            self.p.start_year, self.p.start_month, self.p.start_day
-        )
-        self.end_date = datetime.datetime(
-            self.p.end_year, self.p.end_month, self.p.end_day
-        )
-
-    def is_in_date_range(self):
+""""""
         """Check if current bar is within the date range"""
         current_date = self.datas[0].datetime.datetime(0)
         return self.start_date <= current_date <= self.end_date
@@ -260,36 +193,7 @@ Args:
         return max(1, size)  # At least 1 share
 
     def next(self):
-        """ """
-        # Check if we're in the date range
-        if not self.is_in_date_range():
-            return
-
-        # If an order is pending, we cannot send a new one
-        if self.order:
-            return
-
-        # Check if we are in the market
-        if not self.position:
-            # BUY LOGIC: When price closes above upper band
-            if self.datasrc[0] > self.bbands.top[0]:
-                size = self.calculate_position_size()
-                self.log(f"BUY CREATE: {self.dataclose[0]:.2f}, Size: {size}")
-                self.order = self.buy(size=size)
-
-                # Update the last trade date for throttling
-                self.last_trade_date = self.datas[0].datetime.date(0)
-        else:
-            # SELL LOGIC: When price closes below lower band
-            if self.datasrc[0] < self.bbands.bot[0]:
-                self.log(
-                    f"SELL CREATE: {self.dataclose[0]:.2f}, Size: {self.position.size}"
-                )
-
-                # Use close() instead of sell() to close the entire position
-                self.order = self.close()
-
-    def stop(self):
+""""""
         """Called when backtest is complete"""
         self.log("Bollinger Bands Strategy completed", level="info")
         self.log(
@@ -306,9 +210,10 @@ Args:
         )
 
     def notify_order(self, order):
-        """Handle order notifications
+"""Handle order notifications
 
-Args:
+Args::
+    order:"""
     order:"""
         if order.status in [order.Submitted, order.Accepted]:
             # Order pending, do nothing
@@ -356,9 +261,10 @@ Args:
         self.order = None
 
     def notify_trade(self, trade):
-        """Track completed trades
+"""Track completed trades
 
-Args:
+Args::
+    trade:"""
     trade:"""
         if not trade.isclosed:
             return

@@ -1,37 +1,29 @@
-import backtrader as bt
+"""test_data_resample_optimize.py module.
+
+Description of the module functionality."""
+
 import pytest
 import testcommon
 
 
 class BtTestStrategy(bt.Strategy):
-    """ """
-
-    params = (
-        ("period", 15),
-        ("printdata", True),
-        ("printops", True),
-    )
-
-    def log(self, txt, dt=None):
-        """Args:
+""""""
+"""Args::
     txt: 
+    dt: (Default value = None)"""
     dt: (Default value = None)"""
         dt = dt or self.data.datetime[0]
         dt = bt.num2date(dt)
         print("%s, %s" % (dt.isoformat(), txt))
 
     def __init__(self):
-        """ """
-
-    def next(self):
-        """ """
-
-
-def test_optsample(main=False):
-    """filters can have a state so when running optstrategy then filters will run several times. so they need to be reset before a new run is started.
+""""""
+""""""
+"""filters can have a state so when running optstrategy then filters will run several times. so they need to be reset before a new run is started.
 Otherwise their behavior might change between different runs
 
-Args:
+Args::
+    main: (Default value = False)"""
     main: (Default value = False)"""
     data = testcommon.getdata(0)
 

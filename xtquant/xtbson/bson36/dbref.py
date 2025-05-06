@@ -29,7 +29,7 @@ class DBRef(object):
     _type_marker = 100
 
     def __init__(self, collection, id, database=None, _extra={}, **kwargs):
-        """Initialize a new :class:`DBRef`.
+"""Initialize a new :class:`DBRef`.
 Raises :class:`TypeError` if `collection` or `database` is not
 an instance of :class:`basestring` (:class:`str` in python 3).
 `database` is optional and allows references to documents to work
@@ -43,10 +43,11 @@ additional fields in the resultant embedded document.
 create additional, custom fields
 .. seealso:: The MongoDB documentation on `dbrefs <https://dochub.mongodb.org/core/dbrefs>`_.
 
-Args:
+Args::
     collection: 
     id: 
     database: (Default value = None)
+    _extra: (Default value = {})"""
     _extra: (Default value = {})"""
         if not isinstance(collection, str):
             raise TypeError("collection must be an instance of str")
@@ -76,14 +77,8 @@ Returns None if this DBRef doesn't specify a database."""
         return self.__database
 
     def __getattr__(self, key):
-        """Args:
+"""Args::
     key:"""
-        try:
-            return self.__kwargs[key]
-        except KeyError:
-            raise AttributeError(key)
-
-    def as_doc(self):
         """Get the SON document representation of this DBRef.
 Generally not needed by application developers"""
         doc = SON([("$ref", self.collection), ("$id", self.id)])
@@ -93,37 +88,11 @@ Generally not needed by application developers"""
         return doc
 
     def __repr__(self):
-        """ """
-        extra = "".join([", %s=%r" % (k, v) for k, v in self.__kwargs.items()])
-        if self.database is None:
-            return "DBRef(%r, %r%s)" % (self.collection, self.id, extra)
-        return "DBRef(%r, %r, %r%s)" % (
-            self.collection,
-            self.id,
-            self.database,
-            extra,
-        )
-
-    def __eq__(self, other):
-        """Args:
+""""""
+"""Args::
     other:"""
-        if isinstance(other, DBRef):
-            us = (self.__database, self.__collection, self.__id, self.__kwargs)
-            them = (
-                other.__database,
-                other.__collection,
-                other.__id,
-                other.__kwargs,
-            )
-            return us == them
-        return NotImplemented
-
-    def __ne__(self, other):
-        """Args:
+"""Args::
     other:"""
-        return not self == other
-
-    def __hash__(self):
         """Get a hash value for this :class:`DBRef`."""
         return hash(
             (
@@ -135,9 +104,10 @@ Generally not needed by application developers"""
         )
 
     def __deepcopy__(self, memo):
-        """Support function for `copy.deepcopy()`.
+"""Support function for `copy.deepcopy()`.
 
-Args:
+Args::
+    memo:"""
     memo:"""
         return DBRef(
             deepcopy(self.__collection, memo),

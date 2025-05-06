@@ -1,27 +1,26 @@
 # weekdays-filler
 
-Directory containing weekdays-filler related files. Primarily contains Python code.
+This directory contains various files including 1 md file, 2 py files.
 
 ## Navigation
 
-* [🏠 Root Directory](../../README.md)
+* [🏠 Root Directory](/samples/weekdays-filler/../samples/weekdays-filler/..README.md)
 * [⬆️ Parent Directory (samples)](../README.md)
 
 ## Files
 
-### README.md
-
-File with .md extension.
-
 ### weekdaysaligner.py
+
+weekdaysaligner.py module.
 
 ### weekdaysfiller.py
 
+weekdaysfiller.py module.
+
 ## Directory Summary
 
-This directory contains 3 files and 0 subdirectories.
+This directory contains 2 files and 0 subdirectories.
 
 ### File Types
 
 * .py: 2 files
-* .md: 1 files

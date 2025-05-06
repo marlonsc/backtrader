@@ -1,30 +1,26 @@
 # doc
 
-Contains documentation. Primarily contains Documentation code and includes documentation.
+This directory contains various files including 3 md files.
 
 ## Navigation
 
-* [🏠 Root Directory](../../README.md)
+* [🏠 Root Directory](/xtquant/doc/../xtquant/doc/..README.md)
 * [⬆️ Parent Directory (xtquant)](../README.md)
 
 ## Files
 
-### README.md
-
-File with .md extension.
-
 ### xtdata.md
 
-Documentation file
+Markdown documentation
 
 ### xttrader.md
 
-Documentation file
+Markdown documentation
 
 ## Directory Summary
 
-This directory contains 3 files and 0 subdirectories.
+This directory contains 2 files and 0 subdirectories.
 
 ### File Types
 
-* .md: 3 files
+* .md: 2 files

@@ -1,4 +1,7 @@
-import datetime
+"""JM_J_strategy.py module.
+
+Description of the module functionality."""
+
 
 import backtrader as bt
 import matplotlib.pyplot as plt
@@ -9,62 +12,13 @@ from arbitrage.myutil import calculate_spread  # 假设这是您的价差计算�
 
 # 布林带价差交易策略（参数已优化为可通过网格搜索调整）
 class SpreadBollingerStrategy(bt.Strategy):
-    """ """
+""""""
+""""""
+""""""
+"""执行开仓操作
 
-    params = (
-        ("period", 15),  # 布林带周期（可调参数）
-        ("devfactor", 1.5),  # 标准差倍数（可调参数）
-        ("size0", 10),  # 品种0交易手数（可调参数）
-        ("size1", 14),  # 品种1交易手数（可调参数）
-        ("printlog", False),  # 是否打印交易日志
-    )
-
-    def __init__(self):
-        """ """
-        # Initialize all instance variables to avoid access before definition
-        self.order = None
-        self.entry_price = 0
-        self.position_size = 0
-        # Use a fallback for BollingerBands if not present
-        try:
-            self.boll = bt.indicators.BollingerBands(
-                self.data2.close,
-                period=self.p.period,
-                devfactor=self.p.devfactor,
-                subplot=False,
-            )
-        except AttributeError:
-            # Fallback: use a custom implementation or raise
-            raise ImportError(
-                "BollingerBands indicator not found in backtrader.indicators. "
-                "Please implement or install it."
-            )
-
-    def next(self):
-        """ """
-        if self.order:  # 存在未完成订单时跳过
-            return
-
-        spread = self.data2.close[0]
-        mid = self.boll.lines.mid[0]
-        pos = self.getposition(self.data0).size
-
-        # 开仓逻辑
-        if pos == 0:
-            if spread > self.boll.lines.top[0]:
-                self._execute_trade("short")
-            elif spread < self.boll.lines.bot[0]:
-                self._execute_trade("long")
-
-        # 平仓逻辑
-        else:
-            if (spread <= mid and pos < 0) or (spread >= mid and pos > 0):
-                self._close_positions()
-
-    def _execute_trade(self, direction):
-        """执行开仓操作
-
-Args:
+Args::
+    direction:"""
     direction:"""
         self.entry_price = self.data2.close[0]
         if direction == "short":
@@ -80,9 +34,10 @@ Args:
         self.close(data=self.data1)
 
     def notify_trade(self, trade):
-        """可选：交易通知记录
+"""可选：交易通知记录
 
-Args:
+Args::
+    trade:"""
     trade:"""
         if self.p.printlog:
             if trade.isclosed:
@@ -93,12 +48,13 @@ Args:
 
 # 数据加载函数（与策略解耦）
 def load_data(symbol1, symbol2, fromdate, todate):
-    """加载数据并计算价差
+"""加载数据并计算价差
 
-Args:
+Args::
     symbol1: 
     symbol2: 
     fromdate: 
+    todate:"""
     todate:"""
     output_file = "D:\\FutureData\\ricequant\\1d_2017to2024_noadjust.h5"
 
@@ -175,9 +131,10 @@ def configure_cerebro(**kwargs):
 
 # 修改后的分析函数
 def analyze_results(results):
-    """分析优化结果并输出最佳参数组合
+"""分析优化结果并输出最佳参数组合
 
-Args:
+Args::
+    results:"""
     results:"""
     performance = []
 

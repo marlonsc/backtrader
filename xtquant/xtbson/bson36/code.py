@@ -41,8 +41,9 @@ The default value for :attr:`scope` is ``None`` instead of ``{}``."""
     _type_marker = 13
 
     def __new__(cls, code, scope=None, **kwargs):
-        """Args:
+"""Args::
     code: 
+    scope: (Default value = None)"""
     scope: (Default value = None)"""
         if not isinstance(code, str):
             raise TypeError("code must be an instance of str")
@@ -76,19 +77,10 @@ The default value for :attr:`scope` is ``None`` instead of ``{}``."""
         return self.__scope
 
     def __repr__(self):
-        """ """
-        return "Code(%s, %r)" % (str.__repr__(self), self.__scope)
-
-    def __eq__(self, other):
-        """Args:
+""""""
+"""Args::
     other:"""
-        if isinstance(other, Code):
-            return (self.__scope, str(self)) == (other.__scope, str(other))
-        return False
-
-    __hash__ = None
-
-    def __ne__(self, other):
-        """Args:
+"""Args::
+    other:"""
     other:"""
         return not self == other

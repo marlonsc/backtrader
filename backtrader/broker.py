@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""broker.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -31,17 +34,18 @@ from .utils.py3 import with_metaclass
 
 
 class MetaBroker(MetaParams):
-    """Metaclass for BrokerBase. Handles broker instantiation and method
+"""Metaclass for BrokerBase. Handles broker instantiation and method
     translation for compatibility. All docstrings and comments must be line-wrapped
-    at 90 characters or less.
+    at 90 characters or less."""
     """
 
     def __new__(cls, name, bases, dct):
-        """Class has already been created ... fill missing methods if needed be
+"""Class has already been created ... fill missing methods if needed be
 
-Args:
+Args::
     name: 
     bases: 
+    dct:"""
     dct:"""
         # Initialize the class
         new_cls = super(MetaBroker, cls).__new__(cls, name, bases, dct)
@@ -57,53 +61,40 @@ Args:
 
 
 class BrokerBase(with_metaclass(MetaBroker, object)):
-    """Base class for brokers in Backtrader. Provides commission management,
+"""Base class for brokers in Backtrader. Provides commission management,
     order handling, and fund mode support. All docstrings and comments must be
-    line-wrapped at 90 characters or less.
+    line-wrapped at 90 characters or less."""
     """
 
     params = (("commission", CommInfoBase()),)
 
     def __init__(self):
-        """ """
-        if not hasattr(self, "p"):
-            self.p = type("Params", (), dict(self.params))()
-        self.comminfo = dict()
-        self.init()
+""""""
+""""""
+""""""
+""""""
+"""Add order history. See cerebro for details
 
-    def init(self):
-        """ """
-        # called from init and from start
-        if None not in self.comminfo:
-            self.comminfo = dict({None: self.p.commission})
-
-    def start(self):
-        """ """
-        self.init()
-
-    def stop(self):
-        """ """
-
-    def add_order_history(self, orders, notify=False):
-        """Add order history. See cerebro for details
-
-Args:
+Args::
     orders: 
+    notify: (Default value = False)"""
     notify: (Default value = False)"""
         raise NotImplementedError
 
     def set_fund_history(self, fund):
-        """Add fund history. See cerebro for details
+"""Add fund history. See cerebro for details
 
-Args:
+Args::
+    fund:"""
     fund:"""
         raise NotImplementedError
 
     def getcommissioninfo(self, data):
-        """Retrieves the ``CommissionInfo`` scheme associated with the given
+"""Retrieves the ``CommissionInfo`` scheme associated with the given
 ``data``
 
-Args:
+Args::
+    data:"""
     data:"""
         if data._name in self.comminfo:
             return self.comminfo[data._name]
@@ -124,13 +115,13 @@ Args:
         automargin=False,
         name=None,
     ):
-        """This method sets a `` CommissionInfo`` object for assets managed in
+"""This method sets a `` CommissionInfo`` object for assets managed in
 the broker with the parameters. Consult the reference for
 ``CommInfoBase``
 If name is ``None``, this will be the default for assets for which no
 other ``CommissionInfo`` scheme can be found
 
-Args:
+Args::
     commission: (Default value = 0.0)
     margin: (Default value = None)
     mult: (Default value = 1.0)
@@ -141,6 +132,7 @@ Args:
     interest_long: (Default value = False)
     leverage: (Default value = 1.0)
     automargin: (Default value = False)
+    name: (Default value = None)"""
     name: (Default value = None)"""
 
         comm = CommInfoBase()
@@ -157,41 +149,32 @@ Args:
         self.comminfo[name] = comm
 
     def addcommissioninfo(self, comminfo, name=None):
-        """Adds a ``CommissionInfo`` object that will be the default for all assets if
+"""Adds a ``CommissionInfo`` object that will be the default for all assets if
 ``name`` is ``None``
 
-Args:
+Args::
     comminfo: 
+    name: (Default value = None)"""
     name: (Default value = None)"""
         self.comminfo[name] = comminfo
 
     def getcash(self):
-        """ """
-        raise NotImplementedError
-
-    def getvalue(self, datas=None):
-        """Args:
+""""""
+"""Args::
     datas: (Default value = None)"""
-        raise NotImplementedError
-
-    def get_fundshares(self):
         """Returns the current number of shares in the fund-like mode"""
         return 1.0  # the abstract mode has only 1 share
 
     fundshares = property(get_fundshares)
 
     def get_fundvalue(self):
-        """ """
-        return self.getvalue()
-
-    fundvalue = property(get_fundvalue)
-
-    def set_fundmode(self, fundmode, fundstartval=None):
-        """Set the actual fundmode (True or False)
+""""""
+"""Set the actual fundmode (True or False)
 If the argument fundstartval is not ``None``, it will used
 
-Args:
+Args::
     fundmode: 
+    fundstartval: (Default value = None)"""
     fundstartval: (Default value = None)"""
         pass  # do nothing, not all brokers can support this
 
@@ -202,36 +185,13 @@ Args:
     fundmode = property(get_fundmode, set_fundmode)
 
     def getposition(self, data):
-        """Args:
+"""Args::
     data:"""
-        raise NotImplementedError
-
-    def submit(self, order):
-        """Args:
+"""Args::
     order:"""
-        raise NotImplementedError
-
-    def cancel(self, order):
-        """Args:
+"""Args::
     order:"""
-        raise NotImplementedError
-
-    def buy(
-        self,
-        owner,
-        data,
-        size,
-        price=None,
-        plimit=None,
-        exectype=None,
-        valid=None,
-        tradeid=0,
-        oco=None,
-        trailamount=None,
-        trailpercent=None,
-        **kwargs,
-    ):
-        """Args:
+"""Args::
     owner: 
     data: 
     size: 
@@ -242,6 +202,7 @@ Args:
     tradeid: (Default value = 0)
     oco: (Default value = None)
     trailamount: (Default value = None)
+    trailpercent: (Default value = None)"""
     trailpercent: (Default value = None)"""
 
         raise NotImplementedError
@@ -261,7 +222,7 @@ Args:
         trailpercent=None,
         **kwargs,
     ):
-        """Args:
+"""Args::
     owner: 
     data: 
     size: 
@@ -273,11 +234,12 @@ Args:
     oco: (Default value = None)
     trailamount: (Default value = None)
     trailpercent: (Default value = None)"""
+    trailpercent: (Default value = None)"""
 
         raise NotImplementedError
 
     def next(self):
-        """ """
+""""""
 
 
 # __all__ = ['BrokerBase', 'fillers', 'filler']

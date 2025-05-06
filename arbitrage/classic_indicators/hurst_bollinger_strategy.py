@@ -16,9 +16,8 @@ from backtrader.analyzers.sharpe import SharpeRatio
 from backtrader.analyzers.returns import Returns
 
 class HurstBollingerStrategy(bt.Strategy):
-    """
-    Pair trading strategy using the Hurst exponent and Bollinger Bands on the price
-    difference between two assets.
+"""Pair trading strategy using the Hurst exponent and Bollinger Bands on the price
+    difference between two assets."""
     """
     params = (
         ("hurst_period", 20),  # Hurst exponent calculation period
@@ -28,9 +27,8 @@ class HurstBollingerStrategy(bt.Strategy):
     )
 
     def __init__(self):
-        """
-        Initialize the HurstBollingerStrategy. Computes the price difference, Hurst
-        exponent, Bollinger Bands, and sets up trading state variables.
+"""Initialize the HurstBollingerStrategy. Computes the price difference, Hurst
+        exponent, Bollinger Bands, and sets up trading state variables."""
         """
         self.price_diff = self.data0.close - 1.4 * self.data1.close
         self.bollinger = BollingerBands(
@@ -43,9 +41,8 @@ class HurstBollingerStrategy(bt.Strategy):
         self.position_type = None
 
     def next(self):
-        """
-        Main strategy logic for each bar. Handles entry and exit conditions based on the
-        Hurst exponent and Bollinger Bands.
+"""Main strategy logic for each bar. Handles entry and exit conditions based on the
+        Hurst exponent and Bollinger Bands."""
         """
         if self.order:
             return
@@ -99,8 +96,7 @@ class HurstBollingerStrategy(bt.Strategy):
                     )
 
     def notify_order(self, order):
-        """
-        Handle order notifications and print execution details if logging is enabled.
+"""Handle order notifications and print execution details if logging is enabled."""
         """
         if order.status in [order.Completed]:
             if self.p.printlog:
@@ -121,17 +117,16 @@ class HurstBollingerStrategy(bt.Strategy):
         self.order = None
 
 def load_data(symbol1, symbol2, fromdate, todate):
-    """
-    Load two symbols from HDF5 and return as Backtrader PandasData feeds.
+"""Load two symbols from HDF5 and return as Backtrader PandasData feeds.
 
-    Args:
+Args::
         symbol1 (str): Key for the first symbol in the HDF5 file.
         symbol2 (str): Key for the second symbol in the HDF5 file.
         fromdate (datetime): Start date for the data.
         todate (datetime): End date for the data.
 
-    Returns:
-        tuple: (data0, data1) as Backtrader PandasData feeds.
+Returns::
+        tuple: (data0, data1) as Backtrader PandasData feeds."""
     """
     output_file = "D:\\FutureData\\ricequant\\1d_2017to2024_noadjust.h5"
     try:
@@ -152,8 +147,7 @@ def load_data(symbol1, symbol2, fromdate, todate):
         return None, None
 
 def optimize_parameters():
-    """
-    Optimize strategy parameters by running a grid search and print the best results.
+"""Optimize strategy parameters by running a grid search and print the best results."""
     """
     hurst_periods = [10, 15, 20, 25, 30]
     bollinger_periods = [5, 7, 10, 14, 20]
@@ -208,11 +202,10 @@ def optimize_parameters():
     plot_heatmap(results)
 
 def plot_heatmap(results):
-    """
-    Plot a heatmap of Sharpe ratios for each parameter combination.
+"""Plot a heatmap of Sharpe ratios for each parameter combination.
 
-    Args:
-        results (list): List of dictionaries with parameter results.
+Args::
+        results (list): List of dictionaries with parameter results."""
     """
     if not results:
         print("No valid backtest results. Cannot plot heatmap.")
@@ -244,17 +237,16 @@ def plot_heatmap(results):
     print("Heatmap saved as hurst_bollinger_heatmap.png")
 
 def run_strategy(hurst_period, bollinger_period, bollinger_dev, plot=False):
-    """
-    Run the Hurst-Bollinger arbitrage backtest, print results, and plot the equity curve.
+"""Run the Hurst-Bollinger arbitrage backtest, print results, and plot the equity curve.
 
-    Args:
+Args::
         hurst_period (int): Hurst exponent calculation period.
         bollinger_period (int): Bollinger Band period.
         bollinger_dev (float): Bollinger Band standard deviation multiplier.
         plot (bool): Whether to plot the results. Default is False.
 
-    Returns:
-        dict: Dictionary with Sharpe ratio, max drawdown, and annualized return.
+Returns::
+        dict: Dictionary with Sharpe ratio, max drawdown, and annualized return."""
     """
     cerebro = bt.Cerebro()
     cerebro.broker.setcash(150000)

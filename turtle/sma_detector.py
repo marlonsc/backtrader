@@ -1,4 +1,7 @@
-import os
+"""sma_detector.py module.
+
+Description of the module functionality."""
+
 import time
 
 # import matplotlib.pyplot as plt
@@ -7,28 +10,21 @@ import pandas as pd
 
 
 def calculate_sma(df, window):
-    """Args:
+"""Args::
     df: 
+    window:"""
     window:"""
     return df["close"].rolling(window=window).mean()
 
 
 def detect_golden_cross(df):
-    """Args:
+"""Args::
     df:"""
-    df["SMA5"] = calculate_sma(df, 5)
-    df["SMA10"] = calculate_sma(df, 10)
-    df["Crossover"] = (df["SMA5"] > df["SMA10"]) & (
-        df["SMA5"].shift(1) <= df["SMA10"].shift(1)
-    )
-    return df
-
-
-def run(start_date, end_date, stock_file, detect_days=7):
-    """Args:
+"""Args::
     start_date: 
     end_date: 
     stock_file: 
+    detect_days: (Default value = 7)"""
     detect_days: (Default value = 7)"""
     df = pd.read_csv(stock_file, parse_dates=["updateDate"], encoding="utf-8")
 
@@ -64,7 +60,7 @@ def run(start_date, end_date, stock_file, detect_days=7):
 
 
 def test_sma():
-    """ """
+""""""
     file = "data/sh.601318.csv"
     file = "data/sh.600989.csv"
     df = pd.read_csv(file, parse_dates=["date"], encoding="utf-8")

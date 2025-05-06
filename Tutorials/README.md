@@ -1,29 +1,26 @@
 # Tutorials
 
-Contains tutorial code and examples. Primarily contains Python code.
+This directory contains various files including 1 md file, 1 py file.
 
 ## Navigation
 
-* [🏠 Root Directory](../README.md)
+* [🏠 Root Directory](/Tutorials/..README.md)
 
 ### Subdirectories
 
-* [platform_concepts](platform_concepts/README.md) - Directory containing platform_concepts related files
-* [quickstart](quickstart/README.md) - Directory containing quickstart related files
+* [platform_concepts](platform_concepts/README.md) - This directory contains various files including 1 md file, 1 py file
+* [quickstart](quickstart/README.md) - This directory contains various files including 7 py files, 1 md file
 
 ## Files
 
-### README.md
-
-File with .md extension.
-
 ### __init__.py
+
+__init__.py module.
 
 ## Directory Summary
 
-This directory contains 2 files and 2 subdirectories.
+This directory contains 1 files and 2 subdirectories.
 
 ### File Types
 
-* .md: 1 files
 * .py: 1 files

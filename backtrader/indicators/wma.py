@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""wma.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -46,7 +49,7 @@ See also:
     lines = ("wma",)
 
     def __init__(self):
-        """ """
+""""""
         coef = 2.0 / (self.p.period * (self.p.period + 1.0))
         weights = tuple(float(x) for x in range(1, self.p.period + 1))
 

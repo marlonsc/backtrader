@@ -1,4 +1,7 @@
-import numpy as np
+"""test.py module.
+
+Description of the module functionality."""
+
 import pandas as pd
 
 # Copyright (c) 2025 backtrader contributors
@@ -16,9 +19,10 @@ df_RB = pd.read_hdf(output_file, key="/RB").reset_index()
 
 # 检查并对齐数据
 def check_and_align_data(df1, df2, date_column="date"):
-    """Args:
+"""Args::
     df1: 
     df2: 
+    date_column: (Default value = "date")"""
     date_column: (Default value = "date")"""
     if date_column in df1.columns:
         df1 = df1.set_index(date_column)
@@ -35,9 +39,10 @@ def check_and_align_data(df1, df2, date_column="date"):
 
 # 计算价差
 def calculate_spread(df_I, df_RB, columns=["open", "high", "low", "close", "volume"]):
-    """Args:
+"""Args::
     df_I: 
     df_RB: 
+    columns: (Default value = ["open","high","low","close","volume"])"""
     columns: (Default value = ["open","high","low","close","volume"])"""
     df_I_aligned, df_RB_aligned = check_and_align_data(df_I, df_RB)
     df_spread = pd.DataFrame(index=df_I_aligned.index)
@@ -51,8 +56,9 @@ def calculate_spread(df_I, df_RB, columns=["open", "high", "low", "close", "volu
 
 # 计算年化夏普比率
 def annualized_sharpe_ratio(returns, risk_free_rate=0.01):
-    """Args:
+"""Args::
     returns: 
+    risk_free_rate: (Default value = 0.01)"""
     risk_free_rate: (Default value = 0.01)"""
     excess_returns = returns - risk_free_rate / 252  # daily risk-free rate
     mean_return = excess_returns.mean()
@@ -64,7 +70,8 @@ def annualized_sharpe_ratio(returns, risk_free_rate=0.01):
 
 # 计算最大回撤
 def max_drawdown(nav):
-    """Args:
+"""Args::
+    nav:"""
     nav:"""
     running_max = np.maximum.accumulate(nav)
     drawdowns = (nav - running_max) / running_max

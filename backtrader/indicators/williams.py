@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""williams.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -60,21 +63,8 @@ See:
     plotlines = dict(percR=dict(_name="R%"))
 
     def _plotinif(self):
-        """ """
-        self.plotinfo.plotyhlines = [self.p.upperband, self.p.lowerband]
-
-    def __init__(self):
-        """ """
-        h = Highest(self.data.high, period=self.p.period)
-        l = Lowest(self.data.low, period=self.p.period)
-        c = self.data.close
-
-        self.lines.percR = -100.0 * (h - c) / (h - l)
-
-        super(WilliamsR, self).__init__()
-
-
-class WilliamsAD(Indicator):
+""""""
+""""""
     """By Larry Williams. It does cumulatively measure if the price is
 accumulating (upwards) or distributing (downwards) by using the concept of
 UpDays and DownDays.
@@ -88,7 +78,7 @@ See:
     lines = ("ad",)
 
     def __init__(self):
-        """ """
+""""""
         upday = UpDay(self.data.close)
         downday = DownDay(self.data.close)
 

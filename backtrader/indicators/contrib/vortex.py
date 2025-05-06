@@ -1,4 +1,9 @@
-#!/usr/bin/env python
+"""Vortex Indicator module.
+
+This module implements the Vortex Indicator (VI), which is designed to identify
+the start of a new trend or a continuation of an existing trend. It consists of
+two oscillators that capture positive and negative trend movement."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -33,10 +38,25 @@ __all__ = ["Vortex"]
 
 
 class Vortex(Indicator):
-    """See:
-    - http://www.vortexindicator.com/VFX_VORTEX.PDF
-
-
+"""Vortex Indicator implementation.
+    
+    The Vortex Indicator (VI) is designed to identify the start of a new trend or 
+    a continuation of an existing trend. It consists of two oscillators that capture 
+    positive and negative trend movement.
+    
+    Formula:
+    - VM+ = Sum of |Current High - Prior Low| for the specified period
+    - VM- = Sum of |Current Low - Prior High| for the specified period
+    - TR = Sum of True Range for the specified period
+    - VI+ = VM+ / TR
+    - VI- = VM- / TR
+    
+    Interpretation:
+    - When VI+ crosses above VI-, it may indicate the start of an uptrend
+    - When VI- crosses above VI+, it may indicate the start of a downtrend
+    
+    See:
+        - http://www.vortexindicator.com/VFX_VORTEX.PDF"""
     """
 
     lines = (
@@ -49,7 +69,10 @@ class Vortex(Indicator):
     plotlines = dict(vi_plus=dict(_name="+VI"), vi_minus=dict(_name="-VI"))
 
     def __init__(self):
-        """ """
+"""Initialize the Vortex indicator.
+        
+        Calculates the VI+ and VI- lines based on the formula."""
+        """
         h0l1 = abs(self.data.high(0) - self.data.low(-1))
         vm_plus = SumN(h0l1, period=self.p.period)
 

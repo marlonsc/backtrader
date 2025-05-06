@@ -1,14 +1,18 @@
-import backtrader as bt
+"""util_asserts.py module.
+
+Description of the module functionality."""
+
 
 
 def assert_data(data, idx: int, time, open=None, high=None, low=None, close=None):
-    """Args:
+"""Args::
     data: 
     idx: 
     time: 
     open: (Default value = None)
     high: (Default value = None)
     low: (Default value = None)
+    close: (Default value = None)"""
     close: (Default value = None)"""
     lables = ["open", "high", "low", "close"]
     for l in lables:

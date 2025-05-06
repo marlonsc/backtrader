@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""mt4csv.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #

@@ -1,4 +1,7 @@
-import datetime
+"""stock.py module.
+
+Description of the module functionality."""
+
 import multiprocessing
 import os
 from typing import List
@@ -16,10 +19,11 @@ Download stock datas
 
 
 def get_stock_list(type: str):
-    """Get all A or US stock name list
+"""Get all A or US stock name list
 type: zh_a | us
 
-Args:
+Args::
+    type:"""
     type:"""
     if not os.path.exists(mainpath):
         os.makedirs(mainpath)
@@ -56,18 +60,19 @@ def upsert_stock_detail(
     end_date: str = datetime.datetime.now().strftime("%Y%m%d"),
     period: str = "daily",
 ):
-    """Update or download stock data by symbol. Today's data will be updated after closing.
+"""Update or download stock data by symbol. Today's data will be updated after closing.
 type: us | zh_a
 symbol: stock's code
 start_date: stock data's start date
 end_date: stock data's end date
 period: daily | weekly | monthly
 
-Args:
+Args::
     type: 
     symbol: 
     start_date: 
     end_date: (Default value = datetime.datetime.now().strftime("%Y%m%d"))
+    period: (Default value = "daily")"""
     period: (Default value = "daily")"""
     dir = os.path.join(mainpath, f"{type}")
     if not os.path.exists(dir):
@@ -144,34 +149,14 @@ Args:
 
 
 def name_list(csv_name):
-    """Args:
+"""Args::
     csv_name:"""
-    import csv
-
-    csv_f = os.path.join(mainpath, f"{csv_name}")
-    stock_list = []
-    with open(csv_f, "r", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            if not row["名称"].startswith("N"):
-                stock_list.append(row["代码"])
-            else:
-                print(row["名称"])
-    return stock_list
-
-
-def get_stock_list_task(
-    stock_list: List[str],
-    type: str,
-    start_date: str,
-    end_date: str = datetime.datetime.now().strftime("%Y%m%d"),
-    period: str = "daily",
-):
-    """Args:
+"""Args::
     stock_list: 
     type: 
     start_date: 
     end_date: (Default value = datetime.datetime.now().strftime("%Y%m%d"))
+    period: (Default value = "daily")"""
     period: (Default value = "daily")"""
     # group's download bar
     bar = IncrementalBar("Download", max=len(stock_list))
@@ -208,7 +193,8 @@ if __name__ == "__main__":
     stock_lists = [stock_list[i : i + n] for i in range(0, len(stock_list), n)]
 
     def bar_update(num):
-        """Args:
+"""Args::
+    num:"""
     num:"""
         pbar.update(num)
         print(f"{pbar.n} / {pbar.total} / {pbar.leave}")

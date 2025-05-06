@@ -20,26 +20,8 @@ from .son import RE_TYPE
 
 
 def str_flags_to_int(str_flags):
-    """Args:
+"""Args::
     str_flags:"""
-    flags = 0
-    if "i" in str_flags:
-        flags |= re.IGNORECASE
-    if "l" in str_flags:
-        flags |= re.LOCALE
-    if "m" in str_flags:
-        flags |= re.MULTILINE
-    if "s" in str_flags:
-        flags |= re.DOTALL
-    if "u" in str_flags:
-        flags |= re.UNICODE
-    if "x" in str_flags:
-        flags |= re.VERBOSE
-
-    return flags
-
-
-class Regex(object):
     """BSON regular expression data."""
 
     __slots__ = ("pattern", "flags")
@@ -51,7 +33,7 @@ class Regex(object):
 
     @classmethod
     def from_native(cls, regex):
-        """Convert a Python regular expression into a ``Regex`` instance.
+"""Convert a Python regular expression into a ``Regex`` instance.
 Note that in Python 3, a regular expression compiled from a
 :class:`str` has the ``re.UNICODE`` flag set. If it is undesirable
 to store this flag in a BSON regular expression, unset it first::
@@ -65,7 +47,8 @@ Python, or may match a different set of strings in Python than
 when used in a MongoDB query.
 .. _PCRE: http://www.pcre.org/
 
-Args:
+Args::
+    regex:"""
     regex:"""
         if not isinstance(regex, RE_TYPE):
             raise TypeError(
@@ -75,7 +58,7 @@ Args:
         return Regex(regex.pattern, regex.flags)
 
     def __init__(self, pattern, flags=0):
-        """BSON regular expression data.
+"""BSON regular expression data.
 This class is useful to store and retrieve regular expressions that are
 incompatible with Python's regular expression dialect.
 :Parameters:
@@ -83,8 +66,9 @@ incompatible with Python's regular expression dialect.
 - `flags`: (optional) an integer bitmask, or a string of flag
 characters like "im" for IGNORECASE and MULTILINE
 
-Args:
+Args::
     pattern: 
+    flags: (Default value = 0)"""
     flags: (Default value = 0)"""
         if not isinstance(pattern, (str, bytes)):
             raise TypeError("pattern must be a string, not %s" % type(pattern))
@@ -98,25 +82,11 @@ Args:
             raise TypeError("flags must be a string or int, not %s" % type(flags))
 
     def __eq__(self, other):
-        """Args:
+"""Args::
     other:"""
-        if isinstance(other, Regex):
-            return self.pattern == other.pattern and self.flags == other.flags
-        else:
-            return NotImplemented
-
-    __hash__ = None
-
-    def __ne__(self, other):
-        """Args:
+"""Args::
     other:"""
-        return not self == other
-
-    def __repr__(self):
-        """ """
-        return "Regex(%r, %r)" % (self.pattern, self.flags)
-
-    def try_compile(self):
+""""""
         """Compile this :class:`Regex` as a Python regular expression.
 .. warning::
 Python regular expressions use a different syntax and different

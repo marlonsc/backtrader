@@ -24,57 +24,29 @@ class MinKey(object):
     _type_marker = 255
 
     def __getstate__(self) -> Any:
-        """
-
-
-        :rtype: Any
-
+""":rtype: Any"""
         """
         return {}
 
     def __setstate__(self, state: Any) -> None:
-        """Args:
+"""Args::
     state:"""
-
-    def __eq__(self, other: Any) -> bool:
-        """Args:
+"""Args::
     other:"""
-        return isinstance(other, MinKey)
-
-    def __hash__(self) -> int:
-        """
-
-
-        :rtype: int
-
+""":rtype: int"""
         """
         return hash(self._type_marker)
 
     def __ne__(self, other: Any) -> bool:
-        """Args:
+"""Args::
     other:"""
-        return not self == other
-
-    def __le__(self, dummy: Any) -> bool:
-        """Args:
+"""Args::
     dummy:"""
-        return True
-
-    def __lt__(self, other: Any) -> bool:
-        """Args:
+"""Args::
     other:"""
-        return not isinstance(other, MinKey)
-
-    def __ge__(self, other: Any) -> bool:
-        """Args:
+"""Args::
     other:"""
-        return isinstance(other, MinKey)
-
-    def __gt__(self, dummy: Any) -> bool:
-        """Args:
+"""Args::
     dummy:"""
-        return False
-
-    def __repr__(self):
-        """ """
+""""""
         return "MinKey()"

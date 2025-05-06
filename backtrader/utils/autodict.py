@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""autodict.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -31,68 +34,23 @@ from .py3 import values as py3lvalues
 
 
 def Tree():
-    """ """
-    return defaultdict(Tree)
-
-
-class AutoDictList(dict):
-    """ """
-
-    def __missing__(self, key):
-        """Args:
+""""""
+""""""
+"""Args::
     key:"""
-        value = self[key] = list()
-        return value
-
-
-class DotDict(dict):
-    """ """
-
-    # If the attribut is not found in the usual places try the dict itself
-    def __getattr__(self, key):
-        """Args:
+""""""
+"""Args::
     key:"""
-        if key.startswith("__"):
-            return super(DotDict, self).__getattr__(key)
-        return self[key]
-
-
-class AutoDict(dict):
-    """ """
-
-    _closed = False
-
-    def _close(self):
-        """ """
-        self._closed = True
-        for key, val in self.items():
-            if isinstance(val, (AutoDict, AutoOrderedDict)):
-                val._close()
-
-    def _open(self):
-        """ """
-        self._closed = False
-
-    def __missing__(self, key):
-        """Args:
+""""""
+""""""
+""""""
+"""Args::
     key:"""
-        if self._closed:
-            raise KeyError
-
-        value = self[key] = AutoDict()
-        return value
-
-    def __getattr__(self, key):
-        """Args:
+"""Args::
     key:"""
-        if False and key.startswith("_"):
-            raise AttributeError
-
-        return self[key]
-
-    def __setattr__(self, key, value):
-        """Args:
+"""Args::
     key: 
+    value:"""
     value:"""
         if False and key.startswith("_"):
             self.__dict__[key] = value
@@ -102,42 +60,16 @@ class AutoDict(dict):
 
 
 class AutoOrderedDict(OrderedDict):
-    """ """
-
-    _closed = False
-
-    def _close(self):
-        """ """
-        self._closed = True
-        for key, val in self.items():
-            if isinstance(val, (AutoDict, AutoOrderedDict)):
-                val._close()
-
-    def _open(self):
-        """ """
-        self._closed = False
-
-    def __missing__(self, key):
-        """Args:
+""""""
+""""""
+""""""
+"""Args::
     key:"""
-        if self._closed:
-            raise KeyError
-
-        # value = self[key] = type(self)()
-        value = self[key] = AutoOrderedDict()
-        return value
-
-    def __getattr__(self, key):
-        """Args:
+"""Args::
     key:"""
-        if key.startswith("_"):
-            raise AttributeError
-
-        return self[key]
-
-    def __setattr__(self, key, value):
-        """Args:
+"""Args::
     key: 
+    value:"""
     value:"""
         if key.startswith("_"):
             self.__dict__[key] = value
@@ -147,45 +79,15 @@ class AutoOrderedDict(OrderedDict):
 
     # Define math operations
     def __iadd__(self, other):
-        """Args:
+"""Args::
     other:"""
-        if not isinstance(self, type(other)):
-            return type(other)() + other
-
-        return self + other
-
-    def __isub__(self, other):
-        """Args:
+"""Args::
     other:"""
-        if not isinstance(self, type(other)):
-            return type(other)() - other
-
-        return self - other
-
-    def __imul__(self, other):
-        """Args:
+"""Args::
     other:"""
-        if not isinstance(self, type(other)):
-            return type(other)() * other
-
-        return self + other
-
-    def __idiv__(self, other):
-        """Args:
+"""Args::
     other:"""
-        if not isinstance(self, type(other)):
-            return type(other)() // other
-
-        return self + other
-
-    def __itruediv__(self, other):
-        """Args:
+"""Args::
     other:"""
-        if not isinstance(self, type(other)):
-            return type(other)() / other
-
-        return self + other
-
-    def lvalues(self):
-        """ """
+""""""
         return py3lvalues(self)

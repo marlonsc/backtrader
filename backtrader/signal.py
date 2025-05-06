@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""signal.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -63,10 +66,8 @@ SignalTypes = [
 
 
 class Signal(Indicator):
-    """Signal indicator for strategy logic. All docstrings and comments must be
-    line-wrapped at 90 characters or less.
-
-
+"""Signal indicator for strategy logic. All docstrings and comments must be
+    line-wrapped at 90 characters or less."""
     """
 
     SignalTypes = SignalTypes
@@ -74,6 +75,6 @@ class Signal(Indicator):
     lines = ("signal",)
 
     def __init__(self):
-        """ """
+""""""
         self.lines.signal = self.data0.lines[0]
         self.plotinfo.plotmaster = getattr(self.data0, "_clock", self.data0)

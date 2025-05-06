@@ -1,7 +1,6 @@
 # Copyright (c) 2025 backtrader contributors
-"""
-Utilities for timer manipulation in backtrader.
-All functions and docstrings should be line-wrapped ≤ 90 characters.
+"""Utilities for timer manipulation in backtrader.
+All functions and docstrings should be line-wrapped ≤ 90 characters."""
 """
 
 import datetime
@@ -26,9 +25,9 @@ def create_timer(
     *args,
     **kwargs,
 ):
-    """Creates and adds a timer to the list of pending timers.
+"""Creates and adds a timer to the list of pending timers.
 
-Args:
+Args::
     pretimers: List of pending timers
     owner: Timer owner object
     when: Trigger condition
@@ -43,7 +42,8 @@ Args:
     strats: Strategies
     cheat: Cheat flag
 
-Returns:
+Returns::
+    Timer instance"""
     Timer instance"""
     if weekdays is None:
         weekdays = []
@@ -86,9 +86,9 @@ def schedule_timer(
     *args,
     **kwargs,
 ):
-    """Schedules a timer for the cerebro object.
+"""Schedules a timer for the cerebro object.
 
-Args:
+Args::
     cerebro: Cerebro instance
     when: Trigger condition
     offset: Timer offset
@@ -102,7 +102,8 @@ Args:
     strats: Strategies
     cheat: Cheat flag
 
-Returns:
+Returns::
+    Timer instance"""
     Timer instance"""
     return create_timer(
         cerebro._pretimers,
@@ -124,8 +125,9 @@ Returns:
 
 
 def notify_timer(timer, when, *args, **kwargs):
-    """Timer notification (stub for future interface).
+"""Timer notification (stub for future interface).
 
-Args:
+Args::
     timer: Timer instance
+    when: Timer moment"""
     when: Timer moment"""

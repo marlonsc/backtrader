@@ -1,31 +1,28 @@
 # strategies
 
-Contains trading strategy implementations. Primarily contains Python code.
+This directory contains various files including 1 md file, 1 py file.
 
 ## Navigation
 
-* [🏠 Root Directory](../../README.md)
+* [🏠 Root Directory](/backtest/strategies/../backtest/strategies/..README.md)
 * [⬆️ Parent Directory (backtest)](../README.md)
 
 ### Subdirectories
 
-* [g8_strategy](g8_strategy/README.md) - Directory containing g8_strategy related files
-* [strategy_template](strategy_template/README.md) - Contains temporary files
-* [test_strategy](test_strategy/README.md) - Contains test files and test utilities
+* [g8_strategy](g8_strategy/README.md) - This directory contains various files including 2 csv files, 1 py file, 1 md file
+* [strategy_template](strategy_template/README.md) - This directory contains various files including 1 py file, 1 md file
+* [test_strategy](test_strategy/README.md) - This directory contains various files including 1 md file, 1 py file
 
 ## Files
 
-### README.md
-
-File with .md extension.
-
 ### __init__.py
+
+__init__.py module.
 
 ## Directory Summary
 
-This directory contains 2 files and 3 subdirectories.
+This directory contains 1 files and 3 subdirectories.
 
 ### File Types
 
-* .md: 1 files
 * .py: 1 files

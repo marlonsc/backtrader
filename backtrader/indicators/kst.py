@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""kst.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -66,7 +69,7 @@ See:
     plotinfo = dict(plothlines=[0.0])
 
     def __init__(self):
-        """ """
+""""""
         rcma1 = self.p._rmovav(ROC100(period=self.p.rp1), period=self.p.rma1)
         rcma2 = self.p._rmovav(ROC100(period=self.p.rp2), period=self.p.rma2)
         rcma3 = self.p._rmovav(ROC100(period=self.p.rp3), period=self.p.rma3)

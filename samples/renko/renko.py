@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""renko.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -32,72 +35,13 @@ import backtrader as bt
 
 
 class St(bt.Strategy):
-    """ """
-
-    params = dict()
-
-    def __init__(self):
-        """ """
-        for d in self.datas:
-            bt.ind.RSI(d)
-
-    def next(self):
-        """ """
-
-
-def runstrat(args=None):
-    """Args:
+""""""
+""""""
+""""""
+"""Args::
     args: (Default value = None)"""
-    args = parse_args(args)
-
-    cerebro = bt.Cerebro()
-
-    # Data feed kwargs
-    kwargs = dict()
-
-    # Parse from/to-date
-    dtfmt, tmfmt = "%Y-%m-%d", "T%H:%M:%S"
-    for a, d in ((getattr(args, x), x) for x in ["fromdate", "todate"]):
-        if a:
-            strpfmt = dtfmt + tmfmt * ("T" in a)
-            kwargs[d] = datetime.datetime.strptime(a, strpfmt)
-
-    data0 = bt.feeds.BacktraderCSVData(dataname=args.data0, **kwargs)
-
-    fkwargs = dict()
-    fkwargs.update(**eval("dict(" + args.renko + ")"))
-
-    if not args.dual:
-        data0.addfilter(bt.filters.Renko, **fkwargs)
-        cerebro.adddata(data0)
-    else:
-        cerebro.adddata(data0)
-        data1 = data0.clone()
-        data1.addfilter(bt.filters.Renko, **fkwargs)
-        cerebro.adddata(data1)
-
-    # Broker
-    cerebro.broker = bt.brokers.BackBroker(**eval("dict(" + args.broker + ")"))
-
-    # Sizer
-    cerebro.addsizer(bt.sizers.FixedSize, **eval("dict(" + args.sizer + ")"))
-
-    # Strategy
-    cerebro.addstrategy(St, **eval("dict(" + args.strat + ")"))
-
-    # Execute
-    kwargs = dict(stdstats=False)
-    kwargs.update(**eval("dict(" + args.cerebro + ")"))
-    cerebro.run(**kwargs)
-
-    if args.plot:  # Plot if requested to
-        kwargs = dict(style="candle")
-        kwargs.update(**eval("dict(" + args.plot + ")"))
-        cerebro.plot(**kwargs)
-
-
-def parse_args(pargs=None):
-    """Args:
+"""Args::
+    pargs: (Default value = None)"""
     pargs: (Default value = None)"""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

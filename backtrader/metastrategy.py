@@ -1,4 +1,7 @@
-#!/usr/bin389/env python
+"""metastrategy.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -37,7 +40,9 @@ try:
     from .sizers import FixedSize
 except ImportError:
 
-    class FixedSize:
+"""FixedSize class.
+
+Description of the class functionality."""
         pass
 
 
@@ -45,7 +50,9 @@ try:
     from .order import Order
 except ImportError:
 
-    class Order:
+"""Order class.
+
+Description of the class functionality."""
         pass
 
 
@@ -53,7 +60,9 @@ try:
     from .lineroot import LineRoot
 except ImportError:
 
-    class LineRoot:
+"""LineRoot class.
+
+Description of the class functionality."""
         pass
 
 
@@ -93,7 +102,9 @@ try:
     from .strategy import Strategy
 except ImportError:
 
-    class Strategy:
+"""Strategy class.
+
+Description of the class functionality."""
         pass
 
 
@@ -101,10 +112,14 @@ try:
     from .utils import AutoDictList, AutoOrderedDict
 except ImportError:
 
-    class AutoDictList(dict):
+"""AutoDictList class.
+
+Description of the class functionality."""
         pass
 
-    class AutoOrderedDict(dict):
+"""AutoOrderedDict class.
+
+Description of the class functionality."""
         pass
 
 
@@ -114,10 +129,11 @@ class MetaStrategy(type):
     _indcol = dict()
 
     def __new__(meta, name, bases, dct):
-        """Args:
+"""Args::
     meta: 
     name: 
     bases: 
+    dct:"""
     dct:"""
         # Hack to support original method name for notify_order
         if "notify" in dct:
@@ -130,11 +146,12 @@ class MetaStrategy(type):
         return super(MetaStrategy, meta).__new__(meta, name, bases, dct)
 
     def __init__(cls, name, bases, dct):
-        """Class has already been created ... register subclasses
+"""Class has already been created ... register subclasses
 
-Args:
+Args::
     name: 
     bases: 
+    dct:"""
     dct:"""
         # Initialize the class
         super(MetaStrategy, cls).__init__(name, bases, dct)
@@ -159,28 +176,10 @@ Args:
         return _obj, args, kwargs
 
     def dopreinit(self, _obj, *args, **kwargs):
-        """Args:
+"""Args::
     _obj:"""
-        if hasattr(super(MetaStrategy, self), "dopreinit"):
-            _obj, args, kwargs = super(MetaStrategy, self).dopreinit(
-                _obj, *args, **kwargs
-            )
-        _obj.broker = getattr(_obj.env, "broker", None)
-        _obj._sizer = FixedSize()
-        _obj._orders = list()
-        _obj._orderspending = list()
-        _obj._trades = collections.defaultdict(AutoDictList)
-        _obj._tradespending = list()
-        _obj.stats = _obj.observers = ItemCollection()
-        _obj.analyzers = ItemCollection()
-        _obj._alnames = collections.defaultdict(itertools.count)
-        _obj.writers = list()
-        _obj._slave_analyzers = list()
-        _obj._tradehistoryon = False
-        return _obj, args, kwargs
-
-    def dopostinit(self, _obj, *args, **kwargs):
-        """Args:
+"""Args::
+    _obj:"""
     _obj:"""
         if hasattr(super(MetaStrategy, self), "dopostinit"):
             _obj, args, kwargs = super(MetaStrategy, self).dopostinit(

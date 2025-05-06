@@ -38,10 +38,11 @@ Time_t = Union[dt.time, dt.datetime]
 
 
 def df(objs, labels: Optional[List[str]] = None):
-    """Create pandas DataFrame from the sequence of same-type objects.
+"""Create pandas DataFrame from the sequence of same-type objects.
 
-Args:
+Args::
     objs: 
+    labels: If supplied, retain only the given labels and drop the rest. (Default value = None)"""
     labels: If supplied, retain only the given labels and drop the rest. (Default value = None)"""
     import pandas as pd
 
@@ -71,10 +72,11 @@ Args:
 
 
 def dataclassAsDict(obj) -> dict:
-    """Args:
+"""Args::
     obj: 
 
-Returns:
+Returns::
+    This is a non-recursive variant of ``dataclasses.asdict``."""
     This is a non-recursive variant of ``dataclasses.asdict``."""
     if not is_dataclass(obj):
         raise TypeError(f"Object {obj} is not a dataclass")
@@ -82,10 +84,11 @@ Returns:
 
 
 def dataclassAsTuple(obj) -> tuple:
-    """Args:
+"""Args::
     obj: 
 
-Returns:
+Returns::
+    This is a non-recursive variant of ``dataclasses.astuple``."""
     This is a non-recursive variant of ``dataclasses.astuple``."""
     if not is_dataclass(obj):
         raise TypeError(f"Object {obj} is not a dataclass")
@@ -93,10 +96,11 @@ Returns:
 
 
 def dataclassNonDefaults(obj) -> dict:
-    """For a ``dataclass`` instance get the fields that are different from the
+"""For a ``dataclass`` instance get the fields that are different from the
 default values and return as ``dict``.
 
-Args:
+Args::
+    obj:"""
     obj:"""
     if not is_dataclass(obj):
         raise TypeError(f"Object {obj} is not a dataclass")
@@ -111,10 +115,11 @@ Args:
 
 
 def dataclassUpdate(obj, *srcObjs, **kwargs) -> object:
-    """Update fields of the given ``dataclass`` object from zero or more
+"""Update fields of the given ``dataclass`` object from zero or more
 ``dataclass`` source objects and/or from keyword arguments.
 
-Args:
+Args::
+    obj:"""
     obj:"""
     if not is_dataclass(obj):
         raise TypeError(f"Object {obj} is not a dataclass")
@@ -125,10 +130,11 @@ Args:
 
 
 def dataclassRepr(obj) -> str:
-    """Provide a culled representation of the given ``dataclass`` instance,
+"""Provide a culled representation of the given ``dataclass`` instance,
 showing only the fields with a non-default value.
 
-Args:
+Args::
+    obj:"""
     obj:"""
     attrs = dataclassNonDefaults(obj)
     clsName = obj.__class__.__qualname__
@@ -137,9 +143,10 @@ Args:
 
 
 def isnamedtupleinstance(x):
-    """From https://stackoverflow.com/a/2166841/6067848
+"""From https://stackoverflow.com/a/2166841/6067848
 
-Args:
+Args::
+    x:"""
     x:"""
     t = type(x)
     b = t.__bases__
@@ -152,10 +159,11 @@ Args:
 
 
 def tree(obj):
-    """Convert object to a tree of lists, dicts and simple values.
+"""Convert object to a tree of lists, dicts and simple values.
 The result can be serialized to JSON.
 
-Args:
+Args::
+    obj:"""
     obj:"""
     if isinstance(obj, (bool, int, float, str, bytes)):
         return obj
@@ -174,13 +182,14 @@ Args:
 
 
 def barplot(bars, title="", upColor="blue", downColor="red"):
-    """Create candlestick plot for the given bars. The bars can be given as
+"""Create candlestick plot for the given bars. The bars can be given as
 a DataFrame or as a list of bar objects.
 
-Args:
+Args::
     bars: 
     title: (Default value = "")
     upColor: (Default value = "blue")
+    downColor: (Default value = "red")"""
     downColor: (Default value = "red")"""
     import matplotlib.pyplot as plt
     import pandas as pd
@@ -230,10 +239,11 @@ def allowCtrlC():
 
 
 def logToFile(path, level=logging.INFO):
-    """Create a log handler that logs to the given file.
+"""Create a log handler that logs to the given file.
 
-Args:
+Args::
     path: 
+    level: (Default value = logging.INFO)"""
     level: (Default value = logging.INFO)"""
     logger = logging.getLogger()
     if logger.handlers:
@@ -247,10 +257,11 @@ Args:
 
 
 def logToConsole(level=logging.INFO, logger=None):
-    """Create a log handler that logs to the console.
+"""Create a log handler that logs to the console.
 
-Args:
+Args::
     level: (Default value = logging.INFO)
+    logger: (Default value = None)"""
     logger: (Default value = None)"""
     logger = logger if logger else logging.getLogger()
     stdHandlers = [
@@ -272,17 +283,19 @@ Args:
 
 
 def isNan(x: float) -> bool:
-    """Not a number test.
+"""Not a number test.
 
-Args:
+Args::
+    x:"""
     x:"""
     return x != x
 
 
 def formatSI(n: float) -> str:
-    """Format the integer or float n to 3 significant digits + SI prefix.
+"""Format the integer or float n to 3 significant digits + SI prefix.
 
-Args:
+Args::
+    n:"""
     n:"""
     s = ""
     if n < 0:
@@ -313,28 +326,23 @@ class timeit:
     """Context manager for timing."""
 
     def __init__(self, title="Run"):
-        """Args:
+"""Args::
     title: (Default value = "Run")"""
-        self.title = title
-
-    def __enter__(self):
-        """ """
-        self.t0 = time.time()
-
-    def __exit__(self, *_args):
+""""""
         """"""
         print(self.title + " took " + formatSI(time.time() - self.t0) + "s")
 
 
 def run(*awaitables: Awaitable, timeout: Optional[float] = None):
-    """By default run the event loop forever.
+"""By default run the event loop forever.
 When awaitables (like Tasks, Futures or coroutines) are given then
 run the event loop until each has completed and return their results.
 An optional timeout (in seconds) can be given that will raise
 asyncio.TimeoutError if the awaitables are not ready within the
 timeout period.
 
-Args:
+Args::
+    timeout: (Default value = None)"""
     timeout: (Default value = None)"""
     # loop = getLoop()
     loop = None
@@ -373,39 +381,17 @@ Args:
         task = asyncio.ensure_future(future)
 
         def onError(_):
-            """Args:
+"""Args::
     _:"""
-            task.cancel()
-
-        globalErrorEvent.connect(onError)
-        try:
-            result = loop.run_until_complete(task)
-        except asyncio.CancelledError as e:
-            raise globalErrorEvent.value() or e
-        finally:
-            globalErrorEvent.disconnect(onError)
-
-    return result
-
-
-def _fillDate(time: Time_t) -> dt.datetime:
-    """Args:
+"""Args::
     time:"""
-    # use today if date is absent
-    if isinstance(time, dt.time):
-        t = dt.datetime.combine(dt.date.today(), time)
-    else:
-        t = time
-    return t
-
-
-def schedule(time: Time_t, callback: Callable, *args):
-    """Schedule the callback to be run at the given time with
+"""Schedule the callback to be run at the given time with
 the given arguments.
 This will return the Event Handle.
 
-Args:
+Args::
     time: Time to run callback. If given as :py:class:`datetime.time`
+    callback: Callable scheduled to run."""
     callback: Callable scheduled to run."""
     t = _fillDate(time)
     now = dt.datetime.now(t.tzinfo)
@@ -415,22 +401,24 @@ Args:
 
 
 def sleep(secs: float = 0.02) -> bool:
-    """Wait for the given amount of seconds while everything still keeps
+"""Wait for the given amount of seconds while everything still keeps
 processing in the background. Never use time.sleep().
 
-Args:
+Args::
+    secs: Time in seconds to wait. (Default value = 0.02)"""
     secs: Time in seconds to wait. (Default value = 0.02)"""
     run(asyncio.sleep(secs))
     return True
 
 
 def timeRange(start: Time_t, end: Time_t, step: float) -> Iterator[dt.datetime]:
-    """Iterator that waits periodically until certain time points are
+"""Iterator that waits periodically until certain time points are
 reached while yielding those time points.
 
-Args:
+Args::
     start: Start time, can be specified as datetime.datetime,
     end: End time, can be specified as datetime.datetime,
+    step: The number of seconds of each period"""
     step: The number of seconds of each period"""
     assert step > 0
     delta = dt.timedelta(seconds=step)
@@ -446,9 +434,10 @@ Args:
 
 
 def waitUntil(t: Time_t) -> bool:
-    """Wait until the given time t is reached.
+"""Wait until the given time t is reached.
 
-Args:
+Args::
+    t: The time t can be specified as datetime.datetime,"""
     t: The time t can be specified as datetime.datetime,"""
     now = dt.datetime.now(t.tzinfo)
     secs = (_fillDate(t) - now).total_seconds()
@@ -515,46 +504,19 @@ def startLoop():
 
 
 def useQt(qtLib: str = "PyQt5", period: float = 0.01):
-    """Run combined Qt5/asyncio event loop.
+"""Run combined Qt5/asyncio event loop.
 
-Args:
+Args::
     qtLib: Name of Qt library to use:
+    period: Period in seconds to poll Qt. (Default value = 0.01)"""
     period: Period in seconds to poll Qt. (Default value = 0.01)"""
 
     def qt_step():
-        """ """
-        loop.call_later(period, qt_step)
-        if not stack:
-            qloop = qc.QEventLoop()
-            timer = qc.QTimer()
-            timer.timeout.connect(qloop.quit)
-            stack.append((qloop, timer))
-        qloop, timer = stack.pop()
-        timer.start(0)
-        qloop.exec() if qtLib == "PyQt6" else qloop.exec_()
-        timer.stop()
-        stack.append((qloop, timer))
-        qApp.processEvents()  # type: ignore
+""""""
+"""Format date or datetime to string that IB uses.
 
-    if qtLib not in ("PyQt5", "PyQt6", "PySide2", "PySide6"):
-        raise RuntimeError(f"Unknown Qt library: {qtLib}")
-    from importlib import import_module
-
-    qc = import_module(qtLib + ".QtCore")
-    qw = import_module(qtLib + ".QtWidgets")
-    global qApp
-    qApp = qw.QApplication.instance() or qw.QApplication(  # type: ignore
-        sys.argv
-    )  # type: ignore
-    loop = getLoop()
-    stack: list = []
-    qt_step()
-
-
-def formatIBDatetime(t: Union[dt.date, dt.datetime, str, None]) -> str:
-    """Format date or datetime to string that IB uses.
-
-Args:
+Args::
+    t:"""
     t:"""
     if not t:
         s = ""
@@ -573,9 +535,10 @@ Args:
 
 
 def parseIBDatetime(s: str) -> Union[dt.date, dt.datetime]:
-    """Parse string in IB date or datetime format to datetime.
+"""Parse string in IB date or datetime format to datetime.
 
-Args:
+Args::
+    s:"""
     s:"""
     if len(s) == 8:
         # YYYYmmdd

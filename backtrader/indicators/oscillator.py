@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""oscillator.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -43,20 +46,8 @@ Formula:
     plotlines = dict(_0=dict(_name="osc"))
 
     def _plotinit(self):
-        """ """
-        try:
-            lname = self.lines._getlinealias(0)
-            self.plotlines._0._name = lname + "_osc"
-        except AttributeError:
-            pass
-
-    def __init__(self):
-        """ """
-        self.lines[0] = self.data - self.lines[0]
-        super(OscillatorMixIn, self).__init__()
-
-
-class Oscillator(Indicator):
+""""""
+""""""
     """Oscillation of a given data around another data
 Datas:
 This indicator can accept 1 or 2 datas for the calculation.
@@ -76,30 +67,8 @@ Formula:
     plotlines = dict(_0=dict(_name="osc"))
 
     def _plotinit(self):
-        """ """
-        try:
-            lname = self.dataosc._getlinealias(0)
-            self.plotlines._0._name = lname + "_osc"
-        except AttributeError:
-            pass
-
-    def __init__(self):
-        """ """
-        super(Oscillator, self).__init__()
-
-        if len(self.datas) > 1:
-            datasrc = self.data
-            self.dataosc = self.data1
-        else:
-            datasrc = self.data.data
-            self.dataosc = self.data
-
-        self.lines[0] = datasrc - self.dataosc
-
-
-# Automatic creation of Oscillating Lines
-
-for movav in MovingAverage._movavs[1:]:
+""""""
+""""""
     _newclsdoc = """
     Oscillation of a %s around its data
     """

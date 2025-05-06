@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""drawdown.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -31,10 +34,8 @@ from .. import Observer
 
 
 class DrawDown(Observer):
-    """This observer keeps track of the current drawdown level (plotted) and
-    the maxdrawdown (not plotted) levels
-
-
+"""This observer keeps track of the current drawdown level (plotted) and
+    the maxdrawdown (not plotted) levels"""
     """
 
     _stclock = True
@@ -55,21 +56,10 @@ class DrawDown(Observer):
     )
 
     def __init__(self):
-        """ """
-        kwargs = self.p._getkwargs()
-        self._dd = self._owner._addanalyzer_slave(bt.analyzers.DrawDown, **kwargs)
-
-    def next(self):
-        """ """
-        self.lines.drawdown[0] = self._dd.rets.drawdown  # update drawdown
-        self.lines.maxdrawdown[0] = self._dd.rets.max.drawdown  # update max
-
-
-class DrawDownLength(Observer):
-    """This observer keeps track of the current drawdown length (plotted) and
-    the drawdown max length (not plotted)
-
-
+""""""
+""""""
+"""This observer keeps track of the current drawdown length (plotted) and
+    the drawdown max length (not plotted)"""
     """
 
     _stclock = True
@@ -88,10 +78,7 @@ class DrawDownLength(Observer):
     )
 
     def __init__(self):
-        """ """
-        self._dd = self._owner._addanalyzer_slave(bt.analyzers.DrawDown)
-
-    def next(self):
-        """ """
+""""""
+""""""
         self.lines.len[0] = self._dd.rets.len  # update drawdown length
         self.lines.maxlen[0] = self._dd.rets.max.len  # update max length

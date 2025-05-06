@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""analyzer-annualreturn.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -57,14 +60,11 @@ It can be a long-only strategy by setting the param "onlylong" to True"""
     )
 
     def start(self):
-        """ """
-
-    def stop(self):
-        """ """
-
-    def log(self, txt, dt=None):
-        """Args:
+""""""
+""""""
+"""Args::
     txt: 
+    dt: (Default value = None)"""
     dt: (Default value = None)"""
         if self.p.printout:
             dt = dt or self.data.datetime[0]
@@ -72,135 +72,14 @@ It can be a long-only strategy by setting the param "onlylong" to True"""
             print("%s, %s" % (dt.isoformat(), txt))
 
     def __init__(self):
-        """ """
-        # To control operation entries
-        self.orderid = None
-
-        # Create SMA on 2nd data
-        sma = btind.MovAv.SMA(self.data, period=self.p.period)
-        # Create a CrossOver Signal from close an moving average
-        self.signal = btind.CrossOver(self.data.close, sma)
-        self.signal.csv = self.p.csvcross
-
-    def next(self):
-        """ """
-        if self.orderid:
-            return  # if an order is active, no new orders are allowed
-
-        if self.signal > 0.0:  # cross upwards
-            if self.position:
-                self.log("CLOSE SHORT , %.2f" % self.data.close[0])
-                self.close()
-
-            self.log("BUY CREATE , %.2f" % self.data.close[0])
-            self.buy(size=self.p.stake)
-
-        elif self.signal < 0.0:
-            if self.position:
-                self.log("CLOSE LONG , %.2f" % self.data.close[0])
-                self.close()
-
-            if not self.p.onlylong:
-                self.log("SELL CREATE , %.2f" % self.data.close[0])
-                self.sell(size=self.p.stake)
-
-    def notify_order(self, order):
-        """Args:
+""""""
+""""""
+"""Args::
     order:"""
-        if order.status in [bt.Order.Submitted, bt.Order.Accepted]:
-            return  # Await further notifications
-
-        if order.status == order.Completed:
-            if order.isbuy():
-                buytxt = "BUY COMPLETE, %.2f" % order.executed.price
-                self.log(buytxt, order.executed.dt)
-            else:
-                selltxt = "SELL COMPLETE, %.2f" % order.executed.price
-                self.log(selltxt, order.executed.dt)
-
-        elif order.status in [order.Expired, order.Canceled, order.Margin]:
-            self.log("%s ," % order.Status[order.status])
-            pass  # Simply log
-
-        # Allow new orders
-        self.orderid = None
-
-    def notify_trade(self, trade):
-        """Args:
+"""Args::
     trade:"""
-        if trade.isclosed:
-            self.log("TRADE PROFIT, GROSS %.2f, NET %.2f" % (trade.pnl, trade.pnlcomm))
-
-        elif trade.justopened:
-            self.log("TRADE OPENED, SIZE %2d" % trade.size)
-
-
-def runstrategy():
-    """ """
-    args = parse_args()
-
-    # Create a cerebro
-    cerebro = bt.Cerebro()
-
-    # Get the dates from the args
-    fromdate = datetime.datetime.strptime(args.fromdate, "%Y-%m-%d")
-    todate = datetime.datetime.strptime(args.todate, "%Y-%m-%d")
-
-    # Create the 1st data
-    data = btfeeds.BacktraderCSVData(
-        dataname=args.data, fromdate=fromdate, todate=todate
-    )
-
-    # Add the 1st data to cerebro
-    cerebro.adddata(data)
-
-    # Add the strategy
-    cerebro.addstrategy(
-        LongShortStrategy,
-        period=args.period,
-        onlylong=args.onlylong,
-        csvcross=args.csvcross,
-        stake=args.stake,
-    )
-
-    # Add the commission - only stocks like a for each operation
-    cerebro.broker.setcash(args.cash)
-
-    # Add the commission - only stocks like a for each operation
-    cerebro.broker.setcommission(
-        commission=args.comm, mult=args.mult, margin=args.margin
-    )
-
-    tframes = dict(
-        days=bt.TimeFrame.Days,
-        weeks=bt.TimeFrame.Weeks,
-        months=bt.TimeFrame.Months,
-        years=bt.TimeFrame.Years,
-    )
-
-    # Add the Analyzers
-    cerebro.addanalyzer(SQN)
-    if args.legacyannual:
-        cerebro.addanalyzer(AnnualReturn)
-        cerebro.addanalyzer(SharpeRatio, legacyannual=True)
-    else:
-        cerebro.addanalyzer(TimeReturn, timeframe=tframes[args.tframe])
-        cerebro.addanalyzer(SharpeRatio, timeframe=tframes[args.tframe])
-
-    cerebro.addanalyzer(TradeAnalyzer)
-
-    cerebro.addwriter(bt.WriterFile, csv=args.writercsv, rounding=4)
-
-    # And run it
-    cerebro.run()
-
-    # Plot if requested
-    if args.plot:
-        cerebro.plot(numfigs=args.numfigs, volume=False, zdown=False)
-
-
-def parse_args():
-    """ """
+""""""
+""""""
     parser = argparse.ArgumentParser(description="TimeReturn")
 
     parser.add_argument(

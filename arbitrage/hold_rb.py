@@ -1,8 +1,7 @@
 # Copyright (c) 2025 backtrader contributors
-"""
-Always-hold strategy for rebar (螺纹钢) using Backtrader. This module demonstrates
+"""Always-hold strategy for rebar (螺纹钢) using Backtrader. This module demonstrates
 how to set up a simple strategy that always holds a position in rebar futures and
-analyzes the results using several built-in analyzers.
+analyzes the results using several built-in analyzers."""
 """
 
 
@@ -26,17 +25,15 @@ The trading size for rebar contracts (default is 1)."""
     params = ("size_rb", 1)
 
     def __init__(self):
-        """
-        Initialize the AlwaysHoldRBStrategy. Ensures the parent class is properly
-        initialized and sets up the order tracking attribute.
+"""Initialize the AlwaysHoldRBStrategy. Ensures the parent class is properly
+        initialized and sets up the order tracking attribute."""
         """
         super().__init__()
         self.order = None
 
     def next(self):
-        """
-        Called on each new bar. Always holds a position in rebar by buying if not
-        already in a position.
+"""Called on each new bar. Always holds a position in rebar by buying if not
+        already in a position."""
         """
         if not self.position:
             self.order = self.buy(

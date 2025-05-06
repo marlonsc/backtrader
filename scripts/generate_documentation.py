@@ -40,14 +40,13 @@ INCLUDE_EXTENSIONS = {
 }
 
 def detect_non_english(text: str) -> bool:
-    """
-    Detect if text contains non-English content (focusing on Portuguese, German, Chinese).
+"""Detect if text contains non-English content (focusing on Portuguese, German, Chinese).
     
-    Args:
+Args::
         text: Text to analyze
         
-    Returns:
-        True if non-English content is detected, False otherwise
+Returns::
+        True if non-English content is detected, False otherwise"""
     """
     # Common Portuguese words and patterns
     portuguese_patterns = [
@@ -85,14 +84,13 @@ def detect_non_english(text: str) -> bool:
     return False
 
 def translate_comment(comment: str) -> str:
-    """
-    Translate common non-English comments to English.
+"""Translate common non-English comments to English.
     
-    Args:
+Args::
         comment: Comment to translate
         
-    Returns:
-        Translated comment
+Returns::
+        Translated comment"""
     """
     # Portuguese to English translations
     pt_to_en = {
@@ -161,14 +159,13 @@ def translate_comment(comment: str) -> str:
     return translated
 
 def get_file_description(file_path: str) -> str:
-    """
-    Analyze a file and return a description of its purpose.
+"""Analyze a file and return a description of its purpose.
     
-    Args:
+Args::
         file_path: Path to the file to analyze
         
-    Returns:
-        A string describing the file's purpose
+Returns::
+        A string describing the file's purpose"""
     """
     file_name = os.path.basename(file_path)
     ext = os.path.splitext(file_name)[1].lower()
@@ -270,14 +267,13 @@ def get_file_description(file_path: str) -> str:
         return f"Could not analyze file: {str(e)}"
 
 def get_directory_description(directory: str) -> str:
-    """
-    Generate a description for a directory based on its name and contents.
+"""Generate a description for a directory based on its name and contents.
     
-    Args:
+Args::
         directory: Path to the directory
         
-    Returns:
-        A string describing the directory's purpose
+Returns::
+        A string describing the directory's purpose"""
     """
     dir_name = os.path.basename(directory)
     
@@ -401,15 +397,14 @@ def get_directory_description(directory: str) -> str:
     return f"Directory containing {dir_name} related files"
 
 def analyze_directory_context(directory: str, files: list) -> str:
-    """
-    Analyze the context of a directory based on its files.
+"""Analyze the context of a directory based on its files.
     
-    Args:
+Args::
         directory: Path to the directory
         files: List of files in the directory
         
-    Returns:
-        A string describing the directory's context
+Returns::
+        A string describing the directory's context"""
     """
     # Count file extensions to determine the primary purpose
     extension_counts = {}
@@ -491,12 +486,11 @@ def analyze_directory_context(directory: str, files: list) -> str:
         return "Contains various files"
 
 def generate_readme(directory: str, parent_dir: str = None) -> None:
-    """
-    Generate a README.md file for the specified directory.
+"""Generate a README.md file for the specified directory.
     
-    Args:
+Args::
         directory: Path to the directory to document
-        parent_dir: Path to the parent directory (for creating links)
+        parent_dir: Path to the parent directory (for creating links)"""
     """
     dir_path = Path(directory)
     dir_name = dir_path.name

@@ -199,66 +199,23 @@ Best Market Conditions:
     )
 
     def log(self, txt, dt=None, doprint=False):
-        """Log messages
+"""Log messages
 
-Args:
+Args::
     txt: 
     dt: (Default value = None)
+    doprint: (Default value = False)"""
     doprint: (Default value = False)"""
         if self.params.printlog or doprint:
             dt = dt or self.datas[0].datetime.date(0)
             print(f"{dt.isoformat()}: {txt}")
 
     def __init__(self):
-        """ """
-        # Keep a reference to the "close" line
-        self.dataclose = self.datas[0].close
-        self.datahigh = self.datas[0].high
-        self.datalow = self.datas[0].low
+""""""
+"""Process order notifications
 
-        # Order and position tracking
-        self.order = None
-        self.buyprice = None
-        self.buycomm = None
-        self.stop_price = None
-        self.trail_price = None
-        self.highest_price = None
-
-        # Confirmation tracking
-        self.crossover_count = 0
-        self.cross_direction = None  # 'up' or 'down'
-
-        # For trade throttling
-        self.last_trade_date = None
-
-        # Create moving average indicators
-        # First determine which MA type to use
-        if self.p.ma_type == "SMA":
-            ma_class = bt.indicators.SimpleMovingAverage
-        elif self.p.ma_type == "EMA":
-            ma_class = bt.indicators.ExponentialMovingAverage
-        elif self.p.ma_type == "WMA":
-            ma_class = bt.indicators.WeightedMovingAverage
-        elif self.p.ma_type == "SMMA":
-            ma_class = bt.indicators.SmoothedMovingAverage
-        else:
-            # Default to SMA
-            ma_class = bt.indicators.SimpleMovingAverage
-
-        # Create the moving averages
-        self.ma_short = ma_class(self.datas[0], period=self.p.short_period)
-        self.ma_long = ma_class(self.datas[0], period=self.p.long_period)
-
-        # Create crossover indicator
-        self.crossover = bt.indicators.CrossOver(self.ma_short, self.ma_long)
-
-        # Add ATR for stop loss calculation
-        self.atr = bt.indicators.ATR(self.datas[0], period=14)
-
-    def notify_order(self, order):
-        """Process order notifications
-
-Args:
+Args::
+    order:"""
     order:"""
         if order.status in [order.Submitted, order.Accepted]:
             # Order still in progress - do nothing
@@ -315,9 +272,10 @@ Args:
         self.order = None
 
     def notify_trade(self, trade):
-        """Process trade notifications
+"""Process trade notifications
 
-Args:
+Args::
+    trade:"""
     trade:"""
         if not trade.isclosed:
             return
