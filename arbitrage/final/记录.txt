@@ -1,0 +1,401 @@
+python arbitrage/JM_J_strategy_CUSUM_GridSearch.py --pair1 /C --pair2 /CS --cash 2000000
+
+
+
+========= 最佳参数组合 =========
+对子: /C//CS
+价差计算窗口: 15
+Rolling窗口 (win): 7
+κ系数 (k_coeff): 1.00
+h系数 (h_coeff): 4.00
+基础持仓天数: 1
+天数调整因子: 1.00
+夏普比率: 1.0703
+最大回撤: 0.03%
+年化收益: 0.03%
+总收益率: 0.03%
+总交易次数: 76
+胜率: 55.26%
+平均持仓天数: 3.05天
+持仓天数范围: 1至37天
+
+========= 所有参数组合结果（按夏普比率排序）=========
+1. spread_window=15, win=7, k_coeff=1.00, h_coeff=4.00, base_days=1, factor=1.00, sharpe=1.0703, drawdown=0.03%, return=0.03%, win_rate=55.26%, trades=76, avg_days=3.1
+2. spread_window=15, win=7, k_coeff=0.80, h_coeff=8.00, base_days=1, factor=1.00, sharpe=0.7601, drawdown=0.07%, return=0.02%, win_rate=54.26%, trades=94, avg_days=4.7
+3. spread_window=15, win=7, k_coeff=1.00, h_coeff=12.00, base_days=1, factor=3.00, sharpe=0.6599, drawdown=0.09%, return=0.02%, win_rate=61.54%, trades=26, avg_days=15.2
+4. spread_window=15, win=7, k_coeff=1.00, h_coeff=12.00, base_days=1, factor=1.00, sharpe=0.6519, drawdown=0.03%, return=0.01%, win_rate=46.67%, trades=30, avg_days=5.3
+5. spread_window=15, win=14, k_coeff=0.50, h_coeff=8.00, base_days=1, factor=3.00, sharpe=0.6500, drawdown=0.03%, return=0.02%, win_rate=54.27%, trades=164, avg_days=1.1
+6. spread_window=15, win=14, k_coeff=0.50, h_coeff=8.00, base_days=1, factor=1.00, sharpe=0.6443, drawdown=0.03%, return=0.02%, win_rate=54.88%, trades=164, avg_days=1.0
+7. spread_window=15, win=14, k_coeff=0.80, h_coeff=8.00, base_days=1, factor=7.00, sharpe=0.6316, drawdown=0.03%, return=0.01%, win_rate=51.47%, trades=68, avg_days=2.0
+8. spread_window=15, win=7, k_coeff=0.20, h_coeff=4.00, base_days=1, factor=1.00, sharpe=0.5831, drawdown=0.10%, return=0.03%, win_rate=52.82%, trades=532, avg_days=1.8
+9. spread_window=15, win=7, k_coeff=0.50, h_coeff=12.00, base_days=1, factor=1.00, sharpe=0.5757, drawdown=0.08%, return=0.02%, win_rate=54.37%, trades=160, avg_days=3.6
+10. spread_window=15, win=14, k_coeff=0.80, h_coeff=8.00, base_days=1, factor=5.00, sharpe=0.5566, drawdown=0.03%, return=0.01%, win_rate=52.94%, trades=68, avg_days=1.6
+1
+python arbitrage/JM_J_strategy_CUSUM.py --df0_key /RB --df1_key /HC --window 15 --win 7 --k_coeff 0.20 --h_coeff 4.00 --base_holding_days 1 --days_factor 5.00 --setcash 120000 --plot True
+python arbitrage/JM_J_strategy_CUSUM_GridSearch.py --pair1 /RB --pair2 /HC --cash 2000000 
+========= 最佳参数组合 =========
+对子: /RB//HC
+价差计算窗口: 15
+Rolling窗口 (win): 7
+κ系数 (k_coeff): 0.20
+h系数 (h_coeff): 4.00
+基础持仓天数: 1
+天数调整因子: 5.00
+夏普比率: 0.9150
+最大回撤: 0.47%
+年化收益: 0.18%
+总收益率: 0.18%
+总交易次数: 356
+胜率: 52.53%
+平均持仓天数: 6.33天
+持仓天数范围: 1至135天
+
+========= 所有参数组合结果（按夏普比率排序）=========
+1. spread_window=15, win=7, k_coeff=0.20, h_coeff=4.00, base_days=1, factor=5.00, sharpe=0.9150, drawdown=0.47%, return=0.18%, win_rate=52.53%, trades=356, avg_days=6.3
+2. spread_window=30, win=14, k_coeff=0.80, h_coeff=4.00, base_days=1, factor=7.00, sharpe=0.6014, drawdown=0.34%, return=0.08%, win_rate=49.24%, trades=264, avg_days=3.6
+3. spread_window=30, win=7, k_coeff=0.50, h_coeff=8.00, base_days=1, factor=5.00, sharpe=0.5589, drawdown=0.26%, return=0.09%, win_rate=50.00%, trades=180, avg_days=9.3
+4. spread_window=30, win=7, k_coeff=0.20, h_coeff=8.00, base_days=1, factor=5.00, sharpe=0.5467, drawdown=0.32%, return=0.11%, win_rate=52.63%, trades=190, avg_days=12.3
+5. spread_window=30, win=14, k_coeff=1.00, h_coeff=8.00, base_days=1, factor=5.00, sharpe=0.4799, drawdown=0.06%, return=0.04%, win_rate=51.52%, trades=66, avg_days=1.8
+6. spread_window=30, win=7, k_coeff=0.20, h_coeff=8.00, base_days=1, factor=3.00, sharpe=0.4738, drawdown=0.33%, return=0.08%, win_rate=51.15%, trades=262, avg_days=6.0
+7. spread_window=30, win=14, k_coeff=0.20, h_coeff=8.00, base_days=1, factor=7.00, sharpe=0.4451, drawdown=0.43%, return=0.07%, win_rate=52.46%, trades=284, avg_days=4.2
+8. spread_window=30, win=7, k_coeff=0.50, h_coeff=12.00, base_days=1, factor=7.00, sharpe=0.4383, drawdown=0.45%, return=0.08%, win_rate=50.91%, trades=110, avg_days=16.6
+9. spread_window=15, win=7, k_coeff=0.80, h_coeff=12.00, base_days=1, factor=5.00, sharpe=0.4267, drawdown=0.19%, return=0.04%, win_rate=48.08%, trades=52, avg_days=17.7
+10. spread_window=15, win=7, k_coeff=0.20, h_coeff=4.00, base_days=1, factor=3.00, sharpe=0.4225, drawdown=0.37%, return=0.08%, win_rate=51.51%, trades=464, avg_days=3.2
+
+
+
+
+
+
+
+python arbitrage/JM_J_strategy_CUSUM_GridSearch.py --pair1 /CU --pair2 /AL --cash 2000000
+
+========= 最佳参数组合 =========
+对子: /CU//AL
+价差计算窗口: 30
+Rolling窗口 (win): 7
+κ系数 (k_coeff): 1.00
+h系数 (h_coeff): 8.00
+基础持仓天数: 1
+天数调整因子: 3.00
+夏普比率: 0.6952
+最大回撤: 0.88%
+年化收益: 0.55%
+总收益率: 0.55%
+总交易次数: 88
+胜率: 55.68%
+平均持仓天数: 1.25天
+持仓天数范围: 1至4天
+
+========= 所有参数组合结果（按夏普比率排序）=========
+1. spread_window=30, win=7, k_coeff=1.00, h_coeff=8.00, base_days=1, factor=3.00, sharpe=0.6952, drawdown=0.88%, return=0.55%, win_rate=55.68%, trades=88, avg_days=1.2
+2. spread_window=15, win=7, k_coeff=1.00, h_coeff=8.00, base_days=1, factor=5.00, sharpe=0.6004, drawdown=0.98%, return=0.37%, win_rate=60.53%, trades=38, avg_days=2.0
+3. spread_window=30, win=7, k_coeff=1.00, h_coeff=8.00, base_days=1, factor=5.00, sharpe=0.5868, drawdown=1.29%, return=0.52%, win_rate=52.27%, trades=88, avg_days=1.7
+4. spread_window=30, win=7, k_coeff=1.00, h_coeff=8.00, base_days=1, factor=7.00, sharpe=0.5789, drawdown=1.23%, return=0.55%, win_rate=52.27%, trades=88, avg_days=2.0
+5. spread_window=15, win=7, k_coeff=1.00, h_coeff=12.00, base_days=1, factor=1.00, sharpe=0.5730, drawdown=0.33%, return=0.13%, win_rate=57.89%, trades=19, avg_days=1.0
+6. spread_window=30, win=7, k_coeff=1.00, h_coeff=8.00, base_days=1, factor=1.00, sharpe=0.5688, drawdown=0.89%, return=0.45%, win_rate=53.41%, trades=88, avg_days=1.0
+7. spread_window=30, win=7, k_coeff=0.50, h_coeff=4.00, base_days=1, factor=3.00, sharpe=0.5617, drawdown=3.40%, return=0.90%, win_rate=53.96%, trades=404, avg_days=1.2
+8. spread_window=15, win=7, k_coeff=1.00, h_coeff=8.00, base_days=1, factor=7.00, sharpe=0.5276, drawdown=1.15%, return=0.37%, win_rate=57.89%, trades=38, avg_days=2.6
+9. spread_window=30, win=7, k_coeff=0.50, h_coeff=4.00, base_days=1, factor=7.00, sharpe=0.4666, drawdown=3.56%, return=0.94%, win_rate=51.26%, trades=396, avg_days=2.0
+10. spread_window=15, win=14, k_coeff=0.80, h_coeff=12.00, base_days=1, factor=7.00, sharpe=0.4385, drawdown=0.73%, return=0.19%, win_rate=66.67%, trades=33, avg_days=1.7
+
+
+2 
+python arbitrage/JM_J_strategy_CUSUM.py --df0_key /CU --df1_key /BC --window 15 --win 7 --k_coeff 0.20 --h_coeff 4.00 --base_holding_days 1 --days_factor 1.00 --setcash 1570000 --plot True
+
+python arbitrage/JM_J_strategy_CUSUM_GridSearch.py --pair1 /CU --pair2 /BC --cash 2000000
+
+========= 最佳参数组合 =========
+对子: /CU//BC
+价差计算窗口: 15
+Rolling窗口 (win): 7
+κ系数 (k_coeff): 0.20
+h系数 (h_coeff): 4.00
+基础持仓天数: 1
+天数调整因子: 1.00
+夏普比率: 0.8695
+最大回撤: 0.72%
+年化收益: 0.55%
+总收益率: 0.55%
+总交易次数: 180
+胜率: 50.56%
+平均持仓天数: 5.11天
+持仓天数范围: 1至90天
+
+========= 所有参数组合结果（按夏普比率排序）=========
+1. spread_window=15, win=7, k_coeff=0.20, h_coeff=4.00, base_days=1, factor=1.00, sharpe=0.8695, drawdown=0.72%, return=0.55%, win_rate=50.56%, trades=180, avg_days=5.1
+2. spread_window=15, win=7, k_coeff=1.00, h_coeff=4.00, base_days=1, factor=1.00, sharpe=0.7346, drawdown=0.39%, return=0.24%, win_rate=47.22%, trades=36, avg_days=7.1
+3. spread_window=15, win=14, k_coeff=0.20, h_coeff=8.00, base_days=1, factor=3.00, sharpe=0.6261, drawdown=0.54%, return=0.30%, win_rate=50.00%, trades=90, avg_days=6.9
+4. spread_window=15, win=7, k_coeff=0.80, h_coeff=8.00, base_days=1, factor=5.00, sharpe=0.6167, drawdown=0.98%, return=0.47%, win_rate=50.00%, trades=36, avg_days=37.4
+5. spread_window=30, win=7, k_coeff=0.80, h_coeff=12.00, base_days=1, factor=3.00, sharpe=0.5776, drawdown=1.28%, return=0.41%, win_rate=47.73%, trades=44, avg_days=22.5
+6. spread_window=15, win=14, k_coeff=0.20, h_coeff=4.00, base_days=1, factor=7.00, sharpe=0.5625, drawdown=0.72%, return=0.34%, win_rate=49.17%, trades=120, avg_days=5.2
+7. spread_window=15, win=7, k_coeff=1.00, h_coeff=8.00, base_days=1, factor=1.00, sharpe=0.5562, drawdown=0.22%, return=0.10%, win_rate=44.12%, trades=34, avg_days=4.2
+8. spread_window=30, win=7, k_coeff=1.00, h_coeff=8.00, base_days=1, factor=7.00, sharpe=0.5026, drawdown=1.33%, return=0.33%, win_rate=50.00%, trades=32, avg_days=23.5
+9. spread_window=15, win=14, k_coeff=1.00, h_coeff=4.00, base_days=1, factor=3.00, sharpe=0.4741, drawdown=0.36%, return=0.15%, win_rate=50.00%, trades=26, avg_days=18.5
+10. spread_window=30, win=14, k_coeff=0.50, h_coeff=8.00, base_days=1, factor=1.00, sharpe=0.4379, drawdown=0.53%, return=0.14%, win_rate=51.47%, trades=68, avg_days=4.3
+(venv) ➜  mybacktrader git:(master) ✗ 
+
+3
+
+python arbitrage/JM_J_strategy_CUSUM_GridSearch.py --pair1 /OI  --pair2 /Y --cash 2000000
+========= 最佳参数组合 =========
+对子: /OI//Y
+价差计算窗口: 30
+Rolling窗口 (win): 7
+κ系数 (k_coeff): 0.50
+h系数 (h_coeff): 12.00
+基础持仓天数: 1
+天数调整因子: 1.00
+夏普比率: 0.9769
+最大回撤: 0.32%
+年化收益: 0.22%
+总收益率: 0.22%
+总交易次数: 198
+胜率: 55.56%
+平均持仓天数: 1.51天
+持仓天数范围: 1至11天
+
+========= 所有参数组合结果（按夏普比率排序）=========
+1. spread_window=30, win=7, k_coeff=0.50, h_coeff=12.00, base_days=1, factor=1.00, sharpe=0.9769, drawdown=0.32%, return=0.22%, win_rate=55.56%, trades=198, avg_days=1.5
+2. spread_window=30, win=7, k_coeff=0.80, h_coeff=8.00, base_days=1, factor=1.00, sharpe=0.6905, drawdown=0.31%, return=0.12%, win_rate=53.21%, trades=156, avg_days=1.6
+3. spread_window=30, win=14, k_coeff=0.80, h_coeff=4.00, base_days=1, factor=1.00, sharpe=0.6782, drawdown=0.65%, return=0.17%, win_rate=52.73%, trades=330, avg_days=1.2
+4. spread_window=30, win=7, k_coeff=0.50, h_coeff=12.00, base_days=1, factor=5.00, sharpe=0.6629, drawdown=0.76%, return=0.29%, win_rate=54.35%, trades=184, avg_days=4.6
+5. spread_window=30, win=7, k_coeff=0.50, h_coeff=12.00, base_days=1, factor=3.00, sharpe=0.6543, drawdown=0.51%, return=0.22%, win_rate=52.60%, trades=192, avg_days=3.1
+6. spread_window=15, win=14, k_coeff=0.50, h_coeff=12.00, base_days=1, factor=7.00, sharpe=0.6168, drawdown=0.35%, return=0.09%, win_rate=50.00%, trades=96, avg_days=1.9
+7. spread_window=15, win=14, k_coeff=1.00, h_coeff=8.00, base_days=1, factor=5.00, sharpe=0.6139, drawdown=0.03%, return=0.02%, win_rate=64.29%, trades=14, avg_days=1.4
+8. spread_window=15, win=14, k_coeff=0.20, h_coeff=4.00, base_days=1, factor=5.00, sharpe=0.5472, drawdown=0.70%, return=0.21%, win_rate=51.39%, trades=574, avg_days=1.9
+9. spread_window=15, win=7, k_coeff=0.80, h_coeff=8.00, base_days=1, factor=7.00, sharpe=0.5399, drawdown=0.39%, return=0.12%, win_rate=46.43%, trades=112, avg_days=3.6
+10. spread_window=15, win=7, k_coeff=1.00, h_coeff=4.00, base_days=1, factor=5.00, sharpe=0.5259, drawdown=0.24%, return=0.11%, win_rate=52.50%, trades=80, avg_days=4.5
+
+4 
+python arbitrage/JM_J_strategy_CUSUM.py --df0_key /RU --df1_key /AG --window 30 --win 7 --k_coeff 0.20 --h_coeff 8.00 --base_holding_days 1 --days_factor 3.00 --setcash 970000 --plot True
+
+python arbitrage/JM_J_strategy_CUSUM_GridSearch.py --pair1 /RU --pair2 /AG --cash 2000000
+
+========= 最佳参数组合 =========
+对子: /RU//AG
+价差计算窗口: 30
+Rolling窗口 (win): 7
+κ系数 (k_coeff): 0.20
+h系数 (h_coeff): 8.00
+基础持仓天数: 1
+天数调整因子: 3.00
+夏普比率: 0.7926
+最大回撤: 0.90%
+年化收益: 0.50%
+总收益率: 0.50%
+总交易次数: 248
+胜率: 54.44%
+平均持仓天数: 1.80天
+持仓天数范围: 1至34天
+
+========= 所有参数组合结果（按夏普比率排序）=========
+1. spread_window=30, win=7, k_coeff=0.20, h_coeff=8.00, base_days=1, factor=3.00, sharpe=0.7926, drawdown=0.90%, return=0.50%, win_rate=54.44%, trades=248, avg_days=1.8
+2. spread_window=30, win=7, k_coeff=0.20, h_coeff=8.00, base_days=1, factor=1.00, sharpe=0.7196, drawdown=0.64%, return=0.38%, win_rate=56.00%, trades=250, avg_days=1.1
+3. spread_window=15, win=14, k_coeff=1.00, h_coeff=8.00, base_days=1, factor=7.00, sharpe=0.6394, drawdown=0.09%, return=0.06%, win_rate=62.50%, trades=8, avg_days=1.2
+4. spread_window=30, win=14, k_coeff=0.50, h_coeff=8.00, base_days=1, factor=1.00, sharpe=0.6237, drawdown=0.50%, return=0.24%, win_rate=51.14%, trades=176, avg_days=1.3
+5. spread_window=30, win=7, k_coeff=0.20, h_coeff=4.00, base_days=1, factor=1.00, sharpe=0.5877, drawdown=1.34%, return=0.43%, win_rate=53.36%, trades=446, avg_days=1.2
+6. spread_window=15, win=14, k_coeff=1.00, h_coeff=8.00, base_days=1, factor=1.00, sharpe=0.5746, drawdown=0.09%, return=0.04%, win_rate=62.50%, trades=8, avg_days=1.0
+7. spread_window=15, win=14, k_coeff=1.00, h_coeff=8.00, base_days=1, factor=3.00, sharpe=0.5746, drawdown=0.09%, return=0.04%, win_rate=62.50%, trades=8, avg_days=1.0
+8. spread_window=15, win=14, k_coeff=1.00, h_coeff=8.00, base_days=1, factor=5.00, sharpe=0.5746, drawdown=0.09%, return=0.04%, win_rate=62.50%, trades=8, avg_days=1.0
+9. spread_window=30, win=7, k_coeff=0.20, h_coeff=8.00, base_days=1, factor=5.00, sharpe=0.5731, drawdown=1.73%, return=0.45%, win_rate=54.62%, trades=238, avg_days=3.0
+10. spread_window=30, win=14, k_coeff=1.00, h_coeff=4.00, base_days=1, factor=5.00, sharpe=0.5318, drawdown=0.48%, return=0.20%, win_rate=51.41%, trades=142, avg_days=1.2
+
+
+python arbitrage/JM_J_strategy_CUSUM_GridSearch.py --pair1 /Y --pair2 /M --cash 2000000
+========= 最佳参数组合 =========
+对子: /Y//M
+价差计算窗口: 15
+Rolling窗口 (win): 14
+κ系数 (k_coeff): 0.20
+h系数 (h_coeff): 8.00
+基础持仓天数: 1
+天数调整因子: 1.00
+夏普比率: 0.4759
+最大回撤: 0.34%
+年化收益: 0.12%
+总收益率: 0.12%
+总交易次数: 224
+胜率: 54.46%
+平均持仓天数: 1.14天
+持仓天数范围: 1至8天
+
+========= 所有参数组合结果（按夏普比率排序）=========
+1. spread_window=15, win=14, k_coeff=0.20, h_coeff=8.00, base_days=1, factor=1.00, sharpe=0.4759, drawdown=0.34%, return=0.12%, win_rate=54.46%, trades=224, avg_days=1.1
+2. spread_window=15, win=7, k_coeff=0.80, h_coeff=12.00, base_days=1, factor=7.00, sharpe=0.4569, drawdown=0.19%, return=0.06%, win_rate=54.35%, trades=46, avg_days=2.8
+3. spread_window=15, win=7, k_coeff=1.00, h_coeff=4.00, base_days=1, factor=7.00, sharpe=0.4539, drawdown=0.27%, return=0.07%, win_rate=55.77%, trades=52, avg_days=2.7
+4. spread_window=15, win=7, k_coeff=0.80, h_coeff=12.00, base_days=1, factor=1.00, sharpe=0.4128, drawdown=0.11%, return=0.03%, win_rate=58.70%, trades=46, avg_days=1.0
+5. spread_window=30, win=7, k_coeff=1.00, h_coeff=12.00, base_days=1, factor=3.00, sharpe=0.4115, drawdown=0.24%, return=0.06%, win_rate=59.62%, trades=52, avg_days=1.8
+6. spread_window=15, win=14, k_coeff=0.20, h_coeff=8.00, base_days=1, factor=7.00, sharpe=0.3927, drawdown=0.59%, return=0.13%, win_rate=56.60%, trades=212, avg_days=2.8
+7. spread_window=15, win=14, k_coeff=0.20, h_coeff=8.00, base_days=1, factor=3.00, sharpe=0.3813, drawdown=0.46%, return=0.10%, win_rate=53.15%, trades=222, avg_days=1.7
+8. spread_window=15, win=14, k_coeff=1.00, h_coeff=12.00, base_days=1, factor=3.00, sharpe=0.3573, drawdown=0.05%, return=0.01%, win_rate=75.00%, trades=12, avg_days=1.3
+9. spread_window=30, win=7, k_coeff=1.00, h_coeff=12.00, base_days=1, factor=1.00, sharpe=0.3551, drawdown=0.16%, return=0.05%, win_rate=59.62%, trades=52, avg_days=1.2
+10. spread_window=30, win=14, k_coeff=0.50, h_coeff=4.00, base_days=1, factor=1.00, sharpe=0.2828, drawdown=0.63%, return=0.08%, win_rate=53.50%, trades=428, avg_days=1.1
+
+
+5（）
+python arbitrage/JM_J_strategy_CUSUM.py --df0_key /RB --df1_key /I --window 15 --win 14 --k_coeff 0.20 --h_coeff 4.00 --base_holding_days 1 --days_factor 7 --setcash 110000 --plot True
+
+
+python arbitrage/JM_J_strategy_CUSUM_GridSearch.py --pair1 /RB --pair2 /I --cash 2000000
+
+
+========= 最佳参数组合 =========
+对子: /RB//I
+价差计算窗口: 15
+Rolling窗口 (win): 14
+κ系数 (k_coeff): 0.20
+h系数 (h_coeff): 4.00
+基础持仓天数: 1
+天数调整因子: 5.00
+夏普比率: 0.8674
+最大回撤: 0.64%
+年化收益: 0.32%
+总收益率: 0.32%
+总交易次数: 538
+胜率: 52.04%
+平均持仓天数: 2.24天
+持仓天数范围: 1至83天
+
+========= 所有参数组合结果（按夏普比率排序）=========
+1. spread_window=15, win=14, k_coeff=0.20, h_coeff=4.00, base_days=1, factor=5.00, sharpe=0.8674, drawdown=0.64%, return=0.32%, win_rate=52.04%, trades=538, avg_days=2.2
+2. spread_window=15, win=14, k_coeff=0.20, h_coeff=4.00, base_days=1, factor=7.00, sharpe=0.7374, drawdown=0.56%, return=0.27%, win_rate=54.39%, trades=478, avg_days=3.5
+3. spread_window=15, win=14, k_coeff=0.50, h_coeff=4.00, base_days=1, factor=1.00, sharpe=0.6727, drawdown=0.44%, return=0.10%, win_rate=52.23%, trades=404, avg_days=1.0
+4. spread_window=15, win=7, k_coeff=0.20, h_coeff=4.00, base_days=1, factor=3.00, sharpe=0.6342, drawdown=0.28%, return=0.14%, win_rate=53.12%, trades=576, avg_days=1.4
+5. spread_window=15, win=14, k_coeff=0.50, h_coeff=4.00, base_days=1, factor=3.00, sharpe=0.6044, drawdown=0.42%, return=0.10%, win_rate=51.74%, trades=402, avg_days=1.2
+6. spread_window=30, win=7, k_coeff=0.20, h_coeff=8.00, base_days=1, factor=3.00, sharpe=0.5960, drawdown=0.25%, return=0.09%, win_rate=51.51%, trades=332, avg_days=1.5
+7. spread_window=30, win=14, k_coeff=0.80, h_coeff=12.00, base_days=1, factor=1.00, sharpe=0.5717, drawdown=0.11%, return=0.03%, win_rate=51.92%, trades=104, avg_days=1.0
+8. spread_window=15, win=14, k_coeff=0.80, h_coeff=8.00, base_days=1, factor=3.00, sharpe=0.5394, drawdown=0.13%, return=0.04%, win_rate=53.45%, trades=58, avg_days=1.0
+9. spread_window=15, win=14, k_coeff=0.80, h_coeff=8.00, base_days=1, factor=1.00, sharpe=0.4994, drawdown=0.13%, return=0.03%, win_rate=51.72%, trades=58, avg_days=1.0
+10. spread_window=15, win=14, k_coeff=0.50, h_coeff=4.00, base_days=1, factor=7.00, sharpe=0.4980, drawdown=0.68%, return=0.12%, win_rate=52.65%, trades=378, avg_days=2.0
+
+
+python arbitrage/JM_J_strategy_CUSUM_GridSearch.py --pair1 /L --pair2 /PP --cash 2000000
+========= 最佳参数组合 =========
+对子: /L//PP
+价差计算窗口: 30
+Rolling窗口 (win): 14
+κ系数 (k_coeff): 1.00
+h系数 (h_coeff): 8.00
+基础持仓天数: 1
+天数调整因子: 3.00
+夏普比率: 0.9084
+最大回撤: 0.10%
+年化收益: 0.10%
+总收益率: 0.10%
+总交易次数: 78
+胜率: 48.72%
+平均持仓天数: 1.56天
+持仓天数范围: 1至9天
+
+========= 所有参数组合结果（按夏普比率排序）=========
+1. spread_window=30, win=14, k_coeff=1.00, h_coeff=8.00, base_days=1, factor=3.00, sharpe=0.9084, drawdown=0.10%, return=0.10%, win_rate=48.72%, trades=78, avg_days=1.6
+2. spread_window=30, win=14, k_coeff=1.00, h_coeff=8.00, base_days=1, factor=5.00, sharpe=0.8788, drawdown=0.10%, return=0.10%, win_rate=48.72%, trades=78, avg_days=2.1
+3. spread_window=30, win=14, k_coeff=1.00, h_coeff=8.00, base_days=1, factor=7.00, sharpe=0.8782, drawdown=0.10%, return=0.11%, win_rate=47.44%, trades=78, avg_days=2.6
+4. spread_window=30, win=14, k_coeff=1.00, h_coeff=8.00, base_days=1, factor=1.00, sharpe=0.8190, drawdown=0.09%, return=0.06%, win_rate=48.72%, trades=78, avg_days=1.1
+5. spread_window=15, win=14, k_coeff=0.20, h_coeff=8.00, base_days=1, factor=7.00, sharpe=0.7406, drawdown=0.28%, return=0.12%, win_rate=54.17%, trades=264, avg_days=1.6
+6. spread_window=15, win=14, k_coeff=0.20, h_coeff=8.00, base_days=1, factor=5.00, sharpe=0.6878, drawdown=0.18%, return=0.10%, win_rate=54.89%, trades=266, avg_days=1.3
+7. spread_window=30, win=7, k_coeff=1.00, h_coeff=4.00, base_days=1, factor=3.00, sharpe=0.6659, drawdown=0.21%, return=0.10%, win_rate=53.85%, trades=130, avg_days=4.2
+8. spread_window=30, win=7, k_coeff=1.00, h_coeff=4.00, base_days=1, factor=1.00, sharpe=0.6417, drawdown=0.10%, return=0.07%, win_rate=50.74%, trades=136, avg_days=2.1
+9. spread_window=15, win=14, k_coeff=1.00, h_coeff=8.00, base_days=1, factor=1.00, sharpe=0.6323, drawdown=0.01%, return=0.01%, win_rate=60.00%, trades=10, avg_days=1.2
+10. spread_window=15, win=14, k_coeff=0.20, h_coeff=8.00, base_days=1, factor=1.00, sharpe=0.6241, drawdown=0.18%, return=0.08%, win_rate=54.85%, trades=268, avg_days=1.0
+
+
+5（）
+
+python arbitrage/JM_J_strategy_CUSUM.py --df0_key /A --df1_key /M --window 15 --win 7 --k_coeff 0.50 --h_coeff 12.00 --base_holding_days 1 --days_factor 7.00 --setcash 130000 --plot True
+
+
+python arbitrage/JM_J_strategy_CUSUM_GridSearch.py --pair1 /A --pair2 /M --cash 2000000
+========= 最佳参数组合 =========
+对子: /A//M
+价差计算窗口: 15
+Rolling窗口 (win): 7
+κ系数 (k_coeff): 0.50
+h系数 (h_coeff): 12.00
+基础持仓天数: 1
+天数调整因子: 7.00
+夏普比率: 1.1424
+最大回撤: 0.19%
+年化收益: 0.17%
+总收益率: 0.17%
+总交易次数: 124
+胜率: 50.81%
+平均持仓天数: 4.94天
+持仓天数范围: 1至82天
+
+========= 所有参数组合结果（按夏普比率排序）=========
+1. spread_window=15, win=7, k_coeff=0.50, h_coeff=12.00, base_days=1, factor=7.00, sharpe=1.1424, drawdown=0.19%, return=0.17%, win_rate=50.81%, trades=124, avg_days=4.9
+2. spread_window=15, win=7, k_coeff=0.50, h_coeff=12.00, base_days=1, factor=5.00, sharpe=0.9009, drawdown=0.16%, return=0.12%, win_rate=53.91%, trades=128, avg_days=3.6
+3. spread_window=15, win=7, k_coeff=0.50, h_coeff=4.00, base_days=1, factor=1.00, sharpe=0.7330, drawdown=0.17%, return=0.09%, win_rate=56.00%, trades=300, avg_days=1.2
+4. spread_window=15, win=7, k_coeff=0.20, h_coeff=12.00, base_days=1, factor=1.00, sharpe=0.7035, drawdown=0.18%, return=0.07%, win_rate=51.70%, trades=176, avg_days=1.2
+5. spread_window=15, win=7, k_coeff=0.20, h_coeff=12.00, base_days=1, factor=3.00, sharpe=0.6787, drawdown=0.21%, return=0.09%, win_rate=52.30%, trades=174, avg_days=2.2
+6. spread_window=30, win=7, k_coeff=0.20, h_coeff=8.00, base_days=1, factor=3.00, sharpe=0.6378, drawdown=0.41%, return=0.11%, win_rate=54.47%, trades=246, avg_days=2.3
+7. spread_window=30, win=14, k_coeff=1.00, h_coeff=8.00, base_days=1, factor=3.00, sharpe=0.6322, drawdown=0.10%, return=0.07%, win_rate=61.54%, trades=78, avg_days=1.4
+8. spread_window=30, win=7, k_coeff=0.50, h_coeff=8.00, base_days=1, factor=5.00, sharpe=0.6298, drawdown=0.20%, return=0.08%, win_rate=53.45%, trades=174, avg_days=3.0
+9. spread_window=15, win=7, k_coeff=0.50, h_coeff=12.00, base_days=1, factor=3.00, sharpe=0.6278, drawdown=0.15%, return=0.06%, win_rate=51.54%, trades=130, avg_days=2.4
+10. spread_window=15, win=7, k_coeff=0.80, h_coeff=4.00, base_days=1, factor=7.00, sharpe=0.6244, drawdown=0.17%, return=0.11%, win_rate=48.61%, trades=144, avg_days=4.0
+
+python arbitrage/JM_J_strategy_CUSUM_GridSearch.py --pair1 /Y --pair2 /P --cash 2000000
+========= 最佳参数组合 =========
+对子: /Y//P
+价差计算窗口: 30
+Rolling窗口 (win): 14
+κ系数 (k_coeff): 0.20
+h系数 (h_coeff): 8.00
+基础持仓天数: 1
+天数调整因子: 3.00
+夏普比率: 0.8513
+最大回撤: 0.37%
+年化收益: 0.13%
+总收益率: 0.13%
+总交易次数: 358
+胜率: 49.72%
+平均持仓天数: 1.07天
+持仓天数范围: 1至8天
+
+========= 所有参数组合结果（按夏普比率排序）=========
+1. spread_window=30, win=14, k_coeff=0.20, h_coeff=8.00, base_days=1, factor=3.00, sharpe=0.8513, drawdown=0.37%, return=0.13%, win_rate=49.72%, trades=358, avg_days=1.1
+2. spread_window=30, win=14, k_coeff=0.20, h_coeff=8.00, base_days=1, factor=5.00, sharpe=0.7900, drawdown=0.33%, return=0.13%, win_rate=50.56%, trades=358, avg_days=1.2
+3. spread_window=30, win=14, k_coeff=0.20, h_coeff=4.00, base_days=1, factor=1.00, sharpe=0.7645, drawdown=0.60%, return=0.26%, win_rate=51.46%, trades=756, avg_days=1.0
+4. spread_window=30, win=14, k_coeff=0.20, h_coeff=8.00, base_days=1, factor=1.00, sharpe=0.7402, drawdown=0.41%, return=0.11%, win_rate=49.72%, trades=358, avg_days=1.0
+5. spread_window=30, win=14, k_coeff=0.20, h_coeff=4.00, base_days=1, factor=3.00, sharpe=0.7299, drawdown=0.57%, return=0.26%, win_rate=51.86%, trades=754, avg_days=1.1
+6. spread_window=30, win=14, k_coeff=0.20, h_coeff=4.00, base_days=1, factor=5.00, sharpe=0.6965, drawdown=0.60%, return=0.21%, win_rate=51.20%, trades=748, avg_days=1.4
+7. spread_window=30, win=14, k_coeff=0.20, h_coeff=8.00, base_days=1, factor=7.00, sharpe=0.5826, drawdown=0.50%, return=0.10%, win_rate=50.84%, trades=358, avg_days=1.3
+8. spread_window=30, win=14, k_coeff=0.20, h_coeff=4.00, base_days=1, factor=7.00, sharpe=0.5278, drawdown=0.71%, return=0.22%, win_rate=51.60%, trades=624, avg_days=2.7
+9. spread_window=30, win=7, k_coeff=0.80, h_coeff=4.00, base_days=1, factor=1.00, sharpe=0.5184, drawdown=0.22%, return=0.08%, win_rate=55.56%, trades=252, avg_days=1.5
+10. spread_window=30, win=7, k_coeff=0.50, h_coeff=8.00, base_days=1, factor=1.00, sharpe=0.4880, drawdown=0.34%, return=0.08%, win_rate=52.27%, trades=264, avg_days=1.6
+(venv) ➜  mybacktrader git:(master) ✗ 
+
+
+
+6
+
+ python arbitrage/JM_J_strategy_CUSUM.py --df0_key /J --df1_key /JM --window 30 --win 7 --k_coeff 0.50 --h_coeff 8.00 --base_holding_days 1 --days_factor 5.00 --setcash 80000 --plot Truepython arbitrage/JM_J_strategy_CUSUM_GridSearch.py --pair1 /J --pair2 /JM --cash 2000000========= 最佳参数组合 =========
+对子: /J//JM
+价差计算窗口: 30
+Rolling窗口 (win): 7
+κ系数 (k_coeff): 0.50
+h系数 (h_coeff): 8.00
+基础持仓天数: 1
+天数调整因子: 3.00
+夏普比率: 0.6948
+最大回撤: 0.21%
+年化收益: 0.08%
+总收益率: 0.08%
+总交易次数: 238
+胜率: 52.94%
+平均持仓天数: 2.34天
+持仓天数范围: 1至18天
+
+========= 所有参数组合结果（按夏普比率排序）=========
+1. spread_window=30, win=7, k_coeff=0.50, h_coeff=8.00, base_days=1, factor=3.00, sharpe=0.6948, drawdown=0.21%, return=0.08%, win_rate=52.94%, trades=238, avg_days=2.3
+2. spread_window=30, win=7, k_coeff=0.50, h_coeff=8.00, base_days=1, factor=5.00, sharpe=0.6650, drawdown=0.27%, return=0.09%, win_rate=53.07%, trades=228, avg_days=4.1
+3. spread_window=30, win=7, k_coeff=0.50, h_coeff=8.00, base_days=1, factor=1.00, sharpe=0.6638, drawdown=0.16%, return=0.05%, win_rate=55.00%, trades=240, avg_days=1.3
+4. spread_window=30, win=7, k_coeff=0.50, h_coeff=8.00, base_days=1, factor=7.00, sharpe=0.6256, drawdown=0.37%, return=0.12%, win_rate=54.09%, trades=220, avg_days=5.3
+5. spread_window=30, win=14, k_coeff=0.80, h_coeff=4.00, base_days=1, factor=1.00, sharpe=0.5920, drawdown=0.22%, return=0.07%, win_rate=52.23%, trades=314, avg_days=1.0
+6. spread_window=30, win=7, k_coeff=0.80, h_coeff=4.00, base_days=1, factor=3.00, sharpe=0.5568, drawdown=0.22%, return=0.07%, win_rate=48.35%, trades=242, avg_days=1.9
+7. spread_window=15, win=7, k_coeff=1.00, h_coeff=8.00, base_days=1, factor=5.00, sharpe=0.5466, drawdown=0.03%, return=0.01%, win_rate=57.14%, trades=28, avg_days=2.1
+8. spread_window=15, win=7, k_coeff=1.00, h_coeff=8.00, base_days=1, factor=3.00, sharpe=0.5424, drawdown=0.02%, return=0.01%, win_rate=57.14%, trades=28, avg_days=1.6
+9. spread_window=30, win=14, k_coeff=0.80, h_coeff=4.00, base_days=1, factor=5.00, sharpe=0.5104, drawdown=0.22%, return=0.07%, win_rate=52.92%, trades=308, avg_days=1.3
+10. spread_window=30, win=14, k_coeff=0.80, h_coeff=4.00, base_days=1, factor=3.00, sharpe=0.5089, drawdown=0.22%, return=0.07%, win_rate=52.56%, trades=312, avg_days=1.1

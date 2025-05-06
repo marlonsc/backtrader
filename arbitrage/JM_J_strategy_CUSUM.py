@@ -9,55 +9,24 @@ import pandas as pd
 
 
 def parse_args():
-    """Parse command line arguments"""
-    parser = argparse.ArgumentParser(description="CUSUM strategy parameters")
+    """解析命令行参数"""
+    parser = argparse.ArgumentParser(description='CUSUM策略参数')
 
-    # Required arguments
-    parser.add_argument(
-        "--window", type=int, default=15, help="Rolling spread window size"
-    )
-    parser.add_argument(
-        "--df0_key", type=str, default="/J", help="Key for first dataset"
-    )
-    parser.add_argument(
-        "--df1_key", type=str, default="/JM", help="Key for second dataset"
-    )
-    parser.add_argument(
-        "--fromdate", type=str, default="2017-01-01", help="Backtest start date"
-    )
-    parser.add_argument(
-        "--todate", type=str, default="2025-01-01", help="Backtest end date"
-    )
-    parser.add_argument(
-        "--win", type=int, default=14, help="Rolling window in strategy"
-    )
-    parser.add_argument("--k_coeff", type=float, default=0.5, help="kappa coefficient")
-    parser.add_argument("--h_coeff", type=float, default=4, help="h coefficient")
-    parser.add_argument(
-        "--base_holding_days", type=int, default=5, help="Base holding days"
-    )
-    parser.add_argument(
-        "--days_factor",
-        type=float,
-        default=5.0,
-        help="Holding days adjustment factor",
-    )
-    parser.add_argument("--setcash", type=float, default=100000, help="Initial cash")
-    parser.add_argument(
-        "--plot",
-        type=lambda x: x.lower() == "true",
-        default=True,
-        help="Plot results (True/False)",
-    )
-    parser.add_argument(
-        "--setslippage", type=float, default=0.0, help="Set slippage rate"
-    )
-    parser.add_argument(
-        "--export_csv",
-        type=lambda x: x.lower() == "true",
-        default=False,
-        help="Export backtest data to CSV (True/False)",
-    )
+    # 必须参数
+    parser.add_argument('--window', type=int, default=15, help='计算滚动价差的窗口大小')
+    parser.add_argument('--df0_key', type=str, default='/J', help='第一个数据集的键值')
+    parser.add_argument('--df1_key', type=str, default='/JM', help='第二个数据集的键值')
+    parser.add_argument('--fromdate', type=str, default='2017-01-01', help='回测开始日期')
+    parser.add_argument('--todate', type=str, default='2025-01-01', help='回测结束日期')
+    parser.add_argument('--win', type=int, default=14, help='策略中的滚动窗口')
+    parser.add_argument('--k_coeff', type=float, default=0.5, help='kappa系数')
+    parser.add_argument('--h_coeff', type=float, default=4, help='h系数')
+    parser.add_argument('--base_holding_days', type=int, default=5, help='基础持仓天数')
+    parser.add_argument('--days_factor', type=float, default=5.0, help='持仓天数调整因子')
+    parser.add_argument('--setcash', type=float, default=100000, help='初始资金')
+    parser.add_argument('--plot', type=lambda x: x.lower() == 'true', default=True, help='是否绘制结果(True/False)')
+    parser.add_argument('--setslippage', type=float, default=0.0, help='设置滑点率')
+    parser.add_argument('--export_csv', type=lambda x: x.lower() == 'true', default=False, help='是否导出回测数据到CSV(True/False)')
 
     return parser.parse_args()
 
@@ -391,24 +360,23 @@ def main():
         days_factor=args.days_factor,
     )
 
-    # Set initial cash and slippage
+    # 设置初始资金、滑点和手续费
     cerebro.broker.setcash(args.setcash)
     cerebro.broker.set_shortcash(False)
     cerebro.broker.set_slippage_perc(args.setslippage)
 
-    # Add analyzers
-    cerebro.addanalyzer(bt.analyzers.DrawDown)  # Drawdown analyzer
-    cerebro.addanalyzer(
-        bt.analyzers.SharpeRatio,
-        timeframe=bt.TimeFrame.Days,  # Use daily data
-        riskfreerate=0,  # Default risk-free rate
-        annualize=True,  # Do not annualize
-    )
-    cerebro.addanalyzer(
-        bt.analyzers.Returns,
-        tann=bt.TimeFrame.Days,  # Annualization factor, 252 trading days
-    )
-    # The period here can be daily, weekly, monthly, etc.
+    # 添加分析器
+    cerebro.addanalyzer(bt.analyzers.DrawDown)  # 回撤分析器
+    cerebro.addanalyzer(bt.analyzers.ROIAnalyzer, period=bt.TimeFrame.Days)
+    cerebro.addanalyzer(bt.analyzers.SharpeRatio,
+                        timeframe=bt.TimeFrame.Days,  # 按日数据计算
+                        riskfreerate=0,            # 默认年化1%的风险无风险利率
+                        annualize=True,           # 不进行年化
+                        )
+    cerebro.addanalyzer(bt.analyzers.Returns,
+                        tann=bt.TimeFrame.Days,  # 年化因子，252 个交易日
+                        )
+    cerebro.addanalyzer(bt.analyzers.CAGRAnalyzer, period=bt.TimeFrame.Days)  # 这里的period可以是daily, weekly, monthly等
     cerebro.addanalyzer(bt.analyzers.TradeAnalyzer)
 
     cerebro.addobserver(bt.observers.Trades)
@@ -461,14 +429,10 @@ def main():
     if args.export_csv:
         # Get backtest data
         backtest_data = strategy.get_backtest_data()
-        # Generate filename
-        params_str = f"win{args.win}_k{args.k_coeff}_h{args.h_coeff}_base{
-            args.base_holding_days
-        }_factor{args.days_factor}"
-        filename = f"outcome/CUSUM_backtest_{args.df0_key.replace('/', '')}{
-            args.df1_key.replace('/', '')
-        }_{params_str}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
-        # Save CSV
+        # 生成文件名
+        params_str = f"win{args.win}_k{args.k_coeff}_h{args.h_coeff}_base{args.base_holding_days}_factor{args.days_factor}"
+        filename = f"outcome_slippage_com/CUSUM_backtest_{args.df0_key.replace('/', '')}{args.df1_key.replace('/', '')}_{params_str}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+        # 保存CSV
         backtest_data.to_csv(filename, index=False)
         print(f"Backtest data saved to: {filename}")
 
