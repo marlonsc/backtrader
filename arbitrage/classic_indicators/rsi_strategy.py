@@ -174,6 +174,7 @@ def run_strategy():
 if __name__ == "__main__":
     run_strategy()
 
+# Implement manual RSI calculation if bt.indicators.RSI does not exist
 class ManualRSI(bt.Indicator):
     """
     Manual implementation of the RSI indicator for use in the strategy if

@@ -84,6 +84,6 @@ class AdaptiveMovingAverage(MovingAverageBase):
 
         sc = pow((er * (fast - slow)) + slow, 2)  # scalable constant
 
-        # ExponentialSmoothingDynamic não aceita alpha dinâmico diretamente via construtor
-        # Portanto, a atribuição abaixo é apenas ilustrativa e pode precisar de adaptação
+        # ExponentialSmoothingDynamic does not accept dynamic alpha directly via constructor
+        # Therefore, the assignment below is only illustrative and may need adaptation
         self.lines.kama = ExponentialSmoothingDynamic(self.data, period=self.p.period)

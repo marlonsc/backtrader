@@ -104,7 +104,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
                 params_iter = list(self.params._getitems())
         if self.p is None:
             self.p = make_params(params_iter)
-        # Ensures all expected parameters exist
+        # Ensures that all expected parameters exist
         for pname, pval in params_iter:
             if not hasattr(self.p, pname):
                 setattr(self.p, pname, pval)
@@ -210,7 +210,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
         self._ohistory.append((orders, notify))
 
     def notify_timer(self, timer, when, *args, **kwargs):
-        """Delegação para utilitário de notificação de timer."""
+        """Delegation to timer notification utility."""
         notify_timer(timer, when, *args, **kwargs)
 
     def add_timer(
@@ -229,7 +229,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
         *args,
         **kwargs,
     ):
-        """Agenda um timer usando utilitário."""
+        """Schedules a timer using utility."""
         return schedule_timer(
             self,
             when,
@@ -248,11 +248,11 @@ class Cerebro(with_metaclass(MetaParams, object)):
         )
 
     def addtz(self, tz):
-        """Define o timezone global usando utilitário."""
+        """Sets the global timezone using utility."""
         addtz(self.p, tz)
 
     def addcalendar(self, cal):
-        """Adiciona um calendário global usando utilitário."""
+        """Adds a global calendar using utility."""
         self._tradingcal = addcalendar(cal)
 
     def add_signal(self, sigtype, sigcls, *sigargs, **sigkwargs):
@@ -872,7 +872,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
         if not self.datas:
             return []  # nothing can be run
 
-        # Garante que self.params é objeto Params
+        # Ensures that self.params is a Params object
         if not hasattr(self, "params") or not hasattr(self.params, "_getkeys"):
             self.params = self.p
         pkeys = self.params._getkeys() if hasattr(self.params, "_getkeys") else []

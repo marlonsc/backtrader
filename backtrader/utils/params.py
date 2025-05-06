@@ -1,16 +1,16 @@
 # Copyright (c) 2025 backtrader contributors
 """
-Funções utilitárias para inicialização e manipulação de objetos Params.
-Docstrings e comentários devem ser line-wrap ≤ 90 caracteres.
+Utility functions for initialization and manipulation of Params objects.
+Docstrings and comments should be line-wrapped ≤ 90 characters.
 """
 
 
 def make_params(params_tuple):
-    """Cria dinamicamente uma classe Params a partir de um tuple de pares (nome, valor).
+    """
+    Dynamically creates a Params class from a tuple of (name, value) pairs.
 
-    :param params_tuple: Tupla de pares (nome, valor) de parâmetros
-    :returns: Instância de Params com atributos correspondentes
-
+    :param params_tuple: Tuple of parameter (name, value) pairs
+    :return: Params instance with corresponding attributes
     """
     param_dict = dict((k, v) for k, v in params_tuple)
     return type("Params", (), param_dict)()

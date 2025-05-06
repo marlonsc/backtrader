@@ -62,9 +62,9 @@ class TestStrategy_SMA(bt.Strategy):
         )
 
         # Delayed indexing.
-        # Wenn ich hier self._dataclose[-delay] nehme, wird der *jetzt* aktuelle Wert genommen
-        # Die Formulierung hier ist äquivalent zu self._dataclose[-1] > self._sma in next()
-        # Hier wird ein LineOwnOperation erzeugt, kein Wert (bool)
+        # If I take self._dataclose[-delay] here, the *current* value is taken
+        # The formulation here is equivalent to self._dataclose[-1] > self._sma in next()
+        # Here a LineOwnOperation is created, not a value (bool)
         self._buy_condition: bt.LineOwnOperation = (
             self._dataclose(-self.p.delay) > self._sma
         )
@@ -124,10 +124,10 @@ class TestStrategy_SMA(bt.Strategy):
         print(f"{bars_processed:3} {caller:15}\t{formatted_date} {txt}")
 
     def next(self):
-        """Die Methode next() in einer Backtrader-Strategie wird bei jedem neuen Datenpunkt (Bar) aufgerufen und enthält
-        die Handelslogik der Strategie.
-        Die next()-Methode überprüft den aktuellen Marktstatus, entscheidet basierend auf der definierten Handelslogik,
-        ob Kauf- oder Verkaufsorders erstellt werden sollen, und loggt relevante Informationen.
+        """The next() method in a Backtrader strategy is called for each new data point (bar) and contains
+        the trading logic of the strategy.
+        The next() method checks the current market status, decides based on the defined trading logic
+        whether buy or sell orders should be created, and logs relevant information.
 
 
         """
@@ -165,31 +165,31 @@ class TestStrategy_SMA(bt.Strategy):
         # Check if we are in the market. Every completed BUY order creates a
         # position?
         if not self.position:
-            # Noch nicht im Markt ... wir KÖNNTEN kaufen, wenn ...
+            # Not in the market yet... we COULD buy if...
             if self._buy_condition:  # (identisch zu self._buy_condition)
-                # KAUFEN, KAUFEN, KAUFEN!!! (mit allen möglichen
-                # Standardparametern)
+                # BUY, BUY, BUY!!! (with all possible
+                # standard parameters)
                 buy_order_message = (
-                    f"{Fore.GREEN}Erstelle KAUF-Bestellung"
+                    f"{Fore.GREEN}Creating BUY order"
                     f" {self._dataclose[0]:,.2f}{Fore.RESET}"
                 )
                 self.log(buy_order_message, caller="func next")
                 self._order = self.buy()
         else:
-            # Bereits im Markt (Positionen existieren) ... wir könnten
-            # verkaufen
+            # Already in the market (positions exist) ... we could
+            # sell
             if self._sell_condition:
-                # VERKAUFEN, VERKAUFEN, VERKAUFEN!!! (mit allen möglichen
-                # Standardparametern)
+                # SELL, SELL, SELL!!! (with all possible
+                # standard parameters)
                 sell_order_message = (
-                    f"{Fore.YELLOW}Erstelle VERKAUF-Bestellung"
+                    f"{Fore.YELLOW}Creating SELL order"
                     f" {self._dataclose[0]:,.2f}{Fore.RESET}"
                 )
                 self.log(
                     sell_order_message,
                 )
-                # Verfolge die erstellte Bestellung, um eine zweite Bestellung
-                # zu vermeiden
+                # Track the created order to avoid a second order
+                # being placed
                 self._order = self.sell()
 
     def notify_order(self, order):
@@ -304,7 +304,7 @@ class DelayedIndexing(TestStrategy_SMA):
         self._sma = bt.indicators.SimpleMovingAverage(
             self._dataclose, period=self.p.period
         )
-        # _cmpval wird erst in next() berechnet (verzögert)
+        # _cmpval is only calculated in next() (delayed)
         self._cmpval: bt.linebuffer.LinesOperation = (
             self._dataclose(-self.p.delay) > self._sma
         )
@@ -324,8 +324,8 @@ class DelayedIndexing(TestStrategy_SMA):
         # print(f'Using delayed indexing: {bool(self._cmpval)=}')
 
         # Using __call__ method
-        # Ganz blöde Idee, weil _bei jedem Aufruf_ die Berechnung neu gemacht wird und ein neues
-        # Objekt erzeugt wird. Das ist nicht nur ineffizient, sondern auch fehleranfällig.
+        # Very bad idea, because the calculation is redone _with each call_ and a new
+        # object is created. This is not only inefficient, but also error-prone.
         # buy_condition_call:bt.linebuffer.LinesOperatio = self._dataclose(-self.p.delay) > self._sma
         # if len(buy_condition_call) > 0:
         #     print(f'Using __call__: {buy_condition_call[0]=}')
@@ -477,7 +477,7 @@ class EmptyCall(TestStrategy_SMA):
 
         self._sma0 = bt.indicators.SimpleMovingAverage(self._dataclose_daily, period=20)
         self._sma1 = bt.indicators.SimpleMovingAverage(self._dataclose_weekly, period=5)
-        # Erzeugt einen Indexfehler, weil die Daten unterschiedlich lang sind
+        # Generates an index error because the data has different lengths
         # sma_daily: 255, sma_weekly: 50
         self._buysig = self._sma0 > self._sma1(-1)
 

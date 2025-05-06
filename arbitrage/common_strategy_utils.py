@@ -1,18 +1,18 @@
 # Copyright (c) 2025 backtrader contributors
 """
-Utilitários para estratégias de arbitragem. Inclui funções para inicialização de
-variáveis comuns e notificação de ordens/trades. Todos os comentários e docstrings
-são quebrados em até 90 caracteres.
+Utilities for arbitrage strategies. Includes functions for initialization of
+common variables and notification of orders/trades. All comments and docstrings
+are broken into up to 90 characters.
 """
 
 
 def init_common_vars(strategy, extra_vars=None):
-    """Inicializa variáveis comuns para estratégias de arbitragem. Adicionalmente,
-    permite inicializar variáveis extras passadas em um dicionário.
+    """
+    Initializes common variables for arbitrage strategies. Additionally,
+    allows initializing extra variables passed in a dictionary.
 
-    :param strategy: Instância da estratégia (self)
-    :param extra_vars: Dicionário de variáveis extras a inicializar (Default value = None)
-
+    :param strategy: Strategy instance (self)
+    :param extra_vars: Dictionary of extra variables to initialize
     """
     strategy.returns_j = []
     strategy.returns_jm = []
@@ -26,11 +26,11 @@ def init_common_vars(strategy, extra_vars=None):
 
 
 def notify_order_default(strategy, order):
-    """Notificação padrão de ordens para estratégias de arbitragem.
+    """
+    Default order notification for arbitrage strategies.
 
-    :param strategy: Instância da estratégia (self)
-    :param order: Ordem recebida
-
+    :param strategy: Strategy instance (self)
+    :param order: Received order
     """
     if order.status in [order.Completed]:
         if getattr(strategy.p, "printlog", False):
@@ -52,11 +52,11 @@ def notify_order_default(strategy, order):
 
 
 def notify_trade_default(strategy, trade):
-    """Notificação padrão de trades para estratégias de arbitragem.
+    """
+    Default trade notification for arbitrage strategies.
 
-    :param strategy: Instância da estratégia (self)
-    :param trade: Trade recebido
-
+    :param strategy: Strategy instance (self)
+    :param trade: Received trade
     """
     if getattr(strategy.p, "printlog", False) and trade.isclosed:
         print(f"Trade PnL: {trade.pnlcomm:.2f}")

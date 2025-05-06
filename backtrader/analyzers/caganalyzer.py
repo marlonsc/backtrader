@@ -10,7 +10,7 @@ class CAGRAnalyzer(TimeFrameAnalyzerBase):
     params = (
         ("period", None),
         ("fund", None),
-        ("plot", True),  # 新增参数：是否自动绘图
+        ("plot", True),  # New parameter: whether to automatically plot
     )
 
     _TANN = {

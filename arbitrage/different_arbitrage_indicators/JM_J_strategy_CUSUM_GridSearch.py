@@ -1,7 +1,8 @@
 # Copyright (c) 2025 backtrader contributors
 """
-Grid search for CUSUM pair trading strategy for J/JM futures. Includes rolling beta
-spread calculation, parameter optimization, and result visualization.
+Grid search for CUSUM strategy on J/JM pairs. Includes spread calculation with
+rolling beta, CUSUM strategy, parameter optimization and visualization of the
+results.
 """
 
 import datetime
@@ -18,13 +19,12 @@ from backtrader.analyzers.tradeanalyzer import TradeAnalyzer
 
 
 def calculate_rolling_spread(df0, df1, window=30):
-    """Calcula o spread entre df0 e df1 usando beta dinâmico (rolling window).
-
-    :param df0: DataFrame do ativo 0 (J)
-    :param df1: DataFrame do ativo 1 (JM)
-    :param window: Tamanho da janela rolling para beta (Default value = 30)
-    :returns: DataFrame com spread e beta
-
+    """
+    Calculates the spread between df0 and df1 using dynamic beta (rolling window).
+    :param df0: DataFrame of asset 0 (J)
+    :param df1: DataFrame of asset 1 (JM)
+    :param window: Size of rolling window for beta
+    :return: DataFrame with spread and beta
     """
     df = (
         df0.set_index("date")[["close"]]
@@ -151,7 +151,9 @@ class CUSUMPairStrategy(bt.Strategy):
 
 
 def run_grid_search():
-    """Executa grid search para otimização dos parâmetros do CUSUM em J/JM."""
+    """
+    Executes grid search for optimization of CUSUM parameters in J/JM.
+    """
     output_file = "D:\\FutureData\\ricequant\\1d_2017to2024_noadjust.h5"
     df0 = pd.read_hdf(output_file, key="/J").reset_index()
     df1 = pd.read_hdf(output_file, key="/JM").reset_index()
@@ -178,9 +180,9 @@ def run_grid_search():
     results = []
     total_combinations = len(param_combinations)
     print(f"Starting grid search with {total_combinations} combinations...")
-    for i, (data0, data1, data2, win, k_coeff, h_coeff, spread_window) in enumerate(
-        param_combinations
-    ):
+    for i, (
+        data0, data1, data2, win, k_coeff, h_coeff, spread_window
+    ) in enumerate(param_combinations):
         print(
             f"Testing {i + 1}/{total_combinations}: win={win}, k_coeff={k_coeff},"
             f" h_coeff={h_coeff}, spread_window={spread_window}"
