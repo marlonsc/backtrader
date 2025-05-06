@@ -4,7 +4,8 @@ Contains configuration files. Primarily contains .ini files code, includes docum
 
 ## Navigation
 
-* [↑ Parent Directory (xtquant)](../README.md)
+* [🏠 Root Directory](../../README.md)
+* [⬆️ Parent Directory (xtquant)](../README.md)
 
 ### Subdirectories
 
@@ -15,6 +16,10 @@ Contains configuration files. Primarily contains .ini files code, includes docum
 ### MarketTime.ini
 
 Configuration file
+
+### README.md
+
+File with .md extension.
 
 ### StockInfo.lua
 
@@ -88,15 +93,15 @@ Binary or data file
 
 File with .lua extension (Contains non-English content that should be translated)
 
-
 ## Directory Summary
 
-This directory contains 19 files and 1 subdirectories.
+This directory contains 20 files and 1 subdirectories.
 
 ### File Types
 
 * .ini: 8 files
 * .lua: 7 files
+* .md: 1 files
 * .json: 1 files
 * .txt: 1 files
 * .log4cxx: 1 files

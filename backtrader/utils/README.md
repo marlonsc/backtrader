@@ -4,63 +4,44 @@ Contains utility functions and helper code. Primarily contains Python code.
 
 ## Navigation
 
-* [↑ Parent Directory (backtrader)](../README.md)
+* [🏠 Root Directory](../../README.md)
+* [⬆️ Parent Directory (backtrader)](../README.md)
 
 ## Files
 
-### __init__.py
+### README.md
 
-Python module
+File with .md extension.
+
+### __init__.py
 
 ### autodict.py
 
-
-
 ### calendar.py
-
-Utilities for calendar and timezone manipulation in backtrader.
 
 ### date.py
 
-Python module
-
 ### dateintern.py
-
-:param tz:
 
 ### flushfile.py
 
-
-
 ### iter.py
-
-Iteration utility functions for general use in the backtrader framework.
 
 ### optreturn.py
 
-OptReturn utility class for encapsulating optimization results.
-
 ### ordereddefaultdict.py
-
-
 
 ### params.py
 
-Utility functions for initialization and manipulation of Params objects.
-
 ### py3.py
-
-:param d:
 
 ### timer.py
 
-Utilities for timer manipulation in backtrader.
-
-
 ## Directory Summary
 
-This directory contains 12 files and 0 subdirectories.
+This directory contains 13 files and 0 subdirectories.
 
 ### File Types
 
 * .py: 12 files
+* .md: 1 files

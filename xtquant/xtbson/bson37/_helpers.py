@@ -19,27 +19,16 @@ from typing import Any, Mapping
 
 
 def _setstate_slots(self: Any, state: Any) -> None:
-    """
-
-    :param state:
-    :type state: Any
-    :rtype: None
-
-    """
+    """Args:
+    state:"""
     for slot, value in state.items():
         setattr(self, slot, value)
 
 
 def _mangle_name(name: str, prefix: str) -> str:
-    """
-
-    :param name:
-    :type name: str
-    :param prefix:
-    :type prefix: str
-    :rtype: str
-
-    """
+    """Args:
+    name: 
+    prefix:"""
     if name.startswith("__"):
         prefix = "_" + prefix
     else:

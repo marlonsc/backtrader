@@ -33,23 +33,12 @@ from backtrader import TimeFrameAnalyzerBase
 
 class Returns(TimeFrameAnalyzerBase):
     """Total, Average, Compound and Annualized Returns calculated using a
-    logarithmic approach
-    
-    See:
-    
-      - https://www.crystalbull.com/sharpe-ratio-better-with-log-returns/
+logarithmic approach
+See:
+- https://www.crystalbull.com/sharpe-ratio-better-with-log-returns/
 
-
-    :returns: each return as keys
-    
-        The returned dict the following keys:
-    
-          - ``rtot``: Total compound return
-          - ``ravg``: Average return for the entire period (timeframe specific)
-          - ``rnorm``: Annualized/Normalized return
-          - ``rnorm100``: Annualized/Normalized return expressed in 100%
-
-    """
+Returns:
+    each return as keys"""
 
     params = (
         ("tann", None),

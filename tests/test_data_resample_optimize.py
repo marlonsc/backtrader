@@ -13,12 +13,9 @@ class BtTestStrategy(bt.Strategy):
     )
 
     def log(self, txt, dt=None):
-        """
-
-        :param txt: 
-        :param dt: (Default value = None)
-
-        """
+        """Args:
+    txt: 
+    dt: (Default value = None)"""
         dt = dt or self.data.datetime[0]
         dt = bt.num2date(dt)
         print("%s, %s" % (dt.isoformat(), txt))
@@ -32,11 +29,10 @@ class BtTestStrategy(bt.Strategy):
 
 def test_optsample(main=False):
     """filters can have a state so when running optstrategy then filters will run several times. so they need to be reset before a new run is started.
-    Otherwise their behavior might change between different runs
+Otherwise their behavior might change between different runs
 
-    :param main: (Default value = False)
-
-    """
+Args:
+    main: (Default value = False)"""
     data = testcommon.getdata(0)
 
     cerebro = bt.Cerebro(maxcpus=1, optreturn=False)

@@ -43,13 +43,10 @@ class SlipTestStrategy(bt.SignalStrategy):
     )
 
     def log(self, txt, dt=None, nodate=False):
-        """
-
-        :param txt:
-        :param dt:  (Default value = None)
-        :param nodate:  (Default value = False)
-
-        """
+        """Args:
+    txt: 
+    dt: (Default value = None)
+    nodate: (Default value = False)"""
         if not nodate:
             dt = dt or self.data.datetime[0]
             dt = bt.num2date(dt)
@@ -58,11 +55,8 @@ class SlipTestStrategy(bt.SignalStrategy):
             print("---------- %s" % (txt))
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status in [bt.Order.Submitted, bt.Order.Accepted]:
             return  # Await further notifications
 
@@ -150,9 +144,8 @@ class SlipTestStrategy(bt.SignalStrategy):
 def test_run(main=False):
     """Test a fix in bbroker. See backtrader2 pr#22
 
-    :param main:  (Default value = False)
-
-    """
+Args:
+    main: (Default value = False)"""
 
     cerebro = bt.Cerebro()
 

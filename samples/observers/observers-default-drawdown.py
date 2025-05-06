@@ -37,10 +37,9 @@ class MyStrategy(bt.Strategy):
     def log(self, txt, dt=None):
         """Logging function fot this strategy
 
-        :param txt: 
-        :param dt: (Default value = None)
-
-        """
+Args:
+    txt: 
+    dt: (Default value = None)"""
         dt = dt or self.data.datetime[0]
         if isinstance(dt, float):
             dt = bt.num2date(dt)

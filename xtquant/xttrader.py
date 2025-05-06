@@ -7,11 +7,8 @@ from . import xttype as _XTTYPE_
 
 
 def title(s=None):
-    """
-
-    :param s:  (Default value = None)
-
-    """
+    """Args:
+    s: (Default value = None)"""
     import inspect
 
     if not s:
@@ -21,11 +18,8 @@ def title(s=None):
 
 
 def cp(s=None):
-    """
-
-    :param s:  (Default value = None)
-
-    """
+    """Args:
+    s: (Default value = None)"""
     import inspect
 
     st = inspect.stack()
@@ -45,87 +39,54 @@ class XtQuantTraderCallback(object):
         """连接断开推送"""
 
     def on_account_status(self, status):
-        """
-
-        :param status: XtAccountStatus对象
-
-        """
+        """Args:
+    status: XtAccountStatus对象"""
 
     def on_stock_asset(self, asset):
-        """
-
-        :param asset: XtAsset对象
-
-        """
+        """Args:
+    asset: XtAsset对象"""
 
     def on_stock_order(self, order):
-        """
-
-        :param order: XtOrder对象
-
-        """
+        """Args:
+    order: XtOrder对象"""
 
     def on_stock_trade(self, trade):
-        """
-
-        :param trade: XtTrade对象
-
-        """
+        """Args:
+    trade: XtTrade对象"""
 
     def on_stock_position(self, position):
-        """
-
-        :param position: XtPosition对象
-
-        """
+        """Args:
+    position: XtPosition对象"""
 
     def on_order_error(self, order_error):
-        """
-
-        :param order_error: XtOrderError 对象
-
-        """
+        """Args:
+    order_error: XtOrderError 对象"""
 
     def on_cancel_error(self, cancel_error):
-        """
-
-        :param cancel_error: XtCancelError 对象
-
-        """
+        """Args:
+    cancel_error: XtCancelError 对象"""
 
     def on_order_stock_async_response(self, response):
-        """
-
-        :param response: XtOrderResponse 对象
-
-        """
+        """Args:
+    response: XtOrderResponse 对象"""
 
     def on_cancel_order_stock_async_response(self, response):
-        """
-
-        :param response: XtCancelOrderResponse 对象
-
-        """
+        """Args:
+    response: XtCancelOrderResponse 对象"""
 
     def on_smt_appointment_async_response(self, response):
-        """
-
-        :param response: XtSmtAppointmentResponse 对象
-
-        """
+        """Args:
+    response: XtSmtAppointmentResponse 对象"""
 
 
 class XtQuantTrader(object):
     """ """
 
     def __init__(self, path, session, callback=None):
-        """
-
-        :param path: mini版迅投极速交易客户端安装路径下，userdata文件夹具体路径
-        :param session: 当前任务执行所属的会话id
-        :param callback: 回调方法 (Default value = None)
-
-        """
+        """Args:
+    path: mini版迅投极速交易客户端安装路径下，userdata文件夹具体路径
+    session: 当前任务执行所属的会话id
+    callback: 回调方法 (Default value = None)"""
         import asyncio
         from threading import current_thread
 
@@ -162,12 +123,9 @@ class XtQuantTrader(object):
         #########################
         # push
         def on_common_push_callback_wrapper(argc, callback):
-            """
-
-            :param argc:
-            :param callback:
-
-            """
+            """Args:
+    argc: 
+    callback:"""
             if argc == 0:
 
                 def on_push_data():
@@ -178,23 +136,17 @@ class XtQuantTrader(object):
             elif argc == 1:
 
                 def on_push_data(data):
-                    """
-
-                    :param data:
-
-                    """
+                    """Args:
+    data:"""
                     self.executor.submit(callback, data)
 
                 return on_push_data
             elif argc == 2:
 
                 def on_push_data(data1, data2):
-                    """
-
-                    :param data1:
-                    :param data2:
-
-                    """
+                    """Args:
+    data1: 
+    data2:"""
                     self.executor.submit(callback, data1, data2)
 
                 return on_push_data
@@ -203,12 +155,9 @@ class XtQuantTrader(object):
 
         # response
         def on_common_resp_callback(seq, resp):
-            """
-
-            :param seq:
-            :param resp:
-
-            """
+            """Args:
+    seq: 
+    resp:"""
             callback = self.cbs.pop(seq, None)
             if callback:
                 self.resp_executor.submit(callback, resp)
@@ -249,12 +198,9 @@ class XtQuantTrader(object):
         # order push
 
         def on_push_OrderStockAsyncResponse(seq, resp):
-            """
-
-            :param seq:
-            :param resp:
-
-            """
+            """Args:
+    seq: 
+    resp:"""
             callback = self.cbs.pop(seq, None)
             if callback:
                 resp = _XTTYPE_.XtOrderResponse(
@@ -282,12 +228,9 @@ class XtQuantTrader(object):
             )
 
         def on_push_CancelOrderStockAsyncResponse(seq, resp):
-            """
-
-            :param seq:
-            :param resp:
-
-            """
+            """Args:
+    seq: 
+    resp:"""
             callback = self.cbs.pop(seq, None)
             if callback:
                 resp = _XTTYPE_.XtCancelOrderResponse(
@@ -344,11 +287,8 @@ class XtQuantTrader(object):
             )
 
         def on_push_AccountStatus(data):
-            """
-
-            :param data:
-
-            """
+            """Args:
+    data:"""
             data = _XTTYPE_.XtAccountStatus(
                 data.m_strAccountID, data.m_nAccountType, data.m_nStatus
             )
@@ -360,11 +300,8 @@ class XtQuantTrader(object):
             )
 
         def on_push_StockAsset(data):
-            """
-
-            :param data:
-
-            """
+            """Args:
+    data:"""
             self.callback.on_stock_asset(data)
 
         if enable_push:
@@ -373,11 +310,8 @@ class XtQuantTrader(object):
             )
 
         def on_push_OrderStock(data):
-            """
-
-            :param data:
-
-            """
+            """Args:
+    data:"""
             self.callback.on_stock_order(data)
 
         if enable_push:
@@ -386,11 +320,8 @@ class XtQuantTrader(object):
             )
 
         def on_push_StockTrade(data):
-            """
-
-            :param data:
-
-            """
+            """Args:
+    data:"""
             self.callback.on_stock_trade(data)
 
         if enable_push:
@@ -399,11 +330,8 @@ class XtQuantTrader(object):
             )
 
         def on_push_StockPosition(data):
-            """
-
-            :param data:
-
-            """
+            """Args:
+    data:"""
             self.callback.on_stock_position(data)
 
         if enable_push:
@@ -412,11 +340,8 @@ class XtQuantTrader(object):
             )
 
         def on_push_OrderError(data):
-            """
-
-            :param data:
-
-            """
+            """Args:
+    data:"""
             if (
                 data.seq not in self.queuing_order_seq
                 or data.order_id in self.handled_async_order_stock_order_id
@@ -433,11 +358,8 @@ class XtQuantTrader(object):
             )
 
         def on_push_CancelError(data):
-            """
-
-            :param data:
-
-            """
+            """Args:
+    data:"""
             if data.order_id in self.handled_async_cancel_order_stock_order_id:
                 self.handled_async_cancel_order_stock_order_id.discard(data.order_id)
                 self.callback.on_cancel_error(data)
@@ -456,12 +378,9 @@ class XtQuantTrader(object):
             )
 
         def on_push_SmtAppointmentAsyncResponse(seq, resp):
-            """
-
-            :param seq:
-            :param resp:
-
-            """
+            """Args:
+    seq: 
+    resp:"""
             callback = self.cbs.pop(seq, None)
             if callback:
                 resp = _XTTYPE_.XtSmtAppointmentResponse(
@@ -478,22 +397,15 @@ class XtQuantTrader(object):
     ########################
 
     def common_op_async_with_seq(self, seq, callable, callback):
-        """
-
-        :param seq:
-        :param callable:
-        :param callback:
-
-        """
+        """Args:
+    seq: 
+    callable: 
+    callback:"""
         self.cbs[seq] = callback
 
         def apply(func, *args):
-            """
-
-            :param func:
-            :param *args:
-
-            """
+            """Args:
+    func:"""
             return func(*args)
 
         apply(*callable)
@@ -501,32 +413,22 @@ class XtQuantTrader(object):
         return seq
 
     def set_timeout(self, timeout=0):
-        """
-
-        :param timeout:  (Default value = 0)
-
-        """
+        """Args:
+    timeout: (Default value = 0)"""
         self.async_client.setTimeout(timeout)
 
     def common_op_sync_with_seq(self, seq, callable):
-        """
-
-        :param seq:
-        :param callable:
-
-        """
+        """Args:
+    seq: 
+    callable:"""
         from concurrent.futures import Future
 
         future = Future()
         self.cbs[seq] = lambda resp: future.set_result(resp)
 
         def apply(func, *args):
-            """
-
-            :param func:
-            :param *args:
-
-            """
+            """Args:
+    func:"""
             return func(*args)
 
         apply(*callable)
@@ -544,11 +446,8 @@ class XtQuantTrader(object):
             asyncio.set_event_loop(self.oldloop)
 
     def register_callback(self, callback):
-        """
-
-        :param callback:
-
-        """
+        """Args:
+    callback:"""
         self.callback = callback
 
     def start(self):
@@ -581,11 +480,8 @@ class XtQuantTrader(object):
         return result
 
     def sleep(self, time):
-        """
-
-        :param time:
-
-        """
+        """Args:
+    time:"""
         import asyncio
 
         async def sleep_coroutine(time):
@@ -607,11 +503,8 @@ class XtQuantTrader(object):
         return
 
     def set_relaxed_response_order_enabled(self, enabled):
-        """
-
-        :param enabled:
-
-        """
+        """Args:
+    enabled:"""
         self.relaxed_resp_order_enabled = enabled
         self.resp_executor = (
             self.relaxed_resp_executor
@@ -621,11 +514,8 @@ class XtQuantTrader(object):
         return
 
     def subscribe(self, account):
-        """
-
-        :param account:
-
-        """
+        """Args:
+    account:"""
         req = _XTQC_.SubscribeReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -635,11 +525,8 @@ class XtQuantTrader(object):
         )
 
     def unsubscribe(self, account):
-        """
-
-        :param account:
-
-        """
+        """Args:
+    account:"""
         req = _XTQC_.UnsubscribeReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -659,19 +546,18 @@ class XtQuantTrader(object):
         strategy_name="",
         order_remark="",
     ):
-        """
+        """Args:
+    account: 证券账号
+    stock_code: 证券代码, 例如"600000.SH"
+    order_type: 委托类型, 23:买, 24:卖
+    order_volume: 委托数量, 股票以'股'为单位, 债券以'张'为单位
+    price_type: 报价类型, 详见帮助手册
+    price: 报价价格, 如果price_type为指定价, 那price为指定的价格, 否则填0
+    strategy_name: 策略名称 (Default value = "")
+    order_remark: 委托备注 (Default value = "")
 
-        :param account: 证券账号
-        :param stock_code: 证券代码, 例如"600000.SH"
-        :param order_type: 委托类型, 23:买, 24:卖
-        :param order_volume: 委托数量, 股票以'股'为单位, 债券以'张'为单位
-        :param price_type: 报价类型, 详见帮助手册
-        :param price: 报价价格, 如果price_type为指定价, 那price为指定的价格, 否则填0
-        :param strategy_name: 策略名称 (Default value = "")
-        :param order_remark: 委托备注 (Default value = "")
-        :returns: 返回下单请求序号, 成功委托后的下单请求序号为大于0的正整数, 如果为-1表示委托失败
-
-        """
+Returns:
+    返回下单请求序号, 成功委托后的下单请求序号为大于0的正整数, 如果为-1表示委托失败"""
         req = _XTQC_.OrderStockReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -703,19 +589,18 @@ class XtQuantTrader(object):
         strategy_name="",
         order_remark="",
     ):
-        """
+        """Args:
+    account: 证券账号
+    stock_code: 证券代码, 例如"600000.SH"
+    order_type: 委托类型, 23:买, 24:卖
+    order_volume: 委托数量, 股票以'股'为单位, 债券以'张'为单位
+    price_type: 报价类型, 详见帮助手册
+    price: 报价价格, 如果price_type为指定价, 那price为指定的价格, 否则填0
+    strategy_name: 策略名称 (Default value = "")
+    order_remark: 委托备注 (Default value = "")
 
-        :param account: 证券账号
-        :param stock_code: 证券代码, 例如"600000.SH"
-        :param order_type: 委托类型, 23:买, 24:卖
-        :param order_volume: 委托数量, 股票以'股'为单位, 债券以'张'为单位
-        :param price_type: 报价类型, 详见帮助手册
-        :param price: 报价价格, 如果price_type为指定价, 那price为指定的价格, 否则填0
-        :param strategy_name: 策略名称 (Default value = "")
-        :param order_remark: 委托备注 (Default value = "")
-        :returns: 返回下单请求序号, 成功委托后的下单请求序号为大于0的正整数, 如果为-1表示委托失败
-
-        """
+Returns:
+    返回下单请求序号, 成功委托后的下单请求序号为大于0的正整数, 如果为-1表示委托失败"""
         req = _XTQC_.OrderStockReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -738,13 +623,12 @@ class XtQuantTrader(object):
         return resp.order_id
 
     def cancel_order_stock(self, account, order_id):
-        """
+        """Args:
+    account: 证券账号
+    order_id: 委托编号, 报单时返回的编号
 
-        :param account: 证券账号
-        :param order_id: 委托编号, 报单时返回的编号
-        :returns: 返回撤单成功或者失败, 0:成功,  -1:撤单失败
-
-        """
+Returns:
+    返回撤单成功或者失败, 0:成功,  -1:撤单失败"""
         req = _XTQC_.CancelOrderStockReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -757,13 +641,12 @@ class XtQuantTrader(object):
         return resp.cancel_result
 
     def cancel_order_stock_async(self, account, order_id):
-        """
+        """Args:
+    account: 证券账号
+    order_id: 委托编号, 报单时返回的编号
 
-        :param account: 证券账号
-        :param order_id: 委托编号, 报单时返回的编号
-        :returns: 返回撤单请求序号, 成功委托后的撤单请求序号为大于0的正整数, 如果为-1表示撤单失败
-
-        """
+Returns:
+    返回撤单请求序号, 成功委托后的撤单请求序号为大于0的正整数, 如果为-1表示撤单失败"""
         req = _XTQC_.CancelOrderStockReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -775,14 +658,13 @@ class XtQuantTrader(object):
         return seq
 
     def cancel_order_stock_sysid(self, account, market, sysid):
-        """
+        """Args:
+    account: 证券账号
+    market: 交易市场 0:上海 1:深圳
+    sysid: 柜台合同编号
 
-        :param account: 证券账号
-        :param market: 交易市场 0:上海 1:深圳
-        :param sysid: 柜台合同编号
-        :returns: 返回撤单成功或者失败, 0:成功,  -1:撤单失败
-
-        """
+Returns:
+    返回撤单成功或者失败, 0:成功,  -1:撤单失败"""
         req = _XTQC_.CancelOrderStockReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -800,14 +682,13 @@ class XtQuantTrader(object):
         return resp.cancel_result
 
     def cancel_order_stock_sysid_async(self, account, market, sysid):
-        """
+        """Args:
+    account: 证券账号
+    market: 交易市场 0:上海 1:深圳
+    sysid: 柜台编号
 
-        :param account: 证券账号
-        :param market: 交易市场 0:上海 1:深圳
-        :param sysid: 柜台编号
-        :returns: 返回撤单请求序号, 成功委托后的撤单请求序号为大于0的正整数, 如果为-1表示撤单失败
-
-        """
+Returns:
+    返回撤单请求序号, 成功委托后的撤单请求序号为大于0的正整数, 如果为-1表示撤单失败"""
         req = _XTQC_.CancelOrderStockReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -824,7 +705,8 @@ class XtQuantTrader(object):
         return seq
 
     def query_account_infos(self):
-        """:return: 返回账号列表"""
+        """Returns:
+    返回账号列表"""
         req = _XTQC_.QueryAccountInfosReq()
 
         seq = self.async_client.nextSeq()
@@ -835,11 +717,11 @@ class XtQuantTrader(object):
     query_account_info = query_account_infos
 
     def query_account_infos_async(self, callback):
-        """:return: 返回账号列表
+        """Args:
+    callback: 
 
-        :param callback:
-
-        """
+Returns:
+    返回账号列表"""
         req = _XTQC_.QueryAccountInfosReq()
 
         seq = self.async_client.nextSeq()
@@ -850,7 +732,8 @@ class XtQuantTrader(object):
         )
 
     def query_account_status(self):
-        """:return: 返回账号状态"""
+        """Returns:
+    返回账号状态"""
         req = _XTQC_.QueryAccountStatusReq()
 
         seq = self.async_client.nextSeq()
@@ -859,11 +742,11 @@ class XtQuantTrader(object):
         )
 
     def query_account_status_async(self, callback):
-        """:return: 返回账号状态
+        """Args:
+    callback: 
 
-        :param callback:
-
-        """
+Returns:
+    返回账号状态"""
         req = _XTQC_.QueryAccountStatusReq()
 
         seq = self.async_client.nextSeq()
@@ -874,12 +757,11 @@ class XtQuantTrader(object):
         )
 
     def query_stock_asset(self, account):
-        """
+        """Args:
+    account: 证券账号
 
-        :param account: 证券账号
-        :returns: 返回当前证券账号的资产数据
-
-        """
+Returns:
+    返回当前证券账号的资产数据"""
         req = _XTQC_.QueryStockAssetReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -894,13 +776,12 @@ class XtQuantTrader(object):
         return None
 
     def query_stock_asset_async(self, account, callback):
-        """
+        """Args:
+    account: 证券账号
+    callback: 
 
-        :param account: 证券账号
-        :param callback:
-        :returns: 返回当前证券账号的资产数据
-
-        """
+Returns:
+    返回当前证券账号的资产数据"""
         req = _XTQC_.QueryStockAssetReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -908,11 +789,8 @@ class XtQuantTrader(object):
         seq = self.async_client.nextSeq()
 
         def _cb(resp):
-            """
-
-            :param resp:
-
-            """
+            """Args:
+    resp:"""
             callback(resp[0] if resp else None)
 
         resp = self.common_op_async_with_seq(
@@ -921,13 +799,12 @@ class XtQuantTrader(object):
         return
 
     def query_stock_order(self, account, order_id):
-        """
+        """Args:
+    account: 证券账号
+    order_id: 订单编号，同步报单接口返回的编号
 
-        :param account: 证券账号
-        :param order_id: 订单编号，同步报单接口返回的编号
-        :returns: 返回订单编号对应的委托对象
-
-        """
+Returns:
+    返回订单编号对应的委托对象"""
         req = _XTQC_.QueryStockOrdersReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -942,13 +819,12 @@ class XtQuantTrader(object):
         return None
 
     def query_stock_orders(self, account, cancelable_only=False):
-        """
+        """Args:
+    account: 证券账号
+    cancelable_only: 仅查询可撤委托 (Default value = False)
 
-        :param account: 证券账号
-        :param cancelable_only: 仅查询可撤委托 (Default value = False)
-        :returns: 返回当日所有委托的委托对象组成的list
-
-        """
+Returns:
+    返回当日所有委托的委托对象组成的list"""
         req = _XTQC_.QueryStockOrdersReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -960,14 +836,13 @@ class XtQuantTrader(object):
         )
 
     def query_stock_orders_async(self, account, callback, cancelable_only=False):
-        """
+        """Args:
+    account: 证券账号
+    callback: 
+    cancelable_only: 仅查询可撤委托 (Default value = False)
 
-        :param account: 证券账号
-        :param callback:
-        :param cancelable_only: 仅查询可撤委托 (Default value = False)
-        :returns: 返回当日所有委托的委托对象组成的list
-
-        """
+Returns:
+    返回当日所有委托的委托对象组成的list"""
         req = _XTQC_.QueryStockOrdersReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -979,12 +854,11 @@ class XtQuantTrader(object):
         )
 
     def query_stock_trades(self, account):
-        """
+        """Args:
+    account: 证券账号
 
-        :param account: 证券账号
-        :returns: 返回当日所有成交的成交对象组成的list
-
-        """
+Returns:
+    返回当日所有成交的成交对象组成的list"""
         req = _XTQC_.QueryStockTradesReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -995,13 +869,12 @@ class XtQuantTrader(object):
         )
 
     def query_stock_trades_async(self, account, callback):
-        """
+        """Args:
+    account: 证券账号
+    callback: 
 
-        :param account: 证券账号
-        :param callback:
-        :returns: 返回当日所有成交的成交对象组成的list
-
-        """
+Returns:
+    返回当日所有成交的成交对象组成的list"""
         req = _XTQC_.QueryStockTradesReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -1012,13 +885,12 @@ class XtQuantTrader(object):
         )
 
     def query_stock_position(self, account, stock_code):
-        """
+        """Args:
+    account: 证券账号
+    stock_code: 证券代码, 例如"600000.SH"
 
-        :param account: 证券账号
-        :param stock_code: 证券代码, 例如"600000.SH"
-        :returns: 返回证券代码对应的持仓对象
-
-        """
+Returns:
+    返回证券代码对应的持仓对象"""
         req = _XTQC_.QueryStockPositionsReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -1034,12 +906,11 @@ class XtQuantTrader(object):
         return None
 
     def query_stock_positions(self, account):
-        """
+        """Args:
+    account: 证券账号
 
-        :param account: 证券账号
-        :returns: 返回当日所有持仓的持仓对象组成的list
-
-        """
+Returns:
+    返回当日所有持仓的持仓对象组成的list"""
         req = _XTQC_.QueryStockPositionsReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -1050,13 +921,12 @@ class XtQuantTrader(object):
         )
 
     def query_stock_positions_async(self, account, callback):
-        """
+        """Args:
+    account: 证券账号
+    callback: 
 
-        :param account: 证券账号
-        :param callback:
-        :returns: 返回当日所有持仓的持仓对象组成的list
-
-        """
+Returns:
+    返回当日所有持仓的持仓对象组成的list"""
         req = _XTQC_.QueryStockPositionsReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -1069,12 +939,11 @@ class XtQuantTrader(object):
         )
 
     def query_credit_detail(self, account):
-        """
+        """Args:
+    account: 证券账号
 
-        :param account: 证券账号
-        :returns: 返回当前证券账号的资产数据
-
-        """
+Returns:
+    返回当前证券账号的资产数据"""
         req = _XTQC_.QueryCreditDetailReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -1085,13 +954,12 @@ class XtQuantTrader(object):
         )
 
     def query_credit_detail_async(self, account, callback):
-        """
+        """Args:
+    account: 证券账号
+    callback: 
 
-        :param account: 证券账号
-        :param callback:
-        :returns: 返回当前证券账号的资产数据
-
-        """
+Returns:
+    返回当前证券账号的资产数据"""
         req = _XTQC_.QueryCreditDetailReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -1104,12 +972,11 @@ class XtQuantTrader(object):
         )
 
     def query_stk_compacts(self, account):
-        """
+        """Args:
+    account: 证券账号
 
-        :param account: 证券账号
-        :returns: 返回负债合约
-
-        """
+Returns:
+    返回负债合约"""
         req = _XTQC_.QueryStkCompactsReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -1120,13 +987,12 @@ class XtQuantTrader(object):
         )
 
     def query_stk_compacts_async(self, account, callback):
-        """
+        """Args:
+    account: 证券账号
+    callback: 
 
-        :param account: 证券账号
-        :param callback:
-        :returns: 返回负债合约
-
-        """
+Returns:
+    返回负债合约"""
         req = _XTQC_.QueryStkCompactsReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -1137,12 +1003,11 @@ class XtQuantTrader(object):
         )
 
     def query_credit_subjects(self, account):
-        """
+        """Args:
+    account: 证券账号
 
-        :param account: 证券账号
-        :returns: 返回融资融券标的
-
-        """
+Returns:
+    返回融资融券标的"""
         req = _XTQC_.QueryCreditSubjectsReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -1153,13 +1018,12 @@ class XtQuantTrader(object):
         )
 
     def query_credit_subjects_async(self, account, callback):
-        """
+        """Args:
+    account: 证券账号
+    callback: 
 
-        :param account: 证券账号
-        :param callback:
-        :returns: 返回融资融券标的
-
-        """
+Returns:
+    返回融资融券标的"""
         req = _XTQC_.QueryCreditSubjectsReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -1172,12 +1036,11 @@ class XtQuantTrader(object):
         )
 
     def query_credit_slo_code(self, account):
-        """
+        """Args:
+    account: 证券账号
 
-        :param account: 证券账号
-        :returns: 返回可融券数据
-
-        """
+Returns:
+    返回可融券数据"""
         req = _XTQC_.QueryCreditSloCodeReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -1188,13 +1051,12 @@ class XtQuantTrader(object):
         )
 
     def query_credit_slo_code_async(self, account, callback):
-        """
+        """Args:
+    account: 证券账号
+    callback: 
 
-        :param account: 证券账号
-        :param callback:
-        :returns: 返回可融券数据
-
-        """
+Returns:
+    返回可融券数据"""
         req = _XTQC_.QueryCreditSloCodeReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -1207,12 +1069,11 @@ class XtQuantTrader(object):
         )
 
     def query_credit_assure(self, account):
-        """
+        """Args:
+    account: 证券账号
 
-        :param account: 证券账号
-        :returns: 返回标的担保品
-
-        """
+Returns:
+    返回标的担保品"""
         req = _XTQC_.QueryCreditAssureReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -1223,13 +1084,12 @@ class XtQuantTrader(object):
         )
 
     def query_credit_assure_async(self, account, callback):
-        """
+        """Args:
+    account: 证券账号
+    callback: 
 
-        :param account: 证券账号
-        :param callback:
-        :returns: 返回标的担保品
-
-        """
+Returns:
+    返回标的担保品"""
         req = _XTQC_.QueryCreditAssureReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -1242,12 +1102,11 @@ class XtQuantTrader(object):
         )
 
     def query_new_purchase_limit(self, account):
-        """
+        """Args:
+    account: 证券账号
 
-        :param account: 证券账号
-        :returns: 返回账户新股申购额度数据
-
-        """
+Returns:
+    返回账户新股申购额度数据"""
         req = _XTQC_.QueryNewPurchaseLimitReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -1264,13 +1123,12 @@ class XtQuantTrader(object):
         return new_purchase_limit_result
 
     def query_new_purchase_limit_async(self, account, callback):
-        """
+        """Args:
+    account: 证券账号
+    callback: 
 
-        :param account: 证券账号
-        :param callback:
-        :returns: 返回账户新股申购额度数据
-
-        """
+Returns:
+    返回账户新股申购额度数据"""
         req = _XTQC_.QueryNewPurchaseLimitReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -1283,7 +1141,8 @@ class XtQuantTrader(object):
         )
 
     def query_ipo_data(self):
-        """:return: 返回新股新债信息"""
+        """Returns:
+    返回新股新债信息"""
         req = _XTQC_.QueryIPODataReq()
         req.m_strIPOType = ""
 
@@ -1304,11 +1163,11 @@ class XtQuantTrader(object):
         return ipo_data_result
 
     def query_ipo_data_async(self, callback):
-        """:return: 返回新股新债信息
+        """Args:
+    callback: 
 
-        :param callback:
-
-        """
+Returns:
+    返回新股新债信息"""
         req = _XTQC_.QueryIPODataReq()
         req.m_strIPOType = ""
 
@@ -1318,14 +1177,13 @@ class XtQuantTrader(object):
         )
 
     def fund_transfer(self, account, transfer_direction, price):
-        """
+        """Args:
+    account: 证券账号
+    transfer_direction: 划拨方向
+    price: 划拨金额
 
-        :param account: 证券账号
-        :param transfer_direction: 划拨方向
-        :param price: 划拨金额
-        :returns: 返回划拨操作结果
-
-        """
+Returns:
+    返回划拨操作结果"""
         req = _XTQC_.TransferParam()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -1341,16 +1199,15 @@ class XtQuantTrader(object):
     def secu_transfer(
         self, account, transfer_direction, stock_code, volume, transfer_type
     ):
-        """
+        """Args:
+    account: 证券账号
+    transfer_direction: 划拨方向
+    stock_code: 证券代码, 例如"SH600000"
+    volume: 划拨数量, 股票以'股'为单位, 债券以'张'为单位
+    transfer_type: 划拨类型
 
-        :param account: 证券账号
-        :param transfer_direction: 划拨方向
-        :param stock_code: 证券代码, 例如"SH600000"
-        :param volume: 划拨数量, 股票以'股'为单位, 债券以'张'为单位
-        :param transfer_type: 划拨类型
-        :returns: 返回划拨操作结果
-
-        """
+Returns:
+    返回划拨操作结果"""
         req = _XTQC_.TransferParam()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -1367,12 +1224,11 @@ class XtQuantTrader(object):
         return transfer_result.m_bSuccess, transfer_result.m_strMsg
 
     def query_com_fund(self, account):
-        """
+        """Args:
+    account: 证券账号
 
-        :param account: 证券账号
-        :returns: 返回普通柜台资金信息
-
-        """
+Returns:
+    返回普通柜台资金信息"""
         req = _XTQC_.QueryComFundReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -1398,12 +1254,11 @@ class XtQuantTrader(object):
         return result
 
     def query_com_position(self, account):
-        """
+        """Args:
+    account: 证券账号
 
-        :param account: 证券账号
-        :returns: 返回普通柜台持仓信息
-
-        """
+Returns:
+    返回普通柜台持仓信息"""
         req = _XTQC_.QueryComPositionReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -1438,12 +1293,11 @@ class XtQuantTrader(object):
         return result
 
     def smt_query_quoter(self, account):
-        """
+        """Args:
+    account: 证券账号
 
-        :param account: 证券账号
-        :returns: 返回券源行情信息
-
-        """
+Returns:
+    返回券源行情信息"""
         req = _XTQC_.SmtQueryQuoterReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -1490,22 +1344,17 @@ class XtQuantTrader(object):
         apply_rate,
         dict_param={},
     ):
-        """
+        """Args:
+    account: 证券账号
+    src_group_id: 来源组编号
+    order_code: 证券代码，如'600000.SH'
+    date: 期限天数
+    amount: 委托数量
+    apply_rate: 资券申请利率
+    dict_param: (Default value = {})
 
-        :param account: 证券账号
-        :param src_group_id: 来源组编号
-        :param order_code: 证券代码，如'600000.SH'
-        :param date: 期限天数
-        :param amount: 委托数量
-        :param apply_rate: 资券申请利率
-        :param dict_param:  (Default value = {})
-        :returns: 返回约券请求序号, 成功请求后的序号为大于0的正整数, 如果为-1表示请求失败
-        注:
-        目前有如下参数通过一个可缺省的字典传递，键名与参数名称相同
-        subFareRate: 提前归还利率
-        fineRate: 罚息利率
-
-        """
+Returns:
+    返回约券请求序号, 成功请求后的序号为大于0的正整数, 如果为-1表示请求失败"""
         req = _XTQC_.SmtNegotiateOrderReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -1528,16 +1377,15 @@ class XtQuantTrader(object):
     def smt_appointment_order_async(
         self, account, order_code, date, amount, apply_rate
     ):
-        """
+        """Args:
+    account: 证券账号
+    order_code: 证券代码，如'600000.SH'
+    date: 期限天数
+    amount: 委托数量
+    apply_rate: 资券申请利率
 
-        :param account: 证券账号
-        :param order_code: 证券代码，如'600000.SH'
-        :param date: 期限天数
-        :param amount: 委托数量
-        :param apply_rate: 资券申请利率
-        :returns: 返回约券请求序号, 成功请求后的序号为大于0的正整数, 如果为-1表示请求失败
-
-        """
+Returns:
+    返回约券请求序号, 成功请求后的序号为大于0的正整数, 如果为-1表示请求失败"""
         req = _XTQC_.SmtAppointmentOrderReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -1552,13 +1400,12 @@ class XtQuantTrader(object):
         return seq
 
     def smt_appointment_cancel_async(self, account, apply_id):
-        """
+        """Args:
+    account: 证券账号
+    apply_id: 资券申请编号
 
-        :param account: 证券账号
-        :param apply_id: 资券申请编号
-        :returns: 返回约券撤单请求序号, 成功请求后的序号为大于0的正整数, 如果为-1表示请求失败
-
-        """
+Returns:
+    返回约券撤单请求序号, 成功请求后的序号为大于0的正整数, 如果为-1表示请求失败"""
         req = _XTQC_.SmtAppointmentCancelReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -1570,12 +1417,11 @@ class XtQuantTrader(object):
         return seq
 
     def smt_query_order(self, account):
-        """
+        """Args:
+    account: 证券账号
 
-        :param account: 证券账号
-        :returns: 返回券源行情信息
-
-        """
+Returns:
+    返回券源行情信息"""
         req = _XTQC_.SmtQueryOrderReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -1619,12 +1465,11 @@ class XtQuantTrader(object):
         return result
 
     def smt_query_compact(self, account):
-        """
+        """Args:
+    account: 证券账号
 
-        :param account: 证券账号
-        :returns: 返回券源行情信息
-
-        """
+Returns:
+    返回券源行情信息"""
         req = _XTQC_.SmtQueryCompactReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -1695,17 +1540,16 @@ class XtQuantTrader(object):
         defer_num,
         apply_rate,
     ):
-        """
+        """Args:
+    account: 证券账号
+    cash_compact_id: 头寸合约编号
+    order_code: 证券代码，如'600000.SH'
+    defer_days: 申请展期天数
+    defer_num: 申请展期数量
+    apply_rate: 资券申请利率
 
-        :param account: 证券账号
-        :param cash_compact_id: 头寸合约编号
-        :param order_code: 证券代码，如'600000.SH'
-        :param defer_days: 申请展期天数
-        :param defer_num: 申请展期数量
-        :param apply_rate: 资券申请利率
-        :returns: 返回约券展期请求序号, 成功请求后的序号为大于0的正整数, 如果为-1表示请求失败
-
-        """
+Returns:
+    返回约券展期请求序号, 成功请求后的序号为大于0的正整数, 如果为-1表示请求失败"""
         req = _XTQC_.SmtCompactRenewalReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -1723,16 +1567,15 @@ class XtQuantTrader(object):
     def smt_compact_return_async(
         self, account, src_group_id, cash_compact_id, order_code, occur_amount
     ):
-        """
+        """Args:
+    account: 证券账号
+    src_group_id: 来源组编号
+    cash_compact_id: 头寸合约编号
+    order_code: 证券代码，如'600000.SH'
+    occur_amount: 发生数量
 
-        :param account: 证券账号
-        :param src_group_id: 来源组编号
-        :param cash_compact_id: 头寸合约编号
-        :param order_code: 证券代码，如'600000.SH'
-        :param occur_amount: 发生数量
-        :returns: 返回约券归还请求序号, 成功请求后的序号为大于0的正整数, 如果为-1表示请求失败
-
-        """
+Returns:
+    返回约券归还请求序号, 成功请求后的序号为大于0的正整数, 如果为-1表示请求失败"""
         req = _XTQC_.SmtCompactReturnReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -1747,12 +1590,11 @@ class XtQuantTrader(object):
         return seq
 
     def query_position_statistics(self, account):
-        """
+        """Args:
+    account: 证券账号
 
-        :param account: 证券账号
-        :returns: 返回当日所有持仓统计的持仓对象组成的list
-
-        """
+Returns:
+    返回当日所有持仓统计的持仓对象组成的list"""
         req = _XTQC_.QueryPositionStatisticsReq()
         req.m_nAccountType = account.account_type
         req.m_strAccountID = account.account_id
@@ -1771,17 +1613,16 @@ class XtQuantTrader(object):
         end_time=None,
         user_param={},
     ):
-        """
+        """Args:
+    account: 证券账号
+    result_path: 导出路径，包含文件名及.csv后缀，如'C:\Users\Desktop\test\deal.csv'
+    data_type: 数据类型，如'deal'
+    start_time: 开始时间 (Default value = None)
+    end_time: 结束时间 (Default value = None)
+    user_param: 用户参数 (Default value = {})
 
-        :param account: 证券账号
-        :param result_path: 导出路径，包含文件名及.csv后缀，如'C:\\Users\\Desktop\\test\\deal.csv'
-        :param data_type: 数据类型，如'deal'
-        :param start_time: 开始时间 (Default value = None)
-        :param end_time: 结束时间 (Default value = None)
-        :param user_param: 用户参数 (Default value = {})
-        :returns: 返回dict格式的结果反馈信息
-
-        """
+Returns:
+    返回dict格式的结果反馈信息"""
         fix_param = dict()
         fix_param["accountID"] = account.account_id
         fix_param["accountType"] = account.account_type
@@ -1814,16 +1655,17 @@ class XtQuantTrader(object):
         user_param={},
     ):
         """入参同export_data
-        :return: 返回dict格式的数据信息
 
-        :param account:
-        :param result_path:
-        :param data_type:
-        :param start_time:  (Default value = None)
-        :param end_time:  (Default value = None)
-        :param user_param:  (Default value = {})
+Args:
+    account: 
+    result_path: 
+    data_type: 
+    start_time: (Default value = None)
+    end_time: (Default value = None)
+    user_param: (Default value = {})
 
-        """
+Returns:
+    返回dict格式的数据信息"""
         result = self.export_data(
             account, result_path, data_type, start_time, end_time, user_param
         )
@@ -1839,15 +1681,14 @@ class XtQuantTrader(object):
             return data
 
     def sync_transaction_from_external(self, operation, data_type, account, deal_list):
-        """
+        """Args:
+    operation: 操作类型,有"UPDATE","REPLACE","ADD","DELETE"
+    data_type: 数据类型,有"DEAL"
+    account: 证券账号
+    deal_list: 成交列表,每一项是Deal成交对象的参数字典,键名参考官网数据字典,大小写保持一致
 
-        :param operation: 操作类型,有"UPDATE","REPLACE","ADD","DELETE"
-        :param data_type: 数据类型,有"DEAL"
-        :param account: 证券账号
-        :param deal_list: 成交列表,每一项是Deal成交对象的参数字典,键名参考官网数据字典,大小写保持一致
-        :returns: 返回dict格式的结果反馈信息
-
-        """
+Returns:
+    返回dict格式的结果反馈信息"""
         fix_param = dict()
         fix_param["operation"] = operation
         fix_param["dataType"] = data_type

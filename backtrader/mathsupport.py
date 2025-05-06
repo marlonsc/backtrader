@@ -31,22 +31,24 @@ import math
 def average(x, bessel=False):
     """Compute the average of the elements in x.
 
-    :param x: Iterable with len
-    :param bessel: (Default value = False). If True, use Bessel's correction (N-1).
-    :returns: A float with the average of the elements of x.
+Args:
+    x: Iterable with len
+    bessel: (Default value = False). If True, use Bessel's correction (N-1).
 
-    """
+Returns:
+    A float with the average of the elements of x."""
     return math.fsum(x) / (len(x) - bessel)
 
 
 def variance(x, avgx=None):
     """Compute the variance for each element of x.
 
-    :param x: Iterable with len
-    :param avgx: (Default value = None). Precomputed average of x.
-    :returns: A list with the variance for each element of x.
+Args:
+    x: Iterable with len
+    avgx: (Default value = None). Precomputed average of x.
 
-    """
+Returns:
+    A list with the variance for each element of x."""
     if avgx is None:
         avgx = average(x)
     return [(v - avgx) ** 2 for v in x]
@@ -55,10 +57,11 @@ def variance(x, avgx=None):
 def standarddev(x, avgx=None, bessel=False):
     """Compute the standard deviation of the elements in x.
 
-    :param x: Iterable with len
-    :param avgx: (Default value = None). Precomputed average of x.
-    :param bessel: (Default value = False). If True, use Bessel's correction (N-1).
-    :returns: A float with the standard deviation of the elements of x.
+Args:
+    x: Iterable with len
+    avgx: (Default value = None). Precomputed average of x.
+    bessel: (Default value = False). If True, use Bessel's correction (N-1).
 
-    """
+Returns:
+    A float with the standard deviation of the elements of x."""
     return math.sqrt(average(variance(x, avgx), bessel=bessel))

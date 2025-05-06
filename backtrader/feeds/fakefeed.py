@@ -58,12 +58,9 @@ class FakeFeed(bt.DataBase):
         return self.p.live
 
     def _update_line(self, dt, value):
-        """
-
-        :param dt:
-        :param value:
-
-        """
+        """Args:
+    dt: 
+    value:"""
         _logger.debug(f"{self._name} - Updating line - Bar Time: {dt} - Value: {value}")
 
         self.lines.datetime[0] = bt.date2num(dt)
@@ -82,15 +79,12 @@ class FakeFeed(bt.DataBase):
         self.lines.openinterest[0] = 0.0
 
     def _update_bar(self, dt, vopen, vlow, vhigh, vclose):
-        """
-
-        :param dt:
-        :param vopen:
-        :param vlow:
-        :param vhigh:
-        :param vclose:
-
-        """
+        """Args:
+    dt: 
+    vopen: 
+    vlow: 
+    vhigh: 
+    vclose:"""
         _logger.debug(f"{self._name} - Updating bar - Bar Time: {dt} - Value: {vclose}")
 
         self.lines.datetime[0] = bt.date2num(dt)
@@ -129,12 +123,9 @@ class FakeFeed(bt.DataBase):
             return self._load_bar(now)
 
     def _load_bar(self, now, backfill=False):
-        """
-
-        :param now:
-        :param backfill:  (Default value = False)
-
-        """
+        """Args:
+    now: 
+    backfill: (Default value = False)"""
         tf, comp = (
             (self.p.timeframe, self.p.compression)
             if not backfill
@@ -183,13 +174,10 @@ class FakeFeed(bt.DataBase):
 
     @staticmethod
     def _time_floored(now, timeframe, comp=1):
-        """
-
-        :param now:
-        :param timeframe:
-        :param comp:  (Default value = 1)
-
-        """
+        """Args:
+    now: 
+    timeframe: 
+    comp: (Default value = 1)"""
         t = now
         if timeframe in [bt.TimeFrame.Seconds, bt.TimeFrame.Ticks]:
             t -= datetime.timedelta(seconds=t.second % comp, microseconds=t.microsecond)
@@ -215,11 +203,8 @@ class FakeFeed(bt.DataBase):
         return t
 
     def _load_live(self, now):
-        """
-
-        :param now:
-
-        """
+        """Args:
+    now:"""
         tf = self.p.timeframe
 
         comp = self.p.compression

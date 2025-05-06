@@ -18,23 +18,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-"""
-MOVING AVERAGE CROSSOVER STRATEGY WITH POSTGRESQL DATABASE - (ma-crossover)
+"""MOVING AVERAGE CROSSOVER STRATEGY WITH POSTGRESQL DATABASE - (ma-crossover)
 ==========================================================================
-
 This strategy implements a trend-following system based on moving average crossovers.
 It uses two moving averages (a short-term and a long-term) to generate buy and sell signals.
-
 STRATEGY LOGIC:
 --------------
 1. Bullish Crossover (Golden Cross):
-   - The shorter-term MA crosses above the longer-term MA
-   - This is a buy signal
-
+- The shorter-term MA crosses above the longer-term MA
+- This is a buy signal
 2. Bearish Crossover (Death Cross):
-   - The shorter-term MA crosses below the longer-term MA
-   - This is a sell signal
-
+- The shorter-term MA crosses below the longer-term MA
+- This is a sell signal
 MARKET CONDITIONS:
 ----------------
 *** THIS STRATEGY IS SPECIFICALLY DESIGNED FOR TRENDING MARKETS ***
@@ -42,118 +37,90 @@ MARKET CONDITIONS:
 - AVOID USING: During sideways, choppy, or highly volatile markets
 - IDEAL TIMEFRAMES: Daily charts for long-term trends, 1-hour for medium-term
 - OPTIMAL MARKET CONDITION: Bull or bear markets with clear directional movement
-
 The strategy will struggle in ranging or sideways markets where prices oscillate
 without establishing a clear trend, resulting in multiple false signals and whipsaws.
 It performs best when applied to instruments that exhibit persistent directional moves.
-
 PARAMETER ADJUSTMENT:
 --------------------
 - For longer-term trends: Increase both MA periods (e.g., 50/200)
 - For shorter-term trends: Decrease both MA periods (e.g., 10/30)
 - For fewer signals: Increase the confirmation bars (2+)
 - For faster responses: Use EMA instead of SMA
-
 OPTIMIZED FOR:
 -------------
 - Timeframe: Daily charts for long-term trends, 1-hour for medium-term
 - Year: 2024
 - Market: Stocks with clear trending behavior
 - Best Performance: During strong bull or bear markets
-
 USAGE:
 ------
 python strategies/moving_average_crossover.py --data SYMBOL --fromdate YYYY-MM-DD --todate YYYY-MM-DD [options]
-
 REQUIRED ARGUMENTS:
 ------------------
 --data, -d      : Stock symbol to retrieve data for (e.g., AAPL, MSFT, TSLA)
 --fromdate, -f  : Start date for historical data in YYYY-MM-DD format (default: 2024-01-01)
 --todate, -t    : End date for historical data in YYYY-MM-DD format (default: 2024-12-31)
-
 DATABASE PARAMETERS:
 ------------------
 --dbuser, -u    : PostgreSQL username (default: jason)
 --dbpass, -pw   : PostgreSQL password (default: fsck)
 --dbname, -n    : PostgreSQL database name (default: market_data)
 --cash, -c      : Initial cash for the strategy (default: $100,000)
-
 MOVING AVERAGE PARAMETERS:
 -------------------------
 --short-period, -sp  : Period for the short-term moving average (default: 50)
-                      Shorter values respond faster to price changes but generate more signals.
-
+Shorter values respond faster to price changes but generate more signals.
 --long-period, -lp   : Period for the long-term moving average (default: 200)
-                      Longer values provide more reliable trend identification but are slower.
-
+Longer values provide more reliable trend identification but are slower.
 --ma-type, -mt       : Moving average type (default: SMA, options: SMA, EMA, WMA, SMMA)
-                      EMA responds faster to recent price changes but can be noisier.
-
+EMA responds faster to recent price changes but can be noisier.
 --confirmation, -cf  : Number of bars to confirm a crossover (default: 1)
-                      Higher values reduce false signals but delay entries/exits.
-
+Higher values reduce false signals but delay entries/exits.
 RISK MANAGEMENT:
 ---------------
 --stop-loss, -sl     : Stop loss percentage (default: 2.0)
-                      The maximum loss allowed on a trade (% of entry price).
-
+The maximum loss allowed on a trade (% of entry price).
 --trailing-stop, -ts : Enable trailing stop loss (default: False)
-                      Locks in profits as the price moves favorably.
-
+Locks in profits as the price moves favorably.
 --trail-percent, -tp : Trailing stop percentage (default: 2.0)
-                      Distance of trailing stop from highest price (%).
-
+Distance of trailing stop from highest price (%).
 POSITION SIZING:
 ---------------
 --risk-percent, -rp  : Percentage of equity to risk per trade (default: 1.0)
-                      Controls how much of your account to risk on each position.
-
+Controls how much of your account to risk on each position.
 --max-position, -mp  : Maximum position size as percentage of equity (default: 20.0)
-                      Limits the maximum exposure to any single trade.
-
+Limits the maximum exposure to any single trade.
 TRADE THROTTLING:
 ---------------
 --trade-throttle-days, -ttd : Minimum days between trades (default: 5, set to 0 for no throttling)
-                             Reduces overtrading during highly volatile periods.
-
+Reduces overtrading during highly volatile periods.
 OTHER:
 -----
 --plot, -pl          : Generate and show a plot of the trading activity
-
 EXAMPLE COMMANDS:
 ---------------
 1. Standard configuration - classic 50/200 golden cross:
-   python strategies/moving_average_crossover.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --short-period 50 --long-period 200 --ma-type SMA
-
+python strategies/moving_average_crossover.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --short-period 50 --long-period 200 --ma-type SMA
 2. Short-term trading - faster signals with EMA:
-   python strategies/moving_average_crossover.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --short-period 20 --long-period 50 --ma-type EMA
-
+python strategies/moving_average_crossover.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --short-period 20 --long-period 50 --ma-type EMA
 3. Conservative approach - confirmation bars to reduce false signals:
-   python strategies/moving_average_crossover.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --short-period 50 --long-period 200 --confirmation 3
-
+python strategies/moving_average_crossover.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --short-period 50 --long-period 200 --confirmation 3
 4. Aggressive trading with tighter stops:
-   python strategies/moving_average_crossover.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --short-period 10 --long-period 30 --stop-loss 1.5
-
+python strategies/moving_average_crossover.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --short-period 10 --long-period 30 --stop-loss 1.5
 5. Trailing stop approach - capture more of trending moves:
-   python strategies/moving_average_crossover.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --trailing-stop --trail-percent 3.0
-
+python strategies/moving_average_crossover.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --trailing-stop --trail-percent 3.0
 6. High risk-reward setup with weighted moving averages:
-   python strategies/moving_average_crossover.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --short-period 15 --long-period 60 --ma-type WMA --risk-percent 2.0 --max-position 30
-
+python strategies/moving_average_crossover.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --short-period 15 --long-period 60 --ma-type WMA --risk-percent 2.0 --max-position 30
 EXAMPLE:
 --------
 Basic usage:
 python strategies/moving_average_crossover.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31
-
 With confirmation parameter (wait for 2 bars of consistent signal):
 python strategies/moving_average_crossover.py --data AAPL --confirmation 2 --trailing-stop
-
 With faster moving averages (better for 1-hour timeframe):
 python strategies/moving_average_crossover.py --data AAPL --short-period 20 --long-period 50 --ma-type EMA
-
 With plotting:
-python strategies/moving_average_crossover.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --short-period 50 --long-period 200 --plot
-"""
+python strategies/moving_average_crossover.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --short-period 50 --long-period 200 --plot"""
 
 from __future__ import (
     absolute_import,
@@ -192,32 +159,24 @@ class StockPriceData(bt.feeds.PandasData):
 
 class MovingAverageCrossStrategy(bt.Strategy, TradeThrottling):
     """Moving Average Crossover Strategy
-
-    This strategy generates buy and sell signals based on the crossover
-    of a short-term moving average and a long-term moving average.
-
-    A buy signal is generated when the short-term MA crosses above the long-term MA.
-    A sell signal is generated when the short-term MA crosses below the long-term MA.
-
-    ** IMPORTANT: This strategy is specifically designed for trending markets **
-    It performs poorly in sideways or choppy markets where prices oscillate without
-    establishing a clear trend.
-
-    Strategy Logic:
-    - Buy when the short-term MA crosses above the long-term MA
-    - Sell when the short-term MA crosses below the long-term MA
-    - Optional confirmation period to reduce false signals
-    - Uses risk-based position sizing
-    - Implements stop-loss and optional trailing stop
-
-    Best Market Conditions:
-    - Strong trending markets (either bullish or bearish)
-    - Stocks with clear directional momentum
-    - Lower volatility periods with sustained price direction
-    - Avoid during range-bound, choppy, or highly volatile markets
-
-
-    """
+This strategy generates buy and sell signals based on the crossover
+of a short-term moving average and a long-term moving average.
+A buy signal is generated when the short-term MA crosses above the long-term MA.
+A sell signal is generated when the short-term MA crosses below the long-term MA.
+** IMPORTANT: This strategy is specifically designed for trending markets **
+It performs poorly in sideways or choppy markets where prices oscillate without
+establishing a clear trend.
+Strategy Logic:
+- Buy when the short-term MA crosses above the long-term MA
+- Sell when the short-term MA crosses below the long-term MA
+- Optional confirmation period to reduce false signals
+- Uses risk-based position sizing
+- Implements stop-loss and optional trailing stop
+Best Market Conditions:
+- Strong trending markets (either bullish or bearish)
+- Stocks with clear directional momentum
+- Lower volatility periods with sustained price direction
+- Avoid during range-bound, choppy, or highly volatile markets"""
 
     params = (
         # Moving average parameters
@@ -242,11 +201,10 @@ class MovingAverageCrossStrategy(bt.Strategy, TradeThrottling):
     def log(self, txt, dt=None, doprint=False):
         """Log messages
 
-        :param txt:
-        :param dt:  (Default value = None)
-        :param doprint:  (Default value = False)
-
-        """
+Args:
+    txt: 
+    dt: (Default value = None)
+    doprint: (Default value = False)"""
         if self.params.printlog or doprint:
             dt = dt or self.datas[0].datetime.date(0)
             print(f"{dt.isoformat()}: {txt}")
@@ -300,9 +258,8 @@ class MovingAverageCrossStrategy(bt.Strategy, TradeThrottling):
     def notify_order(self, order):
         """Process order notifications
 
-        :param order:
-
-        """
+Args:
+    order:"""
         if order.status in [order.Submitted, order.Accepted]:
             # Order still in progress - do nothing
             return
@@ -360,9 +317,8 @@ class MovingAverageCrossStrategy(bt.Strategy, TradeThrottling):
     def notify_trade(self, trade):
         """Process trade notifications
 
-        :param trade:
-
-        """
+Args:
+    trade:"""
         if not trade.isclosed:
             return
 

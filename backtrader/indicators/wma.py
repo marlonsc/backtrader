@@ -31,18 +31,13 @@ from . import AverageWeighted, MovingAverageBase
 
 class WeightedMovingAverage(MovingAverageBase):
     """A Moving Average which gives an arithmetic weighting to values with the
-    newest having the more weight
-    
-    Formula:
-      - weights = range(1, period + 1)
-      - coef = 2 / (period * (period + 1))
-      - movav = coef * Sum(weight[i] * data[period - i] for i in range(period))
-    
-    See also:
-      - http://en.wikipedia.org/wiki/Moving_average#Weighted_moving_average
-
-
-    """
+newest having the more weight
+Formula:
+- weights = range(1, period + 1)
+- coef = 2 / (period * (period + 1))
+- movav = coef * Sum(weight[i] * data[period - i] for i in range(period))
+See also:
+- http://en.wikipedia.org/wiki/Moving_average#Weighted_moving_average"""
 
     alias = (
         "WMA",

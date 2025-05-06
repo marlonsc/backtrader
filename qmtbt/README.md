@@ -4,35 +4,29 @@ Directory containing qmtbt related files. Primarily contains Python code and inc
 
 ## Navigation
 
-* [↑ Parent Directory (backtrader)](../README.md)
+* [🏠 Root Directory](../README.md)
 
 ## Files
 
-### __init__.py
+### README.md
 
-Python module
+File with .md extension.
+
+### __init__.py
 
 ### qmtbroker.py
 
-
-
 ### qmtfeed.py
-
-
 
 ### qmtstore.py
 
-Metaclass to make a metaclassed class a singleton
-
 ### test.py
-
-
-
 
 ## Directory Summary
 
-This directory contains 5 files and 0 subdirectories.
+This directory contains 6 files and 0 subdirectories.
 
 ### File Types
 
 * .py: 5 files
+* .md: 1 files

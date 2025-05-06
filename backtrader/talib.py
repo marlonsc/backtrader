@@ -83,13 +83,8 @@ else:
 
         @classmethod
         def dopostinit(cls, _obj, *args, **kwargs):
-            """
-
-            :param _obj:
-            :param *args:
-            :param **kwargs:
-
-            """
+            """Args:
+    _obj:"""
             # Go to parent
             res = Indicator.__class__.dopostinit(cls, _obj, *args, **kwargs)
             _obj, args, kwargs = res
@@ -117,11 +112,8 @@ else:
 
         @classmethod
         def _subclass(cls, name):
-            """
-
-            :param name:
-
-            """
+            """Args:
+    name:"""
             # Module where the class has to end (namely this one)
             clsmodule = sys.modules[cls.__module__]
 
@@ -212,21 +204,15 @@ else:
             setattr(clsmodule, str(name), newcls)  # add to module
 
         def oncestart(self, start, end):
-            """
-
-            :param start:
-            :param end:
-
-            """
+            """Args:
+    start: 
+    end:"""
             pass  # if not ... a call with a single value to once will happen
 
         def once(self, start, end):
-            """
-
-            :param start:
-            :param end:
-
-            """
+            """Args:
+    start: 
+    end:"""
             import array
 
             # prepare the data arrays - single shot

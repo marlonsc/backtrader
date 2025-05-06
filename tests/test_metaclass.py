@@ -37,12 +37,11 @@ class TestFrompackages(testcommon.SampleParamsHolder):
 
 def test_run(main=False):
     """Instantiate the TestFrompackages and see that no exception is raised
-    Bug Discussion:
-    https://community.backtrader.com/topic/2661/frompackages-directive-functionality-seems-to-be-broken-when-using-inheritance
+Bug Discussion:
+https://community.backtrader.com/topic/2661/frompackages-directive-functionality-seems-to-be-broken-when-using-inheritance
 
-    :param main: (Default value = False)
-
-    """
+Args:
+    main: (Default value = False)"""
     TestFrompackages()
 
 

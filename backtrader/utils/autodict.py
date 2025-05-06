@@ -39,11 +39,8 @@ class AutoDictList(dict):
     """ """
 
     def __missing__(self, key):
-        """
-
-        :param key:
-
-        """
+        """Args:
+    key:"""
         value = self[key] = list()
         return value
 
@@ -53,11 +50,8 @@ class DotDict(dict):
 
     # If the attribut is not found in the usual places try the dict itself
     def __getattr__(self, key):
-        """
-
-        :param key:
-
-        """
+        """Args:
+    key:"""
         if key.startswith("__"):
             return super(DotDict, self).__getattr__(key)
         return self[key]
@@ -80,11 +74,8 @@ class AutoDict(dict):
         self._closed = False
 
     def __missing__(self, key):
-        """
-
-        :param key:
-
-        """
+        """Args:
+    key:"""
         if self._closed:
             raise KeyError
 
@@ -92,23 +83,17 @@ class AutoDict(dict):
         return value
 
     def __getattr__(self, key):
-        """
-
-        :param key:
-
-        """
+        """Args:
+    key:"""
         if False and key.startswith("_"):
             raise AttributeError
 
         return self[key]
 
     def __setattr__(self, key, value):
-        """
-
-        :param key:
-        :param value:
-
-        """
+        """Args:
+    key: 
+    value:"""
         if False and key.startswith("_"):
             self.__dict__[key] = value
             return
@@ -133,11 +118,8 @@ class AutoOrderedDict(OrderedDict):
         self._closed = False
 
     def __missing__(self, key):
-        """
-
-        :param key:
-
-        """
+        """Args:
+    key:"""
         if self._closed:
             raise KeyError
 
@@ -146,23 +128,17 @@ class AutoOrderedDict(OrderedDict):
         return value
 
     def __getattr__(self, key):
-        """
-
-        :param key:
-
-        """
+        """Args:
+    key:"""
         if key.startswith("_"):
             raise AttributeError
 
         return self[key]
 
     def __setattr__(self, key, value):
-        """
-
-        :param key:
-        :param value:
-
-        """
+        """Args:
+    key: 
+    value:"""
         if key.startswith("_"):
             self.__dict__[key] = value
             return
@@ -171,55 +147,40 @@ class AutoOrderedDict(OrderedDict):
 
     # Define math operations
     def __iadd__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         if not isinstance(self, type(other)):
             return type(other)() + other
 
         return self + other
 
     def __isub__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         if not isinstance(self, type(other)):
             return type(other)() - other
 
         return self - other
 
     def __imul__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         if not isinstance(self, type(other)):
             return type(other)() * other
 
         return self + other
 
     def __idiv__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         if not isinstance(self, type(other)):
             return type(other)() // other
 
         return self + other
 
     def __itruediv__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         if not isinstance(self, type(other)):
             return type(other)() / other
 

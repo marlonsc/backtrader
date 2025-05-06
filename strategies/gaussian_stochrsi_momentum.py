@@ -18,36 +18,29 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-"""
-GAUSSIAN CHANNEL WITH STOCHASTIC RSI TRADING STRATEGY - (bb-hard)
+"""GAUSSIAN CHANNEL WITH STOCHASTIC RSI TRADING STRATEGY - (bb-hard)
 =================================================================
-
 This strategy focuses on early momentum shifts, looking for StochRSI crossing above 20 during an ascending Gaussian channel, with a trailing stop exit. The name emphasizes
 the momentum reversal aspect of the strategy.
-
 This script implements a trading strategy that combines:
 1. Gaussian Channel - A weighted moving average with standard deviation bands
 2. Stochastic RSI - To filter entry signals for better trade quality
-
 STRATEGY LOGIC:
 --------------
 - Go LONG when:
-  a. Price CLOSES ABOVE the UPPER Gaussian Channel line
-  b. Stochastic RSI's K line is ABOVE its D line (stochastic is "up")
+a. Price CLOSES ABOVE the UPPER Gaussian Channel line
+b. Stochastic RSI's K line is ABOVE its D line (stochastic is "up")
 - Exit LONG (go flat) when price CLOSES BELOW the UPPER Gaussian Channel line
 - No short positions are taken
-
 GAUSSIAN CHANNEL:
 ---------------
 Gaussian Channel consists of:
 - A middle band (Gaussian weighted moving average)
 - An upper band (middle band + multiplier * Gaussian weighted standard deviation)
 - A lower band (middle band - multiplier * Gaussian weighted standard deviation)
-
 This indicator uses a Gaussian weighting function that gives higher importance
 to values near the center of the lookback period and less to those at the
 extremes, creating a smooth, responsive indicator.
-
 STOCHASTIC RSI:
 -------------
 StochRSI combines Relative Strength Index (RSI) with Stochastic oscillator:
@@ -55,17 +48,14 @@ StochRSI combines Relative Strength Index (RSI) with Stochastic oscillator:
 - Then applies Stochastic formula to the RSI values
 - K line = smoothed stochastic value
 - D line = smoothed K line
-
 USAGE:
 ------
 python strategies/bb-hard.py --data SYMBOL --fromdate YYYY-MM-DD --todate YYYY-MM-DD [options]
-
 REQUIRED ARGUMENTS:
 ------------------
 --data, -d      : Stock symbol to retrieve data for (e.g., AAPL, MSFT, TSLA)
 --fromdate, -f  : Start date for historical data in YYYY-MM-DD format (default: 2018-01-01)
 --todate, -t    : End date for historical data in YYYY-MM-DD format (default: 2069-01-01)
-
 OPTIONAL ARGUMENTS:
 ------------------
 --dbuser, -u    : PostgreSQL username (default: jason)
@@ -79,11 +69,9 @@ OPTIONAL ARGUMENTS:
 --klength, -kl      : Smoothing K period for Stochastic RSI (default: 3)
 --dlength, -dl      : Smoothing D period for Stochastic RSI (default: 3)
 --plot, -p          : Generate and show a plot of the trading activity
-
 EXAMPLE:
 --------
-python strategies/gaussian_stochrsi_momentum.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --plot
-"""
+python strategies/gaussian_stochrsi_momentum.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --plot"""
 
 from __future__ import (
     absolute_import,
@@ -130,16 +118,12 @@ class StockPriceData(bt.feeds.PandasData):
 
 class StochasticRSI(bt.Indicator):
     """Stochastic RSI Indicator
-
-    Calculation:
-    1. Calculate RSI with specified length
-    2. Find highest and lowest RSI values over stochlength period
-    3. Calculate stochastic value: 100 * (RSI - RSI lowest) / (RSI highest - RSI lowest)
-    4. Smooth K line: SMA(stochastic, klength)
-    5. Smooth D line: SMA(K, dlength)
-
-
-    """
+Calculation:
+1. Calculate RSI with specified length
+2. Find highest and lowest RSI values over stochlength period
+3. Calculate stochastic value: 100 * (RSI - RSI lowest) / (RSI highest - RSI lowest)
+4. Smooth K line: SMA(stochastic, klength)
+5. Smooth D line: SMA(K, dlength)"""
 
     lines = ("k", "d")
     params = (
@@ -178,11 +162,7 @@ class StochasticRSI(bt.Indicator):
 
 class GaussianFilter(bt.Indicator):
     """Gaussian Filter indicator as described by John Ehlers
-
-    This indicator calculates a filter and channel bands using Gaussian filter techniques
-
-
-    """
+This indicator calculates a filter and channel bands using Gaussian filter techniques"""
 
     lines = ("filt", "hband", "lband")
     params = (
@@ -244,15 +224,10 @@ class GaussianFilter(bt.Indicator):
 
 class GaussianChannel(bt.Indicator):
     """Gaussian Channel Indicator
-
-    A channel indicator that uses Gaussian weighted moving average and
-    standard deviation to create adaptive bands.
-
-    For simplicity, this implementation approximates the Gaussian weighting
-    using standard indicators available in backtrader.
-
-
-    """
+A channel indicator that uses Gaussian weighted moving average and
+standard deviation to create adaptive bands.
+For simplicity, this implementation approximates the Gaussian weighting
+using standard indicators available in backtrader."""
 
     lines = ("mid", "upper", "lower")
     params = (
@@ -300,36 +275,29 @@ class GaussianChannel(bt.Indicator):
 
 class StochasticRSIGaussianChannelStrategy(bt.Strategy, TradeThrottling):
     """Strategy that implements the Stochastic RSI with Gaussian Channel trading rules:
-    - Open long position when:
-      1. The gaussian channel is ascending (filt > filt[1])
-      2. The stochastic RSI crosses from below 20 to above 20 (K[0] > 20 and K[-1] <= 20)
-    - Exit LONG (go flat) when price CLOSES BELOW the UPPER Gaussian Channel line
-    - No short positions are taken
-
-    Exit Strategy Options:
-    - 'default': Exit when Stochastic RSI crosses from above 80 to below 80
-    - 'middle_band': Exit when price closes below the middle gaussian channel band
-    - 'bars': Exit after a specified number of bars
-    - 'trailing_percent': Exit using a trailing stop based on percentage (default: 3.0%)
-    - 'trailing_atr': Exit using a trailing stop based on ATR
-    - 'trailing_ma': Exit when price crosses below a moving average
-
-    Position Sizing Options:
-    - 'percent': Use a fixed percentage of available equity (default 20%)
-    - 'auto': Size based on volatility (less volatile = larger position)
-
-    Additional Features:
-    - Trade throttling to limit trade frequency
-    - Risk management with stop loss functionality
-
-    Best Market Conditions:
-    - Strong uptrending or bull markets
-    - Sectors with momentum and clear trend direction
-    - Avoid using in choppy or ranging markets
-    - Most effective in markets with clear directional movement
-
-
-    """
+- Open long position when:
+1. The gaussian channel is ascending (filt > filt[1])
+2. The stochastic RSI crosses from below 20 to above 20 (K[0] > 20 and K[-1] <= 20)
+- Exit LONG (go flat) when price CLOSES BELOW the UPPER Gaussian Channel line
+- No short positions are taken
+Exit Strategy Options:
+- 'default': Exit when Stochastic RSI crosses from above 80 to below 80
+- 'middle_band': Exit when price closes below the middle gaussian channel band
+- 'bars': Exit after a specified number of bars
+- 'trailing_percent': Exit using a trailing stop based on percentage (default: 3.0%)
+- 'trailing_atr': Exit using a trailing stop based on ATR
+- 'trailing_ma': Exit when price crosses below a moving average
+Position Sizing Options:
+- 'percent': Use a fixed percentage of available equity (default 20%)
+- 'auto': Size based on volatility (less volatile = larger position)
+Additional Features:
+- Trade throttling to limit trade frequency
+- Risk management with stop loss functionality
+Best Market Conditions:
+- Strong uptrending or bull markets
+- Sectors with momentum and clear trend direction
+- Avoid using in choppy or ranging markets
+- Most effective in markets with clear directional movement"""
 
     params = (
         # Stochastic RSI parameters
@@ -466,21 +434,17 @@ class StochasticRSIGaussianChannelStrategy(bt.Strategy, TradeThrottling):
     def log(self, txt, dt=None, doprint=False):
         """Logging function
 
-        :param txt:
-        :param dt:  (Default value = None)
-        :param doprint:  (Default value = False)
-
-        """
+Args:
+    txt: 
+    dt: (Default value = None)
+    doprint: (Default value = False)"""
         if self.params.printlog or doprint:
             dt = dt or self.datas[0].datetime.date(0)
             print("%s, %s" % (dt.isoformat(), txt))
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status in [order.Submitted, order.Accepted]:
             # Order submitted/accepted to/by broker - Nothing to do
             return
@@ -552,11 +516,8 @@ class StochasticRSIGaussianChannelStrategy(bt.Strategy, TradeThrottling):
         self.order = None
 
     def notify_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
+        """Args:
+    trade:"""
         if not trade.isclosed:
             return
 

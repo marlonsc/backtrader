@@ -20,24 +20,18 @@ if parent_dir not in sys.path:
 
 class MACDDivergenceStrategy(bt.Strategy, TradeThrottling):
     """MACD Divergence Strategy
-
-    Identifies and trades on MACD divergences:
-    - Bullish divergence: Price makes lower lows while MACD makes higher lows
-    - Bearish divergence: Price makes higher highs while MACD makes lower highs
-
-    Strategy Logic:
-    - Monitors for divergence between price and MACD
-    - Enters when divergence is confirmed by crossover
-    - Uses risk-based position sizing and stop loss
-    - Implements cool down period to avoid overtrading
-
-    Best Market Conditions:
-    - Works best in ranging markets with clear support and resistance levels
-    - Avoid using during strong trending markets where indicators may lag
-    - Most effective at major market turning points
-
-
-    """
+Identifies and trades on MACD divergences:
+- Bullish divergence: Price makes lower lows while MACD makes higher lows
+- Bearish divergence: Price makes higher highs while MACD makes lower highs
+Strategy Logic:
+- Monitors for divergence between price and MACD
+- Enters when divergence is confirmed by crossover
+- Uses risk-based position sizing and stop loss
+- Implements cool down period to avoid overtrading
+Best Market Conditions:
+- Works best in ranging markets with clear support and resistance levels
+- Avoid using during strong trending markets where indicators may lag
+- Most effective at major market turning points"""
 
     params = (
         ("fast_ema", 12),  # Fast EMA period
@@ -56,10 +50,9 @@ class MACDDivergenceStrategy(bt.Strategy, TradeThrottling):
     def log(self, txt, dt=None):
         """Logging function
 
-        :param txt:
-        :param dt:  (Default value = None)
-
-        """
+Args:
+    txt: 
+    dt: (Default value = None)"""
         dt = dt or self.datas[0].datetime.date(0)
         print(f"{dt.isoformat()}: {txt}")
 
@@ -111,12 +104,8 @@ class MACDDivergenceStrategy(bt.Strategy, TradeThrottling):
 
     def detect_bullish_divergence(self):
         """Detect bullish divergence: price makes lower lows while MACD makes higher lows
-
-        Bullish divergence occurs when price makes a lower low but the MACD
-        makes a higher low, indicating potential upward momentum reversal.
-
-
-        """
+Bullish divergence occurs when price makes a lower low but the MACD
+makes a higher low, indicating potential upward momentum reversal."""
         if len(self.price_lows) < 2 or len(self.macd_lows) < 2:
             return False
 
@@ -153,12 +142,8 @@ class MACDDivergenceStrategy(bt.Strategy, TradeThrottling):
 
     def detect_bearish_divergence(self):
         """Detect bearish divergence: price makes higher highs while MACD makes lower highs
-
-        Bearish divergence occurs when price makes a higher high but the MACD
-        makes a lower high, indicating potential downward momentum reversal.
-
-
-        """
+Bearish divergence occurs when price makes a higher high but the MACD
+makes a lower high, indicating potential downward momentum reversal."""
         if len(self.price_highs) < 2 or len(self.macd_highs) < 2:
             return False
 
@@ -198,9 +183,8 @@ class MACDDivergenceStrategy(bt.Strategy, TradeThrottling):
     def calculate_position_size(self, stop_price):
         """Calculate position size based on risk percentage
 
-        :param stop_price:
-
-        """
+Args:
+    stop_price:"""
         account_value = self.broker.getvalue()
         risk_amount = account_value * self.params.risk_pct
         price_diff = abs(self.dataclose[0] - stop_price)
@@ -362,9 +346,8 @@ class MACDDivergenceStrategy(bt.Strategy, TradeThrottling):
     def notify_order(self, order):
         """Handle order status updates
 
-        :param order:
-
-        """
+Args:
+    order:"""
         if order.status in [order.Submitted, order.Accepted]:
             # Order submitted/accepted - nothing to do
             return
@@ -393,9 +376,8 @@ class MACDDivergenceStrategy(bt.Strategy, TradeThrottling):
     def notify_trade(self, trade):
         """Log trade information when a trade is closed
 
-        :param trade:
-
-        """
+Args:
+    trade:"""
         if not trade.isclosed:
             return
 
@@ -425,17 +407,14 @@ def run_backtest(
 ):
     """Run a backtest for the MACD Divergence Strategy.
 
-    :param ticker: The ticker symbol to backtest (Default value = "SPY")
-    :type ticker: str
-    :param start_date: Start date in YYYY-MM-DD format (Default value = "2018-01-01")
-    :type start_date: str
-    :param end_date: End date in YYYY-MM-DD format (Default value = "2023-01-01")
-    :type end_date: str
-    :param plot: Whether to plot the results (Default value = True)
-    :type plot: bool
-    :returns: The results of the backtest
+Args:
+    ticker: The ticker symbol to backtest (Default value = "SPY")
+    start_date: Start date in YYYY-MM-DD format (Default value = "2018-01-01")
+    end_date: End date in YYYY-MM-DD format (Default value = "2023-01-01")
+    plot: Whether to plot the results (Default value = True)
 
-    """
+Returns:
+    The results of the backtest"""
     # Create a backtest cerebro entity
     cerebro = bt.Cerebro()
 

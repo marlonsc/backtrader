@@ -4,11 +4,8 @@ from . import xtbson as _BSON_
 
 
 def read_from_bson_buffer(buffer):
-    """
-
-    :param buffer:
-
-    """
+    """Args:
+    buffer:"""
     import ctypes as ct
 
     result = []
@@ -36,11 +33,8 @@ def read_from_bson_buffer(buffer):
 
 
 def write_to_bson_buffer(data_list):
-    """
-
-    :param data_list:
-
-    """
+    """Args:
+    data_list:"""
     buffer = b""
 
     for data in data_list:
@@ -50,11 +44,8 @@ def write_to_bson_buffer(data_list):
 
 
 def read_from_feather_file(file):
-    """
-
-    :param file:
-
-    """
+    """Args:
+    file:"""
     import feather as fe
 
     meta = {}
@@ -62,13 +53,10 @@ def read_from_feather_file(file):
 
 
 def write_to_feather_file(data, file, meta=None):
-    """
-
-    :param data:
-    :param file:
-    :param meta:  (Default value = None)
-
-    """
+    """Args:
+    data: 
+    file: 
+    meta: (Default value = None)"""
 
     if not meta:
         meta = {}

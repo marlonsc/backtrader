@@ -4,31 +4,27 @@ Contains tools and utilities. Primarily contains Python code.
 
 ## Navigation
 
-* [↑ Parent Directory (backtrader)](../README.md)
+* [🏠 Root Directory](../README.md)
 
 ## Files
 
-### bt-run.py
+### README.md
 
-Python module
+File with .md extension.
+
+### bt-run.py
 
 ### dump-ticker.py
 
-:param symbol:
-
 ### rewrite-data.py
-
-
 
 ### yahoodownload.py
 
-
-
-
 ## Directory Summary
 
-This directory contains 4 files and 0 subdirectories.
+This directory contains 5 files and 0 subdirectories.
 
 ### File Types
 
 * .py: 4 files
+* .md: 1 files

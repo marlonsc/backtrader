@@ -50,16 +50,11 @@ class _PriceOscBase(Indicator):
 
 class PriceOscillator(_PriceOscBase):
     """Shows the difference between a short and long exponential moving
-    averages expressed in points.
-    
-    Formula:
-      - po = ema(short) - ema(long)
-    
-    See:
-      - http://www.metastock.com/Customer/Resources/TAAZ/?c=3&p=94
-
-
-    """
+averages expressed in points.
+Formula:
+- po = ema(short) - ema(long)
+See:
+- http://www.metastock.com/Customer/Resources/TAAZ/?c=3&p=94"""
 
     alias = (
         "PriceOsc",
@@ -72,21 +67,15 @@ class PriceOscillator(_PriceOscBase):
 
 class PercentagePriceOscillator(_PriceOscBase):
     """Shows the difference between a short and long exponential moving
-    averages expressed in percentage. The MACD does the same but expressed in
-    absolute points.
-    
-    Expressing the difference in percentage allows to compare the indicator at
-    different points in time when the underlying value has significatnly
-    different values.
-    
-    Formula:
-      - po = 100 * (ema(short) - ema(long)) / ema(long)
-    
-    See:
-      - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:price_oscillators_ppo
-
-
-    """
+averages expressed in percentage. The MACD does the same but expressed in
+absolute points.
+Expressing the difference in percentage allows to compare the indicator at
+different points in time when the underlying value has significatnly
+different values.
+Formula:
+- po = 100 * (ema(short) - ema(long)) / ema(long)
+See:
+- http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:price_oscillators_ppo"""
 
     _long = True
 
@@ -113,25 +102,18 @@ class PercentagePriceOscillator(_PriceOscBase):
 
 class PercentagePriceOscillatorShort(PercentagePriceOscillator):
     """Shows the difference between a short and long exponential moving
-    averages expressed in percentage. The MACD does the same but expressed in
-    absolute points.
-    
-    Expressing the difference in percentage allows to compare the indicator at
-    different points in time when the underlying value has significatnly
-    different values.
-    
-    Most on-line literature shows the percentage calculation having the long
-    exponential moving average as the denominator. Some sources like MetaStock
-    use the short one.
-    
-    Formula:
-      - po = 100 * (ema(short) - ema(long)) / ema(short)
-    
-    See:
-      - http://www.metastock.com/Customer/Resources/TAAZ/?c=3&p=94
-
-
-    """
+averages expressed in percentage. The MACD does the same but expressed in
+absolute points.
+Expressing the difference in percentage allows to compare the indicator at
+different points in time when the underlying value has significatnly
+different values.
+Most on-line literature shows the percentage calculation having the long
+exponential moving average as the denominator. Some sources like MetaStock
+use the short one.
+Formula:
+- po = 100 * (ema(short) - ema(long)) / ema(short)
+See:
+- http://www.metastock.com/Customer/Resources/TAAZ/?c=3&p=94"""
 
     _long = False
     alias = (

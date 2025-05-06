@@ -50,12 +50,7 @@ class MetaAnalyzer(MetaParams):
     """
 
     def donew(cls, *args, **kwargs):
-        """Intercept the strategy parameter
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Intercept the strategy parameter"""
         # Create the object and set the params in place
         _obj, args, kwargs = super(MetaAnalyzer, cls).donew(*args, **kwargs)
 
@@ -96,13 +91,8 @@ class MetaAnalyzer(MetaParams):
         return _obj, args, kwargs
 
     def dopostinit(cls, _obj, *args, **kwargs):
-        """
-
-        :param _obj:
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Args:
+    _obj:"""
         _obj, args, kwargs = super(MetaAnalyzer, cls).dopostinit(_obj, *args, **kwargs)
 
         if _obj._parent is not None:
@@ -114,56 +104,36 @@ class MetaAnalyzer(MetaParams):
 
 class Analyzer(with_metaclass(MetaAnalyzer, object)):
     """Analyzer base class. All analyzers are subclass of this one.
-    Provides hooks for strategy notifications and analysis reporting.
-    All docstrings and comments must be line-wrapped at 90 characters or less.
-
-    An Analyzer instance operates in the frame of a strategy and provides an
-    analysis for that strategy.
-
-    Automagically set member attributes:
-
-      - ``self.strategy`` (giving access to the *strategy* and anything
-        accessible from it)
-
-      - ``self.datas[x]`` giving access to the array of data feeds present in
-        the the system, which could also be accessed via the strategy reference
-
-      - ``self.data``, giving access to ``self.datas[0]``
-
-      - ``self.dataX`` -> ``self.datas[X]``
-
-      - ``self.dataX_Y`` -> ``self.datas[X].lines[Y]``
-
-      - ``self.dataX_name`` -> ``self.datas[X].name``
-
-      - ``self.data_name`` -> ``self.datas[0].name``
-
-      - ``self.data_Y`` -> ``self.datas[0].lines[Y]``
-
-    This is not a *Lines* object, but the methods and operation follow the same
-    design
-
-      - ``__init__`` during instantiation and initial setup
-
-      - ``start`` / ``stop`` to signal the begin and end of operations
-
-      - ``prenext`` / ``nextstart`` / ``next`` family of methods that follow
-        the calls made to the same methods in the strategy
-
-      - ``notify_trade`` / ``notify_order`` / ``notify_cashvalue`` /
-        ``notify_fund`` which receive the same notifications as the equivalent
-        methods of the strategy
-
-    The mode of operation is open and no pattern is preferred. As such the
-    analysis can be generated with the ``next`` calls, at the end of operations
-    during ``stop`` and even with a single method like ``notify_trade``
-
-    The important thing is to override ``get_analysis`` to return a *dict-like*
-    object containing the results of the analysis (the actual format is
-    implementation dependent)
-
-
-    """
+Provides hooks for strategy notifications and analysis reporting.
+All docstrings and comments must be line-wrapped at 90 characters or less.
+An Analyzer instance operates in the frame of a strategy and provides an
+analysis for that strategy.
+Automagically set member attributes:
+- ``self.strategy`` (giving access to the *strategy* and anything
+accessible from it)
+- ``self.datas[x]`` giving access to the array of data feeds present in
+the the system, which could also be accessed via the strategy reference
+- ``self.data``, giving access to ``self.datas[0]``
+- ``self.dataX`` -> ``self.datas[X]``
+- ``self.dataX_Y`` -> ``self.datas[X].lines[Y]``
+- ``self.dataX_name`` -> ``self.datas[X].name``
+- ``self.data_name`` -> ``self.datas[0].name``
+- ``self.data_Y`` -> ``self.datas[0].lines[Y]``
+This is not a *Lines* object, but the methods and operation follow the same
+design
+- ``__init__`` during instantiation and initial setup
+- ``start`` / ``stop`` to signal the begin and end of operations
+- ``prenext`` / ``nextstart`` / ``next`` family of methods that follow
+the calls made to the same methods in the strategy
+- ``notify_trade`` / ``notify_order`` / ``notify_cashvalue`` /
+``notify_fund`` which receive the same notifications as the equivalent
+methods of the strategy
+The mode of operation is open and no pattern is preferred. As such the
+analysis can be generated with the ``next`` calls, at the end of operations
+during ``stop`` and even with a single method like ``notify_trade``
+The important thing is to override ``get_analysis`` to return a *dict-like*
+object containing the results of the analysis (the actual format is
+implementation dependent)"""
 
     csv = True
 
@@ -186,11 +156,8 @@ class Analyzer(with_metaclass(MetaAnalyzer, object)):
         return len(self.strategy)
 
     def _register(self, child):
-        """
-
-        :param child:
-
-        """
+        """Args:
+    child:"""
         self._children.append(child)
 
     def _prenext(self):
@@ -201,48 +168,36 @@ class Analyzer(with_metaclass(MetaAnalyzer, object)):
         self.prenext()
 
     def _notify_cashvalue(self, cash, value):
-        """
-
-        :param cash:
-        :param value:
-
-        """
+        """Args:
+    cash: 
+    value:"""
         for child in self._children:
             child._notify_cashvalue(cash, value)
 
         self.notify_cashvalue(cash, value)
 
     def _notify_fund(self, cash, value, fundvalue, shares):
-        """
-
-        :param cash:
-        :param value:
-        :param fundvalue:
-        :param shares:
-
-        """
+        """Args:
+    cash: 
+    value: 
+    fundvalue: 
+    shares:"""
         for child in self._children:
             child._notify_fund(cash, value, fundvalue, shares)
 
         self.notify_fund(cash, value, fundvalue, shares)
 
     def _notify_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
+        """Args:
+    trade:"""
         for child in self._children:
             child._notify_trade(trade)
 
         self.notify_trade(trade)
 
     def _notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         for child in self._children:
             child._notify_order(order)
 
@@ -279,34 +234,30 @@ class Analyzer(with_metaclass(MetaAnalyzer, object)):
     def notify_cashvalue(self, cash, value):
         """Receives the cash/value notification before each next cycle
 
-        :param cash:
-        :param value:
-
-        """
+Args:
+    cash: 
+    value:"""
 
     def notify_fund(self, cash, value, fundvalue, shares):
         """Receives the current cash, value, fundvalue and fund shares
 
-        :param cash:
-        :param value:
-        :param fundvalue:
-        :param shares:
-
-        """
+Args:
+    cash: 
+    value: 
+    fundvalue: 
+    shares:"""
 
     def notify_order(self, order):
         """Receives order notifications before each next cycle
 
-        :param order:
-
-        """
+Args:
+    order:"""
 
     def notify_trade(self, trade):
         """Receives trade notifications before each next cycle
 
-        :param trade:
-
-        """
+Args:
+    trade:"""
 
     def next(self):
         """Invoked for each next invocation of the strategy, once the minum
@@ -317,12 +268,8 @@ class Analyzer(with_metaclass(MetaAnalyzer, object)):
 
     def prenext(self):
         """Invoked for each prenext invocation of the strategy, until the minimum
-        period of the strategy has been reached
-
-        The default behavior for an analyzer is to invoke ``next``
-
-
-        """
+period of the strategy has been reached
+The default behavior for an analyzer is to invoke ``next``"""
         self.next()
 
     def nextstart(self):
@@ -349,39 +296,24 @@ class Analyzer(with_metaclass(MetaAnalyzer, object)):
 
     def create_analysis(self):
         """Meant to be overriden by subclasses. Gives a chance to create the
-        structures that hold the analysis.
-
-        The default behaviour is to create a ``OrderedDict`` named ``rets``
-
-
-        """
+structures that hold the analysis.
+The default behaviour is to create a ``OrderedDict`` named ``rets``"""
         self.rets = OrderedDict()
 
     def get_analysis(self):
         """Returns a *dict-like* object with the results of the analysis
-
-        The keys and format of analysis results in the dictionary is
-        implementation dependent.
-
-        It is not even enforced that the result is a *dict-like object*, just
-        the convention
-
-        The default implementation returns the default OrderedDict ``rets``
-        created by the default ``create_analysis`` method
-
-
-        """
+The keys and format of analysis results in the dictionary is
+implementation dependent.
+It is not even enforced that the result is a *dict-like object*, just
+the convention
+The default implementation returns the default OrderedDict ``rets``
+created by the default ``create_analysis`` method"""
         return self.rets
 
     def print(self, *args, **kwargs):
         """Prints the results returned by ``get_analysis`` via a standard
-        ``Writerfile`` object, which defaults to writing things to standard
-        output
-
-        :param *args:
-        :param **kwargs:
-
-        """
+``Writerfile`` object, which defaults to writing things to standard
+output"""
         writer = WriterFile(*args, **kwargs)
         writer.start()
         pdct = dict()
@@ -391,12 +323,7 @@ class Analyzer(with_metaclass(MetaAnalyzer, object)):
 
     def pprint(self, *args, **kwargs):
         """Prints the results returned by ``get_analysis`` using the pretty
-        print Python module (*pprint*)
-
-        :param *args:
-        :param **kwargs:
-
-        """
+print Python module (*pprint*)"""
         pp.pprint(self.get_analysis(), *args, **kwargs)
 
     def optimize(self):
@@ -416,13 +343,13 @@ class MetaTimeFrameAnalyzerBase(Analyzer.__class__):
     """
 
     def __new__(mcs, name, bases, dct):
-        """
-        Metaclass __new__ method for MetaTimeFrameAnalyzerBase.
-        :param mcs: Metaclass
-        :param name: Class name
-        :param bases: Base classes
-        :param dct: Class dict
-        """
+        """Metaclass __new__ method for MetaTimeFrameAnalyzerBase.
+
+Args:
+    mcs: Metaclass
+    name: Class name
+    bases: Base classes
+    dct: Class dict"""
         # Hack to support original method name
         if "_on_dt_over" in dct:
             dct["on_dt_over"] = dct.pop("_on_dt_over")  # rename method
@@ -529,11 +456,8 @@ class TimeFrameAnalyzerBase(with_metaclass(MetaTimeFrameAnalyzerBase, Analyzer))
         return False
 
     def _get_dt_cmpkey(self, dt):
-        """
-
-        :param dt:
-
-        """
+        """Args:
+    dt:"""
         if self.timeframe == TimeFrame.NoTimeFrame:
             return None, None
 

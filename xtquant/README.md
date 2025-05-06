@@ -4,7 +4,7 @@ Directory containing xtquant related files. Primarily contains Python code and i
 
 ## Navigation
 
-* [↑ Parent Directory (backtrader)](../README.md)
+* [🏠 Root Directory](../README.md)
 
 ### Subdirectories
 
@@ -16,9 +16,11 @@ Directory containing xtquant related files. Primarily contains Python code and i
 
 ## Files
 
-### __init__.py
+### README.md
 
-:param package_name:
+File with .md extension.
+
+### __init__.py
 
 ### libeay32.dll
 
@@ -42,11 +44,7 @@ Binary or data file
 
 ### xtconn.py
 
-addr: 'localhost:58610'
-
 ### xtconstant.py
-
-常量定义模块 [Contains Chinese characters that should be translated]
 
 ### xtdata.ini
 
@@ -58,52 +56,32 @@ Binary or data file
 
 ### xtdata.py
 
-***** xtdata连接成功 ***** [Contains Chinese characters that should be translated]
-
 ### xtdata_config.py
-
-Configuration file
 
 ### xtdatacenter.py
 
-尝试创建RPCClient，如果失败，会抛出异常 [Contains Chinese characters that should be translated]
-
 ### xtextend.py
-
-
 
 ### xtstocktype.py
 
-Python module
-
 ### xttools.py
-
-
 
 ### xttrader.py
 
-:param s:  (Default value = None)
-
 ### xttype.py
-
-定义Python的数据结构,给Python策略使用 [Contains Chinese characters that should be translated]
 
 ### xtutil.py
 
-:param buffer:
-
 ### xtview.py
-
-:param ip:  (Default value = "")
-
 
 ## Directory Summary
 
-This directory contains 20 files and 5 subdirectories.
+This directory contains 21 files and 5 subdirectories.
 
 ### File Types
 
 * .py: 13 files
 * .dll: 5 files
+* .md: 1 files
 * .ini: 1 files
 * .log4cxx: 1 files

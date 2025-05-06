@@ -104,11 +104,8 @@ def finetune(
         elif method == "Optuna":
 
             def objective(trial):
-                """
-
-                :param trial:
-
-                """
+                """Args:
+    trial:"""
                 params = {name: trial.suggest_int(name, 1, 50) for name in param_names}
                 cerebro = bt.Cerebro()
                 cerebro.adddata(data)
@@ -142,15 +139,14 @@ def back_test(
 ):
     """多股票独立参数回测
 
-    :param selected_strategy:
-    :param optimized_params:
-    :param use_real_trading:  (Default value = False)
-    :param live:  (Default value = False)
-    :param stocks:  (Default value = ["000001.SZ"])
-    :param fromdate:  (Default value = datetime(2020, 1, 1))
-    :param todate:  (Default value = datetime(2020, 4, 1))
-
-    """
+Args:
+    selected_strategy: 
+    optimized_params: 
+    use_real_trading: (Default value = False)
+    live: (Default value = False)
+    stocks: (Default value = ["000001.SZ"])
+    fromdate: (Default value = datetime(2020, 1, 1))
+    todate: (Default value = datetime(2020, 4, 1))"""
 
     store = QMTStore()
 

@@ -4,7 +4,7 @@ Contains contributed code. Contains various files.
 
 ## Navigation
 
-* [↑ Parent Directory (backtrader)](../README.md)
+* [🏠 Root Directory](../README.md)
 
 ### Subdirectories
 
@@ -12,7 +12,16 @@ Contains contributed code. Contains various files.
 * [samples](samples/README.md) - Contains sample code and examples
 * [utils](utils/README.md) - Contains utility functions and helper code
 
+## Files
+
+### README.md
+
+File with .md extension.
+
 ## Directory Summary
 
-This directory contains 0 files and 3 subdirectories.
+This directory contains 1 files and 3 subdirectories.
 
+### File Types
+
+* .md: 1 files

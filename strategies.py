@@ -22,87 +22,63 @@ class MyXtQuantTraderCallback(XtQuantTraderCallback):
         print("[连接状态] 与交易服务器连接断开")
 
     def on_stock_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         print("\n[委托单回调] 订单状态更新")
         print(f"证券代码: {order.stock_code}")
         print(f"订单状态: {order.order_status}")  # 需根据券商文档映射状态码含义
         print(f"系统订单号: {order.order_sysid}")
 
     def on_stock_asset(self, asset):
-        """
-
-        :param asset:
-
-        """
+        """Args:
+    asset:"""
         print("\n[账户资产] 资金变动通知")
         print(f"账户ID: {asset.account_id}")
         print(f"可用资金: {asset.cash}")
         print(f"总资产估值: {asset.total_asset}")
 
     def on_stock_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
+        """Args:
+    trade:"""
         print("\n[成交记录] 交易已达成")
         print(f"账户ID: {trade.account_id}")
         print(f"证券代码: {trade.stock_code}")
         print(f"关联订单号: {trade.order_id}")
 
     def on_stock_position(self, position):
-        """
-
-        :param position:
-
-        """
+        """Args:
+    position:"""
         print("\n[持仓变动] 头寸更新")
         print(f"证券代码: {position.stock_code}")
         print(f"当前持仓量: {position.volume}")
 
     def on_order_error(self, order_error):
-        """
-
-        :param order_error:
-
-        """
+        """Args:
+    order_error:"""
         print("\n[委托失败] 订单提交错误")
         print(f"错误订单号: {order_error.order_id}")
         print(f"错误代码: {order_error.error_id}")
         print(f"错误详情: {order_error.error_msg}")  # 建议根据error_id映射具体原因
 
     def on_cancel_error(self, cancel_error):
-        """
-
-        :param cancel_error:
-
-        """
+        """Args:
+    cancel_error:"""
         print("\n[撤单失败] 取消订单错误")
         print(f"目标订单号: {cancel_error.order_id}")
         print(f"错误代码: {cancel_error.error_id}")
         print(f"错误信息: {cancel_error.error_msg}")
 
     def on_order_stock_async_response(self, response):
-        """
-
-        :param response:
-
-        """
+        """Args:
+    response:"""
         print("\n[异步响应] 委托请求已受理")
         print(f"账户ID: {response.account_id}")
         print(f"订单号: {response.order_id}")
         print(f"请求序列号: {response.seq}")
 
     def on_account_status(self, status):
-        """
-
-        :param status:
-
-        """
+        """Args:
+    status:"""
         print("\n[账户状态] 登录/连接状态变化")
         print(f"账户ID: {status.account_id}")
         print(f"账户类型: {status.account_type}")  # 如普通户/信用户
@@ -114,11 +90,8 @@ class my_broker:
     """ """
 
     def __init__(self, use_real_trading=False):
-        """
-
-        :param use_real_trading:  (Default value = False)
-
-        """
+        """Args:
+    use_real_trading: (Default value = False)"""
         self.path = r"E:\software\QMT\userdata_mini"
         self.session_id = 123456
         self.xt_trader = XtQuantTrader(self.path, self.session_id)
@@ -139,13 +112,10 @@ class my_broker:
                 print("账号订阅失败 %d" % subscribe_result)
 
     def buy(self, stock_code, price, quantity):
-        """
-
-        :param stock_code:
-        :param price:
-        :param quantity:
-
-        """
+        """Args:
+    stock_code: 
+    price: 
+    quantity:"""
         if self.use_real_trading:
             fix_result_order_id = self.xt_trader.order_stock(
                 self.acc,
@@ -163,13 +133,10 @@ class my_broker:
             )
 
     def sell(self, stock_code, price, quantity):
-        """
-
-        :param stock_code:
-        :param price:
-        :param quantity:
-
-        """
+        """Args:
+    stock_code: 
+    price: 
+    quantity:"""
         if self.use_real_trading:
             fix_result_order_id = self.xt_trader.order_stock(
                 self.acc,
@@ -187,11 +154,8 @@ class my_broker:
             )
 
     def cancel_order(self, order_id):
-        """
-
-        :param order_id:
-
-        """
+        """Args:
+    order_id:"""
         if self.use_real_trading:
             self.xt_trader.cancel_order_stock(self.acc, order_id)
 
@@ -211,12 +175,9 @@ class TestStrategy(bt.Strategy):
     )
 
     def log(self, txt, dt=None):
-        """
-
-        :param txt:
-        :param dt:  (Default value = None)
-
-        """
+        """Args:
+    txt: 
+    dt: (Default value = None)"""
         dt = dt or self.datas[0].datetime.date(0)
         print("%s, %s" % (dt.isoformat(), txt))
 
@@ -229,11 +190,8 @@ class TestStrategy(bt.Strategy):
         )  # 默认不使用实盘
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status in [order.Submitted, order.Accepted]:
             return
 
@@ -285,12 +243,9 @@ class AnotherStrategy(bt.Strategy):
     )
 
     def log(self, txt, dt=None):
-        """
-
-        :param txt:
-        :param dt:  (Default value = None)
-
-        """
+        """Args:
+    txt: 
+    dt: (Default value = None)"""
         dt = dt or self.datas[0].datetime.date(0)
         print("%s, %s" % (dt.isoformat(), txt))
 
@@ -303,11 +258,8 @@ class AnotherStrategy(bt.Strategy):
         )  # 默认不使用实盘
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status in [order.Submitted, order.Accepted]:
             return
 

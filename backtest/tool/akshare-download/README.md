@@ -4,27 +4,26 @@ Directory containing akshare-download related files. Primarily contains Python c
 
 ## Navigation
 
-* [↑ Parent Directory (tool)](../README.md)
+* [🏠 Root Directory](../../../README.md)
+* [⬆️ Parent Directory (tool)](../README.md)
 
 ## Files
 
-### __init__.py
+### README.md
 
-Python module
+File with .md extension.
+
+### __init__.py
 
 ### fund.py
 
-Get funds datas
-
 ### stock.py
-
-Download stock datas
-
 
 ## Directory Summary
 
-This directory contains 3 files and 0 subdirectories.
+This directory contains 4 files and 0 subdirectories.
 
 ### File Types
 
 * .py: 3 files
+* .md: 1 files

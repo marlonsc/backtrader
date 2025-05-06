@@ -33,20 +33,13 @@ from backtrader import AbstractDataBase, TimeFrame
 
 class DataFiller(AbstractDataBase):
     """This class will fill gaps in the source data using the following
-    information bits from the underlying data source
-    
-      - timeframe and compression to dimension the output bars
-    
-      - sessionstart and sessionend
-    
-    If a data feed has missing bars in between 10:31 and 10:34 and the
-    timeframe is minutes, the output will be filled with bars for minutes
-    10:32 and 10:33 using the closing price of the last bar (10:31)
-    
-    Bars can be missinga amongst other things because
-
-
-    """
+information bits from the underlying data source
+- timeframe and compression to dimension the output bars
+- sessionstart and sessionend
+If a data feed has missing bars in between 10:31 and 10:34 and the
+timeframe is minutes, the output will be filled with bars for minutes
+10:32 and 10:33 using the closing price of the last bar (10:31)
+Bars can be missinga amongst other things because"""
 
     params = (
         ("fill_price", None),

@@ -4,35 +4,30 @@ Contains tools and utilities. Primarily contains Python code.
 
 ## Navigation
 
-* [↑ Parent Directory (xtquant)](../README.md)
+* [🏠 Root Directory](../../README.md)
+* [⬆️ Parent Directory (xtquant)](../README.md)
 
 ## Files
 
-### __init__.py
+### README.md
 
-Python module
+File with .md extension.
+
+### __init__.py
 
 ### contextinfo.py
 
-
-
 ### functions.py
-
-timelabel: str '20221231' '20221231235959'
 
 ### stgentry.py
 
-:param user_script:
-
 ### stgframe.py
-
-
-
 
 ## Directory Summary
 
-This directory contains 5 files and 0 subdirectories.
+This directory contains 6 files and 0 subdirectories.
 
 ### File Types
 
 * .py: 5 files
+* .md: 1 files

@@ -486,14 +486,9 @@ class ConnectionStats(NamedTuple):
 
 class BarDataList(List[BarData]):
     """List of :class:`.BarData` that also stores all request parameters.
-
-    Events:
-
-        * ``updateEvent``
-          (bars: :class:`.BarDataList`, hasNewBar: bool)
-
-
-    """
+Events:
+* ``updateEvent``
+(bars: :class:`.BarDataList`, hasNewBar: bool)"""
 
     reqId: int
     contract: Contract
@@ -507,20 +502,13 @@ class BarDataList(List[BarData]):
     chartOptions: List[TagValue]
 
     def __init__(self, *args):
-        """
-
-        :param *args:
-
-        """
+        """"""
         super().__init__(*args)
         self.updateEvent = Event("updateEvent")
 
     def __eq__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return self is other
 
     def __hash__(self):
@@ -530,14 +518,9 @@ class BarDataList(List[BarData]):
 
 class RealTimeBarList(List[RealTimeBar]):
     """List of :class:`.RealTimeBar` that also stores all request parameters.
-
-    Events:
-
-        * ``updateEvent``
-          (bars: :class:`.RealTimeBarList`, hasNewBar: bool)
-
-
-    """
+Events:
+* ``updateEvent``
+(bars: :class:`.RealTimeBarList`, hasNewBar: bool)"""
 
     reqId: int
     contract: Contract
@@ -547,20 +530,13 @@ class RealTimeBarList(List[RealTimeBar]):
     realTimeBarsOptions: List[TagValue]
 
     def __init__(self, *args):
-        """
-
-        :param *args:
-
-        """
+        """"""
         super().__init__(*args)
         self.updateEvent = Event("updateEvent")
 
     def __eq__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return self is other
 
     def __hash__(self):
@@ -570,12 +546,8 @@ class RealTimeBarList(List[RealTimeBar]):
 
 class ScanDataList(List[ScanData]):
     """List of :class:`.ScanData` that also stores all request parameters.
-
-    Events:
-        * ``updateEvent`` (:class:`.ScanDataList`)
-
-
-    """
+Events:
+* ``updateEvent`` (:class:`.ScanDataList`)"""
 
     reqId: int
     subscription: ScannerSubscription
@@ -583,20 +555,13 @@ class ScanDataList(List[ScanData]):
     scannerSubscriptionFilterOptions: List[TagValue]
 
     def __init__(self, *args):
-        """
-
-        :param *args:
-
-        """
+        """"""
         super().__init__(*args)
         self.updateEvent = Event("updateEvent")
 
     def __eq__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return self is other
 
     def __hash__(self):
@@ -608,11 +573,7 @@ class DynamicObject:
     """ """
 
     def __init__(self, **kwargs):
-        """
-
-        :param **kwargs:
-
-        """
+        """"""
         self.__dict__.update(kwargs)
 
     def __repr__(self):

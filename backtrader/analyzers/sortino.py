@@ -35,14 +35,9 @@ from backtrader.utils.py3 import itervalues
 
 class SortinoRatio(Analyzer):
     """This analyzer calculates the Sortino Ratio of a strategy using a risk free
-    asset which is simply an interest rate
-    
-    See also:
-    
-      - https://en.wikipedia.org/wiki/Sortino_ratio
-
-
-    """
+asset which is simply an interest rate
+See also:
+- https://en.wikipedia.org/wiki/Sortino_ratio"""
 
     params = (
         ("timeframe", TimeFrame.Years),

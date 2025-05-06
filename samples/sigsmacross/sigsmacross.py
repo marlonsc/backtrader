@@ -37,11 +37,8 @@ class SmaCross(bt.SignalStrategy):
     params = dict(sma1=10, sma2=20)
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if not order.alive():
             print(
                 "{} {} {}@{}".format(
@@ -53,11 +50,8 @@ class SmaCross(bt.SignalStrategy):
             )
 
     def notify_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
+        """Args:
+    trade:"""
         if trade.isclosed:
             print("profit {}".format(trade.pnlcomm))
 
@@ -70,11 +64,8 @@ class SmaCross(bt.SignalStrategy):
 
 
 def runstrat(pargs=None):
-    """
-
-    :param pargs:  (Default value = None)
-
-    """
+    """Args:
+    pargs: (Default value = None)"""
     args = parse_args(pargs)
 
     cerebro = bt.Cerebro()
@@ -96,11 +87,8 @@ def runstrat(pargs=None):
 
 
 def parse_args(pargs=None):
-    """
-
-    :param pargs:  (Default value = None)
-
-    """
+    """Args:
+    pargs: (Default value = None)"""
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

@@ -48,11 +48,8 @@ class St(bt.Strategy):
 
 
 def runstrat(pargs=None):
-    """
-
-    :param pargs: (Default value = None)
-
-    """
+    """Args:
+    pargs: (Default value = None)"""
     args = parse_args(pargs)
 
     cerebro = bt.Cerebro()
@@ -83,11 +80,8 @@ def runstrat(pargs=None):
 
 
 def parse_args(pargs=None):
-    """
-
-    :param pargs: (Default value = None)
-
-    """
+    """Args:
+    pargs: (Default value = None)"""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Fake Indicator",

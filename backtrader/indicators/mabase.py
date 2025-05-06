@@ -31,35 +31,21 @@ from . import Indicator
 
 class MovingAverage(object):
     """MovingAverage (alias MovAv)
-
-    A placeholder to gather all Moving Average Types in a single place.
-
-    Instantiating a SimpleMovingAverage can be achieved as follows::
-
-      sma = MovingAverage.Simple(self.data, period)
-
-    Or using the shorter aliases::
-
-      sma = MovAv.SMA(self.data, period)
-
-    or with the full (forwards and backwards) names:
-
-      sma = MovAv.SimpleMovingAverage(self.data, period)
-
-      sma = MovAv.MovingAverageSimple(self.data, period)
-
-
-    """
+A placeholder to gather all Moving Average Types in a single place.
+Instantiating a SimpleMovingAverage can be achieved as follows::
+sma = MovingAverage.Simple(self.data, period)
+Or using the shorter aliases::
+sma = MovAv.SMA(self.data, period)
+or with the full (forwards and backwards) names:
+sma = MovAv.SimpleMovingAverage(self.data, period)
+sma = MovAv.MovingAverageSimple(self.data, period)"""
 
     _movavs = []
 
     @classmethod
     def register(cls, regcls):
-        """
-
-        :param regcls:
-
-        """
+        """Args:
+    regcls:"""
         if getattr(regcls, "_notregister", False):
             return
 
@@ -91,14 +77,11 @@ class MetaMovAvBase(Indicator.__class__):
     # creation of envelopes and oscillators
 
     def __new__(meta, name, bases, dct):
-        """
-
-        :param meta:
-        :param name:
-        :param bases:
-        :param dct:
-
-        """
+        """Args:
+    meta: 
+    name: 
+    bases: 
+    dct:"""
         # Create the class
         cls = super(MetaMovAvBase, meta).__new__(meta, name, bases, dct)
 

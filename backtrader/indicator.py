@@ -50,11 +50,8 @@ class MetaIndicator(IndicatorBase.__class__):
 
     @classmethod
     def usecache(cls, onoff):
-        """
-
-        :param onoff:
-
-        """
+        """Args:
+    onoff:"""
         cls._icacheuse = onoff
 
     # Object cache deactivated on 2016-08-17. If the object is being used
@@ -62,12 +59,7 @@ class MetaIndicator(IndicatorBase.__class__):
     # influences the first usage when being modified during the 2nd usage
 
     def __call__(cls, *args, **kwargs):
-        """
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """"""
         if not cls._icacheuse:
             return super(MetaIndicator, cls).__call__(*args, **kwargs)
 
@@ -86,11 +78,10 @@ class MetaIndicator(IndicatorBase.__class__):
     def __init__(cls, name, bases, dct):
         """Class has already been created ... register subclasses
 
-        :param name:
-        :param bases:
-        :param dct:
-
-        """
+Args:
+    name: 
+    bases: 
+    dct:"""
         # Initialize the class
         super(MetaIndicator, cls).__init__(name, bases, dct)
 
@@ -120,23 +111,17 @@ class Indicator(with_metaclass(MetaIndicator, IndicatorBase)):
     csv = False
 
     def advance(self, size=1):
-        """
-
-        :param size:  (Default value = 1)
-
-        """
+        """Args:
+    size: (Default value = 1)"""
         # Need intercepting this call to support datas with
         # different lengths (timeframes)
         if len(self) < len(self._clock):
             self.lines.advance(size=size)
 
     def preonce_via_prenext(self, start, end):
-        """
-
-        :param start:
-        :param end:
-
-        """
+        """Args:
+    start: 
+    end:"""
         # generic implementation if prenext is overridden but preonce is not
         for i in range(start, end):
             for data in self.datas:
@@ -149,12 +134,9 @@ class Indicator(with_metaclass(MetaIndicator, IndicatorBase)):
             self.prenext()
 
     def oncestart_via_nextstart(self, start, end):
-        """
-
-        :param start:
-        :param end:
-
-        """
+        """Args:
+    start: 
+    end:"""
         # nextstart has been overriden, but oncestart has not and the code is
         # here. call the overriden nextstart
         for i in range(start, end):
@@ -168,12 +150,9 @@ class Indicator(with_metaclass(MetaIndicator, IndicatorBase)):
             self.nextstart()
 
     def once_via_next(self, start, end):
-        """
-
-        :param start:
-        :param end:
-
-        """
+        """Args:
+    start: 
+    end:"""
         # Not overridden, next must be there ...
         for i in range(start, end):
             for data in self.datas:
@@ -193,12 +172,7 @@ class MtLinePlotterIndicator(Indicator.__class__):
     """
 
     def donew(cls, *args, **kwargs):
-        """
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """"""
         lname = kwargs.pop("name")
         name = cls.__name__
 

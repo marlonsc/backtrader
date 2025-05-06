@@ -4,9 +4,14 @@ Directory containing pyfolio2 related files. Primarily contains .ipynb files cod
 
 ## Navigation
 
-* [↑ Parent Directory (samples)](../README.md)
+* [🏠 Root Directory](../../README.md)
+* [⬆️ Parent Directory (samples)](../README.md)
 
 ## Files
+
+### README.md
+
+File with .md extension.
 
 ### backtrader-pyfolio.ipynb
 
@@ -14,14 +19,12 @@ Binary or data file
 
 ### pyfoliotest.py
 
-
-
-
 ## Directory Summary
 
-This directory contains 2 files and 0 subdirectories.
+This directory contains 3 files and 0 subdirectories.
 
 ### File Types
 
+* .md: 1 files
 * .ipynb: 1 files
 * .py: 1 files

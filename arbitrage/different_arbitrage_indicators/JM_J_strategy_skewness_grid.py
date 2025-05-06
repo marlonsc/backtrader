@@ -177,11 +177,8 @@ class SkewnessArbitrageStrategy(bt.Strategy):
                     )
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status in [order.Completed]:
             if self.p.printlog:
                 if order.isbuy():
@@ -297,14 +294,11 @@ class SkewnessArbitrageStrategy(bt.Strategy):
 
 # 关键修复：处理索引问题
 def load_data(symbol1, symbol2, fromdate, todate):
-    """
-
-    :param symbol1:
-    :param symbol2:
-    :param fromdate:
-    :param todate:
-
-    """
+    """Args:
+    symbol1: 
+    symbol2: 
+    fromdate: 
+    todate:"""
     output_file = "D:\\FutureData\\ricequant\\1d_2017to2024_noadjust.h5"
 
     try:

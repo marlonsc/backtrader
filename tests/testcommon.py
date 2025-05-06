@@ -51,22 +51,16 @@ TODATE = datetime.datetime(2006, 12, 31)
 
 
 def getdatadir(filename):
-    """
-
-    :param filename:
-
-    """
+    """Args:
+    filename:"""
     return os.path.join(modpath, dataspath, filename)
 
 
 def getdata(index, fromdate=FROMDATE, todate=TODATE):
-    """
-
-    :param index:
-    :param fromdate:  (Default value = FROMDATE)
-    :param todate:  (Default value = TODATE)
-
-    """
+    """Args:
+    index: 
+    fromdate: (Default value = FROMDATE)
+    todate: (Default value = TODATE)"""
 
     datapath = getdatadir(datafiles[index])
     data = DATAFEED(dataname=datapath, fromdate=fromdate, todate=todate)
@@ -87,21 +81,17 @@ def runtest(
     analyzer=None,
     **kwargs,
 ):
-    """
-
-    :param datas:
-    :param strategy:
-    :param runonce:  (Default value = None)
-    :param preload:  (Default value = None)
-    :param exbar:  (Default value = None)
-    :param plot:  (Default value = False)
-    :param optimize:  (Default value = False)
-    :param maxcpus:  (Default value = 1)
-    :param writer:  (Default value = None)
-    :param analyzer:  (Default value = None)
-    :param **kwargs:
-
-    """
+    """Args:
+    datas: 
+    strategy: 
+    runonce: (Default value = None)
+    preload: (Default value = None)
+    exbar: (Default value = None)
+    plot: (Default value = False)
+    optimize: (Default value = False)
+    maxcpus: (Default value = 1)
+    writer: (Default value = None)
+    analyzer: (Default value = None)"""
 
     runonces = [True, False] if runonce is None else [runonce]
     preloads = [True, False] if preload is None else [preload]

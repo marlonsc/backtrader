@@ -4,31 +4,28 @@ Contains observer implementations. Primarily contains Python code.
 
 ## Navigation
 
-* [↑ Parent Directory (samples)](../README.md)
+* [🏠 Root Directory](../../README.md)
+* [⬆️ Parent Directory (samples)](../README.md)
 
 ## Files
 
+### README.md
+
+File with .md extension.
+
 ### observers-default-drawdown.py
-
-
 
 ### observers-default.py
 
-Python module
-
 ### observers-orderobserver.py
-
-
 
 ### orderobserver.py
 
-
-
-
 ## Directory Summary
 
-This directory contains 4 files and 0 subdirectories.
+This directory contains 5 files and 0 subdirectories.
 
 ### File Types
 
 * .py: 4 files
+* .md: 1 files

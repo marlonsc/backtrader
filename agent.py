@@ -43,17 +43,11 @@ def pull_historical_data(
 ) -> pd.DataFrame:
     """Pull historical data for a given ticker and date range and save as a CSV file.
 
-    :param ctx:
-    :type ctx: RunContext[dict]
-    :param ticker:
-    :type ticker: str
-    :param start:
-    :type start: str
-    :param end:
-    :type end: str
-    :rtype: pd.DataFrame
-
-    """
+Args:
+    ctx: 
+    ticker: 
+    start: 
+    end:"""
     data = yf.download(ticker, start=start, end=end)
     data = cast(pd.DataFrame, data)
     fname = f"{ticker}_{start}_{end}.csv"
@@ -72,17 +66,11 @@ def plot_time_series(
 ) -> None:
     """Plot a time series from a csv file.
 
-    :param ctx:
-    :type ctx: RunContext[dict]
-    :param csv_file:
-    :type csv_file: str
-    :param column:
-    :type column: str
-    :param title:  (Default value = "Time Series Plot")
-    :type title: str
-    :rtype: None
-
-    """
+Args:
+    ctx: 
+    csv_file: 
+    column: 
+    title: (Default value = "Time Series Plot")"""
     data = pd.read_csv(csv_file)
     if column not in data.columns:
         raise ValueError(f"Column '{column}' not found in DataFrame.")
@@ -105,22 +93,15 @@ class BaseAgent:
     """Base class for all trading agents."""
 
     def __init__(self, name: str):
-        """
-
-        :param name:
-        :type name: str
-
-        """
+        """Args:
+    name:"""
         self.name = name
 
     def decide(self, market_data: dict) -> dict:
         """Make a decision based on market data.
 
-        :param market_data:
-        :type market_data: dict
-        :rtype: dict
-
-        """
+Args:
+    market_data:"""
         raise NotImplementedError("This method should be implemented by subclasses.")
 
 
@@ -133,11 +114,8 @@ class LongAgent(BaseAgent):
     def decide(self, market_data: dict) -> dict:
         """Decide to buy to open or sell to close based on market data.
 
-        :param market_data:
-        :type market_data: dict
-        :rtype: dict
-
-        """
+Args:
+    market_data:"""
         # Example logic for long strategy
         if market_data["price"] > market_data["moving_average"]:
             return {
@@ -163,11 +141,8 @@ class ShortAgent(BaseAgent):
     def decide(self, market_data: dict) -> dict:
         """Decide to sell to open or buy to close based on market data.
 
-        :param market_data:
-        :type market_data: dict
-        :rtype: dict
-
-        """
+Args:
+    market_data:"""
         # Example logic for short strategy
         if market_data["price"] < market_data["moving_average"]:
             return {
@@ -191,15 +166,10 @@ class ReportAgent(BaseAgent):
     ) -> str:
         """Generate a daily report.
 
-        :param positions:
-        :type positions: List[dict]
-        :param pnl:
-        :type pnl: float
-        :param data_usage:
-        :type data_usage: int
-        :rtype: str
-
-        """
+Args:
+    positions: 
+    pnl: 
+    data_usage:"""
         report = (
             "Daily Report:\n"
             f"Profit/Loss: {pnl}\n"

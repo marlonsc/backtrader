@@ -1,10 +1,7 @@
 # Copyright (c) 2025 backtrader contributors
-"""
-Spread Bollinger Band Strategy for Backtrader
-
+"""Spread Bollinger Band Strategy for Backtrader
 Implements a pair trading strategy using Bollinger Bands on the spread between two
-instruments.
-"""
+instruments."""
 import datetime
 
 import backtrader as bt

@@ -17,12 +17,10 @@ Download stock datas
 
 def get_stock_list(type: str):
     """Get all A or US stock name list
-    type: zh_a | us
+type: zh_a | us
 
-    :param type:
-    :type type: str
-
-    """
+Args:
+    type:"""
     if not os.path.exists(mainpath):
         os.makedirs(mainpath)
     df = eval(f"ak.stock_{type}_spot_em")()
@@ -59,24 +57,18 @@ def upsert_stock_detail(
     period: str = "daily",
 ):
     """Update or download stock data by symbol. Today's data will be updated after closing.
-    type: us | zh_a
-    symbol: stock's code
-    start_date: stock data's start date
-    end_date: stock data's end date
-    period: daily | weekly | monthly
+type: us | zh_a
+symbol: stock's code
+start_date: stock data's start date
+end_date: stock data's end date
+period: daily | weekly | monthly
 
-    :param type:
-    :type type: str
-    :param symbol:
-    :type symbol: str
-    :param start_date:
-    :type start_date: str
-    :param end_date:  (Default value = datetime.datetime.now().strftime("%Y%m%d"))
-    :type end_date: str
-    :param period:  (Default value = "daily")
-    :type period: str
-
-    """
+Args:
+    type: 
+    symbol: 
+    start_date: 
+    end_date: (Default value = datetime.datetime.now().strftime("%Y%m%d"))
+    period: (Default value = "daily")"""
     dir = os.path.join(mainpath, f"{type}")
     if not os.path.exists(dir):
         os.makedirs(dir)
@@ -152,11 +144,8 @@ def upsert_stock_detail(
 
 
 def name_list(csv_name):
-    """
-
-    :param csv_name:
-
-    """
+    """Args:
+    csv_name:"""
     import csv
 
     csv_f = os.path.join(mainpath, f"{csv_name}")
@@ -178,20 +167,12 @@ def get_stock_list_task(
     end_date: str = datetime.datetime.now().strftime("%Y%m%d"),
     period: str = "daily",
 ):
-    """
-
-    :param stock_list:
-    :type stock_list: List[str]
-    :param type:
-    :type type: str
-    :param start_date:
-    :type start_date: str
-    :param end_date:  (Default value = datetime.datetime.now().strftime("%Y%m%d"))
-    :type end_date: str
-    :param period:  (Default value = "daily")
-    :type period: str
-
-    """
+    """Args:
+    stock_list: 
+    type: 
+    start_date: 
+    end_date: (Default value = datetime.datetime.now().strftime("%Y%m%d"))
+    period: (Default value = "daily")"""
     # group's download bar
     bar = IncrementalBar("Download", max=len(stock_list))
     failed_num = 0
@@ -227,11 +208,8 @@ if __name__ == "__main__":
     stock_lists = [stock_list[i : i + n] for i in range(0, len(stock_list), n)]
 
     def bar_update(num):
-        """
-
-        :param num:
-
-        """
+        """Args:
+    num:"""
         pbar.update(num)
         print(f"{pbar.n} / {pbar.total} / {pbar.leave}")
 

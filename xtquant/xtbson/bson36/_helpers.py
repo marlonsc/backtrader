@@ -17,22 +17,16 @@ compatibility with default pickling protocol
 
 
 def _setstate_slots(self, state):
-    """
-
-    :param state:
-
-    """
+    """Args:
+    state:"""
     for slot, value in state.items():
         setattr(self, slot, value)
 
 
 def _mangle_name(name, prefix):
-    """
-
-    :param name:
-    :param prefix:
-
-    """
+    """Args:
+    name: 
+    prefix:"""
     if name.startswith("__"):
         prefix = "_" + prefix
     else:

@@ -36,12 +36,7 @@ class OrderedDefaultdict(OrderedDict):
     """ """
 
     def __init__(self, *args, **kwargs):
-        """
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """"""
         if not args:
             self.default_factory = None
         else:
@@ -52,11 +47,8 @@ class OrderedDefaultdict(OrderedDict):
         super(OrderedDefaultdict, self).__init__(*args, **kwargs)
 
     def __missing__(self, key):
-        """
-
-        :param key:
-
-        """
+        """Args:
+    key:"""
         if self.default_factory is None:
             raise KeyError(key)
         self[key] = default = self.default_factory()

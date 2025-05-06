@@ -84,23 +84,17 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
     def qbuffer(self, savemem=0, replaying=False):
         """Enable the memory saving schemes. Possible values for ``savemem``:
+0: No savings. Each lines object keeps in memory all values
+1: All lines objects save memory, using the strictly minimum needed
+Negative values are meant to be used when plotting is required:
+-1: Indicators at Strategy Level and Observers do not enable memory
+savings (but anything declared below it does)
+-2: Same as -1 plus activation of memory saving for any indicators
+which has declared *plotinfo.plot* as False (will not be plotted)
 
-          0: No savings. Each lines object keeps in memory all values
-
-          1: All lines objects save memory, using the strictly minimum needed
-
-        Negative values are meant to be used when plotting is required:
-
-          -1: Indicators at Strategy Level and Observers do not enable memory
-              savings (but anything declared below it does)
-
-          -2: Same as -1 plus activation of memory saving for any indicators
-              which has declared *plotinfo.plot* as False (will not be plotted)
-
-        :param savemem:  (Default value = 0)
-        :param replaying:  (Default value = False)
-
-        """
+Args:
+    savemem: (Default value = 0)
+    replaying: (Default value = False)"""
         if savemem < 0:
             # Get any attribute which labels itself as Indicator
             for ind in self._lineiterators[self.IndType]:
@@ -197,57 +191,39 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
     def _addwriter(self, writer):
         """Unlike the other _addxxx functions this one receives an instance
-        because the writer works at cerebro level and is only passed to the
-        strategy to simplify the logic
+because the writer works at cerebro level and is only passed to the
+strategy to simplify the logic
 
-        :param writer:
-
-        """
+Args:
+    writer:"""
         self.writers.append(writer)
 
     def _addindicator(self, indcls, *indargs, **indkwargs):
-        """
-
-        :param indcls:
-        :param *indargs:
-        :param **indkwargs:
-
-        """
+        """Args:
+    indcls:"""
         indcls(*indargs, **indkwargs)
 
     def _addanalyzer_slave(self, ancls, *anargs, **ankwargs):
         """Like _addanalyzer but meant for observers (or other entities) which
-        rely on the output of an analyzer for the data. These analyzers have
-        not been added by the user and are kept separate from the main
-        analyzers
+rely on the output of an analyzer for the data. These analyzers have
+not been added by the user and are kept separate from the main
+analyzers
+Returns the created analyzer
 
-        Returns the created analyzer
-
-        :param ancls:
-        :param *anargs:
-        :param **ankwargs:
-
-        """
+Args:
+    ancls:"""
         analyzer = ancls(*anargs, **ankwargs)
         self._slave_analyzers.append(analyzer)
         return analyzer
 
     def _getanalyzer_slave(self, idx):
-        """
-
-        :param idx:
-
-        """
+        """Args:
+    idx:"""
         return self._slave_analyzers.append[idx]
 
     def _addanalyzer(self, ancls, *anargs, **ankwargs):
-        """
-
-        :param ancls:
-        :param *anargs:
-        :param **ankwargs:
-
-        """
+        """Args:
+    ancls:"""
         anname = ankwargs.pop("_name", "") or ancls.__name__.lower()
         nsuffix = next(self._alnames[anname])
         anname += str(nsuffix or "")  # 0 (first instance) gets no suffix
@@ -255,14 +231,9 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         self.analyzers.append(analyzer, anname)
 
     def _addobserver(self, multi, obscls, *obsargs, **obskwargs):
-        """
-
-        :param multi:
-        :param obscls:
-        :param *obsargs:
-        :param **obskwargs:
-
-        """
+        """Args:
+    multi: 
+    obscls:"""
         obsname = obskwargs.pop("obsname", "")
         if not obsname:
             obsname = obscls.__name__.lower()
@@ -308,11 +279,8 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             self.prenext_open()
 
     def _oncepost(self, dt):
-        """
-
-        :param dt:
-
-        """
+        """Args:
+    dt:"""
         for indicator in self._lineiterators[LineIterator.IndType]:
             if len(indicator._clock) > len(indicator):
                 indicator.advance()
@@ -391,12 +359,9 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         self.clear()
 
     def _next_observers(self, minperstatus, once=False):
-        """
-
-        :param minperstatus:
-        :param once:  (Default value = False)
-
-        """
+        """Args:
+    minperstatus: 
+    once: (Default value = False)"""
         for observer in self._lineiterators[LineIterator.ObsType]:
             for analyzer in observer._analyzers:
                 if minperstatus < 0:
@@ -423,12 +388,9 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
                 observer._next()
 
     def _next_analyzers(self, minperstatus, once=False):
-        """
-
-        :param minperstatus:
-        :param once:  (Default value = False)
-
-        """
+        """Args:
+    minperstatus: 
+    once: (Default value = False)"""
         for analyzer in self.analyzers:
             if minperstatus < 0:
                 analyzer._next()
@@ -438,11 +400,8 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
                 analyzer._prenext()
 
     def _settz(self, tz):
-        """
-
-        :param tz:
-
-        """
+        """Args:
+    tz:"""
         self.lines.datetime._settz(tz)
 
     def _start(self):
@@ -567,11 +526,8 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         """Called right before the backtesting is about to be stopped"""
 
     def set_tradehistory(self, onoff=True):
-        """
-
-        :param onoff:  (Default value = True)
-
-        """
+        """Args:
+    onoff: (Default value = True)"""
         self._tradehistoryon = onoff
 
     def clear(self):
@@ -581,12 +537,9 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         self._tradespending = list()
 
     def _addnotification(self, order, quicknotify=False):
-        """
-
-        :param order:
-        :param quicknotify:  (Default value = False)
-
-        """
+        """Args:
+    order: 
+    quicknotify: (Default value = False)"""
         if not order.p.simulated:
             self._orderspending.append(order)
 
@@ -674,12 +627,9 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             self._notify(qorders=qorders, qtrades=qtrades)
 
     def _notify(self, qorders=None, qtrades=None):
-        """
-
-        :param qorders:  (Default value = None)
-        :param qtrades:  (Default value = None)
-
-        """
+        """Args:
+    qorders: (Default value = None)
+    qtrades: (Default value = None)"""
         if qorders is None:
             qorders = []
         if qtrades is None:
@@ -732,25 +682,23 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         **kwargs,
     ):
         """**Note**: can be called during ``__init__`` or ``start``
+Schedules a timer to invoke either a specified callback or the
+``notify_timer`` of one or more strategies.
 
-        Schedules a timer to invoke either a specified callback or the
-        ``notify_timer`` of one or more strategies.
+Args:
+    when: can be
+    offset: which must be a (Default value = datetime.timedelta())
+    repeat: which must be a (Default value = datetime.timedelta())
+    weekdays: a (Default value = [])
+    weekcarry: default
+    monthdays: a (Default value = [])
+    monthcarry: default
+    allow: default
+    tzdata: which can be either (Default value = None)
+    cheat: default
 
-        :param when: can be
-        :param offset: which must be a (Default value = datetime.timedelta())
-        :param repeat: which must be a (Default value = datetime.timedelta())
-        :param weekdays: a (Default value = [])
-        :param weekcarry: default
-        :param monthdays: a (Default value = [])
-        :param monthcarry: default
-        :param allow: default
-        :param tzdata: which can be either (Default value = None)
-        :param cheat: default
-        :param *args:
-        :param **kwargs:
-        :returns: - The created timer
-
-        """
+Returns:
+    - The created timer"""
         if offset is None:
             offset = datetime.timedelta()
         if repeat is None:
@@ -779,68 +727,53 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
     def notify_timer(self, timer, when, *args, **kwargs):
         """Receives a timer notification where ``timer`` is the timer which was
 
-        :param timer:
-        :param when:
-        :param *args:
-        :param **kwargs:
-        :returns: and ``kwargs`` are any additional arguments passed to ``add_timer``
+Args:
+    timer: 
+    when: 
 
-        The actual ``when`` time can be later, but the system may have not be
-        able to call the timer before. This value is the timer value and no the
-        system time.
-
-        """
+Returns:
+    and ``kwargs`` are any additional arguments passed to ``add_timer``"""
 
     def notify_cashvalue(self, cash, value):
         """Receives the current fund value, value status of the strategy's broker
 
-        :param cash:
-        :param value:
-
-        """
+Args:
+    cash: 
+    value:"""
 
     def notify_fund(self, cash, value, fundvalue, shares):
         """Receives the current cash, value, fundvalue and fund shares
 
-        :param cash:
-        :param value:
-        :param fundvalue:
-        :param shares:
-
-        """
+Args:
+    cash: 
+    value: 
+    fundvalue: 
+    shares:"""
 
     def notify_order(self, order):
         """Receives an order whenever there has been a change in one
 
-        :param order:
-
-        """
+Args:
+    order:"""
 
     def notify_trade(self, trade):
         """Receives a trade whenever there has been a change in one
 
-        :param trade:
-
-        """
+Args:
+    trade:"""
 
     def notify_store(self, msg, *args, **kwargs):
         """Receives a notification from a store provider
 
-        :param msg:
-        :param *args:
-        :param **kwargs:
-
-        """
+Args:
+    msg:"""
 
     def notify_data(self, data, status, *args, **kwargs):
         """Receives a notification from data
 
-        :param data:
-        :param status:
-        :param *args:
-        :param **kwargs:
-
-        """
+Args:
+    data: 
+    status:"""
 
     def getdatanames(self):
         """Returns a list of the existing data names"""
@@ -849,17 +782,15 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
     def getdatabyname(self, name):
         """Returns a given data by name using the environment (cerebro)
 
-        :param name:
-
-        """
+Args:
+    name:"""
         return self.env.datasbyname[name]
 
     def cancel(self, order):
         """Cancels the order in the broker
 
-        :param order:
-
-        """
+Args:
+    order:"""
         self.broker.cancel(order)
 
     def buy(
@@ -879,151 +810,112 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         **kwargs,
     ):
         """Create a buy (long) order and send it to the broker
+- ``data`` (default: ``None``)
+For which data the order has to be created. If ``None`` then the
+first data in the system, ``self.datas[0] or self.data0`` (aka
+``self.data``) will be used
+- ``size`` (default: ``None``)
+Size to use (positive) of units of data to use for the order.
+If ``None`` the ``sizer`` instance retrieved via ``getsizer`` will
+be used to determine the size.
+- ``price`` (default: ``None``)
+Price to use (live brokers may place restrictions on the actual
+format if it does not comply to minimum tick size requirements)
+``None`` is valid for ``Market`` and ``Close`` orders (the market
+determines the price)
+For ``Limit``, ``Stop`` and ``StopLimit`` orders this value
+determines the trigger point (in the case of ``Limit`` the trigger
+is obviously at which price the order should be matched)
+- ``plimit`` (default: ``None``)
+Only applicable to ``StopLimit`` orders. This is the price at which
+to set the implicit *Limit* order, once the *Stop* has been
+triggered (for which ``price`` has been used)
+- ``trailamount`` (default: ``None``)
+If the order type is StopTrail or StopTrailLimit, this is an
+absolute amount which determines the distance to the price (below
+for a Sell order and above for a buy order) to keep the trailing
+stop
+- ``trailpercent`` (default: ``None``)
+If the order type is StopTrail or StopTrailLimit, this is a
+percentage amount which determines the distance to the price (below
+for a Sell order and above for a buy order) to keep the trailing
+stop (if ``trailamount`` is also specified it will be used)
+- ``exectype`` (default: ``None``)
+Possible values:
+- ``Order.Market`` or ``None``. A market order will be executed
+with the next available price. In backtesting it will be the
+opening price of the next bar
+- ``Order.Limit``. An order which can only be executed at the given
+``price`` or better
+- ``Order.Stop``. An order which is triggered at ``price`` and
+executed like an ``Order.Market`` order
+- ``Order.StopLimit``. An order which is triggered at ``price`` and
+executed as an implicit *Limit* order with price given by
+``pricelimit``
+- ``Order.Close``. An order which can only be executed with the
+closing price of the session (usually during a closing auction)
+- ``Order.StopTrail``. An order which is triggered at ``price``
+minus ``trailamount`` (or ``trailpercent``) and which is updated
+if the price moves away from the stop
+- ``Order.StopTrailLimit``. An order which is triggered at
+``price`` minus ``trailamount`` (or ``trailpercent``) and which
+is updated if the price moves away from the stop
+- ``valid`` (default: ``None``)
+Possible values:
+- ``None``: this generates an order that will not expire (aka
+*Good till cancel*) and remain in the market until matched or
+canceled. In reality brokers tend to impose a temporal limit,
+but this is usually so far away in time to consider it as not
+expiring
+- ``datetime.datetime`` or ``datetime.date`` instance: the date
+will be used to generate an order valid until the given
+datetime (aka *good till date*)
+- ``Order.DAY`` or ``0`` or ``timedelta()``: a day valid until
+the *End of the Session* (aka *day* order) will be generated
+- ``numeric value``: This is assumed to be a value corresponding
+to a datetime in ``matplotlib`` coding (the one used by
+``backtrader``) and will used to generate an order valid until
+that time (*good till date*)
+- ``tradeid`` (default: ``0``)
+This is an internal value applied by ``backtrader`` to keep track
+of overlapping trades on the same asset. This ``tradeid`` is sent
+back to the *strategy* when notifying changes to the status of the
+orders.
+- ``oco`` (default: ``None``)
+Another ``order`` instance. This order will become part of an OCO
+(Order Cancel Others) group. The execution of one of the orders,
+immediately cancels all others in the same group
+- ``parent`` (default: ``None``)
+Controls the relationship of a group of orders, for example a buy
+which is bracketed by a high-side limit sell and a low side stop
+sell. The high/low side orders remain inactive until the parent
+order has been either executed (they become active) or is
+canceled/expires (the children are also canceled) bracket orders
+have the same size
+- ``transmit`` (default: ``True``)
+Indicates if the order has to be **transmitted**, ie: not only
+placed in the broker but also issued. This is meant for example to
+control bracket orders, in which one disables the transmission for
+the parent and 1st set of children and activates it for the last
+children, which triggers the full placement of all bracket orders.
+- ``**kwargs``: additional broker implementations may support extra
 
-          - ``data`` (default: ``None``)
+Args:
+    data: (Default value = None)
+    size: (Default value = None)
+    price: (Default value = None)
+    plimit: (Default value = None)
+    exectype: (Default value = None)
+    valid: (Default value = None)
+    tradeid: (Default value = 0)
+    oco: (Default value = None)
+    trailamount: (Default value = None)
+    trailpercent: (Default value = None)
+    parent: (Default value = None)
+    transmit: (Default value = True)
 
-            For which data the order has to be created. If ``None`` then the
-            first data in the system, ``self.datas[0] or self.data0`` (aka
-            ``self.data``) will be used
-
-          - ``size`` (default: ``None``)
-
-            Size to use (positive) of units of data to use for the order.
-
-            If ``None`` the ``sizer`` instance retrieved via ``getsizer`` will
-            be used to determine the size.
-
-          - ``price`` (default: ``None``)
-
-            Price to use (live brokers may place restrictions on the actual
-            format if it does not comply to minimum tick size requirements)
-
-            ``None`` is valid for ``Market`` and ``Close`` orders (the market
-            determines the price)
-
-            For ``Limit``, ``Stop`` and ``StopLimit`` orders this value
-            determines the trigger point (in the case of ``Limit`` the trigger
-            is obviously at which price the order should be matched)
-
-          - ``plimit`` (default: ``None``)
-
-            Only applicable to ``StopLimit`` orders. This is the price at which
-            to set the implicit *Limit* order, once the *Stop* has been
-            triggered (for which ``price`` has been used)
-
-          - ``trailamount`` (default: ``None``)
-
-            If the order type is StopTrail or StopTrailLimit, this is an
-            absolute amount which determines the distance to the price (below
-            for a Sell order and above for a buy order) to keep the trailing
-            stop
-
-          - ``trailpercent`` (default: ``None``)
-
-            If the order type is StopTrail or StopTrailLimit, this is a
-            percentage amount which determines the distance to the price (below
-            for a Sell order and above for a buy order) to keep the trailing
-            stop (if ``trailamount`` is also specified it will be used)
-
-          - ``exectype`` (default: ``None``)
-
-            Possible values:
-
-            - ``Order.Market`` or ``None``. A market order will be executed
-              with the next available price. In backtesting it will be the
-              opening price of the next bar
-
-            - ``Order.Limit``. An order which can only be executed at the given
-              ``price`` or better
-
-            - ``Order.Stop``. An order which is triggered at ``price`` and
-              executed like an ``Order.Market`` order
-
-            - ``Order.StopLimit``. An order which is triggered at ``price`` and
-              executed as an implicit *Limit* order with price given by
-              ``pricelimit``
-
-            - ``Order.Close``. An order which can only be executed with the
-              closing price of the session (usually during a closing auction)
-
-            - ``Order.StopTrail``. An order which is triggered at ``price``
-              minus ``trailamount`` (or ``trailpercent``) and which is updated
-              if the price moves away from the stop
-
-            - ``Order.StopTrailLimit``. An order which is triggered at
-              ``price`` minus ``trailamount`` (or ``trailpercent``) and which
-              is updated if the price moves away from the stop
-
-          - ``valid`` (default: ``None``)
-
-            Possible values:
-
-              - ``None``: this generates an order that will not expire (aka
-                *Good till cancel*) and remain in the market until matched or
-                canceled. In reality brokers tend to impose a temporal limit,
-                but this is usually so far away in time to consider it as not
-                expiring
-
-              - ``datetime.datetime`` or ``datetime.date`` instance: the date
-                will be used to generate an order valid until the given
-                datetime (aka *good till date*)
-
-              - ``Order.DAY`` or ``0`` or ``timedelta()``: a day valid until
-                the *End of the Session* (aka *day* order) will be generated
-
-              - ``numeric value``: This is assumed to be a value corresponding
-                to a datetime in ``matplotlib`` coding (the one used by
-                ``backtrader``) and will used to generate an order valid until
-                that time (*good till date*)
-
-          - ``tradeid`` (default: ``0``)
-
-            This is an internal value applied by ``backtrader`` to keep track
-            of overlapping trades on the same asset. This ``tradeid`` is sent
-            back to the *strategy* when notifying changes to the status of the
-            orders.
-
-          - ``oco`` (default: ``None``)
-
-            Another ``order`` instance. This order will become part of an OCO
-            (Order Cancel Others) group. The execution of one of the orders,
-            immediately cancels all others in the same group
-
-          - ``parent`` (default: ``None``)
-
-            Controls the relationship of a group of orders, for example a buy
-            which is bracketed by a high-side limit sell and a low side stop
-            sell. The high/low side orders remain inactive until the parent
-            order has been either executed (they become active) or is
-            canceled/expires (the children are also canceled) bracket orders
-            have the same size
-
-          - ``transmit`` (default: ``True``)
-
-            Indicates if the order has to be **transmitted**, ie: not only
-            placed in the broker but also issued. This is meant for example to
-            control bracket orders, in which one disables the transmission for
-            the parent and 1st set of children and activates it for the last
-            children, which triggers the full placement of all bracket orders.
-
-          - ``**kwargs``: additional broker implementations may support extra
-
-        :param data:  (Default value = None)
-        :param size:  (Default value = None)
-        :param price:  (Default value = None)
-        :param plimit:  (Default value = None)
-        :param exectype:  (Default value = None)
-        :param valid:  (Default value = None)
-        :param tradeid:  (Default value = 0)
-        :param oco:  (Default value = None)
-        :param trailamount:  (Default value = None)
-        :param trailpercent:  (Default value = None)
-        :param parent:  (Default value = None)
-        :param transmit:  (Default value = True)
-        :param **kwargs:
-        :returns: - the submitted order
-
-        """
+Returns:
+    - the submitted order"""
         if isinstance(data, string_types):
             data = self.getdatabyname(data)
 
@@ -1166,108 +1058,75 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         **kwargs,
     ):
         """Create a bracket order group (low side - buy order - high side). The
-        default behavior is as follows:
+default behavior is as follows:
+- Issue a **buy** order with execution ``Limit``
+- Issue a *low side* bracket **sell** order with execution ``Stop``
+- Issue a *high side* bracket **sell** order with execution
+``Limit``.
+See below for the different parameters
+- ``data`` (default: ``None``)
+For which data the order has to be created. If ``None`` then the
+first data in the system, ``self.datas[0] or self.data0`` (aka
+``self.data``) will be used
+- ``size`` (default: ``None``)
+Size to use (positive) of units of data to use for the order.
+If ``None`` the ``sizer`` instance retrieved via ``getsizer`` will
+be used to determine the size.
+**Note**: The same size is applied to all 3 orders of the bracket
+- ``price`` (default: ``None``)
+Price to use (live brokers may place restrictions on the actual
+format if it does not comply to minimum tick size requirements)
+``None`` is valid for ``Market`` and ``Close`` orders (the market
+determines the price)
+For ``Limit``, ``Stop`` and ``StopLimit`` orders this value
+determines the trigger point (in the case of ``Limit`` the trigger
+is obviously at which price the order should be matched)
+- ``plimit`` (default: ``None``)
+Only applicable to ``StopLimit`` orders. This is the price at which
+to set the implicit *Limit* order, once the *Stop* has been
+triggered (for which ``price`` has been used)
+- ``trailamount`` (default: ``None``)
+If the order type is StopTrail or StopTrailLimit, this is an
+absolute amount which determines the distance to the price (below
+for a Sell order and above for a buy order) to keep the trailing
+stop
+- ``trailpercent`` (default: ``None``)
+If the order type is StopTrail or StopTrailLimit, this is a
+percentage amount which determines the distance to the price (below
+for a Sell order and above for a buy order) to keep the trailing
+stop (if ``trailamount`` is also specified it will be used)
+- ``exectype`` (default: ``bt.Order.Limit``)
+Possible values: (see the documentation for the method ``buy``
+- ``valid`` (default: ``None``)
+Possible values: (see the documentation for the method ``buy``
+- ``tradeid`` (default: ``0``)
+Possible values: (see the documentation for the method ``buy``
+- ``oargs`` (default: ``{}``)
+Specific keyword arguments (in a ``dict``) to pass to the main side
+order. Arguments from the default ``**kwargs`` will be applied on
+top of this.
+- ``**kwargs``: additional broker implementations may support extra
 
-          - Issue a **buy** order with execution ``Limit``
+Args:
+    data: (Default value = None)
+    size: (Default value = None)
+    price: (Default value = None)
+    plimit: (Default value = None)
+    exectype: (Default value = bt.Order.Limit)
+    valid: (Default value = None)
+    tradeid: (Default value = 0)
+    trailamount: (Default value = None)
+    trailpercent: (Default value = None)
+    oargs: (Default value = {})
+    stopprice: default
+    stopexec: None (Default value = bt.Order.Stop)
+    stopargs: default
+    limitprice: default
+    limitexec: None (Default value = bt.Order.Limit)
+    limitargs: default
 
-          - Issue a *low side* bracket **sell** order with execution ``Stop``
-
-          - Issue a *high side* bracket **sell** order with execution
-            ``Limit``.
-
-        See below for the different parameters
-
-          - ``data`` (default: ``None``)
-
-            For which data the order has to be created. If ``None`` then the
-            first data in the system, ``self.datas[0] or self.data0`` (aka
-            ``self.data``) will be used
-
-          - ``size`` (default: ``None``)
-
-            Size to use (positive) of units of data to use for the order.
-
-            If ``None`` the ``sizer`` instance retrieved via ``getsizer`` will
-            be used to determine the size.
-
-            **Note**: The same size is applied to all 3 orders of the bracket
-
-          - ``price`` (default: ``None``)
-
-            Price to use (live brokers may place restrictions on the actual
-            format if it does not comply to minimum tick size requirements)
-
-            ``None`` is valid for ``Market`` and ``Close`` orders (the market
-            determines the price)
-
-            For ``Limit``, ``Stop`` and ``StopLimit`` orders this value
-            determines the trigger point (in the case of ``Limit`` the trigger
-            is obviously at which price the order should be matched)
-
-          - ``plimit`` (default: ``None``)
-
-            Only applicable to ``StopLimit`` orders. This is the price at which
-            to set the implicit *Limit* order, once the *Stop* has been
-            triggered (for which ``price`` has been used)
-
-          - ``trailamount`` (default: ``None``)
-
-            If the order type is StopTrail or StopTrailLimit, this is an
-            absolute amount which determines the distance to the price (below
-            for a Sell order and above for a buy order) to keep the trailing
-            stop
-
-          - ``trailpercent`` (default: ``None``)
-
-            If the order type is StopTrail or StopTrailLimit, this is a
-            percentage amount which determines the distance to the price (below
-            for a Sell order and above for a buy order) to keep the trailing
-            stop (if ``trailamount`` is also specified it will be used)
-
-          - ``exectype`` (default: ``bt.Order.Limit``)
-
-            Possible values: (see the documentation for the method ``buy``
-
-          - ``valid`` (default: ``None``)
-
-            Possible values: (see the documentation for the method ``buy``
-
-          - ``tradeid`` (default: ``0``)
-
-            Possible values: (see the documentation for the method ``buy``
-
-          - ``oargs`` (default: ``{}``)
-
-            Specific keyword arguments (in a ``dict``) to pass to the main side
-            order. Arguments from the default ``**kwargs`` will be applied on
-            top of this.
-
-          - ``**kwargs``: additional broker implementations may support extra
-
-        :param data:  (Default value = None)
-        :param size:  (Default value = None)
-        :param price:  (Default value = None)
-        :param plimit:  (Default value = None)
-        :param exectype:  (Default value = bt.Order.Limit)
-        :param valid:  (Default value = None)
-        :param tradeid:  (Default value = 0)
-        :param trailamount:  (Default value = None)
-        :param trailpercent:  (Default value = None)
-        :param oargs:  (Default value = {})
-        :param stopprice: default
-        :param stopexec: None (Default value = bt.Order.Stop)
-        :param stopargs: default
-        :param limitprice: default
-        :param limitexec: None (Default value = bt.Order.Limit)
-        :param limitargs: default
-        :param **kwargs:
-        :returns: - A list containing the 3 orders [order, stop side, limit side]
-
-          - If high/low orders have been suppressed the return value will still
-            contain 3 orders, but those suppressed will have a value of
-            ``None``
-
-        """
+Returns:
+    - A list containing the 3 orders [order, stop side, limit side]"""
         if oargs is None:
             oargs = {}
         if stopargs is None:
@@ -1349,45 +1208,35 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         **kwargs,
     ):
         """Create a bracket order group (low side - buy order - high side). The
-        default behavior is as follows:
+default behavior is as follows:
+- Issue a **sell** order with execution ``Limit``
+- Issue a *high side* bracket **buy** order with execution ``Stop``
+- Issue a *low side* bracket **buy** order with execution ``Limit``.
+See ``bracket_buy`` for the meaning of the parameters
+High/Low Side orders can be suppressed by using:
+- ``stopexec=None`` to suppress the *high side*
+- ``limitexec=None`` to suppress the *low side*
 
-          - Issue a **sell** order with execution ``Limit``
+Args:
+    data: (Default value = None)
+    size: (Default value = None)
+    price: (Default value = None)
+    plimit: (Default value = None)
+    exectype: (Default value = bt.Order.Limit)
+    valid: (Default value = None)
+    tradeid: (Default value = 0)
+    trailamount: (Default value = None)
+    trailpercent: (Default value = None)
+    oargs: (Default value = {})
+    stopprice: (Default value = None)
+    stopexec: (Default value = bt.Order.Stop)
+    stopargs: (Default value = {})
+    limitprice: (Default value = None)
+    limitexec: (Default value = bt.Order.Limit)
+    limitargs: (Default value = {})
 
-          - Issue a *high side* bracket **buy** order with execution ``Stop``
-
-          - Issue a *low side* bracket **buy** order with execution ``Limit``.
-
-        See ``bracket_buy`` for the meaning of the parameters
-
-        High/Low Side orders can be suppressed by using:
-
-          - ``stopexec=None`` to suppress the *high side*
-
-          - ``limitexec=None`` to suppress the *low side*
-
-        :param data:  (Default value = None)
-        :param size:  (Default value = None)
-        :param price:  (Default value = None)
-        :param plimit:  (Default value = None)
-        :param exectype:  (Default value = bt.Order.Limit)
-        :param valid:  (Default value = None)
-        :param tradeid:  (Default value = 0)
-        :param trailamount:  (Default value = None)
-        :param trailpercent:  (Default value = None)
-        :param oargs:  (Default value = {})
-        :param stopprice:  (Default value = None)
-        :param stopexec:  (Default value = bt.Order.Stop)
-        :param stopargs:  (Default value = {})
-        :param limitprice:  (Default value = None)
-        :param limitexec:  (Default value = bt.Order.Limit)
-        :param limitargs:  (Default value = {})
-        :param **kwargs:
-        :returns: - A list containing the 3 orders [order, stop side, limit side]
-          - If high/low orders have been suppressed the return value will still
-            contain 3 orders, but those suppressed will have a value of
-            ``None``
-
-        """
+Returns:
+    - A list containing the 3 orders [order, stop side, limit side]"""
         if oargs is None:
             oargs = {}
         if stopargs is None:
@@ -1450,27 +1299,18 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
     def order_target_size(self, data=None, target=0, **kwargs):
         """Place an order to rebalance a position to have final size of ``target``
+The current ``position`` size is taken into account as the start point
+to achieve ``target``
+- If ``target`` > ``pos.size`` -> buy ``target - pos.size``
+- If ``target`` < ``pos.size`` -> sell ``pos.size - target``
+It returns either:
+- The generated order
+or
+- ``None`` if no order has been issued (``target == position.size``)
 
-        The current ``position`` size is taken into account as the start point
-        to achieve ``target``
-
-          - If ``target`` > ``pos.size`` -> buy ``target - pos.size``
-
-          - If ``target`` < ``pos.size`` -> sell ``pos.size - target``
-
-        It returns either:
-
-          - The generated order
-
-          or
-
-          - ``None`` if no order has been issued (``target == position.size``)
-
-        :param data:  (Default value = None)
-        :param target:  (Default value = 0)
-        :param **kwargs:
-
-        """
+Args:
+    data: (Default value = None)
+    target: (Default value = 0)"""
         if isinstance(data, string_types):
             data = self.getdatabyname(data)
         elif data is None:
@@ -1490,29 +1330,21 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
     def order_target_value(self, data=None, target=0.0, price=None, **kwargs):
         """Place an order to rebalance a position to have final value of
-        ``target``
+``target``
+The current ``value`` is taken into account as the start point to
+achieve ``target``
+- If no ``target`` then close postion on data
+- If ``target`` > ``value`` then buy on data
+- If ``target`` < ``value`` then sell on data
+It returns either:
+- The generated order
+or
+- ``None`` if no order has been issued
 
-        The current ``value`` is taken into account as the start point to
-        achieve ``target``
-
-          - If no ``target`` then close postion on data
-          - If ``target`` > ``value`` then buy on data
-          - If ``target`` < ``value`` then sell on data
-
-        It returns either:
-
-          - The generated order
-
-          or
-
-          - ``None`` if no order has been issued
-
-        :param data:  (Default value = None)
-        :param target:  (Default value = 0.0)
-        :param price:  (Default value = None)
-        :param **kwargs:
-
-        """
+Args:
+    data: (Default value = None)
+    target: (Default value = 0.0)
+    price: (Default value = None)"""
 
         if isinstance(data, string_types):
             data = self.getdatabyname(data)
@@ -1542,46 +1374,31 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
     def order_target_percent(self, data=None, target=0.0, **kwargs):
         """Place an order to rebalance a position to have final value of
-        ``target`` percentage of current portfolio ``value``
+``target`` percentage of current portfolio ``value``
+``target`` is expressed in decimal: ``0.05`` -> ``5%``
+It uses ``order_target_value`` to execute the order.
+Example:
+- ``target=0.05`` and portfolio value is ``100``
+- The ``value`` to be reached is ``0.05 * 100 = 5``
+- ``5`` is passed as the ``target`` value to ``order_target_value``
+The current ``value`` is taken into account as the start point to
+achieve ``target``
+The ``position.size`` is used to determine if a position is ``long`` /
+``short``
+- If ``target`` > ``value``
+- buy if ``pos.size >= 0`` (Increase a long position)
+- sell if ``pos.size < 0`` (Increase a short position)
+- If ``target`` < ``value``
+- sell if ``pos.size >= 0`` (Decrease a long position)
+- buy if ``pos.size < 0`` (Decrease a short position)
+It returns either:
+- The generated order
+or
+- ``None`` if no order has been issued (``target == position.size``)
 
-        ``target`` is expressed in decimal: ``0.05`` -> ``5%``
-
-        It uses ``order_target_value`` to execute the order.
-
-        Example:
-          - ``target=0.05`` and portfolio value is ``100``
-
-          - The ``value`` to be reached is ``0.05 * 100 = 5``
-
-          - ``5`` is passed as the ``target`` value to ``order_target_value``
-
-        The current ``value`` is taken into account as the start point to
-        achieve ``target``
-
-        The ``position.size`` is used to determine if a position is ``long`` /
-        ``short``
-
-          - If ``target`` > ``value``
-            - buy if ``pos.size >= 0`` (Increase a long position)
-            - sell if ``pos.size < 0`` (Increase a short position)
-
-          - If ``target`` < ``value``
-            - sell if ``pos.size >= 0`` (Decrease a long position)
-            - buy if ``pos.size < 0`` (Decrease a short position)
-
-        It returns either:
-
-          - The generated order
-
-          or
-
-          - ``None`` if no order has been issued (``target == position.size``)
-
-        :param data:  (Default value = None)
-        :param target:  (Default value = 0.0)
-        :param **kwargs:
-
-        """
+Args:
+    data: (Default value = None)
+    target: (Default value = 0.0)"""
         if isinstance(data, string_types):
             data = self.getdatabyname(data)
         elif data is None:
@@ -1594,15 +1411,12 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
     def getposition(self, data=None, broker=None):
         """Returns the current position for a given data in a given broker.
+If both are None, the main data and the default broker will be used
+A property ``position`` is also available
 
-        If both are None, the main data and the default broker will be used
-
-        A property ``position`` is also available
-
-        :param data:  (Default value = None)
-        :param broker:  (Default value = None)
-
-        """
+Args:
+    data: (Default value = None)
+    broker: (Default value = None)"""
         data = data if data is not None else self.datas[0]
         broker = broker or self.broker
         return broker.getposition(data)
@@ -1611,15 +1425,12 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
     def getpositionbyname(self, name=None, broker=None):
         """Returns the current position for a given name in a given broker.
+If both are None, the main data and the default broker will be used
+A property ``positionbyname`` is also available
 
-        If both are None, the main data and the default broker will be used
-
-        A property ``positionbyname`` is also available
-
-        :param name:  (Default value = None)
-        :param broker:  (Default value = None)
-
-        """
+Args:
+    name: (Default value = None)
+    broker: (Default value = None)"""
         data = self.datas[0] if not name else self.getdatabyname(name)
         broker = broker or self.broker
         return broker.getposition(data)
@@ -1628,14 +1439,11 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
     def getpositions(self, broker=None):
         """Returns the current by data positions directly from the broker
+If the given ``broker`` is None, the default broker will be used
+A property ``positions`` is also available
 
-        If the given ``broker`` is None, the default broker will be used
-
-        A property ``positions`` is also available
-
-        :param broker:  (Default value = None)
-
-        """
+Args:
+    broker: (Default value = None)"""
         broker = broker or self.broker
         return broker.positions
 
@@ -1643,14 +1451,11 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
     def getpositionsbyname(self, broker=None):
         """Returns the current by name positions directly from the broker
+If the given ``broker`` is None, the default broker will be used
+A property ``positionsbyname`` is also available
 
-        If the given ``broker`` is None, the default broker will be used
-
-        A property ``positionsbyname`` is also available
-
-        :param broker:  (Default value = None)
-
-        """
+Args:
+    broker: (Default value = None)"""
         broker = broker or self.broker
         positions = broker.positions
 
@@ -1663,13 +1468,8 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
     positionsbyname = property(getpositionsbyname)
 
     def _addsizer(self, sizer, *args, **kwargs):
-        """
-
-        :param sizer:
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Args:
+    sizer:"""
         if sizer is None:
             self.setsizer(FixedSize())
         else:
@@ -1678,32 +1478,26 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
     def setsizer(self, sizer):
         """Replace the default (fixed stake) sizer
 
-        :param sizer:
-
-        """
+Args:
+    sizer:"""
         self._sizer = sizer
         sizer.set(self, self.broker)
         return sizer
 
     def getsizer(self):
         """Returns the sizer which is in used if automatic statke calculation is
-        used
-
-        Also available as ``sizer``
-
-
-        """
+used
+Also available as ``sizer``"""
         return self._sizer
 
     sizer = property(getsizer, setsizer)
 
     def getsizing(self, data=None, isbuy=True):
-        """
+        """Args:
+    data: (Default value = None)
+    isbuy: (Default value = True)
 
-        :param data:  (Default value = None)
-        :param isbuy:  (Default value = True)
-        :returns: situation
-
-        """
+Returns:
+    situation"""
         data = data if data is not None else self.datas[0]
         return self._sizer.getsizing(data, isbuy=isbuy)

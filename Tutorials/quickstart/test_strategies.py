@@ -102,15 +102,11 @@ class TestStrategy_SMA(bt.Strategy):
     def log(self, txt: str, dt=None, caller: str = None, print_it: bool = False):
         """Logging function for this strategy
 
-        :param txt:
-        :type txt: str
-        :param dt:  (Default value = None)
-        :param caller:  (Default value = None)
-        :type caller: str
-        :param print_it:  (Default value = False)
-        :type print_it: bool
-
-        """
+Args:
+    txt: 
+    dt: (Default value = None)
+    caller: (Default value = None)
+    print_it: (Default value = False)"""
         if not print_it and not self.p.log_by_default:
             return
 
@@ -194,21 +190,19 @@ class TestStrategy_SMA(bt.Strategy):
 
     def notify_order(self, order):
         """The order lifecycle is managed through the notify_order method,
-        which is called whenever the status of an order changes.
-        This ensures that the strategy can react to order completions, rejections, or cancellations in a controlled manner.
-        Here is a brief overview of how orders are processed:
-            - Order Submission: Orders are submitted within the next method.
-            - Order Notification: The notify_order method is called to update the status of the order.
-            - Order Execution: Orders are executed based on the market data and broker conditions.
-        This synchronous processing ensures that the strategy can manage orders and positions in a
-        predictable and sequential manner.
+which is called whenever the status of an order changes.
+This ensures that the strategy can react to order completions, rejections, or cancellations in a controlled manner.
+Here is a brief overview of how orders are processed:
+- Order Submission: Orders are submitted within the next method.
+- Order Notification: The notify_order method is called to update the status of the order.
+- Order Execution: Orders are executed based on the market data and broker conditions.
+This synchronous processing ensures that the strategy can manage orders and positions in a
+predictable and sequential manner.
+This method will be called whenever an order status changes
+Order details can be analyzed
 
-        This method will be called whenever an order status changes
-        Order details can be analyzed
-
-        :param order:
-
-        """
+Args:
+    order:"""
         action = (
             f"{Fore.GREEN}BUY{Fore.RESET}"
             if order.isbuy()
@@ -252,19 +246,18 @@ class TestStrategy_SMA(bt.Strategy):
     # 105
     def notify_trade(self, trade):
         """The notify_trade method is called whenever there is a change in the status of a trade.
-        This method is used to handle and log trade results, such as when a trade is closed or its status changes.
-        The method has two primary functions:
-            - Logs Trade Results: It logs the results of a trade, including whether it was a profit or loss,
-              and the gross and net profit/loss.
-            - Updates Trade DataFrame: It updates a DataFrame with the trade details, such as date, price, status,
-              and profit/loss.
-        notify_trade is Called:
-            - Trade Closed: When a trade is closed, the method logs the result and updates the DataFrame.
-            - Trade Status Change: When the status of a trade changes, it logs the new status.
+This method is used to handle and log trade results, such as when a trade is closed or its status changes.
+The method has two primary functions:
+- Logs Trade Results: It logs the results of a trade, including whether it was a profit or loss,
+and the gross and net profit/loss.
+- Updates Trade DataFrame: It updates a DataFrame with the trade details, such as date, price, status,
+and profit/loss.
+notify_trade is Called:
+- Trade Closed: When a trade is closed, the method logs the result and updates the DataFrame.
+- Trade Status Change: When the status of a trade changes, it logs the new status.
 
-        :param trade:
-
-        """
+Args:
+    trade:"""
         if trade.isclosed:
             result = "profit" if trade.pnlcomm > 0 else "loss"
             self.log(
@@ -502,10 +495,9 @@ class TestStrategy_simple(bt.Strategy):
     def log(self, txt, dt=None):
         """Logging function fot this strategy
 
-        :param txt:
-        :param dt:  (Default value = None)
-
-        """
+Args:
+    txt: 
+    dt: (Default value = None)"""
         dt = dt or self.datas[0].datetime.date(0)
         print("%s, %s" % (dt.isoformat(), txt))
 
@@ -536,10 +528,9 @@ class TestStrategy_104(bt.Strategy):
     def log(self, txt, dt=None):
         """Logging function fot this strategy
 
-        :param txt:
-        :param dt:  (Default value = None)
-
-        """
+Args:
+    txt: 
+    dt: (Default value = None)"""
         dt = dt or self.datas[0].datetime.date(0)
         print("%s, %s" % (dt.isoformat(), txt))
 
@@ -552,11 +543,8 @@ class TestStrategy_104(bt.Strategy):
         self.order = None
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status in [order.Submitted, order.Accepted]:
             # Buy/Sell order submitted/accepted to/by broker - Nothing to do
             return
@@ -617,10 +605,9 @@ class TestStrategy_Commission(bt.Strategy):
     def log(self, txt, dt=None):
         """Logging function fot this strategy
 
-        :param txt:
-        :param dt:  (Default value = None)
-
-        """
+Args:
+    txt: 
+    dt: (Default value = None)"""
         dt = dt or self.datas[0].datetime.date(0)
         print("%s, %s" % (dt.isoformat(), txt))
 
@@ -635,11 +622,8 @@ class TestStrategy_Commission(bt.Strategy):
         self.buycomm = None
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status in [order.Submitted, order.Accepted]:
             # Buy/Sell order submitted/accepted to/by broker - Nothing to do
             return
@@ -677,11 +661,8 @@ class TestStrategy_Commission(bt.Strategy):
         self.order = None
 
     def notify_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
+        """Args:
+    trade:"""
         if not trade.isclosed:
             return
 

@@ -1,17 +1,12 @@
 #!/usr/bin/env python3
-"""
-Documentation Generator for Backtrader Repository
-
+"""Documentation Generator for Backtrader Repository
 This script recursively traverses the repository directory structure and generates
 README.md files for each directory, documenting the purpose and content of each file
 and subdirectory. It also creates links between parent and child directories for
 easy navigation.
-
 Usage:
-    python generate_documentation.py
-
-Author: OpenHands AI
-"""
+python generate_documentation.py
+Author: OpenHands AI"""
 
 import os
 import re

@@ -1,10 +1,7 @@
 # Copyright (c) 2025 backtrader contributors
-"""
-RSI Arbitrage Strategy for Backtrader
-
+"""RSI Arbitrage Strategy for Backtrader
 Implements a pair trading strategy using a manually calculated RSI on the price
-difference between two instruments.
-"""
+difference between two instruments."""
 import datetime
 
 import backtrader as bt

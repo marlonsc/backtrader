@@ -32,19 +32,13 @@ class flushfile(object):
     """ """
 
     def __init__(self, f):
-        """
-
-        :param f:
-
-        """
+        """Args:
+    f:"""
         self.f = f
 
     def write(self, x):
-        """
-
-        :param x:
-
-        """
+        """Args:
+    x:"""
         self.f.write(x)
         self.f.flush()
 
@@ -67,11 +61,8 @@ class StdOutDevNull(object):
         sys.stdout = self
 
     def write(self, x):
-        """
-
-        :param x:
-
-        """
+        """Args:
+    x:"""
 
     def flush(self):
         """ """

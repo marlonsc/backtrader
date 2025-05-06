@@ -47,11 +47,8 @@ class AlwaysHoldRBStrategy(bt.Strategy):
         # print('Fund Value: {:.2f}%'.format(self.froi))
 
     def notify_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
+        """Args:
+    trade:"""
         if trade.isclosed:
             print(
                 f"TRADE CLOSED {self.data.datetime.date(0)}, PROFIT: GROSS {
@@ -63,11 +60,8 @@ class AlwaysHoldRBStrategy(bt.Strategy):
             print(f"TRADE OPENED {self.data.datetime.date(0)}, SIZE {trade.size}")
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status in [order.Submitted, order.Accepted]:
             # 订单状态 submitted/accepted，处于未决订单状态。
             return

@@ -43,11 +43,8 @@ class St(bt.Strategy):
         self.order = None
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         curdtstr = self.data.datetime.datetime().strftime("%a %Y-%m-%d %H:%M:%S")
         if order.status in [order.Completed]:
             dtstr = bt.num2date(order.executed.dt).strftime("%a %Y-%m-%d %H:%M:%S")
@@ -89,11 +86,8 @@ def runstrat():
 
 
 def getdata(args):
-    """
-
-    :param args:
-
-    """
+    """Args:
+    args:"""
 
     dataformat = dict(
         bt=btfeeds.BacktraderCSVData,

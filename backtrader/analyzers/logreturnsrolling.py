@@ -35,12 +35,10 @@ __all__ = ["LogReturnsRolling"]
 
 class LogReturnsRolling(bt.TimeFrameAnalyzerBase):
     """This analyzer calculates rolling returns for a given timeframe and
-    compression
+compression
 
-
-    :returns: each return as keys
-
-    """
+Returns:
+    each return as keys"""
 
     params = (
         ("data", None),
@@ -68,14 +66,11 @@ class LogReturnsRolling(bt.TimeFrameAnalyzerBase):
                 self._lastvalue = self.strategy.broker.fundvalue
 
     def notify_fund(self, cash, value, fundvalue, shares):
-        """
-
-        :param cash:
-        :param value:
-        :param fundvalue:
-        :param shares:
-
-        """
+        """Args:
+    cash: 
+    value: 
+    fundvalue: 
+    shares:"""
         if not self._fundmode:
             self._value = value if self.p.data is None else self.p.data[0]
         else:

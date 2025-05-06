@@ -4,43 +4,34 @@ Directory containing quickstart related files. Primarily contains Python code an
 
 ## Navigation
 
-* [↑ Parent Directory (Tutorials)](../README.md)
+* [🏠 Root Directory](../../README.md)
+* [⬆️ Parent Directory (Tutorials)](../README.md)
 
 ## Files
 
 ### 101.py
 
-Python module
-
 ### 102.py
-
-Python module
 
 ### 103.py
 
-
-
 ### 104_orig.py
 
-Python module
+### README.md
+
+File with .md extension.
 
 ### __init__.py
 
-Python module
-
 ### strategy_tester.py
-
-Test file
 
 ### test_strategies.py
 
-Sandbox for different test strategies
-
-
 ## Directory Summary
 
-This directory contains 7 files and 0 subdirectories.
+This directory contains 8 files and 0 subdirectories.
 
 ### File Types
 
 * .py: 7 files
+* .md: 1 files

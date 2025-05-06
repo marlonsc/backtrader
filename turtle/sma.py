@@ -24,10 +24,9 @@ class SmaCross(bt.SignalStrategy):
     def log(self, txt, dt=None):
         """Logging function for this strategy
 
-        :param txt:
-        :param dt:  (Default value = None)
-
-        """
+Args:
+    txt: 
+    dt: (Default value = None)"""
         if debug:
             dt = dt or self.datas[0].datetime.date(0)
             print("%s, %s" % (dt.isoformat(), txt))
@@ -57,9 +56,8 @@ class SmaCross(bt.SignalStrategy):
     def notify_order(self, order):
         """监听订单状态变化
 
-        :param order:
-
-        """
+Args:
+    order:"""
         # self.log(f"🤖 订单状态变更：{bt.Order.Status[order.status]}")
         if order.status in [order.Submitted, order.Accepted]:
             return
@@ -72,9 +70,8 @@ class SmaCross(bt.SignalStrategy):
     def notify_trade(self, trade):
         """监听交易完成，输出盈亏
 
-        :param trade:
-
-        """
+Args:
+    trade:"""
         if trade.isclosed:
             self.log(
                 f"🎉 盈利: {trade.pnlcomm:.2f}"
@@ -103,11 +100,8 @@ class SmaCross(bt.SignalStrategy):
 
 
 def parse_args(pargs=None):
-    """
-
-    :param pargs:  (Default value = None)
-
-    """
+    """Args:
+    pargs: (Default value = None)"""
     import argparse
 
     parser = argparse.ArgumentParser(
@@ -128,13 +122,10 @@ def parse_args(pargs=None):
 
 
 def runstrat(data, plot=False, args={}):
-    """
-
-    :param data:
-    :param plot:  (Default value = False)
-    :param args:  (Default value = {})
-
-    """
+    """Args:
+    data: 
+    plot: (Default value = False)
+    args: (Default value = {})"""
     cerebro = bt.Cerebro()
     data0 = bt.feeds.PandasData(
         dataname=data,

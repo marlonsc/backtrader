@@ -4,7 +4,7 @@ Directory containing backtrader related files. Primarily contains Python code.
 
 ## Navigation
 
-* [↑ Parent Directory (backtrader)](../README.md)
+* [🏠 Root Directory](../README.md)
 
 ### Subdirectories
 
@@ -29,143 +29,87 @@ Directory containing backtrader related files. Primarily contains Python code.
 
 ## Files
 
-### __init__.py
+### README.md
 
-Python module
+File with .md extension.
+
+### __init__.py
 
 ### analyzer.py
 
-Analyzer module for Backtrader. Provides base classes and metaclasses for analyzers,
-
 ### broker.py
-
-
 
 ### cerebro.py
 
-
-
 ### comminfo.py
-
-Base Class for the Commission Schemes.
 
 ### dataseries.py
 
-
-
 ### errors.py
-
-Base exception for all other exceptions
 
 ### feed.py
 
-Metaclass for registering and initializing data feed subclasses.
-
 ### fillers.py
-
-:returns: volume in a bar.
 
 ### flt.py
 
-
-
 ### functions.py
-
-
 
 ### indicator.py
 
-
-
 ### linebuffer.py
-
-.. module:: linebuffer
 
 ### lineiterator.py
 
-
-
 ### lineroot.py
-
-.. module:: lineroot
 
 ### lineseries.py
 
-.. module:: lineroot
-
 ### listener.py
-
-
 
 ### mathsupport.py
 
-:param x: iterable with len
-
 ### metabase.py
 
-:param kls:
+### metasigstrategy.py
+
+### metastrategy.py
 
 ### observer.py
 
-
-
 ### order.py
-
-Intended to hold information about order execution. A "bit" does not
 
 ### position.py
 
-Keeps and updates the size and price of a position. The object has no
-
 ### resamplerfilter.py
-
-
 
 ### signal.py
 
-
+### signalstrategy.py
 
 ### sizer.py
 
-This is the base class for *Sizers*. Any *sizer* should subclass this
-
 ### store.py
-
-Metaclass to make a metaclassed class a singleton
 
 ### strategy.py
 
-
-
 ### talib.py
-
-
 
 ### timer.py
 
-
-
 ### trade.py
-
-Represents the status and update event for each update a Trade has
 
 ### tradingcal.py
 
-
-
 ### version.py
-
-Python module
 
 ### writer.py
 
-
-
-
 ## Directory Summary
 
-This directory contains 33 files and 18 subdirectories.
+This directory contains 37 files and 18 subdirectories.
 
 ### File Types
 
-* .py: 33 files
+* .py: 36 files
+* .md: 1 files

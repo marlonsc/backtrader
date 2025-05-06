@@ -33,21 +33,11 @@ __all__ = ["DrawDown", "TimeDrawDown"]
 
 class DrawDown(bt.Analyzer):
     """This analyzer calculates trading system drawdowns stats such as drawdown
-    values in %s and in dollars, max drawdown in %s and in dollars, drawdown
-    length and drawdown max length
+values in %s and in dollars, max drawdown in %s and in dollars, drawdown
+length and drawdown max length
 
-
-    :returns: drawdown stats as values, the following keys/attributes are available:
-
-        - ``drawdown`` - drawdown value in 0.xx %
-        - ``moneydown`` - drawdown value in monetary units
-        - ``len`` - drawdown length
-
-        - ``max.drawdown`` - max drawdown value in 0.xx %
-        - ``max.moneydown`` - max drawdown value in monetary units
-        - ``max.len`` - max drawdown length
-
-    """
+Returns:
+    drawdown stats as values, the following keys/attributes are available:"""
 
     params = (("fund", None),)
 
@@ -78,14 +68,11 @@ class DrawDown(bt.Analyzer):
         self.rets._close()  # . notation cannot create more keys
 
     def notify_fund(self, cash, value, fundvalue, shares):
-        """
-
-        :param cash:
-        :param value:
-        :param fundvalue:
-        :param shares:
-
-        """
+        """Args:
+    cash: 
+    value: 
+    fundvalue: 
+    shares:"""
         if not self._fundmode:
             self._value = value  # record current value
             self._maxvalue = max(self._maxvalue, value)  # update peak value
@@ -111,21 +98,10 @@ class DrawDown(bt.Analyzer):
 
 class TimeDrawDown(bt.TimeFrameAnalyzerBase):
     """This analyzer calculates trading system drawdowns on the chosen
-    timeframe which can be different from the one used in the underlying data
+timeframe which can be different from the one used in the underlying data
 
-
-    :returns: drawdown stats as values, the following keys/attributes are available:
-
-        - ``drawdown`` - drawdown value in 0.xx %
-        - ``maxdrawdown`` - drawdown value in monetary units
-        - ``maxdrawdownperiod`` - drawdown length
-
-      - Those are available during runs as attributes
-        - ``dd``
-        - ``maxdd``
-        - ``maxddlen``
-
-    """
+Returns:
+    drawdown stats as values, the following keys/attributes are available:"""
 
     params = (("fund", None),)
 

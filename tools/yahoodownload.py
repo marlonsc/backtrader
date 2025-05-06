@@ -49,15 +49,12 @@ class YahooDownload(object):
     retries = 3
 
     def __init__(self, ticker, fromdate, todate, period="d", reverse=False):
-        """
-
-        :param ticker:
-        :param fromdate:
-        :param todate:
-        :param period:  (Default value = "d")
-        :param reverse:  (Default value = False)
-
-        """
+        """Args:
+    ticker: 
+    fromdate: 
+    todate: 
+    period: (Default value = "d")
+    reverse: (Default value = False)"""
         try:
             import requests
         except ImportError:
@@ -154,11 +151,8 @@ class YahooDownload(object):
         self.datafile = f
 
     def writetofile(self, filename):
-        """
-
-        :param filename:
-
-        """
+        """Args:
+    filename:"""
         if not self.datafile:
             return
 

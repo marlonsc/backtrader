@@ -34,11 +34,8 @@ import backtrader as bt
 
 
 def runstrat(pargs=None):
-    """
-
-    :param pargs: (Default value = None)
-
-    """
+    """Args:
+    pargs: (Default value = None)"""
     args = parse_args(pargs)
 
     # Create a cerebro
@@ -107,11 +104,8 @@ def runstrat(pargs=None):
 
 
 def parse_args(pargs=None):
-    """
-
-    :param pargs: (Default value = None)
-
-    """
+    """Args:
+    pargs: (Default value = None)"""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="TimeReturns and SharpeRatio",

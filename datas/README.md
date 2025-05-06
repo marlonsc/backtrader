@@ -4,7 +4,7 @@ Contains data files. Primarily contains Documentation code and includes document
 
 ## Navigation
 
-* [↑ Parent Directory (backtrader)](../README.md)
+* [🏠 Root Directory](../README.md)
 
 ## Files
 
@@ -47,6 +47,10 @@ Documentation file
 ### 2006-week-002.txt
 
 Documentation file
+
+### README.md
+
+File with .md extension.
 
 ### bbroker_try_exec_limit.txt
 
@@ -104,12 +108,12 @@ Documentation file
 
 Documentation file
 
-
 ## Directory Summary
 
-This directory contains 24 files and 0 subdirectories.
+This directory contains 25 files and 0 subdirectories.
 
 ### File Types
 
 * .txt: 20 files
 * .csv: 4 files
+* .md: 1 files

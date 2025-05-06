@@ -7,14 +7,11 @@ from psycopg2.extras import RealDictCursor
 
 
 def main(symbol, fromdate, todate, output_dir=None):
-    """
-
-    :param symbol: 
-    :param fromdate: 
-    :param todate: 
-    :param output_dir: (Default value = None)
-
-    """
+    """Args:
+    symbol: 
+    fromdate: 
+    todate: 
+    output_dir: (Default value = None)"""
     # Database connection parameters
     db_params = {
         "dbname": "market_data",

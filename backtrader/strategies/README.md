@@ -4,27 +4,30 @@ Contains trading strategy implementations. Primarily contains Python code.
 
 ## Navigation
 
-* [↑ Parent Directory (backtrader)](../README.md)
+* [🏠 Root Directory](../../README.md)
+* [⬆️ Parent Directory (backtrader)](../README.md)
 
 ## Files
 
-### __init__.py
+### README.md
 
-Python module
+File with .md extension.
+
+### __init__.py
 
 ### nullstrategy.py
 
-Dummy strategy that does nothing. Really nothing.
+**Classes:**
+
+* `NullStrategy`: Dummy strategy that does nothing. Really nothing.
 
 ### sma_crossover.py
 
-This is a long-only strategy which operates on a moving average cross
-
-
 ## Directory Summary
 
-This directory contains 3 files and 0 subdirectories.
+This directory contains 4 files and 0 subdirectories.
 
 ### File Types
 
 * .py: 3 files
+* .md: 1 files

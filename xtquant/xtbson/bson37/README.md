@@ -4,29 +4,24 @@ Directory containing bson37 related files. Primarily contains Python code.
 
 ## Navigation
 
-* [↑ Parent Directory (xtbson)](../README.md)
+* [🏠 Root Directory](../../../README.md)
+* [⬆️ Parent Directory (xtbson)](../README.md)
 
 ## Files
 
-### __init__.py
+### README.md
 
-BSON (Binary JSON) encoding and decoding.
+File with .md extension.
+
+### __init__.py
 
 ### _helpers.py
 
-Setstate and getstate functions for objects with __slots__, allowing
-
 ### binary.py
-
-Tools for representing BSON binary data.
 
 ### code.py
 
-Tools for representing JavaScript code in BSON.
-
 ### codec_options.py
-
-Tools for specifying BSON codec options.
 
 ### codec_options.pyi
 
@@ -34,39 +29,31 @@ Binary or data file
 
 ### datetime_ms.py
 
-Tools for representing the BSON datetime type.
-
 ### dbref.py
 
-Tools for manipulating DBRefs (references to MongoDB documents).
-
 ### decimal128.py
-
-Tools for working with the BSON decimal128 type.
 
 ### errors.py
 
 Exceptions raised by the BSON package.
 
-### int64.py
+**Classes:**
 
-A BSON wrapper for long (int in python3)
+* `BSONError`: Base class for all BSON exceptions.
+* `InvalidBSON`
+* `InvalidStringData`
+* `InvalidDocument`
+* `InvalidId`
+
+### int64.py
 
 ### json_util.py
 
-Tools for using Python's :mod:`json` module with BSON documents.
-
 ### max_key.py
-
-Representation for the MongoDB internal MaxKey type.
 
 ### min_key.py
 
-Representation for the MongoDB internal MinKey type.
-
 ### objectid.py
-
-Tools for working with MongoDB ObjectIds.
 
 ### py.typed
 
@@ -74,31 +61,21 @@ Binary or data file
 
 ### raw_bson.py
 
-Tools for representing raw BSON documents.
-
 ### regex.py
-
-Tools for representing MongoDB regular expressions.
 
 ### son.py
 
-Tools for creating and manipulating SON, the Serialized Ocument Notation.
-
 ### timestamp.py
-
-Tools for representing MongoDB internal Timestamps.
 
 ### tz_util.py
 
-Timezone related utilities for BSON.
-
-
 ## Directory Summary
 
-This directory contains 21 files and 0 subdirectories.
+This directory contains 22 files and 0 subdirectories.
 
 ### File Types
 
 * .py: 19 files
+* .md: 1 files
 * .pyi: 1 files
 * .typed: 1 files

@@ -7,13 +7,12 @@ are broken into up to 90 characters.
 
 
 def init_common_vars(strategy, extra_vars=None):
-    """
-    Initializes common variables for arbitrage strategies. Additionally,
-    allows initializing extra variables passed in a dictionary.
+    """Initializes common variables for arbitrage strategies. Additionally,
+allows initializing extra variables passed in a dictionary.
 
-    :param strategy: Strategy instance (self)
-    :param extra_vars: Dictionary of extra variables to initialize
-    """
+Args:
+    strategy: Strategy instance (self)
+    extra_vars: Dictionary of extra variables to initialize"""
     strategy.returns_j = []
     strategy.returns_jm = []
     strategy.order = None
@@ -26,12 +25,11 @@ def init_common_vars(strategy, extra_vars=None):
 
 
 def notify_order_default(strategy, order):
-    """
-    Default order notification for arbitrage strategies.
+    """Default order notification for arbitrage strategies.
 
-    :param strategy: Strategy instance (self)
-    :param order: Received order
-    """
+Args:
+    strategy: Strategy instance (self)
+    order: Received order"""
     if order.status in [order.Completed]:
         if getattr(strategy.p, "printlog", False):
             if order.isbuy():
@@ -52,11 +50,10 @@ def notify_order_default(strategy, order):
 
 
 def notify_trade_default(strategy, trade):
-    """
-    Default trade notification for arbitrage strategies.
+    """Default trade notification for arbitrage strategies.
 
-    :param strategy: Strategy instance (self)
-    :param trade: Received trade
-    """
+Args:
+    strategy: Strategy instance (self)
+    trade: Received trade"""
     if getattr(strategy.p, "printlog", False) and trade.isclosed:
         print(f"Trade PnL: {trade.pnlcomm:.2f}")

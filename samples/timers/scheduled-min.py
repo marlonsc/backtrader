@@ -96,14 +96,9 @@ class St(bt.Strategy):
         print(txt)
 
     def notify_timer(self, timer, when, *args, **kwargs):
-        """
-
-        :param timer:
-        :param when:
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Args:
+    timer: 
+    when:"""
         print(
             "strategy notify_timer with tid {}, when {} cheat {}".format(
                 timer.p.tid, when, timer.p.cheat
@@ -115,11 +110,8 @@ class St(bt.Strategy):
             self.order = self.buy()
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status == order.Completed:
             print(
                 "-- {} Buy Exec @ {}".format(
@@ -129,11 +121,8 @@ class St(bt.Strategy):
 
 
 def runstrat(args=None):
-    """
-
-    :param args:  (Default value = None)
-
-    """
+    """Args:
+    args: (Default value = None)"""
     args = parse_args(args)
     cerebro = bt.Cerebro()
 
@@ -173,11 +162,8 @@ def runstrat(args=None):
 
 
 def parse_args(pargs=None):
-    """
-
-    :param pargs:  (Default value = None)
-
-    """
+    """Args:
+    pargs: (Default value = None)"""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Timer Test Intraday",

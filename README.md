@@ -4,7 +4,8 @@ Directory containing backtrader related files. Primarily contains Python code, i
 
 ## Navigation
 
-* This is the root directory of the repository
+* [🏠 Root Directory](./README.md)
+* [⬆️ Parent Directory (workspace)](../README.md)
 
 ### Subdirectories
 
@@ -21,6 +22,7 @@ Directory containing backtrader related files. Primarily contains Python code, i
 * [reference](reference/README.md) - Directory containing reference related files
 * [samples](samples/README.md) - Contains sample code and examples
 * [sandbox](sandbox/README.md) - Contains experimental or sandbox code
+* [scripts](scripts/README.md) - This directory contains files related to scripts
 * [src](src/README.md) - Contains source code
 * [strategies](strategies/README.md) - Contains trading strategy implementations
 * [tests](tests/README.md) - Contains test files and test utilities
@@ -50,17 +52,17 @@ Documentation file
 
 Documentation file
 
+### README.md
+
+File with .md extension.
+
 ### README.rst
 
 Binary or data file
 
 ### __init__.py
 
-Python module
-
 ### agent.py
-
-Pull historical data for a given ticker and date range and save as a CSV file.
 
 ### changelog.txt
 
@@ -75,8 +77,6 @@ Binary or data file
 Binary or data file
 
 ### live_backtrader.py
-
-
 
 ### my_backtrader.code-workspace
 
@@ -128,15 +128,11 @@ Binary or data file
 
 ### strategies.py
 
-
-
 ### test_feed.ipynb
 
 Binary or data file
 
 ### the_backtradersold_setup.py
-
-Setup/installation file
 
 ### tox.ini
 
@@ -144,16 +140,13 @@ Configuration file
 
 ### try.py
 
-为每个股票优化独立参数 [Contains Chinese characters that should be translated]
-
 ### zscore_heatmap.png
 
 Binary or data file
 
-
 ## Directory Summary
 
-This directory contains 31 files and 19 subdirectories.
+This directory contains 31 files and 20 subdirectories.
 
 ### File Types
 

@@ -11,10 +11,8 @@ def calculate_rolling_spread(
     window: int = 30,
     fields=("open", "high", "low", "close"),
 ) -> pd.DataFrame:
-    """
-    Calculate rolling β, and generate spread for specified price fields:
-        spread_x = price0_x - β_{t-1} * price1_x
-    """
+    """Calculate rolling β, and generate spread for specified price fields:
+spread_x = price0_x - β_{t-1} * price1_x"""
     # 1) Align and merge using closing prices (β still estimated using close)
     df = (
         df0.set_index("date")[["close"]]

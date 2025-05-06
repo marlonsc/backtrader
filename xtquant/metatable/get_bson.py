@@ -15,9 +15,8 @@ from .meta_config import (
 def parse_request_from_fields(fields):
     """根据字段解析metaid和field
 
-    :param fields:
-
-    """
+Args:
+    fields:"""
     table_field = OrderedDict()  # {metaid: {key}}
     key2field = OrderedDict()  # {metaid: {key: field}}
     columns = []  # table.field
@@ -70,25 +69,14 @@ def _get_tabular_data_single_ori(
     count: int = -1,
     **kwargs,
 ):
-    """
-
-    :param codes:
-    :type codes: list
-    :param metaid:
-    :type metaid: int
-    :param keys:
-    :type keys: list
-    :param int_period:
-    :type int_period: int
-    :param start_time:
-    :type start_time: str
-    :param end_time:
-    :type end_time: str
-    :param count:  (Default value = -1)
-    :type count: int
-    :param **kwargs:
-
-    """
+    """Args:
+    codes: 
+    metaid: 
+    keys: 
+    int_period: 
+    start_time: 
+    end_time: 
+    count: (Default value = -1)"""
     import os
 
     from .. import xtbson, xtdata
@@ -200,23 +188,13 @@ def get_tabular_data(
     count: int = -1,
     **kwargs,
 ):
-    """
-
-    :param codes:
-    :type codes: list
-    :param fields:
-    :type fields: list
-    :param period:
-    :type period: str
-    :param start_time:
-    :type start_time: str
-    :param end_time:
-    :type end_time: str
-    :param count:  (Default value = -1)
-    :type count: int
-    :param **kwargs:
-
-    """
+    """Args:
+    codes: 
+    fields: 
+    period: 
+    start_time: 
+    end_time: 
+    count: (Default value = -1)"""
     import pandas as pd
 
     time_format = None
@@ -274,10 +252,8 @@ def get_tabular_data(
 def get_tabular_bson_head(fields: list):
     """根据字段解析表头
 
-    :param fields:
-    :type fields: list
-
-    """
+Args:
+    fields:"""
     ret = {"modelName": "", "tableNameCn": "", "fields": []}
 
     if not __META_FIELDS__:
@@ -337,23 +313,13 @@ def get_tabular_bson(
     count: int = -1,
     **kwargs,
 ):
-    """
-
-    :param codes:
-    :type codes: list
-    :param fields:
-    :type fields: list
-    :param period:
-    :type period: str
-    :param start_time:
-    :type start_time: str
-    :param end_time:
-    :type end_time: str
-    :param count:  (Default value = -1)
-    :type count: int
-    :param **kwargs:
-
-    """
+    """Args:
+    codes: 
+    fields: 
+    period: 
+    start_time: 
+    end_time: 
+    count: (Default value = -1)"""
     from .. import xtbson
 
     time_format = None

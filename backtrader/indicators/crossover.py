@@ -30,14 +30,10 @@ from . import And, Indicator
 
 class NonZeroDifference(Indicator):
     """Keeps track of the difference between two data inputs skipping, memorizing
-    the last non zero value if the current difference is zero
-
-    Formula:
-      - diff = data - data1
-      - nzd = diff if diff else diff(-1)
-
-
-    """
+the last non zero value if the current difference is zero
+Formula:
+- diff = data - data1
+- nzd = diff if diff else diff(-1)"""
 
     _mindatas = 2  # requires two (2) data sources
     alias = ("NZD",)
@@ -53,21 +49,15 @@ class NonZeroDifference(Indicator):
         self.l.nzd[0] = d if d else self.l.nzd[-1]
 
     def oncestart(self, start, end):
-        """
-
-        :param start:
-        :param end:
-
-        """
+        """Args:
+    start: 
+    end:"""
         self.line.array[start] = self.data0.array[start] - self.data1.array[start]
 
     def once(self, start, end):
-        """
-
-        :param start:
-        :param end:
-
-        """
+        """Args:
+    start: 
+    end:"""
         d0array = self.data0.array
         d1array = self.data1.array
         larray = self.line.array
@@ -103,55 +93,39 @@ class _CrossBase(Indicator):
 
 class CrossUp(_CrossBase):
     """This indicator gives a signal if the 1st provided data crosses over the 2nd
-    indicator upwards
-
-    It does need to look into the current time index (0) and the previous time
-    index (-1) of both the 1st and 2nd data
-
-    Formula:
-      - diff = data - data1
-      - upcross =  last_non_zero_diff < 0 and data0(0) > data1(0)
-
-
-    """
+indicator upwards
+It does need to look into the current time index (0) and the previous time
+index (-1) of both the 1st and 2nd data
+Formula:
+- diff = data - data1
+- upcross =  last_non_zero_diff < 0 and data0(0) > data1(0)"""
 
     _crossup = True
 
 
 class CrossDown(_CrossBase):
     """This indicator gives a signal if the 1st provided data crosses over the 2nd
-    indicator upwards
-
-    It does need to look into the current time index (0) and the previous time
-    index (-1) of both the 1st and 2nd data
-
-    Formula:
-      - diff = data - data1
-      - downcross = last_non_zero_diff > 0 and data0(0) < data1(0)
-
-
-    """
+indicator upwards
+It does need to look into the current time index (0) and the previous time
+index (-1) of both the 1st and 2nd data
+Formula:
+- diff = data - data1
+- downcross = last_non_zero_diff > 0 and data0(0) < data1(0)"""
 
     _crossup = False
 
 
 class CrossOver(Indicator):
     """This indicator gives a signal if the provided datas (2) cross up or down.
-
-      - 1.0 if the 1st data crosses the 2nd data upwards
-      - -1.0 if the 1st data crosses the 2nd data downwards
-
-    It does need to look into the current time index (0) and the previous time
-    index (-1) of both the 1t and 2nd data
-
-    Formula:
-      - diff = data - data1
-      - upcross =  last_non_zero_diff < 0 and data0(0) > data1(0)
-      - downcross = last_non_zero_diff > 0 and data0(0) < data1(0)
-      - crossover = upcross - downcross
-
-
-    """
+- 1.0 if the 1st data crosses the 2nd data upwards
+- -1.0 if the 1st data crosses the 2nd data downwards
+It does need to look into the current time index (0) and the previous time
+index (-1) of both the 1t and 2nd data
+Formula:
+- diff = data - data1
+- upcross =  last_non_zero_diff < 0 and data0(0) > data1(0)
+- downcross = last_non_zero_diff > 0 and data0(0) < data1(0)
+- crossover = upcross - downcross"""
 
     _mindatas = 2
 

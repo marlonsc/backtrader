@@ -84,11 +84,8 @@ def check_futures():
 
 
 def test_run(main=False):
-    """
-
-    :param main: (Default value = False)
-
-    """
+    """Args:
+    main: (Default value = False)"""
     check_stocks()
     check_futures()
 

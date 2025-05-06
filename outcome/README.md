@@ -4,7 +4,7 @@ Directory containing outcome related files. Primarily contains .csv files code a
 
 ## Navigation
 
-* [↑ Parent Directory (backtrader)](../README.md)
+* [🏠 Root Directory](../README.md)
 
 ## Files
 
@@ -32,6 +32,10 @@ Binary or data file
 
 Binary or data file
 
+### README.md
+
+File with .md extension.
+
 ### combined_daily_returns_20250425_141840.csv
 
 Binary or data file
@@ -40,12 +44,12 @@ Binary or data file
 
 Binary or data file
 
-
 ## Directory Summary
 
-This directory contains 8 files and 0 subdirectories.
+This directory contains 9 files and 0 subdirectories.
 
 ### File Types
 
 * .csv: 7 files
+* .md: 1 files
 * .ipynb: 1 files

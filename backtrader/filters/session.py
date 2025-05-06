@@ -35,12 +35,8 @@ from .. import metabase
 
 class SessionFiller(with_metaclass(metabase.MetaParams, object)):
     """Bar Filler for a Data Source inside the declared session start/end times.
-
-    The fill bars are constructed using the declared Data Source ``timeframe``
-    and ``compression`` (used to calculate the intervening missing times)
-
-
-    """
+The fill bars are constructed using the declared Data Source ``timeframe``
+and ``compression`` (used to calculate the intervening missing times)"""
 
     params = (
         ("fill_price", None),
@@ -59,11 +55,8 @@ class SessionFiller(with_metaclass(metabase.MetaParams, object)):
     }
 
     def __init__(self, data):
-        """
-
-        :param data:
-
-        """
+        """Args:
+    data:"""
         # Calculate and save timedelta for timeframe
         self._tdframe = self._tdeltas[data._timeframe]
         self._tdunit = self._tdeltas[data._timeframe] * data._compression
@@ -72,27 +65,11 @@ class SessionFiller(with_metaclass(metabase.MetaParams, object)):
         self.sessend = self.MAXDATE  # maxdate is the control for session bar
 
     def __call__(self, data):
-        """
+        """Args:
+    data: the data source to filter
 
-        :param data: the data source to filter
-        :returns: - False (always) because this filter does not remove bars from the
-        stream
-
-        The logic (starting with a session end control flag of MAXDATE)
-
-          - If new bar is over session end (never true for 1st bar)
-
-            Fill up to session end. Reset sessionend to MAXDATE & fall through
-
-          - If session end is flagged as MAXDATE
-
-            Recalculate session limits and check whether the bar is within them
-
-            if so, fill up and record the last seen tim
-
-          - Else ... the incoming bar is in the session, fill up to it
-
-        """
+Returns:
+    - False (always) because this filter does not remove bars from the"""
         # Get time of current (from data source) bar
         ret = False
 
@@ -135,15 +112,13 @@ class SessionFiller(with_metaclass(metabase.MetaParams, object)):
 
     def _fillbars(self, data, time_start, time_end, tostack=True):
         """Fills one by one bars as needed from time_start to time_end
+Invalidates the control dtime_prev if requested
 
-        Invalidates the control dtime_prev if requested
-
-        :param data:
-        :param time_start:
-        :param time_end:
-        :param tostack:  (Default value = True)
-
-        """
+Args:
+    data: 
+    time_start: 
+    time_end: 
+    tostack: (Default value = True)"""
         # Control flag - bars added to the stack
         dirty = 0
 
@@ -158,12 +133,9 @@ class SessionFiller(with_metaclass(metabase.MetaParams, object)):
         return bool(dirty) or not tostack
 
     def _fillbar(self, data, dtime):
-        """
-
-        :param data:
-        :param dtime:
-
-        """
+        """Args:
+    data: 
+    dtime:"""
         # Prepare an array of the needed size
         bar = [float("Nan")] * data.size()
 
@@ -191,68 +163,46 @@ class SessionFiller(with_metaclass(metabase.MetaParams, object)):
 
 class SessionFilterSimple(with_metaclass(metabase.MetaParams, object)):
     """This class can be applied to a data source as a filter and will filter out
-    intraday bars which fall outside of the regular session times (ie: pre/post
-    market data)
-
-    This is a "simple" filter and must NOT manage the stack of the data (passed
-    during init and __call__)
-
-    It needs no "last" method because it has nothing to deliver
-
-    Bar Management will be done by the SimpleFilterWrapper class made which is
-    added durint the DataBase.addfilter_simple call
-
-
-    """
+intraday bars which fall outside of the regular session times (ie: pre/post
+market data)
+This is a "simple" filter and must NOT manage the stack of the data (passed
+during init and __call__)
+It needs no "last" method because it has nothing to deliver
+Bar Management will be done by the SimpleFilterWrapper class made which is
+added durint the DataBase.addfilter_simple call"""
 
     def __init__(self, data):
-        """
-
-        :param data:
-
-        """
+        """Args:
+    data:"""
 
     def __call__(self, data):
-        """
+        """Args:
+    data: 
 
-        :param data:
-        :returns: - False: nothing to filter
-          - True: filter current bar (because it's not in the session times)
-
-        """
+Returns:
+    - False: nothing to filter"""
         # Both ends of the comparison are in the session
         return not (data.p.sessionstart <= data.datetime.time(0) <= data.p.sessionend)
 
 
 class SessionFilter(with_metaclass(metabase.MetaParams, object)):
     """This class can be applied to a data source as a filter and will filter out
-    intraday bars which fall outside of the regular session times (ie: pre/post
-    market data)
-
-    This is a "non-simple" filter and must manage the stack of the data (passed
-    during init and __call__)
-
-    It needs no "last" method because it has nothing to deliver
-
-
-    """
+intraday bars which fall outside of the regular session times (ie: pre/post
+market data)
+This is a "non-simple" filter and must manage the stack of the data (passed
+during init and __call__)
+It needs no "last" method because it has nothing to deliver"""
 
     def __init__(self, data):
-        """
-
-        :param data:
-
-        """
+        """Args:
+    data:"""
 
     def __call__(self, data):
-        """
+        """Args:
+    data: 
 
-        :param data:
-        :returns: - False: data stream was not touched
-          - True: data stream was manipulated (bar outside of session times and
-          - removed)
-
-        """
+Returns:
+    - False: data stream was not touched"""
         if data.p.sessionstart <= data.datetime.time(0) <= data.p.sessionend:
             # Both ends of the comparison are in the session
             return False  # say the stream is untouched

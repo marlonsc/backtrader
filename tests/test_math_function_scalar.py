@@ -44,13 +44,10 @@ class SlipTestStrategy(bt.SignalStrategy):
     )
 
     def log(self, txt, dt=None, nodate=False):
-        """
-
-        :param txt: 
-        :param dt: (Default value = None)
-        :param nodate: (Default value = False)
-
-        """
+        """Args:
+    txt: 
+    dt: (Default value = None)
+    nodate: (Default value = False)"""
         if not nodate:
             dt = dt or self.data.datetime[0]
             dt = bt.num2date(dt)
@@ -122,9 +119,8 @@ class SlipTestStrategy(bt.SignalStrategy):
 def test_run(main=False):
     """Test addition of scalar math functions to Backtrader. See backtrader2 pr#22
 
-    :param main: (Default value = False)
-
-    """
+Args:
+    main: (Default value = False)"""
 
     cerebro = bt.Cerebro()
 

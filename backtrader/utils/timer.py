@@ -26,26 +26,25 @@ def create_timer(
     *args,
     **kwargs,
 ):
-    """
-    Creates and adds a timer to the list of pending timers.
+    """Creates and adds a timer to the list of pending timers.
 
-    :param pretimers: List of pending timers
-    :param owner: Timer owner object
-    :param when: Trigger condition
-    :param offset: Timer offset
-    :param repeat: Repetition
-    :param weekdays: Days of the week
-    :param weekcarry: Week carry
-    :param monthdays: Days of the month
-    :param monthcarry: Month carry
-    :param allow: Permission
-    :param tzdata: Timezone
-    :param strats: Strategies
-    :param cheat: Cheat flag
-    :param *args: Additional args
-    :param **kwargs: Additional kwargs
-    :return: Timer instance
-    """
+Args:
+    pretimers: List of pending timers
+    owner: Timer owner object
+    when: Trigger condition
+    offset: Timer offset
+    repeat: Repetition
+    weekdays: Days of the week
+    weekcarry: Week carry
+    monthdays: Days of the month
+    monthcarry: Month carry
+    allow: Permission
+    tzdata: Timezone
+    strats: Strategies
+    cheat: Cheat flag
+
+Returns:
+    Timer instance"""
     if weekdays is None:
         weekdays = []
     if monthdays is None:
@@ -87,24 +86,24 @@ def schedule_timer(
     *args,
     **kwargs,
 ):
-    """
-    Schedules a timer for the cerebro object.
-    :param cerebro: Cerebro instance
-    :param when: Trigger condition
-    :param offset: Timer offset
-    :param repeat: Repetition
-    :param weekdays: Days of the week
-    :param weekcarry: Week carry
-    :param monthdays: Days of the month
-    :param monthcarry: Month carry
-    :param allow: Permission
-    :param tzdata: Timezone
-    :param strats: Strategies
-    :param cheat: Cheat flag
-    :param *args: Additional args
-    :param **kwargs: Additional kwargs
-    :return: Timer instance
-    """
+    """Schedules a timer for the cerebro object.
+
+Args:
+    cerebro: Cerebro instance
+    when: Trigger condition
+    offset: Timer offset
+    repeat: Repetition
+    weekdays: Days of the week
+    weekcarry: Week carry
+    monthdays: Days of the month
+    monthcarry: Month carry
+    allow: Permission
+    tzdata: Timezone
+    strats: Strategies
+    cheat: Cheat flag
+
+Returns:
+    Timer instance"""
     return create_timer(
         cerebro._pretimers,
         owner=cerebro,
@@ -125,10 +124,8 @@ def schedule_timer(
 
 
 def notify_timer(timer, when, *args, **kwargs):
-    """
-    Timer notification (stub for future interface).
-    :param timer: Timer instance
-    :param when: Timer moment
-    :param *args: Additional args
-    :param **kwargs: Additional kwargs
-    """
+    """Timer notification (stub for future interface).
+
+Args:
+    timer: Timer instance
+    when: Timer moment"""

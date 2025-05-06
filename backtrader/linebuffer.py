@@ -18,16 +18,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-"""
-
-.. module:: linebuffer
-
+""".. module:: linebuffer
 Classes that hold the buffer for a *line* and can operate on it
 with appends, forwarding, rewinding, resetting and other
-
-.. moduleauthor:: Daniel Rodriguez
-
-"""
+.. moduleauthor:: Daniel Rodriguez"""
 
 from __future__ import (
     absolute_import,
@@ -56,28 +50,20 @@ NAN = float("NaN")
 
 class LineBuffer(LineSingle):
     """LineBuffer defines an interface to an array for time series data, supporting
-    pointer-based access, bindings, and buffer management. All docstrings and
-    comments must be line-wrapped at 90 characters or less.
-
-    Positive indices fetch values from the past (left hand side)
-    Negative indices fetch values from the future (if the array has been
-    extended on the right hand side)
-
-    With this behavior no index has to be passed around to entities which have
-    to work with the current value produced by other entities: the value is
-    always reachable at "0".
-
-    Likewise storing the current value produced by "self" is done at 0.
-
-    Additional operations to move the pointer (home, forward, extend, rewind,
-    advance getzero) are provided
-
-    The class can also hold "bindings" to other LineBuffers. When a value
-    is set in this class
-    it will also be set in the binding.
-
-
-    """
+pointer-based access, bindings, and buffer management. All docstrings and
+comments must be line-wrapped at 90 characters or less.
+Positive indices fetch values from the past (left hand side)
+Negative indices fetch values from the future (if the array has been
+extended on the right hand side)
+With this behavior no index has to be passed around to entities which have
+to work with the current value produced by other entities: the value is
+always reachable at "0".
+Likewise storing the current value produced by "self" is done at 0.
+Additional operations to move the pointer (home, forward, extend, rewind,
+advance getzero) are provided
+The class can also hold "bindings" to other LineBuffers. When a value
+is set in this class
+it will also be set in the binding."""
 
     UnBounded, QBuffer = (0, 1)
 
@@ -95,12 +81,9 @@ class LineBuffer(LineSingle):
         return self._idx
 
     def set_idx(self, idx, force=False):
-        """
-
-        :param idx:
-        :param force:  (Default value = False)
-
-        """
+        """Args:
+    idx: 
+    force: (Default value = False)"""
         # if QBuffer and the last position of the buffer was reached, keep
         # it (unless force) as index 0. This allows resampling
         #  - forward adds a position, but the 1st one is discarded, the 0 is
@@ -136,12 +119,9 @@ class LineBuffer(LineSingle):
         self.extension = 0
 
     def qbuffer(self, savemem=0, extrasize=0):
-        """
-
-        :param savemem:  (Default value = 0)
-        :param extrasize:  (Default value = 0)
-
-        """
+        """Args:
+    savemem: (Default value = 0)
+    extrasize: (Default value = 0)"""
         self.mode = self.QBuffer
         self.maxlen = self._minperiod
         self.extrasize = extrasize
@@ -154,18 +134,15 @@ class LineBuffer(LineSingle):
 
     def minbuffer(self, size):
         """The linebuffer must guarantee the minimum requested size to be
-        available.
+available.
+In non-dqbuffer mode, this is always true (of course until data is
+filled at the beginning, there are less values, but minperiod in the
+framework should account for this.
+In dqbuffer mode the buffer has to be adjusted for this if currently
+less than requested
 
-        In non-dqbuffer mode, this is always true (of course until data is
-        filled at the beginning, there are less values, but minperiod in the
-        framework should account for this.
-
-        In dqbuffer mode the buffer has to be adjusted for this if currently
-        less than requested
-
-        :param size:
-
-        """
+Args:
+    size:"""
         if self.mode != self.QBuffer or self.maxlen >= size:
             return
 
@@ -179,22 +156,15 @@ class LineBuffer(LineSingle):
 
     def buflen(self):
         """Real data that can be currently held in the internal buffer
-
-        The internal buffer can be longer than the actual stored data to
-        allow for "lookahead" operations. The real amount of data that is
-        held/can be held in the buffer
-        is returned
-
-
-        """
+The internal buffer can be longer than the actual stored data to
+allow for "lookahead" operations. The real amount of data that is
+held/can be held in the buffer
+is returned"""
         return len(self.array) - self.extension
 
     def __getitem__(self, ago):
-        """
-
-        :param ago:
-
-        """
+        """Args:
+    ago:"""
         return self.array[self.idx + ago]
 
     def get(self, ago=0, size=1):
@@ -285,12 +255,8 @@ class LineBuffer(LineSingle):
 
     def home(self):
         """Rewinds the logical index to the beginning
-
-        The underlying buffer remains untouched and the actual len can be found
-        out with buflen
-
-
-        """
+The underlying buffer remains untouched and the actual len can be found
+out with buflen"""
         self.idx = -1
         self.lencount = 0
 
@@ -329,11 +295,8 @@ class LineBuffer(LineSingle):
             self.array.pop()
 
     def rewind(self, size=1):
-        """
-
-        :param size:  (Default value = 1)
-
-        """
+        """Args:
+    size: (Default value = 1)"""
         assert self.idx >= 0
 
         self.idx -= size
@@ -403,12 +366,9 @@ class LineBuffer(LineSingle):
         return self.getzero(idx, size or len(self))
 
     def plotrange(self, start, end):
-        """
-
-        :param start:
-        :param end:
-
-        """
+        """Args:
+    start: 
+    end:"""
         if self.useislice:
             return list(islice(self.array, start, end))
 
@@ -424,9 +384,8 @@ class LineBuffer(LineSingle):
     def bind2lines(self, binding=0):
         """Stores a binding to another line. "binding" can be an index or a name
 
-        :param binding:  (Default value = 0)
-
-        """
+Args:
+    binding: (Default value = 0)"""
         owner = getattr(self, "_owner", None)
         if owner is None:
             raise AttributeError("LineBuffer has no _owner member")
@@ -441,17 +400,15 @@ class LineBuffer(LineSingle):
 
     def __call__(self, ago=None):
         """Returns either a delayed verison of itself in the form of a
-        LineDelay object or a timeframe adapting version with regards to a ago
+LineDelay object or a timeframe adapting version with regards to a ago
+Param: ago (default: None)
+If ago is None or an instance of LineRoot (a lines object) the
 
-        Param: ago (default: None)
+Args:
+    ago: (Default value = None)
 
-          If ago is None or an instance of LineRoot (a lines object) the
-
-        :param ago:  (Default value = None)
-        :returns: If ago is anything else, it is assumed to be an int and a LineDelay
-          object will be returned
-
-        """
+Returns:
+    If ago is anything else, it is assumed to be an int and a LineDelay"""
         from .lineiterator import LineCoupler
 
         if ago is None or isinstance(ago, LineRoot):
@@ -460,102 +417,72 @@ class LineBuffer(LineSingle):
         return LineDelay(self, ago)
 
     def _makeoperation(self, other, operation, r=False):
-        """
-
-        :param other:
-        :param operation:
-        :param r:  (Default value = False)
-
-        """
+        """Args:
+    other: 
+    operation: 
+    r: (Default value = False)"""
         return LinesOperation(self, other, operation, r=r)
 
     def _makeoperationown(self, operation):
-        """
-
-        :param operation:
-
-        """
+        """Args:
+    operation:"""
         return LineOwnOperation(self, operation)
 
     def _settz(self, tz):
-        """
-
-        :param tz:
-
-        """
+        """Args:
+    tz:"""
         self._tz = tz
 
     def datetime(self, ago=0, tz=None, naive=True):
-        """
-
-        :param ago:  (Default value = 0)
-        :param tz:  (Default value = None)
-        :param naive:  (Default value = True)
-
-        """
+        """Args:
+    ago: (Default value = 0)
+    tz: (Default value = None)
+    naive: (Default value = True)"""
         return num2date(self.array[self.idx + ago], tz=tz or self._tz, naive=naive)
 
     def date(self, ago=0, tz=None, naive=True):
-        """
-
-        :param ago:  (Default value = 0)
-        :param tz:  (Default value = None)
-        :param naive:  (Default value = True)
-
-        """
+        """Args:
+    ago: (Default value = 0)
+    tz: (Default value = None)
+    naive: (Default value = True)"""
         return num2date(
             self.array[self.idx + ago], tz=tz or self._tz, naive=naive
         ).date()
 
     def time(self, ago=0, tz=None, naive=True):
-        """
-
-        :param ago:  (Default value = 0)
-        :param tz:  (Default value = None)
-        :param naive:  (Default value = True)
-
-        """
+        """Args:
+    ago: (Default value = 0)
+    tz: (Default value = None)
+    naive: (Default value = True)"""
         return num2date(
             self.array[self.idx + ago], tz=tz or self._tz, naive=naive
         ).time()
 
     def dt(self, ago=0):
-        """
-
-        :param ago:  (Default value = 0)
-
-        """
+        """Args:
+    ago: (Default value = 0)"""
         return math.trunc(self.array[self.idx + ago])
 
     def tm_raw(self, ago=0):
-        """
-
-        :param ago:  (Default value = 0)
-
-        """
+        """Args:
+    ago: (Default value = 0)"""
         # This function is named raw because it retrieves the fractional part
         # without transforming it to time to avoid the influence of the day
         # count (integer part of coding)
         return math.modf(self.array[self.idx + ago])[0]
 
     def tm(self, ago=0):
-        """
-
-        :param ago:  (Default value = 0)
-
-        """
+        """Args:
+    ago: (Default value = 0)"""
         # To avoid precision errors, this returns the fractional part after
         # having converted it to a datetime.time object to avoid precision
         # errors in comparisons
         return time2num(num2date(self.array[self.idx + ago]).time())
 
     def tm_lt(self, other, ago=0):
-        """
-
-        :param other:
-        :param ago:  (Default value = 0)
-
-        """
+        """Args:
+    other: 
+    ago: (Default value = 0)"""
         # To compare a raw "tm" part (fractional part of coded datetime)
         # with the tm of the current datetime, the raw "tm" has to be
         # brought in sync with the current "day" count (integer part) to avoid
@@ -565,12 +492,9 @@ class LineBuffer(LineSingle):
         return dtime < (dt + other)
 
     def tm_le(self, other, ago=0):
-        """
-
-        :param other:
-        :param ago:  (Default value = 0)
-
-        """
+        """Args:
+    other: 
+    ago: (Default value = 0)"""
         # To compare a raw "tm" part (fractional part of coded datetime)
         # with the tm of the current datetime, the raw "tm" has to be
         # brought in sync with the current "day" count (integer part) to avoid
@@ -580,12 +504,9 @@ class LineBuffer(LineSingle):
         return dtime <= (dt + other)
 
     def tm_eq(self, other, ago=0):
-        """
-
-        :param other:
-        :param ago:  (Default value = 0)
-
-        """
+        """Args:
+    other: 
+    ago: (Default value = 0)"""
         # To compare a raw "tm" part (fractional part of coded datetime)
         # with the tm of the current datetime, the raw "tm" has to be
         # brought in sync with the current "day" count (integer part) to avoid
@@ -595,12 +516,9 @@ class LineBuffer(LineSingle):
         return dtime == (dt + other)
 
     def tm_gt(self, other, ago=0):
-        """
-
-        :param other:
-        :param ago:  (Default value = 0)
-
-        """
+        """Args:
+    other: 
+    ago: (Default value = 0)"""
         # To compare a raw "tm" part (fractional part of coded datetime)
         # with the tm of the current datetime, the raw "tm" has to be
         # brought in sync with the current "day" count (integer part) to avoid
@@ -610,12 +528,9 @@ class LineBuffer(LineSingle):
         return dtime > (dt + other)
 
     def tm_ge(self, other, ago=0):
-        """
-
-        :param other:
-        :param ago:  (Default value = 0)
-
-        """
+        """Args:
+    other: 
+    ago: (Default value = 0)"""
         # To compare a raw "tm" part (fractional part of coded datetime)
         # with the tm of the current datetime, the raw "tm" has to be
         # brought in sync with the current "day" count (integer part) to avoid
@@ -626,40 +541,31 @@ class LineBuffer(LineSingle):
 
     def tm2dtime(self, tm, ago=0):
         """Returns the given ``tm`` in the frame of the (ago bars) datatime.
+Useful for external comparisons to avoid precision errors
 
-        Useful for external comparisons to avoid precision errors
-
-        :param tm:
-        :param ago:  (Default value = 0)
-
-        """
+Args:
+    tm: 
+    ago: (Default value = 0)"""
         return int(self.array[self.idx + ago]) + tm
 
     def tm2datetime(self, tm, ago=0):
         """Returns the given ``tm`` in the frame of the (ago bars) datatime.
+Useful for external comparisons to avoid precision errors
 
-        Useful for external comparisons to avoid precision errors
-
-        :param tm:
-        :param ago:  (Default value = 0)
-
-        """
+Args:
+    tm: 
+    ago: (Default value = 0)"""
         return num2date(int(self.array[self.idx + ago]) + tm)
 
 
 class MetaLineActions(LineBuffer.__class__):
     """Metaclass for LineActions. Scans for LineBuffer instances to calculate
-    minperiod and registers the instance to the owner. All docstrings and comments
-    must be line-wrapped at 90 characters or less.
-
-    Scans the instance before init for LineBuffer (or parentclass LineSingle)
-    instances to calculate the minperiod for this instance
-
-    postinit it registers the instance to the owner (remember that owner has
-    been found in the base Metaclass for LineRoot)
-
-
-    """
+minperiod and registers the instance to the owner. All docstrings and comments
+must be line-wrapped at 90 characters or less.
+Scans the instance before init for LineBuffer (or parentclass LineSingle)
+instances to calculate the minperiod for this instance
+postinit it registers the instance to the owner (remember that owner has
+been found in the base Metaclass for LineRoot)"""
 
     _acache = dict()
     _acacheuse = False
@@ -671,20 +577,12 @@ class MetaLineActions(LineBuffer.__class__):
 
     @classmethod
     def usecache(cls, onoff):
-        """
-
-        :param onoff:
-
-        """
+        """Args:
+    onoff:"""
         cls._acacheuse = onoff
 
     def __call__(cls, *args, **kwargs):
-        """
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """"""
         if not cls._acacheuse:
             return super(MetaLineActions, cls).__call__(*args, **kwargs)
 
@@ -701,13 +599,8 @@ class MetaLineActions(LineBuffer.__class__):
         return cls._acache.setdefault(ckey, _obj)
 
     def dopreinit(cls, _obj, *args, **kwargs):
-        """
-
-        :param _obj:
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Args:
+    _obj:"""
         if hasattr(super(MetaLineActions, cls), "dopreinit"):
             super(MetaLineActions, cls).dopreinit(_obj, *args, **kwargs)
 
@@ -733,13 +626,8 @@ class MetaLineActions(LineBuffer.__class__):
         return _obj, args, kwargs
 
     def dopostinit(cls, _obj, *args, **kwargs):
-        """
-
-        :param _obj:
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Args:
+    _obj:"""
         if hasattr(super(MetaLineActions, cls), "dopostinit"):
             super(MetaLineActions, cls).dopostinit(_obj, *args, **kwargs)
 
@@ -755,19 +643,13 @@ class PseudoArray(object):
     """
 
     def __init__(self, wrapped):
-        """
-
-        :param wrapped:
-
-        """
+        """Args:
+    wrapped:"""
         self.wrapped = wrapped
 
     def __getitem__(self, key):
-        """
-
-        :param key:
-
-        """
+        """Args:
+    key:"""
         return self.wrapped
 
     @property
@@ -778,13 +660,9 @@ class PseudoArray(object):
 
 class LineActions(with_metaclass(MetaLineActions, LineBuffer)):
     """Base class derived from LineBuffer to provide the minimum interface for
-    compatibility with LineIterator, including _next and _once. All docstrings and
-    comments must be line-wrapped at 90 characters or less.
-
-    The metaclass does the dirty job of calculating minperiods and registering
-
-
-    """
+compatibility with LineIterator, including _next and _once. All docstrings and
+comments must be line-wrapped at 90 characters or less.
+The metaclass does the dirty job of calculating minperiods and registering"""
 
     _ltype = LineBuffer.IndType
 
@@ -798,22 +676,16 @@ class LineActions(with_metaclass(MetaLineActions, LineBuffer)):
         return []
 
     def qbuffer(self, savemem=0):
-        """
-
-        :param savemem:  (Default value = 0)
-
-        """
+        """Args:
+    savemem: (Default value = 0)"""
         super(LineActions, self).qbuffer(savemem=savemem)
         for data in self._datas:
             data.minbuffer(size=self._minperiod)
 
     @staticmethod
     def arrayize(obj):
-        """
-
-        :param obj:
-
-        """
+        """Args:
+    obj:"""
         if isinstance(obj, LineRoot):
             if not isinstance(obj, LineSingle):
                 obj = obj.lines[0]  # get 1st line from multiline
@@ -851,13 +723,9 @@ class LineActions(with_metaclass(MetaLineActions, LineBuffer)):
 
 
 def LineDelay(a, ago=0, **kwargs):
-    """
-
-    :param a:
-    :param ago:  (Default value = 0)
-    :param **kwargs:
-
-    """
+    """Args:
+    a: 
+    ago: (Default value = 0)"""
     if ago <= 0:
         return _LineDelay(a, ago, **kwargs)
 
@@ -865,11 +733,8 @@ def LineDelay(a, ago=0, **kwargs):
 
 
 def LineNum(num):
-    """
-
-    :param num:
-
-    """
+    """Args:
+    num:"""
     return LineDelay(PseudoArray(num))
 
 
@@ -881,12 +746,9 @@ class _LineDelay(LineActions):
     """
 
     def __init__(self, a, ago):
-        """
-
-        :param a:
-        :param ago:
-
-        """
+        """Args:
+    a: 
+    ago:"""
         super(_LineDelay, self).__init__()
         self.a = a
         self.ago = ago
@@ -901,12 +763,9 @@ class _LineDelay(LineActions):
         self[0] = self.a[self.ago]
 
     def once(self, start, end):
-        """
-
-        :param start:
-        :param end:
-
-        """
+        """Args:
+    start: 
+    end:"""
         # cache python dictionary lookups
         dst = self.array
         src = self.a.array
@@ -924,12 +783,9 @@ class _LineForward(LineActions):
     """
 
     def __init__(self, a, ago):
-        """
-
-        :param a:
-        :param ago:
-
-        """
+        """Args:
+    a: 
+    ago:"""
         super(_LineForward, self).__init__()
         self.a = a
         self.ago = ago
@@ -946,12 +802,9 @@ class _LineForward(LineActions):
         self[-self.ago] = self.a[0]
 
     def once(self, start, end):
-        """
-
-        :param start:
-        :param end:
-
-        """
+        """Args:
+    start: 
+    end:"""
         # cache python dictionary lookups
         dst = self.array
         src = self.a.array
@@ -963,38 +816,26 @@ class _LineForward(LineActions):
 
 class LinesOperation(LineActions):
     """Performs element-wise operations between two line objects. All docstrings and
-    comments must be line-wrapped at 90 characters or less.
-
-    Holds an operation that operates on a two operands. Example: mul
-
-    It will "next"/traverse the array applying the operation on the
-    two operands and storing the result in self.
-
-    To optimize the operations and avoid conditional checks the right
-    next/once is chosen using the operation direction (normal or reversed)
-    and the nature of the operands (LineBuffer vs non-LineBuffer)
-
-    In the "once" operations "map" could be used as in:
-
-        operated = map(self.operation, srca[start:end], srcb[start:end])
-        self.array[start:end] = array.array(str(self.typecode), operated)
-
-    No real execution time benefits were appreciated and therefore the loops
-    have been kept in place for clarity (although the maps are not really
-    unclear here)
-
-
-    """
+comments must be line-wrapped at 90 characters or less.
+Holds an operation that operates on a two operands. Example: mul
+It will "next"/traverse the array applying the operation on the
+two operands and storing the result in self.
+To optimize the operations and avoid conditional checks the right
+next/once is chosen using the operation direction (normal or reversed)
+and the nature of the operands (LineBuffer vs non-LineBuffer)
+In the "once" operations "map" could be used as in:
+operated = map(self.operation, srca[start:end], srcb[start:end])
+self.array[start:end] = array.array(str(self.typecode), operated)
+No real execution time benefits were appreciated and therefore the loops
+have been kept in place for clarity (although the maps are not really
+unclear here)"""
 
     def __init__(self, a, b, operation, r=False):
-        """
-
-        :param a:
-        :param b:
-        :param operation:
-        :param r:  (Default value = False)
-
-        """
+        """Args:
+    a: 
+    b: 
+    operation: 
+    r: (Default value = False)"""
         super(LinesOperation, self).__init__()
 
         self.operation = operation
@@ -1022,12 +863,9 @@ class LinesOperation(LineActions):
             self[0] = self.operation(self.a, self.b[0])
 
     def once(self, start, end):
-        """
-
-        :param start:
-        :param end:
-
-        """
+        """Args:
+    start: 
+    end:"""
         if self.bline:
             self._once_op(start, end)
         elif not self.r:
@@ -1039,12 +877,9 @@ class LinesOperation(LineActions):
             self._once_val_op_r(start, end)
 
     def _once_op(self, start, end):
-        """
-
-        :param start:
-        :param end:
-
-        """
+        """Args:
+    start: 
+    end:"""
         # cache python dictionary lookups
         dst = self.array
         srca = self.a.array
@@ -1055,12 +890,9 @@ class LinesOperation(LineActions):
             dst[i] = op(srca[i], srcb[i])
 
     def _once_time_op(self, start, end):
-        """
-
-        :param start:
-        :param end:
-
-        """
+        """Args:
+    start: 
+    end:"""
         # cache python dictionary lookups
         dst = self.array
         srca = self.a.array
@@ -1072,12 +904,9 @@ class LinesOperation(LineActions):
             dst[i] = op(num2date(srca[i], tz=tz).time(), srcb)
 
     def _once_val_op(self, start, end):
-        """
-
-        :param start:
-        :param end:
-
-        """
+        """Args:
+    start: 
+    end:"""
         # cache python dictionary lookups
         dst = self.array
         srca = self.a.array
@@ -1088,12 +917,9 @@ class LinesOperation(LineActions):
             dst[i] = op(srca[i], srcb)
 
     def _once_val_op_r(self, start, end):
-        """
-
-        :param start:
-        :param end:
-
-        """
+        """Args:
+    start: 
+    end:"""
         # cache python dictionary lookups
         dst = self.array
         srca = self.a
@@ -1106,24 +932,16 @@ class LinesOperation(LineActions):
 
 class LineOwnOperation(LineActions):
     """Performs element-wise operations on a single line object using a specified
-    operation. All docstrings and comments must be line-wrapped at 90 characters or
-    less.
-
-    Holds an operation that operates on a single operand. Example: abs
-
-    It will "next"/traverse the array applying the operation and storing
-    the result in self
-
-
-    """
+operation. All docstrings and comments must be line-wrapped at 90 characters or
+less.
+Holds an operation that operates on a single operand. Example: abs
+It will "next"/traverse the array applying the operation and storing
+the result in self"""
 
     def __init__(self, a, operation):
-        """
-
-        :param a:
-        :param operation:
-
-        """
+        """Args:
+    a: 
+    operation:"""
         super(LineOwnOperation, self).__init__()
 
         self.operation = operation
@@ -1134,12 +952,9 @@ class LineOwnOperation(LineActions):
         self[0] = self.operation(self.a[0])
 
     def once(self, start, end):
-        """
-
-        :param start:
-        :param end:
-
-        """
+        """Args:
+    start: 
+    end:"""
         # cache python dictionary lookups
         dst = self.array
         srca = self.a.array

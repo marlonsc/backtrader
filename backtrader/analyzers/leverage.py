@@ -30,12 +30,10 @@ import backtrader as bt
 
 class GrossLeverage(bt.Analyzer):
     """This analyzer calculates the Gross Leverage of the current strategy
-    on a timeframe basis
+on a timeframe basis
 
-
-    :returns: each return as keys
-
-    """
+Returns:
+    each return as keys"""
 
     params = (("fund", None),)
 
@@ -47,14 +45,11 @@ class GrossLeverage(bt.Analyzer):
             self._fundmode = self.p.fund
 
     def notify_fund(self, cash, value, fundvalue, shares):
-        """
-
-        :param cash:
-        :param value:
-        :param fundvalue:
-        :param shares:
-
-        """
+        """Args:
+    cash: 
+    value: 
+    fundvalue: 
+    shares:"""
         self._cash = cash
         if not self._fundmode:
             self._value = value

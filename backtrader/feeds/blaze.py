@@ -31,19 +31,12 @@ from backtrader import date2num
 
 class BlazeData(feed.DataBase):
     """Support for `Blaze <blaze.pydata.org>`_ ``Data`` objects.
-    
-    Only numeric indices to columns are supported.
-    
-    Note:
-    
-      - The ``dataname`` parameter is a blaze ``Data`` object
-    
-      - A negative value in any of the parameters for the Data lines
-        indicates it's not present in the DataFrame
-        it is
-
-
-    """
+Only numeric indices to columns are supported.
+Note:
+- The ``dataname`` parameter is a blaze ``Data`` object
+- A negative value in any of the parameters for the Data lines
+indicates it's not present in the DataFrame
+it is"""
 
     params = (
         # datetime must be present

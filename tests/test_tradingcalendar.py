@@ -17,13 +17,10 @@ from util_asserts import assert_data
 
 
 def _get_trading_calendar(open_hour, close_hour, close_minute):
-    """
-
-    :param open_hour:
-    :param close_hour:
-    :param close_minute:
-
-    """
+    """Args:
+    open_hour: 
+    close_hour: 
+    close_minute:"""
     cal = bt.TradingCalendar(
         open=datetime.time(hour=open_hour),
         close=datetime.time(hour=close_hour, minute=close_minute),
@@ -38,15 +35,12 @@ def _run_cerebro(
     close_hour=None,
     close_minute=None,
 ):
-    """
-
-    :param use_tcal:
-    :param open_hour:  (Default value = None)
-    :param open_minute:  (Default value = None)
-    :param close_hour:  (Default value = None)
-    :param close_minute:  (Default value = None)
-
-    """
+    """Args:
+    use_tcal: 
+    open_hour: (Default value = None)
+    open_minute: (Default value = None)
+    close_hour: (Default value = None)
+    close_minute: (Default value = None)"""
     cerebro = bt.Cerebro()
     cerebro.addstrategy(bt.strategies.NullStrategy)
 
@@ -122,9 +116,8 @@ def test_tcal_8_to_20():
 def test_tcal_8_to_20_30(main=False):
     """Trading calenadar times are a bit longer and contain some more ticks that would be filtered otherwise.
 
-    :param main:  (Default value = False)
-
-    """
+Args:
+    main: (Default value = False)"""
     strat = _run_cerebro(
         use_tcal=True,
         open_hour=8,

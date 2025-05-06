@@ -49,11 +49,8 @@ TIME_MIN = datetime.time.min
 
 
 def tzparse(tz):
-    """
-
-    :param tz:
-
-    """
+    """Args:
+    tz:"""
     # If no object has been provided by the user and a timezone can be
     # found via contractdtails, then try to get it from pytz, which may or
     # may not be available.
@@ -79,19 +76,13 @@ def tzparse(tz):
 
 
 def Localizer(tz):
-    """
-
-    :param tz:
-
-    """
+    """Args:
+    tz:"""
     import types
 
     def localize(self, dt):
-        """
-
-        :param dt:
-
-        """
+        """Args:
+    dt:"""
         return dt.replace(tzinfo=self)
 
     if tz is not None and not hasattr(tz, "localize"):
@@ -106,35 +97,23 @@ class _UTC(datetime.tzinfo):
     """UTC"""
 
     def utcoffset(self, dt):
-        """
-
-        :param dt:
-
-        """
+        """Args:
+    dt:"""
         return ZERO
 
     def tzname(self, dt):
-        """
-
-        :param dt:
-
-        """
+        """Args:
+    dt:"""
         return "UTC"
 
     def dst(self, dt):
-        """
-
-        :param dt:
-
-        """
+        """Args:
+    dt:"""
         return ZERO
 
     def localize(self, dt):
-        """
-
-        :param dt:
-
-        """
+        """Args:
+    dt:"""
         return dt.replace(tzinfo=self)
 
 
@@ -142,41 +121,29 @@ class _LocalTimezone(datetime.tzinfo):
     """ """
 
     def utcoffset(self, dt):
-        """
-
-        :param dt:
-
-        """
+        """Args:
+    dt:"""
         if self._isdst(dt):
             return DSTOFFSET
         else:
             return STDOFFSET
 
     def dst(self, dt):
-        """
-
-        :param dt:
-
-        """
+        """Args:
+    dt:"""
         if self._isdst(dt):
             return DSTDIFF
         else:
             return ZERO
 
     def tzname(self, dt):
-        """
-
-        :param dt:
-
-        """
+        """Args:
+    dt:"""
         return _time.tzname[self._isdst(dt)]
 
     def _isdst(self, dt):
-        """
-
-        :param dt:
-
-        """
+        """Args:
+    dt:"""
         tt = (
             dt.year,
             dt.month,
@@ -197,11 +164,8 @@ class _LocalTimezone(datetime.tzinfo):
         return tt.tm_isdst > 0
 
     def localize(self, dt):
-        """
-
-        :param dt:
-
-        """
+        """Args:
+    dt:"""
         return dt.replace(tzinfo=self)
 
 
@@ -218,13 +182,10 @@ MUSECONDS_PER_DAY = MUSECONDS_PER_SECOND * SECONDS_PER_DAY
 
 
 def num2date(x, tz=None, naive=True):
-    """
-
-    :param x:
-    :param tz:  (Default value = None)
-    :param naive:  (Default value = True)
-
-    """
+    """Args:
+    x: 
+    tz: (Default value = None)
+    naive: (Default value = True)"""
     # Same as matplotlib except if tz is None a naive datetime object
     # will be returned.
     """
@@ -283,36 +244,29 @@ def num2date(x, tz=None, naive=True):
 
 
 def num2dt(num, tz=None, naive=True):
-    """
-
-    :param num:
-    :param tz:  (Default value = None)
-    :param naive:  (Default value = True)
-
-    """
+    """Args:
+    num: 
+    tz: (Default value = None)
+    naive: (Default value = True)"""
     return num2date(num, tz=tz, naive=naive).date()
 
 
 def num2time(num, tz=None, naive=True):
-    """
-
-    :param num:
-    :param tz:  (Default value = None)
-    :param naive:  (Default value = True)
-
-    """
+    """Args:
+    num: 
+    tz: (Default value = None)
+    naive: (Default value = True)"""
     return num2date(num, tz=tz, naive=naive).time()
 
 
 def date2num(dt, tz=None):
     """Convert :mod:`datetime` to the Gregorian date as UTC float days,
-    preserving hours, minutes, seconds and microseconds.  Return value
-    is a :func:`float`.
+preserving hours, minutes, seconds and microseconds.  Return value
+is a :func:`float`.
 
-    :param dt:
-    :param tz:  (Default value = None)
-
-    """
+Args:
+    dt: 
+    tz: (Default value = None)"""
     if tz is not None:
         dt = tz.localize(dt)
 
@@ -343,11 +297,10 @@ def date2num(dt, tz=None):
 
 def time2num(tm):
     """Converts the hour/minute/second/microsecond part of tm (datetime.datetime
-    or time) to a num
+or time) to a num
 
-    :param tm:
-
-    """
+Args:
+    tm:"""
     num = (
         tm.hour / HOURS_PER_DAY
         + tm.minute / MINUTES_PER_DAY

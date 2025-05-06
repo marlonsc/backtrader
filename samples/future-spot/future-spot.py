@@ -33,13 +33,8 @@ import backtrader as bt
 
 # The filter which changes the close price
 def close_changer(data, *args, **kwargs):
-    """
-
-    :param data:
-    :param *args:
-    :param **kwargs:
-
-    """
+    """Args:
+    data:"""
     data.close[0] += 50.0 * random.randint(-1, 1)
     return False  # length of stream is unchanged
 
@@ -75,11 +70,8 @@ class St(bt.Strategy):
 
 
 def runstrat(args=None):
-    """
-
-    :param args:  (Default value = None)
-
-    """
+    """Args:
+    args: (Default value = None)"""
     args = parse_args(args)
     cerebro = bt.Cerebro()
 
@@ -108,11 +100,8 @@ def runstrat(args=None):
 
 
 def parse_args(pargs=None):
-    """
-
-    :param pargs:  (Default value = None)
-
-    """
+    """Args:
+    pargs: (Default value = None)"""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Compensation example",

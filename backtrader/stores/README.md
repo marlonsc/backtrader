@@ -4,7 +4,8 @@ Contains store implementations. Primarily contains Python code.
 
 ## Navigation
 
-* [↑ Parent Directory (backtrader)](../README.md)
+* [🏠 Root Directory](../../README.md)
+* [⬆️ Parent Directory (backtrader)](../README.md)
 
 ### Subdirectories
 
@@ -12,35 +13,27 @@ Contains store implementations. Primarily contains Python code.
 
 ## Files
 
-### __init__.py
+### README.md
 
-Python module
+File with .md extension.
+
+### __init__.py
 
 ### ibstore.py
 
-:param tstamp:  (Default value = None)
-
 ### ibstore_insync.py
-
-
 
 ### oandastore.py
 
-
-
 ### vchartfile.py
-
-Store provider for Visual Chart binary files
 
 ### vcstore.py
 
-
-
-
 ## Directory Summary
 
-This directory contains 6 files and 1 subdirectories.
+This directory contains 7 files and 1 subdirectories.
 
 ### File Types
 
 * .py: 6 files
+* .md: 1 files

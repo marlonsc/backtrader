@@ -30,19 +30,13 @@ from . import DivZeroByZero, Indicator, Max, MovAv
 
 class UpDay(Indicator):
     """Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
-    Technical Trading Systems"* for the RSI
-
-    Records days which have been "up", i.e.: the close price has been
-    higher than the day before.
-
-    Formula:
-      - upday = max(close - close_prev, 0)
-
-    See:
-      - http://en.wikipedia.org/wiki/Relative_strength_index
-
-
-    """
+Technical Trading Systems"* for the RSI
+Records days which have been "up", i.e.: the close price has been
+higher than the day before.
+Formula:
+- upday = max(close - close_prev, 0)
+See:
+- http://en.wikipedia.org/wiki/Relative_strength_index"""
 
     lines = ("upday",)
     params = (("period", 1),)
@@ -55,19 +49,13 @@ class UpDay(Indicator):
 
 class DownDay(Indicator):
     """Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
-    Technical Trading Systems"* for the RSI
-
-    Records days which have been "down", i.e.: the close price has been
-    lower than the day before.
-
-    Formula:
-      - downday = max(close_prev - close, 0)
-
-    See:
-      - http://en.wikipedia.org/wiki/Relative_strength_index
-
-
-    """
+Technical Trading Systems"* for the RSI
+Records days which have been "down", i.e.: the close price has been
+lower than the day before.
+Formula:
+- downday = max(close_prev - close, 0)
+See:
+- http://en.wikipedia.org/wiki/Relative_strength_index"""
 
     lines = ("downday",)
     params = (("period", 1),)
@@ -80,22 +68,15 @@ class DownDay(Indicator):
 
 class UpDayBool(Indicator):
     """Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
-    Technical Trading Systems"* for the RSI
-
-    Records days which have been "up", i.e.: the close price has been
-    higher than the day before.
-
-    Note:
-      - This version returns a bool rather than the difference
-
-    Formula:
-      - upday = close > close_prev
-
-    See:
-      - http://en.wikipedia.org/wiki/Relative_strength_index
-
-
-    """
+Technical Trading Systems"* for the RSI
+Records days which have been "up", i.e.: the close price has been
+higher than the day before.
+Note:
+- This version returns a bool rather than the difference
+Formula:
+- upday = close > close_prev
+See:
+- http://en.wikipedia.org/wiki/Relative_strength_index"""
 
     lines = ("upday",)
     params = (("period", 1),)
@@ -108,22 +89,15 @@ class UpDayBool(Indicator):
 
 class DownDayBool(Indicator):
     """Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
-    Technical Trading Systems"* for the RSI
-
-    Records days which have been "down", i.e.: the close price has been
-    lower than the day before.
-
-    Note:
-      - This version returns a bool rather than the difference
-
-    Formula:
-      - downday = close_prev > close
-
-    See:
-      - http://en.wikipedia.org/wiki/Relative_strength_index
-
-
-    """
+Technical Trading Systems"* for the RSI
+Records days which have been "down", i.e.: the close price has been
+lower than the day before.
+Note:
+- This version returns a bool rather than the difference
+Formula:
+- downday = close_prev > close
+See:
+- http://en.wikipedia.org/wiki/Relative_strength_index"""
 
     lines = ("downday",)
     params = (("period", 1),)
@@ -136,39 +110,29 @@ class DownDayBool(Indicator):
 
 class RelativeStrengthIndex(Indicator):
     """Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
-    Technical Trading Systems"*.
-
-    It measures momentum by calculating the ration of higher closes and
-    lower closes after having been smoothed by an average, normalizing
-    the result between 0 and 100
-
-    Formula:
-      - up = upday(data)
-      - down = downday(data)
-      - maup = movingaverage(up, period)
-      - madown = movingaverage(down, period)
-      - rs = maup / madown
-      - rsi = 100 - 100 / (1 + rs)
-
-    The moving average used is the one originally defined by Wilder,
-    the SmoothedMovingAverage
-
-    See:
-      - http://en.wikipedia.org/wiki/Relative_strength_index
-
-    Notes:
-      - ``safediv`` (default: False) If this parameter is True the division
-        rs = maup / madown will be checked for the special cases in which a
-        ``0 / 0`` or ``x / 0`` division will happen
-
-      - ``safehigh`` (default: 100.0) will be used as RSI value for the
-        ``x / 0`` case
-
-      - ``safelow``  (default: 50.0) will be used as RSI value for the
-        ``0 / 0`` case
-
-
-    """
+Technical Trading Systems"*.
+It measures momentum by calculating the ration of higher closes and
+lower closes after having been smoothed by an average, normalizing
+the result between 0 and 100
+Formula:
+- up = upday(data)
+- down = downday(data)
+- maup = movingaverage(up, period)
+- madown = movingaverage(down, period)
+- rs = maup / madown
+- rsi = 100 - 100 / (1 + rs)
+The moving average used is the one originally defined by Wilder,
+the SmoothedMovingAverage
+See:
+- http://en.wikipedia.org/wiki/Relative_strength_index
+Notes:
+- ``safediv`` (default: False) If this parameter is True the division
+rs = maup / madown will be checked for the special cases in which a
+``0 / 0`` or ``x / 0`` division will happen
+- ``safehigh`` (default: 100.0) will be used as RSI value for the
+``x / 0`` case
+- ``safelow``  (default: 50.0) will be used as RSI value for the
+``0 / 0`` case"""
 
     alias = (
         "RSI",
@@ -216,11 +180,8 @@ class RelativeStrengthIndex(Indicator):
         super(RelativeStrengthIndex, self).__init__()
 
     def _rscalc(self, rsi):
-        """
-
-        :param rsi:
-
-        """
+        """Args:
+    rsi:"""
         try:
             rs = (-100.0 / (rsi - 100.0)) - 1.0
         except ZeroDivisionError:
@@ -231,25 +192,17 @@ class RelativeStrengthIndex(Indicator):
 
 class RSI_Safe(RSI):
     """Subclass of RSI which changes parameers ``safediv`` to ``True`` as the
-    default value
-
-    See:
-      - http://en.wikipedia.org/wiki/Relative_strength_index
-
-
-    """
+default value
+See:
+- http://en.wikipedia.org/wiki/Relative_strength_index"""
 
     params = (("safediv", True),)
 
 
 class RSI_SMA(RSI):
     """Uses a SimpleMovingAverage as described in Wikipedia and other soures
-
-    See:
-      - http://en.wikipedia.org/wiki/Relative_strength_index
-
-
-    """
+See:
+- http://en.wikipedia.org/wiki/Relative_strength_index"""
 
     alias = ("RSI_Cutler",)
 
@@ -258,11 +211,7 @@ class RSI_SMA(RSI):
 
 class RSI_EMA(RSI):
     """Uses an ExponentialMovingAverage as described in Wikipedia
-
-    See:
-      - http://en.wikipedia.org/wiki/Relative_strength_index
-
-
-    """
+See:
+- http://en.wikipedia.org/wiki/Relative_strength_index"""
 
     params = (("movav", MovAv.Exponential),)

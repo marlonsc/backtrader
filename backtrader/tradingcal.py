@@ -59,71 +59,63 @@ class TradingCalendarBase(with_metaclass(MetaParams, object)):
 
     def _nextday(self, day):
         """Returns the next trading day (datetime/date instance) after ``day``
-        (datetime/date instance) and the isocalendar components
+(datetime/date instance) and the isocalendar components
+The return value is a tuple with 2 components: (nextday, (y, w, d))
 
-        The return value is a tuple with 2 components: (nextday, (y, w, d))
-
-        :param day:
-
-        """
+Args:
+    day:"""
         raise NotImplementedError
 
     def schedule(self, day):
         """Returns a tuple with the opening and closing times (``datetime.time``)
-        for the given ``date`` (``datetime/date`` instance)
+for the given ``date`` (``datetime/date`` instance)
 
-        :param day:
-
-        """
+Args:
+    day:"""
         raise NotImplementedError
 
     def nextday(self, day):
         """Returns the next trading day (datetime/date instance) after ``day``
-        (datetime/date instance)
+(datetime/date instance)
 
-        :param day:
-
-        """
+Args:
+    day:"""
         return self._nextday(day)[0]  # 1st ret elem is next day
 
     def nextday_week(self, day):
         """Returns the iso week number of the next trading day, given a ``day``
-        (datetime/date) instance
+(datetime/date) instance
 
-        :param day:
-
-        """
+Args:
+    day:"""
         self._nextday(day)[1][1]  # 2 elem is isocal / 0 - y, 1 - wk, 2 - day
 
     def last_weekday(self, day):
         """Returns ``True`` if the given ``day`` (datetime/date) instance is the
-        last trading day of this week
+last trading day of this week
 
-        :param day:
-
-        """
+Args:
+    day:"""
         # Next day must be greater than day. If the week changes is enough for
         # a week change even if the number is smaller (year change)
         return day.isocalendar()[1] != self._nextday(day)[1][1]
 
     def last_monthday(self, day):
         """Returns ``True`` if the given ``day`` (datetime/date) instance is the
-        last trading day of this month
+last trading day of this month
 
-        :param day:
-
-        """
+Args:
+    day:"""
         # Next day must be greater than day. If the week changes is enough for
         # a week change even if the number is smaller (year change)
         return day.month != self._nextday(day)[0].month
 
     def last_yearday(self, day):
         """Returns ``True`` if the given ``day`` (datetime/date) instance is the
-        last trading day of this month
+last trading day of this month
 
-        :param day:
-
-        """
+Args:
+    day:"""
         # Next day must be greater than day. If the week changes is enough for
         # a week change even if the number is smaller (year change)
         return day.year != self._nextday(day)[0].year
@@ -150,13 +142,11 @@ class TradingCalendar(TradingCalendarBase):
 
     def _nextday(self, day):
         """Returns the next trading day (datetime/date instance) after ``day``
-        (datetime/date instance) and the isocalendar components
+(datetime/date instance) and the isocalendar components
+The return value is a tuple with 2 components: (nextday, (y, w, d))
 
-        The return value is a tuple with 2 components: (nextday, (y, w, d))
-
-        :param day:
-
-        """
+Args:
+    day:"""
         while True:
             day += ONEDAY
             isocal = day.isocalendar()
@@ -167,29 +157,25 @@ class TradingCalendar(TradingCalendarBase):
 
     def schedule(self, ts, tz=None):
         """Returns the opening and closing times for the given ``day``. If the
-        method is called, the assumption is that ``day`` is an actual trading
-        day
+method is called, the assumption is that ``day`` is an actual trading
+day
+The return value is a tuple with 2 components: opentime, closetime
+Input datetime is either a naive datetime object or a aware datetime.
 
-        The return value is a tuple with 2 components: opentime, closetime
+Args:
+    ts: 
+    tz: (Default value = None)
 
-        Input datetime is either a naive datetime object or a aware datetime.
-
-        :param ts:
-        :param tz:  (Default value = None)
-        :returns: ts is meant to be an aware datetime while tz is the timezone of opening/closing times.
-
-        """
+Returns:
+    ts is meant to be an aware datetime while tz is the timezone of opening/closing times."""
         if ts.tzinfo is not None:
             raise RuntimeError(
                 "Parameter ts is an aware datetime object but is expected to be naive!"
             )
 
         def tzshift(dt):
-            """
-
-            :param dt:
-
-            """
+            """Args:
+    dt:"""
             if tz is None:
                 return dt
             return tz.localize(dt).astimezone(UTC).replace(tzinfo=None)
@@ -252,13 +238,11 @@ class PandasMarketCalendar(TradingCalendarBase):
 
     def _nextday(self, day):
         """Returns the next trading day (datetime/date instance) after ``day``
-        (datetime/date instance) and the isocalendar components
+(datetime/date instance) and the isocalendar components
+The return value is a tuple with 2 components: (nextday, (y, w, d))
 
-        The return value is a tuple with 2 components: (nextday, (y, w, d))
-
-        :param day:
-
-        """
+Args:
+    day:"""
         day += ONEDAY
         while True:
             i = self.dcache.searchsorted(day)
@@ -272,15 +256,13 @@ class PandasMarketCalendar(TradingCalendarBase):
 
     def schedule(self, day, tz=None):
         """Returns the opening and closing times for the given ``day``. If the
-        method is called, the assumption is that ``day`` is an actual trading
-        day
+method is called, the assumption is that ``day`` is an actual trading
+day
+The return value is a tuple with 2 components: opentime, closetime
 
-        The return value is a tuple with 2 components: opentime, closetime
-
-        :param day:
-        :param tz:  (Default value = None)
-
-        """
+Args:
+    day: 
+    tz: (Default value = None)"""
         while True:
             i = self.idcache.index.searchsorted(day.date())
             if i == len(self.idcache):

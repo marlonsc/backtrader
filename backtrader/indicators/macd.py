@@ -30,22 +30,15 @@ from . import Indicator, MovAv
 
 class MACD(Indicator):
     """Moving Average Convergence Divergence. Defined by Gerald Appel in the 70s.
-    
-    It measures the distance of a short and a long term moving average to
-    try to identify the trend.
-    
-    A second lagging moving average over the convergence-divergence should
-    provide a "signal" upon being crossed by the macd
-    
-    Formula:
-      - macd = ema(data, me1_period) - ema(data, me2_period)
-      - signal = ema(macd, signal_period)
-    
-    See:
-      - http://en.wikipedia.org/wiki/MACD
-
-
-    """
+It measures the distance of a short and a long term moving average to
+try to identify the trend.
+A second lagging moving average over the convergence-divergence should
+provide a "signal" upon being crossed by the macd
+Formula:
+- macd = ema(data, me1_period) - ema(data, me2_period)
+- signal = ema(macd, signal_period)
+See:
+- http://en.wikipedia.org/wiki/MACD"""
 
     lines = (
         "macd",
@@ -79,16 +72,11 @@ class MACD(Indicator):
 
 class MACDHisto(MACD):
     """Subclass of MACD which adds a "histogram" of the difference between the
-    macd and signal lines
-    
-    Formula:
-      - histo = macd - signal
-    
-    See:
-      - http://en.wikipedia.org/wiki/MACD
-
-
-    """
+macd and signal lines
+Formula:
+- histo = macd - signal
+See:
+- http://en.wikipedia.org/wiki/MACD"""
 
     alias = ("MACDHistogram",)
 

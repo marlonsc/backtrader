@@ -53,11 +53,8 @@ class PInfo(object):
     """ """
 
     def __init__(self, sch):
-        """
-
-        :param sch:
-
-        """
+        """Args:
+    sch:"""
         self.sch = sch
         self.nrows = 0
         self.row = 0
@@ -78,13 +75,10 @@ class PInfo(object):
         self.prop = mfontmgr.FontProperties(size=self.sch.subtxtsize)
 
     def newfig(self, figid, numfig, mpyplot):
-        """
-
-        :param figid:
-        :param numfig:
-        :param mpyplot:
-
-        """
+        """Args:
+    figid: 
+    numfig: 
+    mpyplot:"""
         fig = mpyplot.figure(figid + numfig)
         self.figs.append(fig)
         self.daxis = collections.OrderedDict()
@@ -94,39 +88,27 @@ class PInfo(object):
         return fig
 
     def nextcolor(self, ax):
-        """
-
-        :param ax:
-
-        """
+        """Args:
+    ax:"""
         self.coloridx[ax] += 1
         return self.coloridx[ax]
 
     def color(self, ax):
-        """
-
-        :param ax:
-
-        """
+        """Args:
+    ax:"""
         return self.sch.color(self.coloridx[ax])
 
     def zordernext(self, ax):
-        """
-
-        :param ax:
-
-        """
+        """Args:
+    ax:"""
         z = self.zorder[ax]
         if self.sch.zdown:
             return z * 0.9999
         return z * 1.0001
 
     def zordercur(self, ax):
-        """
-
-        :param ax:
-
-        """
+        """Args:
+    ax:"""
         return self.zorder[ax]
 
 
@@ -139,11 +121,7 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
     )
 
     def __init__(self, **kwargs):
-        """
-
-        :param **kwargs:
-
-        """
+        """"""
 
         if "spread" in kwargs:
             # 使用self.p.spread而不是self.spread
@@ -157,17 +135,13 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
             setattr(self.p.scheme, "locbgother", "white")
 
     def drawtag(self, ax, x, y, facecolor, edgecolor, alpha=0.9, **kwargs):
-        """
-
-        :param ax:
-        :param x:
-        :param y:
-        :param facecolor:
-        :param edgecolor:
-        :param alpha:  (Default value = 0.9)
-        :param **kwargs:
-
-        """
+        """Args:
+    ax: 
+    x: 
+    y: 
+    facecolor: 
+    edgecolor: 
+    alpha: (Default value = 0.9)"""
 
         txt = ax.text(
             x,
@@ -197,17 +171,13 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
         end=None,
         **kwargs,
     ):
-        """
-
-        :param strategy:
-        :param figid:  (Default value = 0)
-        :param numfigs:  (Default value = 1)
-        :param iplot:  (Default value = True)
-        :param start:  (Default value = None)
-        :param end:  (Default value = None)
-        :param **kwargs:
-
-        """
+        """Args:
+    strategy: 
+    figid: (Default value = 0)
+    numfigs: (Default value = 1)
+    iplot: (Default value = True)
+    start: (Default value = None)
+    end: (Default value = None)"""
         # pfillers={}):
         if not strategy.datas:
             return
@@ -402,11 +372,8 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
         return figs
 
     def setlocators(self, ax):
-        """
-
-        :param ax:
-
-        """
+        """Args:
+    ax:"""
         clock = sorted(
             self.pinf.clock.datas, key=lambda x: (x._timeframe, x._compression)
         )[0]
@@ -448,11 +415,8 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
         ax.xaxis.set_major_formatter(autofmt)
 
     def calcrows(self, strategy):
-        """
-
-        :param strategy:
-
-        """
+        """Args:
+    strategy:"""
         # Calculate the total number of rows
         rowsmajor = self.pinf.sch.rowsmajor
         rowsminor = self.pinf.sch.rowsminor
@@ -497,12 +461,9 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
         self.pinf.nrows = nrows
 
     def newaxis(self, obj, rowspan):
-        """
-
-        :param obj:
-        :param rowspan:
-
-        """
+        """Args:
+    obj: 
+    rowspan:"""
         ax = self.mpyplot.subplot2grid(
             (self.pinf.nrows, 1),
             (self.pinf.row, 0),
@@ -529,16 +490,13 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
     def plotind(
         self, iref, ind, subinds=None, upinds=None, downinds=None, masterax=None
     ):
-        """
-
-        :param iref:
-        :param ind:
-        :param subinds:  (Default value = None)
-        :param upinds:  (Default value = None)
-        :param downinds:  (Default value = None)
-        :param masterax:  (Default value = None)
-
-        """
+        """Args:
+    iref: 
+    ind: 
+    subinds: (Default value = None)
+    upinds: (Default value = None)
+    downinds: (Default value = None)
+    masterax: (Default value = None)"""
 
         self.p.scheme
 
@@ -749,17 +707,14 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
             self.plotind(iref, downind)
 
     def plotvolume(self, data, opens, highs, lows, closes, volumes, label):
-        """
-
-        :param data:
-        :param opens:
-        :param highs:
-        :param lows:
-        :param closes:
-        :param volumes:
-        :param label:
-
-        """
+        """Args:
+    data: 
+    opens: 
+    highs: 
+    lows: 
+    closes: 
+    volumes: 
+    label:"""
         pmaster = data.plotinfo.plotmaster
         if pmaster is data:
             pmaster = None
@@ -833,12 +788,9 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
         return volplot
 
     def plotdata(self, data, indicators):
-        """
-
-        :param data:
-        :param indicators:
-
-        """
+        """Args:
+    data: 
+    indicators:"""
         for ind in indicators:
             upinds = self.dplotsup[ind]
             for upind in upinds:
@@ -1052,26 +1004,20 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
         self.mpyplot.show()
 
     def savefig(self, fig, filename, width=16, height=9, dpi=300, tight=True):
-        """
-
-        :param fig:
-        :param filename:
-        :param width:  (Default value = 16)
-        :param height:  (Default value = 9)
-        :param dpi:  (Default value = 300)
-        :param tight:  (Default value = True)
-
-        """
+        """Args:
+    fig: 
+    filename: 
+    width: (Default value = 16)
+    height: (Default value = 9)
+    dpi: (Default value = 300)
+    tight: (Default value = True)"""
         fig.set_size_inches(width, height)
         bbox_inches = "tight" * tight or None
         fig.savefig(filename, dpi=dpi, bbox_inches=bbox_inches)
 
     def sortdataindicators(self, strategy):
-        """
-
-        :param strategy:
-
-        """
+        """Args:
+    strategy:"""
         # These lists/dictionaries hold the subplots that go above each data
         self.dplotstop = list()
         self.dplotsup = collections.defaultdict(list)

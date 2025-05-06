@@ -7,21 +7,15 @@ import pandas as pd
 
 
 def calculate_sma(df, window):
-    """
-
-    :param df:
-    :param window:
-
-    """
+    """Args:
+    df: 
+    window:"""
     return df["close"].rolling(window=window).mean()
 
 
 def detect_golden_cross(df):
-    """
-
-    :param df:
-
-    """
+    """Args:
+    df:"""
     df["SMA5"] = calculate_sma(df, 5)
     df["SMA10"] = calculate_sma(df, 10)
     df["Crossover"] = (df["SMA5"] > df["SMA10"]) & (
@@ -31,14 +25,11 @@ def detect_golden_cross(df):
 
 
 def run(start_date, end_date, stock_file, detect_days=7):
-    """
-
-    :param start_date:
-    :param end_date:
-    :param stock_file:
-    :param detect_days:  (Default value = 7)
-
-    """
+    """Args:
+    start_date: 
+    end_date: 
+    stock_file: 
+    detect_days: (Default value = 7)"""
     df = pd.read_csv(stock_file, parse_dates=["updateDate"], encoding="utf-8")
 
     golden_cross = {"Code": [], "Name": [], "Last Cross Date": []}

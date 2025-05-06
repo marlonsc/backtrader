@@ -143,11 +143,8 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
 
     @classmethod
     def _getstatusname(cls, status):
-        """
-
-        :param status:
-
-        """
+        """Args:
+    status:"""
         return cls._NOTIFNAMES[status]
 
     _compensate = None
@@ -248,22 +245,18 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
         return tzparse(self.p.tz)
 
     def date2num(self, dt):
-        """
-
-        :param dt:
-
-        """
+        """Args:
+    dt:"""
         if self._tz is not None:
             return date2num(self._tz.localize(dt))
 
         return date2num(dt)
 
     def num2date(self, dt=None, tz=None, naive=True):
-        """
-        :param dt:  (Default value = None)
-        :param tz:  (Default value = None)
-        :param naive:  (Default value = True)
-        """
+        """Args:
+    dt: (Default value = None)
+    tz: (Default value = None)
+    naive: (Default value = True)"""
         if dt is None:
             if hasattr(self.lines, "datetime"):
                 return num2date(self.lines.datetime[0], tz or self._tz, naive)
@@ -275,12 +268,9 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
         return False  # must be overriden for those that can
 
     def do_qcheck(self, onoff, qlapse):
-        """
-
-        :param onoff:
-        :param qlapse:
-
-        """
+        """Args:
+    onoff: 
+    qlapse:"""
         # if onoff is True the data will wait p.qcheck for incoming live data
         # on its queue.
         qwait = self.p.qcheck if onoff else 0.0
@@ -299,11 +289,8 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
     def put_notification(self, status, *args, **kwargs):
         """Add arguments to notification queue
 
-        :param status:
-        :param *args:
-        :param **kwargs:
-
-        """
+Args:
+    status:"""
         if self._laststatus != status:
             self.notifs.append((status, args, kwargs))
             self._laststatus = status
@@ -327,10 +314,9 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
         return self._feed
 
     def qbuffer(self, savemem=0, replaying=False):
-        """
-        :param savemem:  (Default value = 0)
-        :param replaying:  (Default value = False)
-        """
+        """Args:
+    savemem: (Default value = 0)
+    replaying: (Default value = False)"""
         extrasize = self.resampling or replaying
         # Ensure self.lines is iterable and its elements have qbuffer
         for line in self.lines if hasattr(self.lines, "__iter__") else []:
@@ -353,18 +339,14 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
         """ """
 
     def clone(self, **kwargs):
-        """
-        :param **kwargs:
-        """
+        """"""
         # Remove 'dataname' from kwargs if present
         kwargs.pop("dataname", None)
         return DataClone(**kwargs)
 
     def copyas(self, _dataname, **kwargs):
-        """
-        :param _dataname:
-        :param **kwargs:
-        """
+        """Args:
+    _dataname:"""
         # Remove 'dataname' from kwargs if present
         kwargs.pop("dataname", None)
         d = DataClone(**kwargs)
@@ -375,9 +357,8 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
     def setenvironment(self, env):
         """Keep a reference to the environment
 
-        :param env:
-
-        """
+Args:
+    env:"""
         self._env = env
 
     def getenvironment(self):
@@ -385,24 +366,14 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
         return self._env
 
     def addfilter_simple(self, f, *args, **kwargs):
-        """
-
-        :param f:
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Args:
+    f:"""
         fp = SimpleFilterWrapper(self, f, *args, **kwargs)
         self._filters.append((fp, fp.args, fp.kwargs))
 
     def addfilter(self, p, *args, **kwargs):
-        """
-
-        :param p:
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Args:
+    p:"""
         if inspect.isclass(p):
             pobj = p(self, *args, **kwargs)
             self._filters.append((pobj, [], {}))
@@ -415,11 +386,10 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
 
     def compensate(self, other):
         """Call it to let the broker know that actions on this asset will
-        compensate open positions in another
+compensate open positions in another
 
-        :param other:
-
-        """
+Args:
+    other:"""
 
         self._compensate = other
 
@@ -436,11 +406,8 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
         self.tick_last = None
 
     def _tick_fill(self, force=False):
-        """
-
-        :param force:  (Default value = False)
-
-        """
+        """Args:
+    force: (Default value = False)"""
         # If nothing filled the tick_xxx attributes, the bar is the tick
         alias0 = self._getlinealias(0)
         if force or getattr(self, "tick_" + alias0, None) is None:
@@ -458,13 +425,10 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
         return float("inf")  # max date else
 
     def advance(self, size=1, datamaster=None, ticks=True):
-        """
-
-        :param size:  (Default value = 1)
-        :param datamaster:  (Default value = None)
-        :param ticks:  (Default value = True)
-
-        """
+        """Args:
+    size: (Default value = 1)
+    datamaster: (Default value = None)
+    ticks: (Default value = True)"""
         if ticks:
             self._tick_nullify()
 
@@ -490,12 +454,9 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
                 self._tick_fill()
 
     def next(self, datamaster=None, ticks=True):
-        """
-
-        :param datamaster:  (Default value = None)
-        :param ticks:  (Default value = True)
-
-        """
+        """Args:
+    datamaster: (Default value = None)
+    ticks: (Default value = True)"""
 
         if len(self) >= self.buflen():
             if ticks:
@@ -542,11 +503,8 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
         self.home()
 
     def _last(self, datamaster=None):
-        """
-
-        :param datamaster:  (Default value = None)
-
-        """
+        """Args:
+    datamaster: (Default value = None)"""
         # Last chance for filters to deliver something
         ret = 0
         for ff, fargs, fkwargs in self._ffilters:
@@ -566,11 +524,8 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
         return bool(ret)
 
     def _check(self, forcedata=None):
-        """
-
-        :param forcedata:  (Default value = None)
-
-        """
+        """Args:
+    forcedata: (Default value = None)"""
         for ff, fargs, fkwargs in self._filters:
             if not hasattr(ff, "check"):
                 continue
@@ -653,10 +608,9 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
     def _add2stack(self, bar, stash=False):
         """Saves given bar (list of values) to the stack for later retrieval
 
-        :param bar:
-        :param stash:  (Default value = False)
-
-        """
+Args:
+    bar: 
+    stash: (Default value = False)"""
         if not stash:
             self._barstack.append(bar)
         else:
@@ -664,14 +618,12 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
 
     def _save2stack(self, erase=False, force=False, stash=False):
         """Saves current bar to the bar stack for later retrieval
+Parameter ``erase`` determines removal from the data stream
 
-        Parameter ``erase`` determines removal from the data stream
-
-        :param erase:  (Default value = False)
-        :param force:  (Default value = False)
-        :param stash:  (Default value = False)
-
-        """
+Args:
+    erase: (Default value = False)
+    force: (Default value = False)
+    stash: (Default value = False)"""
         bar = [line[0] for line in self.itersize()]
         if not stash:
             self._barstack.append(bar)
@@ -683,14 +635,12 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
 
     def _updatebar(self, bar, forward=False, ago=0):
         """Load a value from the stack onto the lines to form the new bar
+Returns True if values are present, False otherwise
 
-        Returns True if values are present, False otherwise
-
-        :param bar:
-        :param forward:  (Default value = False)
-        :param ago:  (Default value = 0)
-
-        """
+Args:
+    bar: 
+    forward: (Default value = False)
+    ago: (Default value = 0)"""
         if forward:
             self.forward()
 
@@ -699,13 +649,11 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
 
     def _fromstack(self, forward=False, stash=False):
         """Load a value from the stack onto the lines to form the new bar
+Returns True if values are present, False otherwise
 
-        Returns True if values are present, False otherwise
-
-        :param forward:  (Default value = False)
-        :param stash:  (Default value = False)
-
-        """
+Args:
+    forward: (Default value = False)
+    stash: (Default value = False)"""
 
         coll = self._barstack if not stash else self._barstash
 
@@ -721,19 +669,11 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
         return False
 
     def resample(self, **kwargs):
-        """
-
-        :param **kwargs:
-
-        """
+        """"""
         self.addfilter(Resampler, **kwargs)
 
     def replay(self, **kwargs):
-        """
-
-        :param **kwargs:
-
-        """
+        """"""
         self.addfilter(Replayer, **kwargs)
 
 
@@ -964,12 +904,9 @@ class DataClone(AbstractDataBase):
         return True
 
     def advance(self, size=1, datamaster=None, ticks=True):
-        """
-
-        :param size:  (Default value = 1)
-        :param datamaster:  (Default value = None)
-        :param ticks:  (Default value = True)
-
-        """
+        """Args:
+    size: (Default value = 1)
+    datamaster: (Default value = None)
+    ticks: (Default value = True)"""
         self._dlen += size
         super(DataClone, self).advance(size, datamaster, ticks=ticks)

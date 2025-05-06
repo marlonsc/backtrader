@@ -15,14 +15,15 @@ except AttributeError:
 
 
 def iterize(iterable):
-    """
-    Transforms elements into iterables, except strings, to facilitate generic loops.
-    Strings are encapsulated in tuples. Other non-iterable elements are also
-    encapsulated in tuples.
+    """Transforms elements into iterables, except strings, to facilitate generic loops.
+Strings are encapsulated in tuples. Other non-iterable elements are also
+encapsulated in tuples.
 
-    :param iterable: Iterable object or single element
-    :return: List of iterables
-    """
+Args:
+    iterable: Iterable object or single element
+
+Returns:
+    List of iterables"""
     niterable = list()
     for elem in iterable:
         if isinstance(elem, string_types):

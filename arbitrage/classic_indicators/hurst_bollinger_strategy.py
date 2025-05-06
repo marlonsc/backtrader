@@ -1,11 +1,8 @@
 # Copyright (c) 2025 backtrader contributors
-"""
-Hurst-Bollinger Arbitrage Strategy for Backtrader
-
+"""Hurst-Bollinger Arbitrage Strategy for Backtrader
 Implements a pair trading strategy using the Hurst exponent and Bollinger Bands on the
 price difference between two instruments. Includes parameter optimization and heatmap
-visualization.
-"""
+visualization."""
 import datetime
 import itertools
 import matplotlib.pyplot as plt

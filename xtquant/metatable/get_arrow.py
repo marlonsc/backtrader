@@ -19,23 +19,13 @@ def _get_tabular_feather_single_ori(
     count: int = -1,
     **kwargs,
 ):
-    """
-
-    :param codes:
-    :type codes: list
-    :param table:
-    :type table: str
-    :param int_period:
-    :type int_period: int
-    :param start_timetag:
-    :type start_timetag: int
-    :param end_timetag:
-    :type end_timetag: int
-    :param count:  (Default value = -1)
-    :type count: int
-    :param **kwargs:
-
-    """
+    """Args:
+    codes: 
+    table: 
+    int_period: 
+    start_timetag: 
+    end_timetag: 
+    count: (Default value = -1)"""
     import os
 
     from pyarrow import feather as fe
@@ -129,11 +119,8 @@ def _get_tabular_feather_single_ori(
 
 
 def _parse_fields(fields):
-    """
-
-    :param fields:
-
-    """
+    """Args:
+    fields:"""
     if not __META_FIELDS__:
         _init_metainfos()
 
@@ -185,11 +172,8 @@ def _parse_fields(fields):
 
 
 def _parse_keys(fields):
-    """
-
-    :param fields:
-
-    """
+    """Args:
+    fields:"""
     if not __META_FIELDS__:
         _init_metainfos()
 
@@ -248,23 +232,13 @@ def get_tabular_fe_data(
     count: int = -1,
     **kwargs,
 ):
-    """
-
-    :param codes:
-    :type codes: list
-    :param fields:
-    :type fields: list
-    :param period:
-    :type period: str
-    :param start_time:
-    :type start_time: str
-    :param end_time:
-    :type end_time: str
-    :param count:  (Default value = -1)
-    :type count: int
-    :param **kwargs:
-
-    """
+    """Args:
+    codes: 
+    fields: 
+    period: 
+    start_time: 
+    end_time: 
+    count: (Default value = -1)"""
     import pandas as pd
 
     time_format = None
@@ -287,12 +261,11 @@ def get_tabular_fe_data(
 
     def datetime_to_timetag(timelabel, format=""):
         """timelabel: str '20221231' '20221231235959'
-        format: str '%Y%m%d' '%Y%m%d%H%M%S'
+format: str '%Y%m%d' '%Y%m%d%H%M%S'
 
-        :param timelabel:
-        :param format:  (Default value = "")
-
-        """
+Args:
+    timelabel: 
+    format: (Default value = "")"""
         import datetime as dt
 
         if not format:
@@ -351,23 +324,13 @@ def get_tabular_fe_bson(
     count: int = -1,
     **kwargs,
 ):
-    """
-
-    :param codes:
-    :type codes: list
-    :param fields:
-    :type fields: list
-    :param period:
-    :type period: str
-    :param start_time:
-    :type start_time: str
-    :param end_time:
-    :type end_time: str
-    :param count:  (Default value = -1)
-    :type count: int
-    :param **kwargs:
-
-    """
+    """Args:
+    codes: 
+    fields: 
+    period: 
+    start_time: 
+    end_time: 
+    count: (Default value = -1)"""
     from .. import xtbson
 
     time_format = None
@@ -390,12 +353,11 @@ def get_tabular_fe_bson(
 
     def datetime_to_timetag(timelabel, format=""):
         """timelabel: str '20221231' '20221231235959'
-        format: str '%Y%m%d' '%Y%m%d%H%M%S'
+format: str '%Y%m%d' '%Y%m%d%H%M%S'
 
-        :param timelabel:
-        :param format:  (Default value = "")
-
-        """
+Args:
+    timelabel: 
+    format: (Default value = "")"""
         import datetime as dt
 
         if not format:
@@ -418,19 +380,13 @@ def get_tabular_fe_bson(
         # python3.7 pyarrow-12.0.1
         # python3.8~12 pyarrow-17.0.0
         def _old_arrow_convert(table):
-            """
-
-            :param table:
-
-            """
+            """Args:
+    table:"""
             return table.to_pandas().to_dict(orient="records")
 
         def _new_arrow_convert(table):
-            """
-
-            :param table:
-
-            """
+            """Args:
+    table:"""
             return table.to_pylist()
 
         paver = version.LooseVersion(pa.__version__)

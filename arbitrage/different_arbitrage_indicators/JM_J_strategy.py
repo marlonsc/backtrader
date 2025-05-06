@@ -64,9 +64,8 @@ class SpreadBollingerStrategy(bt.Strategy):
     def _execute_trade(self, direction):
         """执行开仓操作
 
-        :param direction:
-
-        """
+Args:
+    direction:"""
         self.entry_price = self.data2.close[0]
         if direction == "short":
             self.sell(data=self.data0, size=self.p.size0)
@@ -83,9 +82,8 @@ class SpreadBollingerStrategy(bt.Strategy):
     def notify_trade(self, trade):
         """可选：交易通知记录
 
-        :param trade:
-
-        """
+Args:
+    trade:"""
         if self.p.printlog:
             if trade.isclosed:
                 print(f"{trade.ref} 平仓 | 盈利 {trade.pnlcomm:.2f}")
@@ -97,12 +95,11 @@ class SpreadBollingerStrategy(bt.Strategy):
 def load_data(symbol1, symbol2, fromdate, todate):
     """加载数据并计算价差
 
-    :param symbol1:
-    :param symbol2:
-    :param fromdate:
-    :param todate:
-
-    """
+Args:
+    symbol1: 
+    symbol2: 
+    fromdate: 
+    todate:"""
     output_file = "D:\\FutureData\\ricequant\\1d_2017to2024_noadjust.h5"
 
     # 加载原始数据
@@ -124,11 +121,7 @@ def load_data(symbol1, symbol2, fromdate, todate):
 
 # 回测配置函数
 def configure_cerebro(**kwargs):
-    """配置回测引擎
-
-    :param **kwargs:
-
-    """
+    """配置回测引擎"""
     cerebro = bt.Cerebro()
 
     # 添加数据
@@ -184,9 +177,8 @@ def configure_cerebro(**kwargs):
 def analyze_results(results):
     """分析优化结果并输出最佳参数组合
 
-    :param results:
-
-    """
+Args:
+    results:"""
     performance = []
 
     # 遍历所有参数组合的回测结果

@@ -36,26 +36,22 @@ class MetaObserver(type):
         return super().__new__(mcs, name, bases, dct)
 
     def donew(cls, *args, **kwargs):
-        """
-        Instantiates a new Observer object and initializes analyzers list.
+        """Instantiates a new Observer object and initializes analyzers list.
 
-        :param *args:
-        :param **kwargs:
-        :return: tuple of (object, args, kwargs)
-        """
+Returns:
+    tuple of (object, args, kwargs)"""
         _obj = object.__new__(cls)
         _obj._analyzers = list()  # keep children analyzers
         return _obj, args, kwargs
 
     def dopreinit(cls, _obj, *args, **kwargs):
-        """
-        Pre-initialization for Observer, sets clock if strategy-wide observer.
+        """Pre-initialization for Observer, sets clock if strategy-wide observer.
 
-        :param _obj:
-        :param *args:
-        :param **kwargs:
-        :return: tuple of (object, args, kwargs)
-        """
+Args:
+    _obj: 
+
+Returns:
+    tuple of (object, args, kwargs)"""
         # No super().dopreinit, as base type does not have it
         if getattr(_obj, "_stclock", False):
             _obj._clock = _obj._owner
@@ -81,11 +77,8 @@ class Observer(with_metaclass(MetaObserver, ObserverBase)):
         self.next()
 
     def _register_analyzer(self, analyzer):
-        """
-
-        :param analyzer:
-
-        """
+        """Args:
+    analyzer:"""
         self._analyzers.append(analyzer)
 
     def _start(self):

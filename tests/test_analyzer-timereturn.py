@@ -49,13 +49,10 @@ class BtTestStrategy(bt.Strategy):
     )
 
     def log(self, txt, dt=None, nodate=False):
-        """
-
-        :param txt:
-        :param dt:  (Default value = None)
-        :param nodate:  (Default value = False)
-
-        """
+        """Args:
+    txt: 
+    dt: (Default value = None)
+    nodate: (Default value = False)"""
         if not nodate:
             dt = dt or self.data.datetime[0]
             dt = bt.num2date(dt)
@@ -64,11 +61,8 @@ class BtTestStrategy(bt.Strategy):
             print("---------- %s" % (txt))
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status in [bt.Order.Submitted, bt.Order.Accepted]:
             return  # Await further notifications
 
@@ -173,11 +167,8 @@ chkdatas = 1
 
 
 def test_run(main=False):
-    """
-
-    :param main:  (Default value = False)
-
-    """
+    """Args:
+    main: (Default value = False)"""
     datas = [testcommon.getdata(i) for i in range(chkdatas)]
     cerebros = testcommon.runtest(
         datas,

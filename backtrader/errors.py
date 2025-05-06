@@ -40,12 +40,8 @@ class ModuleImportError(BacktraderError):
     """ """
 
     def __init__(self, message, *args):
-        """
-
-        :param message: Error message string.
-        :param *args: Additional arguments for context.
-
-        """
+        """Args:
+    message: Error message string."""
         super(ModuleImportError, self).__init__(message)
         self.args = args
 
@@ -54,10 +50,6 @@ class FromModuleImportError(ModuleImportError):
     """ """
 
     def __init__(self, message, *args):
-        """
-
-        :param message: Error message string.
-        :param *args: Additional arguments for context.
-
-        """
+        """Args:
+    message: Error message string."""
         super(FromModuleImportError, self).__init__(message, *args)

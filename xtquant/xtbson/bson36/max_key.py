@@ -26,18 +26,12 @@ class MaxKey(object):
         return {}
 
     def __setstate__(self, state):
-        """
-
-        :param state:
-
-        """
+        """Args:
+    state:"""
 
     def __eq__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return isinstance(other, MaxKey)
 
     def __hash__(self):
@@ -45,43 +39,28 @@ class MaxKey(object):
         return hash(self._type_marker)
 
     def __ne__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return not self == other
 
     def __le__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return isinstance(other, MaxKey)
 
     def __lt__(self, dummy):
-        """
-
-        :param dummy:
-
-        """
+        """Args:
+    dummy:"""
         return False
 
     def __ge__(self, dummy):
-        """
-
-        :param dummy:
-
-        """
+        """Args:
+    dummy:"""
         return True
 
     def __gt__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return not isinstance(other, MaxKey)
 
     def __repr__(self):

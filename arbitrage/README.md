@@ -4,7 +4,7 @@ Contains arbitrage strategy implementations. Primarily contains Python code, inc
 
 ## Navigation
 
-* [↑ Parent Directory (backtrader)](../README.md)
+* [🏠 Root Directory](../README.md)
 
 ### Subdirectories
 
@@ -22,59 +22,39 @@ Binary or data file
 
 ### CUSUM_GridSearch_CLI.py
 
-计算滚动 β，并为指定价格字段生成价差 (spread)： [Contains Chinese characters that should be translated]
-
 ### JM_J_strategy_CUSUM copy.py
-
-解析命令行参数 [Contains Chinese characters that should be translated]
 
 ### JM_J_strategy_CUSUM.py
 
-Parse command line arguments
-
 ### JM_J_strategy_CUSUM_GridSearch.py
-
-Calculate rolling β, and generate spread (spread_x = price0_x - β_{t-1} * price1_x) for specified price fields:
 
 ### JM_J_strategy_RSI_Bollinger_GridSearch.py
 
-计算滚动 β，并为指定价格字段生成价差 (spread)： [Contains Chinese characters that should be translated]
-
 ### JM_J_strategy_RSI_GridSearch.py
-
-计算滚动 β，并为指定价格字段生成价差 (spread)： [Contains Chinese characters that should be translated]
 
 ### JM_J_strategy_RSI_MACD_GridSearch.py
 
-计算滚动 β，并为指定价格字段生成价差 (spread)： [Contains Chinese characters that should be translated]
-
 ### JM_J_strategy_ZScore_GridSearch.py
-
-计算滚动 β，并为指定价格字段生成价差 (spread)： [Contains Chinese characters that should be translated]
 
 ### JM_J_strategy_adjust_pair_ratio.py
 
-Calculate rolling β and spread
-
 ### JM_J_strategy_trailing_stop.py
-
-Python module
 
 ### Kalman.py
 
-the df0 and df1 consist of data from 焦煤(JM) and 焦炭(J) respectively [Contains Chinese characters that should be translated]
+### README.md
+
+File with .md extension.
 
 ### common_strategy_utils.py
 
-Utilities for arbitrage strategies. Includes functions for initialization of
-
 ### concat_cusum.py
 
-批量跑 CUSUM 策略 → 导出每日收益 → 汇总 [Contains Chinese characters that should be translated]
+批量跑 CUSUM 策略 → 导出每日收益 → 汇总
+使用方法：
+    python run_pairs_cusum.py
 
 ### hold_rb.py
-
-
 
 ### log.txt
 
@@ -82,27 +62,21 @@ Documentation file
 
 ### myutil.py
 
-检查并对齐两个DataFrame的数据 [Contains Chinese characters that should be translated]
-
 ### pair_ratio.ipynb
 
 Binary or data file
 
 ### test.py
 
-:param df1:
-
 ### test_feedspread_yearly.py
-
-Check and align data from two DataFrames
-
 
 ## Directory Summary
 
-This directory contains 20 files and 5 subdirectories.
+This directory contains 21 files and 5 subdirectories.
 
 ### File Types
 
 * .py: 17 files
 * .ipynb: 2 files
+* .md: 1 files
 * .txt: 1 files

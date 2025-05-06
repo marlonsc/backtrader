@@ -42,12 +42,9 @@ close: float, close price
 
 # Function to calculate hedge ratio using Kalman Filter
 def calculate_dynamic_hedge_ratio(y, x):
-    """
-
-    :param y:
-    :param x:
-
-    """
+    """Args:
+    y: 
+    x:"""
     delta = 1e-5
     trans_cov = delta / (1 - delta) * np.eye(2)
 
@@ -72,11 +69,8 @@ def calculate_dynamic_hedge_ratio(y, x):
 
 # Calculate half-life of mean reversion
 def calculate_half_life(spread):
-    """
-
-    :param spread:
-
-    """
+    """Args:
+    spread:"""
     spread_lag = spread.shift(1).dropna()
     spread = spread.iloc[1:]
 
@@ -89,12 +83,9 @@ def calculate_half_life(spread):
 
 # Check cointegration using ADF test
 def check_cointegration(series_y, series_x):
-    """
-
-    :param series_y:
-    :param series_x:
-
-    """
+    """Args:
+    series_y: 
+    series_x:"""
     model = OLS(series_y, series_x).fit()
     hedge_ratio = model.params[0]
     spread = series_y - hedge_ratio * series_x
@@ -177,11 +168,8 @@ class KalmanPairTradingStrategy(bt.Strategy):
                 self.position_type = None
 
     def notify_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
+        """Args:
+    trade:"""
         if trade.isclosed:
             print(
                 f"TRADE {trade.ref} CLOSED, PROFIT: GROSS {trade.pnl:.2f}, NET"

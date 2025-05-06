@@ -4,9 +4,14 @@ Contains documentation. Primarily contains Documentation code and includes docum
 
 ## Navigation
 
-* [↑ Parent Directory (xtquant)](../README.md)
+* [🏠 Root Directory](../../README.md)
+* [⬆️ Parent Directory (xtquant)](../README.md)
 
 ## Files
+
+### README.md
+
+File with .md extension.
 
 ### xtdata.md
 
@@ -16,11 +21,10 @@ Documentation file
 
 Documentation file
 
-
 ## Directory Summary
 
-This directory contains 2 files and 0 subdirectories.
+This directory contains 3 files and 0 subdirectories.
 
 ### File Types
 
-* .md: 2 files
+* .md: 3 files

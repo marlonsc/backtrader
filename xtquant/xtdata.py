@@ -290,12 +290,13 @@ def _BSON_call_common(interface, func, param):
 
 
 def get_stock_list_in_sector(sector_name, real_timetag=-1):
-    """
-    获取板块成份股，支持客户端左侧板块列表中任意的板块，包括自定义板块
-    :param sector_name: (str)板块名称
-    :real_timetag: 时间：1512748800000 或 ‘20171209’，可缺省，缺省为获取最新成份，不缺省时获取对应时间的历史成份
-    :return: list
-    """
+    """获取板块成份股，支持客户端左侧板块列表中任意的板块，包括自定义板块
+
+Args:
+    sector_name: (str)板块名称
+
+Returns:
+    list"""
     client = get_client()
     for illegalstr in ["\\", "/", ":", "*", "?", '"', "<", ">", "|"]:
         sector_name = sector_name.replace(illegalstr, "")
@@ -312,11 +313,13 @@ def get_stock_list_in_sector(sector_name, real_timetag=-1):
 
 
 def get_index_weight(index_code):
-    """
-    获取某只股票在某指数中的绝对权重
-    :param index_code: (str)指数名称
-    :return: dict
-    """
+    """获取某只股票在某指数中的绝对权重
+
+Args:
+    index_code: (str)指数名称
+
+Returns:
+    dict"""
     client = get_client()
     return client.get_weight_in_index(index_code)
 
@@ -328,19 +331,16 @@ def get_financial_data(
     end_time="",
     report_type="report_time",
 ):
-    """
-     获取财务数据
-    :param stock_list: (list)合约代码列表
-    :param table_list: (list)报表名称列表
-    :param start_time: (str)起始时间
-    :param end_time: (str)结束时间
-    :param report_type: (str) 时段筛选方式 'announce_time' / 'report_time'
-    :return:
-        field: list[str]
-        date: list[int]
-        stock: list[str]
-        value: list[list[float]]
-    """
+    """获取财务数据
+
+Args:
+    stock_list: (list)合约代码列表
+    table_list: (list)报表名称列表
+    start_time: (str)起始时间
+    end_time: (str)结束时间
+    report_type: (str) 时段筛选方式 'announce_time' / 'report_time'
+
+Returns:"""
     client = get_client()
     all_table = {
         "Balance": "ASHAREBALANCESHEET",
@@ -466,59 +466,20 @@ def get_market_data(
     dividend_type="none",
     fill_data=True,
 ):
-    """
-    获取历史行情数据
-    :param field_list: 行情数据字段列表，[]为全部字段
-        K线可选字段：
-            "time"                #时间戳
-            "open"                #开盘价
-            "high"                #最高价
-            "low"                 #最低价
-            "close"               #收盘价
-            "volume"              #成交量
-            "amount"              #成交额
-            "settle"              #今结算
-            "openInterest"        #持仓量
-        分笔可选字段：
-            "time"                #时间戳
-            "lastPrice"           #最新价
-            "open"                #开盘价
-            "high"                #最高价
-            "low"                 #最低价
-            "lastClose"           #前收盘价
-            "amount"              #成交总额
-            "volume"              #成交总量
-            "pvolume"             #原始成交总量
-            "stockStatus"         #证券状态
-            "openInt"             #持仓量
-            "lastSettlementPrice" #前结算
-            "askPrice1", "askPrice2", "askPrice3", "askPrice4", "askPrice5" #卖一价~卖五价
-            "bidPrice1", "bidPrice2", "bidPrice3", "bidPrice4", "bidPrice5" #买一价~买五价
-            "askVol1", "askVol2", "askVol3", "askVol4", "askVol5"           #卖一量~卖五量
-            "bidVol1", "bidVol2", "bidVol3", "bidVol4", "bidVol5"           #买一量~买五量
-    :param stock_list: 股票代码 "000001.SZ"
-    :param period: 周期 分笔"tick" 分钟线"1m"/"5m"/"15m" 日线"1d"
-        Level2行情快照"l2quote" Level2行情快照补充"l2quoteaux" Level2逐笔委托"l2order" Level2逐笔成交"l2transaction" Level2大单统计"l2transactioncount" Level2委买委卖队列"l2orderqueue"
-        Level1逐笔成交统计一分钟“transactioncount1m” Level1逐笔成交统计日线“transactioncount1d”
-        期货仓单“warehousereceipt” 期货席位“futureholderrank” 互动问答“interactiveqa”
-    :param start_time: 起始时间 "20200101" "20200101093000"
-    :param end_time: 结束时间 "20201231" "20201231150000"
-    :param count: 数量 -1全部/n: 从结束时间向前数n个
-    :param dividend_type: 除权类型"none" "front" "back" "front_ratio" "back_ratio"
-    :param fill_data: 对齐时间戳时是否填充数据，仅对K线有效，分笔周期不对齐时间戳
-        为True时，以缺失数据的前一条数据填充
-            open、high、low、close 为前一条数据的close
-            amount、volume为0
-            settle、openInterest 和前一条数据相同
-        为False时，缺失数据所有字段填NaN
-    :return: 数据集，分笔数据和K线数据格式不同
-        period为'tick'时：{stock1 : value1, stock2 : value2, ...}
-            stock1, stock2, ... : 合约代码
-            value1, value2, ... : np.ndarray 数据列表，按time增序排列
-        period为其他K线周期时：{field1 : value1, field2 : value2, ...}
-            field1, field2, ... : 数据字段
-            value1, value2, ... : pd.DataFrame 字段对应的数据，各字段维度相同，index为stock_list，columns为time_list
-    """
+    """获取历史行情数据
+
+Args:
+    field_list: 行情数据字段列表，[]为全部字段
+    stock_list: 股票代码 "000001.SZ"
+    period: 周期 分笔"tick" 分钟线"1m"/"5m"/"15m" 日线"1d"
+    start_time: 起始时间 "20200101" "20200101093000"
+    end_time: 结束时间 "20201231" "20201231150000"
+    count: 数量 -1全部/n: 从结束时间向前数n个
+    dividend_type: 除权类型"none" "front" "back" "front_ratio" "back_ratio"
+    fill_data: 对齐时间戳时是否填充数据，仅对K线有效，分笔周期不对齐时间戳
+
+Returns:
+    数据集，分笔数据和K线数据格式不同"""
     if period in {
         "1m",
         "5m",
@@ -1189,12 +1150,14 @@ def get_l2_transaction(
 
 
 def get_divid_factors(stock_code, start_time="", end_time=""):
-    """
-    获取除权除息日及对应的权息
-    :param stock_code: (str)股票代码
-    :param date: (str)日期
-    :return: pd.DataFrame 数据集
-    """
+    """获取除权除息日及对应的权息
+
+Args:
+    stock_code: (str)股票代码
+    date: (str)日期
+
+Returns:
+    pd.DataFrame 数据集"""
     client = get_client()
     datas = client.get_divid_factors(stock_code, start_time, end_time)
     import pandas as pd
@@ -1340,12 +1303,14 @@ def datetime_to_timetag(datetime, format="%Y%m%d%H%M%S"):
 
 
 def timetag_to_datetime(timetag, format):
-    """
-    将毫秒时间转换成日期时间
-    :param timetag: (int)时间戳毫秒数
-    :param format: (str)时间格式
-    :return: str
-    """
+    """将毫秒时间转换成日期时间
+
+Args:
+    timetag: (int)时间戳毫秒数
+    format: (str)时间格式
+
+Returns:
+    str"""
     return timetagToDateTime(timetag, format)
 
 
@@ -1359,26 +1324,24 @@ def timetagToDateTime(timetag, format):
 
 
 def get_trading_dates(market, start_time="", end_time="", count=-1):
-    """
-    根据市场获取交易日列表
-    : param market: 市场代码 e.g. 'SH','SZ','IF','DF','SF','ZF'等
-    : param start_time: 起始时间 '20200101'
-    : param end_time: 结束时间 '20201231'
-    : param count: 数据个数，-1为全部数据
-    :return list(long) 毫秒数的时间戳列表
-    """
+    """根据市场获取交易日列表
+: param market: 市场代码 e.g. 'SH','SZ','IF','DF','SF','ZF'等
+: param start_time: 起始时间 '20200101'
+: param end_time: 结束时间 '20201231'
+: param count: 数据个数，-1为全部数据"""
     client = get_client()
     datas = client.get_trading_dates_by_market(market, start_time, end_time, count)
     return datas
 
 
 def get_full_tick(code_list):
-    """
-    获取盘口tick数据
-    :param code_list: (list)stock.market组成的股票代码列表
-    :return: dict
-    {'stock.market': {dict}}
-    """
+    """获取盘口tick数据
+
+Args:
+    code_list: (list)stock.market组成的股票代码列表
+
+Returns:
+    dict"""
     import json
 
     client = get_client()
@@ -1448,19 +1411,19 @@ def subscribe_callback_wrapper_convert(callback, metaid):
 def subscribe_quote(
     stock_code, period="1d", start_time="", end_time="", count=0, callback=None
 ):
-    """
-    订阅股票行情数据
-    :param stock_code: 股票代码 e.g. "000001.SZ"
-    :param period: 周期 分笔"tick" 分钟线"1m"/"5m" 日线"1d"等周期
-    :param start_time: 开始时间，格式YYYYMMDD/YYYYMMDDhhmmss/YYYYMMDDhhmmss.milli，e.g."20200427" "20200427093000" "20200427093000.000"
-        若取某日全量历史数据，时间需要具体到秒，e.g."20200427093000"
-    :param end_time: 结束时间 同“开始时间”
-    :param count: 数量 -1全部/n: 从结束时间向前数n个
-    :param callback:
-        订阅回调函数onSubscribe(datas)
-        :param datas: {stock : [data1, data2, ...]} 数据字典
-    :return: int 订阅序号
-    """
+    """订阅股票行情数据
+
+Args:
+    stock_code: 股票代码 e.g. "000001.SZ"
+    period: 周期 分笔"tick" 分钟线"1m"/"5m" 日线"1d"等周期
+    start_time: 开始时间，格式YYYYMMDD/YYYYMMDDhhmmss/YYYYMMDDhhmmss.milli，e.g."20200427" "20200427093000" "20200427093000.000"
+    end_time: 结束时间 同“开始时间”
+    count: 数量 -1全部/n: 从结束时间向前数n个
+    callback: 
+    datas: {stock : [data1, data2, ...]} 数据字典
+
+Returns:
+    int 订阅序号"""
     return subscribe_quote2(
         stock_code, period, start_time, end_time, count, None, callback
     )
@@ -1475,22 +1438,21 @@ def subscribe_quote2(
     dividend_type=None,
     callback=None,
 ):
-    """
-    订阅股票行情数据第二版
-    与第一版相比增加了除权参数dividend_type，默认None
+    """订阅股票行情数据第二版
+与第一版相比增加了除权参数dividend_type，默认None
 
-    :param stock_code: 股票代码 e.g. "000001.SZ"
-    :param period: 周期 分笔"tick" 分钟线"1m"/"5m" 日线"1d"等周期
-    :param start_time: 开始时间，格式YYYYMMDD/YYYYMMDDhhmmss/YYYYMMDDhhmmss.milli，e.g."20200427" "20200427093000" "20200427093000.000"
-        若取某日全量历史数据，时间需要具体到秒，e.g."20200427093000"
-    :param end_time: 结束时间 同“开始时间”
-    :param count: 数量 -1全部/n: 从结束时间向前数n个
-    :param dividend_type: 除权类型"none" "front" "back" "front_ratio" "back_ratio"
-    :param callback:
-        订阅回调函数onSubscribe(datas)
-        :param datas: {stock : [data1, data2, ...]} 数据字典
-    :return: int 订阅序号
-    """
+Args:
+    stock_code: 股票代码 e.g. "000001.SZ"
+    period: 周期 分笔"tick" 分钟线"1m"/"5m" 日线"1d"等周期
+    start_time: 开始时间，格式YYYYMMDD/YYYYMMDDhhmmss/YYYYMMDDhhmmss.milli，e.g."20200427" "20200427093000" "20200427093000.000"
+    end_time: 结束时间 同“开始时间”
+    count: 数量 -1全部/n: 从结束时间向前数n个
+    dividend_type: 除权类型"none" "front" "back" "front_ratio" "back_ratio"
+    callback: 
+    datas: {stock : [data1, data2, ...]} 数据字典
+
+Returns:
+    int 订阅序号"""
     if callback:
         needconvert, metaid = _needconvert_period(period)
         if needconvert:
@@ -1552,21 +1514,19 @@ def subscribe_l2thousand(stock_code, gear_num=0, callback=None):
 
 
 def subscribe_l2thousand_queue(stock_code, callback=None, gear=None, price=None):
-    """
-    根据档位或价格订阅千档
-    stock_code: 股票代码 e.g. "000001.SZ"
-    callback:
-        订阅回调函数onSubscribe(datas)
-    gear: 按档位订阅 eg.
-    price: 单个价格：float, 价格范围：eg.[8.66, 8.88], 一组价格list
-    return: int 订阅序号
-    例：
-    def on_data(datas):
-        for stock_code in datas:
-            print(stock_code, datas[stock_code])
-    subscribe_l2thousand_queue(‘000001.SZ’, callback = on_data, gear = 3)#订阅买卖3档数据
-    subscribe_l2thousand_queue(‘000001.SZ’, callback = on_data, price = (8.68, 8.88))#订阅[8.68, 8.88]价格区间的数据
-    """
+    """根据档位或价格订阅千档
+stock_code: 股票代码 e.g. "000001.SZ"
+callback:
+订阅回调函数onSubscribe(datas)
+gear: 按档位订阅 eg.
+price: 单个价格：float, 价格范围：eg.[8.66, 8.88], 一组价格list
+return: int 订阅序号
+例：
+def on_data(datas):
+for stock_code in datas:
+print(stock_code, datas[stock_code])
+subscribe_l2thousand_queue(‘000001.SZ’, callback = on_data, gear = 3)#订阅买卖3档数据
+subscribe_l2thousand_queue(‘000001.SZ’, callback = on_data, price = (8.68, 8.88))#订阅[8.68, 8.88]价格区间的数据"""
 
     if callback:
         callback = subscribe_callback_wrapper(callback)
@@ -1650,14 +1610,15 @@ def get_l2thousand_queue(stock_code, gear=None, price=None):
 
 
 def subscribe_whole_quote(code_list, callback=None):
-    """
-    订阅全推数据
-    :param code_list: 市场代码列表 ["SH", "SZ"]
-    :param callback:
-        订阅回调函数onSubscribe(datas)
-        :param datas: {stock1 : data1, stock2 : data2, ...} 数据字典
-    :return: int 订阅序号
-    """
+    """订阅全推数据
+
+Args:
+    code_list: 市场代码列表 ["SH", "SZ"]
+    callback: 
+    datas: {stock1 : data1, stock2 : data2, ...} 数据字典
+
+Returns:
+    int 订阅序号"""
     if callback:
         callback = subscribe_callback_wrapper(callback)
 
@@ -1666,10 +1627,10 @@ def subscribe_whole_quote(code_list, callback=None):
 
 
 def unsubscribe_quote(seq):
-    """
-    :param seq: 订阅接口subscribe_quote返回的订阅号
-    :return:
-    """
+    """Args:
+    seq: 订阅接口subscribe_quote返回的订阅号
+
+Returns:"""
     client = get_client()
     return client.unsubscribe_quote(seq)
 
@@ -1721,20 +1682,20 @@ def create_sector(parent_node, sector_name, overwrite=True):
 
 
 def get_sector_list():
-    """
-    获取板块列表
-    :return: (list[str])
-    """
+    """获取板块列表
+
+Returns:
+    (list[str])"""
     client = get_client()
     return client.get_sector_list()
 
 
 def add_sector(sector_name, stock_list):
-    """
-    增加自定义板块
-    :param sector_name: 板块名称 e.g. "我的自选"
-    :param stock_list: (list)stock.market组成的股票代码列表
-    """
+    """增加自定义板块
+
+Args:
+    sector_name: 板块名称 e.g. "我的自选"
+    stock_list: (list)stock.market组成的股票代码列表"""
     client = get_client()
     data = {}
     data["sectorname"] = sector_name
@@ -1745,11 +1706,10 @@ def add_sector(sector_name, stock_list):
 
 
 def remove_stock_from_sector(sector_name, stock_list):
-    """
-    移除板块成分股
-    :param sector_name: 板块名称 e.g. "我的自选"
-    :stock_list: (list)stock.market组成的股票代码列表
-    """
+    """移除板块成分股
+
+Args:
+    sector_name: 板块名称 e.g. "我的自选""""
     client = get_client()
     data = {}
     data["sectorname"] = sector_name
@@ -1762,10 +1722,10 @@ def remove_stock_from_sector(sector_name, stock_list):
 
 
 def remove_sector(sector_name):
-    """
-    删除自定义板块
-    :param sector_name: 板块名称 e.g. "我的自选"
-    """
+    """删除自定义板块
+
+Args:
+    sector_name: 板块名称 e.g. "我的自选""""
     client = get_client()
     data = {}
     data["sectorname"] = sector_name
@@ -1775,11 +1735,10 @@ def remove_sector(sector_name):
 
 
 def reset_sector(sector_name, stock_list):
-    """
-    重置板块
-    :param sector_name: 板块名称 e.g. "我的自选"
-    :stock_list: (list)stock.market组成的股票代码列表
-    """
+    """重置板块
+
+Args:
+    sector_name: 板块名称 e.g. "我的自选""""
     client = get_client()
     data = {}
     data["sectorname"] = sector_name
@@ -1805,37 +1764,13 @@ def _get_instrument_detail(stock_code):
 
 
 def get_instrument_detail(stock_code, iscomplete=False):
-    """
-    获取合约信息
-    :param stock_code: 股票代码 e.g. "600000.SH"
-    :return: dict
-        ExchangeID(str):合约市场代码
-        , InstrumentID(str):合约代码
-        , InstrumentName(str):合约名称
-        , ProductID(str):合约的品种ID(期货)
-        , ProductName(str):合约的品种名称(期货)
-        , ProductType(str):合约的类型
-        , ExchangeCode(str):交易所代码
-        , UniCode(str):统一规则代码
-        , CreateDate(str):上市日期(期货)
-        , OpenDate(str):IPO日期(股票)
-        , ExpireDate(str):退市日或者到期日
-        , PreClose(double):前收盘价格
-        , SettlementPrice(double):前结算价格
-        , UpStopPrice(double):当日涨停价
-        , DownStopPrice(double):当日跌停价
-        , FloatVolume(double):流通股本
-        , TotalVolume(double):总股本
-        , LongMarginRatio(double):多头保证金率
-        , ShortMarginRatio(double):空头保证金率
-        , PriceTick(double):最小变价单位
-        , VolumeMultiple(int):合约乘数(对期货以外的品种，默认是1)
-        , MainContract(int):主力合约标记
-        , LastVolume(int):昨日持仓量
-        , InstrumentStatus(int):合约停牌状态
-        , IsTrading(bool):合约是否可交易
-        , IsRecent(bool):是否是近月合约,
-    """
+    """获取合约信息
+
+Args:
+    stock_code: 股票代码 e.g. "600000.SH"
+
+Returns:
+    dict"""
 
     inst = _get_instrument_detail(stock_code)
     if not inst:
@@ -1968,18 +1903,12 @@ def _download_history_data(stock_code, period, start_time="", end_time=""):
 def download_history_data(
     stock_code, period, start_time="", end_time="", incrementally=None
 ):
-    """
-    :param stock_code: str 品种代码，例如：'000001.SZ'
-    :param period: str 数据周期
-    :param start_time: str 开始时间
-        格式为 YYYYMMDD 或 YYYYMMDDhhmmss 或 ''
-        例如：'20230101' '20231231235959'
-        空字符串代表全部，自动扩展到完整范围
-    :param end_time: str 结束时间 格式同开始时间
-    :param incrementally: 是否增量下载
-        bool: 是否增量下载
-        None: 使用start_time控制，start_time为空则增量下载
-    """
+    """Args:
+    stock_code: str 品种代码，例如：'000001.SZ'
+    period: str 数据周期
+    start_time: str 开始时间
+    end_time: str 结束时间 格式同开始时间
+    incrementally: 是否增量下载"""
 
     get_client()
 
@@ -2018,14 +1947,14 @@ def download_history_data2(
     callback=None,
     incrementally=None,
 ):
-    """
-    :param stock_list: 股票代码列表 e.g. ["000001.SZ"]
-    :param period: 周期 分笔"tick" 分钟线"1m"/"5m" 日线"1d"
-    :param start_time: 开始时间，格式YYYYMMDD/YYYYMMDDhhmmss/YYYYMMDDhhmmss.milli，e.g."20200427" "20200427093000" "20200427093000.000"
-        若取某日全量历史数据，时间需要具体到秒，e.g."20200427093000"
-    :param end_time: 结束时间 同上，若是未来某时刻会被视作当前时间
-    :return: bool 是否成功
-    """
+    """Args:
+    stock_list: 股票代码列表 e.g. ["000001.SZ"]
+    period: 周期 分笔"tick" 分钟线"1m"/"5m" 日线"1d"
+    start_time: 开始时间，格式YYYYMMDD/YYYYMMDDhhmmss/YYYYMMDDhhmmss.milli，e.g."20200427" "20200427093000" "20200427093000.000"
+    end_time: 结束时间 同上，若是未来某时刻会被视作当前时间
+
+Returns:
+    bool 是否成功"""
     client = get_client()
 
     if isinstance(stock_list, str):
@@ -2094,13 +2023,11 @@ def download_history_data2(
 def download_financial_data(
     stock_list, table_list=[], start_time="", end_time="", incrementally=None
 ):
-    """
-    :param stock_list: 股票代码列表
-    :param table_list: 财务数据表名列表，[]为全部表
-        可选范围：['Balance','Income','CashFlow','Capital','Top10FlowHolder','Top10Holder','HolderNum','PershareIndex']
-    :param start_time: 开始时间，格式YYYYMMDD，e.g."20200427"
-    :param end_time: 结束时间 同上，若是未来某时刻会被视作当前时间
-    """
+    """Args:
+    stock_list: 股票代码列表
+    table_list: 财务数据表名列表，[]为全部表
+    start_time: 开始时间，格式YYYYMMDD，e.g."20200427"
+    end_time: 结束时间 同上，若是未来某时刻会被视作当前时间"""
     get_client()
     if not table_list:
         table_list = [
@@ -2123,13 +2050,11 @@ def download_financial_data(
 def download_financial_data2(
     stock_list, table_list=[], start_time="", end_time="", callback=None
 ):
-    """
-    :param stock_list: 股票代码列表
-    :param table_list: 财务数据表名列表，[]为全部表
-        可选范围：['Balance','Income','CashFlow','Capital','Top10FlowHolder','Top10Holder','HolderNum','PershareIndex']
-    :param start_time: 开始时间，格式YYYYMMDD，e.g."20200427"
-    :param end_time: 结束时间 同上，若是未来某时刻会被视作当前时间
-    """
+    """Args:
+    stock_list: 股票代码列表
+    table_list: 财务数据表名列表，[]为全部表
+    start_time: 开始时间，格式YYYYMMDD，e.g."20200427"
+    end_time: 结束时间 同上，若是未来某时刻会被视作当前时间"""
     client = get_client()
     if not table_list:
         table_list = [
@@ -2163,11 +2088,13 @@ def download_financial_data2(
 
 
 def get_instrument_type(stock_code, variety_list=None):
-    """
-    判断证券类型
-    :param stock_code: 股票代码 e.g. "600000.SH"
-    :return: dict{str : bool} {类型名：是否属于该类型}
-    """
+    """判断证券类型
+
+Args:
+    stock_code: 股票代码 e.g. "600000.SH"
+
+Returns:
+    dict{str : bool} {类型名：是否属于该类型}"""
     client = get_client()
     v_dct = client.get_stock_type(stock_code)  # 默认处理得到全部品种的信息
     if not v_dct:
@@ -2208,10 +2135,10 @@ def download_holiday_data(incrementally=True):
 
 
 def get_holidays():
-    """
-    获取节假日列表
-    :return: 8位int型日期
-    """
+    """获取节假日列表
+
+Returns:
+    8位int型日期"""
     client = get_client()
     return [str(d) for d in client.get_holidays()]
 
@@ -2222,13 +2149,14 @@ def get_market_last_trade_date(market):
 
 
 def get_trading_calendar(market, start_time="", end_time=""):
-    """
-    获取指定市场交易日历
-    :param market: str 市场
-    :param start_time: str 起始时间 '20200101'
-    :param end_time: str 结束时间 '20201231'
-    :return:
-    """
+    """获取指定市场交易日历
+
+Args:
+    market: str 市场
+    start_time: str 起始时间 '20200101'
+    end_time: str 结束时间 '20201231'
+
+Returns:"""
     import datetime as dt
 
     if market not in ["SH", "SZ"]:
@@ -2276,14 +2204,13 @@ def get_trading_calendar(market, start_time="", end_time=""):
 
 
 def get_trading_time(stockcode):
-    """
-    返回指定股票的交易时段
-    :param stockcode:  代码.市场  例如 '600000.SH'
-    :return: 返回交易时段列表，第一位是开始时间，第二位结束时间，第三位交易类型   （2 - 开盘竞价， 3 - 连续交易， 8 - 收盘竞价， 9 - 盘后定价）
-    :note: 需要转换为datetime时，可以用以下方法转换
-            import datetime as dt
-            dt.datetime.combine(dt.date.today(), dt.time()) + dt.timedelta(seconds = 34200)
-    """
+    """返回指定股票的交易时段
+
+Args:
+    stockcode: 代码.市场  例如 '600000.SH'
+
+Returns:
+    返回交易时段列表，第一位是开始时间，第二位结束时间，第三位交易类型   （2 - 开盘竞价， 3 - 连续交易， 8 - 收盘竞价， 9 - 盘后定价）"""
     cl = get_client()
 
     split_codes = stockcode.rsplit(".", 1)
@@ -2570,12 +2497,14 @@ def get_option_list(undl_code, dedate, opttype="", isavailavle=False):
 
 
 def get_his_option_list(undl_code, dedate):
-    """
-    获取历史上某日的指定品种期权信息列表
-    :param undl_code: (str)标的代码，格式 stock.market e.g."000300.SH"
-    :param date: (str)日期 格式YYYYMMDD，e.g."20200427"
-    :return: dataframe
-    """
+    """获取历史上某日的指定品种期权信息列表
+
+Args:
+    undl_code: (str)标的代码，格式 stock.market e.g."000300.SH"
+    date: (str)日期 格式YYYYMMDD，e.g."20200427"
+
+Returns:
+    dataframe"""
     if not dedate:
         return None
 
@@ -2584,12 +2513,13 @@ def get_his_option_list(undl_code, dedate):
 
 
 def get_his_option_list_batch(undl_code, start_time="", end_time=""):
-    """
-    获取历史上某段时间的指定品种期权信息列表
-    :param undl_code: (str)标的代码，格式 stock.market e.g."000300.SH"
-    :param start_time，start_time: (str)日期 格式YYYYMMDD，e.g."20200427"
-    :return: {date : dataframe}
-    """
+    """获取历史上某段时间的指定品种期权信息列表
+
+Args:
+    undl_code: (str)标的代码，格式 stock.market e.g."000300.SH"
+
+Returns:
+    {date : dataframe}"""
     split_codes = undl_code.rsplit(".", 1)
     if len(split_codes) == 2:
         stockcode = split_codes[0]
@@ -2712,11 +2642,9 @@ def get_ipo_info(start_time="", end_time=""):
 
 
 def get_markets():
-    """
-    获取所有可选的市场
-    返回 dict
-        { <市场代码>: <市场名称>, ... }
-    """
+    """获取所有可选的市场
+返回 dict
+{ <市场代码>: <市场名称>, ... }"""
     return {
         "SH": "上交所",
         "SZ": "深交所",
@@ -3072,17 +3000,13 @@ def gen_factor_index(
 
 
 def create_formula(formula_name, formula_content, formula_params={}):
-    """
-    创建策略
-
-    formula_name: str 策略名称
-    formula_content: str 策略内容
-    formula_params: dict 策略参数
-
-    返回: None
-        如果成功，返回None
-        如果失败，会抛出异常信息
-    """
+    """创建策略
+formula_name: str 策略名称
+formula_content: str 策略内容
+formula_params: dict 策略参数
+返回: None
+如果成功，返回None
+如果失败，会抛出异常信息"""
     data = {"formula_name": formula_name, "content": formula_content}
 
     if formula_params:
@@ -3092,13 +3016,10 @@ def create_formula(formula_name, formula_content, formula_params={}):
 
 
 def import_formula(formula_name, file_path):
-    """
-    导入策略
-
-    formula_name: str 策略名称
-    file_path: str 文件路径
-        一般为.rzrk文件，可以从qmt客户端导出得到
-    """
+    """导入策略
+formula_name: str 策略名称
+file_path: str 文件路径
+一般为.rzrk文件，可以从qmt客户端导出得到"""
     return _BSON_call_common(
         get_client().commonControl,
         "importformula",
@@ -3107,11 +3028,8 @@ def import_formula(formula_name, file_path):
 
 
 def del_formula(formula_name):
-    """
-    删除策略
-
-    formula_name: str 策略名称
-    """
+    """删除策略
+formula_name: str 策略名称"""
     return _BSON_call_common(
         get_client().commonControl, "delformula", {"formula_name": formula_name}
     )
@@ -3125,11 +3043,13 @@ def get_formulas():
 
 
 def read_feather(file_path):
-    """
-    读取feather格式的arrow文件
-    :param file_path: (str)
-    :return: param_bin: (dict), df: (pandas.DataFrame)
-    """
+    """读取feather格式的arrow文件
+
+Args:
+    file_path: (str)
+
+Returns:
+    param_bin: (dict), df: (pandas.DataFrame)"""
     import sys
 
     if sys.version_info.major > 2:
@@ -3158,13 +3078,15 @@ def read_feather(file_path):
 
 
 def write_feather(dest_path, param, df):
-    """
-    将panads.DataFrame转换为arrow.Table以feather格式写入文件
-    :param dest_path: (str)路径
-    :param param: (dict) schema的metadata
-    :param df: (pandas.DataFrame) 数据
-    :return: (bool) 成功/失败
-    """
+    """将panads.DataFrame转换为arrow.Table以feather格式写入文件
+
+Args:
+    dest_path: (str)路径
+    param: (dict) schema的metadata
+    df: (pandas.DataFrame) 数据
+
+Returns:
+    (bool) 成功/失败"""
     import json
     import sys
 
@@ -3186,14 +3108,12 @@ def write_feather(dest_path, param, df):
 
 class QuoteServer:
     def __init__(self, info={}):
-        """
-        info: {
-            'ip': '218.16.123.121'
-            , 'port': 55300
-            , 'username': 'test'
-            , 'pwd': 'testpwd'
-        }
-        """
+        """info: {
+'ip': '218.16.123.121'
+, 'port': 55300
+, 'username': 'test'
+, 'pwd': 'testpwd'
+}"""
         self.info = info
 
         ip = info.get("ip", None)
@@ -3245,18 +3165,15 @@ class QuoteServer:
         return
 
     def set_key(self, key_list=[]):
-        """
-        设置数据key到这个地址，后续会使用这个地址获取key对应的市场数据
-
-        key_list: [key, ...]
-        key:
-            f'{market}_{level}'
-        market:
-            SH, SZ, ...
-        level:
-            'L1' # level 1
-            'L2' # level 2
-        """
+        """设置数据key到这个地址，后续会使用这个地址获取key对应的市场数据
+key_list: [key, ...]
+key:
+f'{market}_{level}'
+market:
+SH, SZ, ...
+level:
+'L1' # level 1
+'L2' # level 2"""
         cl = get_client()
 
         result = self._BSON_call_common(
@@ -3330,11 +3247,8 @@ class QuoteServer:
 
 
 def get_quote_server_config():
-    """
-    获取连接配置
-
-    result: [info, ...]
-    """
+    """获取连接配置
+result: [info, ...]"""
     cl = get_client()
 
     inst = _BSON_call_common(cl.commonControl, "getquoteserverconfig", {})
@@ -3345,14 +3259,11 @@ def get_quote_server_config():
 
 
 def get_quote_server_status():
-    """
-    获取当前全局连接状态
-
-    result: {
-        quote_key: info
-        , ...
-    }
-    """
+    """获取当前全局连接状态
+result: {
+quote_key: info
+, ...
+}"""
     cl = get_client()
 
     inst = _BSON_call_common(cl.commonControl, "getquoteserverstatus", {})
@@ -3367,14 +3278,11 @@ def get_quote_server_status():
 
 
 def watch_quote_server_status(callback):
-    """
-    监控全局连接状态变化
-
-    def callback(info):
-        #info: {address : 'ip:port', status: ''}
-        #status: 'connected', 'disconnected'
-        return
-    """
+    """监控全局连接状态变化
+def callback(info):
+#info: {address : 'ip:port', status: ''}
+#status: 'connected', 'disconnected'
+return"""
     cl = get_client()
 
     if callback:
@@ -3568,14 +3476,11 @@ def get_broker_queue_data(
 
 
 def watch_xtquant_status(callback):
-    """
-    监控xtquant连接状态变化
-
-    def callback(info):
-        #info: {address : 'ip:port', status: ''}
-        #status: 'connected', 'disconnected'
-        return
-    """
+    """监控xtquant连接状态变化
+def callback(info):
+#info: {address : 'ip:port', status: ''}
+#status: 'connected', 'disconnected'
+return"""
     if callback:
         callback = subscribe_callback_wrapper(callback)
 
@@ -3639,38 +3544,36 @@ def generate_index_data(
     fill_value=float("nan"),
     result_path=None,
 ):
-    """
-    formula_name:
-        str 模型名称
-    formula_param:
-        dict 模型参数
-            例如 {'param1': 1.0, 'param2': 'sym'}
-    stock_list:
-        list 股票列表
-    period:
-        str 周期
-            '1m' '5m' '1d'
-    dividend_type:
-        str 复权方式
-            'none' - 不复权
-            'front_ratio' - 等比前复权
-            'back_ratio' - 等比后复权
-    start_time:
-        str 起始时间 '20240101' '20240101000000'
-        '' - '19700101'
-    end_time:
-        str 结束时间 '20241231' '20241231235959'
-        '' - '20380119'
-    fill_mode:
-        str 空缺填充方式
-            'fixed' - 固定值填充
-            'forward' - 向前延续
-    fill_value:
-        float 填充数值
-            float('nan') - 以NaN填充
-    result_path:
-        str 结果文件路径，feather格式
-    """
+    """formula_name:
+str 模型名称
+formula_param:
+dict 模型参数
+例如 {'param1': 1.0, 'param2': 'sym'}
+stock_list:
+list 股票列表
+period:
+str 周期
+'1m' '5m' '1d'
+dividend_type:
+str 复权方式
+'none' - 不复权
+'front_ratio' - 等比前复权
+'back_ratio' - 等比后复权
+start_time:
+str 起始时间 '20240101' '20240101000000'
+'' - '19700101'
+end_time:
+str 结束时间 '20241231' '20241231235959'
+'' - '20380119'
+fill_mode:
+str 空缺填充方式
+'fixed' - 固定值填充
+'forward' - 向前延续
+fill_value:
+float 填充数值
+float('nan') - 以NaN填充
+result_path:
+str 结果文件路径，feather格式"""
     cl = get_client()
 
     result = _BSON_call_common(cl.commonControl, "createrequestid", {})
@@ -3736,32 +3639,29 @@ def download_tabular_data(
     download_type="validationbypage",
     source="",
 ):
-    """
-    下载表数据，可以按条数或按时间范围下载
-
-    stock_list:
-        list 股票列表
-    period:
-        str 周期
-            '1m' '5m' '1d'
-    start_time:
-        str 起始时间 '20240101' '20240101000000'
-        '' - '19700101'
-    end_time:
-        str 结束时间 '20241231' '20241231235959'
-        '' - '20380119'
-    incrementally:
-        bool 是否增量
-            'fixed' - 固定值填充
-            'forward' - 向前延续
-    download_type:
-        str 下载类型
-            'bypage' - 按条数下载
-            'byregion' - 按时间范围下载
-            'validatebypage' - 数据校验按条数下载
-    source:
-        str 指定下载地址
-    """
+    """下载表数据，可以按条数或按时间范围下载
+stock_list:
+list 股票列表
+period:
+str 周期
+'1m' '5m' '1d'
+start_time:
+str 起始时间 '20240101' '20240101000000'
+'' - '19700101'
+end_time:
+str 结束时间 '20241231' '20241231235959'
+'' - '20380119'
+incrementally:
+bool 是否增量
+'fixed' - 固定值填充
+'forward' - 向前延续
+download_type:
+str 下载类型
+'bypage' - 按条数下载
+'byregion' - 按时间范围下载
+'validatebypage' - 数据校验按条数下载
+source:
+str 指定下载地址"""
     if incrementally is None:
         incrementally = False if start_time else True
 
@@ -3826,14 +3726,11 @@ def download_tabular_data(
 
 
 def get_trading_contract_list(stockcode, date=None):
-    """
-    获取当前主力合约可交易标的列表
-
-    stockcode:
-        str, 合约代码，需要用主力合约
-    date:
-        str, 查询日期， 8位日期格式，默认为最新交易日
-    """
+    """获取当前主力合约可交易标的列表
+stockcode:
+str, 合约代码，需要用主力合约
+date:
+str, 查询日期， 8位日期格式，默认为最新交易日"""
     split_codes = stockcode.rsplit(".", 1)
     if len(split_codes) == 2:
         code = split_codes[0]
@@ -3883,22 +3780,20 @@ def get_trading_contract_list(stockcode, date=None):
 
 
 def get_trading_period(stock_code):
-    """
-    获取合约最新交易时间段
-    stock_code: 合约市场代码，例如：600000.SH
-    返回值：dict
-        {market, codeRegex, product, category, tradings: [type, bartime:[dayoffset, start, end]]}
-    market:市场
-    codeRegex:代码匹配规则
-    product:产品类型
-    category:证券分类
-    codeRegex, product, category，三个规则，每次只有一个规则有数据。数据中*代表任意
-    tradings, list:
-        type:交易类型(2盘前竞价，3连续交易，8尾盘竞价)
-        dayoffset:交易日偏移
-        start, int:开始时间,时分秒
-        end, int:结束时间,时分秒
-    """
+    """获取合约最新交易时间段
+stock_code: 合约市场代码，例如：600000.SH
+返回值：dict
+{market, codeRegex, product, category, tradings: [type, bartime:[dayoffset, start, end]]}
+market:市场
+codeRegex:代码匹配规则
+product:产品类型
+category:证券分类
+codeRegex, product, category，三个规则，每次只有一个规则有数据。数据中*代表任意
+tradings, list:
+type:交易类型(2盘前竞价，3连续交易，8尾盘竞价)
+dayoffset:交易日偏移
+start, int:开始时间,时分秒
+end, int:结束时间,时分秒"""
     cl = get_client()
 
     result = _BSON_call_common(

@@ -38,11 +38,8 @@ chkargs = dict()
 
 
 def test_run(main=False):
-    """
-
-    :param main: (Default value = False)
-
-    """
+    """Args:
+    main: (Default value = False)"""
     for runonce in [True, False]:
         data = testcommon.getdata(0)
         data.resample(timeframe=bt.TimeFrame.Weeks, compression=1)

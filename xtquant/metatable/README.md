@@ -4,31 +4,28 @@ Directory containing metatable related files. Primarily contains Python code.
 
 ## Navigation
 
-* [↑ Parent Directory (xtquant)](../README.md)
+* [🏠 Root Directory](../../README.md)
+* [⬆️ Parent Directory (xtquant)](../README.md)
 
 ## Files
 
-### __init__.py
+### README.md
 
-Python module
+File with .md extension.
+
+### __init__.py
 
 ### get_arrow.py
 
-:param codes:
-
 ### get_bson.py
-
-根据字段解析metaid和field [Contains Chinese characters that should be translated]
 
 ### meta_config.py
 
-下载metatable信息 [Contains Chinese characters that should be translated]
-
-
 ## Directory Summary
 
-This directory contains 4 files and 0 subdirectories.
+This directory contains 5 files and 0 subdirectories.
 
 ### File Types
 
 * .py: 4 files
+* .md: 1 files

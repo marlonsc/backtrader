@@ -4,7 +4,8 @@ Directory containing xtbson related files. Primarily contains Python code.
 
 ## Navigation
 
-* [↑ Parent Directory (xtquant)](../README.md)
+* [🏠 Root Directory](../../README.md)
+* [⬆️ Parent Directory (xtquant)](../README.md)
 
 ### Subdirectories
 
@@ -13,15 +14,17 @@ Directory containing xtbson related files. Primarily contains Python code.
 
 ## Files
 
+### README.md
+
+File with .md extension.
+
 ### __init__.py
-
-Python module
-
 
 ## Directory Summary
 
-This directory contains 1 files and 2 subdirectories.
+This directory contains 2 files and 2 subdirectories.
 
 ### File Types
 
+* .md: 1 files
 * .py: 1 files

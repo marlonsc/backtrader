@@ -58,14 +58,9 @@ class St(bt.Strategy):
     data_live = False
 
     def notify_data(self, data, status, *args, **kwargs):
-        """
-
-        :param data:
-        :param status:
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Args:
+    data: 
+    status:"""
         print("*" * 5, "DATA NOTIF:", data._getstatusname(status), *args)
         if (
             self.datas[0]._laststatus == self.datas[0].LIVE
@@ -102,11 +97,8 @@ compression = 5
 
 
 def run(args=None):
-    """
-
-    :param args:  (Default value = None)
-
-    """
+    """Args:
+    args: (Default value = None)"""
     cerebro = bt.Cerebro(stdstats=False)
     store = bt.stores.IBStore(
         port=7497,

@@ -4,7 +4,7 @@ Contains backtesting functionality. Primarily contains Python code and includes 
 
 ## Navigation
 
-* [↑ Parent Directory (backtrader)](../README.md)
+* [🏠 Root Directory](../README.md)
 
 ### Subdirectories
 
@@ -16,20 +16,22 @@ Contains backtesting functionality. Primarily contains Python code and includes 
 
 ## Files
 
-### __init__.py
+### README.md
 
-Python module
+File with .md extension.
+
+### __init__.py
 
 ### requirements.txt
 
 Documentation file
 
-
 ## Directory Summary
 
-This directory contains 2 files and 5 subdirectories.
+This directory contains 3 files and 5 subdirectories.
 
 ### File Types
 
+* .md: 1 files
 * .py: 1 files
 * .txt: 1 files

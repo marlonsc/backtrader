@@ -4,35 +4,30 @@ Contains broker implementations. Primarily contains Python code.
 
 ## Navigation
 
-* [↑ Parent Directory (backtrader)](../README.md)
+* [🏠 Root Directory](../../README.md)
+* [⬆️ Parent Directory (backtrader)](../README.md)
 
 ## Files
 
-### __init__.py
+### README.md
 
-Python module
+File with .md extension.
+
+### __init__.py
 
 ### bbroker.py
 
-Broker Simulator
-
 ### ibbroker.py
-
-
 
 ### oandabroker.py
 
-
-
 ### vcbroker.py
-
-Commissions are calculated by ib, but the trades calculations in the
-
 
 ## Directory Summary
 
-This directory contains 5 files and 0 subdirectories.
+This directory contains 6 files and 0 subdirectories.
 
 ### File Types
 
 * .py: 5 files
+* .md: 1 files

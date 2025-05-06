@@ -4,9 +4,13 @@ Directory containing prompts related files. Primarily contains Documentation cod
 
 ## Navigation
 
-* [↑ Parent Directory (backtrader)](../README.md)
+* [🏠 Root Directory](../README.md)
 
 ## Files
+
+### README.md
+
+File with .md extension.
 
 ### bb_upper_breakout.md
 
@@ -16,11 +20,10 @@ Documentation file
 
 Documentation file
 
-
 ## Directory Summary
 
-This directory contains 2 files and 0 subdirectories.
+This directory contains 3 files and 0 subdirectories.
 
 ### File Types
 
-* .md: 2 files
+* .md: 3 files

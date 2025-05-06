@@ -4,19 +4,22 @@ Directory containing signals-strategy related files. Primarily contains Python c
 
 ## Navigation
 
-* [↑ Parent Directory (samples)](../README.md)
+* [🏠 Root Directory](../../README.md)
+* [⬆️ Parent Directory (samples)](../README.md)
 
 ## Files
 
+### README.md
+
+File with .md extension.
+
 ### signals-strategy.py
-
-
-
 
 ## Directory Summary
 
-This directory contains 1 files and 0 subdirectories.
+This directory contains 2 files and 0 subdirectories.
 
 ### File Types
 
+* .md: 1 files
 * .py: 1 files

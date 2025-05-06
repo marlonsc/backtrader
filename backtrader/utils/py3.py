@@ -57,51 +57,33 @@ if PY2:
     bstr = bytes
 
     def iterkeys(d):
-        """
-
-        :param d:
-
-        """
+        """Args:
+    d:"""
         return d.iterkeys()
 
     def itervalues(d):
-        """
-
-        :param d:
-
-        """
+        """Args:
+    d:"""
         return d.itervalues()
 
     def iteritems(d):
-        """
-
-        :param d:
-
-        """
+        """Args:
+    d:"""
         return d.iteritems()
 
     def keys(d):
-        """
-
-        :param d:
-
-        """
+        """Args:
+    d:"""
         return d.keys()
 
     def values(d):
-        """
-
-        :param d:
-
-        """
+        """Args:
+    d:"""
         return d.values()
 
     def items(d):
-        """
-
-        :param d:
-
-        """
+        """Args:
+    d:"""
         return d.items()
 
 else:
@@ -126,76 +108,49 @@ else:
     long = int
 
     def cmp(a, b):
-        """
-
-        :param a:
-        :param b:
-
-        """
+        """Args:
+    a: 
+    b:"""
         return (a > b) - (a < b)
 
     def bytes(x):
-        """
-
-        :param x:
-
-        """
+        """Args:
+    x:"""
         return x.encode("utf-8")
 
     def bstr(x):
-        """
-
-        :param x:
-
-        """
+        """Args:
+    x:"""
         return str(x)
 
     def iterkeys(d):
-        """
-
-        :param d:
-
-        """
+        """Args:
+    d:"""
         return iter(d.keys())
 
     def itervalues(d):
-        """
-
-        :param d:
-
-        """
+        """Args:
+    d:"""
         return iter(d.values())
 
     def iteritems(d):
-        """
-
-        :param d:
-
-        """
+        """Args:
+    d:"""
         return iter(d.items())
 
     def keys(d):
-        """
-
-        :param d:
-
-        """
+        """Args:
+    d:"""
         return list(d.keys())
 
     def values(d):
-        """
-
-        :param d:
-
-        """
+        """Args:
+    d:"""
         return list(d.values())
 
     def items(d):
-        """
-
-        :param d:
-
-        """
+        """Args:
+    d:"""
         return list(d.items())
 
 
@@ -203,10 +158,8 @@ else:
 def with_metaclass(meta, *bases):
     """Create a base class with a metaclass.
 
-    :param meta:
-    :param *bases:
-
-    """
+Args:
+    meta:"""
 
     # This requires a bit of explanation: the basic idea is to make a dummy
     # metaclass for one level of class instantiation that replaces itself with
@@ -215,13 +168,10 @@ def with_metaclass(meta, *bases):
         """ """
 
         def __new__(cls, name, this_bases, d):
-            """
-
-            :param name:
-            :param this_bases:
-            :param d:
-
-            """
+            """Args:
+    name: 
+    this_bases: 
+    d:"""
             return meta(name, bases, d)
 
     return type.__new__(metaclass, str("temporary_class"), (), {})

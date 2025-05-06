@@ -33,24 +33,17 @@ import backtrader as bt
 
 class TheStrategy(bt.Strategy):
     """This strategy is loosely based on some of the examples from the Van
-    K. Tharp book: *Trade Your Way To Financial Freedom*. The logic:
-
-      - Enter the market if:
-        - The MACD.macd line crosses the MACD.signal line to the upside
-        - The Simple Moving Average has a negative direction in the last x
-          periods (actual value below value x periods ago)
-
-     - Set a stop price x times the ATR value away from the close
-
-     - If in the market:
-
-       - Check if the current close has gone below the stop price. If yes,
-         exit.
-       - If not, update the stop price if the new stop price would be higher
-         than the current
-
-
-    """
+K. Tharp book: *Trade Your Way To Financial Freedom*. The logic:
+- Enter the market if:
+- The MACD.macd line crosses the MACD.signal line to the upside
+- The Simple Moving Average has a negative direction in the last x
+periods (actual value below value x periods ago)
+- Set a stop price x times the ATR value away from the close
+- If in the market:
+- Check if the current close has gone below the stop price. If yes,
+exit.
+- If not, update the stop price if the new stop price would be higher
+than the current"""
 
     params = (
         ("use_target_size", False),
@@ -59,11 +52,8 @@ class TheStrategy(bt.Strategy):
     )
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status == order.Completed:
             pass
 
@@ -134,11 +124,8 @@ class TheStrategy(bt.Strategy):
 
 
 def runstrat(args=None):
-    """
-
-    :param args:  (Default value = None)
-
-    """
+    """Args:
+    args: (Default value = None)"""
     args = parse_args(args)
 
     cerebro = bt.Cerebro()
@@ -174,11 +161,8 @@ def runstrat(args=None):
 
 
 def parse_args(pargs=None):
-    """
-
-    :param pargs:  (Default value = None)
-
-    """
+    """Args:
+    pargs: (Default value = None)"""
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

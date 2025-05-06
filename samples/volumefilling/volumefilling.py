@@ -40,11 +40,8 @@ class St(bt.Strategy):
     )
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         print("-- NOTIFY ORDER BEGIN")
         print(order)
         print("-- NOTIFY ORDER END")

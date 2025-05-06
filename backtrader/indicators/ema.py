@@ -30,20 +30,13 @@ from . import ExponentialSmoothing, MovingAverageBase
 
 class ExponentialMovingAverage(MovingAverageBase):
     """A Moving Average that smoothes data exponentially over time.
-    
-    It is a subclass of SmoothingMovingAverage.
-    
-      - self.smfactor -> 2 / (1 + period)
-      - self.smfactor1 -> `1 - self.smfactor`
-    
-    Formula:
-      - movav = prev * (1.0 - smoothfactor) + newdata * smoothfactor
-    
-    See also:
-      - http://en.wikipedia.org/wiki/Moving_average#Exponential_moving_average
-
-
-    """
+It is a subclass of SmoothingMovingAverage.
+- self.smfactor -> 2 / (1 + period)
+- self.smfactor1 -> `1 - self.smfactor`
+Formula:
+- movav = prev * (1.0 - smoothfactor) + newdata * smoothfactor
+See also:
+- http://en.wikipedia.org/wiki/Moving_average#Exponential_moving_average"""
 
     alias = (
         "EMA",

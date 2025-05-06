@@ -30,9 +30,8 @@ class ListenerBase(with_metaclass(MetaParams, object)):
     def start(self, cerebro):
         """Called at the start of the run. Receives the Cerebro instance.
 
-        :param cerebro: The Cerebro engine instance.
-
-        """
+Args:
+    cerebro: The Cerebro engine instance."""
 
     def stop(self):
         """ """

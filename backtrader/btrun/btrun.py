@@ -18,13 +18,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-"""
-btrun.py - Backtrader command-line runner for strategies, analyzers, and data feeds.
-
+"""btrun.py - Backtrader command-line runner for strategies, analyzers, and data feeds.
 This module provides a command-line interface to configure and run backtrader
 strategies, analyzers, observers, and data feeds. It supports modular extension
-and dynamic loading of user components.
-"""
+and dynamic loading of user components."""
 
 from __future__ import (
     absolute_import,
@@ -121,9 +118,8 @@ logger = logging.getLogger(__name__)
 def safe_kwargs_parse(s):
     """Safely parse a string of key=value pairs into a dict.
 
-    :param s: 
-
-    """
+Args:
+    s:"""
     if not s.strip():
         return {}
     try:
@@ -137,16 +133,11 @@ def safe_kwargs_parse(s):
 def btrun(pargs=""):
     """Run the Backtrader command-line interface with the given arguments.
 
-    :param pargs: Command-line arguments as a string. Defaults to
-            "".
-    :type pargs: str
-    :returns: None
-    Side Effects:
-        Configures and runs a Backtrader Cerebro instance, loads data, strategies,
-        analyzers, observers, and writers as specified by the arguments. May plot
-        results or print analyzer output. Exits the process on critical errors.
+Args:
+    pargs: Command-line arguments as a string. Defaults to
 
-    """
+Returns:
+    None"""
     args = parse_args(pargs)
 
     if args.flush:
@@ -245,15 +236,14 @@ def btrun(pargs=""):
 
 def setbroker(args, cerebro):
     """Configure the broker instance in Cerebro with cash, commission, margin, and
-    slippage settings from the parsed arguments.
+slippage settings from the parsed arguments.
 
-    :param args: Parsed command-line arguments.
-    :param cerebro: The Backtrader Cerebro instance to configure.
-    :returns: None
-    Side Effects:
-        Modifies the broker state in the Cerebro instance.
+Args:
+    args: Parsed command-line arguments.
+    cerebro: The Backtrader Cerebro instance to configure.
 
-    """
+Returns:
+    None"""
     broker = cerebro.getbroker()
 
     if args.cash is not None:
@@ -345,16 +335,15 @@ def getdatas(args):
 
 def getmodclasses(mod, clstype, clsname=None):
     """Retrieve classes of a given type from a module, optionally filtering by class
-    name.
+name.
 
-    :param mod: The module to search for classes.
-    :param clstype: The base class type to match.
-    :param clsname: Specific class name to match. Defaults to None.
-    :type clsname: str
-    :returns: List of matching class objects.
-    :rtype: list
+Args:
+    mod: The module to search for classes.
+    clstype: The base class type to match.
+    clsname: Specific class name to match. Defaults to None.
 
-    """
+Returns:
+    List of matching class objects."""
     clsmembers = inspect.getmembers(mod, inspect.isclass)
 
     clslist = list()
@@ -374,15 +363,14 @@ def getmodclasses(mod, clstype, clsname=None):
 
 def getmodfunctions(mod, funcname=None):
     """Retrieve functions or methods from a module, optionally filtering by function
-    name.
+name.
 
-    :param mod: The module to search for functions.
-    :param funcname: Specific function name to match. Defaults to None.
-    :type funcname: str
-    :returns: List of matching function or method objects.
-    :rtype: list
+Args:
+    mod: The module to search for functions.
+    funcname: Specific function name to match. Defaults to None.
 
-    """
+Returns:
+    List of matching function or method objects."""
     members = inspect.getmembers(mod, inspect.isfunction) + inspect.getmembers(
         mod, inspect.ismethod
     )
@@ -401,17 +389,14 @@ def getmodfunctions(mod, funcname=None):
 
 def loadmodule(modpath, modname=""):
     """Dynamically load a Python module from a file path, optionally with a given
-    module name.
+module name.
 
-    :param modpath: Path to the module file.
-    :type modpath: str
-    :param modname: Name to assign to the loaded module. Defaults to
-            "".
-    :type modname: str
-    :returns: (module object or None, exception or None)
-    :rtype: tuple
+Args:
+    modpath: Path to the module file.
+    modname: Name to assign to the loaded module. Defaults to
 
-    """
+Returns:
+    (module object or None, exception or None)"""
     if not modpath.endswith(".py"):
         modpath += ".py"
     if not modname:
@@ -430,19 +415,16 @@ def loadmodule(modpath, modname=""):
 
 def getobjects(iterable, clsbase, modbase, issignal=False):
     """Load and instantiate objects (classes) from modules or built-in modules,
-    optionally handling signal types.
+optionally handling signal types.
 
-    :param iterable: List of module/class/kwargs specifiers.
-    :type iterable: list
-    :param clsbase: Base class type to match.
-    :param modbase: Default module to use if not specified.
-    :param issignal: Whether to handle signal type parsing.
-            Defaults to False.
-    :type issignal: bool
-    :returns: List of (class, kwargs) or (class, kwargs, sigtype) tuples.
-    :rtype: list
+Args:
+    iterable: List of module/class/kwargs specifiers.
+    clsbase: Base class type to match.
+    modbase: Default module to use if not specified.
+    issignal: Whether to handle signal type parsing.
 
-    """
+Returns:
+    List of (class, kwargs) or (class, kwargs, sigtype) tuples."""
     retobjects = list()
 
     for item in iterable or []:
@@ -496,13 +478,12 @@ def getobjects(iterable, clsbase, modbase, issignal=False):
 def getfunctions(iterable, modbase):
     """Load and return functions from modules or built-in modules.
 
-    :param iterable: List of module/function/kwargs specifiers.
-    :type iterable: list
-    :param modbase: Default module to use if not specified.
-    :returns: List of (function, kwargs) tuples.
-    :rtype: list
+Args:
+    iterable: List of module/function/kwargs specifiers.
+    modbase: Default module to use if not specified.
 
-    """
+Returns:
+    List of (function, kwargs) tuples."""
     retfunctions = list()
 
     for item in iterable or []:
@@ -546,12 +527,11 @@ def getfunctions(iterable, modbase):
 def parse_args(pargs=""):
     """Parse command-line arguments for the Backtrader runner.
 
-    :param pargs: Arguments as a string. Defaults to "".
-    :type pargs: str
-    :returns: Parsed arguments namespace.
-    :rtype: argparse.Namespace
+Args:
+    pargs: Arguments as a string. Defaults to "".
 
-    """
+Returns:
+    Parsed arguments namespace."""
     parser = argparse.ArgumentParser(
         description="Backtrader Run Script",
         formatter_class=argparse.RawTextHelpFormatter,

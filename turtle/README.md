@@ -4,29 +4,25 @@ Directory containing turtle related files. Primarily contains Python code.
 
 ## Navigation
 
-* [↑ Parent Directory (backtrader)](../README.md)
+* [🏠 Root Directory](../README.md)
 
 ### Subdirectories
 
-* [data](data/README.md) - Contains data files
+* [data](data/README.md) - This directory contains data files used for backtesting and analysis
 
 ## Files
 
-### a300.py
+### README.md
 
-Python module (Contains non-English content that should be translated)
+File with .md extension.
+
+### a300.py
 
 ### baostock_wrapper.py
 
-
-
 ### bs.py
 
-Python module (Contains non-English content that should be translated)
-
 ### csv_viewer.py
-
-
 
 ### log
 
@@ -34,25 +30,17 @@ Binary or data file
 
 ### main.py
 
-
-
 ### sma.py
-
-
 
 ### sma_detector.py
 
-:param df:
-
 ### z500.py
-
-Python module (Contains non-English content that should be translated)
-
 
 ## Directory Summary
 
-This directory contains 9 files and 1 subdirectories.
+This directory contains 10 files and 1 subdirectories.
 
 ### File Types
 
 * .py: 8 files
+* .md: 1 files

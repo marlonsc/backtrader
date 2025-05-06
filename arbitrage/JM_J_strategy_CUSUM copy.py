@@ -47,10 +47,8 @@ def calculate_rolling_spread(
     window: int = 30,
     fields=("open", "high", "low", "close"),
 ) -> pd.DataFrame:
-    """
-    计算滚动 β，并为指定价格字段生成价差 (spread)：
-        spread_x = price0_x - β_{t-1} * price1_x
-    """
+    """计算滚动 β，并为指定价格字段生成价差 (spread)：
+spread_x = price0_x - β_{t-1} * price1_x"""
     # 1) 用收盘价对齐合并（β 仍用 close 估计）
     df = (
         df0.set_index("date")[["close"]]

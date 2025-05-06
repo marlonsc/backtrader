@@ -37,11 +37,8 @@ class TheStrategy(bt.SignalStrategy):
     params = dict(rsi_per=14, rsi_upper=65.0, rsi_lower=35.0, rsi_out=50.0, warmup=35)
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         super(TheStrategy, self).notify_order(order)
         if order.status == order.Completed:
             print(
@@ -78,11 +75,8 @@ class TheStrategy(bt.SignalStrategy):
 
 
 def runstrat(pargs=None):
-    """
-
-    :param pargs:  (Default value = None)
-
-    """
+    """Args:
+    pargs: (Default value = None)"""
     args = parse_args(pargs)
 
     cerebro = bt.Cerebro()
@@ -109,11 +103,8 @@ def runstrat(pargs=None):
 
 
 def parse_args(pargs=None):
-    """
-
-    :param pargs:  (Default value = None)
-
-    """
+    """Args:
+    pargs: (Default value = None)"""
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

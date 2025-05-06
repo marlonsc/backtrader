@@ -56,12 +56,9 @@ class BuySell(Observer):
 
     @staticmethod
     def _get_bar_dist(data, bardist):
-        """
-
-        :param data:
-        :param bardist:
-
-        """
+        """Args:
+    data: 
+    bardist:"""
         return abs(data.low[0] - data.high[0]) * (1 + bardist)
 
     def next(self):

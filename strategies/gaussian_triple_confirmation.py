@@ -18,38 +18,31 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-"""
-GAUSSIAN CHANNEL STRATEGY WITH STOCHASTIC RSI AND BOLLINGER BANDS - (bb-medium)
+"""GAUSSIAN CHANNEL STRATEGY WITH STOCHASTIC RSI AND BOLLINGER BANDS - (bb-medium)
 ================================================================================
-
 This strategy uses a more complex triple confirmation method: ascending Gaussian channel + price
 above upper band + StochRSI extreme readings. The name should reflect this multiple-indicator
 confirmation approach.
-
 This script implements a more advanced trading strategy that combines:
 1. Gaussian Channel indicator
 2. Stochastic RSI
 3. Bollinger Bands
-
 STRATEGY LOGIC:
 --------------
 - Go LONG when:
-  a. The gaussian channel is green (filt > filt[1])
-  b. The close price is above the high gaussian channel band
-  c. The Stochastic RSI is above 80 or below 20
+a. The gaussian channel is green (filt > filt[1])
+b. The close price is above the high gaussian channel band
+c. The Stochastic RSI is above 80 or below 20
 - Exit LONG (go flat) when the close price crosses below the high gaussian channel band
 - No short positions are taken
-
 USAGE:
 ------
 python strategies/bb-medium.py --data SYMBOL --fromdate YYYY-MM-DD --todate YYYY-MM-DD [options]
-
 REQUIRED ARGUMENTS:
 ------------------
 --data, -d      : Stock symbol to retrieve data for (e.g., AAPL, MSFT, TSLA)
 --fromdate, -f  : Start date for historical data in YYYY-MM-DD format (default: 2018-01-01)
 --todate, -t    : End date for historical data in YYYY-MM-DD format (default: 2069-12-31)
-
 OPTIONAL ARGUMENTS:
 ------------------
 --dbuser, -u    : PostgreSQL username (default: jason)
@@ -69,11 +62,9 @@ OPTIONAL ARGUMENTS:
 --lag, -lg      : Enable reduced lag mode (default: False)
 --fast, -fa     : Enable fast response mode (default: False)
 --plot, -p      : Generate and show a plot of the trading activity
-
 EXAMPLE:
 --------
-python strategies/gaussian_triple_confirmation.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --plot
-"""
+python strategies/gaussian_triple_confirmation.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --plot"""
 
 from __future__ import (
     absolute_import,
@@ -123,14 +114,13 @@ class StockPriceData(bt.feeds.PandasData):
 def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate):
     """Get historical price data from PostgreSQL database
 
-    :param symbol:
-    :param dbuser:
-    :param dbpass:
-    :param dbname:
-    :param fromdate:
-    :param todate:
-
-    """
+Args:
+    symbol: 
+    dbuser: 
+    dbpass: 
+    dbname: 
+    fromdate: 
+    todate:"""
     # Format dates for database query
     from_str = fromdate.strftime("%Y-%m-%d %H:%M:%S")
     to_str = todate.strftime("%Y-%m-%d %H:%M:%S")
@@ -207,14 +197,10 @@ def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate):
 
 class StochasticRSI(bt.Indicator):
     """Stochastic RSI Indicator
-
-    Formula:
-    - RSI = Relative Strength Index
-    - K = SMA(Stochastic(RSI, RSI, RSI, period), smoothK)
-    - D = SMA(K, smoothD)
-
-
-    """
+Formula:
+- RSI = Relative Strength Index
+- K = SMA(Stochastic(RSI, RSI, RSI, period), smoothK)
+- D = SMA(K, smoothD)"""
 
     lines = ("k", "d")
     params = (
@@ -253,11 +239,7 @@ class StochasticRSI(bt.Indicator):
 
 class GaussianFilter(bt.Indicator):
     """Gaussian Filter indicator as described by John Ehlers
-
-    This indicator calculates a filter and channel bands using Gaussian filter techniques
-
-
-    """
+This indicator calculates a filter and channel bands using Gaussian filter techniques"""
 
     lines = ("filt", "hband", "lband")
     params = (
@@ -319,31 +301,25 @@ class GaussianFilter(bt.Indicator):
 
 class GaussianChannelStrategy(bt.Strategy, TradeThrottling):
     """Strategy that implements the Gaussian Channel with Stochastic RSI trading rules:
-    - Open long position when:
-      - The gaussian channel is green (filt > filt[1])
-      - The close price is above the high gaussian channel band
-      - The Stochastic RSI is above 80 or below 20
-    - Multiple exit strategies available (see below)
-    - Only trades within the specified date range
-
-    Exit Strategy Options:
-    - 'default': Exit when price crosses below the high gaussian channel band
-    - 'middle_band': Exit when price closes below the middle gaussian channel band (default)
-    - 'bars': Exit after a specified number of bars
-    - 'trailing_percent': Exit using a trailing stop based on percentage
-    - 'trailing_atr': Exit using a trailing stop based on ATR
-    - 'trailing_ma': Exit when price crosses below a moving average
-
-    Position Sizing Options:
-    - 'percent': Use a fixed percentage of available equity (default 20%)
-    - 'auto': Size based on volatility (less volatile = larger position)
-
-    Additional Features:
-    - Trade throttling to limit trade frequency
-    - Risk management with stop loss functionality
-
-
-    """
+- Open long position when:
+- The gaussian channel is green (filt > filt[1])
+- The close price is above the high gaussian channel band
+- The Stochastic RSI is above 80 or below 20
+- Multiple exit strategies available (see below)
+- Only trades within the specified date range
+Exit Strategy Options:
+- 'default': Exit when price crosses below the high gaussian channel band
+- 'middle_band': Exit when price closes below the middle gaussian channel band (default)
+- 'bars': Exit after a specified number of bars
+- 'trailing_percent': Exit using a trailing stop based on percentage
+- 'trailing_atr': Exit using a trailing stop based on ATR
+- 'trailing_ma': Exit when price crosses below a moving average
+Position Sizing Options:
+- 'percent': Use a fixed percentage of available equity (default 20%)
+- 'auto': Size based on volatility (less volatile = larger position)
+Additional Features:
+- Trade throttling to limit trade frequency
+- Risk management with stop loss functionality"""
 
     params = (
         # Bollinger Bands parameters
@@ -507,21 +483,17 @@ class GaussianChannelStrategy(bt.Strategy, TradeThrottling):
     def log(self, txt, dt=None, doprint=False):
         """Logging function
 
-        :param txt:
-        :param dt:  (Default value = None)
-        :param doprint:  (Default value = False)
-
-        """
+Args:
+    txt: 
+    dt: (Default value = None)
+    doprint: (Default value = False)"""
         if self.params.printlog or doprint:
             dt = dt or self.datas[0].datetime.date(0)
             print("%s, %s" % (dt.isoformat(), txt))
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status in [order.Submitted, order.Accepted]:
             # Order submitted/accepted to/by broker - Nothing to do
             return
@@ -593,11 +565,8 @@ class GaussianChannelStrategy(bt.Strategy, TradeThrottling):
         self.order = None
 
     def notify_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
+        """Args:
+    trade:"""
         if not trade.isclosed:
             return
 

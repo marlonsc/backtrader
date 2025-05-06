@@ -4,7 +4,8 @@ Contains analysis tools and metrics. Primarily contains Python code.
 
 ## Navigation
 
-* [↑ Parent Directory (backtest)](../README.md)
+* [🏠 Root Directory](../../README.md)
+* [⬆️ Parent Directory (backtest)](../README.md)
 
 ### Subdirectories
 
@@ -12,15 +13,17 @@ Contains analysis tools and metrics. Primarily contains Python code.
 
 ## Files
 
+### README.md
+
+File with .md extension.
+
 ### __init__.py
-
-Python module
-
 
 ## Directory Summary
 
-This directory contains 1 files and 1 subdirectories.
+This directory contains 2 files and 1 subdirectories.
 
 ### File Types
 
+* .md: 1 files
 * .py: 1 files

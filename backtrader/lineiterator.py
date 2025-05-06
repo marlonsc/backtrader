@@ -58,12 +58,7 @@ class MetaLineIterator(LineSeries.__class__):
     """
 
     def donew(cls, *args, **kwargs):
-        """
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """"""
         _obj, args, kwargs = super(MetaLineIterator, cls).donew(*args, **kwargs)
 
         # Prepare to hold children that need to be calculated and
@@ -259,11 +254,8 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
         return self._lineiterators[LineIterator.ObsType]
 
     def addindicator(self, indicator):
-        """
-
-        :param indicator:
-
-        """
+        """Args:
+    indicator:"""
         # store in right queue
         self._lineiterators[indicator._ltype].append(indicator)
 
@@ -279,12 +271,9 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
                 o = o._owner  # move up the hierarchy
 
     def bindlines(self, owner=None, own=None):
-        """
-
-        :param owner:  (Default value = None)
-        :param own:  (Default value = None)
-
-        """
+        """Args:
+    owner: (Default value = None)
+    own: (Default value = None)"""
         if not owner:
             owner = 0
 
@@ -388,29 +377,20 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
             line.oncebinding()
 
     def preonce(self, start, end):
-        """
-
-        :param start:
-        :param end:
-
-        """
+        """Args:
+    start: 
+    end:"""
 
     def oncestart(self, start, end):
-        """
-
-        :param start:
-        :param end:
-
-        """
+        """Args:
+    start: 
+    end:"""
         self.once(start, end)
 
     def once(self, start, end):
-        """
-
-        :param start:
-        :param end:
-
-        """
+        """Args:
+    start: 
+    end:"""
 
     def prenext(self):
         """This method will be called before the minimum period of all
@@ -438,12 +418,7 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
         """
 
     def _addnotification(self, *args, **kwargs):
-        """
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """"""
 
     def _notify(self):
         """ """
@@ -452,11 +427,8 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
         """ """
 
     def qbuffer(self, savemem=0):
-        """
-
-        :param savemem:  (Default value = 0)
-
-        """
+        """Args:
+    savemem: (Default value = 0)"""
         if savemem:
             for line in self.lines:
                 line.qbuffer()
@@ -507,12 +479,9 @@ class SingleCoupler(LineActions):
     """ """
 
     def __init__(self, cdata, clock=None):
-        """
-
-        :param cdata:
-        :param clock:  (Default value = None)
-
-        """
+        """Args:
+    cdata: 
+    clock: (Default value = None)"""
         super(SingleCoupler, self).__init__()
         # _owner may not exist if not set by metaclass; fallback to None
         self._clock = clock if clock is not None else getattr(self, "_owner", None)
@@ -555,13 +524,9 @@ class MultiCoupler(LineIterator):
 
 
 def LinesCoupler(cdata, clock=None, **kwargs):
-    """
-
-    :param cdata:
-    :param clock:  (Default value = None)
-    :param **kwargs:
-
-    """
+    """Args:
+    cdata: 
+    clock: (Default value = None)"""
     if isinstance(cdata, LineSingle):
         return SingleCoupler(cdata, clock)  # return for single line
 

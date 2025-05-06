@@ -64,59 +64,38 @@ except ImportError:
 
 class SignalStrategy(with_metaclass(MetaSigStrategy, Strategy)):
     """This subclass of ``Strategy`` is meant to to auto-operate using
-    **signals**.
-    
-    *Signals* are usually indicators and the expected output values:
-    
-      - ``> 0`` is a ``long`` indication
-    
-      - ``< 0`` is a ``short`` indication
-    
-    There are 5 types of *Signals*, broken in 2 groups.
-    
-    **Main Group**:
-    
-      - ``LONGSHORT``: both ``long`` and ``short`` indications from this signal
-        are taken
-    
-      - ``LONG``:
-        - ``long`` indications are taken to go long
-        - ``short`` indications are taken to *close* the long position. But:
-    
-          - If a ``LONGEXIT`` (see below) signal is in the system it will be
-            used to exit the long
-    
-          - If a ``SHORT`` signal is available and no ``LONGEXIT`` is available
-            , it will be used to close a ``long`` before opening a ``short``
-    
-      - ``SHORT``:
-        - ``short`` indications are taken to go short
-        - ``long`` indications are taken to *close* the short position. But:
-    
-          - If a ``SHORTEXIT`` (see below) signal is in the system it will be
-            used to exit the short
-    
-          - If a ``LONG`` signal is available and no ``SHORTEXIT`` is available
-            , it will be used to close a ``short`` before opening a ``long``
-    
-    **Exit Group**:
-    
-      This 2 signals are meant to override others and provide criteria for
-      exitins a ``long``/``short`` position
-    
-      - ``LONGEXIT``: ``short`` indications are taken to exit ``long``
-        positions
-    
-      - ``SHORTEXIT``: ``long`` indications are taken to exit ``short``
-        positions
-    
-    **Order Issuing**
-    
-      Orders execution type is ``Market`` and validity is ``None`` (*Good until
-      Canceled*)
-
-
-    """
+**signals**.
+*Signals* are usually indicators and the expected output values:
+- ``> 0`` is a ``long`` indication
+- ``< 0`` is a ``short`` indication
+There are 5 types of *Signals*, broken in 2 groups.
+**Main Group**:
+- ``LONGSHORT``: both ``long`` and ``short`` indications from this signal
+are taken
+- ``LONG``:
+- ``long`` indications are taken to go long
+- ``short`` indications are taken to *close* the long position. But:
+- If a ``LONGEXIT`` (see below) signal is in the system it will be
+used to exit the long
+- If a ``SHORT`` signal is available and no ``LONGEXIT`` is available
+, it will be used to close a ``long`` before opening a ``short``
+- ``SHORT``:
+- ``short`` indications are taken to go short
+- ``long`` indications are taken to *close* the short position. But:
+- If a ``SHORTEXIT`` (see below) signal is in the system it will be
+used to exit the short
+- If a ``LONG`` signal is available and no ``SHORTEXIT`` is available
+, it will be used to close a ``short`` before opening a ``long``
+**Exit Group**:
+This 2 signals are meant to override others and provide criteria for
+exitins a ``long``/``short`` position
+- ``LONGEXIT``: ``short`` indications are taken to exit ``long``
+positions
+- ``SHORTEXIT``: ``long`` indications are taken to exit ``short``
+positions
+**Order Issuing**
+Orders execution type is ``Market`` and validity is ``None`` (*Good until
+Canceled*)"""
 
     params = (
         ("signals", []),
@@ -131,21 +110,15 @@ class SignalStrategy(with_metaclass(MetaSigStrategy, Strategy)):
         super(SignalStrategy, self)._start()
 
     def signal_add(self, sigtype, signal):
-        """
-
-        :param sigtype: 
-        :param signal: 
-
-        """
+        """Args:
+    sigtype: 
+    signal:"""
         self._signals[sigtype].append(signal)
 
     def _notify(self, qorders=[], qtrades=[]):
-        """
-
-        :param qorders:  (Default value = [])
-        :param qtrades:  (Default value = [])
-
-        """
+        """Args:
+    qorders: (Default value = [])
+    qtrades: (Default value = [])"""
         # Nullify the sentinel if done
         procorders = qorders or self._orderspending
         if self._sentinel is not None:

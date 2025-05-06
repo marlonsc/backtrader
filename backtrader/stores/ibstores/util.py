@@ -40,11 +40,9 @@ Time_t = Union[dt.time, dt.datetime]
 def df(objs, labels: Optional[List[str]] = None):
     """Create pandas DataFrame from the sequence of same-type objects.
 
-    :param objs:
-    :param labels: If supplied, retain only the given labels and drop the rest. (Default value = None)
-    :type labels: Optional[List[str]]
-
-    """
+Args:
+    objs: 
+    labels: If supplied, retain only the given labels and drop the rest. (Default value = None)"""
     import pandas as pd
 
     from .objects import DynamicObject
@@ -73,26 +71,22 @@ def df(objs, labels: Optional[List[str]] = None):
 
 
 def dataclassAsDict(obj) -> dict:
-    """
+    """Args:
+    obj: 
 
-    :param obj:
-    :returns: This is a non-recursive variant of ``dataclasses.asdict``.
-    :rtype: dict
-
-    """
+Returns:
+    This is a non-recursive variant of ``dataclasses.asdict``."""
     if not is_dataclass(obj):
         raise TypeError(f"Object {obj} is not a dataclass")
     return {field.name: getattr(obj, field.name) for field in fields(obj)}
 
 
 def dataclassAsTuple(obj) -> tuple:
-    """
+    """Args:
+    obj: 
 
-    :param obj:
-    :returns: This is a non-recursive variant of ``dataclasses.astuple``.
-    :rtype: tuple
-
-    """
+Returns:
+    This is a non-recursive variant of ``dataclasses.astuple``."""
     if not is_dataclass(obj):
         raise TypeError(f"Object {obj} is not a dataclass")
     return tuple(getattr(obj, field.name) for field in fields(obj))
@@ -100,12 +94,10 @@ def dataclassAsTuple(obj) -> tuple:
 
 def dataclassNonDefaults(obj) -> dict:
     """For a ``dataclass`` instance get the fields that are different from the
-    default values and return as ``dict``.
+default values and return as ``dict``.
 
-    :param obj:
-    :rtype: dict
-
-    """
+Args:
+    obj:"""
     if not is_dataclass(obj):
         raise TypeError(f"Object {obj} is not a dataclass")
     values = [getattr(obj, field.name) for field in fields(obj)]
@@ -120,14 +112,10 @@ def dataclassNonDefaults(obj) -> dict:
 
 def dataclassUpdate(obj, *srcObjs, **kwargs) -> object:
     """Update fields of the given ``dataclass`` object from zero or more
-    ``dataclass`` source objects and/or from keyword arguments.
+``dataclass`` source objects and/or from keyword arguments.
 
-    :param obj:
-    :param *srcObjs:
-    :param **kwargs:
-    :rtype: object
-
-    """
+Args:
+    obj:"""
     if not is_dataclass(obj):
         raise TypeError(f"Object {obj} is not a dataclass")
     for srcObj in srcObjs:
@@ -138,12 +126,10 @@ def dataclassUpdate(obj, *srcObjs, **kwargs) -> object:
 
 def dataclassRepr(obj) -> str:
     """Provide a culled representation of the given ``dataclass`` instance,
-    showing only the fields with a non-default value.
+showing only the fields with a non-default value.
 
-    :param obj:
-    :rtype: str
-
-    """
+Args:
+    obj:"""
     attrs = dataclassNonDefaults(obj)
     clsName = obj.__class__.__qualname__
     kwargs = ", ".join(f"{k}={v!r}" for k, v in attrs.items())
@@ -153,9 +139,8 @@ def dataclassRepr(obj) -> str:
 def isnamedtupleinstance(x):
     """From https://stackoverflow.com/a/2166841/6067848
 
-    :param x:
-
-    """
+Args:
+    x:"""
     t = type(x)
     b = t.__bases__
     if len(b) != 1 or b[0] != tuple:
@@ -168,11 +153,10 @@ def isnamedtupleinstance(x):
 
 def tree(obj):
     """Convert object to a tree of lists, dicts and simple values.
-    The result can be serialized to JSON.
+The result can be serialized to JSON.
 
-    :param obj:
-
-    """
+Args:
+    obj:"""
     if isinstance(obj, (bool, int, float, str, bytes)):
         return obj
     elif isinstance(obj, (dt.date, dt.time)):
@@ -191,14 +175,13 @@ def tree(obj):
 
 def barplot(bars, title="", upColor="blue", downColor="red"):
     """Create candlestick plot for the given bars. The bars can be given as
-    a DataFrame or as a list of bar objects.
+a DataFrame or as a list of bar objects.
 
-    :param bars:
-    :param title:  (Default value = "")
-    :param upColor:  (Default value = "blue")
-    :param downColor:  (Default value = "red")
-
-    """
+Args:
+    bars: 
+    title: (Default value = "")
+    upColor: (Default value = "blue")
+    downColor: (Default value = "red")"""
     import matplotlib.pyplot as plt
     import pandas as pd
     from matplotlib.lines import Line2D
@@ -249,10 +232,9 @@ def allowCtrlC():
 def logToFile(path, level=logging.INFO):
     """Create a log handler that logs to the given file.
 
-    :param path:
-    :param level:  (Default value = logging.INFO)
-
-    """
+Args:
+    path: 
+    level: (Default value = logging.INFO)"""
     logger = logging.getLogger()
     if logger.handlers:
         logging.getLogger("ib_insync").setLevel(level)
@@ -267,10 +249,9 @@ def logToFile(path, level=logging.INFO):
 def logToConsole(level=logging.INFO, logger=None):
     """Create a log handler that logs to the console.
 
-    :param level:  (Default value = logging.INFO)
-    :param logger:  (Default value = None)
-
-    """
+Args:
+    level: (Default value = logging.INFO)
+    logger: (Default value = None)"""
     logger = logger if logger else logging.getLogger()
     stdHandlers = [
         h
@@ -293,22 +274,16 @@ def logToConsole(level=logging.INFO, logger=None):
 def isNan(x: float) -> bool:
     """Not a number test.
 
-    :param x:
-    :type x: float
-    :rtype: bool
-
-    """
+Args:
+    x:"""
     return x != x
 
 
 def formatSI(n: float) -> str:
     """Format the integer or float n to 3 significant digits + SI prefix.
 
-    :param n:
-    :type n: float
-    :rtype: str
-
-    """
+Args:
+    n:"""
     s = ""
     if n < 0:
         n = -n
@@ -338,11 +313,8 @@ class timeit:
     """Context manager for timing."""
 
     def __init__(self, title="Run"):
-        """
-
-        :param title:  (Default value = "Run")
-
-        """
+        """Args:
+    title: (Default value = "Run")"""
         self.title = title
 
     def __enter__(self):
@@ -350,30 +322,20 @@ class timeit:
         self.t0 = time.time()
 
     def __exit__(self, *_args):
-        """
-
-        :param *_args:
-
-        """
+        """"""
         print(self.title + " took " + formatSI(time.time() - self.t0) + "s")
 
 
 def run(*awaitables: Awaitable, timeout: Optional[float] = None):
     """By default run the event loop forever.
+When awaitables (like Tasks, Futures or coroutines) are given then
+run the event loop until each has completed and return their results.
+An optional timeout (in seconds) can be given that will raise
+asyncio.TimeoutError if the awaitables are not ready within the
+timeout period.
 
-    When awaitables (like Tasks, Futures or coroutines) are given then
-    run the event loop until each has completed and return their results.
-
-    An optional timeout (in seconds) can be given that will raise
-    asyncio.TimeoutError if the awaitables are not ready within the
-    timeout period.
-
-    :param *awaitables:
-    :type *awaitables: Awaitable
-    :param timeout:  (Default value = None)
-    :type timeout: Optional[float]
-
-    """
+Args:
+    timeout: (Default value = None)"""
     # loop = getLoop()
     loop = None
     try:
@@ -411,11 +373,8 @@ def run(*awaitables: Awaitable, timeout: Optional[float] = None):
         task = asyncio.ensure_future(future)
 
         def onError(_):
-            """
-
-            :param _:
-
-            """
+            """Args:
+    _:"""
             task.cancel()
 
         globalErrorEvent.connect(onError)
@@ -430,13 +389,8 @@ def run(*awaitables: Awaitable, timeout: Optional[float] = None):
 
 
 def _fillDate(time: Time_t) -> dt.datetime:
-    """
-
-    :param time:
-    :type time: Time_t
-    :rtype: dt.datetime
-
-    """
+    """Args:
+    time:"""
     # use today if date is absent
     if isinstance(time, dt.time):
         t = dt.datetime.combine(dt.date.today(), time)
@@ -447,17 +401,12 @@ def _fillDate(time: Time_t) -> dt.datetime:
 
 def schedule(time: Time_t, callback: Callable, *args):
     """Schedule the callback to be run at the given time with
-    the given arguments.
-    This will return the Event Handle.
+the given arguments.
+This will return the Event Handle.
 
-    :param time: Time to run callback. If given as :py:class:`datetime.time`
-            then use today as date.
-    :type time: Time_t
-    :param callback: Callable scheduled to run.
-    :type callback: Callable
-    :param *args:
-
-    """
+Args:
+    time: Time to run callback. If given as :py:class:`datetime.time`
+    callback: Callable scheduled to run."""
     t = _fillDate(time)
     now = dt.datetime.now(t.tzinfo)
     delay = (t - now).total_seconds()
@@ -467,32 +416,22 @@ def schedule(time: Time_t, callback: Callable, *args):
 
 def sleep(secs: float = 0.02) -> bool:
     """Wait for the given amount of seconds while everything still keeps
-    processing in the background. Never use time.sleep().
+processing in the background. Never use time.sleep().
 
-    :param secs: Time in seconds to wait. (Default value = 0.02)
-    :type secs: float
-    :rtype: bool
-
-    """
+Args:
+    secs: Time in seconds to wait. (Default value = 0.02)"""
     run(asyncio.sleep(secs))
     return True
 
 
 def timeRange(start: Time_t, end: Time_t, step: float) -> Iterator[dt.datetime]:
     """Iterator that waits periodically until certain time points are
-    reached while yielding those time points.
+reached while yielding those time points.
 
-    :param start: Start time, can be specified as datetime.datetime,
-            or as datetime.time in which case today is used as the date
-    :type start: Time_t
-    :param end: End time, can be specified as datetime.datetime,
-            or as datetime.time in which case today is used as the date
-    :type end: Time_t
-    :param step: The number of seconds of each period
-    :type step: float
-    :rtype: Iterator[dt.datetime]
-
-    """
+Args:
+    start: Start time, can be specified as datetime.datetime,
+    end: End time, can be specified as datetime.datetime,
+    step: The number of seconds of each period"""
     assert step > 0
     delta = dt.timedelta(seconds=step)
     t = _fillDate(start)
@@ -509,12 +448,8 @@ def timeRange(start: Time_t, end: Time_t, step: float) -> Iterator[dt.datetime]:
 def waitUntil(t: Time_t) -> bool:
     """Wait until the given time t is reached.
 
-    :param t: The time t can be specified as datetime.datetime,
-            or as datetime.time in which case today is used as the date.
-    :type t: Time_t
-    :rtype: bool
-
-    """
+Args:
+    t: The time t can be specified as datetime.datetime,"""
     now = dt.datetime.now(t.tzinfo)
     secs = (_fillDate(t) - now).total_seconds()
     run(asyncio.sleep(secs))
@@ -582,16 +517,9 @@ def startLoop():
 def useQt(qtLib: str = "PyQt5", period: float = 0.01):
     """Run combined Qt5/asyncio event loop.
 
-    :param qtLib: Name of Qt library to use:
-          * PyQt5
-          * PyQt6
-          * PySide2
-          * PySide6 (Default value = "PyQt5")
-    :type qtLib: str
-    :param period: Period in seconds to poll Qt. (Default value = 0.01)
-    :type period: float
-
-    """
+Args:
+    qtLib: Name of Qt library to use:
+    period: Period in seconds to poll Qt. (Default value = 0.01)"""
 
     def qt_step():
         """ """
@@ -626,11 +554,8 @@ def useQt(qtLib: str = "PyQt5", period: float = 0.01):
 def formatIBDatetime(t: Union[dt.date, dt.datetime, str, None]) -> str:
     """Format date or datetime to string that IB uses.
 
-    :param t:
-    :type t: Union[dt.date, dt.datetime, str, None]
-    :rtype: str
-
-    """
+Args:
+    t:"""
     if not t:
         s = ""
     elif isinstance(t, dt.datetime):
@@ -650,11 +575,8 @@ def formatIBDatetime(t: Union[dt.date, dt.datetime, str, None]) -> str:
 def parseIBDatetime(s: str) -> Union[dt.date, dt.datetime]:
     """Parse string in IB date or datetime format to datetime.
 
-    :param s:
-    :type s: str
-    :rtype: Union[dt.date,dt.datetime]
-
-    """
+Args:
+    s:"""
     if len(s) == 8:
         # YYYYmmdd
         y = int(s[0:4])

@@ -4,7 +4,7 @@ Contains sample code and examples. Contains various files.
 
 ## Navigation
 
-* [↑ Parent Directory (backtrader)](../README.md)
+* [🏠 Root Directory](../README.md)
 
 ### Subdirectories
 
@@ -78,7 +78,16 @@ Contains sample code and examples. Contains various files.
 * [writer-test](writer-test/README.md) - Contains test files and test utilities
 * [yahoo-test](yahoo-test/README.md) - Contains test files and test utilities
 
+## Files
+
+### README.md
+
+File with .md extension.
+
 ## Directory Summary
 
-This directory contains 0 files and 69 subdirectories.
+This directory contains 1 files and 69 subdirectories.
 
+### File Types
+
+* .md: 1 files

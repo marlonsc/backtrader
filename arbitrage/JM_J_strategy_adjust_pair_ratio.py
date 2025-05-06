@@ -22,12 +22,10 @@ from backtrader.analyzers.tradeanalyzer import TradeAnalyzer
 def calculate_rolling_spread(df0, df1, window: int = 90):
     """Calculate rolling β and spread
 
-    :param df0:
-    :param df1:
-    :param window:  (Default value = 90)
-    :type window: int
-
-    """
+Args:
+    df0: 
+    df1: 
+    window: (Default value = 90)"""
     # 1. Align and merge prices
     df = (
         df0.set_index("date")["close"]
@@ -160,9 +158,8 @@ class DynamicSpreadStrategy(bt.Strategy):
     def _open_position(self, short):
         """Place order with dynamic ratio
 
-        :param short:
-
-        """
+Args:
+    short:"""
         # Confirm trade size is valid
         if not hasattr(self, "size0") or not hasattr(self, "size1"):
             self.size0 = 10  # Default value
@@ -188,11 +185,8 @@ class DynamicSpreadStrategy(bt.Strategy):
         self.close(data=self.data1)
 
     def notify_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
+        """Args:
+    trade:"""
         if trade.isclosed:
             print(
                 "TRADE %s CLOSED, PROFIT: GROSS %.2f, NET %.2f, PRICE %d"

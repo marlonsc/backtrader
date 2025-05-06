@@ -12,11 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Tools for working with the BSON decimal128 type.
-
 .. versionadded:: 3.4
-
-.. note:: The Decimal128 BSON type requires MongoDB 3.4+.
-"""
+.. note:: The Decimal128 BSON type requires MongoDB 3.4+."""
 
 import decimal
 import struct
@@ -69,13 +66,11 @@ def create_decimal128_context():
 
 def _decimal_to_128(value):
     """Converts a decimal.Decimal to BID (high bits, low bits).
+:Parameters:
+- `value`: An instance of decimal.Decimal
 
-    :Parameters:
-      - `value`: An instance of decimal.Decimal
-
-    :param value:
-
-    """
+Args:
+    value:"""
     with decimal.localcontext(_DEC128_CTX) as ctx:
         value = ctx.create_decimal(value)
 
@@ -121,116 +116,91 @@ def _decimal_to_128(value):
 
 class Decimal128(object):
     """BSON Decimal128 type::
-
-
-    :Parameters:
-      - `value`: An instance of :class:`decimal.Decimal`, string, or tuple of
-        (high bits, low bits) from Binary Integer Decimal (BID) format.
-
-    .. note:: :class:`~Decimal128` uses an instance of :class:`decimal.Context`
-      configured for IEEE-754 Decimal128 when validating parameters.
-      Signals like :class:`decimal.InvalidOperation`, :class:`decimal.Inexact`,
-      and :class:`decimal.Overflow` are trapped and raised as exceptions::
-
-
-      To ensure the result of a calculation can always be stored as BSON
-      Decimal128 use the context returned by
-      :func:`create_decimal128_context`::
-
-
-      To match the behavior of MongoDB's Decimal128 implementation
-      str(Decimal(value)) may not match str(Decimal128(value)) for NaN values::
-
-
-      However, :meth:`~Decimal128.to_decimal` will return the exact value::
-
-
-      Two instances of :class:`Decimal128` compare equal if their Binary
-      Integer Decimal encodings are equal::
-
-
-      This differs from :class:`decimal.Decimal` comparisons for NaN::
-
-
-    >>> Decimal128(Decimal("0.0005"))
-      Decimal128('0.0005')
-      >>> Decimal128("0.0005")
-      Decimal128('0.0005')
-      >>> Decimal128((3474527112516337664, 5))
-      Decimal128('0.0005')
-
-        >>> Decimal128(".13.1")
-        Traceback (most recent call last):
-          File "<stdin>", line 1, in <module>
-          ...
-        decimal.InvalidOperation: [<class 'decimal.ConversionSyntax'>]
-        >>>
-        >>> Decimal128("1E-6177")
-        Traceback (most recent call last):
-          File "<stdin>", line 1, in <module>
-          ...
-        decimal.Inexact: [<class 'decimal.Inexact'>]
-        >>>
-        >>> Decimal128("1E6145")
-        Traceback (most recent call last):
-          File "<stdin>", line 1, in <module>
-          ...
-        decimal.Overflow: [<class 'decimal.Overflow'>, <class 'decimal.Rounded'>]
-
-        >>> import decimal
-        >>> decimal128_ctx = create_decimal128_context()
-        >>> with decimal.localcontext(decimal128_ctx) as ctx:
-        ...     Decimal128(ctx.create_decimal(".13.3"))
-        ...
-        Decimal128('NaN')
-        >>>
-        >>> with decimal.localcontext(decimal128_ctx) as ctx:
-        ...     Decimal128(ctx.create_decimal("1E-6177"))
-        ...
-        Decimal128('0E-6176')
-        >>>
-        >>> with decimal.localcontext(DECIMAL128_CTX) as ctx:
-        ...     Decimal128(ctx.create_decimal("1E6145"))
-        ...
-        Decimal128('Infinity')
-
-        >>> Decimal128(Decimal('NaN'))
-        Decimal128('NaN')
-        >>> Decimal128(Decimal('-NaN'))
-        Decimal128('NaN')
-        >>> Decimal128(Decimal('sNaN'))
-        Decimal128('NaN')
-        >>> Decimal128(Decimal('-sNaN'))
-        Decimal128('NaN')
-
-        >>> Decimal128(Decimal('NaN')).to_decimal()
-        Decimal('NaN')
-        >>> Decimal128(Decimal('-NaN')).to_decimal()
-        Decimal('-NaN')
-        >>> Decimal128(Decimal('sNaN')).to_decimal()
-        Decimal('sNaN')
-        >>> Decimal128(Decimal('-sNaN')).to_decimal()
-        Decimal('-sNaN')
-
-        >>> Decimal128('NaN') == Decimal128('NaN')
-        True
-        >>> Decimal128('NaN').bid == Decimal128('NaN').bid
-        True
-
-        >>> Decimal('NaN') == Decimal('NaN')
-        False
-    """
+:Parameters:
+- `value`: An instance of :class:`decimal.Decimal`, string, or tuple of
+(high bits, low bits) from Binary Integer Decimal (BID) format.
+.. note:: :class:`~Decimal128` uses an instance of :class:`decimal.Context`
+configured for IEEE-754 Decimal128 when validating parameters.
+Signals like :class:`decimal.InvalidOperation`, :class:`decimal.Inexact`,
+and :class:`decimal.Overflow` are trapped and raised as exceptions::
+To ensure the result of a calculation can always be stored as BSON
+Decimal128 use the context returned by
+:func:`create_decimal128_context`::
+To match the behavior of MongoDB's Decimal128 implementation
+str(Decimal(value)) may not match str(Decimal128(value)) for NaN values::
+However, :meth:`~Decimal128.to_decimal` will return the exact value::
+Two instances of :class:`Decimal128` compare equal if their Binary
+Integer Decimal encodings are equal::
+This differs from :class:`decimal.Decimal` comparisons for NaN::
+>>> Decimal128(Decimal("0.0005"))
+Decimal128('0.0005')
+>>> Decimal128("0.0005")
+Decimal128('0.0005')
+>>> Decimal128((3474527112516337664, 5))
+Decimal128('0.0005')
+>>> Decimal128(".13.1")
+Traceback (most recent call last):
+File "<stdin>", line 1, in <module>
+...
+decimal.InvalidOperation: [<class 'decimal.ConversionSyntax'>]
+>>>
+>>> Decimal128("1E-6177")
+Traceback (most recent call last):
+File "<stdin>", line 1, in <module>
+...
+decimal.Inexact: [<class 'decimal.Inexact'>]
+>>>
+>>> Decimal128("1E6145")
+Traceback (most recent call last):
+File "<stdin>", line 1, in <module>
+...
+decimal.Overflow: [<class 'decimal.Overflow'>, <class 'decimal.Rounded'>]
+>>> import decimal
+>>> decimal128_ctx = create_decimal128_context()
+>>> with decimal.localcontext(decimal128_ctx) as ctx:
+...     Decimal128(ctx.create_decimal(".13.3"))
+...
+Decimal128('NaN')
+>>>
+>>> with decimal.localcontext(decimal128_ctx) as ctx:
+...     Decimal128(ctx.create_decimal("1E-6177"))
+...
+Decimal128('0E-6176')
+>>>
+>>> with decimal.localcontext(DECIMAL128_CTX) as ctx:
+...     Decimal128(ctx.create_decimal("1E6145"))
+...
+Decimal128('Infinity')
+>>> Decimal128(Decimal('NaN'))
+Decimal128('NaN')
+>>> Decimal128(Decimal('-NaN'))
+Decimal128('NaN')
+>>> Decimal128(Decimal('sNaN'))
+Decimal128('NaN')
+>>> Decimal128(Decimal('-sNaN'))
+Decimal128('NaN')
+>>> Decimal128(Decimal('NaN')).to_decimal()
+Decimal('NaN')
+>>> Decimal128(Decimal('-NaN')).to_decimal()
+Decimal('-NaN')
+>>> Decimal128(Decimal('sNaN')).to_decimal()
+Decimal('sNaN')
+>>> Decimal128(Decimal('-sNaN')).to_decimal()
+Decimal('-sNaN')
+>>> Decimal128('NaN') == Decimal128('NaN')
+True
+>>> Decimal128('NaN').bid == Decimal128('NaN').bid
+True
+>>> Decimal('NaN') == Decimal('NaN')
+False"""
 
     __slots__ = ("__high", "__low")
 
     _type_marker = 19
 
     def __init__(self, value):
-        """
-
-        :param value:
-
-        """
+        """Args:
+    value:"""
         if isinstance(value, (str, decimal.Decimal)):
             self.__high, self.__low = _decimal_to_128(value)
         elif isinstance(value, (list, tuple)):
@@ -290,15 +260,13 @@ class Decimal128(object):
     @classmethod
     def from_bid(cls, value):
         """Create an instance of :class:`Decimal128` from Binary Integer
-        Decimal string.
+Decimal string.
+:Parameters:
+- `value`: 16 byte string (128-bit IEEE 754-2008 decimal floating
+point in Binary Integer Decimal (BID) format).
 
-        :Parameters:
-          - `value`: 16 byte string (128-bit IEEE 754-2008 decimal floating
-            point in Binary Integer Decimal (BID) format).
-
-        :param value:
-
-        """
+Args:
+    value:"""
         if not isinstance(value, bytes):
             raise TypeError("value must be an instance of bytes")
         if len(value) != 16:
@@ -323,11 +291,8 @@ class Decimal128(object):
         return "Decimal128('%s')" % (str(self),)
 
     def __setstate__(self, value):
-        """
-
-        :param value:
-
-        """
+        """Args:
+    value:"""
         self.__high, self.__low = value
 
     def __getstate__(self):
@@ -335,19 +300,13 @@ class Decimal128(object):
         return self.__high, self.__low
 
     def __eq__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         if isinstance(other, Decimal128):
             return self.bid == other.bid
         return NotImplemented
 
     def __ne__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return not self == other

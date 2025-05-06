@@ -26,18 +26,12 @@ class MinKey(object):
         return {}
 
     def __setstate__(self, state):
-        """
-
-        :param state:
-
-        """
+        """Args:
+    state:"""
 
     def __eq__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return isinstance(other, MinKey)
 
     def __hash__(self):
@@ -45,43 +39,28 @@ class MinKey(object):
         return hash(self._type_marker)
 
     def __ne__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return not self == other
 
     def __le__(self, dummy):
-        """
-
-        :param dummy:
-
-        """
+        """Args:
+    dummy:"""
         return True
 
     def __lt__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return not isinstance(other, MinKey)
 
     def __ge__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return isinstance(other, MinKey)
 
     def __gt__(self, dummy):
-        """
-
-        :param dummy:
-
-        """
+        """Args:
+    dummy:"""
         return False
 
     def __repr__(self):

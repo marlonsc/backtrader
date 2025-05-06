@@ -8,12 +8,8 @@ Docstrings and comments should be line-wrapped ≤ 90 characters.
 class OptReturn(object):
 
     def __init__(self, params, **kwargs):
-        """
-
-        :param params:
-        :param **kwargs:
-
-        """
+        """Args:
+    params:"""
         self.p = self.params = params
         for k, v in kwargs.items():
             setattr(self, k, v)

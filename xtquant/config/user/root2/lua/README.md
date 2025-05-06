@@ -4,7 +4,8 @@ Directory containing lua related files. Primarily contains .lua files code.
 
 ## Navigation
 
-* [↑ Parent Directory (root2)](../README.md)
+* [🏠 Root Directory](../../../../../README.md)
+* [⬆️ Parent Directory (root2)](../README.md)
 
 ## Files
 
@@ -52,6 +53,10 @@ File with .lua extension (Contains non-English content that should be translated
 
 File with .lua extension (Contains non-English content that should be translated)
 
+### README.md
+
+File with .md extension.
+
 ### config.lua
 
 Configuration file
@@ -60,11 +65,11 @@ Configuration file
 
 File with .lua extension (Contains non-English content that should be translated)
 
-
 ## Directory Summary
 
-This directory contains 13 files and 0 subdirectories.
+This directory contains 14 files and 0 subdirectories.
 
 ### File Types
 
 * .lua: 13 files
+* .md: 1 files

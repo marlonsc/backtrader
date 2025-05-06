@@ -38,13 +38,10 @@ class FixedSize(with_metaclass(MetaParams, object)):
     params = (("size", None),)
 
     def __call__(self, order, price, ago):
-        """
-
-        :param order:
-        :param price:
-        :param ago:
-
-        """
+        """Args:
+    order: 
+    price: 
+    ago:"""
         p = getattr(self, "p", None)
         size = getattr(p, "size", None)
         if size is None and hasattr(self, "params"):
@@ -62,13 +59,10 @@ class FixedBarPerc(with_metaclass(MetaParams, object)):
     params = (("perc", 100.0),)
 
     def __call__(self, order, price, ago):
-        """
-
-        :param order:
-        :param price:
-        :param ago:
-
-        """
+        """Args:
+    order: 
+    price: 
+    ago:"""
         p = getattr(self, "p", None)
         perc = getattr(p, "perc", None)
         if perc is None and hasattr(self, "params"):
@@ -93,13 +87,10 @@ class BarPointPerc(with_metaclass(MetaParams, object)):
     )
 
     def __call__(self, order, price, ago):
-        """
-
-        :param order:
-        :param price:
-        :param ago:
-
-        """
+        """Args:
+    order: 
+    price: 
+    ago:"""
         data = order.data
         p = getattr(self, "p", None)
         minmov = getattr(p, "minmov", None)

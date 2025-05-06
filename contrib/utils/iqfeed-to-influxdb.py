@@ -67,19 +67,15 @@ class IQFeedTool(object):
     def _send_cmd(self, cmd: str):
         """Encode IQFeed API messages.
 
-        :param cmd:
-        :type cmd: str
-
-        """
+Args:
+    cmd:"""
         self._sock.sendall(cmd.encode(encoding="latin-1", errors="strict"))
 
     def iq_query(self, message: str):
         """Send data query to IQFeed API.
 
-        :param message:
-        :type message: str
-
-        """
+Args:
+    message:"""
         end_msg = "!ENDMSG!"
         recv_buffer = 4096
 
@@ -110,10 +106,8 @@ class IQFeedTool(object):
     def get_historical_minute_data(self, ticker: str):
         """Request historical 5 minute data from DTN.
 
-        :param ticker:
-        :type ticker: str
-
-        """
+Args:
+    ticker:"""
         start = self._start
         stop = self._stop
 
@@ -141,10 +135,8 @@ class IQFeedTool(object):
     def add_data_to_df(self, data: np.array):
         """Build Pandas Dataframe in memory
 
-        :param data:
-        :type data: np.array
-
-        """
+Args:
+    data:"""
 
         col_names = ["high_p", "low_p", "open_p", "close_p", "volume", "oi"]
 
@@ -170,9 +162,8 @@ class IQFeedTool(object):
     def get_tickers_from_file(self, filename):
         """Load ticker list from txt file
 
-        :param filename:
-
-        """
+Args:
+    filename:"""
         if not os.path.exists(filename):
             log.error("Ticker List file does not exist: %s", filename)
 

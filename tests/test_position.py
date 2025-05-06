@@ -29,11 +29,8 @@ from backtrader import position
 
 
 def test_run(main=False):
-    """
-
-    :param main: (Default value = False)
-
-    """
+    """Args:
+    main: (Default value = False)"""
     size = 10
     price = 10.0
 

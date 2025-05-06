@@ -36,16 +36,11 @@ import backtrader.indicators as btind
 
 class MultiDataStrategy(bt.Strategy):
     """This strategy operates on 2 datas. The expectation is that the 2 datas are
-    correlated and the 2nd data is used to generate signals on the 1st
-
-      - Buy/Sell Operationss will be executed on the 1st data
-      - The signals are generated using a Simple Moving Average on the 2nd data
-        when the close price crosses upwwards/downwards
-
-    The strategy is a long-only strategy
-
-
-    """
+correlated and the 2nd data is used to generate signals on the 1st
+- Buy/Sell Operationss will be executed on the 1st data
+- The signals are generated using a Simple Moving Average on the 2nd data
+when the close price crosses upwwards/downwards
+The strategy is a long-only strategy"""
 
     params = dict(
         period=15,
@@ -54,23 +49,17 @@ class MultiDataStrategy(bt.Strategy):
     )
 
     def log(self, txt, dt=None):
-        """
-
-        :param txt:
-        :param dt:  (Default value = None)
-
-        """
+        """Args:
+    txt: 
+    dt: (Default value = None)"""
         if self.p.printout:
             dt = dt or self.data.datetime[0]
             dt = bt.num2date(dt)
             print("%s, %s" % (dt.isoformat(), txt))
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status in [bt.Order.Submitted, bt.Order.Accepted]:
             return  # Await further notifications
 

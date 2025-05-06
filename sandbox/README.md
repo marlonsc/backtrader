@@ -4,39 +4,31 @@ Contains experimental or sandbox code. Primarily contains Python code and includ
 
 ## Navigation
 
-* [↑ Parent Directory (backtrader)](../README.md)
+* [🏠 Root Directory](../README.md)
 
 ## Files
 
 ### ATR_bito.py
 
-Python module
-
 ### ATR_example.py
-
-The calculate_true_range function calculates the True Range (TR) for a given
 
 ### ATR_example_polars.py
 
-The calculate_true_range function calculates the True Range (TR) for a given
+### README.md
+
+File with .md extension.
 
 ### __init__.py
 
-Python module
-
 ### check_tkinter.py
-
-Python module
 
 ### random_strategy.py
 
-Python module
-
-
 ## Directory Summary
 
-This directory contains 6 files and 0 subdirectories.
+This directory contains 7 files and 0 subdirectories.
 
 ### File Types
 
 * .py: 6 files
+* .md: 1 files

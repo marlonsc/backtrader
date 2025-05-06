@@ -276,14 +276,11 @@ class SkewnessArbitrageStrategy(bt.Strategy):
 
 # 关键修复：处理索引问题
 def load_data(symbol1, symbol2, fromdate, todate):
-    """
-
-    :param symbol1:
-    :param symbol2:
-    :param fromdate:
-    :param todate:
-
-    """
+    """Args:
+    symbol1: 
+    symbol2: 
+    fromdate: 
+    todate:"""
     output_file = "D:\\FutureData\\ricequant\\1d_2017to2024_noadjust.h5"
 
     try:
@@ -315,11 +312,7 @@ def load_data(symbol1, symbol2, fromdate, todate):
 
 # 其余代码保持不变
 def configure_cerebro(**kwargs):
-    """
-
-    :param **kwargs:
-
-    """
+    """"""
     cerebro = bt.Cerebro()
     data0, data1 = load_data(
         "/J",
@@ -354,11 +347,8 @@ def configure_cerebro(**kwargs):
 
 
 def analyze_results(results):
-    """
-
-    :param results:
-
-    """
+    """Args:
+    results:"""
     if not results:
         print("没有回测结果可分析")
         return

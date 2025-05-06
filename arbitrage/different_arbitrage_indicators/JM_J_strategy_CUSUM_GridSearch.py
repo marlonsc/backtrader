@@ -19,13 +19,15 @@ from backtrader.analyzers.tradeanalyzer import TradeAnalyzer
 
 
 def calculate_rolling_spread(df0, df1, window=30):
-    """
-    Calculates the spread between df0 and df1 using dynamic beta (rolling window).
-    :param df0: DataFrame of asset 0 (J)
-    :param df1: DataFrame of asset 1 (JM)
-    :param window: Size of rolling window for beta
-    :return: DataFrame with spread and beta
-    """
+    """Calculates the spread between df0 and df1 using dynamic beta (rolling window).
+
+Args:
+    df0: DataFrame of asset 0 (J)
+    df1: DataFrame of asset 1 (JM)
+    window: Size of rolling window for beta
+
+Returns:
+    DataFrame with spread and beta"""
     df = (
         df0.set_index("date")[["close"]]
         .rename(columns={"close": "close0"})
@@ -78,11 +80,8 @@ class CUSUMPairStrategy(bt.Strategy):
         self.spread_series = self.data2.close
 
     def _open_position(self, short):
-        """
-
-        :param short:
-
-        """
+        """Args:
+    short:"""
         if not hasattr(self, "size0"):
             self.size0 = 10
             self.size1 = round(self.data2.beta[0] * 10)
@@ -131,11 +130,8 @@ class CUSUMPairStrategy(bt.Strategy):
                 self._close_positions()
 
     def notify_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
+        """Args:
+    trade:"""
         if not self.p.verbose:
             return
         if trade.isclosed:

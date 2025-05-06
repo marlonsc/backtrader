@@ -69,10 +69,7 @@ class Timer(with_metaclass(MetaParams, object)):
     SESSION_TIME, SESSION_START, SESSION_END = range(3)
 
     def __init__(self, *args, **kwargs):
-        """
-        :param *args:
-        :param **kwargs:
-        """
+        """"""
         # Ensure self.p is always present
         if not hasattr(self, "p"):
 
@@ -96,11 +93,8 @@ class Timer(with_metaclass(MetaParams, object)):
         self.kwargs = kwargs
 
     def start(self, data):
-        """
-
-        :param data:
-
-        """
+        """Args:
+    data:"""
         # write down the 'reset when' value
         if not isinstance(self.p.when, integer_types):  # expect time/datetime
             self._rstwhen = self.p.when
@@ -126,22 +120,16 @@ class Timer(with_metaclass(MetaParams, object)):
         self._weekmask = collections.deque()
 
     def _reset_when(self, ddate=datetime.min):
-        """
-
-        :param ddate:  (Default value = datetime.min)
-
-        """
+        """Args:
+    ddate: (Default value = datetime.min)"""
         self._when = self._rstwhen
         self._dtwhen = self._dwhen = None
 
         self._lastcall = ddate
 
     def _check_month(self, ddate):
-        """
-
-        :param ddate:
-
-        """
+        """Args:
+    ddate:"""
         if not self.p.monthdays:
             return True
 
@@ -169,11 +157,8 @@ class Timer(with_metaclass(MetaParams, object)):
         return daycarry or curday
 
     def _check_week(self, ddate=date.min):
-        """
-
-        :param ddate:  (Default value = date.min)
-
-        """
+        """Args:
+    ddate: (Default value = date.min)"""
         if not self.p.weekdays:
             return True
 
@@ -201,11 +186,8 @@ class Timer(with_metaclass(MetaParams, object)):
         return daycarry or curday
 
     def check(self, dt):
-        """
-
-        :param dt:
-
-        """
+        """Args:
+    dt:"""
         d = num2date(dt)
         ddate = d.date()
         if self._lastcall == ddate:  # not repeating, awaiting date change

@@ -114,14 +114,11 @@ class MetaStrategy(type):
     _indcol = dict()
 
     def __new__(meta, name, bases, dct):
-        """
-
-        :param meta:
-        :param name:
-        :param bases:
-        :param dct:
-
-        """
+        """Args:
+    meta: 
+    name: 
+    bases: 
+    dct:"""
         # Hack to support original method name for notify_order
         if "notify" in dct:
             # rename 'notify' to 'notify_order'
@@ -135,11 +132,10 @@ class MetaStrategy(type):
     def __init__(cls, name, bases, dct):
         """Class has already been created ... register subclasses
 
-        :param name:
-        :param bases:
-        :param dct:
-
-        """
+Args:
+    name: 
+    bases: 
+    dct:"""
         # Initialize the class
         super(MetaStrategy, cls).__init__(name, bases, dct)
 
@@ -151,12 +147,7 @@ class MetaStrategy(type):
             cls._indcol[name] = cls
 
     def donew(self, *args, **kwargs):
-        """
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """"""
         # Only call super if it exists
         if hasattr(super(MetaStrategy, self), "donew"):
             _obj, args, kwargs = super(MetaStrategy, self).donew(*args, **kwargs)
@@ -168,13 +159,8 @@ class MetaStrategy(type):
         return _obj, args, kwargs
 
     def dopreinit(self, _obj, *args, **kwargs):
-        """
-
-        :param _obj:
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Args:
+    _obj:"""
         if hasattr(super(MetaStrategy, self), "dopreinit"):
             _obj, args, kwargs = super(MetaStrategy, self).dopreinit(
                 _obj, *args, **kwargs
@@ -194,13 +180,8 @@ class MetaStrategy(type):
         return _obj, args, kwargs
 
     def dopostinit(self, _obj, *args, **kwargs):
-        """
-
-        :param _obj:
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Args:
+    _obj:"""
         if hasattr(super(MetaStrategy, self), "dopostinit"):
             _obj, args, kwargs = super(MetaStrategy, self).dopostinit(
                 _obj, *args, **kwargs

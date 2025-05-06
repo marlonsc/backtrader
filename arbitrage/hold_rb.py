@@ -17,14 +17,11 @@ from backtrader.analyzers.caganalyzer import CAGRAnalyzer
 
 # 始终持有螺纹钢策略
 class AlwaysHoldRBStrategy(bt.Strategy):
-    """
-    A Backtrader strategy that always holds a position in rebar (螺纹钢).
-
-    Parameters
-    ----------
-    size_rb : int, optional
-        The trading size for rebar contracts (default is 1).
-    """
+    """A Backtrader strategy that always holds a position in rebar (螺纹钢).
+Parameters
+----------
+size_rb : int, optional
+The trading size for rebar contracts (default is 1)."""
 
     params = ("size_rb", 1)
 
@@ -51,15 +48,12 @@ class AlwaysHoldRBStrategy(bt.Strategy):
             )
 
     def notify_order(self, order):
-        """
-        Receives order notifications and resets the order attribute when the order
-        is completed, canceled, or has a margin issue.
-
-        Parameters
-        ----------
-        order : bt.Order
-            The order object being notified.
-        """
+        """Receives order notifications and resets the order attribute when the order
+is completed, canceled, or has a margin issue.
+Parameters
+----------
+order : bt.Order
+The order object being notified."""
         if order.status in [order.Completed, order.Canceled, order.Margin]:
             self.order = None
 

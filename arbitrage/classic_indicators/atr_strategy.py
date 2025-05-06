@@ -1,10 +1,7 @@
 # Copyright (c) 2025 backtrader contributors
-"""
-ATR Arbitrage Strategy for Backtrader
-
+"""ATR Arbitrage Strategy for Backtrader
 Implements a pair trading strategy using ATR and SMA bands on the price difference
-between two instruments.
-"""
+between two instruments."""
 
 import datetime
 

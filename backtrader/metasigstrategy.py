@@ -113,14 +113,11 @@ class MetaSigStrategy(type):
     """Metaclass for signal strategies."""
 
     def __new__(meta, name, bases, dct):
-        """
-
-        :param meta:
-        :param name:
-        :param bases:
-        :param dct:
-
-        """
+        """Args:
+    meta: 
+    name: 
+    bases: 
+    dct:"""
         # map user defined next to custom to be able to call own method before
         if "next" in dct:
             dct["_next_custom"] = dct.pop("next")
@@ -133,13 +130,8 @@ class MetaSigStrategy(type):
         return cls
 
     def dopreinit(self, _obj, *args, **kwargs):
-        """
-
-        :param _obj:
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Args:
+    _obj:"""
         # Use self for metaclass methods
         if hasattr(super(MetaSigStrategy, self), "dopreinit"):
             _obj, args, kwargs = super(MetaSigStrategy, self).dopreinit(
@@ -160,13 +152,8 @@ class MetaSigStrategy(type):
         return _obj, args, kwargs
 
     def dopostinit(self, _obj, *args, **kwargs):
-        """
-
-        :param _obj:
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Args:
+    _obj:"""
         if hasattr(super(MetaSigStrategy, self), "dopostinit"):
             _obj, args, kwargs = super(MetaSigStrategy, self).dopostinit(
                 _obj, *args, **kwargs
