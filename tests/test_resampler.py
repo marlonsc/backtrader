@@ -33,11 +33,11 @@ def _run_resampler(
 ) -> bt.Strategy:
     """
 
-    :param data_timeframe:
-    :param data_compression:
-    :param resample_timeframe:
-    :param resample_compression:
-    :param num_gen_bars:
+    :param data_timeframe: 
+    :param data_compression: 
+    :param resample_timeframe: 
+    :param resample_compression: 
+    :param num_gen_bars: 
     :param runtime_seconds: (Default value = 27)
     :param starting_value: (Default value = 200)
     :param tick_interval: (Default value = datetime.timedelta(seconds=25))
@@ -47,6 +47,7 @@ def _run_resampler(
     :param open_minute: (Default value = None)
     :param close_hour: (Default value = None)
     :param close_minute: (Default value = None)
+    :rtype: bt.Strategy
     :rtype: bt.Strategy
     :rtype: bt.Strategy
     :rtype: bt.Strategy

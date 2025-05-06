@@ -54,13 +54,13 @@ class AlwaysHoldRBStrategy(bt.Strategy):
         """
         if trade.isclosed:
             print(
-                f"TRADE CLOSED {self.data.datetime.date(0)}, PROFIT: GROSS {trade.pnl:.2f}, NET {trade.pnlcomm:.2f}"
+                f"TRADE CLOSED {self.data.datetime.date(0)}, PROFIT: GROSS {
+                    trade.pnl:.2f
+                }, NET {trade.pnlcomm:.2f}"
             )
 
         elif trade.justopened:
-            print(
-                f"TRADE OPENED {self.data.datetime.date(0)}, SIZE {trade.size}"
-            )
+            print(f"TRADE OPENED {self.data.datetime.date(0)}, SIZE {trade.size}")
 
     def notify_order(self, order):
         """
@@ -76,7 +76,9 @@ class AlwaysHoldRBStrategy(bt.Strategy):
         if order.status in [order.Completed]:
             if order.isbuy():
                 print(
-                    f"executed date {self.data.datetime.date(0)},executed price {order.executed.price}, created date {self.data.datetime.date(0)}"
+                    f"executed date {self.data.datetime.date(0)},executed price {
+                        order.executed.price
+                    }, created date {self.data.datetime.date(0)}"
                 )
 
 

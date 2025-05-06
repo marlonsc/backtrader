@@ -30,10 +30,11 @@ import backtrader as bt
 
 
 class RelativeVolumeByBar(bt.Indicator):
-    """
-    RelativeVolumeByBar: Backtrader indicator for relative volume by bar session time.
+    """RelativeVolumeByBar: Backtrader indicator for relative volume by bar session time.
     Implements a session-aware volume ratio for each bar in a trading day.
     by <marlonsc@gmail.com>
+
+
     """
 
     alias = ("RVBB",)
@@ -46,7 +47,7 @@ class RelativeVolumeByBar(bt.Indicator):
     )
 
     def _plotlabel(self):
-        """Return a list of parameter labels for plotting."""
+        """ """
         plabels = [
             f"prestart: {self.p.prestart.strftime('%H:%M')}",
             f"start: {self.p.start.strftime('%H:%M')}",
@@ -65,7 +66,11 @@ class RelativeVolumeByBar(bt.Indicator):
         super(RelativeVolumeByBar, self).__init__()
 
     def _barisvalid(self, tm):
-        """Check if the bar time is within the valid session window."""
+        """Check if the bar time is within the valid session window.
+
+        :param tm: 
+
+        """
         return self.p.start <= tm <= self.p.end
 
     def _daycount(self):

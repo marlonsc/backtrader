@@ -1,29 +1,30 @@
 # Copyright (c) 2025 backtrader contributors
 """
-Lógica de execução e orquestração do loop principal do backtrader.
-Todas as funções e docstrings devem ser line-wrap ≤ 90 caracteres.
+Execution and orchestration logic for the main backtrader loop.
+All functions and docstrings must be line-wrapped at ≤ 90 characters.
 """
 
 import itertools
 import multiprocessing
-from backtrader.utils.optreturn import OptReturn
+
 from backtrader.observers.broker import Broker
 from backtrader.observers.buysell import BuySell
-from backtrader.observers.trades import Trades
-from backtrader.observers.trades import DataTrades
+from backtrader.observers.trades import DataTrades, Trades
+from backtrader.utils.optreturn import OptReturn
 
 
 def startrun(cerebro):
-    """
-    Inicia a execução das estratégias, incluindo otimização se necessário.
-    :param cerebro: Instância de Cerebro
+    """Inicia a execution of strategies, including optimization if necessary.
+
+    :param cerebro: Cerebro instance
+
     """
     iterstrats = itertools.product(*cerebro.strats)
     dooptimize = getattr(cerebro, "_dooptimize", False)
     maxcpus = getattr(cerebro.p, "maxcpus", 1)
     predata = getattr(cerebro.p, "predata", False)
     if not dooptimize or maxcpus == 1:
-        # Se não for otimização ou só 1 núcleo, executa sequencial
+        # If not optimization or only 1 core, execute sequentially
         for iterstrat in iterstrats:
             runstrat = cerebro.runstrategies(iterstrat, predata=predata)
             cerebro.runstrats.append(runstrat)
@@ -55,23 +56,25 @@ def startrun(cerebro):
 
 
 def finishrun(cerebro):
-    """
-    Finaliza a execução das estratégias, retornando os resultados.
-    :param cerebro: Instância de Cerebro
+    """Finalizes the execution of strategies, returning the results.
+
+    :param cerebro: Cerebro instance
+
     """
     dooptimize = getattr(cerebro, "_dooptimize", False)
     if not dooptimize:
-        # evitar lista de listas para casos regulares
+        # avoid list of lists for regular cases
         return cerebro.runstrats[0]
     return cerebro.runstrats
 
 
 def runstrategies(cerebro, iterstrat, predata=False):
-    """
-    Executa o loop principal das estratégias.
-    :param cerebro: Instância de Cerebro
-    :param iterstrat: Iterador de estratégias
-    :param predata: Flag de pré-carregamento
+    """Executes the main loop of strategies.
+
+    :param cerebro: Cerebro instance
+    :param iterstrat: Strategy iterator
+    :param predata: Preload flag (Default value = False)
+
     """
     cerebro._init_stcount()
     cerebro.runningstrats = runstrats = list()
@@ -207,11 +210,12 @@ def runstrategies(cerebro, iterstrat, predata=False):
 
 
 def prerunstrategies(cerebro, iterstrat, predata=False):
-    """
-    Executa o pré-processamento das estratégias antes do loop principal.
-    :param cerebro: Instância de Cerebro
-    :param iterstrat: Iterador de estratégias
-    :param predata: Flag de pré-carregamento
+    """Executes the pre-processing of strategies before the main loop.
+
+    :param cerebro: Cerebro instance
+    :param iterstrat: Strategy iterator
+    :param predata: Preload flag (Default value = False)
+
     """
     cerebro._init_stcount()
     cerebro.runningstrats = runstrats = list()
@@ -282,32 +286,34 @@ def prerunstrategies(cerebro, iterstrat, predata=False):
 
 
 def runstrategieskenel(cerebro):
+    """Executes the main kernel of strategies (placeholder for future extensions).
+
+    :param cerebro: Cerebro instance
+
     """
-    Executa o kernel principal das estratégias (placeholder para extensões futuras).
-    :param cerebro: Instância de Cerebro
-    """
-    # Placeholder: implementar lógica específica se necessário
-    pass
+    # Placeholder: implement specific logic if necessary
 
 
 def _runnext(cerebro, runstrats):
+    """Executes the "next" execution loop for strategies.
+
+    :param cerebro: Cerebro instance
+    :param runstrats: List of strategies in execution
+
     """
-    Executa o loop de execução "next" para as estratégias.
-    :param cerebro: Instância de Cerebro
-    :param runstrats: Lista de estratégias em execução
-    """
-    # Implementação extraída de cerebro.py
+    # Implementation extracted from cerebro.py
     for strat in runstrats:
         while not strat.stop():
             strat.next()
 
 
 def _runonce(cerebro, runstrats):
+    """Executes the "runonce" execution loop for strategies.
+
+    :param cerebro: Cerebro instance
+    :param runstrats: List of strategies in execution
+
     """
-    Executa o loop de execução "runonce" para as estratégias.
-    :param cerebro: Instância de Cerebro
-    :param runstrats: Lista de estratégias em execução
-    """
-    # Implementação extraída de cerebro.py
+    # Implementation extracted from cerebro.py
     for strat in runstrats:
         strat.runonce()

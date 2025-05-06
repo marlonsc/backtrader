@@ -31,7 +31,15 @@ from datetime import date, datetime, timedelta
 
 from .feed import AbstractDataBase
 from .metabase import MetaParams
-from .utils import TIME_MAX, date2num, num2date
+from .utils.date import date2num, num2date
+
+try:
+    from .utils.time import TIME_MAX
+except ImportError:
+    # Fallback if TIME_MAX is not available
+    from datetime import time
+
+    TIME_MAX = time(23, 59, 59, 999999)
 from .utils.py3 import integer_types, range, with_metaclass
 
 __all__ = ["SESSION_TIME", "SESSION_START", "SESSION_END", "Timer"]
@@ -62,11 +70,28 @@ class Timer(with_metaclass(MetaParams, object)):
 
     def __init__(self, *args, **kwargs):
         """
-
         :param *args:
         :param **kwargs:
-
         """
+        # Ensure self.p is always present
+        if not hasattr(self, "p"):
+
+            class DummyParams:
+                tid = None
+                owner = None
+                strats = False
+                when = None
+                offset = timedelta()
+                repeat = timedelta()
+                weekdays = []
+                weekcarry = False
+                monthdays = []
+                monthcarry = True
+                allow = None
+                tzdata = None
+                cheat = False
+
+            self.p = DummyParams()
         self.args = args
         self.kwargs = kwargs
 
@@ -200,7 +225,9 @@ class Timer(with_metaclass(MetaParams, object)):
             if ret:
                 ret = self._check_week(ddate)
             if ret and self.p.allow is not None:
-                ret = self.p.allow(ddate)
+                if callable(self.p.allow):
+                    ret = self.p.allow(ddate)
+                # If not callable, do not change ret
 
             if not ret:
                 self._reset_when(ddate)  # this day won't make it

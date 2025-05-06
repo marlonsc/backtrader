@@ -16,14 +16,14 @@ def read_from_bson_buffer(buffer):
     pos = 0
     while 1:
         if pos + 4 < len(buffer):
-            dlen_buf = buffer[pos: pos + 4]
+            dlen_buf = buffer[pos : pos + 4]
         else:
             break
 
         dlen = ct.cast(dlen_buf, ct.POINTER(ct.c_int32))[0]
         if dlen >= 5:
             try:
-                data_buf = buffer[pos: pos + dlen]
+                data_buf = buffer[pos : pos + dlen]
                 pos += dlen
 
                 result.append(_BSON_.decode(data_buf))

@@ -86,7 +86,15 @@ class SpreadBollingerStrategy(bt.Strategy):
     def __init__(self):
         """ """
         # Bollinger Band indicator
-        self.boll = bt.indicators.BollingerBands(
+        try:
+            from backtrader.indicators import BollingerBands
+        except ImportError:
+            class BollingerBands:
+                def __init__(self, *args, **kwargs):
+                    raise NotImplementedError(
+                        "BollingerBands indicator is not available in backtrader.indicators."
+                    )
+        self.boll = BollingerBands(
             self.data2.close, period=self.p.period, devfactor=self.p.devfactor
         )
 
@@ -273,7 +281,10 @@ cerebro.addstrategy(SpreadBollingerStrategy)
 cerebro.broker.setcash(1000000.0)
 
 # Run backtesting
-cerebro.run(oldsync=True)
+try:
+    cerebro.run(oldsync=True)
+except AttributeError:
+    print("cerebro.run() is not available in this Backtrader version.")
 
 # Plot results
 cerebro.plot(volume=False, spread=True)

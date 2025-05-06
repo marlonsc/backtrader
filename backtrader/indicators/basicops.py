@@ -82,7 +82,7 @@ class OperationN(PeriodN):
         func = self.func
 
         for i in range(start, end):
-            dst[i] = func(src[i - period + 1: i + 1])
+            dst[i] = func(src[i - period + 1 : i + 1])
 
 
 class BaseApplyN(OperationN):
@@ -452,7 +452,7 @@ class Average(PeriodN):
         period = self.p.period
 
         for i in range(start, end):
-            dst[i] = math.fsum(src[i - period + 1: i + 1]) / period
+            dst[i] = math.fsum(src[i - period + 1 : i + 1]) / period
 
 
 class ExponentialSmoothing(Average):
@@ -620,5 +620,5 @@ class WeightedAverage(PeriodN):
         weights = self.p.weights
 
         for i in range(start, end):
-            data = darray[i - period + 1: i + 1]
+            data = darray[i - period + 1 : i + 1]
             larray[i] = coef * math.fsum(map(operator.mul, data, weights))

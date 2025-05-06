@@ -37,10 +37,10 @@ class AccelerationDecelerationOscillator(bt.Indicator):
     and deceleration of the current driving force. This indicator will change
     direction before any changes in the driving force, which, it its turn, will
     change its direction before the price.
-
+    
     Formula:
      - AcdDecOsc = AwesomeOscillator - SMA(AwesomeOscillator, period)
-
+    
     See:
       - https://www.metatrader5.com/en/terminal/help/indicators/bw_indicators/ao
       - https://www.ifcmarkets.com/en/ntx-indicators/ntx-indicators-accelerator-decelerator-oscillator

@@ -29,26 +29,21 @@ __all__ = ["BacktraderError", "StrategySkipError"]
 
 
 class BacktraderError(Exception):
-    """Base exception for all other exceptions"""
+    """Base exception for all Backtrader-specific errors."""
 
 
 class StrategySkipError(BacktraderError):
-    """Requests the platform to skip this strategy for backtesting. To be"""
+    """Requests the platform to skip this strategy during backtesting."""
 
 
 class ModuleImportError(BacktraderError):
-    """
-
-
-    :raises be: imported
-
-    """
+    """ """
 
     def __init__(self, message, *args):
         """
 
-        :param message:
-        :param *args:
+        :param message: Error message string.
+        :param *args: Additional arguments for context.
 
         """
         super(ModuleImportError, self).__init__(message)
@@ -56,18 +51,13 @@ class ModuleImportError(BacktraderError):
 
 
 class FromModuleImportError(ModuleImportError):
-    """
-
-
-    :raises be: imported
-
-    """
+    """ """
 
     def __init__(self, message, *args):
         """
 
-        :param message:
-        :param *args:
+        :param message: Error message string.
+        :param *args: Additional arguments for context.
 
         """
         super(FromModuleImportError, self).__init__(message, *args)

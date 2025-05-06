@@ -33,11 +33,11 @@ __all__ = ["LaguerreRSI", "LRSI", "LaguerreFilter", "LAGF"]
 class LaguerreRSI(PeriodN):
     """Defined by John F. Ehlers in `Cybernetic Analysis for Stock and Futures`,
     2004, published by Wiley. `ISBN: 978-0-471-46307-8`
-
+    
     The Laguerre RSI tries to implements a better RSI by providing a sort of
     *Time Warp without Time Travel* using a Laguerre filter. This provides for
     faster reactions to price changes
-
+    
     ``gamma`` is meant to have values between ``0.2`` and ``0.8``, with the
     best balance found theoretically at the default of ``0.5``
 
@@ -91,7 +91,7 @@ class LaguerreRSI(PeriodN):
 class LaguerreFilter(PeriodN):
     """Defined by John F. Ehlers in `Cybernetic Analysis for Stock and Futures`,
     2004, published by Wiley. `ISBN: 978-0-471-46307-8`
-
+    
     ``gamma`` is meant to have values between ``0.2`` and ``0.8``, with the
     best balance found theoretically at the default of ``0.5``
 

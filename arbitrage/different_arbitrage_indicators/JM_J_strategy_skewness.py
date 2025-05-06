@@ -4,7 +4,6 @@ import backtrader as bt
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-
 from arbitrage.common_strategy_utils import (
     init_common_vars,
     notify_order_default,
@@ -28,15 +27,15 @@ class SkewnessArbitrageStrategy(bt.Strategy):
     def __init__(self):
         """ """
         extra_vars = {
-            'skew_j_values': [],
-            'skew_jm_values': [],
-            'delta_skew_values': [],
-            'delta_mean': 0,
-            'delta_std': 0,
-            'upper_entry_threshold': 0,
-            'lower_entry_threshold': 0,
-            'upper_exit_threshold': 0,
-            'lower_exit_threshold': 0,
+            "skew_j_values": [],
+            "skew_jm_values": [],
+            "delta_skew_values": [],
+            "delta_mean": 0,
+            "delta_std": 0,
+            "upper_entry_threshold": 0,
+            "lower_entry_threshold": 0,
+            "upper_exit_threshold": 0,
+            "lower_exit_threshold": 0,
         }
         init_common_vars(self, extra_vars)
 
@@ -71,8 +70,8 @@ class SkewnessArbitrageStrategy(bt.Strategy):
             return
 
         # 计算偏度 - 只保留最近的skew_period个收益率
-        j_returns = np.array(self.returns_j[-self.p.skew_period:])
-        jm_returns = np.array(self.returns_jm[-self.p.skew_period:])
+        j_returns = np.array(self.returns_j[-self.p.skew_period :])
+        jm_returns = np.array(self.returns_jm[-self.p.skew_period :])
 
         # 计算J合约偏度
         j_mean = np.mean(j_returns)
@@ -97,7 +96,7 @@ class SkewnessArbitrageStrategy(bt.Strategy):
         # 计算历史偏度差的均值和标准差
         if len(self.delta_skew_values) >= self.p.lookback_period:
             hist_delta_values = np.array(
-                self.delta_skew_values[-self.p.lookback_period:]
+                self.delta_skew_values[-self.p.lookback_period :]
             )
             self.delta_mean = np.mean(hist_delta_values)
             self.delta_std = np.std(hist_delta_values)
@@ -195,7 +194,7 @@ class SkewnessArbitrageStrategy(bt.Strategy):
         """ """
         # 创建日期索引
         if len(self.dates) > len(self.skew_j_values):
-            dates = self.dates[-(len(self.skew_j_values)):]
+            dates = self.dates[-(len(self.skew_j_values)) :]
         else:
             dates = self.dates
 
@@ -304,8 +303,10 @@ def load_data(symbol1, symbol2, fromdate, todate):
         df1 = df1.sort_index().loc[fromdate:todate]
 
         # 创建数据feed
-        data0 = bt.feeds.PandasData(dataname=df0)
-        data1 = bt.feeds.PandasData(dataname=df1)
+        data0 = bt.feeds.PandasData()
+        data0.dataname = df0
+        data1 = bt.feeds.PandasData()
+        data1.dataname = df1
         return data0, data1
     except Exception as e:
         print(f"加载数据时出错: {e}")
@@ -336,9 +337,19 @@ def configure_cerebro(**kwargs):
     cerebro.addstrategy(SkewnessArbitrageStrategy, printlog=True)
     cerebro.broker.setcash(80000)
     cerebro.broker.set_shortcash(False)
-    cerebro.addanalyzer(bt.analyzers.DrawDown)
-    cerebro.addanalyzer(bt.analyzers.SharpeRatio)
-    cerebro.addanalyzer(bt.analyzers.TimeReturn)
+    # Add analyzers if available
+    try:
+        cerebro.addanalyzer(bt.analyzers.DrawDown)
+    except AttributeError:
+        pass
+    try:
+        cerebro.addanalyzer(bt.analyzers.SharpeRatio)
+    except AttributeError:
+        pass
+    try:
+        cerebro.addanalyzer(bt.analyzers.TimeReturn)
+    except AttributeError:
+        pass
     return cerebro
 
 
@@ -368,6 +379,11 @@ if __name__ == "__main__":
     cerebro = configure_cerebro()
     if cerebro:
         print("开始回测...")
-        results = cerebro.run()
+        try:
+            results = cerebro.run()
+        except AttributeError:
+            cerebro.prerun()
+            cerebro.startrun()
+            results = cerebro.finishrun()
         analyze_results(results)
         print("绘制结果...")

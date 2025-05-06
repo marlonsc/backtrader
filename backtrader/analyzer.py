@@ -36,15 +36,18 @@ import pprint as pp
 from collections import OrderedDict
 
 from . import TimeFrame
-from .utils.py3 import MAXINT, with_metaclass
 from .metabase import MetaParams, findowner
-from .strategy import Strategy
 from .observer import Observer
+from .strategy import Strategy
+from .utils.py3 import MAXINT, with_metaclass
 from .writer import WriterFile
 
 
 class MetaAnalyzer(MetaParams):
-    """ """
+    """Metaclass for Analyzer. Handles analyzer instantiation and parent/child
+    registration. All docstrings and comments must be line-wrapped at 90 characters
+    or less.
+    """
 
     def donew(cls, *args, **kwargs):
         """Intercept the strategy parameter
@@ -110,7 +113,9 @@ class MetaAnalyzer(MetaParams):
 
 
 class Analyzer(with_metaclass(MetaAnalyzer, object)):
-    """Analyzer base class. All analyzers are subclass of this one
+    """Analyzer base class. All analyzers are subclass of this one.
+    Provides hooks for strategy notifications and analysis reporting.
+    All docstrings and comments must be line-wrapped at 90 characters or less.
 
     An Analyzer instance operates in the frame of a strategy and provides an
     analysis for that strategy.
@@ -405,7 +410,10 @@ class Analyzer(with_metaclass(MetaAnalyzer, object)):
 
 
 class MetaTimeFrameAnalyzerBase(Analyzer.__class__):
-    """ """
+    """Metaclass for TimeFrameAnalyzerBase. Handles class creation for analyzers
+    that operate on specific timeframes. All docstrings and comments must be
+    line-wrapped at 90 characters or less.
+    """
 
     def __new__(mcs, name, bases, dct):
         """
@@ -423,7 +431,9 @@ class MetaTimeFrameAnalyzerBase(Analyzer.__class__):
 
 
 class TimeFrameAnalyzerBase(with_metaclass(MetaTimeFrameAnalyzerBase, Analyzer)):
-    """ """
+    """Base class for analyzers that operate on specific timeframes. All docstrings
+    and comments must be line-wrapped at 90 characters or less.
+    """
 
     params = (
         ("timeframe", None),

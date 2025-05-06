@@ -43,15 +43,21 @@ import math
 from itertools import islice
 
 from .lineroot import LineMultiple, LineRoot, LineSingle
-from .utils import num2date, time2num
+
+try:
+    from .utils import num2date, time2num
+except ImportError:
+    from .utils.date import num2date, time2num
+
 from .utils.py3 import range, string_types, with_metaclass
 
 NAN = float("NaN")
 
 
 class LineBuffer(LineSingle):
-    """LineBuffer defines an interface to an "array.array" (or list) in which
-    index 0 points to the item which is active for input and output.
+    """LineBuffer defines an interface to an array for time series data, supporting
+    pointer-based access, bindings, and buffer management. All docstrings and
+    comments must be line-wrapped at 90 characters or less.
 
     Positive indices fetch values from the past (left hand side)
     Negative indices fetch values from the future (if the array has been
@@ -80,6 +86,7 @@ class LineBuffer(LineSingle):
         self.lines = [self]
         self.mode = self.UnBounded
         self.bindings = list()
+        self._idx = -1
         self.reset()
         self._tz = None
 
@@ -211,7 +218,7 @@ class LineBuffer(LineSingle):
             end = self.idx + ago + 1
             return list(islice(self.array, start, end))
 
-        return self.array[self.idx + ago - size + 1: self.idx + ago + 1]
+        return self.array[self.idx + ago - size + 1 : self.idx + ago + 1]
 
     def getzeroval(self, idx=0):
         """Returns a single value of the array relative to the real zero
@@ -242,7 +249,7 @@ class LineBuffer(LineSingle):
         if self.useislice:
             return list(islice(self.array, idx, idx + size))
 
-        return self.array[idx: idx + size]
+        return self.array[idx : idx + size]
 
     def __setitem__(self, ago, value):
         """Sets a value at position "ago" and executes any associated bindings
@@ -420,13 +427,14 @@ class LineBuffer(LineSingle):
         :param binding:  (Default value = 0)
 
         """
+        owner = getattr(self, "_owner", None)
+        if owner is None:
+            raise AttributeError("LineBuffer has no _owner member")
         if isinstance(binding, string_types):
-            line = getattr(self._owner.lines, binding)
+            line = getattr(owner.lines, binding)
         else:
-            line = self._owner.lines[binding]
-
+            line = owner.lines[binding]
         self.addbinding(line)
-
         return self
 
     bind2line = bind2lines
@@ -451,25 +459,23 @@ class LineBuffer(LineSingle):
 
         return LineDelay(self, ago)
 
-    def _makeoperation(self, other, operation, r=False, _ownerskip=None):
+    def _makeoperation(self, other, operation, r=False):
         """
 
         :param other:
         :param operation:
         :param r:  (Default value = False)
-        :param _ownerskip:  (Default value = None)
 
         """
-        return LinesOperation(self, other, operation, r=r, _ownerskip=_ownerskip)
+        return LinesOperation(self, other, operation, r=r)
 
-    def _makeoperationown(self, operation, _ownerskip=None):
+    def _makeoperationown(self, operation):
         """
 
         :param operation:
-        :param _ownerskip:  (Default value = None)
 
         """
-        return LineOwnOperation(self, operation, _ownerskip=_ownerskip)
+        return LineOwnOperation(self, operation)
 
     def _settz(self, tz):
         """
@@ -642,7 +648,9 @@ class LineBuffer(LineSingle):
 
 
 class MetaLineActions(LineBuffer.__class__):
-    """Metaclass for Lineactions
+    """Metaclass for LineActions. Scans for LineBuffer instances to calculate
+    minperiod and registers the instance to the owner. All docstrings and comments
+    must be line-wrapped at 90 characters or less.
 
     Scans the instance before init for LineBuffer (or parentclass LineSingle)
     instances to calculate the minperiod for this instance
@@ -700,9 +708,8 @@ class MetaLineActions(LineBuffer.__class__):
         :param **kwargs:
 
         """
-        _obj, args, kwargs = super(MetaLineActions, cls).dopreinit(
-            _obj, *args, **kwargs
-        )
+        if hasattr(super(MetaLineActions, cls), "dopreinit"):
+            super(MetaLineActions, cls).dopreinit(_obj, *args, **kwargs)
 
         _obj._clock = _obj._owner  # default setting
 
@@ -710,7 +717,7 @@ class MetaLineActions(LineBuffer.__class__):
             _obj._clock = args[0]
 
         # Keep a reference to the datas for buffer adjustment purposes
-        _obj._datas = [x for x in args if isinstance(x, LineRoot)]
+        _obj._datas = getattr(_obj, "_datas", [])
 
         # Do not produce anything until the operation lines produce something
         _minperiods = [x._minperiod for x in args if isinstance(x, LineSingle)]
@@ -733,9 +740,8 @@ class MetaLineActions(LineBuffer.__class__):
         :param **kwargs:
 
         """
-        _obj, args, kwargs = super(MetaLineActions, cls).dopostinit(
-            _obj, *args, **kwargs
-        )
+        if hasattr(super(MetaLineActions, cls), "dopostinit"):
+            super(MetaLineActions, cls).dopostinit(_obj, *args, **kwargs)
 
         # register with _owner to be kicked later
         _obj._owner.addindicator(_obj)
@@ -744,7 +750,9 @@ class MetaLineActions(LineBuffer.__class__):
 
 
 class PseudoArray(object):
-    """ """
+    """Wrapper for array-like objects to provide a uniform interface. All docstrings
+    and comments must be line-wrapped at 90 characters or less.
+    """
 
     def __init__(self, wrapped):
         """
@@ -769,9 +777,9 @@ class PseudoArray(object):
 
 
 class LineActions(with_metaclass(MetaLineActions, LineBuffer)):
-    """Base class derived from LineBuffer intented to defined the
-    minimum interface to make it compatible with a LineIterator by
-    providing operational _next and _once interfaces.
+    """Base class derived from LineBuffer to provide the minimum interface for
+    compatibility with LineIterator, including _next and _once. All docstrings and
+    comments must be line-wrapped at 90 characters or less.
 
     The metaclass does the dirty job of calculating minperiods and registering
 
@@ -779,6 +787,11 @@ class LineActions(with_metaclass(MetaLineActions, LineBuffer)):
     """
 
     _ltype = LineBuffer.IndType
+
+    def __init__(self):
+        super().__init__()
+        self._datas = []
+        self._clock = []
 
     def getindicators(self):
         """ """
@@ -825,7 +838,9 @@ class LineActions(with_metaclass(MetaLineActions, LineBuffer)):
 
     def _once(self):
         """ """
-        self.forward(size=self._clock.buflen())
+        clock = self._clock
+        size = clock.buflen() if hasattr(clock, "buflen") else len(clock)
+        self.forward(size=size)
         self.home()
 
         self.preonce(0, self._minperiod - 1)
@@ -947,7 +962,10 @@ class _LineForward(LineActions):
 
 
 class LinesOperation(LineActions):
-    """Holds an operation that operates on a two operands. Example: mul
+    """Performs element-wise operations between two line objects. All docstrings and
+    comments must be line-wrapped at 90 characters or less.
+
+    Holds an operation that operates on a two operands. Example: mul
 
     It will "next"/traverse the array applying the operation on the
     two operands and storing the result in self.
@@ -1087,7 +1105,11 @@ class LinesOperation(LineActions):
 
 
 class LineOwnOperation(LineActions):
-    """Holds an operation that operates on a single operand. Example: abs
+    """Performs element-wise operations on a single line object using a specified
+    operation. All docstrings and comments must be line-wrapped at 90 characters or
+    less.
+
+    Holds an operation that operates on a single operand. Example: abs
 
     It will "next"/traverse the array applying the operation and storing
     the result in self

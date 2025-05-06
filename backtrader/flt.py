@@ -32,11 +32,16 @@ __all__ = ["Filter"]
 
 
 class MetaFilter(MetaParams):
-    """ """
+    """Metaclass for Filter. Handles filter instantiation. All docstrings and
+    comments must be line-wrapped at 90 characters or less.
+    """
 
 
 class Filter(with_metaclass(MetaParams, object)):
-    """ """
+    """Base class for data filters in Backtrader. Subclass to implement custom
+    filtering logic. All docstrings and comments must be line-wrapped at 90
+    characters or less.
+    """
 
     _firsttime = True
 

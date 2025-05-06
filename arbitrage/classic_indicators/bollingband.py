@@ -1,3 +1,10 @@
+# Copyright (c) 2025 backtrader contributors
+"""
+Spread Bollinger Band Strategy for Backtrader
+
+Implements a pair trading strategy using Bollinger Bands on the spread between two
+instruments.
+"""
 import datetime
 
 import backtrader as bt
@@ -7,7 +14,9 @@ from arbitrage.myutil import calculate_spread
 
 # 布林带策略
 class SpreadBollingerStrategy(bt.Strategy):
-    """ """
+    """
+    Pair trading strategy using Bollinger Bands on the spread between two assets.
+    """
 
     params = (
         ("period", 20),  # 布林带周期
@@ -17,7 +26,10 @@ class SpreadBollingerStrategy(bt.Strategy):
     )
 
     def __init__(self):
-        """ """
+        """
+        Initialize the SpreadBollingerStrategy. Sets up Bollinger Bands on the spread and
+        trading state variables.
+        """
         # 布林带指标
         self.boll = bt.indicators.BollingerBands(
             self.data2.close,  # 使用外部计算的价差
@@ -33,7 +45,10 @@ class SpreadBollingerStrategy(bt.Strategy):
         self.year_values = {}
 
     def next(self):
-        """ """
+        """
+        Main strategy logic for each bar. Handles entry and exit conditions based on
+        Bollinger Bands.
+        """
         # 如果有未完成订单，跳过
         if self.order:
             return
@@ -67,9 +82,7 @@ class SpreadBollingerStrategy(bt.Strategy):
 
     def notify_trade(self, trade):
         """
-
-        :param trade:
-
+        Handle trade notifications and print execution details.
         """
         if trade.isclosed:
             print(
@@ -115,7 +128,7 @@ df_RB = pd.read_hdf(output_file, key="/RB").reset_index()
 # i:rb = 5:1
 df_spread = calculate_spread(df_I, df_RB, 5, 1)
 
-print(f"价差数据形状: {df_spread.shape}")
+print(f"Spread data shape: {df_spread.shape}")
 
 # 数据必须大于fromdate
 fromdate = datetime.datetime(2017, 1, 1)

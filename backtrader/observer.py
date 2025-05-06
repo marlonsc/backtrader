@@ -25,39 +25,40 @@ from __future__ import (
     unicode_literals,
 )
 
-from backtrader.utils.py3 import with_metaclass
-
 from .lineiterator import LineIterator, ObserverBase, StrategyBase
+from .utils.py3 import with_metaclass
 
 
-class MetaObserver(ObserverBase.__class__):
-    """ """
+class MetaObserver(type):
+    """Metaclass for ObserverBase to handle instantiation and pre-initialization."""
+
+    def __new__(mcs, name, bases, dct):
+        return super().__new__(mcs, name, bases, dct)
 
     def donew(cls, *args, **kwargs):
         """
+        Instantiates a new Observer object and initializes analyzers list.
 
         :param *args:
         :param **kwargs:
-
+        :return: tuple of (object, args, kwargs)
         """
-        _obj, args, kwargs = super(MetaObserver, cls).donew(*args, **kwargs)
+        _obj = object.__new__(cls)
         _obj._analyzers = list()  # keep children analyzers
-
-        return _obj, args, kwargs  # return the instantiated object and args
+        return _obj, args, kwargs
 
     def dopreinit(cls, _obj, *args, **kwargs):
         """
+        Pre-initialization for Observer, sets clock if strategy-wide observer.
 
         :param _obj:
         :param *args:
         :param **kwargs:
-
+        :return: tuple of (object, args, kwargs)
         """
-        _obj, args, kwargs = super(MetaObserver, cls).dopreinit(_obj, *args, **kwargs)
-
-        if _obj._stclock:  # Change clock if strategy wide observer
+        # No super().dopreinit, as base type does not have it
+        if getattr(_obj, "_stclock", False):
             _obj._clock = _obj._owner
-
         return _obj, args, kwargs
 
 

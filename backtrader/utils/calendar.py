@@ -9,12 +9,12 @@ from ..utils.py3 import string_types
 
 
 def addcalendar(cal):
-    """
-    Instancia e retorna um calendário de negociação global a partir de diferentes
+    """Instancia e retorna um calendário de negociação global a partir de diferentes
     tipos de entrada (string, instância, classe, etc).
 
     :param cal: String, instância ou classe de calendário
-    :return: Instância de calendário
+    :returns: Instância de calendário
+
     """
     if isinstance(cal, string_types):
         calobj = PandasMarketCalendar()
@@ -34,10 +34,10 @@ def addcalendar(cal):
 
 
 def addtz(params, tz):
-    """
-    Define o timezone global nos parâmetros do sistema.
+    """Define o timezone global nos parâmetros do sistema.
 
     :param params: Objeto de parâmetros
     :param tz: Timezone (None, string, int, pytz)
+
     """
     params.tz = tz

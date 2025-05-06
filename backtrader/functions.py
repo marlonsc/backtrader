@@ -34,7 +34,9 @@ from .utils.py3 import cmp, range
 
 # Generate a List equivalent which uses "is" for contains
 class List(list):
-    """ """
+    """List subclass using 'is' for contains. All docstrings and comments must be
+    line-wrapped at 90 characters or less.
+    """
 
     def __contains__(self, other):
         """
@@ -46,7 +48,9 @@ class List(list):
 
 
 class Logic(LineActions):
-    """ """
+    """Base class for logic operations on line objects. All docstrings and comments
+    must be line-wrapped at 90 characters or less.
+    """
 
     def __init__(self, *args):
         """
@@ -159,7 +163,9 @@ class DivZeroByZero(Logic):
 
 
 class Cmp(Logic):
-    """ """
+    """Compares two line objects element-wise. All docstrings and comments must be
+    line-wrapped at 90 characters or less.
+    """
 
     def __init__(self, a, b):
         """
@@ -193,7 +199,9 @@ class Cmp(Logic):
 
 
 class CmpEx(Logic):
-    """ """
+    """Extended comparison logic for line objects. All docstrings and comments must
+    be line-wrapped at 90 characters or less.
+    """
 
     def __init__(self, a, b, r1, r2, r3):
         """
@@ -244,7 +252,9 @@ class CmpEx(Logic):
 
 
 class If(Logic):
-    """ """
+    """Implements conditional logic for line objects. All docstrings and comments
+    must be line-wrapped at 90 characters or less.
+    """
 
     def __init__(self, cond, a, b):
         """
@@ -281,71 +291,93 @@ class If(Logic):
 
 
 class MultiLogic(Logic):
-    """ """
+    """Base class for multi-argument logic operations. All docstrings and comments
+    must be line-wrapped at 90 characters or less.
+    """
+
+    flogic = None
 
     def next(self):
         """ """
-        self[0] = self.flogic([arg[0] for arg in self.args])
+        flogic = type(self).flogic
+        if flogic is None or not callable(flogic):
+            raise NotImplementedError(
+                "flogic must be defined in subclass and callable."
+            )
+        self[0] = flogic(*[arg[0] for arg in self.args])
 
     def once(self, start, end):
         """
-
         :param start:
         :param end:
-
         """
         # cache python dictionary lookups
         dst = self.array
         arrays = [arg.array for arg in self.args]
-        flogic = self.flogic
-
+        flogic = type(self).flogic
+        if flogic is None or not callable(flogic):
+            raise NotImplementedError(
+                "flogic must be defined in subclass and callable."
+            )
         for i in range(start, end):
-            dst[i] = flogic([arr[i] for arr in arrays])
+            dst[i] = flogic(*[arr[i] for arr in arrays])
 
 
 class SingleLogic(Logic):
-    """ """
+    """Base class for single-argument logic operations. All docstrings and comments
+    must be line-wrapped at 90 characters or less.
+    """
+
+    flogic = None
 
     def next(self):
         """ """
-        self[0] = self.flogic(self.args[0])
+        flogic = type(self).flogic
+        if flogic is None or not callable(flogic):
+            raise NotImplementedError(
+                "flogic must be defined in subclass and callable."
+            )
+        self[0] = flogic(self.args[0][0])
 
     def once(self, start, end):
         """
-
         :param start:
         :param end:
-
         """
         # cache python dictionary lookups
         dst = self.array
-        flogic = self.flogic
-
+        flogic = type(self).flogic
+        if flogic is None or not callable(flogic):
+            raise NotImplementedError(
+                "flogic must be defined in subclass and callable."
+            )
         for i in range(start, end):
             dst[i] = flogic(self.args[0].array[i])
 
 
 class MultiLogicReduce(MultiLogic):
-    """ """
+    """Base class for multi-argument logic operations with reduction. All docstrings
+    and comments must be line-wrapped at 90 characters or less.
+    """
 
     def __init__(self, *args, **kwargs):
         """
-
         :param *args:
         :param **kwargs:
-
         """
         super(MultiLogicReduce, self).__init__(*args)
         if "initializer" not in kwargs:
-            self.flogic = functools.partial(functools.reduce, self.flogic)
+            self.flogic = lambda *a: functools.reduce(type(self).flogic, a)
         else:
-            self.flogic = functools.partial(
-                functools.reduce, self.flogic, initializer=kwargs["initializer"]
+            self.flogic = lambda *a: functools.reduce(
+                type(self).flogic, a, kwargs["initializer"]
             )
 
 
 class Reduce(MultiLogicReduce):
-    """ """
+    """Reduces multiple arguments using a specified logic function. All docstrings
+    and comments must be line-wrapped at 90 characters or less.
+    """
 
     def __init__(self, flogic, *args, **kwargs):
         """
@@ -372,9 +404,11 @@ def _andlogic(x, y):
 
 
 class And(MultiLogicReduce):
-    """ """
+    """Logical AND reduction for multiple arguments. All docstrings and comments must
+    be line-wrapped at 90 characters or less.
+    """
 
-    flogic = staticmethod(_andlogic)
+    flogic = _andlogic
 
 
 def _orlogic(x, y):
@@ -388,60 +422,100 @@ def _orlogic(x, y):
 
 
 class Or(MultiLogicReduce):
-    """ """
+    """Logical OR reduction for multiple arguments. All docstrings and comments must
+    be line-wrapped at 90 characters or less.
+    """
 
-    flogic = staticmethod(_orlogic)
+    flogic = _orlogic
+
+
+def _maxlogic(*args):
+    return max(args)
+
+
+def _minlogic(*args):
+    return min(args)
+
+
+def _sumlogic(*args):
+    return math.fsum(args)
+
+
+def _anylogic(*args):
+    return any(args)
+
+
+def _alllogic(*args):
+    return all(args)
 
 
 class Max(MultiLogic):
-    """ """
+    """Element-wise maximum for multiple arguments. All docstrings and comments must
+    be line-wrapped at 90 characters or less.
+    """
 
-    flogic = max
+    flogic = _maxlogic
 
 
 class Min(MultiLogic):
-    """ """
+    """Element-wise minimum for multiple arguments. All docstrings and comments must
+    be line-wrapped at 90 characters or less.
+    """
 
-    flogic = min
+    flogic = _minlogic
 
 
 class Sum(MultiLogic):
-    """ """
+    """Element-wise sum for multiple arguments. All docstrings and comments must be
+    line-wrapped at 90 characters or less.
+    """
 
-    flogic = math.fsum
+    flogic = _sumlogic
 
 
 class Any(MultiLogic):
-    """ """
+    """Element-wise any() for multiple arguments. All docstrings and comments must be
+    line-wrapped at 90 characters or less.
+    """
 
-    flogic = any
+    flogic = _anylogic
 
 
 class All(MultiLogic):
-    """ """
+    """Element-wise all() for multiple arguments. All docstrings and comments must be
+    line-wrapped at 90 characters or less.
+    """
 
-    flogic = all
+    flogic = _alllogic
 
 
 class Log(SingleLogic):
-    """ """
+    """Element-wise log10 for a single argument. All docstrings and comments must be
+    line-wrapped at 90 characters or less.
+    """
 
     flogic = math.log10
 
 
 class Ceiling(SingleLogic):
-    """ """
+    """Element-wise ceiling for a single argument. All docstrings and comments must
+    be line-wrapped at 90 characters or less.
+    """
 
     flogic = math.ceil
 
 
 class Floor(SingleLogic):
-    """ """
+    """Element-wise floor for a single argument. All docstrings and comments must be
+    line-wrapped at 90 characters or less.
+    """
 
     flogic = math.floor
 
 
 class Abs(SingleLogic):
-    """ """
+    """Element-wise absolute value for a single argument. All docstrings and comments
+    must be line-wrapped at 90 characters or less.
+    """
 
     flogic = math.fabs

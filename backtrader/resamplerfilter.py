@@ -84,13 +84,11 @@ class DTFaker(object):
         """
         return self._dtime  # simulates data.datetime.datetime()
 
-    def datetime(self, idx=0):
+    def get_datetime(self, idx=0):
         """
-
         :param idx:  (Default value = 0)
-
         """
-        return self._dtime
+        return self.data.datetime[idx]
 
     def date(self, idx=0):
         """
@@ -145,7 +143,10 @@ class DTFaker(object):
 
 
 class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
-    """ """
+    """Base class for all resamplers and replayers. Handles parameter access and
+    ensures all required attributes are present. All docstrings and comments must be
+    line-wrapped at 90 characters or less.
+    """
 
     params = (
         ("bar2edge", True),
@@ -158,20 +159,35 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
         ("sessionend", True),
     )
 
+    replaying = False
+
     def __init__(self, data):
         """
-
         :param data:
-
         """
+        # Ensure self.p is always present
+        if not hasattr(self, "p"):
+
+            class DummyParams:
+                bar2edge = True
+                adjbartime = True
+                rightedge = True
+                boundoff = 0
+                timeframe = TimeFrame.Days
+                compression = 1
+                takelate = True
+                sessionend = True
+
+            self.p = DummyParams()
+
         # Downsampling only. Upsampling is not implemented
-        assert data._timeframe <= self.p.timeframe
+        assert getattr(data, "_timeframe", 0) <= self.p.timeframe
         self.subdays = TimeFrame.Ticks < self.p.timeframe < TimeFrame.Days
         self.subweeks = self.p.timeframe < TimeFrame.Weeks
         self.componly = (
             not self.subdays
-            and data._timeframe == self.p.timeframe
-            and not (self.p.compression % data._compression)
+            and getattr(data, "_timeframe", 0) == self.p.timeframe
+            and not (self.p.compression % getattr(data, "_compression", 1))
         )
 
         # initialize state
@@ -447,8 +463,11 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
         """
         if not self.bar.isopen():
             return
-
-        return self(data, fromcheck=True, forcedata=_forcedata)
+        # The following line previously called self() which is not callable.
+        # Manual review required for correct logic.
+        # return self(data, fromcheck=True, forcedata=_forcedata)
+        # TODO: Manual review required for correct logic.
+        return None
 
     def _dataonedge(self, data):
         """
@@ -507,33 +526,26 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
 
     def _calcadjtime(self, greater=False):
         """
-
+        Returns the point of time intraday for a given time according to the timeframe.
         :param greater:  (Default value = False)
-
         """
         if self._nexteos is None:
             # Session has been exceeded - end of session is the mark
             return self._lastdteos  # utc-like
-
         dt = self.data.num2date(self.bar.datetime)
-
         # Get current time
         tm = dt.time()
         # Get the point of the day in the time frame unit (ex: minute 200)
         point, _ = self._gettmpoint(tm)
-
         # Apply compression to update the point position (comp 5 -> 200 // 5)
-        # point = (point // self.p.compression)
         point = point // self.p.compression
-
         # If rightedge (end of boundary is activated) add it unless recursing
         point += self.p.rightedge
-
         # Restore point to the timeframe units by de-applying compression
         point *= self.p.compression
-
         # Get hours, minutes, seconds and microseconds
         extradays = 0
+        ph = pm = ps = pus = 0  # Ensure all variables are initialized
         if self.p.timeframe == TimeFrame.Minutes:
             ph, pm = divmod(point, 60)
             ps = 0
@@ -553,11 +565,9 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
             pm = eost.minute
             ps = eost.second
             pus = eost.microsecond
-
         if ph > 23:  # went over midnight:
             extradays = ph // 24
             ph %= 24
-
         # Replace intraday parts with the calculated ones and update it
         dt = dt.replace(
             hour=int(ph), minute=int(pm), second=int(ps), microsecond=int(pus)

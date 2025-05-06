@@ -31,7 +31,10 @@ from .utils.py3 import with_metaclass
 
 
 class MetaBroker(MetaParams):
-    """ """
+    """Metaclass for BrokerBase. Handles broker instantiation and method
+    translation for compatibility. All docstrings and comments must be line-wrapped
+    at 90 characters or less.
+    """
 
     def __new__(cls, name, bases, dct):
         """Class has already been created ... fill missing methods if needed be
@@ -55,7 +58,10 @@ class MetaBroker(MetaParams):
 
 
 class BrokerBase(with_metaclass(MetaBroker, object)):
-    """ """
+    """Base class for brokers in Backtrader. Provides commission management,
+    order handling, and fund mode support. All docstrings and comments must be
+    line-wrapped at 90 characters or less.
+    """
 
     params = (("commission", CommInfoBase()),)
 

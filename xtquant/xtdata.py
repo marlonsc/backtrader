@@ -367,7 +367,7 @@ def get_financial_data(
     data = {}
     sl_len = 20
     stock_list2 = [
-        stock_list[i: i + sl_len] for i in range(0, len(stock_list), sl_len)
+        stock_list[i : i + sl_len] for i in range(0, len(stock_list), sl_len)
     ]
     for sl in stock_list2:
         data2 = client.get_financial_data(

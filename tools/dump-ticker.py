@@ -9,9 +9,9 @@ from psycopg2.extras import RealDictCursor
 def main(symbol, fromdate, todate, output_dir=None):
     """
 
-    :param symbol:
-    :param fromdate:
-    :param todate:
+    :param symbol: 
+    :param fromdate: 
+    :param todate: 
     :param output_dir: (Default value = None)
 
     """

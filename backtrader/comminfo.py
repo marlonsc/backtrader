@@ -110,6 +110,7 @@ class CommInfoBase(with_metaclass(MetaParams)):
 
 
     """
+
     # pylint: disable=no-member
 
     COMM_PERC, COMM_FIXED = range(2)

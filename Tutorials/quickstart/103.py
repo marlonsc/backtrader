@@ -18,7 +18,7 @@ class TestStrategy(bt.Strategy):
     def log(self, txt, dt=None):
         """Logging function for this strategy
 
-        :param txt:
+        :param txt: 
         :param dt: (Default value = None)
 
         """

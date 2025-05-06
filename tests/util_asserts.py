@@ -4,10 +4,10 @@ import backtrader as bt
 def assert_data(data, idx: int, time, open=None, high=None, low=None, close=None):
     """
 
-    :param data:
-    :param idx:
+    :param data: 
+    :param idx: 
     :type idx: int
-    :param time:
+    :param time: 
     :param open: (Default value = None)
     :param high: (Default value = None)
     :param low: (Default value = None)

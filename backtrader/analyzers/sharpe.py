@@ -36,9 +36,9 @@ from backtrader.utils.py3 import itervalues
 class SharpeRatio(Analyzer):
     """This analyzer calculates the SharpeRatio of a strategy using a risk free
     asset which is simply an interest rate
-
+    
     See also:
-
+    
       - https://en.wikipedia.org/wiki/Sharpe_ratio
 
 
@@ -156,9 +156,9 @@ class SharpeRatio(Analyzer):
 class SharpeRatio_A(SharpeRatio):
     """Extension of the SharpeRatio which returns the Sharpe Ratio directly in
     annualized form
-
+    
     The following param has been changed from ``SharpeRatio``
-
+    
       - ``annualize`` (default: ``True``)
 
 

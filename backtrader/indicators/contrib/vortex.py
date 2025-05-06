@@ -27,7 +27,7 @@ from __future__ import (
 )
 
 from ...indicator import Indicator
-from ..basicops import SumN, Max
+from ..basicops import Max, SumN
 
 __all__ = ["Vortex"]
 

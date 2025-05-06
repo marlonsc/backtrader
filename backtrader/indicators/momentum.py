@@ -31,11 +31,11 @@ from . import Indicator
 class Momentum(Indicator):
     """Measures the change in price by calculating the difference between the
     current price and the price from a given period ago
-
-
+    
+    
     Formula:
       - momentum = data - data_period
-
+    
     See:
       - http://en.wikipedia.org/wiki/Momentum_(technical_analysis)
 
@@ -54,10 +54,10 @@ class Momentum(Indicator):
 
 class MomentumOscillator(Indicator):
     """Measures the ratio of change in prices over a period
-
+    
     Formula:
       - mosc = 100 * (data / data_period)
-
+    
     See:
       - http://ta.mql4.com/indicators/oscillators/momentum
 
@@ -89,10 +89,10 @@ class MomentumOscillator(Indicator):
 
 class RateOfChange(Indicator):
     """Measures the ratio of change in prices over a period
-
+    
     Formula:
       - roc = (data - data_period) / data_period
-
+    
     See:
       - http://en.wikipedia.org/wiki/Momentum_(technical_analysis)
 
@@ -116,12 +116,12 @@ class RateOfChange(Indicator):
 
 class RateOfChange100(Indicator):
     """Measures the ratio of change in prices over a period with base 100
-
+    
     This is for example how ROC is defined in stockcharts
-
+    
     Formula:
       - roc = 100 * (data - data_period) / data_period
-
+    
     See:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:rate_of_change_roc_and_momentum
 

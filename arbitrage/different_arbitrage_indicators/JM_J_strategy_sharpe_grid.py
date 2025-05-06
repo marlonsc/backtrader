@@ -4,7 +4,7 @@ import backtrader as bt
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import seaborn as sns  # pylint: disable=import-error
+import seaborn as sns
 
 
 # 夏普差值布林带策略
@@ -82,10 +82,10 @@ class SharpeDiffStrategy(bt.Strategy):
             return
 
         # 计算15日波动率
-        j_vol_15d = np.std(self.returns_j[-self.p.return_period:]) * np.sqrt(
+        j_vol_15d = np.std(self.returns_j[-self.p.return_period :]) * np.sqrt(
             self.p.return_period
         )
-        jm_vol_15d = np.std(self.returns_jm[-self.p.return_period:]) * np.sqrt(
+        jm_vol_15d = np.std(self.returns_jm[-self.p.return_period :]) * np.sqrt(
             self.p.return_period
         )
 
@@ -104,11 +104,11 @@ class SharpeDiffStrategy(bt.Strategy):
         # 计算20日移动平均和标准差
         if len(self.delta_sharpe_values) >= self.p.ma_period:
             # 计算20日移动平均 MA(ΔSharpe) = MA20(ΔSharpe)
-            ma_delta = np.mean(self.delta_sharpe_values[-self.p.ma_period:])
+            ma_delta = np.mean(self.delta_sharpe_values[-self.p.ma_period :])
             self.delta_sharpe_ma.append(ma_delta)
 
             # 计算20日标准差 σΔSharpe = Std20(ΔSharpe)
-            std_delta = np.std(self.delta_sharpe_values[-self.p.ma_period:])
+            std_delta = np.std(self.delta_sharpe_values[-self.p.ma_period :])
             self.delta_sharpe_std.append(std_delta)
 
             # 计算布林带上下轨
@@ -234,9 +234,11 @@ def load_data(symbol1, symbol2, fromdate, todate):
         df0 = df0.sort_index().loc[fromdate:todate]
         df1 = df1.sort_index().loc[fromdate:todate]
 
-        # 创建数据feed
-        data0 = bt.feeds.PandasData(dataframe=df0)
-        data1 = bt.feeds.PandasData(dataframe=df1)
+        # Create data feeds using 'dataname' for compatibility
+        data0 = bt.feeds.PandasData()
+        data0.dataname = df0
+        data1 = bt.feeds.PandasData()
+        data1.dataname = df1
         return data0, data1
     except Exception as e:
         print(f"加载数据时出错: {e}")
@@ -348,12 +350,13 @@ def run_grid_search():
 
     # 找出最佳参数组合（排除无效值）
     if np.any(~np.isnan(results_clean)):
+        # Ensure indices are int for list access
         max_i, max_j = np.unravel_index(
-            np.nanargmax(results_clean), results_clean.shape
+            int(np.nanargmax(results_clean)), results_clean.shape
         )
-        best_ma_period = ma_periods[max_i]
-        best_entry_multiplier = entry_multipliers[max_j]
-        best_sharpe = results_clean[max_i, max_j]
+        best_ma_period = ma_periods[int(max_i)]
+        best_entry_multiplier = entry_multipliers[int(max_j)]
+        best_sharpe = results_clean[int(max_i), int(max_j)]
 
         print("\n最佳参数组合:")
         print(f"ma_period: {best_ma_period}")

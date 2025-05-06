@@ -420,7 +420,7 @@ def _get_object(
     obj_size, end = _get_object_size(data, position, obj_end)
     if _raw_document_class(opts.document_class):
         return (
-            opts.document_class(data[position: end + 1], opts),
+            opts.document_class(data[position : end + 1], opts),
             position + obj_size,
         )
 
@@ -932,7 +932,7 @@ else:
         element_name, position = _get_c_string(data, view, position, opts)
         if raw_array and element_type == ord(BSONARR):
             _, end = _get_object_size(data, position, len(data))
-            return element_name, view[position: end + 1], end + 1
+            return element_name, view[position : end + 1], end + 1
         try:
             value, position = _ELEMENT_GETTER[element_type](
                 data, view, position, obj_end, opts, element_name
@@ -1227,7 +1227,7 @@ def _encode_dbref(
         buf += _element_to_bson(key, val, check_keys, opts)
 
     buf += b"\x00"
-    buf[begin: begin + 4] = _PACK_INT(len(buf) - begin)
+    buf[begin : begin + 4] = _PACK_INT(len(buf) - begin)
     return bytes(buf)
 
 
@@ -1895,8 +1895,7 @@ def _decode_all(
             if data[obj_end] != 0:
                 raise InvalidBSON("bad eoo")
             if use_raw:
-                docs.append(opts.document_class(
-                    data[position: obj_end + 1], opts))  # type: ignore
+                docs.append(opts.document_class(data[position : obj_end + 1], opts))  # type: ignore
             else:
                 docs.append(_elements_to_dict(data, view, position + 4, obj_end, opts))
             position += obj_size
@@ -2005,7 +2004,7 @@ def _array_of_documents_to_buffer(view: memoryview) -> bytes:
             position += 1
         position += 1
         obj_size, _ = _get_object_size(view, position, end)
-        append(view[position: position + obj_size])
+        append(view[position : position + obj_size])
         position += obj_size
     if position != end:
         raise InvalidBSON("bad object or element length")
@@ -2131,7 +2130,7 @@ def decode_iter(
     end = len(data) - 1
     while position < end:
         obj_size = _UNPACK_INT_FROM(data, position)[0]
-        elements = data[position: position + obj_size]
+        elements = data[position : position + obj_size]
         position += obj_size
 
         yield _bson_to_dict(elements, opts)

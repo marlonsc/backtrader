@@ -69,8 +69,8 @@ class SkewnessArbitrageStrategy(bt.Strategy):
             return
 
         # 计算偏度 - 只保留最近的skew_period个收益率
-        j_returns = np.array(self.returns_j[-self.p.skew_period:])
-        jm_returns = np.array(self.returns_jm[-self.p.skew_period:])
+        j_returns = np.array(self.returns_j[-self.p.skew_period :])
+        jm_returns = np.array(self.returns_jm[-self.p.skew_period :])
 
         # 计算J合约偏度
         j_mean = np.mean(j_returns)
@@ -95,7 +95,7 @@ class SkewnessArbitrageStrategy(bt.Strategy):
         # 计算历史偏度差的均值和标准差
         if len(self.delta_skew_values) >= self.p.lookback_period:
             hist_delta_values = np.array(
-                self.delta_skew_values[-self.p.lookback_period:]
+                self.delta_skew_values[-self.p.lookback_period :]
             )
             self.delta_mean = np.mean(hist_delta_values)
             self.delta_std = np.std(hist_delta_values)
@@ -215,7 +215,7 @@ class SkewnessArbitrageStrategy(bt.Strategy):
         """ """
         # 创建日期索引
         if len(self.dates) > len(self.skew_j_values):
-            dates = self.dates[-(len(self.skew_j_values)):]
+            dates = self.dates[-(len(self.skew_j_values)) :]
         else:
             dates = self.dates
 
@@ -323,9 +323,11 @@ def load_data(symbol1, symbol2, fromdate, todate):
         df0 = df0.sort_index().loc[fromdate:todate]
         df1 = df1.sort_index().loc[fromdate:todate]
 
-        # 创建数据feed
-        data0 = bt.feeds.PandasData(dataname=df0)
-        data1 = bt.feeds.PandasData(dataname=df1)
+        # Create data feeds using 'dataname' for compatibility
+        data0 = bt.feeds.PandasData()
+        data0.dataname = df0
+        data1 = bt.feeds.PandasData()
+        data1.dataname = df1
         return data0, data1
     except Exception as e:
         print(f"加载数据时出错: {e}")
@@ -400,7 +402,12 @@ def run_grid_search():
                 pass  # pylint: disable=import-error
 
             # 运行回测
-            strats = cerebro.run()
+            try:
+                strats = cerebro.run()
+            except AttributeError:
+                cerebro.prerun()
+                cerebro.startrun()
+                strats = cerebro.finishrun()
 
             # 获取夏普比率
             sharpe = (
@@ -437,8 +444,8 @@ def run_grid_search():
 
     print("热力图已保存为 'sharpe_ratio_heatmap.png'")
 
-    # 找出最佳参数组合
-    max_i, max_j = np.unravel_index(results.argmax(), results.shape)
+    # Find best parameter combination
+    max_i, max_j = np.unravel_index(int(results.argmax()), results.shape)
     max_i = int(max_i)
     max_j = int(max_j)
     best_skew_period = skew_periods[max_i]

@@ -33,14 +33,14 @@ from backtrader.utils.py3 import filter, integer_types, string_types
 class PandasDirectData(feed.DataBase):
     """Uses a Pandas DataFrame as the feed source, iterating directly over the
     tuples returned by "itertuples".
-
+    
     This means that all parameters related to lines must have numeric
     values as indices into the tuples
-
+    
     Note:
-
+    
       - The ``dataname`` parameter is a Pandas DataFrame
-
+    
       - A negative value in any of the parameters for the Data lines
         indicates it's not present in the DataFrame
         it is
@@ -119,7 +119,7 @@ class PandasDirectData(feed.DataBase):
 class PandasData(feed.DataBase):
     """Uses a Pandas DataFrame as the feed source, using indices into column
     names (which can be "numeric")
-
+    
     This means that all parameters related to lines must have numeric
     values as indices into the tuples
 

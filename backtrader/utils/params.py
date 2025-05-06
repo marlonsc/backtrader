@@ -6,11 +6,11 @@ Docstrings e comentários devem ser line-wrap ≤ 90 caracteres.
 
 
 def make_params(params_tuple):
-    """
-    Cria dinamicamente uma classe Params a partir de um tuple de pares (nome, valor).
+    """Cria dinamicamente uma classe Params a partir de um tuple de pares (nome, valor).
 
     :param params_tuple: Tupla de pares (nome, valor) de parâmetros
-    :return: Instância de Params com atributos correspondentes
+    :returns: Instância de Params com atributos correspondentes
+
     """
     param_dict = dict((k, v) for k, v in params_tuple)
     return type("Params", (), param_dict)()

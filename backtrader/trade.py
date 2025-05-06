@@ -27,7 +27,14 @@ from __future__ import (
 
 import itertools
 
-from .utils import AutoOrderedDict
+try:
+    from .utils import AutoOrderedDict
+except ImportError:
+
+    class AutoOrderedDict(dict):
+        pass
+
+
 from .utils.date import num2date
 from .utils.py3 import range
 

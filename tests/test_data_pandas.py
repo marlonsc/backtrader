@@ -65,7 +65,7 @@ class PandasDataOptix(btfeeds.PandasData):
 def getdata(index, noheaders=True):
     """
 
-    :param index:
+    :param index: 
     :param noheaders: (Default value = True)
 
     """

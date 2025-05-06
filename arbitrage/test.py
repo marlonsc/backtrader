@@ -1,6 +1,13 @@
 import numpy as np
 import pandas as pd
 
+# Copyright (c) 2025 backtrader contributors
+"""
+Backtest simulation for spread trading between Iron Ore and Rebar using a Bollinger
+Band strategy. Includes data alignment, spread calculation, annualized Sharpe ratio,
+and maximum drawdown computation.
+"""
+
 # 读取数据
 output_file = "D:\\FutureData\\ricequant\\1d_2017to2024_noadjust.h5"
 df_I = pd.read_hdf(output_file, key="/I").reset_index()
@@ -93,10 +100,11 @@ df_spread["lower"] = df_spread["rolling_mean"] - devfactor * df_spread["rolling_
 # 初始化资金和仓位
 initial_cash = 1000000
 cash = initial_cash
-position = 0  # 0表示没有仓位，1表示多仓，-1表示空仓
-trade_pnl = []  # 记录每次交易的盈亏
+position = 0  # 0 means no position, 1 means long, -1 means short
+trade_pnl = []  # Record PnL for each trade
+entry_price = 0  # Initialize entry_price to avoid use-before-assignment
 
-# 计算每日收益
+# Calculate daily returns
 returns = []
 
 # 模拟交易
@@ -136,6 +144,6 @@ nav = np.array([initial_cash + sum(trade_pnl[: i + 1]) for i in range(len(trade_
 annual_sharpe = annualized_sharpe_ratio(np.array(returns))
 max_dd = max_drawdown(nav)
 
-# 打印结果
-print(f"年化夏普比率: {annual_sharpe:.2f}")
-print(f"最大回撤: {max_dd:.2%}")
+# Print results
+print(f"Annualized Sharpe Ratio: {annual_sharpe:.2f}")
+print(f"Maximum Drawdown: {max_dd:.2%}")

@@ -33,16 +33,16 @@ from . import ROC100, SMA
 class KnowSureThing(bt.Indicator):
     """It is a "summed" momentum indicator. Developed by Martin Pring and
     published in 1992 in Stocks & Commodities.
-
+    
     Formula:
       - rcma1 = MovAv(roc100(rp1), period)
       - rcma2 = MovAv(roc100(rp2), period)
       - rcma3 = MovAv(roc100(rp3), period)
       - rcma4 = MovAv(roc100(rp4), period)
-
+    
       - kst = 1.0 * rcma1 + 2.0 * rcma2 + 3.0 * rcma3 + 4.0 * rcma4
       - signal = MovAv(kst, speriod)
-
+    
     See:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:know_sure_thing_kst
 

@@ -5,13 +5,14 @@ variáveis comuns e notificação de ordens/trades. Todos os comentários e docs
 são quebrados em até 90 caracteres.
 """
 
+
 def init_common_vars(strategy, extra_vars=None):
-    """
-    Inicializa variáveis comuns para estratégias de arbitragem. Adicionalmente,
+    """Inicializa variáveis comuns para estratégias de arbitragem. Adicionalmente,
     permite inicializar variáveis extras passadas em um dicionário.
 
     :param strategy: Instância da estratégia (self)
-    :param extra_vars: Dicionário de variáveis extras a inicializar
+    :param extra_vars: Dicionário de variáveis extras a inicializar (Default value = None)
+
     """
     strategy.returns_j = []
     strategy.returns_jm = []
@@ -23,15 +24,16 @@ def init_common_vars(strategy, extra_vars=None):
         for k, v in extra_vars.items():
             setattr(strategy, k, v)
 
+
 def notify_order_default(strategy, order):
-    """
-    Notificação padrão de ordens para estratégias de arbitragem.
+    """Notificação padrão de ordens para estratégias de arbitragem.
 
     :param strategy: Instância da estratégia (self)
     :param order: Ordem recebida
+
     """
     if order.status in [order.Completed]:
-        if getattr(strategy.p, 'printlog', False):
+        if getattr(strategy.p, "printlog", False):
             if order.isbuy():
                 print(
                     f"Buy executed: price={order.executed.price:.2f}, "
@@ -48,12 +50,13 @@ def notify_order_default(strategy, order):
         print("Order Canceled/Margin/Rejected")
     strategy.order = None
 
+
 def notify_trade_default(strategy, trade):
-    """
-    Notificação padrão de trades para estratégias de arbitragem.
+    """Notificação padrão de trades para estratégias de arbitragem.
 
     :param strategy: Instância da estratégia (self)
     :param trade: Trade recebido
+
     """
-    if getattr(strategy.p, 'printlog', False) and trade.isclosed:
+    if getattr(strategy.p, "printlog", False) and trade.isclosed:
         print(f"Trade PnL: {trade.pnlcomm:.2f}")

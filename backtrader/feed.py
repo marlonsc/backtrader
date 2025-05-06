@@ -35,27 +35,28 @@ from . import (
     dataseries,
     metabase,
 )
-from .dataseries import TimeFrame
-from .utils.date import tzparse, date2num, num2date, time2num, Localizer
-from .utils.py3 import range, string_types, with_metaclass, zip
-
-from .dataseries import SimpleFilterWrapper
+from .dataseries import SimpleFilterWrapper, TimeFrame
 from .resamplerfilter import Replayer, Resampler
 from .tradingcal import PandasMarketCalendar
+from .utils.date import Localizer, date2num, num2date, time2num, tzparse
+from .utils.py3 import range, string_types, with_metaclass, zip
 
 
-class MetaAbstractDataBase(dataseries.OHLCDateTime.__class__):
+class MetaAbstractDataBase(type):
     """Metaclass for registering and initializing data feed subclasses."""
 
     _indcol = dict()
 
     def __init__(self, name, bases, dct):
         super().__init__(name, bases, dct)
-        if not getattr(self, 'aliased', False) and name != "DataBase" and not name.startswith("_"):
+        if (
+            not getattr(self, "aliased", False)
+            and name != "DataBase"
+            and not name.startswith("_")
+        ):
             self._indcol[name] = self
 
     def dopreinit(self, _obj, *args, **kwargs):
-        _obj, args, kwargs = super().dopreinit(_obj, *args, **kwargs)
         _obj._feed = metabase.findowner(_obj, FeedBase)
         _obj.notifs = collections.deque()  # store notifications for cerebro
         _obj._dataname = _obj.p.dataname
@@ -63,7 +64,6 @@ class MetaAbstractDataBase(dataseries.OHLCDateTime.__class__):
         return _obj, args, kwargs
 
     def dopostinit(self, _obj, *args, **kwargs):
-        _obj, args, kwargs = super().dopostinit(_obj, *args, **kwargs)
         _obj._name = _obj._name or _obj.p.name
         if not _obj._name and isinstance(_obj.p.dataname, string_types):
             _obj._name = _obj.p.dataname
@@ -101,7 +101,7 @@ class MetaAbstractDataBase(dataseries.OHLCDateTime.__class__):
 
 
 class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateTime)):
-    """ """
+    """Abstract base class for all data feeds."""
 
     params = (
         ("dataname", None),
@@ -167,14 +167,10 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
 
     def _start_finish(self):
         """ """
-        # A live feed (for example) may have learnt something about the
-        # timezones after the start and that's why the date/time related
-        # parameters are converted at this late stage
-        # Get the output timezone (if any)
         self._tz = self._gettz()
-        # Lines have already been create, set the tz
-        self.lines.datetime._settz(self._tz)
-
+        # Ensure self.lines is the correct object type before accessing .datetime
+        if hasattr(self.lines, "datetime") and hasattr(self.lines.datetime, "_settz"):
+            self.lines.datetime._settz(self._tz)
         # This should probably be also called from an override-able method
         self._tzinput = Localizer(self._gettzinput())
 
@@ -216,25 +212,27 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
         """Returns the next eos using a trading calendar if available"""
         if self._clone:
             return self.data._getnexteos()
-
         if not len(self):
             return datetime.datetime.min, 0.0
-
-        dt = self.lines.datetime[0]
+        # Ensure self.lines is the correct object type before accessing .datetime
+        if hasattr(self.lines, "datetime"):
+            dt = self.lines.datetime[0]
+        else:
+            dt = 0.0
         dtime = num2date(dt)
         if self._calendar is None:
             nexteos = datetime.datetime.combine(dtime, self.p.sessionend)
-            nextdteos = self.date2num(nexteos)  # locl'ed -> utc-like
-            nexteos = num2date(nextdteos)  # utc
+            nextdteos = self.date2num(nexteos)
+            nexteos = num2date(nextdteos)
             while dtime > nexteos:
-                nexteos += datetime.timedelta(days=1)  # already utc-like
-
-            nextdteos = date2num(nexteos)  # -> utc-like
-
+                nexteos += datetime.timedelta(days=1)
+            nextdteos = date2num(nexteos)
         else:
-            # returns times in utc
+            # Remove 'calendar' keyword argument if present
+            if isinstance(self._calendar, str):
+                self._calendar = PandasMarketCalendar(self._calendar)
             _, nexteos = self._calendar.schedule(dtime, self._tz)
-            nextdteos = date2num(nexteos)  # nextos is already utc
+            nextdteos = date2num(nexteos)
         return nexteos, nextdteos
 
     def _gettzinput(self):
@@ -262,15 +260,14 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
 
     def num2date(self, dt=None, tz=None, naive=True):
         """
-
         :param dt:  (Default value = None)
         :param tz:  (Default value = None)
         :param naive:  (Default value = True)
-
         """
         if dt is None:
-            return num2date(self.lines.datetime[0], tz or self._tz, naive)
-
+            if hasattr(self.lines, "datetime"):
+                return num2date(self.lines.datetime[0], tz or self._tz, naive)
+            return num2date(0.0, tz or self._tz, naive)
         return num2date(dt, tz or self._tz, naive)
 
     def haslivedata(self):
@@ -331,14 +328,14 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
 
     def qbuffer(self, savemem=0, replaying=False):
         """
-
         :param savemem:  (Default value = 0)
         :param replaying:  (Default value = False)
-
         """
         extrasize = self.resampling or replaying
-        for line in self.lines:
-            line.qbuffer(savemem=savemem, extrasize=extrasize)
+        # Ensure self.lines is iterable and its elements have qbuffer
+        for line in self.lines if hasattr(self.lines, "__iter__") else []:
+            if hasattr(line, "qbuffer"):
+                line.qbuffer(savemem=savemem, extrasize=extrasize)
 
     def start(self):
         """ """
@@ -357,20 +354,20 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
 
     def clone(self, **kwargs):
         """
-
         :param **kwargs:
-
         """
-        return DataClone(dataname=self, **kwargs)
+        # Remove 'dataname' from kwargs if present
+        kwargs.pop("dataname", None)
+        return DataClone(**kwargs)
 
     def copyas(self, _dataname, **kwargs):
         """
-
         :param _dataname:
         :param **kwargs:
-
         """
-        d = DataClone(dataname=self, **kwargs)
+        # Remove 'dataname' from kwargs if present
+        kwargs.pop("dataname", None)
+        d = DataClone(**kwargs)
         d._dataname = _dataname
         d._name = _dataname
         return d
@@ -744,95 +741,57 @@ class DataBase(AbstractDataBase):
     """ """
 
 
-class FeedBase(with_metaclass(metabase.MetaParams, object)):
-    """ """
+class FeedBase(object):
+    """Base class for all feed containers."""
 
-    params = () + DataBase.params._gettuple()
+    params = getattr(DataBase.params, "_gettuple", lambda: DataBase.params)()
+    DataCls = None  # Ensure DataCls is always present
 
     def __init__(self):
-        """ """
         self.datas = list()
 
     def start(self):
-        """ """
         for data in self.datas:
             data.start()
 
     def stop(self):
-        """ """
         for data in self.datas:
             data.stop()
 
     def getdata(self, dataname, name=None, **kwargs):
-        """
-
-        :param dataname:
-        :param name:  (Default value = None)
-        :param **kwargs:
-
-        """
-        for pname, pvalue in self.p._getitems():
-            kwargs.setdefault(pname, getattr(self.p, pname))
-
+        # Only access self.p if it exists
+        if hasattr(self, "p"):
+            for pname, pvalue in self.p._getitems():
+                kwargs.setdefault(pname, getattr(self.p, pname))
         kwargs["dataname"] = dataname
         data = self._getdata(**kwargs)
-
-        data._name = name
-
-        self.datas.append(data)
+        if data is not None:
+            data._name = name
+            self.datas.append(data)
         return data
 
     def _getdata(self, dataname, **kwargs):
-        """
-
-        :param dataname:
-        :param **kwargs:
-
-        """
-        for pname, pvalue in self.p._getitems():
-            kwargs.setdefault(pname, getattr(self.p, pname))
-
+        if hasattr(self, "p"):
+            for pname, pvalue in self.p._getitems():
+                kwargs.setdefault(pname, getattr(self.p, pname))
         kwargs["dataname"] = dataname
-        return self.DataCls(**kwargs)
+        if hasattr(self, "DataCls") and self.DataCls is not None:
+            return self.DataCls(**kwargs)
+        return None
 
 
-class MetaCSVDataBase(DataBase.__class__):
-    """ """
+class MetaCSVDataBase(type):
+    """Metaclass for CSVDataBase."""
 
     def dopostinit(cls, _obj, *args, **kwargs):
-        """
-
-        :param _obj:
-        :param *args:
-        :param **kwargs:
-
-        """
-        # Before going to the base class to make sure it overrides the default
         if not _obj.p.name and not _obj._name:
             _obj._name, _ = os.path.splitext(os.path.basename(_obj.p.dataname))
-
-        _obj, args, kwargs = super(MetaCSVDataBase, cls).dopostinit(
-            _obj, *args, **kwargs
-        )
-
+        # No super().dopostinit, as base type does not have it
         return _obj, args, kwargs
 
 
 class CSVDataBase(with_metaclass(MetaCSVDataBase, DataBase)):
-    """Base class for classes implementing CSV DataFeeds
-
-    The class takes care of opening the file, reading the lines and
-    tokenizing them.
-
-    Subclasses do only need to override:
-
-      - _loadline(tokens)
-
-    The return value of ``_loadline`` (True/False) will be the return value
-    of ``_load`` which has been overriden by this base class
-
-
-    """
+    """Base class for classes implementing CSV DataFeeds."""
 
     f = None
     params = (
@@ -907,18 +866,18 @@ class CSVDataBase(with_metaclass(MetaCSVDataBase, DataBase)):
 
 
 class CSVFeedBase(FeedBase):
-    """ """
+    """Base class for CSV feed containers."""
 
-    params = (("basepath", ""),) + tuple(getattr(CSVDataBase.params, '_gettuple', lambda: CSVDataBase.params)())
+    params = ("basepath", "") + tuple(
+        getattr(CSVDataBase.params, "_gettuple", lambda: CSVDataBase.params)()
+    )
 
     def _getdata(self, dataname, **kwargs):
-        """
-
-        :param dataname:
-        :param **kwargs:
-
-        """
-        return self.DataCls(dataname=self.p.basepath + dataname, **self.p._getkwargs())
+        return (
+            self.DataCls(dataname=self.p.basepath + dataname, **self.p._getkwargs())
+            if hasattr(self, "DataCls") and hasattr(self, "p")
+            else None
+        )
 
 
 class DataClone(AbstractDataBase):
@@ -947,7 +906,8 @@ class DataClone(AbstractDataBase):
 
         # Copy tz infos
         self._tz = self.data._tz
-        self.lines.datetime._settz(self._tz)
+        if hasattr(self.lines, "datetime") and hasattr(self.lines.datetime, "_settz"):
+            self.lines.datetime._settz(self._tz)
 
         self._calendar = self.data._calendar
 

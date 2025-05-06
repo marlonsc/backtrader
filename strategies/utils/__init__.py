@@ -443,14 +443,14 @@ def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate, interval="1h")
 
 class TradeThrottling:
     """Trade throttling functionality that can be added to any strategy
-
+    
     This mixin allows setting a minimum number of days between trades to avoid
     overtrading and to let positions develop. It can be configured through the
     'trade_throttle_days' parameter.
-
+    
     Usage in __init__:
         self.last_trade_date = None
-
+    
     Usage in next method:
         if not self.can_trade_now():
 

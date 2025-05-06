@@ -51,13 +51,13 @@ class _SarStatus(object):
 class ParabolicSAR(PeriodN):
     """Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"* for the RSI
-
+    
     SAR stands for *Stop and Reverse* and the indicator was meant as a signal
     for entry (and reverse)
-
+    
     How to select the 1st signal is left unspecified in the book and the
     increase/decrease of bars
-
+    
     See:
       - https://en.wikipedia.org/wiki/Parabolic_SAR
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:parabolic_sar

@@ -28,7 +28,6 @@ from __future__ import (
 import collections
 import datetime
 import itertools
-import multiprocessing
 
 try:  # For new Python versions
     # collections.Iterable -> collections.abc.Iterable
@@ -36,44 +35,33 @@ try:  # For new Python versions
 except AttributeError:  # For old Python versions
     collectionsAbc = collections  # Используем collections.Iterable
 
-import backtrader as bt
 
-from . import indicator, linebuffer, observers
+from . import indicator, linebuffer
 from .brokers.bbroker import BackBroker
-from .metabase import MetaParams
-from .strategy import SignalStrategy, Strategy
-from .timer import Timer
-from .tradingcal import (
-    PandasMarketCalendar,
-    TradingCalendarBase,
+from .engine.runner import (
+    _runnext,
+    _runonce,
+    finishrun,
+    prerunstrategies,
+    runstrategies,
+    runstrategieskenel,
+    startrun,
 )
-from .utils.date import date2num, num2date, tzparse
+from .feeds.chainer import Chainer
+from .feeds.rollover import RollOver
+from .metabase import MetaParams
+from .plot.plot import Plot_OldSync
+from .strategy import SignalStrategy, Strategy
+from .utils.calendar import addcalendar, addtz
+from .utils.iter import iterize
+from .utils.params import make_params
 from .utils.py3 import (
-    integer_types,
     map,
-    range,
-    string_types,
     with_metaclass,
     zip,
 )
+from .utils.timer import notify_timer, schedule_timer
 from .writer import WriterFile
-from .feeds.chainer import Chainer
-from .feeds.rollover import RollOver
-from .utils.iter import iterize
-from .utils.optreturn import OptReturn
-from .utils.params import make_params
-from .utils.calendar import addcalendar, addtz
-from .utils.timer import create_timer, schedule_timer, notify_timer
-from .engine.runner import (
-    startrun,
-    finishrun,
-    runstrategies,
-    prerunstrategies,
-    runstrategieskenel,
-    _runnext,
-    _runonce,
-)
-from .plot.plot import Plot_OldSync
 
 # Defined here to make it pickable. Ideally it could be defined inside Cerebro
 
@@ -106,8 +94,8 @@ class Cerebro(with_metaclass(MetaParams, object)):
     )
 
     def __init__(self):
-        self.p = None  # Garante que self.p exista antes de qualquer acesso
-        # Garante que self.params seja sempre uma lista de tuplas
+        self.p = None  # Ensures self.p exists before any access
+        # Ensures self.params is always a list of tuples
         params_iter = []
         if hasattr(self, "params"):
             if isinstance(self.params, (list, tuple)):
@@ -116,7 +104,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
                 params_iter = list(self.params._getitems())
         if self.p is None:
             self.p = make_params(params_iter)
-        # Garante que todos os parâmetros esperados existem
+        # Ensures all expected parameters exist
         for pname, pval in params_iter:
             if not hasattr(self.p, pname):
                 setattr(self.p, pname, pval)
@@ -128,7 +116,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
         self.datas = list()
         self.datasbyname = collections.OrderedDict()
         self.strats = list()
-        self.optcbs = list()  # holds a list of callbacks for opt strategies
+        self.optcbs = list()  # Holds a list of callbacks for opt strategies
         self.observers = list()
         self.analyzers = list()
         self.indicators = list()

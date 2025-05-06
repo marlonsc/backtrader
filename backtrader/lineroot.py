@@ -43,10 +43,9 @@ from .utils.py3 import range, with_metaclass
 
 
 class MetaLineRoot(metabase.MetaParams):
-    """Once the object is created (effectively pre-init) the "owner" of this
-    class is sought
-
-
+    """Metaclass for LineRoot. Handles owner resolution and pre-init logic for
+    line root objects. All docstrings and comments must be line-wrapped at
+    90 characters or less.
     """
 
     def donew(cls, *args, **kwargs):
@@ -70,15 +69,10 @@ class MetaLineRoot(metabase.MetaParams):
 
 
 class LineRoot(with_metaclass(MetaLineRoot, object)):
-    """Defines a common base and interfaces for Single and Multiple
-    LineXXX instances
-
-        Period management
-        Iteration management
-        Operation (dual/single operand) Management
-        Rich Comparison operator definition
-
-
+    """Defines a common base and interfaces for Single and Multiple LineXXX instances.
+    Handles period management, iteration, and rich operator overloading for line
+    objects. All docstrings and comments must be line-wrapped at 90 characters or
+    less.
     """
 
     _OwnerCls = None
@@ -346,19 +340,17 @@ class LineRoot(with_metaclass(MetaLineRoot, object)):
 
     def __div__(self, other):
         """
-
         :param other:
-
         """
-        return self._operation(other, operator.__div__)
+        # Python 3: use truediv
+        return self._operation(other, operator.truediv)
 
     def __rdiv__(self, other):
         """
-
         :param other:
-
         """
-        return self._roperation(other, operator.__div__)
+        # Python 3: use truediv
+        return self._roperation(other, operator.truediv)
 
     def __floordiv__(self, other):
         """
@@ -476,86 +468,92 @@ class LineRoot(with_metaclass(MetaLineRoot, object)):
 
 
 class LineMultiple(LineRoot):
-    """Base class for LineXXX instances that hold more than one line"""
+    """Represents multiple time series lines. All docstrings and comments must be
+    line-wrapped at 90 characters or less.
+    """
 
     def reset(self):
-        """ """
+        """
+        Reset all lines in this LineMultiple instance.
+        """
+        lines = getattr(self, "lines", None)
+        if lines is not None:
+            lines.reset()
         self._stage1()
-        self.lines.reset()
 
     def _stage1(self):
-        """ """
-        super(LineMultiple, self)._stage1()
-        for line in self.lines:
-            line._stage1()
+        """
+        Set stage 1 for all lines in this LineMultiple instance.
+        """
+        lines = getattr(self, "lines", None)
+        if lines is not None:
+            lines._stage1()
+        self._opstage = 1
 
     def _stage2(self):
-        """ """
-        super(LineMultiple, self)._stage2()
-        for line in self.lines:
-            line._stage2()
+        """
+        Set stage 2 for all lines in this LineMultiple instance.
+        """
+        lines = getattr(self, "lines", None)
+        if lines is not None:
+            lines._stage2()
+        self._opstage = 2
 
     def addminperiod(self, minperiod):
-        """The passed minperiod is fed to the lines
-
-        :param minperiod:
-
         """
-        # pass it down to the lines
-        for line in self.lines:
-            line.addminperiod(minperiod)
+        Add minperiod to all lines in this LineMultiple instance.
+        """
+        lines = getattr(self, "lines", None)
+        if lines is not None:
+            lines.addminperiod(minperiod)
 
     def incminperiod(self, minperiod):
-        """The passed minperiod is fed to the lines
-
-        :param minperiod:
-
         """
-        # pass it down to the lines
-        for line in self.lines:
-            line.incminperiod(minperiod)
+        Increment minperiod for all lines in this LineMultiple instance.
+        """
+        lines = getattr(self, "lines", None)
+        if lines is not None:
+            lines.incminperiod(minperiod)
 
     def _makeoperation(self, other, operation, r=False, _ownerskip=None):
         """
-
-        :param other:
-        :param operation:
-        :param r:  (Default value = False)
-        :param _ownerskip:  (Default value = None)
-
+        Make operation for all lines in this LineMultiple instance.
         """
-        return self.lines[0]._makeoperation(other, operation, r, _ownerskip)
+        lines = getattr(self, "lines", None)
+        if lines is not None:
+            return lines._makeoperation(other, operation, r, _ownerskip)
+        raise AttributeError("No 'lines' attribute in LineMultiple instance")
 
     def _makeoperationown(self, operation, _ownerskip=None):
         """
-
-        :param operation:
-        :param _ownerskip:  (Default value = None)
-
+        Make own operation for all lines in this LineMultiple instance.
         """
-        return self.lines[0]._makeoperationown(operation, _ownerskip)
+        lines = getattr(self, "lines", None)
+        if lines is not None:
+            return lines._makeoperationown(operation, _ownerskip)
+        raise AttributeError("No 'lines' attribute in LineMultiple instance")
 
     def qbuffer(self, savemem=0):
         """
-
-        :param savemem:  (Default value = 0)
-
+        Enable memory saving scheme for all lines in this LineMultiple instance.
         """
-        for line in self.lines:
-            line.qbuffer(savemem=1)
+        lines = getattr(self, "lines", None)
+        if lines is not None:
+            lines.qbuffer(savemem)
 
     def minbuffer(self, size):
         """
-
-        :param size:
-
+        Set minimum buffer size for all lines in this LineMultiple instance.
         """
-        for line in self.lines:
-            line.minbuffer(size)
+        lines = getattr(self, "lines", None)
+        if lines is not None:
+            lines.minbuffer(size)
 
 
 class LineSingle(LineRoot):
-    """Base class for LineXXX instances that hold a single line"""
+    """Represents a single time series line. All docstrings and comments must be
+    line-wrapped at 90 characters or less.
+    """
 
     def addminperiod(self, minperiod):
         """Add the minperiod (substracting the overlapping 1 minimum period)

@@ -46,7 +46,7 @@ class SlipTestStrategy(bt.SignalStrategy):
     def log(self, txt, dt=None, nodate=False):
         """
 
-        :param txt:
+        :param txt: 
         :param dt: (Default value = None)
         :param nodate: (Default value = False)
 

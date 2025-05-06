@@ -32,17 +32,19 @@ import itertools
 import operator
 
 import backtrader as bt
+from .order import Order
+from .sizers.fixedsize import FixedSize
 
 from .lineiterator import LineIterator, StrategyBase
-from .lineroot import LineSingle
+from .lineroot import (
+    LineSingle,
+)
 from .lineseries import LineSeriesStub
-from .metabase import ItemCollection, findowner
 from .trade import Trade
-from .utils import AutoDictList, AutoOrderedDict
+from .utils.autodict import AutoOrderedDict
 from .utils.py3 import (
     MAXINT,
     filter,
-    integer_types,
     iteritems,
     keys,
     map,
@@ -50,100 +52,12 @@ from .utils.py3 import (
     with_metaclass,
 )
 
+try:
+    from .metastrategy import MetaStrategy
+except ImportError:
 
-class MetaStrategy(StrategyBase.__class__):
-    """ """
-
-    _indcol = dict()
-
-    def __new__(meta, name, bases, dct):
-        """
-
-        :param meta:
-        :param name:
-        :param bases:
-        :param dct:
-
-        """
-        # Hack to support original method name for notify_order
-        if "notify" in dct:
-            # rename 'notify' to 'notify_order'
-            dct["notify_order"] = dct.pop("notify")
-        if "notify_operation" in dct:
-            # rename 'notify' to 'notify_order'
-            dct["notify_trade"] = dct.pop("notify_operation")
-
-        return super(MetaStrategy, meta).__new__(meta, name, bases, dct)
-
-    def __init__(cls, name, bases, dct):
-        """Class has already been created ... register subclasses
-
-        :param name:
-        :param bases:
-        :param dct:
-
-        """
-        # Initialize the class
-        super(MetaStrategy, cls).__init__(name, bases, dct)
-
-        if not cls.aliased and name != "Strategy" and not name.startswith("_"):
-            cls._indcol[name] = cls
-
-    def donew(cls, *args, **kwargs):
-        """
-
-        :param *args:
-        :param **kwargs:
-
-        """
-        _obj, args, kwargs = super(MetaStrategy, cls).donew(*args, **kwargs)
-
-        # Find the owner and store it
-        _obj.env = _obj.cerebro = cerebro = findowner(_obj, bt.Cerebro)
-        _obj._id = cerebro._next_stid()
-
-        return _obj, args, kwargs
-
-    def dopreinit(cls, _obj, *args, **kwargs):
-        """
-
-        :param _obj:
-        :param *args:
-        :param **kwargs:
-
-        """
-        _obj, args, kwargs = super(MetaStrategy, cls).dopreinit(_obj, *args, **kwargs)
-        _obj.broker = _obj.env.broker
-        _obj._sizer = bt.sizers.FixedSize()
-        _obj._orders = list()
-        _obj._orderspending = list()
-        _obj._trades = collections.defaultdict(AutoDictList)
-        _obj._tradespending = list()
-
-        _obj.stats = _obj.observers = ItemCollection()
-        _obj.analyzers = ItemCollection()
-        _obj._alnames = collections.defaultdict(itertools.count)
-        _obj.writers = list()
-
-        _obj._slave_analyzers = list()
-
-        _obj._tradehistoryon = False
-
-        return _obj, args, kwargs
-
-    def dopostinit(cls, _obj, *args, **kwargs):
-        """
-
-        :param _obj:
-        :param *args:
-        :param **kwargs:
-
-        """
-        _obj, args, kwargs = super(MetaStrategy, cls).dopostinit(_obj, *args, **kwargs)
-
-        _obj._sizer.set(_obj, _obj.broker)
-
-        return _obj, args, kwargs
+    class MetaStrategy(type):
+        pass
 
 
 class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
@@ -156,6 +70,17 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
     # keep the latest delivered data date in the line
     lines = ("datetime",)
+
+    def __init__(self, *args, **kwargs):
+        super(Strategy, self).__init__(*args, **kwargs)
+        self._orderspending = []
+        self._tradespending = []
+        self._tradehistoryon = False
+        self._minperiods = []
+        self._minperstatus = 0
+        self._dlens = []
+        self.indobscsv = []
+        self._sizer = None
 
     def qbuffer(self, savemem=0, replaying=False):
         """Enable the memory saving schemes. Possible values for ``savemem``:
@@ -186,15 +111,28 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
         elif savemem > 0:
             for data in self.datas:
-                data.qbuffer(replaying=replaying)
-
+                if (
+                    not isinstance(data, (str, tuple))
+                    and hasattr(data, "qbuffer")
+                    and callable(data.qbuffer)
+                ):
+                    data.qbuffer(replaying=replaying)
             for line in self.lines:
-                line.qbuffer(savemem=1)
-
+                if (
+                    not isinstance(line, (str, tuple))
+                    and hasattr(line, "qbuffer")
+                    and callable(line.qbuffer)
+                ):
+                    line.qbuffer(savemem=1)
             # Save in all object types depending on the strategy
             for itcls in self._lineiterators:
                 for it in self._lineiterators[itcls]:
-                    it.qbuffer(savemem=1)
+                    if (
+                        not isinstance(it, (str, tuple))
+                        and hasattr(it, "qbuffer")
+                        and callable(it.qbuffer)
+                    ):
+                        it.qbuffer(savemem=1)
 
     def _periodset(self):
         """ """
@@ -206,7 +144,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             # timeframe may place larger time constraints in calling next.
             clk = getattr(lineiter, "_clock", None)
             if clk is None:
-                clk = getattr(lineiter._owner, "_clock", None)
+                clk = getattr(getattr(lineiter, "_owner", None), "_clock", None)
                 if clk is None:
                     continue
 
@@ -217,7 +155,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
                 # See if the current clock has higher level clocks
                 clk2 = getattr(clk, "_clock", None)
                 if clk2 is None:
-                    clk2 = getattr(clk._owner, "_clock", None)
+                    clk2 = getattr(getattr(clk, "_owner", None), "_clock", None)
 
                 if clk2 is None:
                     break  # if no clock found, bail out
@@ -250,12 +188,12 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             # keep the reference to the line if any was found
             _dminperiods[data] = [max(dlminperiods)] if dlminperiods else []
 
-            dminperiod = max(_dminperiods[data] or [data._minperiod])
+            dminperiod = max(_dminperiods[data] or [getattr(data, "_minperiod", 0)])
             self._minperiods.append(dminperiod)
 
         # Set the minperiod
-        minperiods = [x._minperiod for x in self._lineiterators[LineIterator.IndType]]
-        self._minperiod = max(minperiods or [self._minperiod])
+        minperiods = [getattr(x, "_minperiod", 0) for x in self._lineiterators[LineIterator.IndType]]
+        self._minperiod = max(minperiods or [getattr(self, "_minperiod", 0)])
 
     def _addwriter(self, writer):
         """Unlike the other _addxxx functions this one receives an instance
@@ -406,14 +344,28 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         """ """
         if self._oldsync:
             clk_len = super(Strategy, self)._clk_update()
-            self.lines.datetime[0] = max(d.datetime[0] for d in self.datas if len(d))
+            self.lines.datetime[0] = max(
+                d.datetime[0]
+                for d in self.datas
+                if hasattr(d, "datetime")
+                and len(d)
+                and not isinstance(d.datetime, (tuple, str))
+                and hasattr(d.datetime, "__getitem__")
+            )
             return clk_len
 
         newdlens = [len(d) for d in self.datas]
         if any(nl > l for l, nl in zip(self._dlens, newdlens)):
             self.forward()
 
-        self.lines.datetime[0] = max(d.datetime[0] for d in self.datas if len(d))
+        self.lines.datetime[0] = max(
+            d.datetime[0]
+            for d in self.datas
+            if hasattr(d, "datetime")
+            and len(d)
+            and not isinstance(d.datetime, (tuple, str))
+            and hasattr(d.datetime, "__getitem__")
+        )
         self._dlens = newdlens
 
         return len(self)
@@ -530,10 +482,16 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
         # prepare the indicators/observers data headers
         for iocsv in self.indobscsv:
-            name = iocsv.plotinfo.plotname or iocsv.__class__.__name__
+            name = (
+                getattr(getattr(iocsv, "plotinfo", None), "plotname", None)
+                or iocsv.__class__.__name__
+            )
             headers.append(name)
             headers.append("len")
-            headers.extend(iocsv.getlinealiases())
+            if hasattr(iocsv, "getlinealiases"):
+                headers.extend(iocsv.getlinealiases())
+            else:
+                headers.extend([])
 
         return headers
 
@@ -542,14 +500,25 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         values = list()
 
         for iocsv in self.indobscsv:
-            name = iocsv.plotinfo.plotname or iocsv.__class__.__name__
+            name = (
+                getattr(getattr(iocsv, "plotinfo", None), "plotname", None)
+                or iocsv.__class__.__name__
+            )
             values.append(name)
             lio = len(iocsv)
             values.append(lio)
-            if lio:
+            if (
+                lio
+                and hasattr(iocsv, "lines")
+                and not isinstance(iocsv.lines, (tuple, str))
+                and hasattr(iocsv.lines, "itersize")
+                and callable(iocsv.lines.itersize)
+            ):
                 values.extend(map(lambda l: l[0], iocsv.lines.itersize()))
-            else:
+            elif hasattr(iocsv, "lines") and hasattr(iocsv.lines, "size"):
                 values.extend([""] * iocsv.lines.size())
+            else:
+                values.extend([])
 
         return values
 
@@ -623,6 +592,9 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
         if quicknotify:
             qorders = [order]
+            qtrades = []
+        else:
+            qorders = []
             qtrades = []
 
         if not order.executed.size:
@@ -701,17 +673,18 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         if quicknotify:
             self._notify(qorders=qorders, qtrades=qtrades)
 
-    def _notify(self, qorders=[], qtrades=[]):
+    def _notify(self, qorders=None, qtrades=None):
         """
 
-        :param qorders:  (Default value = [])
-        :param qtrades:  (Default value = [])
+        :param qorders:  (Default value = None)
+        :param qtrades:  (Default value = None)
 
         """
+        if qorders is None:
+            qorders = []
+        if qtrades is None:
+            qtrades = []
         if self.cerebro.p.quicknotify:
-            # need to know if quicknotify is on, to not reprocess pendingorders
-            # and pendingtrades, which have to exist for things like observers
-            # which look into it
             procorders = qorders
             proctrades = qtrades
         else:
@@ -746,11 +719,11 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
     def add_timer(
         self,
         when,
-        offset=datetime.timedelta(),
-        repeat=datetime.timedelta(),
-        weekdays=[],
+        offset=None,
+        repeat=None,
+        weekdays=None,
         weekcarry=False,
-        monthdays=[],
+        monthdays=None,
         monthcarry=True,
         allow=None,
         tzdata=None,
@@ -778,6 +751,14 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         :returns: - The created timer
 
         """
+        if offset is None:
+            offset = datetime.timedelta()
+        if repeat is None:
+            repeat = datetime.timedelta()
+        if weekdays is None:
+            weekdays = []
+        if monthdays is None:
+            monthdays = []
         return self.cerebro._add_timer(
             owner=self,
             when=when,
@@ -1170,18 +1151,18 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         size=None,
         price=None,
         plimit=None,
-        exectype=bt.Order.Limit,
+        exectype=Order.Limit,
         valid=None,
         tradeid=0,
         trailamount=None,
         trailpercent=None,
-        oargs={},
+        oargs=None,
         stopprice=None,
-        stopexec=bt.Order.Stop,
-        stopargs={},
+        stopexec=Order.Stop,
+        stopargs=None,
         limitprice=None,
-        limitexec=bt.Order.Limit,
-        limitargs={},
+        limitexec=Order.Limit,
+        limitargs=None,
         **kwargs,
     ):
         """Create a bracket order group (low side - buy order - high side). The
@@ -1287,7 +1268,12 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             ``None``
 
         """
-
+        if oargs is None:
+            oargs = {}
+        if stopargs is None:
+            stopargs = {}
+        if limitargs is None:
+            limitargs = {}
         kargs = dict(
             size=size,
             data=data,
@@ -1348,18 +1334,18 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         size=None,
         price=None,
         plimit=None,
-        exectype=bt.Order.Limit,
+        exectype=Order.Limit,
         valid=None,
         tradeid=0,
         trailamount=None,
         trailpercent=None,
-        oargs={},
+        oargs=None,
         stopprice=None,
-        stopexec=bt.Order.Stop,
-        stopargs={},
+        stopexec=Order.Stop,
+        stopargs=None,
         limitprice=None,
-        limitexec=bt.Order.Limit,
-        limitargs={},
+        limitexec=Order.Limit,
+        limitargs=None,
         **kwargs,
     ):
         """Create a bracket order group (low side - buy order - high side). The
@@ -1402,7 +1388,12 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             ``None``
 
         """
-
+        if oargs is None:
+            oargs = {}
+        if stopargs is None:
+            stopargs = {}
+        if limitargs is None:
+            limitargs = {}
         kargs = dict(
             size=size,
             data=data,
@@ -1431,7 +1422,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             kargs.update(stopargs)
             kargs.update(kwargs)
             kargs["parent"] = o
-            kargs["transmit"] = limitexec is None  # transmit if last
+            kargs["transmit"] = limitexec is None
             kargs["size"] = o.size
             ostop = self.buy(**kargs)
         else:
@@ -1680,9 +1671,9 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
         """
         if sizer is None:
-            self.setsizer(bt.sizers.FixedSize())
+            self.setsizer(FixedSize())
         else:
-            self.setsizer(sizer(*args, **kwargs))
+            self.setsizer(sizer, *args, **kwargs)
 
     def setsizer(self, sizer):
         """Replace the default (fixed stake) sizer
@@ -1716,267 +1707,3 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         """
         data = data if data is not None else self.datas[0]
         return self._sizer.getsizing(data, isbuy=isbuy)
-
-
-class MetaSigStrategy(Strategy.__class__):
-    """ """
-
-    def __new__(meta, name, bases, dct):
-        """
-
-        :param meta:
-        :param name:
-        :param bases:
-        :param dct:
-
-        """
-        # map user defined next to custom to be able to call own method before
-        if "next" in dct:
-            dct["_next_custom"] = dct.pop("next")
-
-        cls = super(MetaSigStrategy, meta).__new__(meta, name, bases, dct)
-
-        # after class creation remap _next_catch to be next
-        cls.next = cls._next_catch
-        return cls
-
-    def dopreinit(cls, _obj, *args, **kwargs):
-        """
-
-        :param _obj:
-        :param *args:
-        :param **kwargs:
-
-        """
-        _obj, args, kwargs = super(MetaSigStrategy, cls).dopreinit(
-            _obj, *args, **kwargs
-        )
-
-        _obj._signals = collections.defaultdict(list)
-
-        _data = _obj.p._data
-        if _data is None:
-            _obj._dtarget = _obj.data0
-        elif isinstance(_data, integer_types):
-            _obj._dtarget = _obj.datas[_data]
-        elif isinstance(_data, string_types):
-            _obj._dtarget = _obj.getdatabyname(_data)
-        elif isinstance(_data, bt.LineRoot):
-            _obj._dtarget = _data
-        else:
-            _obj._dtarget = _obj.data0
-
-        return _obj, args, kwargs
-
-    def dopostinit(cls, _obj, *args, **kwargs):
-        """
-
-        :param _obj:
-        :param *args:
-        :param **kwargs:
-
-        """
-        _obj, args, kwargs = super(MetaSigStrategy, cls).dopostinit(
-            _obj, *args, **kwargs
-        )
-
-        for sigtype, sigcls, sigargs, sigkwargs in _obj.p.signals:
-            _obj._signals[sigtype].append(sigcls(*sigargs, **sigkwargs))
-
-        # Record types of signals
-        _obj._longshort = bool(_obj._signals[bt.SIGNAL_LONGSHORT])
-
-        _obj._long = bool(_obj._signals[bt.SIGNAL_LONG])
-        _obj._short = bool(_obj._signals[bt.SIGNAL_SHORT])
-
-        _obj._longexit = bool(_obj._signals[bt.SIGNAL_LONGEXIT])
-        _obj._shortexit = bool(_obj._signals[bt.SIGNAL_SHORTEXIT])
-
-        return _obj, args, kwargs
-
-
-class SignalStrategy(with_metaclass(MetaSigStrategy, Strategy)):
-    """This subclass of ``Strategy`` is meant to to auto-operate using
-    **signals**.
-
-    *Signals* are usually indicators and the expected output values:
-
-      - ``> 0`` is a ``long`` indication
-
-      - ``< 0`` is a ``short`` indication
-
-    There are 5 types of *Signals*, broken in 2 groups.
-
-    **Main Group**:
-
-      - ``LONGSHORT``: both ``long`` and ``short`` indications from this signal
-        are taken
-
-      - ``LONG``:
-        - ``long`` indications are taken to go long
-        - ``short`` indications are taken to *close* the long position. But:
-
-          - If a ``LONGEXIT`` (see below) signal is in the system it will be
-            used to exit the long
-
-          - If a ``SHORT`` signal is available and no ``LONGEXIT`` is available
-            , it will be used to close a ``long`` before opening a ``short``
-
-      - ``SHORT``:
-        - ``short`` indications are taken to go short
-        - ``long`` indications are taken to *close* the short position. But:
-
-          - If a ``SHORTEXIT`` (see below) signal is in the system it will be
-            used to exit the short
-
-          - If a ``LONG`` signal is available and no ``SHORTEXIT`` is available
-            , it will be used to close a ``short`` before opening a ``long``
-
-    **Exit Group**:
-
-      This 2 signals are meant to override others and provide criteria for
-      exitins a ``long``/``short`` position
-
-      - ``LONGEXIT``: ``short`` indications are taken to exit ``long``
-        positions
-
-      - ``SHORTEXIT``: ``long`` indications are taken to exit ``short``
-        positions
-
-    **Order Issuing**
-
-      Orders execution type is ``Market`` and validity is ``None`` (*Good until
-      Canceled*)
-
-
-    """
-
-    params = (
-        ("signals", []),
-        ("_accumulate", False),
-        ("_concurrent", False),
-        ("_data", None),
-    )
-
-    def _start(self):
-        """ """
-        self._sentinel = None  # sentinel for order concurrency
-        super(SignalStrategy, self)._start()
-
-    def signal_add(self, sigtype, signal):
-        """
-
-        :param sigtype:
-        :param signal:
-
-        """
-        self._signals[sigtype].append(signal)
-
-    def _notify(self, qorders=[], qtrades=[]):
-        """
-
-        :param qorders:  (Default value = [])
-        :param qtrades:  (Default value = [])
-
-        """
-        # Nullify the sentinel if done
-        procorders = qorders or self._orderspending
-        if self._sentinel is not None:
-            for order in procorders:
-                if order == self._sentinel and not order.alive():
-                    self._sentinel = None
-                    break
-
-        super(SignalStrategy, self)._notify(qorders=qorders, qtrades=qtrades)
-
-    def _next_catch(self):
-        """ """
-        self._next_signal()
-        if hasattr(self, "_next_custom"):
-            self._next_custom()
-
-    def _next_signal(self):
-        """ """
-        if self._sentinel is not None and not self.p._concurrent:
-            return  # order active and more than 1 not allowed
-
-        sigs = self._signals
-        nosig = [[0.0]]
-
-        # Calculate current status of the signals
-        ls_long = all(x[0] > 0.0 for x in sigs[bt.SIGNAL_LONGSHORT] or nosig)
-        ls_short = all(x[0] < 0.0 for x in sigs[bt.SIGNAL_LONGSHORT] or nosig)
-
-        l_enter0 = all(x[0] > 0.0 for x in sigs[bt.SIGNAL_LONG] or nosig)
-        l_enter1 = all(x[0] < 0.0 for x in sigs[bt.SIGNAL_LONG_INV] or nosig)
-        l_enter2 = all(x[0] for x in sigs[bt.SIGNAL_LONG_ANY] or nosig)
-        l_enter = l_enter0 or l_enter1 or l_enter2
-
-        s_enter0 = all(x[0] < 0.0 for x in sigs[bt.SIGNAL_SHORT] or nosig)
-        s_enter1 = all(x[0] > 0.0 for x in sigs[bt.SIGNAL_SHORT_INV] or nosig)
-        s_enter2 = all(x[0] for x in sigs[bt.SIGNAL_SHORT_ANY] or nosig)
-        s_enter = s_enter0 or s_enter1 or s_enter2
-
-        l_ex0 = all(x[0] < 0.0 for x in sigs[bt.SIGNAL_LONGEXIT] or nosig)
-        l_ex1 = all(x[0] > 0.0 for x in sigs[bt.SIGNAL_LONGEXIT_INV] or nosig)
-        l_ex2 = all(x[0] for x in sigs[bt.SIGNAL_LONGEXIT_ANY] or nosig)
-        l_exit = l_ex0 or l_ex1 or l_ex2
-
-        s_ex0 = all(x[0] > 0.0 for x in sigs[bt.SIGNAL_SHORTEXIT] or nosig)
-        s_ex1 = all(x[0] < 0.0 for x in sigs[bt.SIGNAL_SHORTEXIT_INV] or nosig)
-        s_ex2 = all(x[0] for x in sigs[bt.SIGNAL_SHORTEXIT_ANY] or nosig)
-        s_exit = s_ex0 or s_ex1 or s_ex2
-
-        # Use oppossite signales to start reversal (by closing)
-        # but only if no "xxxExit" exists
-        l_rev = not self._longexit and s_enter
-        s_rev = not self._shortexit and l_enter
-
-        # Opposite of individual long and short
-        l_leav0 = all(x[0] < 0.0 for x in sigs[bt.SIGNAL_LONG] or nosig)
-        l_leav1 = all(x[0] > 0.0 for x in sigs[bt.SIGNAL_LONG_INV] or nosig)
-        l_leav2 = all(x[0] for x in sigs[bt.SIGNAL_LONG_ANY] or nosig)
-        l_leave = l_leav0 or l_leav1 or l_leav2
-
-        s_leav0 = all(x[0] > 0.0 for x in sigs[bt.SIGNAL_SHORT] or nosig)
-        s_leav1 = all(x[0] < 0.0 for x in sigs[bt.SIGNAL_SHORT_INV] or nosig)
-        s_leav2 = all(x[0] for x in sigs[bt.SIGNAL_SHORT_ANY] or nosig)
-        s_leave = s_leav0 or s_leav1 or s_leav2
-
-        # Invalidate long leave if longexit signals are available
-        l_leave = not self._longexit and l_leave
-        # Invalidate short leave if shortexit signals are available
-        s_leave = not self._shortexit and s_leave
-
-        # Take size and start logic
-        size = self.getposition(self._dtarget).size
-        if not size:
-            if ls_long or l_enter:
-                self._sentinel = self.buy(self._dtarget)
-
-            elif ls_short or s_enter:
-                self._sentinel = self.sell(self._dtarget)
-
-        elif size > 0:  # current long position
-            if ls_short or l_exit or l_rev or l_leave:
-                # closing position - not relevant for concurrency
-                self.close(self._dtarget)
-
-            if ls_short or l_rev:
-                self._sentinel = self.sell(self._dtarget)
-
-            if ls_long or l_enter:
-                if self.p._accumulate:
-                    self._sentinel = self.buy(self._dtarget)
-
-        elif size < 0:  # current short position
-            if ls_long or s_exit or s_rev or s_leave:
-                # closing position - not relevant for concurrency
-                self.close(self._dtarget)
-
-            if ls_long or s_rev:
-                self._sentinel = self.buy(self._dtarget)
-
-            if ls_short or s_enter:
-                if self.p._accumulate:
-                    self._sentinel = self.sell(self._dtarget)

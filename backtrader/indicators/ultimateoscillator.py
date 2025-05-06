@@ -33,18 +33,18 @@ class UltimateOscillator(bt.Indicator):
     """Formula:
       # Buying Pressure = Close - TrueLow
       BP = Close - Minimum(Low or Prior Close)
-
+    
       # TrueRange = TrueHigh - TrueLow
       TR = Maximum(High or Prior Close)  -  Minimum(Low or Prior Close)
-
+    
       Average7 = (7-period BP Sum) / (7-period TR Sum)
       Average14 = (14-period BP Sum) / (14-period TR Sum)
       Average28 = (28-period BP Sum) / (28-period TR Sum)
-
+    
       UO = 100 x [(4 x Average7)+(2 x Average14)+Average28]/(4+2+1)
-
+    
     See:
-
+    
       - https://en.wikipedia.org/wiki/Ultimate_oscillator
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:ultimate_oscillator
 

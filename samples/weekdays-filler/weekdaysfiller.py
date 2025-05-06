@@ -38,7 +38,7 @@ class WeekDaysFiller(object):
     def __init__(self, data, fillclose=False):
         """
 
-        :param data:
+        :param data: 
         :param fillclose: (Default value = False)
 
         """

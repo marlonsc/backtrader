@@ -34,32 +34,32 @@ from __future__ import (
 )
 
 import argparse
+import ast
 import datetime
+import importlib
 import inspect
+import logging
 import random
 import string
 import sys
-import logging
-import importlib
-import ast
 
-from ..feeds import (
-    BacktraderCSVData,
-    VChartCSVData,
-    VChartFile,
-    SierraChartCSVData,
-    MT4CSVData,
-    YahooFinanceCSVData,
-    YahooFinanceData,
-    VCData,
-    IBData,
-    OandaData,
-)
-from .. import TimeFrame, Cerebro, Analyzer, Strategy, Observer
-from .. import signals as bt_signals
+from .. import Analyzer, Cerebro, Observer, Strategy, TimeFrame
+from .. import analyzers as bt_analyzers
 from .. import indicators as bt_indicators
 from .. import observers as bt_observers
-from .. import analyzers as bt_analyzers
+from .. import signals as bt_signals
+from ..feeds import (
+    BacktraderCSVData,
+    IBData,
+    MT4CSVData,
+    OandaData,
+    SierraChartCSVData,
+    VCData,
+    VChartCSVData,
+    VChartFile,
+    YahooFinanceCSVData,
+    YahooFinanceData,
+)
 from ..writer import WriterFile
 
 DATAFORMATS = dict(
@@ -119,7 +119,11 @@ logger = logging.getLogger(__name__)
 
 # Helper to safely parse dict-like strings (key1=val1,key2=val2)
 def safe_kwargs_parse(s):
-    """Safely parse a string of key=value pairs into a dict."""
+    """Safely parse a string of key=value pairs into a dict.
+
+    :param s: 
+
+    """
     if not s.strip():
         return {}
     try:
@@ -131,20 +135,17 @@ def safe_kwargs_parse(s):
 
 
 def btrun(pargs=""):
-    """
-    Run the Backtrader command-line interface with the given arguments.
+    """Run the Backtrader command-line interface with the given arguments.
 
-    Args:
-        pargs (str, optional): Command-line arguments as a string. Defaults to
+    :param pargs: Command-line arguments as a string. Defaults to
             "".
-
-    Returns:
-        None
-
+    :type pargs: str
+    :returns: None
     Side Effects:
         Configures and runs a Backtrader Cerebro instance, loads data, strategies,
         analyzers, observers, and writers as specified by the arguments. May plot
         results or print analyzer output. Exits the process on critical errors.
+
     """
     args = parse_args(pargs)
 
@@ -243,19 +244,15 @@ def btrun(pargs=""):
 
 
 def setbroker(args, cerebro):
-    """
-    Configure the broker instance in Cerebro with cash, commission, margin, and
+    """Configure the broker instance in Cerebro with cash, commission, margin, and
     slippage settings from the parsed arguments.
 
-    Args:
-        args: Parsed command-line arguments.
-        cerebro: The Backtrader Cerebro instance to configure.
-
-    Returns:
-        None
-
+    :param args: Parsed command-line arguments.
+    :param cerebro: The Backtrader Cerebro instance to configure.
+    :returns: None
     Side Effects:
         Modifies the broker state in the Cerebro instance.
+
     """
     broker = cerebro.getbroker()
 
@@ -294,18 +291,17 @@ def setbroker(args, cerebro):
 
 
 def getdatas(args):
-    """
-    Create and return a list of Backtrader data feed objects based on the parsed
+    """Create and return a list of Backtrader data feed objects based on the parsed
     arguments.
-
+    
     Args:
-        args: Parsed command-line arguments.
 
-    Returns:
-        list: List of Backtrader data feed objects.
-
+    :param args: 
+    :returns: list: List of Backtrader data feed objects.
+    
     Side Effects:
         Instantiates data feed objects, may parse dates from arguments.
+
     """
     # Get the data feed class from the global dictionary
     dfcls = DATAFORMATS[args.format]
@@ -348,17 +344,16 @@ def getdatas(args):
 
 
 def getmodclasses(mod, clstype, clsname=None):
-    """
-    Retrieve classes of a given type from a module, optionally filtering by class
+    """Retrieve classes of a given type from a module, optionally filtering by class
     name.
 
-    Args:
-        mod: The module to search for classes.
-        clstype: The base class type to match.
-        clsname (str, optional): Specific class name to match. Defaults to None.
+    :param mod: The module to search for classes.
+    :param clstype: The base class type to match.
+    :param clsname: Specific class name to match. Defaults to None.
+    :type clsname: str
+    :returns: List of matching class objects.
+    :rtype: list
 
-    Returns:
-        list: List of matching class objects.
     """
     clsmembers = inspect.getmembers(mod, inspect.isclass)
 
@@ -378,16 +373,15 @@ def getmodclasses(mod, clstype, clsname=None):
 
 
 def getmodfunctions(mod, funcname=None):
-    """
-    Retrieve functions or methods from a module, optionally filtering by function
+    """Retrieve functions or methods from a module, optionally filtering by function
     name.
 
-    Args:
-        mod: The module to search for functions.
-        funcname (str, optional): Specific function name to match. Defaults to None.
+    :param mod: The module to search for functions.
+    :param funcname: Specific function name to match. Defaults to None.
+    :type funcname: str
+    :returns: List of matching function or method objects.
+    :rtype: list
 
-    Returns:
-        list: List of matching function or method objects.
     """
     members = inspect.getmembers(mod, inspect.isfunction) + inspect.getmembers(
         mod, inspect.ismethod
@@ -406,17 +400,17 @@ def getmodfunctions(mod, funcname=None):
 
 
 def loadmodule(modpath, modname=""):
-    """
-    Dynamically load a Python module from a file path, optionally with a given
+    """Dynamically load a Python module from a file path, optionally with a given
     module name.
 
-    Args:
-        modpath (str): Path to the module file.
-        modname (str, optional): Name to assign to the loaded module. Defaults to
+    :param modpath: Path to the module file.
+    :type modpath: str
+    :param modname: Name to assign to the loaded module. Defaults to
             "".
+    :type modname: str
+    :returns: (module object or None, exception or None)
+    :rtype: tuple
 
-    Returns:
-        tuple: (module object or None, exception or None)
     """
     if not modpath.endswith(".py"):
         modpath += ".py"
@@ -435,19 +429,19 @@ def loadmodule(modpath, modname=""):
 
 
 def getobjects(iterable, clsbase, modbase, issignal=False):
-    """
-    Load and instantiate objects (classes) from modules or built-in modules,
+    """Load and instantiate objects (classes) from modules or built-in modules,
     optionally handling signal types.
 
-    Args:
-        iterable (list): List of module/class/kwargs specifiers.
-        clsbase: Base class type to match.
-        modbase: Default module to use if not specified.
-        issignal (bool, optional): Whether to handle signal type parsing.
+    :param iterable: List of module/class/kwargs specifiers.
+    :type iterable: list
+    :param clsbase: Base class type to match.
+    :param modbase: Default module to use if not specified.
+    :param issignal: Whether to handle signal type parsing.
             Defaults to False.
+    :type issignal: bool
+    :returns: List of (class, kwargs) or (class, kwargs, sigtype) tuples.
+    :rtype: list
 
-    Returns:
-        list: List of (class, kwargs) or (class, kwargs, sigtype) tuples.
     """
     retobjects = list()
 
@@ -500,15 +494,14 @@ def getobjects(iterable, clsbase, modbase, issignal=False):
 
 
 def getfunctions(iterable, modbase):
-    """
-    Load and return functions from modules or built-in modules.
+    """Load and return functions from modules or built-in modules.
 
-    Args:
-        iterable (list): List of module/function/kwargs specifiers.
-        modbase: Default module to use if not specified.
+    :param iterable: List of module/function/kwargs specifiers.
+    :type iterable: list
+    :param modbase: Default module to use if not specified.
+    :returns: List of (function, kwargs) tuples.
+    :rtype: list
 
-    Returns:
-        list: List of (function, kwargs) tuples.
     """
     retfunctions = list()
 
@@ -551,14 +544,13 @@ def getfunctions(iterable, modbase):
 
 
 def parse_args(pargs=""):
-    """
-    Parse command-line arguments for the Backtrader runner.
+    """Parse command-line arguments for the Backtrader runner.
 
-    Args:
-        pargs (str, optional): Arguments as a string. Defaults to "".
+    :param pargs: Arguments as a string. Defaults to "".
+    :type pargs: str
+    :returns: Parsed arguments namespace.
+    :rtype: argparse.Namespace
 
-    Returns:
-        argparse.Namespace: Parsed arguments namespace.
     """
     parser = argparse.ArgumentParser(
         description="Backtrader Run Script",

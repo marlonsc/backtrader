@@ -27,35 +27,30 @@ from __future__ import (
 
 import collections
 
-from backtrader.metabase import MetaParams
-from backtrader.utils.py3 import with_metaclass
+from .metabase import MetaParams
+from .utils.py3 import with_metaclass
 
 
 class MetaSingleton(MetaParams):
-    """Metaclass to make a metaclassed class a singleton"""
+    """Metaclass to make a metaclassed class a singleton."""
 
-    def __init__(cls, name, bases, dct):
+    def __init__(self, name, bases, dct):
         """
-
         :param name:
         :param bases:
         :param dct:
-
         """
-        super(MetaSingleton, cls).__init__(name, bases, dct)
-        cls._singleton = None
+        super().__init__(name, bases, dct)
+        self._singleton = None
 
-    def __call__(cls, *args, **kwargs):
+    def __call__(self, *args, **kwargs):
         """
-
         :param *args:
         :param **kwargs:
-
         """
-        if cls._singleton is None:
-            cls._singleton = super(MetaSingleton, cls).__call__(*args, **kwargs)
-
-        return cls._singleton
+        if self._singleton is None:
+            self._singleton = super().__call__(*args, **kwargs)
+        return self._singleton
 
 
 class Store(with_metaclass(MetaSingleton, object)):
@@ -72,6 +67,10 @@ class Store(with_metaclass(MetaSingleton, object)):
         :param **kwargs:
 
         """
+        if not hasattr(self, "DataCls") or self.DataCls is None:
+            raise RuntimeError("DataCls is not set for this Store.")
+        if not callable(self.DataCls):
+            raise TypeError("DataCls is not callable. Manual review required.")
         data = self.DataCls(*args, **kwargs)
         data._store = self
         return data
@@ -84,6 +83,10 @@ class Store(with_metaclass(MetaSingleton, object)):
         :param **kwargs:
 
         """
+        if not hasattr(cls, "BrokerCls") or cls.BrokerCls is None:
+            raise RuntimeError("BrokerCls is not set for this Store.")
+        if not callable(cls.BrokerCls):
+            raise TypeError("BrokerCls is not callable. Manual review required.")
         broker = cls.BrokerCls(*args, **kwargs)
         broker._store = cls
         return broker

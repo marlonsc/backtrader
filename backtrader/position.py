@@ -28,16 +28,15 @@ from __future__ import (
 
 class Position(object):
     """Keeps and updates the size and price of a position. The object has no
-    relationship to any asset. It only keeps size and price.
+    relationship to any asset. All docstrings and comments must be line-wrapped
+    at 90 characters or less.
 
     Member Attributes:
       - size (int): current size of the position
       - price (float): current price of the position
 
     The Position instances can be tested using len(position) to see if size
-    is not null
-
-
+    is not null.
     """
 
     def __str__(self):

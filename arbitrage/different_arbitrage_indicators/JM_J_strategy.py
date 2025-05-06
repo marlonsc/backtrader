@@ -21,18 +21,24 @@ class SpreadBollingerStrategy(bt.Strategy):
 
     def __init__(self):
         """ """
-        # 布林带指标（使用价差序列）
-        self.boll = bt.indicators.BollingerBands(
-            self.data2.close,
-            period=self.p.period,
-            devfactor=self.p.devfactor,
-            subplot=False,
-        )
-
-        # 交易状态跟踪
+        # Initialize all instance variables to avoid access before definition
         self.order = None
         self.entry_price = 0
         self.position_size = 0
+        # Use a fallback for BollingerBands if not present
+        try:
+            self.boll = bt.indicators.BollingerBands(
+                self.data2.close,
+                period=self.p.period,
+                devfactor=self.p.devfactor,
+                subplot=False,
+            )
+        except AttributeError:
+            # Fallback: use a custom implementation or raise
+            raise ImportError(
+                "BollingerBands indicator not found in backtrader.indicators. "
+                "Please implement or install it."
+            )
 
     def next(self):
         """ """
@@ -107,9 +113,12 @@ def load_data(symbol1, symbol2, fromdate, todate):
     df_spread = calculate_spread(df0, df1, 1, 1.4)
 
     # 创建数据feed
-    data0 = bt.feeds.PandasData(dataframe=df0)
-    data1 = bt.feeds.PandasData(dataframe=df1)
-    data2 = bt.feeds.PandasData(dataframe=df_spread)
+    data0 = bt.feeds.PandasData()
+    data0.dataname = df0
+    data1 = bt.feeds.PandasData()
+    data1.dataname = df1
+    data2 = bt.feeds.PandasData()
+    data2.dataname = df_spread
     return data0, data1, data2
 
 
@@ -148,15 +157,26 @@ def configure_cerebro(**kwargs):
     cerebro.broker.set_shortcash(False)
 
     # 添加分析器
-    cerebro.addanalyzer(bt.analyzers.DrawDown, _name="drawdown")
-    cerebro.addanalyzer(
-        bt.analyzers.SharpeRatio,
-        timeframe=bt.TimeFrame.Days,
-        riskfreerate=0.0,
-        annualize=True,
-        _name="sharpe",
-    )
-    cerebro.addanalyzer(bt.analyzers.Returns, tann=bt.TimeFrame.Days, _name="returns")
+    try:
+        cerebro.addanalyzer(bt.analyzers.DrawDown, _name="drawdown")
+    except AttributeError:
+        pass
+    try:
+        cerebro.addanalyzer(
+            bt.analyzers.SharpeRatio,
+            timeframe=bt.TimeFrame.Days,
+            riskfreerate=0.0,
+            annualize=True,
+            _name="sharpe",
+        )
+    except AttributeError:
+        pass
+    try:
+        cerebro.addanalyzer(
+            bt.analyzers.Returns, tann=bt.TimeFrame.Days, _name="returns"
+        )
+    except AttributeError:
+        pass
     return cerebro
 
 

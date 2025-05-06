@@ -3,34 +3,40 @@ import pandas as pd
 import statsmodels.api as sm
 
 
+# Copyright (c) 2025 backtrader contributors
+"""
+Utility functions for data alignment, spread calculation, volatility ratio,
+Kalman filter, and cointegration ratio for financial time series analysis.
+"""
+
 # 1. 首先确认两个DataFrame的index是否相同
 def check_and_align_data(df1, df2, date_column="date"):
-    """检查并对齐两个DataFrame的数据
+    """Check and align two DataFrames by date index.
 
-    :param df1:
-    :param df2:
-    :param date_column:  (Default value = "date")
-
+    :param df1: First DataFrame
+    :param df2: Second DataFrame
+    :param date_column: Name of the date column (default: "date")
+    :returns: Tuple of aligned DataFrames
     """
-    # 确保date列作为index
+    # Ensure the date column is set as index
     if date_column in df1.columns:
         df1 = df1.set_index(date_column)
     if date_column in df2.columns:
         df2 = df2.set_index(date_column)
 
-    # 找出共同的日期
+    # Find common dates
     common_dates = df1.index.intersection(df2.index)
 
-    # 检查是否有缺失的日期
+    # Check for missing dates
     missing_in_df1 = df2.index.difference(df1.index)
     missing_in_df2 = df1.index.difference(df2.index)
 
     if len(missing_in_df1) > 0:
-        print(f"在df_I中缺失的日期数: {len(missing_in_df1)}")
+        print(f"Number of missing dates in df1: {len(missing_in_df1)}")
     if len(missing_in_df2) > 0:
-        print(f"在df_RB中缺失的日期数: {len(missing_in_df2)}")
+        print(f"Number of missing dates in df2: {len(missing_in_df2)}")
 
-    # 对齐数据
+    # Align data
     df1_aligned = df1.loc[common_dates]
     df2_aligned = df2.loc[common_dates]
 
@@ -141,37 +147,36 @@ class KalmanFilter:
 
 
 def kalman_ratio(df1, df2):
-    """
+    """Calculate Kalman filter ratio and spread for two series.
 
-    :param df1:
-    :param df2:
-
+    :param df1: First series
+    :param df2: Second series
+    :returns: Tuple of (integer ratio, spread array)
     """
     kf = KalmanFilter()
     spreads = []
+    beta = 1.0  # Initialize beta to avoid use-before-assignment
     for p1, p2 in zip(df1, df2):
         if p2 != 0:
-            ratio = p1 / p2  # 实时价格比
+            ratio = p1 / p2  # Real-time price ratio
             beta = kf.update(ratio)
         spreads.append(p1 - beta * p2)
 
-    # 取末段均值确定整数配比
+    # Use the last 30 values of beta for integer ratio if available
     final_beta = np.mean(kf.x[-30:]) if len(df1) > 30 else round(kf.x[-1])
     return simplify_ratio(final_beta), np.array(spreads)
 
 
 def cointegration_ratio(df1, df2):
+    """Calculate cointegration regression ratio and spread.
+
+    :param df1: First series
+    :param df2: Second series
+    :returns: Tuple of (integer ratio, spread array)
     """
-
-    :param df1:
-    :param df2:
-
-    """
-
-    # 协整回归
+    # Cointegration regression
     X = sm.add_constant(df2)
     model = sm.OLS(df1, X).fit()
-    beta = model.params[1]  # 回归系数整数化
-    spread = df1 - beta * df2  # 价差序列
-
-    return simplify_ratio(beta), spread  # 配比格式(资产1单位:资产β单位)
+    beta = model.params[1]  # Regression coefficient as integer
+    spread = df1 - beta * df2  # Spread series
+    return simplify_ratio(beta), spread  # Format: (asset1 units : asset2 beta units)

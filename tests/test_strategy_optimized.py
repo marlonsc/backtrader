@@ -140,7 +140,7 @@ class BtTestStrategy(bt.Strategy):
     def log(self, txt, dt=None):
         """
 
-        :param txt:
+        :param txt: 
         :param dt: (Default value = None)
 
         """

@@ -33,34 +33,34 @@ class PivotPoint(Indicator):
     bar components of the past period of a larger timeframe. For example when
     operating with days, the values are taking from the already "past" month
     fixed prices.
-
+    
     Example of using this indicator:
-
+    
       data = btfeeds.ADataFeed(dataname=x, timeframe=bt.TimeFrame.Days)
       cerebro.adddata(data)
       cerebro.resampledata(data, timeframe=bt.TimeFrame.Months)
-
+    
     In the ``__init__`` method of the strategy:
-
+    
       pivotindicator = btind.PivotPoiont(self.data1)  # the resampled data
-
+    
     The indicator will try to automatically plo to the non-resampled data. To
     disable this behavior use the following during construction:
-
+    
       - _autoplot=False
-
+    
     Note:
-
+    
       The example shows *days* and *months*, but any combination of timeframes
       can be used. See the literature for recommended combinations
-
+    
     Formula:
       - pivot = (h + l + c) / 3  # variants duplicate close or add open
       - support1 = 2.0 * pivot - high
       - support2 = pivot - (high - low)
       - resistance1 = 2.0 * pivot - low
       - resistance2 = pivot + (high - low)
-
+    
     See:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:pivot_points
       - https://en.wikipedia.org/wiki/Pivot_point_(technical_analysis)
@@ -122,29 +122,29 @@ class FibonacciPivotPoint(Indicator):
     bar components of the past period of a larger timeframe. For example when
     operating with days, the values are taking from the already "past" month
     fixed prices.
-
+    
     Fibonacci levels (configurable) are used to define the support/resistance levels
-
+    
     Example of using this indicator:
-
+    
       data = btfeeds.ADataFeed(dataname=x, timeframe=bt.TimeFrame.Days)
       cerebro.adddata(data)
       cerebro.resampledata(data, timeframe=bt.TimeFrame.Months)
-
+    
     In the ``__init__`` method of the strategy:
-
+    
       pivotindicator = btind.FibonacciPivotPoiont(self.data1)  # the resampled data
-
+    
     The indicator will try to automatically plo to the non-resampled data. To
     disable this behavior use the following during construction:
-
+    
       - _autoplot=False
-
+    
     Note:
-
+    
       The example shows *days* and *months*, but any combination of timeframes
       can be used. See the literature for recommended combinations
-
+    
     Formula:
       - pivot = (h + l + c) / 3  # variants duplicate close or add open
       - support1 = p - level1 * (high - low)  # level1 0.382
@@ -153,7 +153,7 @@ class FibonacciPivotPoint(Indicator):
       - resistance1 = p + level1 * (high - low)  # level1 0.382
       - resistance2 = p + level2 * (high - low)  # level2 0.618
       - resistance3 = p + level3 * (high - low)  # level3 1.000
-
+    
     See:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:pivot_points
 
@@ -212,39 +212,39 @@ class DemarkPivotPoint(Indicator):
     bar components of the past period of a larger timeframe. For example when
     operating with days, the values are taking from the already "past" month
     fixed prices.
-
+    
     Example of using this indicator:
-
+    
       data = btfeeds.ADataFeed(dataname=x, timeframe=bt.TimeFrame.Days)
       cerebro.adddata(data)
       cerebro.resampledata(data, timeframe=bt.TimeFrame.Months)
-
+    
     In the ``__init__`` method of the strategy:
-
+    
       pivotindicator = btind.DemarkPivotPoiont(self.data1)  # the resampled data
-
+    
     The indicator will try to automatically plo to the non-resampled data. To
     disable this behavior use the following during construction:
-
+    
       - _autoplot=False
-
+    
     Note:
-
+    
       The example shows *days* and *months*, but any combination of timeframes
       can be used. See the literature for recommended combinations
-
+    
     Formula:
       - if close < open x = high + (2 x low) + close
-
+    
       - if close > open x = (2 x high) + low + close
-
+    
       - if Close == open x = high + low + (2 x close)
-
+    
       - p = x / 4
-
+    
       - support1 = x / 2 - high
       - resistance1 = x / 2 - low
-
+    
     See:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:pivot_points
 

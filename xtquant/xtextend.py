@@ -125,10 +125,10 @@ class Extender:
         num = (sizeof(self.value_type) + sizeof(self.rank_type)) * stock_length
         for time_index in time_indexs:
             index = num * time_index
-            value_data = data[index: index + sizeof(self.value_type) * stock_length]
+            value_data = data[index : index + sizeof(self.value_type) * stock_length]
             values = cast(value_data, POINTER(c_float))
             rank_data = data[
-                index + sizeof(self.value_type) * stock_length: index + num
+                index + sizeof(self.value_type) * stock_length : index + num
             ]
             ranks = cast(rank_data, POINTER(c_short))
             res[self.timedatelist[time_index]] = [

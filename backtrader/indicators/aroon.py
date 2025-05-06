@@ -31,10 +31,10 @@ from . import FindFirstIndexHighest, FindFirstIndexLowest, Indicator
 class _AroonBase(Indicator):
     """Base class which does the calculation of the AroonUp/AroonDown values and
     defines the common parameters.
-
+    
     It uses the class attributes _up and _down (boolean flags) to decide which
     value has to be calculated.
-
+    
     Values are not assigned to lines but rather stored in the "up" and "down"
     instance variables, which can be used by subclasses to for assignment or
     further calculations
@@ -82,19 +82,19 @@ class _AroonBase(Indicator):
 class AroonUp(_AroonBase):
     """This is the AroonUp from the indicator AroonUpDown developed by Tushar
     Chande in 1995.
-
+    
     Formula:
       - up = 100 * (period - distance to highest high) / period
-
+    
     Note:
       The lines oscillate between 0 and 100. That means that the "distance" to
       the last highest or lowest must go from 0 to period so that the formula
       can yield 0 and 100.
-
+    
       Hence the lookback period is period + 1, because the current bar is also
       taken into account. And therefore this indicator needs an effective
       lookback period of period + 1.
-
+    
     See:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:aroon
 
@@ -115,19 +115,19 @@ class AroonUp(_AroonBase):
 class AroonDown(_AroonBase):
     """This is the AroonDown from the indicator AroonUpDown developed by Tushar
     Chande in 1995.
-
+    
     Formula:
       - down = 100 * (period - distance to lowest low) / period
-
+    
     Note:
       The lines oscillate between 0 and 100. That means that the "distance" to
       the last highest or lowest must go from 0 to period so that the formula
       can yield 0 and 100.
-
+    
       Hence the lookback period is period + 1, because the current bar is also
       taken into account. And therefore this indicator needs an effective
       lookback period of period + 1.
-
+    
     See:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:aroon
 
@@ -147,23 +147,23 @@ class AroonDown(_AroonBase):
 
 class AroonUpDown(AroonUp, AroonDown):
     """Developed by Tushar Chande in 1995.
-
+    
     It tries to determine if a trend exists or not by calculating how far away
     within a given period the last highs/lows are (AroonUp/AroonDown)
-
+    
     Formula:
       - up = 100 * (period - distance to highest high) / period
       - down = 100 * (period - distance to lowest low) / period
-
+    
     Note:
       The lines oscillate between 0 and 100. That means that the "distance" to
       the last highest or lowest must go from 0 to period so that the formula
       can yield 0 and 100.
-
+    
       Hence the lookback period is period + 1, because the current bar is also
       taken into account. And therefore this indicator needs an effective
       lookback period of period + 1.
-
+    
     See:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:aroon
 
@@ -178,10 +178,10 @@ class AroonOscillator(_AroonBase):
     difference between the AroonUp and AroonDown value, trying to present a
     visualization which indicates which is stronger (greater than 0 -> AroonUp
     and less than 0 -> AroonDown)
-
+    
     Formula:
       - aroonosc = aroonup - aroondown
-
+    
     See:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:aroon
 
@@ -211,10 +211,10 @@ class AroonOscillator(_AroonBase):
 
 class AroonUpDownOscillator(AroonUpDown, AroonOscillator):
     """Presents together the indicators AroonUpDown and AroonOsc
-
+    
     Formula:
       (None, uses the aforementioned indicators)
-
+    
     See:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:aroon
 

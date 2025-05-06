@@ -27,9 +27,9 @@ from __future__ import (
 
 import sys
 
+from .cerebro import Cerebro
 from .indicator import Indicator
 from .metabase import findowner
-from .cerebro import Cerebro
 from .utils.py3 import with_metaclass
 
 # The modules below should/must define __all__ with the objects wishes

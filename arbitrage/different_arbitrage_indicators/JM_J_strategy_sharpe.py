@@ -1,15 +1,22 @@
+# Copyright (c) 2025 backtrader contributors
+"""
+Sharpe difference Bollinger Band strategy for J/JM futures. Includes data loading,
+strategy logic, and result analysis with plotting.
+"""
 import datetime
 
 import backtrader as bt
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import seaborn as sns  # pylint: disable=import-error
 from arbitrage.common_strategy_utils import (
     init_common_vars,
     notify_order_default,
     notify_trade_default,
 )
+from backtrader.analyzers.drawdown import DrawDown
+from backtrader.analyzers.sharpe import SharpeRatio
+from backtrader.analyzers.timereturn import TimeReturn
 
 
 # 夏普差值布林带策略
@@ -26,16 +33,23 @@ class SharpeDiffStrategy(bt.Strategy):
 
     def __init__(self):
         """ """
+        # Initialize all instance variables to avoid access before definition
+        self.order = None
+        self.position_type = None
+        self.entry_day = 0
         extra_vars = {
-            'j_prices': [],
-            'jm_prices': [],
-            'sharpe_j_values': [],
-            'sharpe_jm_values': [],
-            'delta_sharpe_values': [],
-            'delta_sharpe_ma': [],
-            'delta_sharpe_std': [],
-            'upper_band': [],
-            'lower_band': [],
+            "j_prices": [],
+            "jm_prices": [],
+            "sharpe_j_values": [],
+            "sharpe_jm_values": [],
+            "delta_sharpe_values": [],
+            "delta_sharpe_ma": [],
+            "delta_sharpe_std": [],
+            "upper_band": [],
+            "lower_band": [],
+            "returns_j": [],
+            "returns_jm": [],
+            "dates": [],
         }
         init_common_vars(self, extra_vars)
 
@@ -62,23 +76,14 @@ class SharpeDiffStrategy(bt.Strategy):
         ) - 1
 
         # 保存每日收益率用于计算波动率
-        if len(self) > 1:  # 确保有前一个价格
-            ret_j = (self.data0.close[0] / self.data0.close[-1]) - 1
-            ret_jm = (self.data1.close[0] / self.data1.close[-1]) - 1
-            self.returns_j.append(ret_j)
-            self.returns_jm.append(ret_jm)
-        else:
-            return  # 第一个bar没有前一天价格，跳过
-
-        # 当收益率数据不足时，跳过
         if len(self.returns_j) < self.p.return_period:
             return
 
         # 计算15日波动率
-        j_vol_15d = np.std(self.returns_j[-self.p.return_period:]) * np.sqrt(
+        j_vol_15d = np.std(self.returns_j[-self.p.return_period :]) * np.sqrt(
             self.p.return_period
         )
-        jm_vol_15d = np.std(self.returns_jm[-self.p.return_period:]) * np.sqrt(
+        jm_vol_15d = np.std(self.returns_jm[-self.p.return_period :]) * np.sqrt(
             self.p.return_period
         )
 
@@ -97,11 +102,11 @@ class SharpeDiffStrategy(bt.Strategy):
         # 计算20日移动平均和标准差
         if len(self.delta_sharpe_values) >= self.p.ma_period:
             # 计算20日移动平均 MA(ΔSharpe) = MA20(ΔSharpe)
-            ma_delta = np.mean(self.delta_sharpe_values[-self.p.ma_period:])
+            ma_delta = np.mean(self.delta_sharpe_values[-self.p.ma_period :])
             self.delta_sharpe_ma.append(ma_delta)
 
             # 计算20日标准差 σΔSharpe = Std20(ΔSharpe)
-            std_delta = np.std(self.delta_sharpe_values[-self.p.ma_period:])
+            std_delta = np.std(self.delta_sharpe_values[-self.p.ma_period :])
             self.delta_sharpe_std.append(std_delta)
 
             # 计算布林带上下轨
@@ -286,9 +291,9 @@ def load_data(symbol1, symbol2, fromdate, todate):
         df0 = df0.sort_index().loc[fromdate:todate]
         df1 = df1.sort_index().loc[fromdate:todate]
 
-        # 创建数据feed
-        data0 = bt.feeds.PandasData(dataname=df0)
-        data1 = bt.feeds.PandasData(dataname=df1)
+        # Create data feeds
+        data0 = bt.feeds.PandasData(df0)
+        data1 = bt.feeds.PandasData(df1)
         return data0, data1
     except Exception as e:
         print(f"加载数据时出错: {e}")
@@ -319,9 +324,9 @@ def configure_cerebro(**kwargs):
     cerebro.addstrategy(SharpeDiffStrategy, printlog=True)
     cerebro.broker.setcash(80000)
     cerebro.broker.set_shortcash(False)
-    cerebro.addanalyzer(bt.analyzers.DrawDown)
-    cerebro.addanalyzer(bt.analyzers.SharpeRatio)
-    cerebro.addanalyzer(bt.analyzers.TimeReturn)
+    cerebro.addanalyzer(DrawDown)
+    cerebro.addanalyzer(SharpeRatio)
+    cerebro.addanalyzer(TimeReturn)
     return cerebro
 
 

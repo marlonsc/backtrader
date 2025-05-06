@@ -36,17 +36,15 @@ try:  # For new Python versions
 except AttributeError:  # For old Python versions
     collectionsAbc = collections  # Используем collections.Iterable
 
-import backtrader as bt
+
+from .lineseries import LineSeries
+from .metabase import MetaParams
 from .utils.py3 import (
     integer_types,
     map,
     string_types,
     with_metaclass,
-    MAXINT,
 )
-from .lineseries import LineSeries
-from .metabase import MetaParams
-from .strategy import Strategy
 
 
 class WriterBase(with_metaclass(MetaParams, object)):

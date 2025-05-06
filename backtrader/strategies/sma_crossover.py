@@ -31,22 +31,22 @@ import backtrader.indicators as btind
 
 class MA_CrossOver(bt.Strategy):
     """This is a long-only strategy which operates on a moving average cross
-
+    
     Note:
       - Although the default
-
+    
     Buy Logic:
       - No position is open on the data
-
+    
       - The ``fast`` moving averagecrosses over the ``slow`` strategy to the
         upside.
-
+    
     Sell Logic:
       - A position exists on the data
-
+    
       - The ``fast`` moving average crosses over the ``slow`` strategy to the
         downside
-
+    
     Order Execution Type:
       - Market
 

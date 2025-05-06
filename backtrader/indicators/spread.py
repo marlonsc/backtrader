@@ -13,7 +13,7 @@ from . import Indicator
 
 class SpreadWithSignals(Indicator):
     """计算两个数据之间的价差并标注买卖信号点
-
+    
     参数:
       - data2: 第二个数据源(用于计算价差)
       - buy_signal: 买入信号数组

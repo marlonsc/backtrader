@@ -27,10 +27,9 @@ from __future__ import (
 
 from datetime import datetime, time, timedelta
 
-from backtrader.utils import UTC
-from backtrader.utils.py3 import string_types, with_metaclass
-
 from .metabase import MetaParams
+from .utils import UTC
+from .utils.py3 import string_types, with_metaclass
 
 __all__ = ["TradingCalendarBase", "TradingCalendar", "PandasMarketCalendar"]
 
@@ -236,8 +235,13 @@ class PandasMarketCalendar(TradingCalendarBase):
         self._calendar = self.p.calendar
 
         if isinstance(self._calendar, string_types):  # use passed mkt name
-            import pandas_market_calendars as mcal
-
+            try:
+                import pandas_market_calendars as mcal
+            except ImportError:
+                raise ImportError(
+                    "pandas_market_calendars is required for PandasMarketCalendar. "
+                    "Please install it via pip."
+                )
             self._calendar = mcal.get_calendar(self._calendar)
 
         import pandas as pd  # guaranteed because of pandas_market_calendars

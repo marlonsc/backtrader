@@ -45,8 +45,8 @@ from .utils.py3 import map, range, string_types, with_metaclass
 
 
 class LineAlias(object):
-    """Descriptor class that store a line reference and returns that line
-    from the owner
+    """Descriptor class that stores a line reference and returns that line from the
+    owner. All docstrings and comments must be line-wrapped at 90 characters or less.
 
     Keyword Args:
         line (int): reference to the line that will be returned from
@@ -100,8 +100,9 @@ class LineAlias(object):
 
 
 class Lines(object):
-    """Defines an "array" of lines which also has most of the interface of
-    a LineBuffer class (forward, rewind, advance...).
+    """Defines an array of lines with most of the interface of a LineBuffer class.
+    Supports dynamic subclassing and line management. All docstrings and comments
+    must be line-wrapped at 90 characters or less.
 
     This interface operations are passed to the lines held by self
 
@@ -266,7 +267,7 @@ class Lines(object):
 
     def itersize(self):
         """ """
-        return iter(self.lines[0: self.size()])
+        return iter(self.lines[0 : self.size()])
 
     def __init__(self, initlines=None):
         """Create the lines recording during "_derive" or else use the
@@ -398,7 +399,8 @@ class Lines(object):
 
 
 class MetaLineSeries(LineMultiple.__class__):
-    """Dirty job manager for a LineSeries
+    """Metaclass for LineSeries. Handles dynamic class creation and line management.
+    All docstrings and comments must be line-wrapped at 90 characters or less.
 
     - During __new__ (class creation), it reads "lines", "plotinfo",
       "plotlines" class variable definitions and turns them into
@@ -506,48 +508,22 @@ class MetaLineSeries(LineMultiple.__class__):
         return cls
 
     def donew(cls, *args, **kwargs):
-        """Intercept instance creation, take over lines/plotinfo/plotlines
-        class attributes by creating corresponding instance variables and add
-        aliases for "lines" and the "lines" held within it
-
-        :param *args:
-        :param **kwargs:
-
         """
-        # _obj.plotinfo shadows the plotinfo (class) definition in the class
-        plotinfo = cls.plotinfo()
-
-        for pname, pdef in cls.plotinfo._getitems():
-            setattr(plotinfo, pname, kwargs.pop(pname, pdef))
-
-        # Create the object and set the params in place
-        _obj, args, kwargs = super(MetaLineSeries, cls).donew(*args, **kwargs)
-
-        # set the plotinfo member in the class
-        _obj.plotinfo = plotinfo
-
-        # _obj.lines shadows the lines (class) definition in the class
-        _obj.lines = cls.lines()
-
-        # _obj.plotinfo shadows the plotinfo (class) definition in the class
-        _obj.plotlines = cls.plotlines()
-
-        # add aliases for lines and for the lines class itself
-        _obj.l = _obj.lines
-        if _obj.lines.fullsize():
-            _obj.line = _obj.lines[0]
-
-        for l, line in enumerate(_obj.lines):
-            setattr(_obj, "line_%s" % l, _obj._getlinealias(l))
-            setattr(_obj, "line_%d" % l, line)
-            setattr(_obj, "line%d" % l, line)
-
-        # Parameter values have now been set before __init__
+        Create a new instance, calling super if available.
+        """
+        if hasattr(super(MetaLineSeries, cls), "donew"):
+            _obj, args, kwargs = super(MetaLineSeries, cls).donew(*args, **kwargs)
+        else:
+            _obj = cls.__new__(cls, *args, **kwargs)
         return _obj, args, kwargs
 
 
 class LineSeries(with_metaclass(MetaLineSeries, LineMultiple)):
-    """ """
+    """Base class for line-based series (Indicators, Observers, Strategies).
+    Handles data binding, minperiod calculation, and orchestration of line
+    operations. All docstrings and comments must be line-wrapped at 90 characters
+    or less.
+    """
 
     plotinfo = dict(
         plot=True,
@@ -609,7 +585,7 @@ class LineSeries(with_metaclass(MetaLineSeries, LineMultiple)):
 
     def plotlabel(self):
         """ """
-        label = self.plotinfo.plotname or self.__class__.__name__
+        name = self.plotinfo.get("plotname", "") or self.__class__.__name__
         sublabels = self._plotlabel()
         if sublabels:
             for i, sublabel in enumerate(sublabels):
@@ -622,8 +598,8 @@ class LineSeries(with_metaclass(MetaLineSeries, LineMultiple)):
 
                     sublabels[i] = s or sublabel.__name__
 
-            label += " (%s)" % ", ".join(map(str, sublabels))
-        return label
+            name += " (%s)" % ", ".join(map(str, sublabels))
+        return name
 
     def _plotlabel(self):
         """ """

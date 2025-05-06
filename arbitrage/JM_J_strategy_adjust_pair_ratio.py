@@ -1,7 +1,20 @@
+# Copyright (c) 2025 backtrader contributors
+"""
+Dynamic spread trading strategy for JM/J using Backtrader. This module demonstrates
+how to set up a pair trading strategy with dynamic ratio adjustment and built-in
+analyzers.
+"""
+
 import datetime
 
-import backtrader as bt
 import pandas as pd
+import backtrader as bt
+from backtrader.indicators.sma import MovingAverageSimple as SimpleMovingAverage
+from backtrader.indicators.deviation import StandardDeviation
+from backtrader.analyzers.drawdown import DrawDown
+from backtrader.analyzers.sharpe import SharpeRatio
+from backtrader.analyzers.returns import Returns
+from backtrader.analyzers.tradeanalyzer import TradeAnalyzer
 
 # https://mp.weixin.qq.com/s/na-5duJiRM1fTJF0WrcptA
 
@@ -83,9 +96,9 @@ df1_bt = df1[(df1["date"] >= fromdate) & (df1["date"] <= todate)]
 df_spread_bt = df_spread[
     (df_spread["date"] >= fromdate) & (df_spread["date"] <= todate)
 ]
-data0 = bt.feeds.PandasData(dataframe=df0_bt)
-data1 = bt.feeds.PandasData(dataframe=df1_bt)
-data2 = SpreadData(dataframe=df_spread_bt)
+data0 = bt.feeds.PandasData(dataname=df0_bt)
+data1 = bt.feeds.PandasData(dataname=df1_bt)
+data2 = SpreadData(dataname=df_spread_bt)
 
 
 class DynamicSpreadStrategy(bt.Strategy):
@@ -97,14 +110,12 @@ class DynamicSpreadStrategy(bt.Strategy):
     )
 
     def __init__(self):
-        """ """
-        # Bollinger Bands indicator - using passed spread data
-        self.boll_mid = bt.indicators.SimpleMovingAverage(self.data2.close, period=self.p.period)
-        self.boll_std = bt.indicators.StandardDeviation(self.data2.close, period=self.p.period)
+        """Initialize the strategy and indicators."""
+        super().__init__()
+        self.boll_mid = SimpleMovingAverage(self.data2.close, period=self.p.period)
+        self.boll_std = StandardDeviation(self.data2.close, period=self.p.period)
         self.boll_top = self.boll_mid + self.p.devfactor * self.boll_std
         self.boll_bot = self.boll_mid - self.p.devfactor * self.boll_std
-
-        # Trading status
         self.order = None
         self.entry_price = 0
 
@@ -241,22 +252,20 @@ cerebro.addstrategy(DynamicSpreadStrategy)
 # Set initial capital
 cerebro.broker.setcash(100000)
 cerebro.broker.set_shortcash(False)
-cerebro.addanalyzer(bt.analyzers.DrawDown, _name="drawdown")
-# ROIAnalyzer and CAGRAnalyzer are not standard Backtrader analyzers;
-# removed for compatibility
-cerebro.addanalyzer(bt.analyzers.SharpeRatio, _name="sharperatio")
-cerebro.addanalyzer(bt.analyzers.Returns, _name="returns")
-cerebro.addanalyzer(bt.analyzers.TradeAnalyzer, _name="tradeanalyzer")
+cerebro.addanalyzer(DrawDown, _name="drawdown")
+cerebro.addanalyzer(SharpeRatio, _name="sharperatio")
+cerebro.addanalyzer(Returns, _name="returns")
+cerebro.addanalyzer(TradeAnalyzer, _name="tradeanalyzer")
 
 # cerebro.addobserver(bt.observers.CashValue)
 cerebro.addanalyzer(
-    bt.analyzers.SharpeRatio,
+    SharpeRatio,
     timeframe=bt.TimeFrame.Days,  # Calculate based on daily data
     riskfreerate=0,  # Default annualized 1% risk-free rate
     annualize=True,  # Do not annualize
 )
 cerebro.addanalyzer(
-    bt.analyzers.Returns,
+    Returns,
     tann=bt.TimeFrame.Days,  # Annualization factor, 252 trading days
 )
 cerebro.addanalyzer(bt.analyzers.TradeAnalyzer)

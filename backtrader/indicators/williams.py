@@ -41,14 +41,14 @@ from . import (
 class WilliamsR(Indicator):
     """Developed by Larry Williams to show the relation of closing prices to
     the highest-lowest range of a given period.
-
+    
     Known as Williams %R (but % is not allowed in Python identifiers)
-
+    
     Formula:
       - num = highest_period - close
       - den = highestg_period - lowest_period
       - percR = (num / den) * -100.0
-
+    
     See:
       - http://en.wikipedia.org/wiki/Williams_%25R
 
@@ -84,11 +84,11 @@ class WilliamsAD(Indicator):
     """By Larry Williams. It does cumulatively measure if the price is
     accumulating (upwards) or distributing (downwards) by using the concept of
     UpDays and DownDays.
-
+    
     Prices can go upwards but do so in a fashion that no longer shows
     accumulation because updays and downdays are canceling out each other,
     creating a divergence.
-
+    
     See:
     - http://www.metastock.com/Customer/Resources/TAAZ/?p=125
     - http://ta.mql4.com/indicators/trends/williams_accumulation_distribution

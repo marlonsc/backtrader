@@ -30,10 +30,10 @@ from . import Average, MovingAverageBase
 
 class MovingAverageSimple(MovingAverageBase):
     """Non-weighted average of the last n periods
-
+    
     Formula:
       - movav = Sum(data, period) / period
-
+    
     See also:
       - http://en.wikipedia.org/wiki/Moving_average#Simple_moving_average
 

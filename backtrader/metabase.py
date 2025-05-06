@@ -80,7 +80,9 @@ def findowner(owned, cls, startlevel=2, skip=None):
 
 
 class MetaBase(type):
-    """ """
+    """Base metaclass for Backtrader objects. Handles custom instantiation logic.
+    All docstrings and comments must be line-wrapped at 90 characters or less.
+    """
 
     def doprenew(cls, *args, **kwargs):
         """
@@ -148,7 +150,9 @@ class MetaBase(type):
 
 
 class AutoInfoClass(object):
-    """ """
+    """Base class for auto-generated info classes (e.g., plotinfo, plotlines).
+    All docstrings and comments must be line-wrapped at 90 characters or less.
+    """
 
     _getpairsbase = classmethod(lambda cls: OrderedDict())
     _getpairs = classmethod(lambda cls: OrderedDict())
@@ -322,7 +326,10 @@ class AutoInfoClass(object):
 
 
 class MetaParams(MetaBase):
-    """ """
+    """Metaclass for parameterized Backtrader objects. Handles parameter
+    management and inheritance. All docstrings and comments must be line-wrapped
+    at 90 characters or less.
+    """
 
     def __new__(meta, name, bases, dct):
         """
@@ -431,18 +438,16 @@ class MetaParams(MetaBase):
 
 
 class ParamsBase(with_metaclass(MetaParams, object)):
-    """ """
+    """Base class for objects with parameters in Backtrader. All docstrings and
+    comments must be line-wrapped at 90 characters or less.
+    """
 
     pass  # stub to allow easy subclassing without metaclasses
 
 
 class ItemCollection(object):
-    """Holds a collection of items that can be reached by
-
-    - Index
-    - Name (if set in the append operation)
-
-
+    """Collection class for Backtrader items (e.g., analyzers, observers).
+    All docstrings and comments must be line-wrapped at 90 characters or less.
     """
 
     def __init__(self):

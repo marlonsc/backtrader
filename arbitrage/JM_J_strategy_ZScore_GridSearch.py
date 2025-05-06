@@ -1,10 +1,20 @@
+# Copyright (c) 2025 backtrader contributors
+"""
+Grid search for CUSUM/Z-Score pair trading strategy for J/JM futures. Includes
+rolling beta spread calculation, parameter optimization, and result visualization.
+"""
 import datetime
-
-import backtrader as bt
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+import backtrader as bt
+from backtrader.indicators.deviation import StandardDeviation as StdDev
+from backtrader.analyzers.drawdown import DrawDown
+from backtrader.analyzers.sharpe import SharpeRatio
+from backtrader.analyzers.returns import Returns
+from backtrader.analyzers.roi import ROIAnalyzer
+from backtrader.analyzers.tradeanalyzer import TradeAnalyzer
 
 
 def calculate_rolling_spread(
@@ -146,11 +156,15 @@ class DynamicSpreadZScoreStrategy(bt.Strategy):
 
         if trade.isclosed:
             print(
-                f"TRADE {trade.ref} CLOSED, PROFIT: GROSS {trade.pnl:.2f}, NET {trade.pnlcomm:.2f}, PRICE {trade.value}"
+                f"TRADE {trade.ref} CLOSED, PROFIT: GROSS {trade.pnl:.2f}, NET {
+                    trade.pnlcomm:.2f
+                }, PRICE {trade.value}"
             )
         elif trade.justopened:
             print(
-                f"TRADE {trade.ref} OPENED {trade.dtopen}, SIZE {trade.size}, PRICE {trade.value}"
+                f"TRADE {trade.ref} OPENED {trade.dtopen}, SIZE {trade.size}, PRICE {
+                    trade.value
+                }"
             )
 
 
@@ -331,9 +345,9 @@ def grid_search():
         df_spread = calculate_rolling_spread(df0, df1, window=spread_window)
 
         # 添加数据
-        data0 = bt.feeds.PandasData(dataframe=df0)
-        data1 = bt.feeds.PandasData(dataframe=df1)
-        data2 = SpreadData(dataframe=df_spread, fromdate=fromdate, todate=todate)
+        data0 = bt.feeds.PandasData(df0)
+        data1 = bt.feeds.PandasData(df1)
+        data2 = SpreadData(df_spread)
 
         for win in win_values:
             for entry_zscore in entry_zscore_values:

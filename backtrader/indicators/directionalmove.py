@@ -32,12 +32,12 @@ class UpMove(Indicator):
     """Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"* as part of the Directional Move System to
     calculate Directional Indicators.
-
+    
     Positive if the given data has moved higher than the previous day
-
+    
     Formula:
       - upmove = data - data(-1)
-
+    
     See:
       - https://en.wikipedia.org/wiki/Average_directional_movement_index
 
@@ -56,12 +56,12 @@ class DownMove(Indicator):
     """Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"* as part of the Directional Move System to
     calculate Directional Indicators.
-
+    
     Positive if the given data has moved lower than the previous day
-
+    
     Formula:
       - downmove = data(-1) - data
-
+    
     See:
       - https://en.wikipedia.org/wiki/Average_directional_movement_index
 
@@ -80,7 +80,7 @@ class _DirectionalIndicator(Indicator):
     """This class serves as the root base class for all "Directional Movement
     System" related indicators, given that the calculations are first common
     and then derived from the common calculations.
-
+    
     It can calculate the +DI and -DI values (using kwargs as the hint as to
     what to calculate) but doesn't assign them to lines. This is left for
     sublcases of this class.
@@ -141,9 +141,9 @@ class _DirectionalIndicator(Indicator):
 class DirectionalIndicator(_DirectionalIndicator):
     """Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"*.
-
+    
     Intended to measure trend strength
-
+    
     This indicator shows +DI, -DI:
       - Use PlusDirectionalIndicator (PlusDI) to get +DI
       - Use MinusDirectionalIndicator (MinusDI) to get -DI
@@ -151,7 +151,7 @@ class DirectionalIndicator(_DirectionalIndicator):
       - Use AverageDirectionalIndexRating (ADXR) to get ADX, ADXR
       - Use DirectionalMovementIndex (DMI) to get ADX, +DI, -DI
       - Use DirectionalMovement (DM) to get ADX, ADXR, +DI, -DI
-
+    
     Formula:
       - upmove = high - high(-1)
       - downmove = low(-1) - low
@@ -159,10 +159,10 @@ class DirectionalIndicator(_DirectionalIndicator):
       - -dm = downmove if downmove > upmove and downmove > 0 else 0
       - +di = 100 * MovingAverage(+dm, period) / atr(period)
       - -di = 100 * MovingAverage(-dm, period) / atr(period)
-
+    
     The moving average used is the one originally defined by Wilder,
     the SmoothedMovingAverage
-
+    
     See:
       - https://en.wikipedia.org/wiki/Average_directional_movement_index
 
@@ -186,9 +186,9 @@ class DirectionalIndicator(_DirectionalIndicator):
 class PlusDirectionalIndicator(_DirectionalIndicator):
     """Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"*.
-
+    
     Intended to measure trend strength
-
+    
     This indicator shows +DI:
       - Use MinusDirectionalIndicator (MinusDI) to get -DI
       - Use Directional Indicator (DI) to get +DI, -DI
@@ -196,16 +196,16 @@ class PlusDirectionalIndicator(_DirectionalIndicator):
       - Use AverageDirectionalIndexRating (ADXR) to get ADX, ADXR
       - Use DirectionalMovementIndex (DMI) to get ADX, +DI, -DI
       - Use DirectionalMovement (DM) to get ADX, ADXR, +DI, -DI
-
+    
     Formula:
       - upmove = high - high(-1)
       - downmove = low(-1) - low
       - +dm = upmove if upmove > downmove and upmove > 0 else 0
       - +di = 100 * MovingAverage(+dm, period) / atr(period)
-
+    
     The moving average used is the one originally defined by Wilder,
     the SmoothedMovingAverage
-
+    
     See:
       - https://en.wikipedia.org/wiki/Average_directional_movement_index
 
@@ -227,9 +227,9 @@ class PlusDirectionalIndicator(_DirectionalIndicator):
 class MinusDirectionalIndicator(_DirectionalIndicator):
     """Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"*.
-
+    
     Intended to measure trend strength
-
+    
     This indicator shows -DI:
       - Use PlusDirectionalIndicator (PlusDI) to get +DI
       - Use Directional Indicator (DI) to get +DI, -DI
@@ -237,16 +237,16 @@ class MinusDirectionalIndicator(_DirectionalIndicator):
       - Use AverageDirectionalIndexRating (ADXR) to get ADX, ADXR
       - Use DirectionalMovementIndex (DMI) to get ADX, +DI, -DI
       - Use DirectionalMovement (DM) to get ADX, ADXR, +DI, -DI
-
+    
     Formula:
       - upmove = high - high(-1)
       - downmove = low(-1) - low
       - -dm = downmove if downmove > upmove and downmove > 0 else 0
       - -di = 100 * MovingAverage(-dm, period) / atr(period)
-
+    
     The moving average used is the one originally defined by Wilder,
     the SmoothedMovingAverage
-
+    
     See:
       - https://en.wikipedia.org/wiki/Average_directional_movement_index
 
@@ -268,9 +268,9 @@ class MinusDirectionalIndicator(_DirectionalIndicator):
 class AverageDirectionalMovementIndex(_DirectionalIndicator):
     """Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"*.
-
+    
     Intended to measure trend strength
-
+    
     This indicator only shows ADX:
       - Use PlusDirectionalIndicator (PlusDI) to get +DI
       - Use MinusDirectionalIndicator (MinusDI) to get -DI
@@ -278,7 +278,7 @@ class AverageDirectionalMovementIndex(_DirectionalIndicator):
       - Use AverageDirectionalIndexRating (ADXR) to get ADX, ADXR
       - Use DirectionalMovementIndex (DMI) to get ADX, +DI, -DI
       - Use DirectionalMovement (DM) to get ADX, ADXR, +DI, -DI
-
+    
     Formula:
       - upmove = high - high(-1)
       - downmove = low(-1) - low
@@ -288,10 +288,10 @@ class AverageDirectionalMovementIndex(_DirectionalIndicator):
       - -di = 100 * MovingAverage(-dm, period) / atr(period)
       - dx = 100 * abs(+di - -di) / (+di + -di)
       - adx = MovingAverage(dx, period)
-
+    
     The moving average used is the one originally defined by Wilder,
     the SmoothedMovingAverage
-
+    
     See:
       - https://en.wikipedia.org/wiki/Average_directional_movement_index
 
@@ -322,11 +322,11 @@ class AverageDirectionalMovementIndex(_DirectionalIndicator):
 class AverageDirectionalMovementIndexRating(AverageDirectionalMovementIndex):
     """Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"*.
-
+    
     Intended to measure trend strength.
-
+    
     ADXR is the average of ADX with a value period bars ago
-
+    
     This indicator shows the ADX and ADXR:
       - Use PlusDirectionalIndicator (PlusDI) to get +DI
       - Use MinusDirectionalIndicator (MinusDI) to get -DI
@@ -334,7 +334,7 @@ class AverageDirectionalMovementIndexRating(AverageDirectionalMovementIndex):
       - Use AverageDirectionalIndex (ADX) to get ADX
       - Use DirectionalMovementIndex (DMI) to get ADX, +DI, -DI
       - Use DirectionalMovement (DM) to get ADX, ADXR, +DI, -DI
-
+    
     Formula:
       - upmove = high - high(-1)
       - downmove = low(-1) - low
@@ -345,10 +345,10 @@ class AverageDirectionalMovementIndexRating(AverageDirectionalMovementIndex):
       - dx = 100 * abs(+di - -di) / (+di + -di)
       - adx = MovingAverage(dx, period)
       - adxr = (adx + adx(-period)) / 2
-
+    
     The moving average used is the one originally defined by Wilder,
     the SmoothedMovingAverage
-
+    
     See:
       - https://en.wikipedia.org/wiki/Average_directional_movement_index
 
@@ -370,9 +370,9 @@ class AverageDirectionalMovementIndexRating(AverageDirectionalMovementIndex):
 class DirectionalMovementIndex(AverageDirectionalMovementIndex, DirectionalIndicator):
     """Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"*.
-
+    
     Intended to measure trend strength
-
+    
     This indicator shows the ADX, +DI, -DI:
       - Use PlusDirectionalIndicator (PlusDI) to get +DI
       - Use MinusDirectionalIndicator (MinusDI) to get -DI
@@ -380,7 +380,7 @@ class DirectionalMovementIndex(AverageDirectionalMovementIndex, DirectionalIndic
       - Use AverageDirectionalIndex (ADX) to get ADX
       - Use AverageDirectionalIndexRating (ADXRating) to get ADX, ADXR
       - Use DirectionalMovement (DM) to get ADX, ADXR, +DI, -DI
-
+    
     Formula:
       - upmove = high - high(-1)
       - downmove = low(-1) - low
@@ -390,10 +390,10 @@ class DirectionalMovementIndex(AverageDirectionalMovementIndex, DirectionalIndic
       - -di = 100 * MovingAverage(-dm, period) / atr(period)
       - dx = 100 * abs(+di - -di) / (+di + -di)
       - adx = MovingAverage(dx, period)
-
+    
     The moving average used is the one originally defined by Wilder,
     the SmoothedMovingAverage
-
+    
     See:
       - https://en.wikipedia.org/wiki/Average_directional_movement_index
 
@@ -406,18 +406,18 @@ class DirectionalMovementIndex(AverageDirectionalMovementIndex, DirectionalIndic
 class DirectionalMovement(AverageDirectionalMovementIndexRating, DirectionalIndicator):
     """Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"*.
-
+    
     Intended to measure trend strength
-
+    
     This indicator shows ADX, ADXR, +DI, -DI.
-
+    
       - Use PlusDirectionalIndicator (PlusDI) to get +DI
       - Use MinusDirectionalIndicator (MinusDI) to get -DI
       - Use Directional Indicator (DI) to get +DI, -DI
       - Use AverageDirectionalIndex (ADX) to get ADX
       - Use AverageDirectionalIndexRating (ADXR) to get ADX, ADXR
       - Use DirectionalMovementIndex (DMI) to get ADX, +DI, -DI
-
+    
     Formula:
       - upmove = high - high(-1)
       - downmove = low(-1) - low
@@ -427,10 +427,10 @@ class DirectionalMovement(AverageDirectionalMovementIndexRating, DirectionalIndi
       - -di = 100 * MovingAverage(-dm, period) / atr(period)
       - dx = 100 * abs(+di - -di) / (+di + -di)
       - adx = MovingAverage(dx, period)
-
+    
     The moving average used is the one originally defined by Wilder,
     the SmoothedMovingAverage
-
+    
     See:
       - https://en.wikipedia.org/wiki/Average_directional_movement_index
 
