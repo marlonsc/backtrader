@@ -18,40 +18,33 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-"""
-RISK AVERSE STRATEGY WITH POSTGRESQL DATABASE - (risk_adverse)
+"""RISK AVERSE STRATEGY WITH POSTGRESQL DATABASE - (risk_adverse)
 ===============================================================================
-
 This strategy is designed to buy stocks that exhibit specific characteristics of stability
 and controlled momentum. It identifies securities with:
 - Low volatility (stable price movement)
 - Recent new highs (positive momentum)
 - High trading volume (market interest)
 - Small difference between high and low prices (price consolidation)
-
 These combined factors aim to find stocks that are stable but still have upward
 momentum, reducing the risk associated with high volatility while still capturing
 growth opportunities.
-
 STRATEGY LOGIC:
 --------------
 - GO LONG when ALL of the following conditions are met:
-  1. Volatility is below a specified threshold
-  2. Price has recently made a new high
-  3. Volume is above a minimum threshold
-  4. The high-low price difference is below a specified threshold
-
+1. Volatility is below a specified threshold
+2. Price has recently made a new high
+3. Volume is above a minimum threshold
+4. The high-low price difference is below a specified threshold
 - EXIT LONG when TWO OR MORE of the above conditions are no longer valid
-  This ensures we exit positions when the stock no longer exhibits the
-  favorable risk-reward characteristics we seek.
-
+This ensures we exit positions when the stock no longer exhibits the
+favorable risk-reward characteristics we seek.
 MARKET CONDITIONS:
 ----------------
 - Best used in moderately bullish markets
 - Works well for stocks in consolidation phases that are preparing to move higher
 - Avoids highly volatile stocks that may experience sharp price drops
 - Most effective in sectors with steady growth rather than cyclical or highly speculative areas
-
 VOLATILITY ASSESSMENT:
 -------------------
 The strategy calculates average volatility over a specified period to assess price stability.
@@ -59,120 +52,98 @@ Low volatility suggests:
 - More predictable price action
 - Lower risk of sharp adverse price movements
 - Better potential risk-reward ratio
-
 NEW HIGH DETECTION:
 ----------------
 The strategy monitors when a security makes a new high within a lookback period:
 - Indicates positive momentum
 - Suggests underlying strength
 - Identifies potential breakout candidates
-
 VOLUME ANALYSIS:
 -------------
 High trading volume is required as it:
 - Indicates market interest in the security
 - Provides liquidity for entries and exits
 - Validates price movement as significant
-
 HIGH-LOW DIFFERENTIAL:
 -------------------
 Small differences between high and low prices indicate:
 - Controlled price movement (not erratic)
 - Potential consolidation before further movement
 - Reduced intraday volatility
-
 RISK MANAGEMENT:
 --------------
 The strategy employs a unique exit criterion that monitors multiple factors:
 - Exits when 2+ conditions are no longer favorable
 - Responsive to changing market conditions
 - Adapts to deteriorating security-specific metrics
-
 USAGE:
 ------
 python strategies/risk_adverse.py --data SYMBOL --fromdate YYYY-MM-DD --todate YYYY-MM-DD [options]
-
 REQUIRED ARGUMENTS:
 ------------------
 --data, -d            : Stock symbol to retrieve data for (e.g., AAPL, MSFT, TSLA)
 --fromdate, -f        : Start date for historical data in YYYY-MM-DD format (default: 2024-01-01)
 --todate, -t          : End date for historical data in YYYY-MM-DD format (default: 2024-12-31)
-
 DATABASE PARAMETERS:
 ------------------
 --dbuser, -u          : PostgreSQL username (default: jason)
 --dbpass, -pw         : PostgreSQL password (default: fsck)
 --dbname, -n          : PostgreSQL database name (default: market_data)
 --cash, -c            : Initial cash for the strategy (default: $100,000)
-
 VOLATILITY PARAMETERS:
 -------------------
 --volatility-period, -vp   : Period for volatility calculation (default: 20)
-                            This determines how many bars are used to calculate average volatility.
-                            Longer periods provide more stable measurements but may be less responsive
-                            to recent market changes.
-
+This determines how many bars are used to calculate average volatility.
+Longer periods provide more stable measurements but may be less responsive
+to recent market changes.
 --volatility-threshold, -vt : Maximum allowed volatility (default: 8.0)
-                            Lower values create stricter entry criteria requiring more stable stocks.
-                            Higher values are more permissive, allowing more volatile stocks.
-                            The value represents percentage volatility (e.g., 8.0 = 8% average volatility).
-
+Lower values create stricter entry criteria requiring more stable stocks.
+Higher values are more permissive, allowing more volatile stocks.
+The value represents percentage volatility (e.g., 8.0 = 8% average volatility).
 HIGH-LOW PARAMETERS:
 -----------------
 --high-low-period, -hlp    : Period for high-low difference calculation (default: 60)
-                            This determines how many bars are used to assess the high-low price range.
-                            Longer periods capture longer-term price behavior.
-
+This determines how many bars are used to assess the high-low price range.
+Longer periods capture longer-term price behavior.
 --high-low-threshold, -hlt : Maximum allowed high-low difference (default: 0.3)
-                            Expressed as a ratio of the difference to price.
-                            Lower values require more consolidated price action.
-                            Higher values allow wider price ranges.
-
+Expressed as a ratio of the difference to price.
+Lower values require more consolidated price action.
+Higher values allow wider price ranges.
 VOLUME PARAMETERS:
 ---------------
 --vol-period, -volp        : Period for volume moving average (default: 5)
-                            Determines how many bars are used to calculate average volume.
-                            Shorter periods make the strategy more responsive to recent volume changes.
-
+Determines how many bars are used to calculate average volume.
+Shorter periods make the strategy more responsive to recent volume changes.
 --vol-threshold, -volt     : Minimum required volume (default: 100000)
-                            Sets the minimum trading volume required for entry.
-                            Should be adjusted based on the typical volume of the target stock.
-                            Higher values ensure greater liquidity.
-
+Sets the minimum trading volume required for entry.
+Should be adjusted based on the typical volume of the target stock.
+Higher values ensure greater liquidity.
 EXIT PARAMETERS:
 ---------------
 --exit-count, -ec          : Number of failed conditions required for exit (default: 2)
-                            Higher values make exits more conservative (require more conditions to fail).
-                            Lower values make exits more aggressive (fewer conditions need to fail).
-
+Higher values make exits more conservative (require more conditions to fail).
+Lower values make exits more aggressive (fewer conditions need to fail).
 POSITION SIZING:
 ---------------
 --position-percent, -pp    : Percentage of equity to use per trade (default: 20.0)
-                            Controls how much of your account to risk on each position.
-                            Higher values increase potential returns but also increase risk.
-
+Controls how much of your account to risk on each position.
+Higher values increase potential returns but also increase risk.
 --max-position, -mp        : Maximum position size as percentage of equity (default: 95.0)
-                            Prevents over-leveraging by limiting the maximum position size.
-
+Prevents over-leveraging by limiting the maximum position size.
 OTHER:
 -----
 --plot, -pl               : Generate and show a plot of the trading activity
-                           Shows price data, indicators, and entry/exit points.
-
+Shows price data, indicators, and entry/exit points.
 EXAMPLE COMMANDS:
 ---------------
 Basic usage:
 python strategies/risk_adverse.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31
-
 Conservative settings:
 python strategies/risk_adverse.py --data MSFT --volatility-threshold 5.0 --high-low-threshold 0.2 --vol-threshold 150000
-
 More permissive settings:
 python strategies/risk_adverse.py --data TSLA --volatility-threshold 12.0 --high-low-threshold 0.5 --exit-count 3
-
 Adjusting lookback periods:
-python strategies/risk_adverse.py --data GOOGL --volatility-period 15 --high-low-period 40 --vol-period 3
-"""
+python strategies/risk_adverse.py --data GOOGL --volatility-period 15 --high-low-period 40 --vol-period 3"""
 
 from __future__ import (
     absolute_import,
@@ -218,112 +189,53 @@ class StockPriceData(bt.feeds.PandasData):
 
 class AverageVolatility(bt.Indicator):
     """Average Volatility Indicator
-
-    Calculates the average volatility over a specified period as percentage change
-    from close to close.
-
-    Lines:
-        - avg_volatility: Average volatility as a percentage
-
-
-    """
+Calculates the average volatility over a specified period as percentage change
+from close to close.
+Lines:
+- avg_volatility: Average volatility as a percentage"""
 
     lines = ("avg_volatility",)
     params = dict(period=20)
 
     def __init__(self):
-        """ """
-        # Calculate daily percentage change
-        self.pct_change = (
-            100.0 * (self.data.close(-1) - self.data.close(-2)) / self.data.close(-2)
-        )
-
-        # Calculate the absolute value of the percentage change
-        self.abs_change = abs(self.pct_change)
-
-        # Use simple moving average to get the average volatility
-        self.lines.avg_volatility = bt.indicators.SimpleMovingAverage(
-            self.abs_change, period=self.params.period
-        )
-
-
-class RecentHigh(bt.Indicator):
+""""""
     """Recent High Indicator
-
-    Detects if the current price is a new high within a specified lookback period.
-
-    Lines:
-        - new_high: 1 if current price is a new high, 0 otherwise
-
-
-    """
+Detects if the current price is a new high within a specified lookback period.
+Lines:
+- new_high: 1 if current price is a new high, 0 otherwise"""
 
     lines = ("new_high",)
     params = dict(lookback=20)
 
     def __init__(self):
-        """ """
-        # Compare current high with highest high in lookback period
-        self.highest = bt.indicators.Highest(
-            self.data.high, period=self.params.lookback
-        )
-
-        # Set new_high to 1 if current high is greater than or equal to highest
-        self.lines.new_high = self.data.high >= self.highest
-
-
-class DiffHighLow(bt.Indicator):
+""""""
     """Difference High Low Indicator
-
-    Calculates the ratio of the difference between the highest high and lowest low
-    to the average price over a specified period.
-
-    Lines:
-        - diff: The ratio of high-low difference to average price
-
-
-    """
+Calculates the ratio of the difference between the highest high and lowest low
+to the average price over a specified period.
+Lines:
+- diff: The ratio of high-low difference to average price"""
 
     lines = ("diff",)
     params = dict(period=60)
 
     def __init__(self):
-        """ """
-        # Find highest high and lowest low in period
-        self.highest = bt.indicators.Highest(self.data.high, period=self.params.period)
-        self.lowest = bt.indicators.Lowest(self.data.low, period=self.params.period)
-
-        # Calculate the average price for normalization
-        self.avg_price = (self.highest + self.lowest) / 2.0
-
-        # Calculate the normalized difference
-        self.lines.diff = (self.highest - self.lowest) / self.avg_price
-
-
-class RiskAverseStrategy(bt.Strategy, TradeThrottling):
+""""""
     """Risk Averse Strategy
-
-    This strategy seeks to buy stocks with low volatility, recent new highs, high volume,
-    and small differences between high and low prices. It exits positions when multiple
-    conditions deteriorate.
-
-    The goal is to find stable stocks with controlled upward momentum while minimizing
-    exposure to erratic price movements.
-
-    Strategy Logic:
-    - Buy when volatility is low, price is near highs, and volume is strong
-    - Exit when conditions deteriorate (high volatility, price weakness)
-    - Uses risk-based position sizing for proper money management
-    - Implements cool down period to avoid overtrading
-
-    Best Market Conditions:
-    - Stable bull markets with low volatility
-    - Sectors with steady growth rather than erratic momentum
-    - Quality stocks with consistent institutional buying
-    - Avoid using in highly volatile or bear markets
-
-
-    """
+This strategy seeks to buy stocks with low volatility, recent new highs, high volume,
+and small differences between high and low prices. It exits positions when multiple
+conditions deteriorate.
+The goal is to find stable stocks with controlled upward momentum while minimizing
+exposure to erratic price movements.
+Strategy Logic:
+- Buy when volatility is low, price is near highs, and volume is strong
+- Exit when conditions deteriorate (high volatility, price weakness)
+- Uses risk-based position sizing for proper money management
+- Implements cool down period to avoid overtrading
+Best Market Conditions:
+- Stable bull markets with low volatility
+- Sectors with steady growth rather than erratic momentum
+- Quality stocks with consistent institutional buying
+- Avoid using in highly volatile or bear markets"""
 
     params = (
         # Volatility parameters
@@ -356,13 +268,13 @@ class RiskAverseStrategy(bt.Strategy, TradeThrottling):
     )
 
     def log(self, txt, dt=None, level="info"):
-        """Logging function for the strategy
+"""Logging function for the strategy
 
-        :param txt:
-        :param dt:  (Default value = None)
-        :param level:  (Default value = "info")
-
-        """
+Args::
+    txt: 
+    dt: (Default value = None)
+    level: (Default value = "info")"""
+    level: (Default value = "info")"""
         if level == "debug" and self.params.log_level != "debug":
             return
 
@@ -370,64 +282,12 @@ class RiskAverseStrategy(bt.Strategy, TradeThrottling):
         print(f"{dt.isoformat()}: {txt}")
 
     def __init__(self):
-        """ """
-        super(RiskAverseStrategy, self).__init__()
+""""""
+"""Calculate how many shares to buy based on position sizing rules
 
-        # Used to keep track of pending orders
-        self.order = None
-
-        # Initialize price indicators
-        self.dataclose = self.datas[0].close
-        self.datahigh = self.datas[0].high
-        self.datalow = self.datas[0].low
-        self.datavolume = self.datas[0].volume
-
-        # Initialize indicators
-        self.volatility = AverageVolatility(
-            self.data, period=self.params.volatility_period
-        )
-        self.new_high = RecentHigh(self.data, lookback=self.params.high_low_period)
-        self.high_low_diff = DiffHighLow(self.data, period=self.params.high_low_period)
-        self.volume_ma = bt.indicators.SimpleMovingAverage(
-            self.datavolume, period=self.params.vol_period
-        )
-
-        # Initialize trade management variables
-        self.stop_price = None
-        self.trail_price = None
-        self.highest_price = None
-
-        # Initialize trade tracking variables
-        self.trade_count = 0
-        self.winning_trades = 0
-        self.losing_trades = 0
-
-        # Initialize last trade date for trade throttling
-        self.last_trade_date = None
-
-        # Log the strategy initialization
-        self.log(
-            "Strategy initialized with volatility threshold:"
-            f" {self.params.volatility_threshold}%"
-        )
-        self.log(
-            f"Using stop loss: {self.params.use_stop_loss}, Stop loss percentage:"
-            f" {self.params.stop_pct}%"
-        )
-        self.log(
-            f"Using trailing stop: {self.params.use_trailing_stop}, Trailing stop"
-            f" percentage: {self.params.trail_pct}%"
-        )
-        self.log(
-            f"Trade throttling: {self.params.trade_throttle_days} days between trades"
-        )
-
-    def calculate_position_size(self, price):
-        """Calculate how many shares to buy based on position sizing rules
-
-        :param price:
-
-        """
+Args::
+    price:"""
+    price:"""
         available_cash = self.broker.get_cash()
         value = self.broker.getvalue()
         current_price = price
@@ -474,146 +334,7 @@ class RiskAverseStrategy(bt.Strategy, TradeThrottling):
         return size
 
     def next(self):
-        """ """
-        # If an order is pending, we cannot send a new one
-        if self.order:
-            return
-
-        # Check if we are in the market
-        if not self.position:
-            # BUY LOGIC
-
-            # Check if we're allowed to trade based on the throttling rules
-            if not self.can_trade_now():
-                return
-
-            # Check all entry conditions
-
-            # Condition 1: Low volatility
-            cond_1 = (
-                self.volatility.avg_volatility[0] < self.params.volatility_threshold
-            )
-
-            # Condition 2: Recent new high
-            cond_2 = self.new_high.new_high[0] > 0
-
-            # Condition 3: High volume
-            cond_3 = self.datavolume[0] > self.params.vol_threshold
-
-            # Condition 4: Small high-low difference
-            cond_4 = self.high_low_diff.diff[0] < self.params.high_low_threshold
-
-            # Print debug information every 10 bars
-            if len(self) % 10 == 0:
-                self.log(
-                    f"DEBUG - Close: {self.dataclose[0]:.2f}, Volatility:"
-                    f" {self.volatility.avg_volatility[0]:.2f}%, "
-                    + f"New High: {'Yes' if cond_2 else 'No'}, "
-                    + f"Volume: {self.datavolume[0]:.0f}, High-Low Diff:"
-                    f" {self.high_low_diff.diff[0]:.3f}",
-                    level="debug",
-                )
-
-            # All conditions must be met for entry
-            if cond_1 and cond_2 and cond_3 and cond_4:
-                # Calculate position size
-                price = self.dataclose[0]
-                size = self.calculate_position_size(price)
-
-                if size <= 0:
-                    self.log(
-                        "Position size calculation resulted in zero or negative size",
-                        level="warning",
-                    )
-                    return
-
-                self.log(
-                    "BUY SIGNAL: Volatility:"
-                    f" {self.volatility.avg_volatility[0]:.2f}%, "
-                    + f"New High: Yes, Volume: {self.datavolume[0]:.0f}, High-Low Diff:"
-                    f" {self.high_low_diff.diff[0]:.3f}"
-                )
-                self.log(f"BUY CREATE: {self.dataclose[0]:.2f}, Size: {size}")
-
-                # Set stop loss if enabled
-                if self.params.use_stop_loss:
-                    self.stop_price = price * (1.0 - self.params.stop_pct / 100.0)
-                    self.log(f"Stop loss set at {self.stop_price:.2f}")
-
-                # Set trailing stop if enabled
-                if self.params.use_trailing_stop:
-                    self.highest_price = price
-                    self.trail_price = price * (1.0 - self.params.trail_pct / 100.0)
-                    self.log(f"Initial trailing stop set at {self.trail_price:.2f}")
-
-                # Create the buy order
-                self.order = self.buy(size=size)
-
-                # Update the last trade date for throttling
-                self.last_trade_date = self.datas[0].datetime.date(0)
-
-        else:
-            # SELL LOGIC - We are in the market, check for exit conditions
-
-            # Check for stop loss hit
-            if self.params.use_stop_loss and self.stop_price is not None:
-                if self.datalow[0] <= self.stop_price:
-                    self.log(f"SELL CREATE (Stop Loss): {self.dataclose[0]:.2f}")
-                    self.order = self.sell()
-                    return
-
-            # Update trailing stop if enabled
-            if self.params.use_trailing_stop and self.trail_price is not None:
-                # Update the highest price seen
-                if self.datahigh[0] > self.highest_price:
-                    self.highest_price = self.datahigh[0]
-                    # Calculate new trail price
-                    new_trail = self.highest_price * (
-                        1.0 - self.params.trail_pct / 100.0
-                    )
-                    # Only update if the new trail price is higher
-                    if new_trail > self.trail_price:
-                        self.trail_price = new_trail
-                        self.log(
-                            f"Trailing stop updated to {self.trail_price:.2f}",
-                            level="debug",
-                        )
-
-                # Check if trailing stop is hit
-                if self.datalow[0] <= self.trail_price:
-                    self.log(f"SELL CREATE (Trailing Stop): {self.datalow[0]:.2f}")
-                    self.order = self.sell()
-                    return
-
-            # Check for exit conditions based on strategy logic
-            # Count how many exit conditions are met
-            exit_count = 0
-
-            # Exit condition 1: Volatility is high
-            if self.volatility.avg_volatility[0] >= self.params.volatility_threshold:
-                exit_count += 1
-
-            # Exit condition 2: No new high recently
-            if self.new_high.new_high[0] == 0:
-                exit_count += 1
-
-            # Exit condition 3: Volume is low
-            if self.datavolume[0] <= self.params.vol_threshold:
-                exit_count += 1
-
-            # Exit condition 4: High-low difference is large
-            if self.high_low_diff.diff[0] >= self.params.high_low_threshold:
-                exit_count += 1
-
-            # Exit if enough conditions are met
-            if exit_count >= self.params.exit_count:
-                self.log(
-                    f"SELL CREATE (Strategy Exit): {exit_count} exit conditions met"
-                )
-                self.order = self.sell()
-                return
-
-    def stop(self):
+""""""
         """Called when backtest is finished"""
         self.log(f"Final Portfolio Value: {self.broker.getvalue():.2f}")
 
@@ -636,11 +357,11 @@ class RiskAverseStrategy(bt.Strategy, TradeThrottling):
         )
 
     def notify_order(self, order):
-        """Handle order notifications
+"""Handle order notifications
 
-        :param order:
-
-        """
+Args::
+    order:"""
+    order:"""
         if order.status in [order.Submitted, order.Accepted]:
             # Order pending, do nothing
             return
@@ -667,11 +388,11 @@ class RiskAverseStrategy(bt.Strategy, TradeThrottling):
         self.order = None
 
     def notify_trade(self, trade):
-        """Track completed trades
+"""Track completed trades
 
-        :param trade:
-
-        """
+Args::
+    trade:"""
+    trade:"""
         if not trade.isclosed:
             return
 

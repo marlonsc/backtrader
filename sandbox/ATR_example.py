@@ -1,28 +1,27 @@
-import pandas as pd
+"""ATR_example.py module.
+
+Description of the module functionality."""
+
 from pandas import Series
 
 
 def calculate_true_range(high: Series, low: Series, close: Series) -> pd.DataFrame:
-    """The calculate_true_range function calculates the True Range (TR) for a given
-    set of high, low, and close prices.
-    The True Range is a measure of market volatility and is used in the
-    calculation of the Average True Range (ATR).
-    The True Range is the maximum of the following three values:
-    1. The difference between the current high and low prices.
-    2. The absolute value of the difference between the current high and the
-    previous close.
-    3. The absolute value of the difference between the current low and the
-    previous close.
+"""The calculate_true_range function calculates the True Range (TR) for a given
+set of high, low, and close prices.
+The True Range is a measure of market volatility and is used in the
+calculation of the Average True Range (ATR).
+The True Range is the maximum of the following three values:
+1. The difference between the current high and low prices.
+2. The absolute value of the difference between the current high and the
+previous close.
+3. The absolute value of the difference between the current low and the
+previous close.
 
-    :param high:
-    :type high: Series
-    :param low:
-    :type low: Series
-    :param close:
-    :type close: Series
-    :rtype: pd.DataFrame
-
-    """
+Args::
+    high: 
+    low: 
+    close:"""
+    close:"""
     # Maximum difference between high and low prices
     tr1 = high - low
     # Absolute difference between high and the previous close
@@ -38,20 +37,15 @@ def calculate_true_range(high: Series, low: Series, close: Series) -> pd.DataFra
 def calculate_atr(
     high: Series, low: Series, close: Series, period: int = 5
 ) -> pd.DataFrame:
-    """Calculate the Average True Range (ATR) for a given set of high, low, and
-    close prices over a specified period.
+"""Calculate the Average True Range (ATR) for a given set of high, low, and
+close prices over a specified period.
 
-    :param high:
-    :type high: Series
-    :param low:
-    :type low: Series
-    :param close:
-    :type close: Series
-    :param period:  (Default value = 5)
-    :type period: int
-    :rtype: pd.DataFrame
-
-    """
+Args::
+    high: 
+    low: 
+    close: 
+    period: (Default value = 5)"""
+    period: (Default value = 5)"""
     true_range: pd.DataFrame = calculate_true_range(high, low, close)
     atr: pd.DataFrame = true_range.rolling(window=period).mean()
     return atr

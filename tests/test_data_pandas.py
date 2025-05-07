@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""test_data_pandas.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -52,23 +55,11 @@ TODATE = datetime.datetime(2006, 12, 31)
 
 
 class PandasDataOptix(btfeeds.PandasData):
-    """ """
-
-    lines = (
-        "optix_close",
-        "optix_pess",
-        "optix_opt",
-    )
-    params = (("optix_close", -1), ("optix_pess", -1), ("optix_opt", -1))
-
-
-def getdata(index, noheaders=True):
-    """
-
-    :param index:
-    :param noheaders: (Default value = True)
-
-    """
+""""""
+"""Args::
+    index: 
+    noheaders: (Default value = True)"""
+    noheaders: (Default value = True)"""
 
     datapath = os.path.join(modpath, dataspath, datafiles[index])
 
@@ -94,11 +85,9 @@ def getdata(index, noheaders=True):
 
 
 def test_run(main=False):
-    """
-
-    :param main: (Default value = False)
-
-    """
+"""Args::
+    main: (Default value = False)"""
+    main: (Default value = False)"""
     # Create list with bool possibilitys for:
     # PandasData and PandasOptix,
     # no headers,

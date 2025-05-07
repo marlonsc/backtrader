@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""smma.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -30,25 +33,16 @@ from . import ExponentialSmoothing, MovingAverageBase
 
 class SmoothedMovingAverage(MovingAverageBase):
     """Smoothing Moving Average used by Wilder in his 1978 book `New Concepts in
-    Technical Trading`
-
-    Defined in his book originally as:
-
-      - new_value = (old_value * (period - 1) + new_data) / period
-
-    Can be expressed as a SmoothingMovingAverage with the following factors:
-
-      - self.smfactor -> 1.0 / period
-      - self.smfactor1 -> `1.0 - self.smfactor`
-
-    Formula:
-      - movav = prev * (1.0 - smoothfactor) + newdata * smoothfactor
-
-    See also:
-      - http://en.wikipedia.org/wiki/Moving_average#Modified_moving_average
-
-
-    """
+Technical Trading`
+Defined in his book originally as:
+- new_value = (old_value * (period - 1) + new_data) / period
+Can be expressed as a SmoothingMovingAverage with the following factors:
+- self.smfactor -> 1.0 / period
+- self.smfactor1 -> `1.0 - self.smfactor`
+Formula:
+- movav = prev * (1.0 - smoothfactor) + newdata * smoothfactor
+See also:
+- http://en.wikipedia.org/wiki/Moving_average#Modified_moving_average"""
 
     alias = (
         "SMMA",
@@ -60,7 +54,7 @@ class SmoothedMovingAverage(MovingAverageBase):
     lines = ("smma",)
 
     def __init__(self):
-        """ """
+""""""
         # Before super to ensure mixins (right-hand side in subclassing)
         # can see the assignment operation and operate on the line
         self.lines[0] = ExponentialSmoothing(

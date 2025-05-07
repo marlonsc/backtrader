@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""sqn.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -34,69 +37,44 @@ from backtrader.utils import AutoOrderedDict
 
 class SQN(Analyzer):
     """SQN or SystemQualityNumber. Defined by Van K. Tharp to categorize trading
-    systems.
-
-      - 1.6 - 1.9 Below average
-      - 2.0 - 2.4 Average
-      - 2.5 - 2.9 Good
-      - 3.0 - 5.0 Excellent
-      - 5.1 - 6.9 Superb
-      - 7.0 -     Holy Grail?
-
-    The formula:
-
-      - SquareRoot(NumberTrades) * Average(TradesProfit) / StdDev(TradesProfit)
-
-    The sqn value should be deemed reliable when the number of trades >= 30
-
-    Methods:
-
-      - get_analysis
-
-        Returns a dictionary with keys "sqn" and "trades" (number of
-        considered trades)
-
-
-    """
+systems.
+- 1.6 - 1.9 Below average
+- 2.0 - 2.4 Average
+- 2.5 - 2.9 Good
+- 3.0 - 5.0 Excellent
+- 5.1 - 6.9 Superb
+- 7.0 -     Holy Grail?
+The formula:
+- SquareRoot(NumberTrades) * Average(TradesProfit) / StdDev(TradesProfit)
+The sqn value should be deemed reliable when the number of trades >= 30
+Methods:
+- get_analysis
+Returns a dictionary with keys "sqn" and "trades" (number of
+considered trades)"""
 
     alias = ("SystemQualityNumber",)
 
     def create_analysis(self):
-        """Replace default implementation to instantiate an AutoOrdereDict
-        rather than an OrderedDict
-
-
+"""Replace default implementation to instantiate an AutoOrdereDict
+        rather than an OrderedDict"""
         """
         self.rets = AutoOrderedDict()
 
     def start(self):
-        """ """
-        super(SQN, self).start()
-        self.pnl = list()
-        self.count = 0
+""""""
+"""Args::
+    trade:"""
+"""使用字典映射进行分级
+- 1.6 - 1.9 Below average
+- 2.0 - 2.4 Average
+- 2.5 - 2.9 Good
+- 3.0 - 5.0 Excellent
+- 5.1 - 6.9 Superb
+- 7.0 -     Holy Grail?
 
-    def notify_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
-        if trade.status == trade.Closed:
-            self.pnl.append(trade.pnlcomm)
-            self.count += 1
-
-    def grade_dict(self, score):
-        """使用字典映射进行分级
-        - 1.6 - 1.9 Below average
-        - 2.0 - 2.4 Average
-        - 2.5 - 2.9 Good
-        - 3.0 - 5.0 Excellent
-        - 5.1 - 6.9 Superb
-        - 7.0 -     Holy Grail?
-
-        :param score:
-
-        """
+Args::
+    score:"""
+    score:"""
         grade_mapping = {
             (float("-inf"), 1.5): "G0-Invalid",
             (1.6, 1.9): "G1-Below average",
@@ -112,7 +90,7 @@ class SQN(Analyzer):
                 return grade
 
     def stop(self):
-        """ """
+""""""
         if self.count > 1:
             pnl_av = average(self.pnl)
             pnl_stddev = standarddev(self.pnl)

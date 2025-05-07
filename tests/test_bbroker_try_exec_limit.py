@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""test_bbroker_try_exec_limit.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -35,21 +38,12 @@ import backtrader as bt
 
 
 class SlipTestStrategy(bt.SignalStrategy):
-    """ """
-
-    params = (
-        ("printdata", False),
-        ("printops", False),
-    )
-
-    def log(self, txt, dt=None, nodate=False):
-        """
-
-        :param txt:
-        :param dt:  (Default value = None)
-        :param nodate:  (Default value = False)
-
-        """
+""""""
+"""Args::
+    txt: 
+    dt: (Default value = None)
+    nodate: (Default value = False)"""
+    nodate: (Default value = False)"""
         if not nodate:
             dt = dt or self.data.datetime[0]
             dt = bt.num2date(dt)
@@ -58,101 +52,18 @@ class SlipTestStrategy(bt.SignalStrategy):
             print("---------- %s" % (txt))
 
     def notify_order(self, order):
-        """
+"""Args::
+    order:"""
+""""""
+""""""
+""""""
+""""""
+""""""
+"""Test a fix in bbroker. See backtrader2 pr#22
 
-        :param order:
-
-        """
-        if order.status in [bt.Order.Submitted, bt.Order.Accepted]:
-            return  # Await further notifications
-
-        if order.status == order.Completed:
-            if isinstance(order, bt.BuyOrder):
-                if self.p.printops:
-                    txt = "BUY, %.2f" % order.executed.price
-                    self.log(txt, order.executed.dt)
-                chkprice = "%.2f" % order.executed.price
-                self.buyexec.append(chkprice)
-            else:  # elif isinstance(order, SellOrder):
-                if self.p.printops:
-                    txt = "SELL, %.2f" % order.executed.price
-                    self.log(txt, order.executed.dt)
-
-                chkprice = "%.2f" % order.executed.price
-                self.sellexec.append(chkprice)
-
-        elif order.status in [order.Expired, order.Canceled, order.Margin]:
-            if self.p.printops:
-                self.log("%s ," % order.Status[order.status])
-
-        # Allow new orders
-        self.order = None
-
-    def __init__(self):
-        """ """
-        # Flag to allow new orders in the system or not
-        self.order = None
-        self.price = 1285.0
-        self.counter = 0
-
-    def start(self):
-        """ """
-
-        if self.p.printdata:
-            self.log("-------------------------", nodate=True)
-            self.log(
-                "Starting portfolio value: %.2f" % self.broker.getvalue(),
-                nodate=True,
-            )
-
-        self.tstart = time_clock()
-
-        self.buycreate = list()
-        self.sellcreate = list()
-        self.buyexec = list()
-        self.sellexec = list()
-
-    def stop(self):
-        """ """
-        tused = time_clock() - self.tstart
-        if self.p.printdata:
-            self.log("Time used: %s" % str(tused))
-            self.log("Final portfolio value: %.2f" % self.broker.getvalue())
-            self.log("Final cash value: %.2f" % self.broker.getcash())
-            self.log("-------------------------")
-        else:
-            pass
-
-    def print_signal(self):
-        """ """
-        if self.p.printdata:
-            self.log(
-                "Open, High, Low, Close, %.2f, %.2f, %.2f, %.2f"
-                % (
-                    self.data.open[0],
-                    self.data.high[0],
-                    self.data.low[0],
-                    self.data.close[0],
-                )
-            )
-
-    def next(self):
-        """ """
-        self.print_signal()
-
-        if self.counter == 0:
-            self.order = self.sell(exectype=bt.Order.Limit, price=self.price)
-            if self.p.printops:
-                self.log("SELL ISSUED @ %0.2f" % self.price)
-        self.counter += 1
-
-
-def test_run(main=False):
-    """Test a fix in bbroker. See backtrader2 pr#22
-
-    :param main:  (Default value = False)
-
-    """
+Args::
+    main: (Default value = False)"""
+    main: (Default value = False)"""
 
     cerebro = bt.Cerebro()
 

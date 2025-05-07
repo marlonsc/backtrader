@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""positions.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -29,13 +32,12 @@ import backtrader as bt
 
 
 class PositionsValue(bt.Analyzer):
-    """This analyzer reports the value of the positions of the current set of
-    datas
+"""This analyzer reports the value of the positions of the current set of
+datas
 
-
-    :returns: each return as keys
-
-    """
+Returns::
+    each return as keys"""
+    each return as keys"""
 
     params = (
         ("headers", False),
@@ -43,16 +45,8 @@ class PositionsValue(bt.Analyzer):
     )
 
     def start(self):
-        """ """
-        if self.p.headers:
-            headers = [d._name or "Data%d" % i for i, d in enumerate(self.datas)]
-            self.rets["Datetime"] = headers + ["cash"] * self.p.cash
-
-        tf = min(d._timeframe for d in self.datas)
-        self._usedate = tf >= bt.TimeFrame.Days
-
-    def next(self):
-        """ """
+""""""
+""""""
         pvals = [self.strategy.broker.get_value([d]) for d in self.datas]
         if self.p.cash:
             pvals.append(self.strategy.broker.get_cash())

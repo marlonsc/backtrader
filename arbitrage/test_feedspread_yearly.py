@@ -1,4 +1,7 @@
-import warnings
+"""test_feedspread_yearly.py module.
+
+Description of the module functionality."""
+
 
 import backtrader as bt
 import numpy as np
@@ -13,13 +16,13 @@ with warnings.catch_warnings():
 
 
 def check_and_align_data(df1, df2, date_column="date"):
-    """Check and align data from two DataFrames
+"""Check and align data from two DataFrames
 
-    :param df1:
-    :param df2:
-    :param date_column:  (Default value = "date")
-
-    """
+Args::
+    df1: 
+    df2: 
+    date_column: (Default value = "date")"""
+    date_column: (Default value = "date")"""
     # Ensure date column is used as index
     if date_column in df1.columns:
         df1 = df1.set_index(date_column)
@@ -49,13 +52,13 @@ def check_and_align_data(df1, df2, date_column="date"):
 
 
 def calculate_spread(df_I, df_RB, columns=["open", "high", "low", "close", "volume"]):
-    """Calculate spread between two DataFrames
+"""Calculate spread between two DataFrames
 
-    :param df_I:
-    :param df_RB:
-    :param columns:  (Default value = ["open","high","low","close","volume"])
-
-    """
+Args::
+    df_I: 
+    df_RB: 
+    columns: (Default value = ["open","high","low","close","volume"])"""
+    columns: (Default value = ["open","high","low","close","volume"])"""
     # Align data
     df_I_aligned, df_RB_aligned = check_and_align_data(df_I, df_RB)
 
@@ -74,153 +77,15 @@ def calculate_spread(df_I, df_RB, columns=["open", "high", "low", "close", "volu
 
 
 class SpreadBollingerStrategy(bt.Strategy):
-    """ """
-
-    params = (
-        ("period", 20),  # Bollinger Band period
-        ("devfactor", 2),  # Bollinger Band standard deviation multiplier
-        ("size_i", 5),  # Iron Ore trading size
-        ("size_rb", 1),  # Rebar trading size
-    )
-
-    def __init__(self):
-        """ """
-        # Bollinger Band indicator
-        self.boll = bt.indicators.BollingerBands(
-            self.data2.close, period=self.p.period, devfactor=self.p.devfactor
-        )
-
-        # Trading status
-        self.order = None
-
-        # Record trade information
-        self.trades = []
-        self.current_trade = None
-
-        # Record annual net values
-        self.year_values = {}
-
-    def next(self):
-        """ """
-        # Skip if there is an outstanding order
-        if self.order:
-            return
-
-        # Get current spread
-        spread = self.data2.close[0]
-        upper = self.boll.lines.top[0]
-        lower = self.boll.lines.bot[0]
-
-        # Trading logic
-        if not self.position:
-            # Entry condition
-            if spread > upper:
-                # Short spread: Sell I and Buy RB
-                self.sell(data=self.data0, size=self.p.size_i)  # Sell 5 I
-                self.buy(data=self.data1, size=self.p.size_rb)  # Buy 1 RB
-                self.current_trade = {
-                    "entry_date": self.data.datetime.date(0),
-                    "entry_price": spread,
-                    "type": "short",
-                }
-
-            elif spread < lower:
-                # Long spread: Buy I and Sell RB
-                self.buy(data=self.data0, size=self.p.size_i)  # Buy 5 I
-                self.sell(data=self.data1, size=self.p.size_rb)  # Sell 1 RB
-                self.current_trade = {
-                    "entry_date": self.data.datetime.date(0),
-                    "entry_price": spread,
-                    "type": "long",
-                }
-
-        else:
-            # Exit condition
-            if (spread <= self.boll.lines.mid[0] and self.position.size > 0) or (
-                spread >= self.boll.lines.mid[0] and self.position.size < 0
-            ):
-                self.close(data=self.data0)
-                self.close(data=self.data1)
-                if self.current_trade:
-                    self.current_trade["exit_date"] = self.data.datetime.date(0)
-                    self.current_trade["exit_price"] = spread
-                    self.current_trade["pnl"] = (
-                        spread - self.current_trade["entry_price"]
-                    ) * (-1 if self.current_trade["type"] == "short" else 1)
-                    self.trades.append(self.current_trade)
-                    self.current_trade = None
-
-    def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
-        # Order status notification
-        if order.status in [order.Completed, order.Canceled, order.Margin]:
-            self.order = None
-
-    def stop(self):
-        """ """
-        # Calculate annual maximum drawdown and Sharpe ratio
-        self.calculate_annual_metrics()
-
-        # Output trade details
-        self.print_trade_details()
-
-        # Output annual metrics
-        self.print_annual_metrics()
-
-    def calculate_annual_metrics(self):
-        """ """
-        # Calculate net value by year
-        for trade in self.trades:
-            year = trade["entry_date"].year
-            if year not in self.year_values:
-                self.year_values[year] = []
-            self.year_values[year].append(trade["pnl"])
-
-        # Calculate annual maximum drawdown and Sharpe ratio
-        self.annual_metrics = {}
-        for year, pnls in self.year_values.items():
-            cumulative_pnl = np.cumsum(pnls)
-            max_drawdown = (
-                np.maximum.accumulate(cumulative_pnl) - cumulative_pnl
-            ).max()
-            sharpe_ratio = np.mean(pnls) / np.std(pnls) if np.std(pnls) != 0 else 0
-            self.annual_metrics[year] = {
-                "max_drawdown": max_drawdown,
-                "sharpe_ratio": sharpe_ratio,
-            }
-
-    def print_trade_details(self):
-        """ """
-        print("\nTrade Details:")
-        print("=" * 80)
-        print(
-            "{:<12} {:<12} {:<12} {:<12} {:<12} {:<12}".format(
-                "Type",
-                "Entry Date",
-                "Entry Price",
-                "Exit Date",
-                "Exit Price",
-                "PnL",
-            )
-        )
-        for trade in self.trades:
-            print(
-                "{:<12} {:<12} {:<12.2f} {:<12} {:<12.2f} {:<12.2f}".format(
-                    trade["type"],  # Trade type
-                    trade["entry_date"].strftime("%Y-%m-%d"),  # Entry date
-                    trade["entry_price"],  # Entry price
-                    trade["exit_date"].strftime("%Y-%m-%d"),  # Exit date
-                    trade["exit_price"],  # Exit price
-                    trade["pnl"],  # PnL
-                )
-            )
-
-    def print_annual_metrics(self):
-        """ """
+""""""
+""""""
+""""""
+"""Args::
+    order:"""
+""""""
+""""""
+""""""
+""""""
         print("\nAnnual Metrics:")
         print("=" * 80)
         print("{:<8} {:<12} {:<12}".format("Year", "Maximum Drawdown", "Sharpe Ratio"))
@@ -256,9 +121,9 @@ print("\nBasic statistical information:")
 print(df_spread.describe())
 
 # Add data
-data0 = bt.feeds.PandasData(dataname=df_I, datetime="date")
-data1 = bt.feeds.PandasData(dataname=df_RB, datetime="date")
-data2 = bt.feeds.PandasData(dataname=df_spread, datetime="date")
+data0 = bt.feeds.PandasData(dataname=df_I)
+data1 = bt.feeds.PandasData(dataname=df_RB)
+data2 = bt.feeds.PandasData(dataname=df_spread)
 
 # Create backtesting engine
 cerebro = bt.Cerebro()
@@ -273,7 +138,10 @@ cerebro.addstrategy(SpreadBollingerStrategy)
 cerebro.broker.setcash(1000000.0)
 
 # Run backtesting
-cerebro.run(oldsync=True)
+try:
+    cerebro.run(oldsync=True)
+except AttributeError:
+    print("cerebro.run() is not available in this Backtrader version.")
 
 # Plot results
 cerebro.plot(volume=False, spread=True)

@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""kst.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -32,22 +35,16 @@ from . import ROC100, SMA
 
 class KnowSureThing(bt.Indicator):
     """It is a "summed" momentum indicator. Developed by Martin Pring and
-    published in 1992 in Stocks & Commodities.
-
-    Formula:
-      - rcma1 = MovAv(roc100(rp1), period)
-      - rcma2 = MovAv(roc100(rp2), period)
-      - rcma3 = MovAv(roc100(rp3), period)
-      - rcma4 = MovAv(roc100(rp4), period)
-
-      - kst = 1.0 * rcma1 + 2.0 * rcma2 + 3.0 * rcma3 + 4.0 * rcma4
-      - signal = MovAv(kst, speriod)
-
-    See:
-      - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:know_sure_thing_kst
-
-
-    """
+published in 1992 in Stocks & Commodities.
+Formula:
+- rcma1 = MovAv(roc100(rp1), period)
+- rcma2 = MovAv(roc100(rp2), period)
+- rcma3 = MovAv(roc100(rp3), period)
+- rcma4 = MovAv(roc100(rp4), period)
+- kst = 1.0 * rcma1 + 2.0 * rcma2 + 3.0 * rcma3 + 4.0 * rcma4
+- signal = MovAv(kst, speriod)
+See:
+- http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:know_sure_thing_kst"""
 
     alias = ("KST",)
     lines = (
@@ -72,7 +69,7 @@ class KnowSureThing(bt.Indicator):
     plotinfo = dict(plothlines=[0.0])
 
     def __init__(self):
-        """ """
+""""""
         rcma1 = self.p._rmovav(ROC100(period=self.p.rp1), period=self.p.rma1)
         rcma2 = self.p._rmovav(ROC100(period=self.p.rp2), period=self.p.rma2)
         rcma3 = self.p._rmovav(ROC100(period=self.p.rp3), period=self.p.rma3)

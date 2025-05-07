@@ -1,74 +1,23 @@
-# coding:utf-8
+"""xtutil.py module.
+
+Description of the module functionality."""
+
 
 from . import xtbson as _BSON_
 
 
 def read_from_bson_buffer(buffer):
-    """
-
-    :param buffer:
-
-    """
-    import ctypes as ct
-
-    result = []
-
-    pos = 0
-    while 1:
-        if pos + 4 < len(buffer):
-            dlen_buf = buffer[pos: pos + 4]
-        else:
-            break
-
-        dlen = ct.cast(dlen_buf, ct.POINTER(ct.c_int32))[0]
-        if dlen >= 5:
-            try:
-                data_buf = buffer[pos: pos + dlen]
-                pos += dlen
-
-                result.append(_BSON_.decode(data_buf))
-            except Exception:
-                pass
-        else:
-            break
-
-    return result
-
-
-def write_to_bson_buffer(data_list):
-    """
-
-    :param data_list:
-
-    """
-    buffer = b""
-
-    for data in data_list:
-        buffer += _BSON_.encode(data)
-
-    return buffer
-
-
-def read_from_feather_file(file):
-    """
-
-    :param file:
-
-    """
-    import feather as fe
-
-    meta = {}
-    return meta, fe.read_dataframe(file)
-
-
-def write_to_feather_file(data, file, meta=None):
-    """
-
-    :param data:
-    :param file:
-    :param meta:  (Default value = None)
-
-    """
+"""Args::
+    buffer:"""
+"""Args::
+    data_list:"""
+"""Args::
+    file:"""
+"""Args::
+    data: 
+    file: 
+    meta: (Default value = None)"""
+    meta: (Default value = None)"""
 
     if not meta:
         meta = {}

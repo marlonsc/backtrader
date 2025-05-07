@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""tradeanalyzer.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -31,185 +34,34 @@ from backtrader.utils.py3 import MAXINT
 
 
 class TradeAnalyzer(Analyzer):
-    """Provides statistics on closed trades (keeps also the count of open ones)
+"""Provides statistics on closed trades (keeps also the count of open ones)
+- Total Open/Closed Trades
+- Streak Won/Lost Current/Longest
+- ProfitAndLoss Total/Average
+- Won/Lost Count/ Total PNL/ Average PNL / Max PNL
+- Long/Short Count/ Total PNL / Average PNL / Max PNL
+- Won/Lost Count/ Total PNL/ Average PNL / Max PNL
+- Length (bars in the market)
+- Total/Average/Max/Min
+- Won/Lost Total/Average/Max/Min
+- Long/Short Total/Average/Max/Min
+- Won/Lost Total/Average/Max/Min
 
-      - Total Open/Closed Trades
+Note::
+The analyzer uses an "auto"dict for the fields, which means that if no
+trades are executed, no statistics will be generated.
+In that case there will be a single field/subfield in the dictionary
 
-      - Streak Won/Lost Current/Longest
-
-      - ProfitAndLoss Total/Average
-
-      - Won/Lost Count/ Total PNL/ Average PNL / Max PNL
-
-      - Long/Short Count/ Total PNL / Average PNL / Max PNL
-
-          - Won/Lost Count/ Total PNL/ Average PNL / Max PNL
-
-      - Length (bars in the market)
-
-        - Total/Average/Max/Min
-
-        - Won/Lost Total/Average/Max/Min
-
-        - Long/Short Total/Average/Max/Min
-
-          - Won/Lost Total/Average/Max/Min
-
-    Note:
-
-      The analyzer uses an "auto"dict for the fields, which means that if no
-      trades are executed, no statistics will be generated.
-
-      In that case there will be a single field/subfield in the dictionary
-
-
-    :returns: - dictname['total']['total'] which will have a value of 0 (the field is
-          also reachable with dot notation dictname.total.total
-
-    """
+Returns::
+    - dictname['total']['total'] which will have a value of 0 (the field is"""
+    - dictname['total']['total'] which will have a value of 0 (the field is"""
 
     def create_analysis(self):
-        """ """
-        self.rets = AutoOrderedDict(
-            {
-                "total": AutoOrderedDict({"total": 0, "open": 0, "closed": 0}),
-                "streak": AutoOrderedDict(
-                    {
-                        "won": AutoOrderedDict({"current": 0, "longest": 0}),
-                        "lost": AutoOrderedDict({"current": 0, "longest": 0}),
-                    }
-                ),
-                "pnl": AutoOrderedDict(
-                    {
-                        "gross": AutoOrderedDict({"total": 0, "average": 0}),
-                        "net": AutoOrderedDict({"total": 0, "average": 0}),
-                    }
-                ),
-                "won": AutoOrderedDict(
-                    {
-                        "total": 0,
-                        "pnl": AutoOrderedDict({"total": 0, "average": 0, "max": 0}),
-                    }
-                ),
-                "lost": AutoOrderedDict(
-                    {
-                        "total": 0,
-                        "pnl": AutoOrderedDict({"total": 0, "average": 0, "max": 0}),
-                    }
-                ),
-                "long": AutoOrderedDict(
-                    {
-                        "total": 0,
-                        "pnl": AutoOrderedDict(
-                            {
-                                "total": 0,
-                                "average": 0,
-                                "won": AutoOrderedDict(
-                                    {"total": 0, "average": 0, "max": 0}
-                                ),
-                                "lost": AutoOrderedDict(
-                                    {"total": 0, "average": 0, "max": 0}
-                                ),
-                            }
-                        ),
-                        "won": 0,
-                        "lost": 0,
-                    }
-                ),
-                "short": AutoOrderedDict(
-                    {
-                        "total": 0,
-                        "pnl": AutoOrderedDict(
-                            {
-                                "total": 0,
-                                "average": 0,
-                                "won": AutoOrderedDict(
-                                    {"total": 0, "average": 0, "max": 0}
-                                ),
-                                "lost": AutoOrderedDict(
-                                    {"total": 0, "average": 0, "max": 0}
-                                ),
-                            }
-                        ),
-                        "won": 0,
-                        "lost": 0,
-                    }
-                ),
-                "len": AutoOrderedDict(
-                    {
-                        "total": 0,
-                        "average": 0,
-                        "max": 0,
-                        "min": 0,
-                        "won": AutoOrderedDict({"total": 0, "average": 0, "max": 0}),
-                        "lost": AutoOrderedDict(
-                            {"total": 0, "average": 0, "max": 0, "min": 0}
-                        ),
-                        "long": AutoOrderedDict(
-                            {
-                                "total": 0,
-                                "average": 0,
-                                "max": 0,
-                                "min": 0,
-                                "won": AutoOrderedDict(
-                                    {
-                                        "total": 0,
-                                        "average": 0,
-                                        "max": 0,
-                                        "min": 0,
-                                    }
-                                ),
-                                "lost": AutoOrderedDict(
-                                    {
-                                        "total": 0,
-                                        "average": 0,
-                                        "max": 0,
-                                        "min": 0,
-                                    }
-                                ),
-                            }
-                        ),
-                        "short": AutoOrderedDict(
-                            {
-                                "total": 0,
-                                "average": 0.0,
-                                "max": 0,
-                                "min": 0,
-                                "won": AutoOrderedDict(
-                                    {
-                                        "total": 0,
-                                        "average": 0.0,
-                                        "max": 0,
-                                        "min": 0,
-                                    }
-                                ),
-                                "lost": AutoOrderedDict(
-                                    {
-                                        "total": 0,
-                                        "average": 0.0,
-                                        "max": 0,
-                                        "min": 0,
-                                    }
-                                ),
-                            }
-                        ),
-                    }
-                ),
-            }
-        )
-        self.rets.total.total = 0
-
-    def stop(self):
-        """ """
-        super(TradeAnalyzer, self).stop()
-        self.rets._close()
-
-    def notify_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
+""""""
+""""""
+"""Args::
+    trade:"""
+    trade:"""
         if trade.justopened:
             # Trade just opened
             self.rets.total.total += 1

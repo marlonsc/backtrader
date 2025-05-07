@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""relative-volume.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -35,51 +38,8 @@ from relvolbybar import RelativeVolumeByBar
 
 
 def runstrategy():
-    """ """
-    args = parse_args()
-
-    # Create a cerebro
-    cerebro = bt.Cerebro()
-
-    # Get the dates from the args
-    fromdate = datetime.datetime.strptime(args.fromdate, "%Y-%m-%d")
-    todate = datetime.datetime.strptime(args.todate, "%Y-%m-%d")
-
-    # Create the 1st data
-    data = btfeeds.BacktraderCSVData(
-        dataname=args.data,
-        fromdate=fromdate,
-        todate=todate,
-    )
-
-    # Add the 1st data to cerebro
-    cerebro.adddata(data)
-
-    # Add an empty strategy
-    cerebro.addstrategy(bt.Strategy)
-
-    # Get the session times to pass them to the indicator
-    prestart = datetime.datetime.strptime(args.prestart, "%H:%M").time()
-    start = datetime.datetime.strptime(args.start, "%H:%M").time()
-    end = datetime.datetime.strptime(args.end, "%H:%M").time()
-
-    # Add the Relative volume indicator
-    cerebro.addindicator(RelativeVolumeByBar, prestart=prestart, start=start, end=end)
-
-    # Add a writer with CSV
-    if args.writer:
-        cerebro.addwriter(bt.WriterFile, csv=args.wrcsv)
-
-    # And run it
-    cerebro.run(stdstats=False)
-
-    # Plot if requested
-    if args.plot:
-        cerebro.plot(numfigs=args.numfigs, volume=True)
-
-
-def parse_args():
-    """ """
+""""""
+""""""
     parser = argparse.ArgumentParser(description="MultiData Strategy")
 
     parser.add_argument(

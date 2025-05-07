@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""test_ind_smaenvelope.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -40,11 +43,9 @@ chkind = btind.SMAEnvelope
 
 
 def test_run(main=False):
-    """
-
-    :param main: (Default value = False)
-
-    """
+"""Args::
+    main: (Default value = False)"""
+    main: (Default value = False)"""
     datas = [testcommon.getdata(i) for i in range(chkdatas)]
     testcommon.runtest(
         datas,

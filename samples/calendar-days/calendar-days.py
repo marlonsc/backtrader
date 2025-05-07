@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""calendar-days.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -35,52 +38,8 @@ import backtrader.indicators as btind
 
 
 def runstrat():
-    """ """
-    args = parse_args()
-
-    # Create a cerebro entity
-    cerebro = bt.Cerebro(stdstats=False)
-
-    # Add a strategy
-    cerebro.addstrategy(bt.Strategy)
-
-    # Get the dates from the args
-    fromdate = datetime.datetime.strptime(args.fromdate, "%Y-%m-%d")
-    todate = datetime.datetime.strptime(args.todate, "%Y-%m-%d")
-
-    data = btfeeds.BacktraderCSVData(
-        dataname=args.data, fromdate=fromdate, todate=todate
-    )
-
-    if args.calendar:
-        if args.fprice is not None:
-            args.fprice = float(args.fprice)
-
-        data.addfilter(
-            btfilters.CalendarDays, fill_price=args.fprice, fill_vol=args.fvol
-        )
-
-    # Add the resample data instead of the original
-    cerebro.adddata(data)
-
-    # Add a simple moving average if requirested
-    if args.sma:
-        cerebro.addindicator(btind.SMA, period=args.period)
-
-    # Add a writer with CSV
-    if args.writer:
-        cerebro.addwriter(bt.WriterFile, csv=args.wrcsv)
-
-    # Run over everything
-    cerebro.run()
-
-    # Plot if requested
-    if args.plot:
-        cerebro.plot(style="bar", numfigs=args.numfigs, volume=False)
-
-
-def parse_args():
-    """ """
+""""""
+""""""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Calendar Days Filter Sample",

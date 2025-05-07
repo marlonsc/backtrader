@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""williams.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -40,20 +43,14 @@ from . import (
 
 class WilliamsR(Indicator):
     """Developed by Larry Williams to show the relation of closing prices to
-    the highest-lowest range of a given period.
-
-    Known as Williams %R (but % is not allowed in Python identifiers)
-
-    Formula:
-      - num = highest_period - close
-      - den = highestg_period - lowest_period
-      - percR = (num / den) * -100.0
-
-    See:
-      - http://en.wikipedia.org/wiki/Williams_%25R
-
-
-    """
+the highest-lowest range of a given period.
+Known as Williams %R (but % is not allowed in Python identifiers)
+Formula:
+- num = highest_period - close
+- den = highestg_period - lowest_period
+- percR = (num / den) * -100.0
+See:
+- http://en.wikipedia.org/wiki/Williams_%25R"""
 
     lines = ("percR",)
     params = (
@@ -66,40 +63,22 @@ class WilliamsR(Indicator):
     plotlines = dict(percR=dict(_name="R%"))
 
     def _plotinif(self):
-        """ """
-        self.plotinfo.plotyhlines = [self.p.upperband, self.p.lowerband]
-
-    def __init__(self):
-        """ """
-        h = Highest(self.data.high, period=self.p.period)
-        l = Lowest(self.data.low, period=self.p.period)
-        c = self.data.close
-
-        self.lines.percR = -100.0 * (h - c) / (h - l)
-
-        super(WilliamsR, self).__init__()
-
-
-class WilliamsAD(Indicator):
+""""""
+""""""
     """By Larry Williams. It does cumulatively measure if the price is
-    accumulating (upwards) or distributing (downwards) by using the concept of
-    UpDays and DownDays.
-
-    Prices can go upwards but do so in a fashion that no longer shows
-    accumulation because updays and downdays are canceling out each other,
-    creating a divergence.
-
-    See:
-    - http://www.metastock.com/Customer/Resources/TAAZ/?p=125
-    - http://ta.mql4.com/indicators/trends/williams_accumulation_distribution
-
-
-    """
+accumulating (upwards) or distributing (downwards) by using the concept of
+UpDays and DownDays.
+Prices can go upwards but do so in a fashion that no longer shows
+accumulation because updays and downdays are canceling out each other,
+creating a divergence.
+See:
+- http://www.metastock.com/Customer/Resources/TAAZ/?p=125
+- http://ta.mql4.com/indicators/trends/williams_accumulation_distribution"""
 
     lines = ("ad",)
 
     def __init__(self):
-        """ """
+""""""
         upday = UpDay(self.data.close)
         downday = DownDay(self.data.close)
 

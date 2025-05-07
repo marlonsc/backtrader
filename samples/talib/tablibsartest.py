@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""tablibsartest.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -32,53 +35,13 @@ import backtrader as bt
 
 
 class TALibStrategy(bt.Strategy):
-    """ """
-
-    def __init__(self):
-        """ """
-        bt.talib.SAR(self.data.high, self.data.low)
-        bt.ind.PSAR()
-
-
-def runstrat(args=None):
-    """
-
-    :param args: (Default value = None)
-
-    """
-    args = parse_args(args)
-
-    cerebro = bt.Cerebro()
-
-    dkwargs = dict()
-    if args.fromdate:
-        fromdate = datetime.datetime.strptime(args.fromdate, "%Y-%m-%d")
-        dkwargs["fromdate"] = fromdate
-
-    if args.todate:
-        todate = datetime.datetime.strptime(args.todate, "%Y-%m-%d")
-        dkwargs["todate"] = todate
-
-    data0 = bt.feeds.YahooFinanceCSVData(dataname=args.data0, **dkwargs)
-    cerebro.adddata(data0)
-
-    cerebro.addstrategy(TALibStrategy)
-    cerebro.run(runonce=not args.use_next, stdstats=False)
-    if args.plot:
-        pkwargs = dict(style="candle")
-        if args.plot is not True:  # evals to True but is not True
-            npkwargs = eval("dict(" + args.plot + ")")  # args were passed
-            pkwargs.update(npkwargs)
-
-        cerebro.plot(**pkwargs)
-
-
-def parse_args(pargs=None):
-    """
-
-    :param pargs: (Default value = None)
-
-    """
+""""""
+""""""
+"""Args::
+    args: (Default value = None)"""
+"""Args::
+    pargs: (Default value = None)"""
+    pargs: (Default value = None)"""
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

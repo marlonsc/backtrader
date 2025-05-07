@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""memory-savings.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -34,96 +37,19 @@ import backtrader.utils.flushfile
 
 
 class TestInd(bt.Indicator):
-    """ """
-
-    lines = ("a", "b")
-
-    def __init__(self):
-        """ """
-        self.lines.a = b = self.data.close - self.data.high
-        self.lines.b = btind.SMA(b, period=20)
-
-
-class St(bt.Strategy):
-    """ """
-
-    params = (
-        ("datalines", False),
-        ("lendetails", False),
-    )
-
-    def __init__(self):
-        """ """
-        btind.SMA()
-        btind.Stochastic()
-        btind.RSI()
-        btind.MACD()
-        btind.CCI()
-        TestInd().plotinfo.plot = False
-
-    def next(self):
-        """ """
-        if self.p.datalines:
-            txt = ",".join(
-                [
-                    "%04d" % len(self),
-                    "%04d" % len(self.data0),
-                    self.data.datetime.date(0).isoformat(),
-                ]
-            )
-
-            print(txt)
-
-    def loglendetails(self, msg):
-        """
-
-        :param msg:
-
-        """
-        if self.p.lendetails:
-            print(msg)
-
-    def stop(self):
-        """ """
-        super(St, self).stop()
-
-        tlen = 0
-        self.loglendetails("-- Evaluating Datas")
-        for i, data in enumerate(self.datas):
-            tdata = 0
-            for line in data.lines:
-                tdata += len(line.array)
-                tline = len(line.array)
-
-            tlen += tdata
-            logtxt = "---- Data {} Total Cells {} - Cells per Line {}"
-            self.loglendetails(logtxt.format(i, tdata, tline))
-
-        self.loglendetails("-- Evaluating Indicators")
-        for i, ind in enumerate(self.getindicators()):
-            tlen += self.rindicator(ind, i, 0)
-
-        self.loglendetails("-- Evaluating Observers")
-        for i, obs in enumerate(self.getobservers()):
-            tobs = 0
-            for line in obs.lines:
-                tobs += len(line.array)
-                tline = len(line.array)
-
-            tlen += tdata
-            logtxt = "---- Observer {} Total Cells {} - Cells per Line {}"
-            self.loglendetails(logtxt.format(i, tobs, tline))
-
-        print("Total memory cells used: {}".format(tlen))
-
-    def rindicator(self, ind, i, deep):
-        """
-
-        :param ind:
-        :param i:
-        :param deep:
-
-        """
+""""""
+""""""
+""""""
+""""""
+""""""
+"""Args::
+    msg:"""
+""""""
+"""Args::
+    ind: 
+    i: 
+    deep:"""
+    deep:"""
         tind = 0
         for line in ind.lines:
             tind += len(line.array)
@@ -144,21 +70,8 @@ class St(bt.Strategy):
 
 
 def runstrat():
-    """ """
-    args = parse_args()
-
-    cerebro = bt.Cerebro()
-    data = btfeeds.YahooFinanceCSVData(dataname=args.data)
-    cerebro.adddata(data)
-    cerebro.addstrategy(St, datalines=args.datalines, lendetails=args.lendetails)
-
-    cerebro.run(runonce=False, exactbars=args.save)
-    if args.plot:
-        cerebro.plot(style="bar")
-
-
-def parse_args():
-    """ """
+""""""
+""""""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Check Memory Savings",

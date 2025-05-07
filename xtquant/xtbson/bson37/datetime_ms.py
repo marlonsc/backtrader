@@ -12,9 +12,7 @@
 # implied.  See the License for the specific language governing
 # permissions and limitations under the License.
 """Tools for representing the BSON datetime type.
-
-.. versionadded:: 4.3
-"""
+.. versionadded:: 4.3"""
 
 import calendar
 import datetime
@@ -38,28 +36,24 @@ class DatetimeMS:
     __slots__ = ("_value",)
 
     def __init__(self, value: Union[int, datetime.datetime]):
-        """Represents a BSON UTC datetime.
+"""Represents a BSON UTC datetime.
+BSON UTC datetimes are defined as an int64 of milliseconds since the
+Unix epoch. The principal use of DatetimeMS is to represent
+datetimes outside the range of the Python builtin
+:class:`~datetime.datetime` class when
+encoding/decoding BSON.
+To decode UTC datetimes as a ``DatetimeMS``, `datetime_conversion` in
+:class:`~bson.CodecOptions` must be set to 'datetime_ms' or
+'datetime_auto'. See :ref:`handling-out-of-range-datetimes` for
+details.
+:Parameters:
+- `value`: An instance of :class:`datetime.datetime` to be
+represented as milliseconds since the Unix epoch, or int of
+milliseconds since the Unix epoch.
 
-        BSON UTC datetimes are defined as an int64 of milliseconds since the
-        Unix epoch. The principal use of DatetimeMS is to represent
-        datetimes outside the range of the Python builtin
-        :class:`~datetime.datetime` class when
-        encoding/decoding BSON.
-
-        To decode UTC datetimes as a ``DatetimeMS``, `datetime_conversion` in
-        :class:`~bson.CodecOptions` must be set to 'datetime_ms' or
-        'datetime_auto'. See :ref:`handling-out-of-range-datetimes` for
-        details.
-
-        :Parameters:
-          - `value`: An instance of :class:`datetime.datetime` to be
-            represented as milliseconds since the Unix epoch, or int of
-            milliseconds since the Unix epoch.
-
-        :param value:
-        :type value: Union[int, datetime.datetime]
-
-        """
+Args::
+    value:"""
+    value:"""
         if isinstance(value, int):
             if not (-(2**63) <= value <= 2**63 - 1):
                 raise OverflowError("Must be a 64-bit integer of milliseconds")
@@ -70,113 +64,42 @@ class DatetimeMS:
             raise TypeError(f"{type(value)} is not a valid type for DatetimeMS")
 
     def __hash__(self) -> int:
-        """
-
-
-        :rtype: int
-
+""":rtype: int"""
         """
         return hash(self._value)
 
     def __repr__(self) -> str:
-        """
-
-
-        :rtype: str
-
+""":rtype: str"""
         """
         return type(self).__name__ + "(" + str(self._value) + ")"
 
     def __lt__(self, other: Union["DatetimeMS", int]) -> bool:
-        """
+"""Args::
+    other:"""
+"""Args::
+    other:"""
+"""Args::
+    other:"""
+"""Args::
+    other:"""
+"""Args::
+    other:"""
+"""Args::
+    other:"""
+"""Create a Python :class:`~datetime.datetime` from this DatetimeMS object.
+:Parameters:
+- `codec_options`: A CodecOptions instance for specifying how the
+resulting DatetimeMS object will be formatted using ``tz_aware``
+and ``tz_info``. Defaults to
+:const:`~bson.codec_options.DEFAULT_CODEC_OPTIONS`.
 
-        :param other:
-        :type other: Union["DatetimeMS", int]
-        :rtype: bool
-
-        """
-        return self._value < other
-
-    def __le__(self, other: Union["DatetimeMS", int]) -> bool:
-        """
-
-        :param other:
-        :type other: Union["DatetimeMS", int]
-        :rtype: bool
-
-        """
-        return self._value <= other
-
-    def __eq__(self, other: Any) -> bool:
-        """
-
-        :param other:
-        :type other: Any
-        :rtype: bool
-
-        """
-        if isinstance(other, DatetimeMS):
-            return self._value == other._value
-        return False
-
-    def __ne__(self, other: Any) -> bool:
-        """
-
-        :param other:
-        :type other: Any
-        :rtype: bool
-
-        """
-        if isinstance(other, DatetimeMS):
-            return self._value != other._value
-        return True
-
-    def __gt__(self, other: Union["DatetimeMS", int]) -> bool:
-        """
-
-        :param other:
-        :type other: Union["DatetimeMS", int]
-        :rtype: bool
-
-        """
-        return self._value > other
-
-    def __ge__(self, other: Union["DatetimeMS", int]) -> bool:
-        """
-
-        :param other:
-        :type other: Union["DatetimeMS", int]
-        :rtype: bool
-
-        """
-        return self._value >= other
-
-    _type_marker = 9
-
-    def as_datetime(
-        self, codec_options: CodecOptions = DEFAULT_CODEC_OPTIONS
-    ) -> datetime.datetime:
-        """Create a Python :class:`~datetime.datetime` from this DatetimeMS object.
-
-        :Parameters:
-          - `codec_options`: A CodecOptions instance for specifying how the
-            resulting DatetimeMS object will be formatted using ``tz_aware``
-            and ``tz_info``. Defaults to
-            :const:`~bson.codec_options.DEFAULT_CODEC_OPTIONS`.
-
-        :param codec_options:  (Default value = DEFAULT_CODEC_OPTIONS)
-        :type codec_options: CodecOptions
-        :rtype: datetime.datetime
-
-        """
+Args::
+    codec_options: (Default value = DEFAULT_CODEC_OPTIONS)"""
+    codec_options: (Default value = DEFAULT_CODEC_OPTIONS)"""
         return cast(datetime.datetime, _millis_to_datetime(self._value, codec_options))
 
     def __int__(self) -> int:
-        """
-
-
-        :rtype: int
-
+""":rtype: int"""
         """
         return self._value
 
@@ -186,36 +109,16 @@ class DatetimeMS:
 # and therefore there are more than 24 possible timezones.
 @functools.lru_cache(maxsize=None)
 def _min_datetime_ms(tz=datetime.timezone.utc):
-    """
+"""Args::
+    tz: (Default value = datetime.timezone.utc)"""
+"""Args::
+    tz: (Default value = datetime.timezone.utc)"""
+"""Convert milliseconds since epoch UTC to datetime.
 
-    :param tz:  (Default value = datetime.timezone.utc)
-
-    """
-    return _datetime_to_millis(datetime.datetime.min.replace(tzinfo=tz))
-
-
-@functools.lru_cache(maxsize=None)
-def _max_datetime_ms(tz=datetime.timezone.utc):
-    """
-
-    :param tz:  (Default value = datetime.timezone.utc)
-
-    """
-    return _datetime_to_millis(datetime.datetime.max.replace(tzinfo=tz))
-
-
-def _millis_to_datetime(
-    millis: int, opts: CodecOptions
-) -> Union[datetime.datetime, DatetimeMS]:
-    """Convert milliseconds since epoch UTC to datetime.
-
-    :param millis:
-    :type millis: int
-    :param opts:
-    :type opts: CodecOptions
-    :rtype: Union[datetime.datetime,DatetimeMS]
-
-    """
+Args::
+    millis: 
+    opts:"""
+    opts:"""
     if (
         opts.datetime_conversion == DatetimeConversion.DATETIME
         or opts.datetime_conversion == DatetimeConversion.DATETIME_CLAMP
@@ -248,13 +151,11 @@ def _millis_to_datetime(
 
 
 def _datetime_to_millis(dtm: datetime.datetime) -> int:
-    """Convert datetime to milliseconds since epoch UTC.
+"""Convert datetime to milliseconds since epoch UTC.
 
-    :param dtm:
-    :type dtm: datetime.datetime
-    :rtype: int
-
-    """
+Args::
+    dtm:"""
+    dtm:"""
     if dtm.utcoffset() is not None:
         dtm = dtm - dtm.utcoffset()  # type: ignore
     return int(calendar.timegm(dtm.timetuple()) * 1000 + dtm.microsecond // 1000)

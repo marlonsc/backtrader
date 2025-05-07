@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""wma.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -31,18 +34,13 @@ from . import AverageWeighted, MovingAverageBase
 
 class WeightedMovingAverage(MovingAverageBase):
     """A Moving Average which gives an arithmetic weighting to values with the
-    newest having the more weight
-
-    Formula:
-      - weights = range(1, period + 1)
-      - coef = 2 / (period * (period + 1))
-      - movav = coef * Sum(weight[i] * data[period - i] for i in range(period))
-
-    See also:
-      - http://en.wikipedia.org/wiki/Moving_average#Weighted_moving_average
-
-
-    """
+newest having the more weight
+Formula:
+- weights = range(1, period + 1)
+- coef = 2 / (period * (period + 1))
+- movav = coef * Sum(weight[i] * data[period - i] for i in range(period))
+See also:
+- http://en.wikipedia.org/wiki/Moving_average#Weighted_moving_average"""
 
     alias = (
         "WMA",
@@ -51,7 +49,7 @@ class WeightedMovingAverage(MovingAverageBase):
     lines = ("wma",)
 
     def __init__(self):
-        """ """
+""""""
         coef = 2.0 / (self.p.period * (self.p.period + 1.0))
         weights = tuple(float(x) for x in range(1, self.p.period + 1))
 

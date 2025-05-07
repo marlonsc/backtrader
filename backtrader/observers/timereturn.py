@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""timereturn.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -46,21 +49,9 @@ class TimeReturn(Observer):
     )
 
     def _plotlabel(self):
-        """ """
-        return [
-            # Use the final tf/comp values calculated by the return analyzer
-            TimeFrame.getname(self.treturn.timeframe, self.treturn.compression),
-            str(self.treturn.compression),
-        ]
-
-    def __init__(self):
-        """ """
-        self.treturn = self._owner._addanalyzer_slave(
-            bt.analyzers.TimeReturn, **self.p._getkwargs()
-        )
-
-    def next(self):
-        """ """
+""""""
+""""""
+""""""
         self.lines.timereturn[0] = self.treturn.rets.get(
             self.treturn.dtkey, float("NaN")
         )

@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""ema.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -30,20 +33,13 @@ from . import ExponentialSmoothing, MovingAverageBase
 
 class ExponentialMovingAverage(MovingAverageBase):
     """A Moving Average that smoothes data exponentially over time.
-
-    It is a subclass of SmoothingMovingAverage.
-
-      - self.smfactor -> 2 / (1 + period)
-      - self.smfactor1 -> `1 - self.smfactor`
-
-    Formula:
-      - movav = prev * (1.0 - smoothfactor) + newdata * smoothfactor
-
-    See also:
-      - http://en.wikipedia.org/wiki/Moving_average#Exponential_moving_average
-
-
-    """
+It is a subclass of SmoothingMovingAverage.
+- self.smfactor -> 2 / (1 + period)
+- self.smfactor1 -> `1 - self.smfactor`
+Formula:
+- movav = prev * (1.0 - smoothfactor) + newdata * smoothfactor
+See also:
+- http://en.wikipedia.org/wiki/Moving_average#Exponential_moving_average"""
 
     alias = (
         "EMA",
@@ -52,7 +48,7 @@ class ExponentialMovingAverage(MovingAverageBase):
     lines = ("ema",)
 
     def __init__(self):
-        """ """
+""""""
         # Before super to ensure mixins (right-hand side in subclassing)
         # can see the assignment operation and operate on the line
         self.lines[0] = es = ExponentialSmoothing(

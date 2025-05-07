@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""cheat-on-open.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -32,122 +35,19 @@ import backtrader as bt
 
 
 class St(bt.Strategy):
-    """ """
-
-    params = dict(
-        periods=[10, 30],
-        matype=bt.ind.SMA,
-    )
-
-    def __init__(self):
-        """ """
-        self.cheating = self.cerebro.p.cheat_on_open
-        mas = [self.p.matype(period=x) for x in self.p.periods]
-        self.signal = bt.ind.CrossOver(*mas)
-        self.order = None
-
-    def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
-        if order.status != order.Completed:
-            return
-
-        self.order = None
-        print(
-            "{} {} Executed at price {}".format(
-                bt.num2date(order.executed.dt).date(),
-                "Buy" * order.isbuy() or "Sell",
-                order.executed.price,
-            )
-        )
-
-    def operate(self, fromopen):
-        """
-
-        :param fromopen:
-
-        """
-        if self.order is not None:
-            return
-        if self.position:
-            if self.signal < 0:
-                self.order = self.close()
-        elif self.signal > 0:
-            print(
-                "{} Send Buy, fromopen {}, close {}".format(
-                    self.data.datetime.date(), fromopen, self.data.close[0]
-                )
-            )
-            self.order = self.buy()
-
-    def next(self):
-        """ """
-        print(
-            "{} next, open {} close {}".format(
-                self.data.datetime.date(), self.data.open[0], self.data.close[0]
-            )
-        )
-
-        if self.cheating:
-            return
-        self.operate(fromopen=False)
-
-    def next_open(self):
-        """ """
-        if not self.cheating:
-            return
-        self.operate(fromopen=True)
-
-
-def runstrat(args=None):
-    """
-
-    :param args:  (Default value = None)
-
-    """
-    args = parse_args(args)
-
-    cerebro = bt.Cerebro()
-
-    # Data feed kwargs
-    kwargs = dict()
-
-    # Parse from/to-date
-    dtfmt, tmfmt = "%Y-%m-%d", "T%H:%M:%S"
-    for a, d in ((getattr(args, x), x) for x in ["fromdate", "todate"]):
-        if a:
-            strpfmt = dtfmt + tmfmt * ("T" in a)
-            kwargs[d] = datetime.datetime.strptime(a, strpfmt)
-
-    # Data feed
-    data0 = bt.feeds.BacktraderCSVData(dataname=args.data0, **kwargs)
-    cerebro.adddata(data0)
-
-    # Broker
-    cerebro.broker = bt.brokers.BackBroker(**eval("dict(" + args.broker + ")"))
-
-    # Sizer
-    cerebro.addsizer(bt.sizers.FixedSize, **eval("dict(" + args.sizer + ")"))
-
-    # Strategy
-    cerebro.addstrategy(St, **eval("dict(" + args.strat + ")"))
-
-    # Execute
-    cerebro.run(**eval("dict(" + args.cerebro + ")"))
-
-    if args.plot:  # Plot if requested to
-        cerebro.plot(**eval("dict(" + args.plot + ")"))
-
-
-def parse_args(pargs=None):
-    """
-
-    :param pargs:  (Default value = None)
-
-    """
+""""""
+""""""
+"""Args::
+    order:"""
+"""Args::
+    fromopen:"""
+""""""
+""""""
+"""Args::
+    args: (Default value = None)"""
+"""Args::
+    pargs: (Default value = None)"""
+    pargs: (Default value = None)"""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Cheat-On-Open Sample",

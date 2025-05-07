@@ -1,4 +1,7 @@
-import backtrader as bt
+"""roi.py module.
+
+Description of the module functionality."""
+
 from backtrader import TimeFrameAnalyzerBase
 
 

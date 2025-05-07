@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""vcdata.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -40,16 +43,14 @@ from backtrader.utils.py3 import (
 
 
 class MetaVCData(DataBase.__class__):
-    """ """
+""""""
+"""Class has already been created ... register
 
-    def __init__(cls, name, bases, dct):
-        """Class has already been created ... register
-
-        :param name:
-        :param bases:
-        :param dct:
-
-        """
+Args::
+    name: 
+    bases: 
+    dct:"""
+    dct:"""
         # Initialize the class
         super(MetaVCData, cls).__init__(name, bases, dct)
 
@@ -201,13 +202,12 @@ class VCData(with_metaclass(MetaVCData, DataBase)):
         return self._gettz(tzin=True)
 
     def _gettz(self, tzin=False):
-        """Returns the default output timezone for the data
+"""Returns the default output timezone for the data
+This defaults to be the timezone in which the market is traded
 
-        This defaults to be the timezone in which the market is traded
-
-        :param tzin:  (Default value = False)
-
-        """
+Args::
+    tzin: (Default value = False)"""
+    tzin: (Default value = False)"""
         # If no object has been provided by the user and a timezone can be
         # found via contractdtails, then try to get it from pytz, which may or
         # may not be available.
@@ -265,19 +265,13 @@ class VCData(with_metaclass(MetaVCData, DataBase)):
         return tz
 
     def islive(self):
-        """Returns ``True`` to notify ``Cerebro`` that preloading and runonce
-        should be deactivated
-
-
+"""Returns ``True`` to notify ``Cerebro`` that preloading and runonce
+        should be deactivated"""
         """
         return True
 
     def __init__(self, **kwargs):
-        """
-
-        :param **kwargs:
-
-        """
+        """"""
         self.store = vcstore.VCStore(**kwargs)
 
         # Correct a copy past directly from VisualChart
@@ -296,20 +290,18 @@ class VCData(with_metaclass(MetaVCData, DataBase)):
             self._tradename = tradename
 
     def setenvironment(self, env):
-        """Receives an environment (cerebro) and passes it over to the store it
-        belongs to
+"""Receives an environment (cerebro) and passes it over to the store it
+belongs to
 
-        :param env:
-
-        """
+Args::
+    env:"""
+    env:"""
         super(VCData, self).setenvironment(env)
         env.addstore(self.store)
 
     def start(self):
-        """Starts the VC connecction and gets the real contract and
-        contractdetails if it exists
-
-
+"""Starts the VC connecction and gets the real contract and
+        contractdetails if it exists"""
         """
         super(VCData, self).start()
 
@@ -413,89 +405,15 @@ class VCData(with_metaclass(MetaVCData, DataBase)):
             self.store._canceldirectdata(self.q)
 
     def _setserie(self, serie):
-        """
-
-        :param serie:
-
-        """
-        # Accepts a serie (COM Object) to use in ping events
-        self._serie = serie
-
-    def haslivedata(self):
-        """ """
-        return self._laststatus == self.LIVE and self.q
-
-    def _load(self):
-        """ """
-        if self._state == self._ST_NOTFOUND:
-            return False  # nothing can be done
-
-        while True:
-            try:
-                # tmout <> 0 only if resampling/replaying, else no waking up
-                tmout = self._qcheck * bool(self.resampling)
-                msg = self.q.get(timeout=tmout)
-            except queue.Empty:
-                return None
-
-            if msg is None:
-                return False  # end of stream
-
-            if msg == self.store._RT_SHUTDOWN:
-                self.put_notification(self.DISCONNECTED)
-                return False  # VC has exited
-
-            if msg == self.store._RT_DISCONNECTED:
-                self.put_notification(self.CONNBROKEN)
-                continue
-
-            if msg == self.store._RT_CONNECTED:
-                self.put_notification(self.CONNECTED)
-                self.put_notification(self.DELAYED)
-                continue
-
-            if msg == self.store._RT_LIVE:
-                if self._laststatus != self.LIVE:
-                    self.put_notification(self.LIVE)
-                continue
-
-            if msg == self.store._RT_DELAYED:
-                if self._laststatus != self.DELAYED:
-                    self.put_notification(self.DELAYED)
-                continue
-
-            if isinstance(msg, integer_types):
-                self.put_notification(self.UNKNOWN, msg)
-                continue
-
-            # it must be a bar
-            bar = msg
-
-            # Put the tick into the bar
-            self.lines.open[0] = bar.Open
-            self.lines.high[0] = bar.High
-            self.lines.low[0] = bar.Low
-            self.lines.close[0] = bar.Close
-            self.lines.volume[0] = bar.Volume
-            self.lines.openinterest[0] = bar.OpenInterest
-
-            # Convert time to "market" time (096 exception)
-            dt = self.NULLDATE + timedelta(days=bar.Date) - self._mktoffset
-            self.lines.datetime[0] = date2num(dt)
-
-            return True
-
-    #
-    # DS Events
-    #
-    def _getpingtmout(self):
-        """Returns the actual ping timeout for PumpEvents to wake up and call
+"""Args::
+    serie:"""
+""""""
+""""""
+"""Returns the actual ping timeout for PumpEvents to wake up and call
         ping, which will check if the not yet delivered bar can be
         delivered. The bar may be stalled because vc awaits a new tick and
         during low negotiation hour this can take several seconds after the
-        actual expected delivery time
-
-
+        actual expected delivery time"""
         """
         if self._ticking:
             return -1  # no timeout
@@ -503,12 +421,10 @@ class VCData(with_metaclass(MetaVCData, DataBase)):
         return self._pingtmout
 
     def OnNewDataSerieBar(self, DataSerie, forcepush=False):
-        """
-
-        :param DataSerie:
-        :param forcepush:  (Default value = False)
-
-        """
+"""Args::
+    DataSerie: 
+    forcepush: (Default value = False)"""
+    forcepush: (Default value = False)"""
         # Processes the COM Event (also called directly when 1st creating the
         # data serie
         ssize = DataSerie.Size
@@ -547,46 +463,12 @@ class VCData(with_metaclass(MetaVCData, DataBase)):
         self.idx = max(1, ssize)
 
     def ping(self):
-        """ """
-        ssize = self._serie.Size
-
-        if self.idx > ssize:
-            return  # no bar available
-
-        if self._laststatus == self.CONNBROKEN:
-            self._pingtmout = self.PING_TIMEOUT
-            return  # do not push during disconnection
-
-        dtnow = datetime.now() - self._TOFFSET
-        # CHECK: there should be a maximum of 1 bar when pinging
-        # In any case the algorithm doesn't hurt
-        for idx in range(self.idx, ssize + 1):  # reach ssize
-            bar = self._serie.GetBarValues(self.idx)
-            # dt = (self.NULLDATE + timedelta(days=bar.Date) + self._mktoff1)
-            dt = self.NULLDATE + timedelta(days=bar.Date) - self._mktoffdiff
-            if dtnow < dt:
-                self._pingtmout = (dt - dtnow).total_seconds() + 0.5
-                break  # cannot deliver anything
-
-            # Adjust ping timeout to the bar boundary (plus mini leeway)
-            self._pingtmout = self.PING_TIMEOUT  # no bar, nothing to check
-            self.q.put(bar)  # push bar and update index
-            self.idx += 1
-
-    #
-    # RTEvents
-    #
-    # Can be used on a per data basis to check the connection status
-    if False:
-
-        def OnInternalEvent(self, p1, p2, p3):
-            """
-
-            :param p1:
-            :param p2:
-            :param p3:
-
-            """
+""""""
+"""Args::
+    p1: 
+    p2: 
+    p3:"""
+    p3:"""
             if p1 != 1:  # Apparently "Connection Event"
                 return
 
@@ -599,66 +481,11 @@ class VCData(with_metaclass(MetaVCData, DataBase)):
             self.store._vcrt_connection(self.store._RT_BASEMSG - p2)
 
     def OnNewTicks(self, ArrayTicks):
-        """
-
-        :param ArrayTicks:
-
-        """
-        # Process the COM Event for New Ticks. This is only used temporarily
-        # for 2 purposes
-        #
-        # 1. If tick.Field == Field_Description is returned, it can be checked
-        # if the requested symbol has been found or not (tick.Date == 0 -> not
-        # found). tick.Text has 'Not Found', but this is more likely to change
-        # Once Field_Description has been seen, the 2nd stage takes place
-        #
-        # 2. When a tick.Field == Field_Time is seen and tick.TickIndex == 0,
-        # the 1st tick of a second is seen and the tick.Date value can be used
-        # to calculate a time offset to the feed server. This is later used to
-        # check if a bar is due delivery or not
-        #
-        # After this the reception of ticks is cancelled
-
-        aticks = ArrayTicks[0]
-        # self.debug_ticks(aticks)
-        ticks = dict()
-        for tick in aticks:
-            ticks[tick.Field] = tick
-
-        if self.store.vcrtmod.Field_Description in ticks:
-            if self._newticks:
-                self._newticks = False
-                hasdate = bool(ticks.get(self.store.vcrtmod.Field_Date, False))
-                self.qrt.put(hasdate)
-                return
-
-        else:
-            try:
-                tick = ticks[self.store.vcrtmod.Field_Time]
-            except KeyError:
-                return
-
-            if tick.TickIndex == 0 and self._mktoff1 is not None:
-                # Adjust the tick time using the mktoffset (with the 096 excep)
-                dttick = self.NULLDATE + timedelta(days=tick.Date) + self._mktoff1
-
-                self._TOFFSET = datetime.now() - dttick
-                if self._mktcode in self._EXTRA_TIMEOFFSET:
-                    # These codes live theoretically in (UTC+00:00) Dublin,
-                    # Edinburgh, Lisbon, London which is 'Europe/London'
-                    # But all experiments show the times to be displaced 1
-                    # hour to the west and hence the extra 3600 seconds
-                    self._TOFFSET -= timedelta(seconds=3600)
-
-                # Cancel ticks
-                self._vcrt.CancelSymbolFeed(self._dataname, False)
-
-    def debug_ticks(self, ticks):
-        """
-
-        :param ticks:
-
-        """
+"""Args::
+    ArrayTicks:"""
+"""Args::
+    ticks:"""
+    ticks:"""
         print("*" * 50, "DEBUG OnNewTicks")
         for tick in ticks:
             print("-" * 40)

@@ -1,4 +1,7 @@
-import logging
+"""nullstrategy.py module.
+
+Description of the module functionality."""
+
 
 import backtrader as bt
 

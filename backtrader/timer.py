@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""timer.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -31,7 +34,15 @@ from datetime import date, datetime, timedelta
 
 from .feed import AbstractDataBase
 from .metabase import MetaParams
-from .utils import TIME_MAX, date2num, num2date
+from .utils.date import date2num, num2date
+
+try:
+    from .utils.time import TIME_MAX
+except ImportError:
+    # Fallback if TIME_MAX is not available
+    from datetime import time
+
+    TIME_MAX = time(23, 59, 59, 999999)
 from .utils.py3 import integer_types, range, with_metaclass
 
 __all__ = ["SESSION_TIME", "SESSION_START", "SESSION_END", "Timer"]
@@ -40,147 +51,44 @@ SESSION_TIME, SESSION_START, SESSION_END = range(3)
 
 
 class Timer(with_metaclass(MetaParams, object)):
-    """ """
+""""""
+        """"""
+        # Ensure self.p is always present
+        if not hasattr(self, "p"):
 
-    params = (
-        ("tid", None),
-        ("owner", None),
-        ("strats", False),
-        ("when", None),
-        ("offset", timedelta()),
-        ("repeat", timedelta()),
-        ("weekdays", []),
-        ("weekcarry", False),
-        ("monthdays", []),
-        ("monthcarry", True),
-        ("allow", None),  # callable that allows a timer to take place
-        ("tzdata", None),
-        ("cheat", False),
-    )
+"""DummyParams class.
 
-    SESSION_TIME, SESSION_START, SESSION_END = range(3)
+Description of the class functionality."""
+                tid = None
+                owner = None
+                strats = False
+                when = None
+                offset = timedelta()
+                repeat = timedelta()
+                weekdays = []
+                weekcarry = False
+                monthdays = []
+                monthcarry = True
+                allow = None
+                tzdata = None
+                cheat = False
 
-    def __init__(self, *args, **kwargs):
-        """
-
-        :param *args:
-        :param **kwargs:
-
-        """
+            self.p = DummyParams()
         self.args = args
         self.kwargs = kwargs
 
     def start(self, data):
-        """
-
-        :param data:
-
-        """
-        # write down the 'reset when' value
-        if not isinstance(self.p.when, integer_types):  # expect time/datetime
-            self._rstwhen = self.p.when
-            self._tzdata = self.p.tzdata
-        else:
-            self._tzdata = data if self.p.tzdata is None else self.p.tzdata
-
-            if self.p.when == SESSION_START:
-                self._rstwhen = self._tzdata.p.sessionstart
-            elif self.p.when == SESSION_END:
-                self._rstwhen = self._tzdata.p.sessionend
-
-        self._isdata = isinstance(self._tzdata, AbstractDataBase)
-        self._reset_when()
-
-        self._nexteos = datetime.min
-        self._curdate = date.min
-
-        self._curmonth = -1  # non-existent month
-        self._monthmask = collections.deque()
-
-        self._curweek = -1  # non-existent week
-        self._weekmask = collections.deque()
-
-    def _reset_when(self, ddate=datetime.min):
-        """
-
-        :param ddate:  (Default value = datetime.min)
-
-        """
-        self._when = self._rstwhen
-        self._dtwhen = self._dwhen = None
-
-        self._lastcall = ddate
-
-    def _check_month(self, ddate):
-        """
-
-        :param ddate:
-
-        """
-        if not self.p.monthdays:
-            return True
-
-        mask = self._monthmask
-        daycarry = False
-        dmonth = ddate.month
-        if dmonth != self._curmonth:
-            self._curmonth = dmonth  # write down new month
-            daycarry = self.p.monthcarry and bool(mask)
-            self._monthmask = mask = collections.deque(self.p.monthdays)
-
-        dday = ddate.day
-        dc = bisect.bisect_left(mask, dday)  # "left" for days before dday
-        daycarry = daycarry or (self.p.monthcarry and dc > 0)
-        if dc < len(mask):
-            curday = bisect.bisect_right(mask, dday, lo=dc) > 0  # check dday
-            dc += curday
-        else:
-            curday = False
-
-        while dc:
-            mask.popleft()
-            dc -= 1
-
-        return daycarry or curday
-
-    def _check_week(self, ddate=date.min):
-        """
-
-        :param ddate:  (Default value = date.min)
-
-        """
-        if not self.p.weekdays:
-            return True
-
-        _, dweek, dwkday = ddate.isocalendar()
-
-        mask = self._weekmask
-        daycarry = False
-        if dweek != self._curweek:
-            self._curweek = dweek  # write down new month
-            daycarry = self.p.weekcarry and bool(mask)
-            self._weekmask = mask = collections.deque(self.p.weekdays)
-
-        dc = bisect.bisect_left(mask, dwkday)  # "left" for days before dday
-        daycarry = daycarry or (self.p.weekcarry and dc > 0)
-        if dc < len(mask):
-            curday = bisect.bisect_right(mask, dwkday, lo=dc) > 0  # check dday
-            dc += curday
-        else:
-            curday = False
-
-        while dc:
-            mask.popleft()
-            dc -= 1
-
-        return daycarry or curday
-
-    def check(self, dt):
-        """
-
-        :param dt:
-
-        """
+"""Args::
+    data:"""
+"""Args::
+    ddate: (Default value = datetime.min)"""
+"""Args::
+    ddate:"""
+"""Args::
+    ddate: (Default value = date.min)"""
+"""Args::
+    dt:"""
+    dt:"""
         d = num2date(dt)
         ddate = d.date()
         if self._lastcall == ddate:  # not repeating, awaiting date change
@@ -200,7 +108,9 @@ class Timer(with_metaclass(MetaParams, object)):
             if ret:
                 ret = self._check_week(ddate)
             if ret and self.p.allow is not None:
-                ret = self.p.allow(ddate)
+                if callable(self.p.allow):
+                    ret = self.p.allow(ddate)
+                # If not callable, do not change ret
 
             if not ret:
                 self._reset_when(ddate)  # this day won't make it

@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""observers-default.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #

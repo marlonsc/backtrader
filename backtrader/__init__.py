@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""__init__.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -25,15 +28,14 @@ from __future__ import (
     unicode_literals,
 )
 
-from .sizers.fixedsize import SizerFix
-from . import feeds
-from .indicator import Indicator
+from . import TimeFrame, feeds
 from .analyzer import Analyzer
-from .strategy import Strategy
+from .cerebro import Cerebro
+from .indicator import Indicator
 from .observer import Observer
 from .signal import Signal
-from .cerebro import Cerebro
-from . import TimeFrame
+from .sizers.fixedsize import SizerFix
+from .strategy import Strategy
 
 __all__ = [
     "feeds",

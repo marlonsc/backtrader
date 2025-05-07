@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""signal.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -25,7 +28,7 @@ from __future__ import (
     unicode_literals,
 )
 
-import backtrader as bt
+from .indicator import Indicator
 
 (
     SIGNAL_NONE,
@@ -62,14 +65,16 @@ SignalTypes = [
 ]
 
 
-class Signal(bt.Indicator):
-    """ """
+class Signal(Indicator):
+"""Signal indicator for strategy logic. All docstrings and comments must be
+    line-wrapped at 90 characters or less."""
+    """
 
     SignalTypes = SignalTypes
 
     lines = ("signal",)
 
     def __init__(self):
-        """ """
+""""""
         self.lines.signal = self.data0.lines[0]
         self.plotinfo.plotmaster = getattr(self.data0, "_clock", self.data0)

@@ -1,4 +1,7 @@
-# -*- coding: UTF-8 -*-
+"""momentum.py module.
+
+Description of the module functionality."""
+
 # From:
 # https://medium.com/modern-ai/the-coolest-python-library-for-quants-in-2024-3c2f954752d1
 
@@ -12,20 +15,9 @@ import yfinance as yf
 
 # functions
 class MomentumStrategy(bt.Strategy):
-    """ """
-
-    params = (
-        ("threshold", 0.001),  # Threshold for generating buy/sell signals
-        ("size", 10),  # Number of shares to trade
-    )
-
-    def __init__(self):
-        """ """
-        self.data_close = self.data.close  # We will operate based on close prices
-        self.portfolio_values = []  # List to store portfolio values
-
-    def next(self):
-        """ """
+""""""
+""""""
+""""""
         # Append current portfolio value to the list
         self.portfolio_values.append(self.broker.getvalue())
 

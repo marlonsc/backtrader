@@ -1,4 +1,7 @@
-# -*- coding: UTF-8 -*-
+"""104_orig.py module.
+
+Description of the module functionality."""
+
 
 # import
 import datetime  # For datetime objects

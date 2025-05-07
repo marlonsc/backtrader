@@ -18,72 +18,57 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-"""
-BOLLINGER BANDS MEAN REVERSION STRATEGY WITH POSTGRESQL DATABASE - (bb_mean_reversal)
+"""BOLLINGER BANDS MEAN REVERSION STRATEGY WITH POSTGRESQL DATABASE - (bb_mean_reversal)
 ===============================================================================
-
 This strategy is a mean reversion trading system that buys when price touches the
 lower Bollinger Band and RSI is oversold, then sells when price touches the upper
 Bollinger Band and RSI is overbought. It's designed to capture price movements in
 range-bound or sideways markets.
-
 STRATEGY LOGIC:
 --------------
 - Go LONG when price CLOSES BELOW the LOWER Bollinger Band AND RSI < 30 (oversold)
 - Exit LONG when price touches the UPPER Bollinger Band AND RSI is overbought
 - Or exit when price crosses the middle band (optional)
 - Optional stop-loss below the recent swing low
-
 MARKET CONDITIONS:
 ----------------
 - Best used in SIDEWAYS or RANGE-BOUND markets
 - Avoids trending markets where mean reversion is less reliable
 - Performs well in consolidation periods with clear support and resistance
-
 BOLLINGER BANDS:
 --------------
 Bollinger Bands consist of:
 - A middle band (typically a 20-period moving average)
 - An upper band (middle band + 2 standard deviations)
 - A lower band (middle band - 2 standard deviations)
-
 These bands adapt to volatility - widening during volatile periods and
 narrowing during less volatile periods.
-
 EXAMPLE COMMANDS:
 ---------------
 1. Standard configuration - classic support/resistance bounce:
-   python strategies/support_resistance_bounce.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31
-
+python strategies/support_resistance_bounce.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31
 2. More sensitive settings - tighter bands for choppy markets:
-   python strategies/support_resistance_bounce.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --bb-period 15 --bb-dev 1.8
-
+python strategies/support_resistance_bounce.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --bb-period 15 --bb-dev 1.8
 3. Extreme oversold/overbought thresholds - fewer but stronger signals:
-   python strategies/support_resistance_bounce.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --rsi-oversold 25 --rsi-overbought 75
-
+python strategies/support_resistance_bounce.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --rsi-oversold 25 --rsi-overbought 75
 4. Risk management focus - fixed stop loss with larger position:
-   python strategies/support_resistance_bounce.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --stop-loss --stop-atr 2.0 --risk-percent 2.0
-
+python strategies/support_resistance_bounce.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --stop-loss --stop-atr 2.0 --risk-percent 2.0
 5. Faster exit approach - use middle band crossing for quicker profits:
-   python strategies/support_resistance_bounce.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --exit-middle-band
-
+python strategies/support_resistance_bounce.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --exit-middle-band
 RSI (RELATIVE STRENGTH INDEX):
 ----------------------------
 - Oscillator that measures momentum
 - Ranges from 0 to 100
 - Values below 30 typically indicate oversold conditions
 - Values above 70 typically indicate overbought conditions
-
 USAGE:
 ------
 python strategies/sideways/bb_mean_reversal.py --data SYMBOL --fromdate YYYY-MM-DD --todate YYYY-MM-DD [options]
-
 REQUIRED ARGUMENTS:
 ------------------
 --data, -d      : Stock symbol to retrieve data for (e.g., AAPL, MSFT, TSLA)
 --fromdate, -f  : Start date for historical data in YYYY-MM-DD format (default: 2024-01-01)
 --todate, -t    : End date for historical data in YYYY-MM-DD format (default: 2024-12-31)
-
 OPTIONAL ARGUMENTS:
 ------------------
 --dbuser, -u    : PostgreSQL username (default: jason)
@@ -100,11 +85,9 @@ OPTIONAL ARGUMENTS:
 --stop-pct, -sp : Stop loss percentage (default: 2.0)
 --matype, -mt   : Moving average type for Bollinger Bands basis (default: SMA, options: SMA, EMA, WMA, SMMA)
 --plot, -p      : Generate and show a plot of the trading activity
-
 EXAMPLE:
 --------
-python strategies/support_resistance_bounce.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --exit-middle --use-stop --stop-pct 2.5 --plot
-"""
+python strategies/support_resistance_bounce.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --exit-middle --use-stop --stop-pct 2.5 --plot"""
 
 from __future__ import (
     absolute_import,
@@ -151,33 +134,25 @@ class StockPriceData(bt.feeds.PandasData):
 
 class BollingerMeanReversionStrategy(bt.Strategy, TradeThrottling):
     """Bollinger Bands Mean Reversion Strategy
-
-    This strategy attempts to capture mean reversion moves by:
-    1. Buying when price touches or crosses below the lower Bollinger Band and RSI < 30
-    2. Selling when price touches or crosses above the upper Bollinger Band and RSI > 70
-
-    Additional exit mechanisms include:
-    - Optional exit when price crosses the middle Bollinger Band
-    - Optional stop loss to limit potential losses
-
-    ** IMPORTANT: This strategy is specifically designed for SIDEWAYS/RANGING MARKETS **
-    It performs poorly in trending markets where prices can remain overbought or oversold
-    for extended periods without reverting.
-
-    Strategy Logic:
-    - Buy when price crosses or touches lower Bollinger Band and RSI is oversold
-    - Sell when price crosses or touches upper Bollinger Band and RSI is overbought
-    - Uses risk-based position sizing for proper money management
-    - Implements cool down period to avoid overtrading
-
-    Best Market Conditions:
-    - Sideways or range-bound markets with clear support and resistance
-    - Markets with regular mean reversion tendencies
-    - Low ADX readings (below 25) indicating absence of strong trends
-    - Avoid using in strong trending markets
-
-
-    """
+This strategy attempts to capture mean reversion moves by:
+1. Buying when price touches or crosses below the lower Bollinger Band and RSI < 30
+2. Selling when price touches or crosses above the upper Bollinger Band and RSI > 70
+Additional exit mechanisms include:
+- Optional exit when price crosses the middle Bollinger Band
+- Optional stop loss to limit potential losses
+** IMPORTANT: This strategy is specifically designed for SIDEWAYS/RANGING MARKETS **
+It performs poorly in trending markets where prices can remain overbought or oversold
+for extended periods without reverting.
+Strategy Logic:
+- Buy when price crosses or touches lower Bollinger Band and RSI is oversold
+- Sell when price crosses or touches upper Bollinger Band and RSI is overbought
+- Uses risk-based position sizing for proper money management
+- Implements cool down period to avoid overtrading
+Best Market Conditions:
+- Sideways or range-bound markets with clear support and resistance
+- Markets with regular mean reversion tendencies
+- Low ADX readings (below 25) indicating absence of strong trends
+- Avoid using in strong trending markets"""
 
     params = (
         ("position_size", 0.2),  # Percentage of portfolio to use per position
@@ -202,13 +177,13 @@ class BollingerMeanReversionStrategy(bt.Strategy, TradeThrottling):
     )
 
     def log(self, txt, dt=None, level="info"):
-        """Logging function for the strategy
+"""Logging function for the strategy
 
-        :param txt:
-        :param dt:  (Default value = None)
-        :param level:  (Default value = "info")
-
-        """
+Args::
+    txt: 
+    dt: (Default value = None)
+    level: (Default value = "info")"""
+    level: (Default value = "info")"""
         if level == "debug" and self.p.log_level != "debug":
             return
 
@@ -216,55 +191,12 @@ class BollingerMeanReversionStrategy(bt.Strategy, TradeThrottling):
         print(f"{dt.isoformat()}: {txt}")
 
     def __init__(self):
-        """ """
-        # Store the close price reference
-        self.dataclose = self.datas[0].close
+""""""
+"""Calculate how many shares to buy based on risk-based position sizing
 
-        # Track order and position state
-        self.order = None
-        self.entry_price = None
-        self.stop_price = None
-        self.buysell = None  # 'buy' or 'sell' to track position type
-
-        # Initialize trade tracking
-        self.trade_count = 0
-        self.winning_trades = 0
-        self.losing_trades = 0
-
-        # Initialize last trade date for trade throttling
-        self.last_trade_date = None
-
-        # Calculate indicators
-        # Bollinger Bands
-        self.bbands = bt.indicators.BollingerBands(
-            self.datas[0],
-            period=self.p.bbands_period,
-            devfactor=self.p.bbands_dev,
-        )
-
-        # Extract individual Bollinger Band components
-        self.upper_band = self.bbands.top
-        self.middle_band = self.bbands.mid
-        self.lower_band = self.bbands.bot
-
-        # RSI indicator
-        self.rsi = bt.indicators.RSI(self.datas[0], period=self.p.rsi_period)
-
-        # Crossover indicators for entry and exit conditions
-        self.price_cross_lower = bt.indicators.CrossDown(
-            self.dataclose, self.lower_band
-        )
-        self.price_cross_upper = bt.indicators.CrossUp(self.dataclose, self.upper_band)
-        self.price_cross_middle = bt.indicators.CrossUp(
-            self.dataclose, self.middle_band
-        )
-
-    def calculate_position_size(self, price):
-        """Calculate how many shares to buy based on risk-based position sizing
-
-        :param price:
-
-        """
+Args::
+    price:"""
+    price:"""
         available_cash = self.broker.get_cash()
         value = self.broker.getvalue()
         current_price = price
@@ -309,126 +241,7 @@ class BollingerMeanReversionStrategy(bt.Strategy, TradeThrottling):
         return size
 
     def next(self):
-        """ """
-        # If an order is pending, we cannot send a new one
-        if self.order:
-            return
-
-        # Calculate Bollinger Band percentage (simpler approach)
-        # 1.0 = at upper band, 0.5 = at middle band, 0.0 = at lower band
-        bb_range = self.upper_band[0] - self.lower_band[0]
-        if bb_range != 0:  # Avoid division by zero
-            bb_pct = (self.dataclose[0] - self.lower_band[0]) / bb_range
-        else:
-            bb_pct = 0.5  # Middle band position if bands are identical (rare)
-
-        # Print debug information every 10 bars
-        if len(self) % 10 == 0:
-            self.log(
-                f"DEBUG - Close: {self.dataclose[0]:.2f}, BB Upper:"
-                f" {self.upper_band[0]:.2f}, "
-                + f"BB Middle: {self.middle_band[0]:.2f}, BB Lower:"
-                f" {self.lower_band[0]:.2f}, "
-                + f"RSI: {self.rsi[0]:.2f}, BB%: {bb_pct:.2f}"
-            )
-
-            # Check if we're near entry conditions
-            if bb_pct <= 0.2:
-                self.log(
-                    f"CLOSE TO ENTRY - Price near lower band (BB%: {bb_pct:.2f}), RSI:"
-                    f" {self.rsi[0]:.2f}"
-                )
-
-            # Check if we're near exit conditions
-            if bb_pct >= 0.8:
-                self.log(
-                    f"CLOSE TO EXIT - Price near upper band (BB%: {bb_pct:.2f}), RSI:"
-                    f" {self.rsi[0]:.2f}"
-                )
-
-        # Log current market conditions
-        self.log(
-            f"Close: {self.dataclose[0]:.2f}, BB Upper: {self.upper_band[0]:.2f}, "
-            + f"BB Middle: {self.middle_band[0]:.2f}, BB Lower:"
-            f" {self.lower_band[0]:.2f}, "
-            + f"RSI: {self.rsi[0]:.2f}, BB%: {bb_pct:.2f}",
-            level="debug",
-        )
-
-        # Check for stop loss if we have a position and stop loss is enabled
-        if self.position and self.p.use_stop_loss and self.stop_price is not None:
-            if (self.buysell == "buy" and self.dataclose[0] < self.stop_price) or (
-                self.buysell == "sell" and self.dataclose[0] > self.stop_price
-            ):
-                self.log(
-                    f"STOP LOSS TRIGGERED: Close Price: {self.dataclose[0]:.2f}, Stop"
-                    f" Price: {self.stop_price:.2f}"
-                )
-                self.order = self.close()
-                return
-
-        # Check for exit on middle band cross if enabled
-        if self.position and self.p.exit_middle:
-            if (self.buysell == "buy" and self.price_cross_middle[0]) or (
-                self.buysell == "sell" and self.price_cross_middle[0]
-            ):
-                self.log(
-                    f"EXIT ON MIDDLE BAND: Close Price: {self.dataclose[0]:.2f}, Middle"
-                    f" Band: {self.middle_band[0]:.2f}"
-                )
-                self.order = self.close()
-                return
-
-        # If we are in a position, check for exit conditions
-        if self.position:
-            # For long positions, exit when price touches or crosses upper band
-            # and RSI > threshold
-            if (
-                self.buysell == "buy"
-                and bb_pct >= 0.8
-                and self.rsi[0] > self.p.rsi_sell_threshold
-            ):
-                self.log(
-                    f"SELL SIGNAL: Close Price: {self.dataclose[0]:.2f}, Upper Band:"
-                    f" {self.upper_band[0]:.2f}, RSI: {self.rsi[0]:.2f}"
-                )
-                self.order = self.close()
-                return
-
-        # If we are not in the market, look for entry conditions
-        else:
-            # Check if we're allowed to trade based on the throttling rules
-            if not self.can_trade_now():
-                return
-
-            # For long entries, check if price is below lower band and RSI <
-            # threshold
-            if bb_pct <= 0.2 and self.rsi[0] < self.p.rsi_buy_threshold:
-                # Calculate position size based on current portfolio value
-                price = self.dataclose[0]
-                size = self.calculate_position_size(price)
-
-                self.log(
-                    f"BUY SIGNAL: Close Price: {price:.2f}, Lower Band:"
-                    f" {self.lower_band[0]:.2f}, RSI: {self.rsi[0]:.2f}"
-                )
-
-                # Keep track of the executed price
-                self.entry_price = price
-
-                # Set stop loss price if enabled
-                if self.p.use_stop_loss:
-                    self.stop_price = price * (1.0 - self.p.stop_loss_pct / 100.0)
-                    self.log(f"Stop loss set at {self.stop_price:.2f}")
-
-                # Enter long position
-                self.buysell = "buy"
-                self.order = self.buy(size=size)
-
-                # Update the last trade date for throttling
-                self.last_trade_date = self.datas[0].datetime.date(0)
-
-    def stop(self):
+""""""
         """Called when backtest is finished"""
         self.log(f"Final Portfolio Value: {self.broker.getvalue():.2f}")
 
@@ -442,11 +255,11 @@ class BollingerMeanReversionStrategy(bt.Strategy, TradeThrottling):
             self.log("No trades executed during the backtest period")
 
     def notify_order(self, order):
-        """Handle order notifications
+"""Handle order notifications
 
-        :param order:
-
-        """
+Args::
+    order:"""
+    order:"""
         if order.status in [order.Submitted, order.Accepted]:
             # Order pending, do nothing
             return
@@ -473,11 +286,11 @@ class BollingerMeanReversionStrategy(bt.Strategy, TradeThrottling):
         self.order = None
 
     def notify_trade(self, trade):
-        """Track completed trades
+"""Track completed trades
 
-        :param trade:
-
-        """
+Args::
+    trade:"""
+    trade:"""
         if not trade.isclosed:
             return
 

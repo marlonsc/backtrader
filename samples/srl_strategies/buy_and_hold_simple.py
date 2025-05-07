@@ -1,4 +1,7 @@
-# -*- coding: UTF-8 -*-
+"""buy_and_hold_simple.py module.
+
+Description of the module functionality."""
+
 
 # import
 import backtrader as bt
@@ -7,14 +10,9 @@ import backtrader as bt
 
 
 class BuyAndHold(bt.Strategy):
-    """ """
-
-    def __init__(self):
-        """ """
-        self.order = None
-
-    def next(self):
-        """ """
+""""""
+""""""
+""""""
         if self.order is None:
             self.order = self.buy()
 

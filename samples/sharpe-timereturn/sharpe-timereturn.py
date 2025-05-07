@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""sharpe-timereturn.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -34,84 +37,11 @@ import backtrader as bt
 
 
 def runstrat(pargs=None):
-    """
-
-    :param pargs: (Default value = None)
-
-    """
-    args = parse_args(pargs)
-
-    # Create a cerebro
-    cerebro = bt.Cerebro()
-
-    if args.cash is not None:
-        cerebro.broker.set_cash(args.cash)
-
-    # Get the dates from the args
-    fromdate = datetime.datetime.strptime(args.fromdate, "%Y-%m-%d")
-    todate = datetime.datetime.strptime(args.todate, "%Y-%m-%d")
-
-    # Create the 1st data
-    data = bt.feeds.BacktraderCSVData(
-        dataname=args.data, fromdate=fromdate, todate=todate
-    )
-
-    cerebro.adddata(data)  # Add the data to cerebro
-
-    # Add the strategy
-    cerebro.addstrategy(bt.strategies.SMA_CrossOver)
-
-    tframes = dict(
-        days=bt.TimeFrame.Days,
-        weeks=bt.TimeFrame.Weeks,
-        months=bt.TimeFrame.Months,
-        years=bt.TimeFrame.Years,
-    )
-
-    # Add the Analyzers
-    cerebro.addanalyzer(bt.analyzers.TimeReturn, timeframe=tframes[args.tframe])
-
-    shkwargs = dict()
-    if args.annualize:
-        shkwargs["annualize"] = True
-
-    if args.riskfreerate is not None:
-        shkwargs["riskfreerate"] = args.riskfreerate
-
-    if args.factor is not None:
-        shkwargs["factor"] = args.factor
-
-    if args.stddev_sample:
-        shkwargs["stddev_sample"] = True
-
-    if args.no_convertrate:
-        shkwargs["convertrate"] = False
-
-    cerebro.addanalyzer(
-        bt.analyzers.SharpeRatio, timeframe=tframes[args.tframe], **shkwargs
-    )
-
-    # Add a writer to get output
-    cerebro.addwriter(bt.WriterFile, csv=args.writercsv, rounding=4)
-
-    cerebro.run()  # And run it
-
-    # Plot if requested
-    if args.plot:
-        pkwargs = dict(style="bar")
-        if args.plot is not True:  # evals to True but is not True
-            npkwargs = eval("dict(" + args.plot + ")")  # args were passed
-            pkwargs.update(npkwargs)
-
-        cerebro.plot(**pkwargs)
-
-
-def parse_args(pargs=None):
-    """
-
-    :param pargs: (Default value = None)
-
-    """
+"""Args::
+    pargs: (Default value = None)"""
+"""Args::
+    pargs: (Default value = None)"""
+    pargs: (Default value = None)"""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="TimeReturns and SharpeRatio",

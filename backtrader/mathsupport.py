@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""mathsupport.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -29,37 +32,42 @@ import math
 
 
 def average(x, bessel=False):
-    """
+"""Compute the average of the elements in x.
 
-    :param x: iterable with len
-    :param bessel: (Default value = False)
-    :returns: A float with the average of the elements of x
+Args::
+    x: Iterable with len
+    bessel: (Default value = False). If True, use Bessel's correction (N-1).
 
-    """
+Returns::
+    A float with the average of the elements of x."""
+    A float with the average of the elements of x."""
     return math.fsum(x) / (len(x) - bessel)
 
 
 def variance(x, avgx=None):
-    """
+"""Compute the variance for each element of x.
 
-    :param x: iterable with len
-    :param avgx: (Default value = None)
-    :returns: A list with the variance for each element of x
+Args::
+    x: Iterable with len
+    avgx: (Default value = None). Precomputed average of x.
 
-    """
+Returns::
+    A list with the variance for each element of x."""
+    A list with the variance for each element of x."""
     if avgx is None:
         avgx = average(x)
-    return [pow(y - avgx, 2.0) for y in x]
+    return [(v - avgx) ** 2 for v in x]
 
 
 def standarddev(x, avgx=None, bessel=False):
-    """
+"""Compute the standard deviation of the elements in x.
 
-    :param x: iterable with len
-    :param avgx: (Default value = None)
-    :param bessel: (default ``False``) to be passed to the average to divide by
-      ``N - 1`` (Bessel's correction)
-    :returns: A float with the standard deviation of the elements of x
+Args::
+    x: Iterable with len
+    avgx: (Default value = None). Precomputed average of x.
+    bessel: (Default value = False). If True, use Bessel's correction (N-1).
 
-    """
+Returns::
+    A float with the standard deviation of the elements of x."""
+    A float with the standard deviation of the elements of x."""
     return math.sqrt(average(variance(x, avgx), bessel=bessel))

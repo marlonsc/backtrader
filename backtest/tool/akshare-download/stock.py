@@ -1,4 +1,7 @@
-import datetime
+"""stock.py module.
+
+Description of the module functionality."""
+
 import multiprocessing
 import os
 from typing import List
@@ -16,13 +19,12 @@ Download stock datas
 
 
 def get_stock_list(type: str):
-    """Get all A or US stock name list
-    type: zh_a | us
+"""Get all A or US stock name list
+type: zh_a | us
 
-    :param type:
-    :type type: str
-
-    """
+Args::
+    type:"""
+    type:"""
     if not os.path.exists(mainpath):
         os.makedirs(mainpath)
     df = eval(f"ak.stock_{type}_spot_em")()
@@ -58,25 +60,20 @@ def upsert_stock_detail(
     end_date: str = datetime.datetime.now().strftime("%Y%m%d"),
     period: str = "daily",
 ):
-    """Update or download stock data by symbol. Today's data will be updated after closing.
-    type: us | zh_a
-    symbol: stock's code
-    start_date: stock data's start date
-    end_date: stock data's end date
-    period: daily | weekly | monthly
+"""Update or download stock data by symbol. Today's data will be updated after closing.
+type: us | zh_a
+symbol: stock's code
+start_date: stock data's start date
+end_date: stock data's end date
+period: daily | weekly | monthly
 
-    :param type:
-    :type type: str
-    :param symbol:
-    :type symbol: str
-    :param start_date:
-    :type start_date: str
-    :param end_date:  (Default value = datetime.datetime.now().strftime("%Y%m%d"))
-    :type end_date: str
-    :param period:  (Default value = "daily")
-    :type period: str
-
-    """
+Args::
+    type: 
+    symbol: 
+    start_date: 
+    end_date: (Default value = datetime.datetime.now().strftime("%Y%m%d"))
+    period: (Default value = "daily")"""
+    period: (Default value = "daily")"""
     dir = os.path.join(mainpath, f"{type}")
     if not os.path.exists(dir):
         os.makedirs(dir)
@@ -152,46 +149,15 @@ def upsert_stock_detail(
 
 
 def name_list(csv_name):
-    """
-
-    :param csv_name:
-
-    """
-    import csv
-
-    csv_f = os.path.join(mainpath, f"{csv_name}")
-    stock_list = []
-    with open(csv_f, "r", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            if not row["名称"].startswith("N"):
-                stock_list.append(row["代码"])
-            else:
-                print(row["名称"])
-    return stock_list
-
-
-def get_stock_list_task(
-    stock_list: List[str],
-    type: str,
-    start_date: str,
-    end_date: str = datetime.datetime.now().strftime("%Y%m%d"),
-    period: str = "daily",
-):
-    """
-
-    :param stock_list:
-    :type stock_list: List[str]
-    :param type:
-    :type type: str
-    :param start_date:
-    :type start_date: str
-    :param end_date:  (Default value = datetime.datetime.now().strftime("%Y%m%d"))
-    :type end_date: str
-    :param period:  (Default value = "daily")
-    :type period: str
-
-    """
+"""Args::
+    csv_name:"""
+"""Args::
+    stock_list: 
+    type: 
+    start_date: 
+    end_date: (Default value = datetime.datetime.now().strftime("%Y%m%d"))
+    period: (Default value = "daily")"""
+    period: (Default value = "daily")"""
     # group's download bar
     bar = IncrementalBar("Download", max=len(stock_list))
     failed_num = 0
@@ -224,14 +190,12 @@ if __name__ == "__main__":
     pbar = tqdm(total=len(stock_list))
     # group per 20
     n = 20
-    stock_lists = [stock_list[i: i + n] for i in range(0, len(stock_list), n)]
+    stock_lists = [stock_list[i : i + n] for i in range(0, len(stock_list), n)]
 
     def bar_update(num):
-        """
-
-        :param num:
-
-        """
+"""Args::
+    num:"""
+    num:"""
         pbar.update(num)
         print(f"{pbar.n} / {pbar.total} / {pbar.leave}")
 

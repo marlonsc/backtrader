@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""scheduled.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -32,66 +35,14 @@ import backtrader as bt
 
 
 class St(bt.Strategy):
-    """ """
-
-    params = dict(
-        when=bt.timer.SESSION_START,
-        timer=True,
-        cheat=False,
-        offset=datetime.timedelta(),
-        repeat=datetime.timedelta(),
-        weekdays=[],
-    )
-
-    def __init__(self):
-        """ """
-        bt.ind.SMA()
-        if self.p.timer:
-            self.add_timer(
-                when=self.p.when,
-                offset=self.p.offset,
-                repeat=self.p.repeat,
-                weekdays=self.p.weekdays,
-            )
-        if self.p.cheat:
-            self.add_timer(
-                when=self.p.when,
-                offset=self.p.offset,
-                repeat=self.p.repeat,
-                cheat=True,
-            )
-
-        self.order = None
-
-    def prenext(self):
-        """ """
-        self.next()
-
-    def next(self):
-        """ """
-        _, isowk, isowkday = self.datetime.date().isocalendar()
-        txt = "{}, {}, Week {}, Day {}, O {}, H {}, L {}, C {}".format(
-            len(self),
-            self.datetime.datetime(),
-            isowk,
-            isowkday,
-            self.data.open[0],
-            self.data.high[0],
-            self.data.low[0],
-            self.data.close[0],
-        )
-
-        print(txt)
-
-    def notify_timer(self, timer, when, *args, **kwargs):
-        """
-
-        :param timer:
-        :param when:
-        :param *args:
-        :param **kwargs:
-
-        """
+""""""
+""""""
+""""""
+""""""
+"""Args::
+    timer: 
+    when:"""
+    when:"""
         print(
             "strategy notify_timer with tid {}, when {} cheat {}".format(
                 timer.p.tid, when, timer.p.cheat
@@ -103,70 +54,13 @@ class St(bt.Strategy):
             self.order = self.buy()
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
-        if order.status == order.Completed:
-            print(
-                "-- {} Buy Exec @ {}".format(
-                    self.data.datetime.date(), order.executed.price
-                )
-            )
-
-
-def runstrat(args=None):
-    """
-
-    :param args:  (Default value = None)
-
-    """
-    args = parse_args(args)
-
-    cerebro = bt.Cerebro()
-
-    # Data feed kwargs
-    kwargs = dict(
-        timeframe=bt.TimeFrame.Days,
-        compression=1,
-        sessionstart=datetime.time(9, 0),
-        sessionend=datetime.time(17, 30),
-    )
-
-    # Parse from/to-date
-    dtfmt, tmfmt = "%Y-%m-%d", "T%H:%M:%S"
-    for a, d in ((getattr(args, x), x) for x in ["fromdate", "todate"]):
-        if a:
-            strpfmt = dtfmt + tmfmt * ("T" in a)
-            kwargs[d] = datetime.datetime.strptime(a, strpfmt)
-
-    # Data feed
-    data0 = bt.feeds.BacktraderCSVData(dataname=args.data0, **kwargs)
-    cerebro.adddata(data0)
-
-    # Broker
-    cerebro.broker = bt.brokers.BackBroker(**eval("dict(" + args.broker + ")"))
-
-    # Sizer
-    cerebro.addsizer(bt.sizers.FixedSize, **eval("dict(" + args.sizer + ")"))
-
-    # Strategy
-    cerebro.addstrategy(St, **eval("dict(" + args.strat + ")"))
-
-    # Execute
-    cerebro.run(**eval("dict(" + args.cerebro + ")"))
-
-    if args.plot:  # Plot if requested to
-        cerebro.plot(**eval("dict(" + args.plot + ")"))
-
-
-def parse_args(pargs=None):
-    """
-
-    :param pargs:  (Default value = None)
-
-    """
+"""Args::
+    order:"""
+"""Args::
+    args: (Default value = None)"""
+"""Args::
+    pargs: (Default value = None)"""
+    pargs: (Default value = None)"""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Sample Skeleton",

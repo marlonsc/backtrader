@@ -1,10 +1,10 @@
 # Copyright (c) 2025 backtrader contributors
-"""
-Utilitários para manipulação de timers no backtrader.
-Todas as funções e docstrings devem ser line-wrap ≤ 90 caracteres.
+"""Utilities for timer manipulation in backtrader.
+All functions and docstrings should be line-wrapped ≤ 90 characters."""
 """
 
 import datetime
+
 from ..timer import Timer
 
 
@@ -25,26 +25,26 @@ def create_timer(
     *args,
     **kwargs,
 ):
-    """
-    Cria e adiciona um timer à lista de timers pendentes.
+"""Creates and adds a timer to the list of pending timers.
 
-    :param pretimers: Lista de timers pendentes
-    :param owner: Objeto dono do timer
-    :param when: Condição de disparo
-    :param offset: Offset do timer
-    :param repeat: Repetição
-    :param weekdays: Dias da semana
-    :param weekcarry: Carregar semana
-    :param monthdays: Dias do mês
-    :param monthcarry: Carregar mês
-    :param allow: Permissão
-    :param tzdata: Timezone
-    :param strats: Estratégias
-    :param cheat: Cheat flag
-    :param *args: Args adicionais
-    :param **kwargs: Kwargs adicionais
-    :return: Instância de Timer
-    """
+Args::
+    pretimers: List of pending timers
+    owner: Timer owner object
+    when: Trigger condition
+    offset: Timer offset
+    repeat: Repetition
+    weekdays: Days of the week
+    weekcarry: Week carry
+    monthdays: Days of the month
+    monthcarry: Month carry
+    allow: Permission
+    tzdata: Timezone
+    strats: Strategies
+    cheat: Cheat flag
+
+Returns::
+    Timer instance"""
+    Timer instance"""
     if weekdays is None:
         weekdays = []
     if monthdays is None:
@@ -86,24 +86,25 @@ def schedule_timer(
     *args,
     **kwargs,
 ):
-    """
-    Agenda um timer para o objeto cerebro.
-    :param cerebro: Instância de Cerebro
-    :param when: Condição de disparo
-    :param offset: Offset do timer
-    :param repeat: Repetição
-    :param weekdays: Dias da semana
-    :param weekcarry: Carregar semana
-    :param monthdays: Dias do mês
-    :param monthcarry: Carregar mês
-    :param allow: Permissão
-    :param tzdata: Timezone
-    :param strats: Estratégias
-    :param cheat: Cheat flag
-    :param *args: Args adicionais
-    :param **kwargs: Kwargs adicionais
-    :return: Instância de Timer
-    """
+"""Schedules a timer for the cerebro object.
+
+Args::
+    cerebro: Cerebro instance
+    when: Trigger condition
+    offset: Timer offset
+    repeat: Repetition
+    weekdays: Days of the week
+    weekcarry: Week carry
+    monthdays: Days of the month
+    monthcarry: Month carry
+    allow: Permission
+    tzdata: Timezone
+    strats: Strategies
+    cheat: Cheat flag
+
+Returns::
+    Timer instance"""
+    Timer instance"""
     return create_timer(
         cerebro._pretimers,
         owner=cerebro,
@@ -124,11 +125,9 @@ def schedule_timer(
 
 
 def notify_timer(timer, when, *args, **kwargs):
-    """
-    Notificação de timer (stub para interface futura).
-    :param timer: Instância de Timer
-    :param when: Momento do timer
-    :param *args: Args adicionais
-    :param **kwargs: Kwargs adicionais
-    """
-    pass
+"""Timer notification (stub for future interface).
+
+Args::
+    timer: Timer instance
+    when: Timer moment"""
+    when: Timer moment"""

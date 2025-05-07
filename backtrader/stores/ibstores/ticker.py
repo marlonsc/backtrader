@@ -25,26 +25,18 @@ nan = float("nan")
 @dataclass
 class Ticker:
     """Current market data such as bid, ask, last price, etc. for a contract.
-
-    Streaming level-1 ticks of type :class:`.TickData` are stored in
-    the ``ticks`` list.
-
-    Streaming level-2 ticks of type :class:`.MktDepthData` are stored in the
-    ``domTicks`` list. The order book (DOM) is available as lists of
-    :class:`.DOMLevel` in ``domBids`` and ``domAsks``.
-
-    Streaming tick-by-tick ticks are stored in ``tickByTicks``.
-
-    For options the :class:`.OptionComputation` values for the bid, ask, resp.
-    last price are stored in the ``bidGreeks``, ``askGreeks`` resp.
-    ``lastGreeks`` attributes. There is also ``modelGreeks`` that conveys
-    the greeks as calculated by Interactive Brokers' option model.
-
-    Events:
-        * ``updateEvent`` (ticker: :class:`.Ticker`)
-
-
-    """
+Streaming level-1 ticks of type :class:`.TickData` are stored in
+the ``ticks`` list.
+Streaming level-2 ticks of type :class:`.MktDepthData` are stored in the
+``domTicks`` list. The order book (DOM) is available as lists of
+:class:`.DOMLevel` in ``domBids`` and ``domAsks``.
+Streaming tick-by-tick ticks are stored in ``tickByTicks``.
+For options the :class:`.OptionComputation` values for the bid, ask, resp.
+last price are stored in the ``bidGreeks``, ``askGreeks`` resp.
+``lastGreeks`` attributes. There is also ``modelGreeks`` that conveys
+the greeks as calculated by Interactive Brokers' option model.
+Events:
+* ``updateEvent`` (ticker: :class:`.Ticker`)"""
 
     events: ClassVar = ("updateEvent",)
 
@@ -127,11 +119,8 @@ class Ticker:
         self.updateEvent = TickerUpdateEvent("updateEvent")
 
     def __eq__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return self is other
 
     def __hash__(self):
@@ -143,11 +132,7 @@ class Ticker:
 
     def hasBidAsk(self) -> bool:
         """See if this ticker has a valid bid and ask.
-
-
-        :rtype: bool
-
-        """
+:rtype: bool"""
         return (
             self.bid != -1
             and not isNan(self.bid)
@@ -158,26 +143,13 @@ class Ticker:
         )
 
     def midpoint(self) -> float:
-        """
-
-
-        :returns: are available.
-
-        :rtype: float
-
-        """
+        """Returns:
+    are available."""
         return (self.bid + self.ask) * 0.5 if self.hasBidAsk() else nan
 
     def marketPrice(self) -> float:
-        """
-
-
-        :returns: * last price if within current bid/ask or no bid/ask available;
-        * average of bid and ask (midpoint).
-
-        :rtype: float
-
-        """
+        """Returns:
+    * last price if within current bid/ask or no bid/ask available;"""
         if self.hasBidAsk():
             if self.bid <= self.last <= self.ask:
                 price = self.last
@@ -195,47 +167,27 @@ class TickerUpdateEvent(Event):
 
     def trades(self) -> "Tickfilter":
         """Emit trade ticks.
-
-
-        :rtype: "Tickfilter"
-
-        """
+:rtype: "Tickfilter""""
         return Tickfilter((4, 5, 48, 68, 71), self)
 
     def bids(self) -> "Tickfilter":
         """Emit bid ticks.
-
-
-        :rtype: "Tickfilter"
-
-        """
+:rtype: "Tickfilter""""
         return Tickfilter((0, 1, 66, 69), self)
 
     def asks(self) -> "Tickfilter":
         """Emit ask ticks.
-
-
-        :rtype: "Tickfilter"
-
-        """
+:rtype: "Tickfilter""""
         return Tickfilter((2, 3, 67, 70), self)
 
     def bidasks(self) -> "Tickfilter":
         """Emit bid and ask ticks.
-
-
-        :rtype: "Tickfilter"
-
-        """
+:rtype: "Tickfilter""""
         return Tickfilter((0, 1, 66, 69, 2, 3, 67, 70), self)
 
     def midpoints(self) -> "Tickfilter":
         """Emit midpoint ticks.
-
-
-        :rtype: "Tickfilter"
-
-        """
+:rtype: "Tickfilter""""
         return Midpoints((), self)
 
 
@@ -245,66 +197,48 @@ class Tickfilter(Op):
     __slots__ = ("_tickTypes",)
 
     def __init__(self, tickTypes, source=None):
-        """
-
-        :param tickTypes:
-        :param source:  (Default value = None)
-
-        """
+        """Args:
+    tickTypes: 
+    source: (Default value = None)"""
         Op.__init__(self, source)
         self._tickTypes = set(tickTypes)
 
     def on_source(self, ticker):
-        """
-
-        :param ticker:
-
-        """
+        """Args:
+    ticker:"""
         for t in ticker.ticks:
             if t.tickType in self._tickTypes:
                 self.emit(t.time, t.price, t.size)
 
     def timebars(self, timer: Event) -> "TimeBars":
         """Aggregate ticks into time bars, where the timing of new bars
-        is derived from a timer event.
-        Emits a completed :class:`Bar`.
+is derived from a timer event.
+Emits a completed :class:`Bar`.
+This event stores a :class:`BarList` of all created bars in the
+``bars`` property.
 
-        This event stores a :class:`BarList` of all created bars in the
-        ``bars`` property.
-
-        :param timer: Event for timing when a new bar starts.
-        :type timer: Event
-        :rtype: "TimeBars"
-
-        """
+Args:
+    timer: Event for timing when a new bar starts."""
         return TimeBars(timer, self)
 
     def tickbars(self, count: int) -> "TickBars":
         """Aggregate ticks into bars that have the same number of ticks.
-        Emits a completed :class:`Bar`.
+Emits a completed :class:`Bar`.
+This event stores a :class:`BarList` of all created bars in the
+``bars`` property.
 
-        This event stores a :class:`BarList` of all created bars in the
-        ``bars`` property.
-
-        :param count: Number of ticks to use to form one bar.
-        :type count: int
-        :rtype: "TickBars"
-
-        """
+Args:
+    count: Number of ticks to use to form one bar."""
         return TickBars(count, self)
 
     def volumebars(self, volume: int) -> "VolumeBars":
         """Aggregate ticks into bars that have the same volume.
-        Emits a completed :class:`Bar`.
+Emits a completed :class:`Bar`.
+This event stores a :class:`BarList` of all created bars in the
+``bars`` property.
 
-        This event stores a :class:`BarList` of all created bars in the
-        ``bars`` property.
-
-        :param volume:
-        :type volume: int
-        :rtype: "VolumeBars"
-
-        """
+Args:
+    volume:"""
         return VolumeBars(volume, self)
 
 
@@ -314,11 +248,8 @@ class Midpoints(Tickfilter):
     __slots__ = ()
 
     def on_source(self, ticker):
-        """
-
-        :param ticker:
-
-        """
+        """Args:
+    ticker:"""
         if ticker.ticks:
             self.emit(ticker.time, ticker.midpoint(), 0)
 
@@ -340,20 +271,13 @@ class BarList(List[Bar]):
     """ """
 
     def __init__(self, *args):
-        """
-
-        :param *args:
-
-        """
+        """"""
         super().__init__(*args)
         self.updateEvent = Event("updateEvent")
 
     def __eq__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return self is other
 
     def __hash__(self):
@@ -373,25 +297,19 @@ class TimeBars(Op):
     bars: BarList
 
     def __init__(self, timer, source=None):
-        """
-
-        :param timer:
-        :param source:  (Default value = None)
-
-        """
+        """Args:
+    timer: 
+    source: (Default value = None)"""
         Op.__init__(self, source)
         self._timer = timer
         self._timer.connect(self._on_timer, None, self._on_timer_done)
         self.bars = BarList()
 
     def on_source(self, time, price, size):
-        """
-
-        :param time:
-        :param price:
-        :param size:
-
-        """
+        """Args:
+    time: 
+    price: 
+    size:"""
         if not self.bars:
             return
         bar = self.bars[-1]
@@ -405,11 +323,8 @@ class TimeBars(Op):
         self.bars.updateEvent.emit(self.bars, False)
 
     def _on_timer(self, time):
-        """
-
-        :param time:
-
-        """
+        """Args:
+    time:"""
         if self.bars:
             bar = self.bars[-1]
             if isNan(bar.close) and len(self.bars) > 1:
@@ -419,11 +334,8 @@ class TimeBars(Op):
         self.bars.append(Bar(time))
 
     def _on_timer_done(self, timer):
-        """
-
-        :param timer:
-
-        """
+        """Args:
+    timer:"""
         self._timer = None
         self.set_done()
 
@@ -437,24 +349,18 @@ class TickBars(Op):
     bars: BarList
 
     def __init__(self, count, source=None):
-        """
-
-        :param count:
-        :param source:  (Default value = None)
-
-        """
+        """Args:
+    count: 
+    source: (Default value = None)"""
         Op.__init__(self, source)
         self._count = count
         self.bars = BarList()
 
     def on_source(self, time, price, size):
-        """
-
-        :param time:
-        :param price:
-        :param size:
-
-        """
+        """Args:
+    time: 
+    price: 
+    size:"""
         if not self.bars or self.bars[-1].count == self._count:
             bar = Bar(time, price, price, price, price, size, 1)
             self.bars.append(bar)
@@ -479,24 +385,18 @@ class VolumeBars(Op):
     bars: BarList
 
     def __init__(self, volume, source=None):
-        """
-
-        :param volume:
-        :param source:  (Default value = None)
-
-        """
+        """Args:
+    volume: 
+    source: (Default value = None)"""
         Op.__init__(self, source)
         self._volume = volume
         self.bars = BarList()
 
     def on_source(self, time, price, size):
-        """
-
-        :param time:
-        :param price:
-        :param size:
-
-        """
+        """Args:
+    time: 
+    price: 
+    size:"""
         if not self.bars or self.bars[-1].volume >= self._volume:
             bar = Bar(time, price, price, price, price, size, 1)
             self.bars.append(bar)

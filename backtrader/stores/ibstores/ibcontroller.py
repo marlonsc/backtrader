@@ -15,10 +15,8 @@ from ib_insync.ib import IB
 
 @dataclass
 class IBC:
-    r"""Programmatic control over starting and stopping TWS/Gateway
-    using IBC (https://github.com/IbcAlpha/IBC).
-
-
+"""Programmatic control over starting and stopping TWS/Gateway
+    using IBC (https://github.com/IbcAlpha/IBC)."""
     """
 
     IbcLogLevel: ClassVar = logging.DEBUG
@@ -38,25 +36,9 @@ class IBC:
     on2fatimeout: str = ""
 
     def __post_init__(self):
-        """ """
-        self._isWindows = sys.platform == "win32"
-        if not self.ibcPath:
-            self.ibcPath = "/opt/ibc" if not self._isWindows else "C:\\IBC"
-        self._proc = None
-        self._monitor = None
-        self._logger = logging.getLogger("ib_insync.IBC")
-
-    def __enter__(self):
-        """ """
-        self.start()
-        return self
-
-    def __exit__(self, *_exc):
-        """
-
-        :param *_exc:
-
-        """
+""""""
+""""""
+        """"""
         self.terminate()
 
     def start(self):
@@ -143,16 +125,12 @@ class IBC:
 
 @dataclass
 class Watchdog:
-    r"""Start, connect and watch over the TWS or gateway app and try to keep it
-    up and running. It is intended to be used in an event-driven
-    application that properly initializes itself upon (re-)connect.
-
-    It is not intended to be used in a notebook or in imperative-style code.
-    Do not expect Watchdog to magically shield you from reality. Do not use
-    Watchdog unless you understand what it does and doesn't do.
-
-
-    """
+    """Start, connect and watch over the TWS or gateway app and try to keep it
+up and running. It is intended to be used in an event-driven
+application that properly initializes itself upon (re-)connect.
+It is not intended to be used in a notebook or in imperative-style code.
+Do not expect Watchdog to magically shield you from reality. Do not use
+Watchdog unless you understand what it does and doesn't do."""
 
     events = [
         "startingEvent",
@@ -179,62 +157,25 @@ class Watchdog:
     probeTimeout: float = 4
 
     def __post_init__(self):
-        """ """
-        self.startingEvent = Event("startingEvent")
-        self.startedEvent = Event("startedEvent")
-        self.stoppingEvent = Event("stoppingEvent")
-        self.stoppedEvent = Event("stoppedEvent")
-        self.softTimeoutEvent = Event("softTimeoutEvent")
-        self.hardTimeoutEvent = Event("hardTimeoutEvent")
-        if not self.controller:
-            raise ValueError("No controller supplied")
-        if not self.ib:
-            raise ValueError("No IB instance supplied")
-        if self.ib.isConnected():
-            raise ValueError("IB instance must not be connected")
-        self._runner = None
-        self._logger = logging.getLogger("ib_insync.Watchdog")
-
-    def start(self):
-        """ """
-        self._logger.info("Starting")
-        self.startingEvent.emit(self)
-        self._runner = asyncio.ensure_future(self.runAsync())
-        return self._runner
-
-    def stop(self):
-        """ """
-        self._logger.info("Stopping")
-        self.stoppingEvent.emit(self)
-        self.ib.disconnect()
-        self._runner = None
-
-    async def runAsync(self):
+""""""
+""""""
+""""""
         """ """
 
         def onTimeout(idlePeriod):
-            """
-
-            :param idlePeriod:
-
-            """
-            if not waiter.done():
-                waiter.set_result(None)
-
-        def onError(reqId, errorCode, errorString, contract):
-            """
-
-            :param reqId:
-            :param errorCode:
-            :param errorString:
-            :param contract:
-
-            """
+"""Args::
+    idlePeriod:"""
+"""Args::
+    reqId: 
+    errorCode: 
+    errorString: 
+    contract:"""
+    contract:"""
             if errorCode in {100, 1100} and not waiter.done():
                 waiter.set_exception(Warning(f"Error {errorCode}"))
 
         def onDisconnected():
-            """ """
+""""""
             if not waiter.done():
                 waiter.set_exception(Warning("Disconnected"))
 

@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""locator.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -53,13 +56,11 @@ from matplotlib.dates import (
 
 
 def _idx2dt(idx, dates, tz):
-    """
-
-    :param idx:
-    :param dates:
-    :param tz:
-
-    """
+"""Args::
+    idx: 
+    dates: 
+    tz:"""
+    tz:"""
     if isinstance(idx, datetime.date):
         return idx
 
@@ -75,16 +76,12 @@ def _idx2dt(idx, dates, tz):
 
 
 class RRuleLocator(RRLocator):
-    """ """
-
-    def __init__(self, dates, o, tz=None):
-        """
-
-        :param dates:
-        :param o:
-        :param tz:  (Default value = None)
-
-        """
+""""""
+"""Args::
+    dates: 
+    o: 
+    tz: (Default value = None)"""
+    tz: (Default value = None)"""
         self._dates = dates
         super(RRuleLocator, self).__init__(o, tz)
 
@@ -111,12 +108,10 @@ class RRuleLocator(RRLocator):
         )
 
     def tick_values(self, vmin, vmax):
-        """
-
-        :param vmin:
-        :param vmax:
-
-        """
+"""Args::
+    vmin: 
+    vmax:"""
+    vmax:"""
         import bisect
 
         dtnums = super(RRuleLocator, self).tick_values(vmin, vmax)
@@ -124,20 +119,9 @@ class RRuleLocator(RRLocator):
 
 
 class AutoDateLocator(ADLocator):
-    """ """
-
-    def __init__(self, dates, *args, **kwargs):
-        """
-
-        :param dates:
-        :param *args:
-        :param **kwargs:
-
-        """
-        self._dates = dates
-        super(AutoDateLocator, self).__init__(*args, **kwargs)
-
-    def datalim_to_dt(self):
+""""""
+"""Args::
+    dates:"""
         """Convert axis data interval to datetime objects."""
         dmin, dmax = self.axis.get_data_interval()
         if dmin > dmax:
@@ -160,24 +144,20 @@ class AutoDateLocator(ADLocator):
         )
 
     def tick_values(self, vmin, vmax):
-        """
-
-        :param vmin:
-        :param vmax:
-
-        """
+"""Args::
+    vmin: 
+    vmax:"""
+    vmax:"""
         import bisect
 
         dtnums = super(AutoDateLocator, self).tick_values(vmin, vmax)
         return [bisect.bisect_left(self._dates, x) for x in dtnums]
 
     def get_locator(self, dmin, dmax):
-        """
-
-        :param dmin:
-        :param dmax:
-
-        """
+"""Args::
+    dmin: 
+    dmax:"""
+    dmax:"""
         "Pick the best locator based on a distance."
         delta = relativedelta(dmax, dmin)
         tdelta = dmax - dmin
@@ -307,27 +287,21 @@ class AutoDateLocator(ADLocator):
 
 
 class AutoDateFormatter(ADFormatter):
-    """ """
-
-    def __init__(self, dates, locator, tz=None, defaultfmt="%Y-%m-%d"):
-        """
-
-        :param dates:
-        :param locator:
-        :param tz:  (Default value = None)
-        :param defaultfmt:  (Default value = "%Y-%m-%d")
-
-        """
+""""""
+"""Args::
+    dates: 
+    locator: 
+    tz: (Default value = None)
+    defaultfmt: (Default value = "%Y-%m-%d")"""
+    defaultfmt: (Default value = "%Y-%m-%d")"""
         self._dates = dates
         super(AutoDateFormatter, self).__init__(locator, tz, defaultfmt)
 
     def __call__(self, x, pos=None):
-        """
-
-        :param x:
-        :param pos:  (Default value = None)
-
-        """
+"""Args::
+    x: 
+    pos: (Default value = None)"""
+    pos: (Default value = None)"""
         x = int(round(x))
         ldates = len(self._dates)
         if x >= ldates:

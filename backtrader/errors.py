@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""errors.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -29,45 +32,19 @@ __all__ = ["BacktraderError", "StrategySkipError"]
 
 
 class BacktraderError(Exception):
-    """Base exception for all other exceptions"""
+    """Base exception for all Backtrader-specific errors."""
 
 
 class StrategySkipError(BacktraderError):
-    """Requests the platform to skip this strategy for backtesting. To be"""
+    """Requests the platform to skip this strategy during backtesting."""
 
 
 class ModuleImportError(BacktraderError):
-    """
-
-
-    :raises be: imported
-
-    """
-
-    def __init__(self, message, *args):
-        """
-
-        :param message:
-        :param *args:
-
-        """
-        super(ModuleImportError, self).__init__(message)
-        self.args = args
-
-
-class FromModuleImportError(ModuleImportError):
-    """
-
-
-    :raises be: imported
-
-    """
-
-    def __init__(self, message, *args):
-        """
-
-        :param message:
-        :param *args:
-
-        """
+""""""
+"""Args::
+    message: Error message string."""
+""""""
+"""Args::
+    message: Error message string."""
+    message: Error message string."""
         super(FromModuleImportError, self).__init__(message, *args)

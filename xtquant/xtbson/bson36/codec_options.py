@@ -26,38 +26,23 @@ from .binary import (
 
 
 def _abstractproperty(func):
-    """
+"""Args::
+    func:"""
+"""Determine if a document_class is a RawBSONDocument class.
 
-    :param func:
-
-    """
-    return property(abc.abstractmethod(func))
-
-
-_RAW_BSON_DOCUMENT_MARKER = 101
-
-
-def _raw_document_class(document_class):
-    """Determine if a document_class is a RawBSONDocument class.
-
-    :param document_class:
-
-    """
+Args::
+    document_class:"""
+    document_class:"""
     marker = getattr(document_class, "_type_marker", None)
     return marker == _RAW_BSON_DOCUMENT_MARKER
 
 
 class TypeEncoder(abc.ABC):
     """Base class for defining type codec classes which describe how a
-    custom type can be transformed to one of the types BSON understands.
-
-    Codec classes must implement the ``python_type`` attribute, and the
-    ``transform_python`` method to support encoding.
-
-    See :ref:`custom-type-type-codec` documentation for an example.
-
-
-    """
+custom type can be transformed to one of the types BSON understands.
+Codec classes must implement the ``python_type`` attribute, and the
+``transform_python`` method to support encoding.
+See :ref:`custom-type-type-codec` documentation for an example."""
 
     @_abstractproperty
     def python_type(self):
@@ -65,24 +50,19 @@ class TypeEncoder(abc.ABC):
 
     @abc.abstractmethod
     def transform_python(self, value):
-        """Convert the given Python object into something serializable.
+"""Convert the given Python object into something serializable.
 
-        :param value:
-
-        """
+Args::
+    value:"""
+    value:"""
 
 
 class TypeDecoder(abc.ABC):
     """Base class for defining type codec classes which describe how a
-    BSON type can be transformed to a custom type.
-
-    Codec classes must implement the ``bson_type`` attribute, and the
-    ``transform_bson`` method to support decoding.
-
-    See :ref:`custom-type-type-codec` documentation for an example.
-
-
-    """
+BSON type can be transformed to a custom type.
+Codec classes must implement the ``bson_type`` attribute, and the
+``transform_bson`` method to support decoding.
+See :ref:`custom-type-type-codec` documentation for an example."""
 
     @_abstractproperty
     def bson_type(self):
@@ -90,65 +70,51 @@ class TypeDecoder(abc.ABC):
 
     @abc.abstractmethod
     def transform_bson(self, value):
-        """Convert the given BSON value into our own type.
+"""Convert the given BSON value into our own type.
 
-        :param value:
-
-        """
+Args::
+    value:"""
+    value:"""
 
 
 class TypeCodec(TypeEncoder, TypeDecoder):
     """Base class for defining type codec classes which describe how a
-    custom type can be transformed to/from one of the types :mod:`bson`
-    can already encode/decode.
-
-    Codec classes must implement the ``python_type`` attribute, and the
-    ``transform_python`` method to support encoding, as well as the
-    ``bson_type`` attribute, and the ``transform_bson`` method to support
-    decoding.
-
-    See :ref:`custom-type-type-codec` documentation for an example.
-
-
-    """
+custom type can be transformed to/from one of the types :mod:`bson`
+can already encode/decode.
+Codec classes must implement the ``python_type`` attribute, and the
+``transform_python`` method to support encoding, as well as the
+``bson_type`` attribute, and the ``transform_bson`` method to support
+decoding.
+See :ref:`custom-type-type-codec` documentation for an example."""
 
 
 class TypeRegistry(object):
     """Encapsulates type codecs used in encoding and / or decoding BSON, as
-    well as the fallback encoder. Type registries cannot be modified after
-    instantiation.
-
-    ``TypeRegistry`` can be initialized with an iterable of type codecs, and
-    a callable for the fallback encoder::
-
-
-    See :ref:`custom-type-type-registry` documentation for an example.
-
-    :Parameters:
-      - `type_codecs` (optional): iterable of type codec instances. If
-        ``type_codecs`` contains multiple codecs that transform a single
-        python or BSON type, the transformation specified by the type codec
-        occurring last prevails. A TypeError will be raised if one or more
-        type codecs modify the encoding behavior of a built-in :mod:`bson`
-        type.
-      - `fallback_encoder` (optional): callable that accepts a single,
-        unencodable python value and transforms it into a type that
-        :mod:`bson` can encode. See :ref:`fallback-encoder-callable`
-        documentation for an example.
-
-
-    >>> from .codec_options import TypeRegistry
-      >>> type_registry = TypeRegistry([Codec1, Codec2, Codec3, ...],
-      ...                              fallback_encoder)
-    """
+well as the fallback encoder. Type registries cannot be modified after
+instantiation.
+``TypeRegistry`` can be initialized with an iterable of type codecs, and
+a callable for the fallback encoder::
+See :ref:`custom-type-type-registry` documentation for an example.
+:Parameters:
+- `type_codecs` (optional): iterable of type codec instances. If
+``type_codecs`` contains multiple codecs that transform a single
+python or BSON type, the transformation specified by the type codec
+occurring last prevails. A TypeError will be raised if one or more
+type codecs modify the encoding behavior of a built-in :mod:`bson`
+type.
+- `fallback_encoder` (optional): callable that accepts a single,
+unencodable python value and transforms it into a type that
+:mod:`bson` can encode. See :ref:`fallback-encoder-callable`
+documentation for an example.
+>>> from .codec_options import TypeRegistry
+>>> type_registry = TypeRegistry([Codec1, Codec2, Codec3, ...],
+...                              fallback_encoder)"""
 
     def __init__(self, type_codecs=None, fallback_encoder=None):
-        """
-
-        :param type_codecs:  (Default value = None)
-        :param fallback_encoder:  (Default value = None)
-
-        """
+"""Args::
+    type_codecs: (Default value = None)
+    fallback_encoder: (Default value = None)"""
+    fallback_encoder: (Default value = None)"""
         self.__type_codecs = list(type_codecs or [])
         self._fallback_encoder = fallback_encoder
         self._encoder_map = {}
@@ -181,136 +147,75 @@ class TypeRegistry(object):
                 )
 
     def _validate_type_encoder(self, codec):
-        """
-
-        :param codec:
-
-        """
-        from . import _BUILT_IN_TYPES
-
-        for pytype in _BUILT_IN_TYPES:
-            if issubclass(codec.python_type, pytype):
-                err_msg = (
-                    "TypeEncoders cannot change how built-in types are "
-                    "encoded (encoder %s transforms type %s)" % (codec, pytype)
-                )
-                raise TypeError(err_msg)
-
-    def __repr__(self):
-        """ """
-        return "%s(type_codecs=%r, fallback_encoder=%r)" % (
-            self.__class__.__name__,
-            self.__type_codecs,
-            self._fallback_encoder,
-        )
-
-    def __eq__(self, other):
-        """
-
-        :param other:
-
-        """
-        if not isinstance(other, type(self)):
-            return NotImplemented
-        return (
-            (self._decoder_map == other._decoder_map)
-            and (self._encoder_map == other._encoder_map)
-            and (self._fallback_encoder == other._fallback_encoder)
-        )
-
-
-_options_base = namedtuple(
-    "CodecOptions",
-    (
-        "document_class",
-        "tz_aware",
-        "uuid_representation",
-        "unicode_decode_error_handler",
-        "tzinfo",
-        "type_registry",
-    ),
-)
-
-
-class CodecOptions(_options_base):
+"""Args::
+    codec:"""
+""""""
+"""Args::
+    other:"""
     """Encapsulates options used encoding and / or decoding BSON.
-
-    The `document_class` option is used to define a custom type for use
-    decoding BSON documents. Access to the underlying raw BSON bytes for
-    a document is available using the :class:`~bson.raw_bson.RawBSONDocument`
-    type::
-
-
-    The document class can be any type that inherits from
-    :class:`~collections.abc.MutableMapping`::
-
-
-    See :doc:`/examples/datetimes` for examples using the `tz_aware` and
-    `tzinfo` options.
-
-    See :doc:`examples/uuid` for examples using the `uuid_representation`
-    option.
-
-    :Parameters:
-      - `document_class`: BSON documents returned in queries will be decoded
-        to an instance of this class. Must be a subclass of
-        :class:`~collections.abc.MutableMapping`. Defaults to :class:`dict`.
-      - `tz_aware`: If ``True``, BSON datetimes will be decoded to timezone
-        aware instances of :class:`~datetime.datetime`. Otherwise they will be
-        naive. Defaults to ``False``.
-      - `uuid_representation`: The BSON representation to use when encoding
-        and decoding instances of :class:`~uuid.UUID`. Defaults to
-        :data:`~bson.binary.UuidRepresentation.UNSPECIFIED`. New
-        applications should consider setting this to
-        :data:`~bson.binary.UuidRepresentation.STANDARD` for cross language
-        compatibility. See :ref:`handling-uuid-data-example` for details.
-      - `unicode_decode_error_handler`: The error handler to apply when
-        a Unicode-related error occurs during BSON decoding that would
-        otherwise raise :exc:`UnicodeDecodeError`. Valid options include
-        'strict', 'replace', 'backslashreplace', 'surrogateescape', and
-        'ignore'. Defaults to 'strict'.
-      - `tzinfo`: A :class:`~datetime.tzinfo` subclass that specifies the
-        timezone to/from which :class:`~datetime.datetime` objects should be
-        encoded/decoded.
-      - `type_registry`: Instance of :class:`TypeRegistry` used to customize
-        encoding and decoding behavior.
-
-    .. versionchanged:: 4.0
-       The default for `uuid_representation` was changed from
-       :const:`~bson.binary.UuidRepresentation.PYTHON_LEGACY` to
-       :const:`~bson.binary.UuidRepresentation.UNSPECIFIED`.
-
-    .. versionadded:: 3.8
-       `type_registry` attribute.
-
-    .. warning:: Care must be taken when changing
-       `unicode_decode_error_handler` from its default value ('strict').
-       The 'replace' and 'ignore' modes should not be used when documents
-       retrieved from the server will be modified in the client application
-       and stored back to the server.
-
-
-    >>> from .raw_bson import RawBSONDocument
-      >>> from .codec_options import CodecOptions
-      >>> codec_options = CodecOptions(document_class=RawBSONDocument)
-      >>> coll = db.get_collection('test', codec_options=codec_options)
-      >>> doc = coll.find_one()
-      >>> doc.raw
-      '\\x16\\x00\\x00\\x00\\x07_id\\x00[0\\x165\\x91\\x10\\xea\\x14\\xe8\\xc5\\x8b\\x93\\x00'
-
-      >>> class AttributeDict(dict):
-      ...     # A dict that supports attribute access.
-      ...     def __getattr__(self, key):
-      ...         return self[key]
-      ...     def __setattr__(self, key, value):
-      ...         self[key] = value
-      ...
-      >>> codec_options = CodecOptions(document_class=AttributeDict)
-      >>> coll = db.get_collection('test', codec_options=codec_options)
-      >>> doc = coll.find_one()
-      >>> doc._id
-      ObjectId('5b3016359110ea14e8c58b93')
-    """
+The `document_class` option is used to define a custom type for use
+decoding BSON documents. Access to the underlying raw BSON bytes for
+a document is available using the :class:`~bson.raw_bson.RawBSONDocument`
+type::
+The document class can be any type that inherits from
+:class:`~collections.abc.MutableMapping`::
+See :doc:`/examples/datetimes` for examples using the `tz_aware` and
+`tzinfo` options.
+See :doc:`examples/uuid` for examples using the `uuid_representation`
+option.
+:Parameters:
+- `document_class`: BSON documents returned in queries will be decoded
+to an instance of this class. Must be a subclass of
+:class:`~collections.abc.MutableMapping`. Defaults to :class:`dict`.
+- `tz_aware`: If ``True``, BSON datetimes will be decoded to timezone
+aware instances of :class:`~datetime.datetime`. Otherwise they will be
+naive. Defaults to ``False``.
+- `uuid_representation`: The BSON representation to use when encoding
+and decoding instances of :class:`~uuid.UUID`. Defaults to
+:data:`~bson.binary.UuidRepresentation.UNSPECIFIED`. New
+applications should consider setting this to
+:data:`~bson.binary.UuidRepresentation.STANDARD` for cross language
+compatibility. See :ref:`handling-uuid-data-example` for details.
+- `unicode_decode_error_handler`: The error handler to apply when
+a Unicode-related error occurs during BSON decoding that would
+otherwise raise :exc:`UnicodeDecodeError`. Valid options include
+'strict', 'replace', 'backslashreplace', 'surrogateescape', and
+'ignore'. Defaults to 'strict'.
+- `tzinfo`: A :class:`~datetime.tzinfo` subclass that specifies the
+timezone to/from which :class:`~datetime.datetime` objects should be
+encoded/decoded.
+- `type_registry`: Instance of :class:`TypeRegistry` used to customize
+encoding and decoding behavior.
+.. versionchanged:: 4.0
+The default for `uuid_representation` was changed from
+:const:`~bson.binary.UuidRepresentation.PYTHON_LEGACY` to
+:const:`~bson.binary.UuidRepresentation.UNSPECIFIED`.
+.. versionadded:: 3.8
+`type_registry` attribute.
+.. warning:: Care must be taken when changing
+`unicode_decode_error_handler` from its default value ('strict').
+The 'replace' and 'ignore' modes should not be used when documents
+retrieved from the server will be modified in the client application
+and stored back to the server.
+>>> from .raw_bson import RawBSONDocument
+>>> from .codec_options import CodecOptions
+>>> codec_options = CodecOptions(document_class=RawBSONDocument)
+>>> coll = db.get_collection('test', codec_options=codec_options)
+>>> doc = coll.find_one()
+>>> doc.raw
+'\x16\x00\x00\x00\x07_id\x00[0\x165\x91\x10\xea\x14\xe8\xc5\x8b\x93\x00'
+>>> class AttributeDict(dict):
+...     # A dict that supports attribute access.
+...     def __getattr__(self, key):
+...         return self[key]
+...     def __setattr__(self, key, value):
+...         self[key] = value
+...
+>>> codec_options = CodecOptions(document_class=AttributeDict)
+>>> coll = db.get_collection('test', codec_options=codec_options)
+>>> doc = coll.find_one()
+>>> doc._id
+ObjectId('5b3016359110ea14e8c58b93')"""
 
     def __new__(
         cls,
@@ -321,16 +226,14 @@ class CodecOptions(_options_base):
         tzinfo=None,
         type_registry=None,
     ):
-        """
-
-        :param document_class:  (Default value = dict)
-        :param tz_aware:  (Default value = False)
-        :param uuid_representation:  (Default value = UuidRepresentation.UNSPECIFIED)
-        :param unicode_decode_error_handler:  (Default value = "strict")
-        :param tzinfo:  (Default value = None)
-        :param type_registry:  (Default value = None)
-
-        """
+"""Args::
+    document_class: (Default value = dict)
+    tz_aware: (Default value = False)
+    uuid_representation: (Default value = UuidRepresentation.UNSPECIFIED)
+    unicode_decode_error_handler: (Default value = "strict")
+    tzinfo: (Default value = None)
+    type_registry: (Default value = None)"""
+    type_registry: (Default value = None)"""
         if not (
             issubclass(document_class, _MutableMapping)
             or _raw_document_class(document_class)
@@ -410,24 +313,9 @@ class CodecOptions(_options_base):
         }
 
     def __repr__(self):
-        """ """
-        return "%s(%s)" % (self.__class__.__name__, self._arguments_repr())
-
-    def with_options(self, **kwargs):
+""""""
         """Make a copy of this CodecOptions, overriding some options::
-
-
-        .. versionadded:: 3.5
-
-        :param **kwargs:
-
-        >>> from .codec_options import DEFAULT_CODEC_OPTIONS
-            >>> DEFAULT_CODEC_OPTIONS.tz_aware
-            False
-            >>> options = DEFAULT_CODEC_OPTIONS.with_options(tz_aware=True)
-            >>> options.tz_aware
-            True
-        """
+.. versionadded:: 3.5"""
         opts = self._options_dict()
         opts.update(kwargs)
         return CodecOptions(**opts)
@@ -437,11 +325,11 @@ DEFAULT_CODEC_OPTIONS = CodecOptions()
 
 
 def _parse_codec_options(options):
-    """Parse BSON codec options.
+"""Parse BSON codec options.
 
-    :param options:
-
-    """
+Args::
+    options:"""
+    options:"""
     kwargs = {}
     for k in set(options) & {
         "document_class",

@@ -1,4 +1,7 @@
-import datetime
+"""test_pickle_datatrades.py module.
+
+Description of the module functionality."""
+
 import pickle
 from io import BytesIO
 
@@ -7,17 +10,8 @@ from testcommon import getdatadir
 
 
 class BtTestStrategy(bt.Strategy):
-    """ """
-
-    params = (
-        ("period", 15),
-        ("printdata", True),
-        ("printops", True),
-    )
-
-
-def test_pickle_datatrades():
-    """ """
+""""""
+""""""
     cerebro = bt.Cerebro(optreturn=False)
 
     cerebro.addobserver(bt.observers.DataTrades)

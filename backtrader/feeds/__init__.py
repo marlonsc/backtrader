@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""__init__.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -41,16 +44,16 @@ except ImportError:
     pass  # The user may not have something installed
 
 from .btcsv import BacktraderCSVData
-from .vchartcsv import VChartCSVData
-from .vchartfile import VChartFile
-from .sierrachart import SierraChartCSVData
-from .mt4csv import MT4CSVData
-from .yahoo import YahooFinanceCSVData, YahooFinanceData
-from .vcdata import VCData
+from .csvgeneric import GenericCSVData
 from .ibdata import IBData
+from .mt4csv import MT4CSVData
 from .oanda import OandaData
 from .pandafeed import PandasData
-from .csvgeneric import GenericCSVData
+from .sierrachart import SierraChartCSVData
+from .vcdata import VCData
+from .vchartcsv import VChartCSVData
+from .vchartfile import VChartFile
+from .yahoo import YahooFinanceCSVData, YahooFinanceData
 
 __all__ = [
     "BacktraderCSVData",

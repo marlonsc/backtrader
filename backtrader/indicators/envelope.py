@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""envelope.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -32,23 +35,16 @@ from . import Indicator, MovingAverage
 
 class EnvelopeMixIn(object):
     """MixIn class to create a subclass with another indicator. The main line of
-    that indicator will be surrounded by an upper and lower band separated a
-    given "perc"entage from the input main line
-
-    The usage is:
-
-      - Class XXXEnvelope(XXX, EnvelopeMixIn)
-
-    Formula:
-      - 'line' (inherited from XXX))
-      - top = 'line' * (1 + perc)
-      - bot = 'line' * (1 - perc)
-
-    See also:
-      - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:moving_average_envelopes
-
-
-    """
+that indicator will be surrounded by an upper and lower band separated a
+given "perc"entage from the input main line
+The usage is:
+- Class XXXEnvelope(XXX, EnvelopeMixIn)
+Formula:
+- 'line' (inherited from XXX))
+- top = 'line' * (1 + perc)
+- bot = 'line' * (1 - perc)
+See also:
+- http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:moving_average_envelopes"""
 
     lines = (
         "top",
@@ -61,48 +57,17 @@ class EnvelopeMixIn(object):
     )
 
     def __init__(self):
-        """ """
-        # Mix-in & directly from object -> does not necessarily need super
-        # super(EnvelopeMixIn, self).__init__()
-        perc = self.p.perc / 100.0
-
-        self.lines.top = self.lines[0] * (1.0 + perc)
-        self.lines.bot = self.lines[0] * (1.0 - perc)
-
-        super(EnvelopeMixIn, self).__init__()
-
-
-class _EnvelopeBase(Indicator):
-    """ """
-
-    lines = ("src",)
-
-    # plot the envelope lines along the passed source
-    plotinfo = dict(subplot=False)
-
-    # Do not replot the data line
-    plotlines = dict(src=dict(_plotskip=True))
-
-    def __init__(self):
-        """ """
-        self.lines.src = self.data
-        super(_EnvelopeBase, self).__init__()
-
-
-class Envelope(_EnvelopeBase, EnvelopeMixIn):
+""""""
+""""""
+""""""
     """It creates envelopes bands separated from the source data by a given
-    percentage
-
-    Formula:
-      - src = datasource
-      - top = src * (1 + perc)
-      - bot = src * (1 - perc)
-
-    See also:
-      - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:moving_average_envelopes
-
-
-    """
+percentage
+Formula:
+- src = datasource
+- top = src * (1 + perc)
+- bot = src * (1 - perc)
+See also:
+- http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:moving_average_envelopes"""
 
 
 # Automatic creation of Moving Average Envelope classes

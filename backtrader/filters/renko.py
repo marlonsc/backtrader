@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""renko.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -43,26 +46,11 @@ class Renko(Filter):
     )
 
     def nextstart(self, data):
-        """
-
-        :param data:
-
-        """
-        o = data.open[0]
-        o = round(o / self.p.align, 0) * self.p.align  # aligned
-        self._size = self.p.size or float(o // self.p.autosize)
-        if self.p.roundstart:
-            o = int(o)
-
-        self._top = o + self._size
-        self._bot = o - self._size
-
-    def next(self, data):
-        """
-
-        :param data:
-
-        """
+"""Args::
+    data:"""
+"""Args::
+    data:"""
+    data:"""
         c = data.close[0]
         h = data.high[0]
         l = data.low[0]

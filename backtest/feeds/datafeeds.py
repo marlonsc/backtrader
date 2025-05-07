@@ -1,12 +1,11 @@
-"""
-Write private data file classes.
+"""Write private data file classes."""
 """
 
 from backtrader.feeds import GenericCSVData
 
 
 class StockCsvData(GenericCSVData):
-    """ """
+""""""
 
     params = (
         ("nullvalue", 0.0),

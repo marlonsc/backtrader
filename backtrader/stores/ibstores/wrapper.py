@@ -86,24 +86,15 @@ OrderKeyType = Union[int, Tuple[int, int]]
 
 
 class RequestError(Exception):
-    """
-
-
-    :raises a: single request
-
+""":raises a: single request"""
     """
 
     def __init__(self, reqId: int, code: int, message: str):
-        """
-
-        :param reqId: Original request ID.
-        :type reqId: int
-        :param code: Original error code.
-        :type code: int
-        :param message: Original error message.
-        :type message: str
-
-        """
+"""Args::
+    reqId: Original request ID.
+    code: Original error code.
+    message: Original error message."""
+    message: Original error message."""
         super().__init__(f"API error: {code}: {message}")
         self.reqId = reqId
         self.code = code
@@ -187,48 +178,9 @@ class Wrapper:
     _timeoutHandle: Union[asyncio.TimerHandle, None]
 
     def __init__(self, ib):
-        """
-
-        :param ib:
-
-        """
-        self.ib = ib
-        self._logger = logging.getLogger("ib_insync.wrapper")
-        self._timeoutHandle = None
-        self.reset()
-
-    def reset(self):
-        """ """
-        self.accountValues = {}
-        self.acctSummary = {}
-        self.portfolio = defaultdict(dict)
-        self.positions = defaultdict(dict)
-        self.trades = {}
-        self.permId2Trade = {}
-        self.fills = {}
-        self.newsTicks = []
-        self.msgId2NewsBulletin = {}
-        self.tickers = {}
-        self.pendingTickers = set()
-        self.reqId2Ticker = {}
-        self.ticker2ReqId = defaultdict(dict)
-        self.reqId2Subscriber = {}
-        self.reqId2PnL = {}
-        self.reqId2PnlSingle = {}
-        self.pnlKey2ReqId = {}
-        self.pnlSingleKey2ReqId = {}
-        self.lastTime = datetime.min
-        self.accounts = []
-        self.clientId = -1
-        self.wshMetaReqId = 0
-        self.wshEventReqId = 0
-        self._reqId2Contract = {}
-        self._timeout = 0
-        self._futures = {}
-        self._results = {}
-        self.setTimeout(0)
-
-    def setEventsDone(self):
+"""Args::
+    ib:"""
+""""""
         """Set all subscription-type events as done."""
         events = [ticker.updateEvent for ticker in self.tickers.values()]
         events += [sub.updateEvent for sub in self.reqId2Subscriber.values()]
@@ -246,24 +198,15 @@ class Wrapper:
             event.set_done()
 
     def connectionClosed(self):
-        """ """
-        error = ConnectionError("Socket disconnect")
-        print("Connection closed")
-        for future in self._futures.values():
-            if not future.done():
-                future.set_exception(error)
-        globalErrorEvent.emit(error)
-        self.reset()
+""""""
+"""Start a new request and return the future that is associated
+with the key and container. The container is a list by default.
 
-    def startReq(self, key, contract=None, container=None):
-        """Start a new request and return the future that is associated
-        with the key and container. The container is a list by default.
-
-        :param key:
-        :param contract:  (Default value = None)
-        :param container:  (Default value = None)
-
-        """
+Args::
+    key: 
+    contract: (Default value = None)
+    container: (Default value = None)"""
+    container: (Default value = None)"""
         future: asyncio.Future = asyncio.Future()
         self._futures[key] = future
         self._results[key] = container if container is not None else []
@@ -272,14 +215,14 @@ class Wrapper:
         return future
 
     def _endReq(self, key, result=None, success=True):
-        """Finish the future of corresponding key with the given result.
-        If no result is given then it will be popped of the general results.
+"""Finish the future of corresponding key with the given result.
+If no result is given then it will be popped of the general results.
 
-        :param key:
-        :param result:  (Default value = None)
-        :param success:  (Default value = True)
-
-        """
+Args::
+    key: 
+    result: (Default value = None)
+    success: (Default value = True)"""
+    success: (Default value = True)"""
         future = self._futures.pop(key, None)
         self._reqId2Contract.pop(key, None)
         if future:
@@ -292,16 +235,13 @@ class Wrapper:
                     future.set_exception(result)
 
     def startTicker(self, reqId: int, contract: Contract, tickType: Union[int, str]):
-        """Start a tick request that has the reqId associated with the contract.
+"""Start a tick request that has the reqId associated with the contract.
 
-        :param reqId:
-        :type reqId: int
-        :param contract:
-        :type contract: Contract
-        :param tickType:
-        :type tickType: Union[int, str]
-
-        """
+Args::
+    reqId: 
+    contract: 
+    tickType:"""
+    tickType:"""
         ticker = self.tickers.get(id(contract))
         if not ticker:
             ticker = Ticker(
@@ -319,50 +259,40 @@ class Wrapper:
         return ticker
 
     def endTicker(self, ticker: Ticker, tickType: Union[int, str]):
-        """
-
-        :param ticker:
-        :type ticker: Ticker
-        :param tickType:
-        :type tickType: Union[int, str]
-
-        """
+"""Args::
+    ticker: 
+    tickType:"""
+    tickType:"""
         reqId = self.ticker2ReqId[tickType].pop(ticker, 0)
         self._reqId2Contract.pop(reqId, None)
         return reqId
 
     def startSubscription(self, reqId, subscriber, contract=None):
-        """Register a live subscription.
+"""Register a live subscription.
 
-        :param reqId:
-        :param subscriber:
-        :param contract:  (Default value = None)
-
-        """
+Args::
+    reqId: 
+    subscriber: 
+    contract: (Default value = None)"""
+    contract: (Default value = None)"""
         self._reqId2Contract[reqId] = contract
         self.reqId2Subscriber[reqId] = subscriber
 
     def endSubscription(self, subscriber):
-        """Unregister a live subscription.
+"""Unregister a live subscription.
 
-        :param subscriber:
-
-        """
+Args::
+    subscriber:"""
+    subscriber:"""
         self._reqId2Contract.pop(subscriber.reqId, None)
         self.reqId2Subscriber.pop(subscriber.reqId, None)
 
     def orderKey(self, clientId: int, orderId: int, permId: int) -> OrderKeyType:
-        """
-
-        :param clientId:
-        :type clientId: int
-        :param orderId:
-        :type orderId: int
-        :param permId:
-        :type permId: int
-        :rtype: OrderKeyType
-
-        """
+"""Args::
+    clientId: 
+    orderId: 
+    permId:"""
+    permId:"""
         key: OrderKeyType
         if orderId <= 0:
             # order is placed manually from TWS
@@ -372,89 +302,30 @@ class Wrapper:
         return key
 
     def setTimeout(self, timeout: float):
-        """
+"""Args::
+    timeout:"""
+"""Args::
+    delay: (Default value = 0)"""
+""""""
+"""Receives next valid order id.
 
-        :param timeout:
-        :type timeout: float
-
-        """
-        self.lastTime = datetime.now(timezone.utc)
-        if self._timeoutHandle:
-            self._timeoutHandle.cancel()
-        self._timeoutHandle = None
-        self._timeout = timeout
-        if timeout:
-            self._setTimer(timeout)
-
-    def _setTimer(self, delay: float = 0):
-        """
-
-        :param delay:  (Default value = 0)
-        :type delay: float
-
-        """
-        if self.lastTime == datetime.min:
-            return
-        now = datetime.now(timezone.utc)
-        diff = (now - self.lastTime).total_seconds()
-        if not delay:
-            delay = self._timeout - diff
-        if delay > 0:
-            loop = getLoop()
-            self._timeoutHandle = loop.call_later(delay, self._setTimer)
-        else:
-            self._logger.debug("Timeout")
-            self.setTimeout(0)
-            self.ib.timeoutEvent.emit(diff)
-
-    # wrapper methods
-
-    def connectAck(self):
-        """ """
-        print("connectAck")
-
-    def nextValidId(self, reqId: int):
-        """Receives next valid order id.
-
-        :param reqId:
-        :type reqId: int
-
-        """
+Args::
+    reqId:"""
+    reqId:"""
         print(f"nextValidId: {reqId}")
         self.ib.nextValidId(reqId)
 
     def managedAccounts(self, accountsList: str):
-        """
-
-        :param accountsList:
-        :type accountsList: str
-
-        """
-        self.accounts = [a for a in accountsList.split(",") if a]
-        # self.ib.managedAccounts(accountsList)
-
-    def updateAccountTime(self, timestamp: str):
-        """
-
-        :param timestamp:
-        :type timestamp: str
-
-        """
-        # print(f"timeStamp: {timestamp}")
-
-    def updateAccountValue(self, tag: str, val: str, currency: str, account: str):
-        """
-
-        :param tag:
-        :type tag: str
-        :param val:
-        :type val: str
-        :param currency:
-        :type currency: str
-        :param account:
-        :type account: str
-
-        """
+"""Args::
+    accountsList:"""
+"""Args::
+    timestamp:"""
+"""Args::
+    tag: 
+    val: 
+    currency: 
+    account:"""
+    account:"""
         key = (account, tag, currency, "")
         acctVal = AccountValue(account, tag, val, currency, "")
         self.accountValues[key] = acctVal
@@ -462,118 +333,49 @@ class Wrapper:
         # print("UpdateAccountValue. Key:", key, "acctVal:", acctVal)
 
     def accountDownloadEnd(self, _account: str):
-        """
-
-        :param _account:
-        :type _account: str
-
-        """
-        # sent after updateAccountValue and updatePortfolio both finished
-        self._endReq("accountValues")
-        print("AccountDownloadEnd. Account:", _account)
-        # self.ib.accountDownloadEnd(_account)
-
-    def accountUpdateMulti(
-        self,
-        reqId: int,
-        account: str,
-        modelCode: str,
-        tag: str,
-        val: str,
-        currency: str,
-    ):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param account:
-        :type account: str
-        :param modelCode:
-        :type modelCode: str
-        :param tag:
-        :type tag: str
-        :param val:
-        :type val: str
-        :param currency:
-        :type currency: str
-
-        """
+"""Args::
+    _account:"""
+"""Args::
+    reqId: 
+    account: 
+    modelCode: 
+    tag: 
+    val: 
+    currency:"""
+    currency:"""
         key = (account, tag, currency, modelCode)
         acctVal = AccountValue(account, tag, val, currency, modelCode)
         self.accountValues[key] = acctVal
         self.ib.accountValueEvent.emit(tag, val, currency, account)
 
     def accountUpdateMultiEnd(self, reqId: int):
-        """
-
-        :param reqId:
-        :type reqId: int
-
-        """
-        self._endReq(reqId)
-
-    def accountSummary(
-        self, _reqId: int, account: str, tag: str, value: str, currency: str
-    ):
-        """
-
-        :param _reqId:
-        :type _reqId: int
-        :param account:
-        :type account: str
-        :param tag:
-        :type tag: str
-        :param value:
-        :type value: str
-        :param currency:
-        :type currency: str
-
-        """
+"""Args::
+    reqId:"""
+"""Args::
+    _reqId: 
+    account: 
+    tag: 
+    value: 
+    currency:"""
+    currency:"""
         key = (account, tag, currency)
         acctVal = AccountValue(account, tag, value, currency, "")
         self.acctSummary[key] = acctVal
         self.ib.accountSummaryEvent.emit(acctVal)
 
     def accountSummaryEnd(self, reqId: int):
-        """
-
-        :param reqId:
-        :type reqId: int
-
-        """
-        self._endReq(reqId)
-
-    def updatePortfolio(
-        self,
-        contract: Contract,
-        posSize: float,
-        marketPrice: float,
-        marketValue: float,
-        averageCost: float,
-        unrealizedPNL: float,
-        realizedPNL: float,
-        account: str,
-    ):
-        """
-
-        :param contract:
-        :type contract: Contract
-        :param posSize:
-        :type posSize: float
-        :param marketPrice:
-        :type marketPrice: float
-        :param marketValue:
-        :type marketValue: float
-        :param averageCost:
-        :type averageCost: float
-        :param unrealizedPNL:
-        :type unrealizedPNL: float
-        :param realizedPNL:
-        :type realizedPNL: float
-        :param account:
-        :type account: str
-
-        """
+"""Args::
+    reqId:"""
+"""Args::
+    contract: 
+    posSize: 
+    marketPrice: 
+    marketValue: 
+    averageCost: 
+    unrealizedPNL: 
+    realizedPNL: 
+    account:"""
+    account:"""
         contract = Contract.create(**dataclassAsDict(contract))
         portfItem = PortfolioItem(
             contract,
@@ -600,18 +402,12 @@ class Wrapper:
     def position(
         self, account: str, contract: Contract, posSize: float, avgCost: float
     ):
-        """
-
-        :param account:
-        :type account: str
-        :param contract:
-        :type contract: Contract
-        :param posSize:
-        :type posSize: float
-        :param avgCost:
-        :type avgCost: float
-
-        """
+"""Args::
+    account: 
+    contract: 
+    posSize: 
+    avgCost:"""
+    avgCost:"""
         contract = Contract.create(**dataclassAsDict(contract))
         position = Position(account, contract, posSize, avgCost)
         positions = self.positions[account]
@@ -633,62 +429,25 @@ class Wrapper:
         )
 
     def positionEnd(self):
-        """ """
-        self._endReq("positions")
-
-    def positionMulti(
-        self,
-        reqId: int,
-        account: str,
-        modelCode: str,
-        contract: Contract,
-        pos: float,
-        avgCost: float,
-    ):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param account:
-        :type account: str
-        :param modelCode:
-        :type modelCode: str
-        :param contract:
-        :type contract: Contract
-        :param pos:
-        :type pos: float
-        :param avgCost:
-        :type avgCost: float
-
-        """
+""""""
+"""Args::
+    reqId: 
+    account: 
+    modelCode: 
+    contract: 
+    pos: 
+    avgCost:"""
+    avgCost:"""
 
     def positionMultiEnd(self, reqId: int):
-        """
-
-        :param reqId:
-        :type reqId: int
-
-        """
-
-    def pnl(
-        self,
-        reqId: int,
-        dailyPnL: float,
-        unrealizedPnL: float,
-        realizedPnL: float,
-    ):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param dailyPnL:
-        :type dailyPnL: float
-        :param unrealizedPnL:
-        :type unrealizedPnL: float
-        :param realizedPnL:
-        :type realizedPnL: float
-
-        """
+"""Args::
+    reqId:"""
+"""Args::
+    reqId: 
+    dailyPnL: 
+    unrealizedPnL: 
+    realizedPnL:"""
+    realizedPnL:"""
         pnl = self.reqId2PnL.get(reqId)
         if not pnl:
             return
@@ -706,22 +465,14 @@ class Wrapper:
         realizedPnL: float,
         value: float,
     ):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param pos:
-        :type pos: int
-        :param dailyPnL:
-        :type dailyPnL: float
-        :param unrealizedPnL:
-        :type unrealizedPnL: float
-        :param realizedPnL:
-        :type realizedPnL: float
-        :param value:
-        :type value: float
-
-        """
+"""Args::
+    reqId: 
+    pos: 
+    dailyPnL: 
+    unrealizedPnL: 
+    realizedPnL: 
+    value:"""
+    value:"""
         pnlSingle = self.reqId2PnlSingle.get(reqId)
         if not pnlSingle:
             return
@@ -739,24 +490,19 @@ class Wrapper:
         order: Order,
         orderState: OrderState,
     ):
-        """This wrapper is called to:
+"""This wrapper is called to:
+* feed in open orders at startup;
+* feed in open orders or order updates from other clients and TWS
+if clientId=master id;
+* feed in manual orders and order updates from TWS if clientId=0;
+* handle openOrders and allOpenOrders responses.
 
-        * feed in open orders at startup;
-        * feed in open orders or order updates from other clients and TWS
-          if clientId=master id;
-        * feed in manual orders and order updates from TWS if clientId=0;
-        * handle openOrders and allOpenOrders responses.
-
-        :param orderId:
-        :type orderId: int
-        :param contract:
-        :type contract: Contract
-        :param order:
-        :type order: Order
-        :param orderState:
-        :type orderState: OrderState
-
-        """
+Args::
+    orderId: 
+    contract: 
+    order: 
+    orderState:"""
+    orderState:"""
         if order.whatIf:
             # response to whatIfOrder
             if orderState.initMarginChange != str(UNSET_DOUBLE):
@@ -795,21 +541,12 @@ class Wrapper:
         self.ib.client.updateReqId(orderId + 1)
 
     def openOrderEnd(self):
-        """ """
-        print("openOrderEnd")
-        self._endReq("openOrders")
-
-    def completedOrder(self, contract: Contract, order: Order, orderState: OrderState):
-        """
-
-        :param contract:
-        :type contract: Contract
-        :param order:
-        :type order: Order
-        :param orderState:
-        :type orderState: OrderState
-
-        """
+""""""
+"""Args::
+    contract: 
+    order: 
+    orderState:"""
+    orderState:"""
         contract = Contract.create(**dataclassAsDict(contract))
         orderStatus = OrderStatus(orderId=order.orderId, status=orderState.status)
         trade = Trade(contract, order, orderStatus, [], [])
@@ -820,49 +557,20 @@ class Wrapper:
         print("completedOrder orderId", contract, order, orderState)
 
     def completedOrdersEnd(self):
-        """ """
-        self._endReq("completedOrders")
-
-    def orderStatus(
-        self,
-        orderId: int,
-        status: str,
-        filled: float,
-        remaining: float,
-        avgFillPrice: float,
-        permId: int,
-        parentId: int,
-        lastFillPrice: float,
-        clientId: int,
-        whyHeld: str,
-        mktCapPrice: float = 0.0,
-    ):
-        """
-
-        :param orderId:
-        :type orderId: int
-        :param status:
-        :type status: str
-        :param filled:
-        :type filled: float
-        :param remaining:
-        :type remaining: float
-        :param avgFillPrice:
-        :type avgFillPrice: float
-        :param permId:
-        :type permId: int
-        :param parentId:
-        :type parentId: int
-        :param lastFillPrice:
-        :type lastFillPrice: float
-        :param clientId:
-        :type clientId: int
-        :param whyHeld:
-        :type whyHeld: str
-        :param mktCapPrice:  (Default value = 0.0)
-        :type mktCapPrice: float
-
-        """
+""""""
+"""Args::
+    orderId: 
+    status: 
+    filled: 
+    remaining: 
+    avgFillPrice: 
+    permId: 
+    parentId: 
+    lastFillPrice: 
+    clientId: 
+    whyHeld: 
+    mktCapPrice: (Default value = 0.0)"""
+    mktCapPrice: (Default value = 0.0)"""
         key = self.orderKey(clientId, orderId, permId)
         trade = self.trades.get(key)
         if trade:
@@ -914,17 +622,14 @@ class Wrapper:
             )
 
     def execDetails(self, reqId: int, contract: Contract, execution: Execution):
-        """This wrapper handles both live fills and responses to
-        reqExecutions.
+"""This wrapper handles both live fills and responses to
+reqExecutions.
 
-        :param reqId:
-        :type reqId: int
-        :param contract:
-        :type contract: Contract
-        :param execution:
-        :type execution: Execution
-
-        """
+Args::
+    reqId: 
+    contract: 
+    execution:"""
+    execution:"""
         self._logger.info(f"execDetails {execution}")
         if execution.orderId == UNSET_INTEGER:
             # bug in TWS: executions of manual orders have unset value
@@ -960,110 +665,47 @@ class Wrapper:
             self._results[reqId].append(fill)
 
     def execDetailsEnd(self, reqId: int):
-        """
-
-        :param reqId:
-        :type reqId: int
-
-        """
-        self._endReq(reqId)
-
-    def commissionReport(self, commissionReport: CommissionReport):
-        """
-
-        :param commissionReport:
-        :type commissionReport: CommissionReport
-
-        """
-        if commissionReport.yield_ == UNSET_DOUBLE:
-            commissionReport.yield_ = 0.0
-        if commissionReport.realizedPNL == UNSET_DOUBLE:
-            commissionReport.realizedPNL = 0.0
-        fill = self.fills.get(commissionReport.execId)
-        if fill:
-            report = dataclassUpdate(fill.commissionReport, commissionReport)
-            self._logger.info(f"commissionReport: {report}")
-            trade = self.permId2Trade.get(fill.execution.permId)
-            if trade:
-                self.ib.commissionReportEvent.emit(trade, fill, report)
-                trade.commissionReportEvent.emit(trade, fill, report)
-            else:
-                # this is not a live execution and the order was filled
-                # before this connection started
-                pass
-        else:
-            # commission report is not for this client
-            pass
-
-    def orderBound(self, reqId: int, apiClientId: int, apiOrderId: int):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param apiClientId:
-        :type apiClientId: int
-        :param apiOrderId:
-        :type apiOrderId: int
-
-        """
+"""Args::
+    reqId:"""
+"""Args::
+    commissionReport:"""
+"""Args::
+    reqId: 
+    apiClientId: 
+    apiOrderId:"""
+    apiOrderId:"""
 
     def contractDetails(self, reqId: int, contractDetails: ContractDetails):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param contractDetails:
-        :type contractDetails: ContractDetails
-
-        """
+"""Args::
+    reqId: 
+    contractDetails:"""
+    contractDetails:"""
         self._results[reqId].append(contractDetails)
         # self.ib.contractDetails(reqId, contractDetails)
 
     bondContractDetails = contractDetails
 
     def contractDetailsEnd(self, reqId: int):
-        """
-
-        :param reqId:
-        :type reqId: int
-
-        """
-        self._endReq(reqId)
-        # self.ib.contractDetailsEnd(reqId)
-
-    def symbolSamples(
-        self, reqId: int, contractDescriptions: List[ContractDescription]
-    ):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param contractDescriptions:
-        :type contractDescriptions: List[ContractDescription]
-
-        """
+"""Args::
+    reqId:"""
+"""Args::
+    reqId: 
+    contractDescriptions:"""
+    contractDescriptions:"""
         self._endReq(reqId, contractDescriptions)
 
     def marketRule(self, marketRuleId: int, priceIncrements: List[PriceIncrement]):
-        """
-
-        :param marketRuleId:
-        :type marketRuleId: int
-        :param priceIncrements:
-        :type priceIncrements: List[PriceIncrement]
-
-        """
+"""Args::
+    marketRuleId: 
+    priceIncrements:"""
+    priceIncrements:"""
         self._endReq(f"marketRule-{marketRuleId}", priceIncrements)
 
     def marketDataType(self, reqId: int, marketDataId: int):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param marketDataId:
-        :type marketDataId: int
-
-        """
+"""Args::
+    reqId: 
+    marketDataId:"""
+    marketDataId:"""
         ticker = self.reqId2Ticker.get(reqId)
         if ticker:
             ticker.marketDataType = marketDataId
@@ -1080,28 +722,17 @@ class Wrapper:
         wap: float,
         count: int,
     ):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param time:
-        :type time: int
-        :param open_:
-        :type open_: float
-        :param high:
-        :type high: float
-        :param low:
-        :type low: float
-        :param close:
-        :type close: float
-        :param volume:
-        :type volume: float
-        :param wap:
-        :type wap: float
-        :param count:
-        :type count: int
-
-        """
+"""Args::
+    reqId: 
+    time: 
+    open_: 
+    high: 
+    low: 
+    close: 
+    volume: 
+    wap: 
+    count:"""
+    count:"""
         dt = datetime.fromtimestamp(time, timezone.utc)
         bar = RealTimeBar(dt, -1, open_, high, low, close, volume, wap, count)
         bars = self.reqId2Subscriber.get(reqId)
@@ -1133,14 +764,10 @@ class Wrapper:
         )
 
     def historicalData(self, reqId: int, bar: BarData):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param bar:
-        :type bar: BarData
-
-        """
+"""Args::
+    reqId: 
+    bar:"""
+    bar:"""
         results = self._results.get(reqId)
         if results is not None:
             bar.date = parseIBDatetime(bar.date)  # type: ignore
@@ -1156,20 +783,13 @@ class Wrapper:
         timeZone: str,
         sessions: List[HistoricalSession],
     ):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param startDateTime:
-        :type startDateTime: str
-        :param endDateTime:
-        :type endDateTime: str
-        :param timeZone:
-        :type timeZone: str
-        :param sessions:
-        :type sessions: List[HistoricalSession]
-
-        """
+"""Args::
+    reqId: 
+    startDateTime: 
+    endDateTime: 
+    timeZone: 
+    sessions:"""
+    sessions:"""
         schedule = HistoricalSchedule(startDateTime, endDateTime, timeZone, sessions)
         self._endReq(reqId, schedule)
         print(
@@ -1184,27 +804,19 @@ class Wrapper:
         )
 
     def historicalDataEnd(self, reqId, _start: str, _end: str):
-        """
-
-        :param reqId:
-        :param _start:
-        :type _start: str
-        :param _end:
-        :type _end: str
-
-        """
+"""Args::
+    reqId: 
+    _start: 
+    _end:"""
+    _end:"""
         self._endReq(reqId)
         print("HistoricalDataEnd. ReqId:", reqId, "from", _start, "to", _end)
 
     def historicalDataUpdate(self, reqId: int, bar: BarData):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param bar:
-        :type bar: BarData
-
-        """
+"""Args::
+    reqId: 
+    bar:"""
+    bar:"""
         bars = self.reqId2Subscriber.get(reqId)
         bar.date = parseIBDatetime(bar.date)
         hasNewBar = len(bars) == 0
@@ -1227,14 +839,10 @@ class Wrapper:
         # print("HistoricalDataUpdate. ReqId:", reqId, "BarData.", bar.date, "New.", hasNewBar)
 
     def headTimestamp(self, reqId: int, headTimestamp: str):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param headTimestamp:
-        :type headTimestamp: str
-
-        """
+"""Args::
+    reqId: 
+    headTimestamp:"""
+    headTimestamp:"""
         try:
             dt = parseIBDatetime(headTimestamp)
             self._endReq(reqId, dt)
@@ -1242,16 +850,11 @@ class Wrapper:
             self._endReq(reqId, exc, False)
 
     def historicalTicks(self, reqId: int, ticks: List[HistoricalTick], done: bool):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param ticks:
-        :type ticks: List[HistoricalTick]
-        :param done:
-        :type done: bool
-
-        """
+"""Args::
+    reqId: 
+    ticks: 
+    done:"""
+    done:"""
         result = self._results.get(reqId)
         if result is not None:
             result += ticks
@@ -1261,16 +864,11 @@ class Wrapper:
     def historicalTicksBidAsk(
         self, reqId: int, ticks: List[HistoricalTickBidAsk], done: bool
     ):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param ticks:
-        :type ticks: List[HistoricalTickBidAsk]
-        :param done:
-        :type done: bool
-
-        """
+"""Args::
+    reqId: 
+    ticks: 
+    done:"""
+    done:"""
         result = self._results.get(reqId)
         if result is not None:
             result += ticks
@@ -1280,16 +878,11 @@ class Wrapper:
     def historicalTicksLast(
         self, reqId: int, ticks: List[HistoricalTickLast], done: bool
     ):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param ticks:
-        :type ticks: List[HistoricalTickLast]
-        :param done:
-        :type done: bool
-
-        """
+"""Args::
+    reqId: 
+    ticks: 
+    done:"""
+    done:"""
         result = self._results.get(reqId)
         if result is not None:
             result += ticks
@@ -1298,18 +891,12 @@ class Wrapper:
 
     # additional wrapper method provided by Client
     def priceSizeTick(self, reqId: int, tickType: int, price: float, size: float):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param tickType:
-        :type tickType: int
-        :param price:
-        :type price: float
-        :param size:
-        :type size: float
-
-        """
+"""Args::
+    reqId: 
+    tickType: 
+    price: 
+    size:"""
+    size:"""
         ticker = self.reqId2Ticker.get(reqId)
         if not ticker:
             self._logger.error(f"priceSizeTick: Unknown reqId: {reqId}")
@@ -1376,30 +963,20 @@ class Wrapper:
         self.pendingTickers.add(ticker)
 
     def tickPrice(self, tickerId: int, tickType: int, price: float, attribs):
-        """
-
-        :param tickerId:
-        :type tickerId: int
-        :param tickType:
-        :type tickType: int
-        :param price:
-        :type price: float
-        :param attribs:
-
-        """
+"""Args::
+    tickerId: 
+    tickType: 
+    price: 
+    attribs:"""
+    attribs:"""
         self.ib.tickPrice(tickerId, tickType, price, attribs)
 
     def tickSize(self, reqId: int, tickType: int, size: float):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param tickType:
-        :type tickType: int
-        :param size:
-        :type size: float
-
-        """
+"""Args::
+    reqId: 
+    tickType: 
+    size:"""
+    size:"""
         ticker = self.reqId2Ticker.get(reqId)
         if not ticker:
             self._logger.error(f"tickSize: Unknown reqId: {reqId}")
@@ -1455,43 +1032,18 @@ class Wrapper:
         self.pendingTickers.add(ticker)
 
     def tickSnapshotEnd(self, reqId: int):
-        """
-
-        :param reqId:
-        :type reqId: int
-
-        """
-        self._endReq(reqId)
-
-    def tickByTickAllLast(
-        self,
-        reqId: int,
-        tickType: int,
-        time: int,
-        price: float,
-        size: float,
-        tickAttribLast: TickAttribLast,
-        exchange,
-        specialConditions,
-    ):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param tickType:
-        :type tickType: int
-        :param time:
-        :type time: int
-        :param price:
-        :type price: float
-        :param size:
-        :type size: float
-        :param tickAttribLast:
-        :type tickAttribLast: TickAttribLast
-        :param exchange:
-        :param specialConditions:
-
-        """
+"""Args::
+    reqId:"""
+"""Args::
+    reqId: 
+    tickType: 
+    time: 
+    price: 
+    size: 
+    tickAttribLast: 
+    exchange: 
+    specialConditions:"""
+    specialConditions:"""
         ticker = self.reqId2Ticker.get(reqId)
         if not ticker:
             self._logger.error(f"tickByTickAllLast: Unknown reqId: {reqId}")
@@ -1524,24 +1076,15 @@ class Wrapper:
         askSize: float,
         tickAttribBidAsk: TickAttribBidAsk,
     ):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param time:
-        :type time: int
-        :param bidPrice:
-        :type bidPrice: float
-        :param askPrice:
-        :type askPrice: float
-        :param bidSize:
-        :type bidSize: float
-        :param askSize:
-        :type askSize: float
-        :param tickAttribBidAsk:
-        :type tickAttribBidAsk: TickAttribBidAsk
-
-        """
+"""Args::
+    reqId: 
+    time: 
+    bidPrice: 
+    askPrice: 
+    bidSize: 
+    askSize: 
+    tickAttribBidAsk:"""
+    tickAttribBidAsk:"""
         ticker = self.reqId2Ticker.get(reqId)
         if not ticker:
             self._logger.error(f"tickByTickBidAsk: Unknown reqId: {reqId}")
@@ -1570,16 +1113,11 @@ class Wrapper:
         self.pendingTickers.add(ticker)
 
     def tickByTickMidPoint(self, reqId: int, time: int, midPoint: float):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param time:
-        :type time: int
-        :param midPoint:
-        :type midPoint: float
-
-        """
+"""Args::
+    reqId: 
+    time: 
+    midPoint:"""
+    midPoint:"""
         ticker = self.reqId2Ticker.get(reqId)
         if not ticker:
             self._logger.error(f"tickByTickMidPoint: Unknown reqId: {reqId}")
@@ -1589,16 +1127,11 @@ class Wrapper:
         self.pendingTickers.add(ticker)
 
     def tickString(self, reqId: int, tickType: int, value: str):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param tickType:
-        :type tickType: int
-        :param value:
-        :type value: str
-
-        """
+"""Args::
+    reqId: 
+    tickType: 
+    value:"""
+    value:"""
         ticker = self.reqId2Ticker.get(reqId)
         if not ticker:
             return
@@ -1671,16 +1204,11 @@ class Wrapper:
             )
 
     def tickGeneric(self, reqId: int, tickType: int, value: float):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param tickType:
-        :type tickType: int
-        :param value:
-        :type value: float
-
-        """
+"""Args::
+    reqId: 
+    tickType: 
+    value:"""
+    value:"""
         ticker = self.reqId2Ticker.get(reqId)
         if not ticker:
             return
@@ -1716,18 +1244,12 @@ class Wrapper:
         bboExchange: str,
         snapshotPermissions: int,
     ):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param minTick:
-        :type minTick: float
-        :param bboExchange:
-        :type bboExchange: str
-        :param snapshotPermissions:
-        :type snapshotPermissions: int
-
-        """
+"""Args::
+    reqId: 
+    minTick: 
+    bboExchange: 
+    snapshotPermissions:"""
+    snapshotPermissions:"""
         ticker = self.reqId2Ticker.get(reqId)
         if not ticker:
             return
@@ -1736,50 +1258,25 @@ class Wrapper:
         ticker.snapshotPermissions = snapshotPermissions
 
     def smartComponents(self, reqId, components):
-        """
-
-        :param reqId:
-        :param components:
-
-        """
+"""Args::
+    reqId: 
+    components:"""
+    components:"""
         self._endReq(reqId, components)
 
     def mktDepthExchanges(
         self, depthMktDataDescriptions: List[DepthMktDataDescription]
     ):
-        """
-
-        :param depthMktDataDescriptions:
-        :type depthMktDataDescriptions: List[DepthMktDataDescription]
-
-        """
-        self._endReq("mktDepthExchanges", depthMktDataDescriptions)
-
-    def updateMktDepth(
-        self,
-        reqId: int,
-        position: int,
-        operation: int,
-        side: int,
-        price: float,
-        size: float,
-    ):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param position:
-        :type position: int
-        :param operation:
-        :type operation: int
-        :param side:
-        :type side: int
-        :param price:
-        :type price: float
-        :param size:
-        :type size: float
-
-        """
+"""Args::
+    depthMktDataDescriptions:"""
+"""Args::
+    reqId: 
+    position: 
+    operation: 
+    side: 
+    price: 
+    size:"""
+    size:"""
         self.updateMktDepthL2(reqId, position, "", operation, side, price, size)
 
     def updateMktDepthL2(
@@ -1793,26 +1290,16 @@ class Wrapper:
         size: float,
         isSmartDepth: bool = False,
     ):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param position:
-        :type position: int
-        :param marketMaker:
-        :type marketMaker: str
-        :param operation:
-        :type operation: int
-        :param side:
-        :type side: int
-        :param price:
-        :type price: float
-        :param size:
-        :type size: float
-        :param isSmartDepth:  (Default value = False)
-        :type isSmartDepth: bool
-
-        """
+"""Args::
+    reqId: 
+    position: 
+    marketMaker: 
+    operation: 
+    side: 
+    price: 
+    size: 
+    isSmartDepth: (Default value = False)"""
+    isSmartDepth: (Default value = False)"""
         # operation: 0 = insert, 1 = update, 2 = delete
         # side: 0 = ask, 1 = bid
         ticker = self.reqId2Ticker[reqId]
@@ -1848,32 +1335,19 @@ class Wrapper:
         theta: float,
         undPrice: float,
     ):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param tickType:
-        :type tickType: int
-        :param tickAttrib:
-        :type tickAttrib: int
-        :param impliedVol:
-        :type impliedVol: float
-        :param delta:
-        :type delta: float
-        :param optPrice:
-        :type optPrice: float
-        :param pvDividend:
-        :type pvDividend: float
-        :param gamma:
-        :type gamma: float
-        :param vega:
-        :type vega: float
-        :param theta:
-        :type theta: float
-        :param undPrice:
-        :type undPrice: float
-
-        """
+"""Args::
+    reqId: 
+    tickType: 
+    tickAttrib: 
+    impliedVol: 
+    delta: 
+    optPrice: 
+    pvDividend: 
+    gamma: 
+    vega: 
+    theta: 
+    undPrice:"""
+    undPrice:"""
         comp = OptionComputation(
             tickAttrib,
             impliedVol if impliedVol != -1 else None,
@@ -1905,63 +1379,30 @@ class Wrapper:
             self._logger.error(f"tickOptionComputation: Unknown reqId: {reqId}")
 
     def deltaNeutralValidation(self, reqId: int, dnc: DeltaNeutralContract):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param dnc:
-        :type dnc: DeltaNeutralContract
-
-        """
+"""Args::
+    reqId: 
+    dnc:"""
+    dnc:"""
 
     def fundamentalData(self, reqId: int, data: str):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param data:
-        :type data: str
-
-        """
+"""Args::
+    reqId: 
+    data:"""
+    data:"""
         self._endReq(reqId, data)
 
     def scannerParameters(self, xml: str):
-        """
-
-        :param xml:
-        :type xml: str
-
-        """
-        self._endReq("scannerParams", xml)
-
-    def scannerData(
-        self,
-        reqId: int,
-        rank: int,
-        contractDetails: ContractDetails,
-        distance: str,
-        benchmark: str,
-        projection: str,
-        legsStr: str,
-    ):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param rank:
-        :type rank: int
-        :param contractDetails:
-        :type contractDetails: ContractDetails
-        :param distance:
-        :type distance: str
-        :param benchmark:
-        :type benchmark: str
-        :param projection:
-        :type projection: str
-        :param legsStr:
-        :type legsStr: str
-
-        """
+"""Args::
+    xml:"""
+"""Args::
+    reqId: 
+    rank: 
+    contractDetails: 
+    distance: 
+    benchmark: 
+    projection: 
+    legsStr:"""
+    legsStr:"""
         data = ScanData(rank, contractDetails, distance, benchmark, projection, legsStr)
         dataList = self.reqId2Subscriber.get(reqId)
         if dataList is None:
@@ -1972,30 +1413,12 @@ class Wrapper:
             dataList.append(data)
 
     def scannerDataEnd(self, reqId: int):
-        """
-
-        :param reqId:
-        :type reqId: int
-
-        """
-        dataList = self._results.get(reqId)
-        if dataList is not None:
-            self._endReq(reqId)
-        else:
-            dataList = self.reqId2Subscriber.get(reqId)
-        if dataList is not None:
-            self.ib.scannerDataEvent.emit(dataList)
-            dataList.updateEvent.emit(dataList)
-
-    def histogramData(self, reqId: int, items: List[HistogramData]):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param items:
-        :type items: List[HistogramData]
-
-        """
+"""Args::
+    reqId:"""
+"""Args::
+    reqId: 
+    items:"""
+    items:"""
         result = [HistogramData(item.price, item.count) for item in items]
         self._endReq(reqId, result)
 
@@ -2009,24 +1432,15 @@ class Wrapper:
         expirations: List[str],
         strikes: List[float],
     ):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param exchange:
-        :type exchange: str
-        :param underlyingConId:
-        :type underlyingConId: int
-        :param tradingClass:
-        :type tradingClass: str
-        :param multiplier:
-        :type multiplier: str
-        :param expirations:
-        :type expirations: List[str]
-        :param strikes:
-        :type strikes: List[float]
-
-        """
+"""Args::
+    reqId: 
+    exchange: 
+    underlyingConId: 
+    tradingClass: 
+    multiplier: 
+    expirations: 
+    strikes:"""
+    strikes:"""
         chain = OptionChain(
             exchange,
             underlyingConId,
@@ -2038,64 +1452,28 @@ class Wrapper:
         self._results[reqId].append(chain)
 
     def securityDefinitionOptionParameterEnd(self, reqId: int):
-        """
-
-        :param reqId:
-        :type reqId: int
-
-        """
-        self._endReq(reqId)
-
-    def newsProviders(self, newsProviders: List[NewsProvider]):
-        """
-
-        :param newsProviders:
-        :type newsProviders: List[NewsProvider]
-
-        """
-        newsProviders = [NewsProvider(code=p.code, name=p.name) for p in newsProviders]
-        self._endReq("newsProviders", newsProviders)
-
-    def tickNews(
-        self,
-        _reqId: int,
-        timeStamp: int,
-        providerCode: str,
-        articleId: str,
-        headline: str,
-        extraData: str,
-    ):
-        """
-
-        :param _reqId:
-        :type _reqId: int
-        :param timeStamp:
-        :type timeStamp: int
-        :param providerCode:
-        :type providerCode: str
-        :param articleId:
-        :type articleId: str
-        :param headline:
-        :type headline: str
-        :param extraData:
-        :type extraData: str
-
-        """
+"""Args::
+    reqId:"""
+"""Args::
+    newsProviders:"""
+"""Args::
+    _reqId: 
+    timeStamp: 
+    providerCode: 
+    articleId: 
+    headline: 
+    extraData:"""
+    extraData:"""
         news = NewsTick(timeStamp, providerCode, articleId, headline, extraData)
         self.newsTicks.append(news)
         self.ib.tickNewsEvent.emit(news)
 
     def newsArticle(self, reqId: int, articleType: int, articleText: str):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param articleType:
-        :type articleType: int
-        :param articleText:
-        :type articleText: str
-
-        """
+"""Args::
+    reqId: 
+    articleType: 
+    articleText:"""
+    articleText:"""
         article = NewsArticle(articleType, articleText)
         self._endReq(reqId, article)
 
@@ -2107,182 +1485,98 @@ class Wrapper:
         articleId: str,
         headline: str,
     ):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param time:
-        :type time: str
-        :param providerCode:
-        :type providerCode: str
-        :param articleId:
-        :type articleId: str
-        :param headline:
-        :type headline: str
-
-        """
+"""Args::
+    reqId: 
+    time: 
+    providerCode: 
+    articleId: 
+    headline:"""
+    headline:"""
         dt = parseIBDatetime(time)
         dt = cast(datetime, dt)
         article = HistoricalNews(dt, providerCode, articleId, headline)
         self._results[reqId].append(article)
 
     def historicalNewsEnd(self, reqId, _hasMore: bool):
-        """
-
-        :param reqId:
-        :param _hasMore:
-        :type _hasMore: bool
-
-        """
+"""Args::
+    reqId: 
+    _hasMore:"""
+    _hasMore:"""
         self._endReq(reqId)
 
     def updateNewsBulletin(
         self, msgId: int, msgType: int, message: str, origExchange: str
     ):
-        """
-
-        :param msgId:
-        :type msgId: int
-        :param msgType:
-        :type msgType: int
-        :param message:
-        :type message: str
-        :param origExchange:
-        :type origExchange: str
-
-        """
+"""Args::
+    msgId: 
+    msgType: 
+    message: 
+    origExchange:"""
+    origExchange:"""
         bulletin = NewsBulletin(msgId, msgType, message, origExchange)
         self.msgId2NewsBulletin[msgId] = bulletin
         self.ib.newsBulletinEvent.emit(bulletin)
 
     def receiveFA(self, _faDataType: int, faXmlData: str):
-        """
-
-        :param _faDataType:
-        :type _faDataType: int
-        :param faXmlData:
-        :type faXmlData: str
-
-        """
+"""Args::
+    _faDataType: 
+    faXmlData:"""
+    faXmlData:"""
         self._endReq("requestFA", faXmlData)
 
     def currentTime(self, time: int):
-        """
-
-        :param time:
-        :type time: int
-
-        """
-        dt = datetime.fromtimestamp(time, timezone.utc)
-        self._endReq("currentTime", dt)
-
-    def tickEFP(
-        self,
-        reqId: int,
-        tickType: int,
-        basisPoints: float,
-        formattedBasisPoints: str,
-        totalDividends: float,
-        holdDays: int,
-        futureLastTradeDate: str,
-        dividendImpact: float,
-        dividendsToLastTradeDate: float,
-    ):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param tickType:
-        :type tickType: int
-        :param basisPoints:
-        :type basisPoints: float
-        :param formattedBasisPoints:
-        :type formattedBasisPoints: str
-        :param totalDividends:
-        :type totalDividends: float
-        :param holdDays:
-        :type holdDays: int
-        :param futureLastTradeDate:
-        :type futureLastTradeDate: str
-        :param dividendImpact:
-        :type dividendImpact: float
-        :param dividendsToLastTradeDate:
-        :type dividendsToLastTradeDate: float
-
-        """
+"""Args::
+    time:"""
+"""Args::
+    reqId: 
+    tickType: 
+    basisPoints: 
+    formattedBasisPoints: 
+    totalDividends: 
+    holdDays: 
+    futureLastTradeDate: 
+    dividendImpact: 
+    dividendsToLastTradeDate:"""
+    dividendsToLastTradeDate:"""
 
     def wshMetaData(self, reqId: int, dataJson: str):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param dataJson:
-        :type dataJson: str
-
-        """
+"""Args::
+    reqId: 
+    dataJson:"""
+    dataJson:"""
         self.ib.wshMetaEvent.emit(dataJson)
         self._endReq(reqId, dataJson)
 
     def wshEventData(self, reqId: int, dataJson: str):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param dataJson:
-        :type dataJson: str
-
-        """
+"""Args::
+    reqId: 
+    dataJson:"""
+    dataJson:"""
         self.ib.wshEvent.emit(dataJson)
         self._endReq(reqId, dataJson)
 
     def userInfo(self, reqId: int, whiteBrandingId: str):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param whiteBrandingId:
-        :type whiteBrandingId: str
-
-        """
+"""Args::
+    reqId: 
+    whiteBrandingId:"""
+    whiteBrandingId:"""
         self._endReq(reqId)
 
     def softDollarTiers(self, reqId: int, tiers: List[SoftDollarTier]):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param tiers:
-        :type tiers: List[SoftDollarTier]
-
-        """
+"""Args::
+    reqId: 
+    tiers:"""
+    tiers:"""
 
     def familyCodes(self, familyCodes: List[FamilyCode]):
-        """
-
-        :param familyCodes:
-        :type familyCodes: List[FamilyCode]
-
-        """
-
-    def error(
-        self,
-        reqId: int,
-        errorCode: int,
-        errorString: str,
-        advancedOrderRejectJson: str,
-    ):
-        """
-
-        :param reqId:
-        :type reqId: int
-        :param errorCode:
-        :type errorCode: int
-        :param errorString:
-        :type errorString: str
-        :param advancedOrderRejectJson:
-        :type advancedOrderRejectJson: str
-
-        """
+"""Args::
+    familyCodes:"""
+"""Args::
+    reqId: 
+    errorCode: 
+    errorString: 
+    advancedOrderRejectJson:"""
+    advancedOrderRejectJson:"""
         # https://interactivebrokers.github.io/tws-api/message_codes.html
         isRequest = reqId in self._futures
         trade = self.trades.get((self.clientId, reqId))
@@ -2386,16 +1680,8 @@ class Wrapper:
         self.ib.errorEvent.emit(reqId, errorCode, errorString, contract)
 
     def tcpDataArrived(self):
-        """ """
-        self.lastTime = datetime.now(timezone.utc)
-        for ticker in self.pendingTickers:
-            ticker.ticks = []
-            ticker.tickByTicks = []
-            ticker.domTicks = []
-        self.pendingTickers = set()
-
-    def tcpDataProcessed(self):
-        """ """
+""""""
+""""""
         self.ib.updateEvent.emit()
         if self.pendingTickers:
             for ticker in self.pendingTickers:

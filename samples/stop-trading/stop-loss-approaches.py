@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""stop-loss-approaches.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -32,222 +35,26 @@ import backtrader as bt
 
 
 class BaseStrategy(bt.Strategy):
-    """ """
-
-    params = dict(
-        fast_ma=10,
-        slow_ma=20,
-    )
-
-    def __init__(self):
-        """ """
-        # omitting a data implies self.datas[0] (aka self.data and self.data0)
-        fast_ma = bt.ind.EMA(period=self.p.fast_ma)
-        slow_ma = bt.ind.EMA(period=self.p.slow_ma)
-        # our entry point
-        self.crossup = bt.ind.CrossUp(fast_ma, slow_ma)
-
-
-class ManualStopOrStopTrail(BaseStrategy):
-    """ """
-
-    params = dict(
-        stop_loss=0.02,  # price is 2% less than the entry point
-        trail=False,
-    )
-
-    def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
-        if not order.status == order.Completed:
-            return  # discard any other notification
-
-        if not self.position:  # we left the market
-            print("SELL@price: {:.2f}".format(order.executed.price))
-            return
-
-        # We have entered the market
-        print("BUY @price: {:.2f}".format(order.executed.price))
-
-        if not self.p.trail:
-            stop_price = order.executed.price * (1.0 - self.p.stop_loss)
-            self.sell(exectype=bt.Order.Stop, price=stop_price)
-        else:
-            self.sell(exectype=bt.Order.StopTrail, trailamount=self.p.trail)
-
-    def next(self):
-        """ """
-        if not self.position and self.crossup > 0:
-            # not in the market and signal triggered
-            self.buy()
-
-
-class ManualStopOrStopTrailCheat(BaseStrategy):
-    """ """
-
-    params = dict(
-        stop_loss=0.02,  # price is 2% less than the entry point
-        trail=False,
-    )
-
-    def __init__(self):
-        """ """
-        super().__init__()
-        self.broker.set_coc(True)
-
-    def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
-        if not order.status == order.Completed:
-            return  # discard any other notification
-
-        if not self.position:  # we left the market
-            print("SELL@price: {:.2f}".format(order.executed.price))
-            return
-
-        # We have entered the market
-        print("BUY @price: {:.2f}".format(order.executed.price))
-
-    def next(self):
-        """ """
-        if not self.position and self.crossup > 0:
-            # not in the market and signal triggered
-            self.buy()
-
-            if not self.p.trail:
-                stop_price = self.data.close[0] * (1.0 - self.p.stop_loss)
-                self.sell(exectype=bt.Order.Stop, price=stop_price)
-            else:
-                self.sell(exectype=bt.Order.StopTrail, trailamount=self.p.trail)
-
-
-class AutoStopOrStopTrail(BaseStrategy):
-    """ """
-
-    params = dict(
-        stop_loss=0.02,  # price is 2% less than the entry point
-        trail=False,
-        buy_limit=False,
-    )
-
-    buy_order = None  # default value for a potential buy_order
-
-    def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
-        if order.status == order.Cancelled:
-            print(
-                "CANCEL@price: {:.2f} {}".format(
-                    order.executed.price, "buy" if order.isbuy() else "sell"
-                )
-            )
-            return
-
-        if not order.status == order.Completed:
-            return  # discard any other notification
-
-        if not self.position:  # we left the market
-            print("SELL@price: {:.2f}".format(order.executed.price))
-            return
-
-        # We have entered the market
-        print("BUY @price: {:.2f}".format(order.executed.price))
-
-    def next(self):
-        """ """
-        if not self.position and self.crossup > 0:
-            if self.buy_order:  # something was pending
-                self.cancel(self.buy_order)
-
-            # not in the market and signal triggered
-            if not self.p.buy_limit:
-                self.buy_order = self.buy(transmit=False)
-            else:
-                price = self.data.close[0] * (1.0 - self.p.buy_limit)
-
-                # transmit = False ... await child order before transmission
-                self.buy_order = self.buy(
-                    price=price, exectype=bt.Order.Limit, transmit=False
-                )
-
-            # Setting parent=buy_order ... sends both together
-            if not self.p.trail:
-                stop_price = self.data.close[0] * (1.0 - self.p.stop_loss)
-                self.sell(
-                    exectype=bt.Order.Stop,
-                    price=stop_price,
-                    parent=self.buy_order,
-                )
-            else:
-                self.sell(
-                    exectype=bt.Order.StopTrail,
-                    trailamount=self.p.trail,
-                    parent=self.buy_order,
-                )
-
-
-APPROACHES = dict(
-    manual=ManualStopOrStopTrail,
-    manualcheat=ManualStopOrStopTrailCheat,
-    auto=AutoStopOrStopTrail,
-)
-
-
-def runstrat(args=None):
-    """
-
-    :param args:  (Default value = None)
-
-    """
-    args = parse_args(args)
-
-    cerebro = bt.Cerebro()
-
-    # Data feed kwargs
-    kwargs = dict()
-
-    # Parse from/to-date
-    dtfmt, tmfmt = "%Y-%m-%d", "T%H:%M:%S"
-    for a, d in ((getattr(args, x), x) for x in ["fromdate", "todate"]):
-        if a:
-            strpfmt = dtfmt + tmfmt * ("T" in a)
-            kwargs[d] = datetime.datetime.strptime(a, strpfmt)
-
-    data0 = bt.feeds.BacktraderCSVData(dataname=args.data0, **kwargs)
-    cerebro.adddata(data0)
-
-    # Broker
-    cerebro.broker = bt.brokers.BackBroker(**eval("dict(" + args.broker + ")"))
-
-    # Sizer
-    cerebro.addsizer(bt.sizers.FixedSize, **eval("dict(" + args.sizer + ")"))
-
-    # Strategy
-    StClass = APPROACHES[args.approach]
-    cerebro.addstrategy(StClass, **eval("dict(" + args.strat + ")"))
-
-    # Execute
-    cerebro.run(**eval("dict(" + args.cerebro + ")"))
-
-    if args.plot:  # Plot if requested to
-        cerebro.plot(**eval("dict(" + args.plot + ")"))
-
-
-def parse_args(pargs=None):
-    """
-
-    :param pargs:  (Default value = None)
-
-    """
+""""""
+""""""
+""""""
+"""Args::
+    order:"""
+""""""
+""""""
+""""""
+"""Args::
+    order:"""
+""""""
+""""""
+"""Args::
+    order:"""
+""""""
+"""Args::
+    args: (Default value = None)"""
+"""Args::
+    pargs: (Default value = None)"""
+    pargs: (Default value = None)"""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Stop-Loss Approaches",

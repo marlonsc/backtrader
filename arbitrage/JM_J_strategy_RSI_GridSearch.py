@@ -1,4 +1,7 @@
-import datetime
+"""JM_J_strategy_RSI_GridSearch.py module.
+
+Description of the module functionality."""
+
 
 import backtrader as bt
 import pandas as pd
@@ -10,10 +13,8 @@ def calculate_rolling_spread(
     window: int = 30,
     fields=("open", "high", "low", "close"),
 ) -> pd.DataFrame:
-    """
-    计算滚动 β，并为指定价格字段生成价差 (spread)：
-        spread_x = price0_x - β_{t-1} * price1_x
-    """
+    """计算滚动 β，并为指定价格字段生成价差 (spread)：
+spread_x = price0_x - β_{t-1} * price1_x"""
     # 1) 用收盘价对齐合并（β 仍用 close 估计）
     df = (
         df0.set_index("date")[["close"]]
@@ -54,7 +55,9 @@ def calculate_rolling_spread(
 
 
 # 创建自定义数据类以支持beta列
-class SpreadData(bt.feeds.PandasData):
+"""SpreadData class.
+
+Description of the class functionality."""
     lines = ("beta",)  # 添加beta线
 
     params = (
@@ -65,7 +68,9 @@ class SpreadData(bt.feeds.PandasData):
     )
 
 
-class DynamicSpreadRSIStrategy(bt.Strategy):
+"""DynamicSpreadRSIStrategy class.
+
+Description of the class functionality."""
     params = (
         ("win", 20),  # RSI计算窗口
         ("overbought", 70),  # 超买阈值
@@ -74,14 +79,25 @@ class DynamicSpreadRSIStrategy(bt.Strategy):
         ("verbose", False),  # 是否打印详细信息
     )
 
-    def __init__(self):
+"""__init__ function.
+
+Returns:
+    Description of return value
+"""
         # 方便读取最近 win 根价差
         self.spread_series = self.data2.close
 
         # 计算价差的RSI
         self.rsi = bt.indicators.RSI(self.spread_series, period=self.p.win)
 
-    def _open_position(self, short):
+"""_open_position function.
+
+Args:
+    short: Description of short
+
+Returns:
+    Description of return value
+"""
         if not hasattr(self, "size0"):
             self.size0 = 10
             self.size1 = round(self.data2.beta[0] * 10)
@@ -92,11 +108,19 @@ class DynamicSpreadRSIStrategy(bt.Strategy):
             self.buy(data=self.data0, size=self.size0)
             self.sell(data=self.data1, size=self.size1)
 
-    def _close_positions(self):
+"""_close_positions function.
+
+Returns:
+    Description of return value
+"""
         self.close(data=self.data0)
         self.close(data=self.data1)
 
-    def next(self):
+"""next function.
+
+Returns:
+    Description of return value
+"""
         # 确保有足够的历史数据
         if len(self.rsi) < self.p.win + 2:
             return
@@ -129,7 +153,14 @@ class DynamicSpreadRSIStrategy(bt.Strategy):
             ):  # 做空价差的平仓条件
                 self._close_positions()
 
-    def notify_trade(self, trade):
+"""notify_trade function.
+
+Args:
+    trade: Description of trade
+
+Returns:
+    Description of return value
+"""
         if not self.p.verbose:
             return
 

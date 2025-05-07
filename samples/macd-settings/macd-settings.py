@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""macd-settings.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -39,14 +42,12 @@ class FixedPerc(bt.Sizer):
     params = (("perc", 0.20),)  # perc of cash to use for operation
 
     def _getsizing(self, comminfo, cash, data, isbuy):
-        """
-
-        :param comminfo:
-        :param cash:
-        :param data:
-        :param isbuy:
-
-        """
+"""Args::
+    comminfo: 
+    cash: 
+    data: 
+    isbuy:"""
+    isbuy:"""
         cashtouse = self.p.perc * cash
         if BTVERSION > (1, 7, 1, 93):
             size = comminfo.getsize(data.close[0], cashtouse)
@@ -57,24 +58,17 @@ class FixedPerc(bt.Sizer):
 
 class TheStrategy(bt.Strategy):
     """This strategy is loosely based on some of the examples from the Van
-    K. Tharp book: *Trade Your Way To Financial Freedom*. The logic:
-
-      - Enter the market if:
-        - The MACD.macd line crosses the MACD.signal line to the upside
-        - The Simple Moving Average has a negative direction in the last x
-          periods (actual value below value x periods ago)
-
-     - Set a stop price x times the ATR value away from the close
-
-     - If in the market:
-
-       - Check if the current close has gone below the stop price. If yes,
-         exit.
-       - If not, update the stop price if the new stop price would be higher
-         than the current
-
-
-    """
+K. Tharp book: *Trade Your Way To Financial Freedom*. The logic:
+- Enter the market if:
+- The MACD.macd line crosses the MACD.signal line to the upside
+- The Simple Moving Average has a negative direction in the last x
+periods (actual value below value x periods ago)
+- Set a stop price x times the ATR value away from the close
+- If in the market:
+- Check if the current close has gone below the stop price. If yes,
+exit.
+- If not, update the stop price if the new stop price would be higher
+than the current"""
 
     params = (
         # Standard MACD Parameters
@@ -88,161 +82,16 @@ class TheStrategy(bt.Strategy):
     )
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
-        if order.status == order.Completed:
-            pass
-
-        if not order.alive():
-            self.order = None  # indicate no order is pending
-
-    def __init__(self):
-        """ """
-        self.macd = bt.indicators.MACD(
-            self.data,
-            period_me1=self.p.macd1,
-            period_me2=self.p.macd2,
-            period_signal=self.p.macdsig,
-        )
-
-        # Cross of macd.macd and macd.signal
-        self.mcross = bt.indicators.CrossOver(self.macd.macd, self.macd.signal)
-
-        # To set the stop price
-        self.atr = bt.indicators.ATR(self.data, period=self.p.atrperiod)
-
-        # Control market trend
-        self.sma = bt.indicators.SMA(self.data, period=self.p.smaperiod)
-        self.smadir = self.sma - self.sma(-self.p.dirperiod)
-
-    def start(self):
-        """ """
-        self.order = None  # sentinel to avoid operrations on pending order
-
-    def next(self):
-        """ """
-        if self.order:
-            return  # pending order execution
-
-        if not self.position:  # not in the market
-            if self.mcross[0] > 0.0 and self.smadir < 0.0:
-                self.order = self.buy()
-                pdist = self.atr[0] * self.p.atrdist
-                self.pstop = self.data.close[0] - pdist
-
-        else:  # in the market
-            pclose = self.data.close[0]
-            pstop = self.pstop
-
-            if pclose < pstop:
-                self.close()  # stop met - get out
-            else:
-                pdist = self.atr[0] * self.p.atrdist
-                # Update only if greater than
-                self.pstop = max(pstop, pclose - pdist)
-
-
-DATASETS = {
-    "yhoo": "../../datas/yhoo-1996-2014.txt",
-    "orcl": "../../datas/orcl-1995-2014.txt",
-    "nvda": "../../datas/nvda-1999-2014.txt",
-}
-
-
-def runstrat(args=None):
-    """
-
-    :param args:  (Default value = None)
-
-    """
-    args = parse_args(args)
-
-    cerebro = bt.Cerebro()
-    cerebro.broker.set_cash(args.cash)
-    comminfo = bt.commissions.CommInfo_Stocks_Perc(
-        commission=args.commperc, percabs=True
-    )
-
-    cerebro.broker.addcommissioninfo(comminfo)
-
-    dkwargs = dict()
-    if args.fromdate is not None:
-        fromdate = datetime.datetime.strptime(args.fromdate, "%Y-%m-%d")
-        dkwargs["fromdate"] = fromdate
-
-    if args.todate is not None:
-        todate = datetime.datetime.strptime(args.todate, "%Y-%m-%d")
-        dkwargs["todate"] = todate
-
-    # if dataset is None, args.data has been given
-    dataname = DATASETS.get(args.dataset, args.data)
-    data0 = bt.feeds.YahooFinanceCSVData(dataname=dataname, **dkwargs)
-    cerebro.adddata(data0)
-
-    cerebro.addstrategy(
-        TheStrategy,
-        macd1=args.macd1,
-        macd2=args.macd2,
-        macdsig=args.macdsig,
-        atrperiod=args.atrperiod,
-        atrdist=args.atrdist,
-        smaperiod=args.smaperiod,
-        dirperiod=args.dirperiod,
-    )
-
-    cerebro.addsizer(FixedPerc, perc=args.cashalloc)
-
-    # Add TimeReturn Analyzers for self and the benchmark data
-    cerebro.addanalyzer(
-        bt.analyzers.TimeReturn,
-        _name="alltime_roi",
-        timeframe=bt.TimeFrame.NoTimeFrame,
-    )
-
-    cerebro.addanalyzer(
-        bt.analyzers.TimeReturn,
-        data=data0,
-        _name="benchmark",
-        timeframe=bt.TimeFrame.NoTimeFrame,
-    )
-
-    # Add TimeReturn Analyzers fot the annuyl returns
-    cerebro.addanalyzer(bt.analyzers.TimeReturn, timeframe=bt.TimeFrame.Years)
-    # Add a SharpeRatio
-    cerebro.addanalyzer(
-        bt.analyzers.SharpeRatio,
-        timeframe=bt.TimeFrame.Years,
-        riskfreerate=args.riskfreerate,
-    )
-
-    # Add SQN to qualify the trades
-    cerebro.addanalyzer(bt.analyzers.SQN)
-    cerebro.addobserver(bt.observers.DrawDown)  # visualize the drawdown evol
-
-    results = cerebro.run()
-    st0 = results[0]
-
-    for alyzer in st0.analyzers:
-        alyzer.print()
-
-    if args.plot:
-        pkwargs = dict(style="bar")
-        if args.plot is not True:  # evals to True but is not True
-            npkwargs = eval("dict(" + args.plot + ")")  # args were passed
-            pkwargs.update(npkwargs)
-
-        cerebro.plot(**pkwargs)
-
-
-def parse_args(pargs=None):
-    """
-
-    :param pargs:  (Default value = None)
-
-    """
+"""Args::
+    order:"""
+""""""
+""""""
+""""""
+"""Args::
+    args: (Default value = None)"""
+"""Args::
+    pargs: (Default value = None)"""
+    pargs: (Default value = None)"""
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""rollover.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -33,50 +36,13 @@ import backtrader as bt
 
 
 class TheStrategy(bt.Strategy):
-    """ """
-
-    def start(self):
-        """ """
-        header = [
-            "Len",
-            "Name",
-            "RollName",
-            "Datetime",
-            "WeekDay",
-            "Open",
-            "High",
-            "Low",
-            "Close",
-            "Volume",
-            "OpenInterest",
-        ]
-        print(", ".join(header))
-
-    def next(self):
-        """ """
-        txt = list()
-        txt.append("%04d" % len(self.data0))
-        txt.append("{}".format(self.data0._dataname))
-        # Internal knowledge ... current expiration in use is in _d
-        txt.append("{}".format(self.data0._d._dataname))
-        txt.append("{}".format(self.data.datetime.date()))
-        txt.append("{}".format(self.data.datetime.date().strftime("%a")))
-        txt.append("{}".format(self.data.open[0]))
-        txt.append("{}".format(self.data.high[0]))
-        txt.append("{}".format(self.data.low[0]))
-        txt.append("{}".format(self.data.close[0]))
-        txt.append("{}".format(self.data.volume[0]))
-        txt.append("{}".format(self.data.openinterest[0]))
-        print(", ".join(txt))
-
-
-def checkdate(dt, d):
-    """
-
-    :param dt:
-    :param d:
-
-    """
+""""""
+""""""
+""""""
+"""Args::
+    dt: 
+    d:"""
+    d:"""
     # Check if the date is in the week where the 3rd friday of Mar/Jun/Sep/Dec
 
     # EuroStoxx50 expiry codes: MY
@@ -109,63 +75,19 @@ def checkdate(dt, d):
 
 
 def checkvolume(d0, d1):
-    """
-
-    :param d0:
-    :param d1:
-
-    """
+"""Args::
+    d0: 
+    d1:"""
+    d1:"""
     return d0.volume[0] < d1.volume[0]  # Switch if volume from d0 < d1
 
 
 def runstrat(args=None):
-    """
-
-    :param args:  (Default value = None)
-
-    """
-    args = parse_args(args)
-
-    cerebro = bt.Cerebro()
-
-    fcodes = ["199FESXM4", "199FESXU4", "199FESXZ4", "199FESXH5", "199FESXM5"]
-    store = bt.stores.VChartFile()
-    ffeeds = [store.getdata(dataname=x) for x in fcodes]
-
-    rollkwargs = dict()
-    if args.checkdate:
-        rollkwargs["checkdate"] = checkdate
-
-        if args.checkcondition:
-            rollkwargs["checkcondition"] = checkvolume
-
-    if not args.no_cerebro:
-        if args.rollover:
-            cerebro.rolloverdata(name="FESX", *ffeeds, **rollkwargs)
-        else:
-            cerebro.chaindata(name="FESX", *ffeeds)
-    else:
-        drollover = bt.feeds.RollOver(*ffeeds, dataname="FESX", **rollkwargs)
-        cerebro.adddata(drollover)
-
-    cerebro.addstrategy(TheStrategy)
-    cerebro.run(stdstats=False)
-
-    if args.plot:
-        pkwargs = dict(style="bar")
-        if args.plot is not True:  # evals to True but is not True
-            npkwargs = eval("dict(" + args.plot + ")")  # args were passed
-            pkwargs.update(npkwargs)
-
-        cerebro.plot(**pkwargs)
-
-
-def parse_args(pargs=None):
-    """
-
-    :param pargs:  (Default value = None)
-
-    """
+"""Args::
+    args: (Default value = None)"""
+"""Args::
+    pargs: (Default value = None)"""
+    pargs: (Default value = None)"""
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

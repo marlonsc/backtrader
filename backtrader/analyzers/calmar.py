@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""calmar.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -33,13 +36,12 @@ __all__ = ["Calmar"]
 
 
 class Calmar(bt.TimeFrameAnalyzerBase):
-    """This analyzer calculates the CalmarRatio
-    timeframe which can be different from the one used in the underlying data
+"""This analyzer calculates the CalmarRatio
+timeframe which can be different from the one used in the underlying data
 
-
-    :returns: corresponding rolling Calmar ratio
-
-    """
+Returns::
+    corresponding rolling Calmar ratio"""
+    corresponding rolling Calmar ratio"""
 
     packages = (
         "collections",
@@ -53,39 +55,8 @@ class Calmar(bt.TimeFrameAnalyzerBase):
     )
 
     def __init__(self):
-        """ """
-        self._maxdd = TimeDrawDown(
-            timeframe=self.p.timeframe, compression=self.p.compression
-        )
-
-    def start(self):
-        """ """
-        self._mdd = float("-inf")
-        self._values = collections.deque(
-            [float("Nan")] * self.p.period, maxlen=self.p.period
-        )
-        if self.p.fund is None:
-            self._fundmode = self.strategy.broker.fundmode
-        else:
-            self._fundmode = self.p.fund
-
-        if not self._fundmode:
-            self._values.append(self.strategy.broker.getvalue())
-        else:
-            self._values.append(self.strategy.broker.fundvalue)
-
-    def on_dt_over(self):
-        """ """
-        self._mdd = max(self._mdd, self._maxdd.maxdd)
-        if not self._fundmode:
-            self._values.append(self.strategy.broker.getvalue())
-        else:
-            self._values.append(self.strategy.broker.fundvalue)
-        rann = math.log(self._values[-1] / self._values[0]) / len(self._values)
-        self.calmar = calmar = rann / (self._mdd or float("Inf"))
-
-        self.rets[self.dtkey] = calmar
-
-    def stop(self):
-        """ """
+""""""
+""""""
+""""""
+""""""
         self.on_dt_over()  # update last values

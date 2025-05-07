@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""ordereddefaultdict.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -33,15 +36,8 @@ from .py3 import iteritems
 
 
 class OrderedDefaultdict(OrderedDict):
-    """ """
-
-    def __init__(self, *args, **kwargs):
-        """
-
-        :param *args:
-        :param **kwargs:
-
-        """
+""""""
+        """"""
         if not args:
             self.default_factory = None
         else:
@@ -52,17 +48,8 @@ class OrderedDefaultdict(OrderedDict):
         super(OrderedDefaultdict, self).__init__(*args, **kwargs)
 
     def __missing__(self, key):
-        """
-
-        :param key:
-
-        """
-        if self.default_factory is None:
-            raise KeyError(key)
-        self[key] = default = self.default_factory()
-        return default
-
-    def __reduce__(self):  # optional, for pickle support
-        """ """
+"""Args::
+    key:"""
+""""""
         args = (self.default_factory,) if self.default_factory else ()
         return self.__class__, args, None, None, iteritems(self)

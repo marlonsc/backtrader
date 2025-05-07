@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""test_data_replay.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -39,12 +42,10 @@ chkargs = dict()
 
 
 def test_run(main=False, exbar=False):
-    """
-
-    :param main: (Default value = False)
-    :param exbar: (Default value = False)
-
-    """
+"""Args::
+    main: (Default value = False)
+    exbar: (Default value = False)"""
+    exbar: (Default value = False)"""
     data = testcommon.getdata(0)
     data.replay(timeframe=bt.TimeFrame.Weeks, compression=1)
     datas = [data]

@@ -1,4 +1,7 @@
-# -*- coding: UTF-8 -*-
+"""strategy_tester.py module.
+
+Description of the module functionality."""
+
 # https://www.backtrader.com/docu/quickstart/quickstart/#adding-a-data-feed
 
 # import
@@ -83,8 +86,8 @@ if __name__ == "__main__":
     print(f"Starting Portfolio Value: {cerebro.broker.getvalue():,.2f}")
 
     # Run over everything
-    # maxcpus=1 ist wichtig, wenn mehrere Varianten über optstrategy
-    # analysiert werden
+    # maxcpus=1 is important when multiple variants are used via optstrategy
+    # are being analyzed
     cerebro.run(maxcpus=1)
 
     print("Trade Results:")

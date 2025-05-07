@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""dateintern.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -49,182 +52,39 @@ TIME_MIN = datetime.time.min
 
 
 def tzparse(tz):
-    """
-
-    :param tz:
-
-    """
-    # If no object has been provided by the user and a timezone can be
-    # found via contractdtails, then try to get it from pytz, which may or
-    # may not be available.
-    tzstr = isinstance(tz, string_types)
-    if tz is None or not tzstr:
-        return Localizer(tz)
-
-    try:
-        import pytz  # keep the import very local
-    except ImportError:
-        return Localizer(tz)  # nothing can be done
-
-    tzs = tz
-    if tzs == "CST":  # usual alias
-        tzs = "CST6CDT"
-
-    try:
-        tz = pytz.timezone(tzs)
-    except pytz.UnknownTimeZoneError:
-        return Localizer(tz)  # nothing can be done
-
-    return tz
-
-
-def Localizer(tz):
-    """
-
-    :param tz:
-
-    """
-    import types
-
-    def localize(self, dt):
-        """
-
-        :param dt:
-
-        """
-        return dt.replace(tzinfo=self)
-
-    if tz is not None and not hasattr(tz, "localize"):
-        # patch the tz instance with a bound method
-        tz.localize = types.MethodType(localize, tz)
-
-    return tz
-
-
-# A UTC class, same as the one in the Python Docs
-class _UTC(datetime.tzinfo):
+"""Args::
+    tz:"""
+"""Args::
+    tz:"""
+"""Args::
+    dt:"""
     """UTC"""
 
     def utcoffset(self, dt):
-        """
-
-        :param dt:
-
-        """
-        return ZERO
-
-    def tzname(self, dt):
-        """
-
-        :param dt:
-
-        """
-        return "UTC"
-
-    def dst(self, dt):
-        """
-
-        :param dt:
-
-        """
-        return ZERO
-
-    def localize(self, dt):
-        """
-
-        :param dt:
-
-        """
-        return dt.replace(tzinfo=self)
-
-
-class _LocalTimezone(datetime.tzinfo):
-    """ """
-
-    def utcoffset(self, dt):
-        """
-
-        :param dt:
-
-        """
-        if self._isdst(dt):
-            return DSTOFFSET
-        else:
-            return STDOFFSET
-
-    def dst(self, dt):
-        """
-
-        :param dt:
-
-        """
-        if self._isdst(dt):
-            return DSTDIFF
-        else:
-            return ZERO
-
-    def tzname(self, dt):
-        """
-
-        :param dt:
-
-        """
-        return _time.tzname[self._isdst(dt)]
-
-    def _isdst(self, dt):
-        """
-
-        :param dt:
-
-        """
-        tt = (
-            dt.year,
-            dt.month,
-            dt.day,
-            dt.hour,
-            dt.minute,
-            dt.second,
-            dt.weekday(),
-            0,
-            0,
-        )
-        try:
-            stamp = _time.mktime(tt)
-        except (ValueError, OverflowError):
-            return False  # Too far in the future, not relevant
-
-        tt = _time.localtime(stamp)
-        return tt.tm_isdst > 0
-
-    def localize(self, dt):
-        """
-
-        :param dt:
-
-        """
-        return dt.replace(tzinfo=self)
-
-
-UTC = _UTC()
-TZLocal = _LocalTimezone()
-
-HOURS_PER_DAY = 24.0
-MINUTES_PER_HOUR = 60.0
-SECONDS_PER_MINUTE = 60.0
-MUSECONDS_PER_SECOND = 1e6
-MINUTES_PER_DAY = MINUTES_PER_HOUR * HOURS_PER_DAY
-SECONDS_PER_DAY = SECONDS_PER_MINUTE * MINUTES_PER_DAY
-MUSECONDS_PER_DAY = MUSECONDS_PER_SECOND * SECONDS_PER_DAY
-
-
-def num2date(x, tz=None, naive=True):
-    """
-
-    :param x:
-    :param tz:  (Default value = None)
-    :param naive:  (Default value = True)
-
-    """
+"""Args::
+    dt:"""
+"""Args::
+    dt:"""
+"""Args::
+    dt:"""
+"""Args::
+    dt:"""
+""""""
+"""Args::
+    dt:"""
+"""Args::
+    dt:"""
+"""Args::
+    dt:"""
+"""Args::
+    dt:"""
+"""Args::
+    dt:"""
+"""Args::
+    x: 
+    tz: (Default value = None)
+    naive: (Default value = True)"""
+    naive: (Default value = True)"""
     # Same as matplotlib except if tz is None a naive datetime object
     # will be returned.
     """
@@ -283,36 +143,32 @@ def num2date(x, tz=None, naive=True):
 
 
 def num2dt(num, tz=None, naive=True):
-    """
-
-    :param num:
-    :param tz:  (Default value = None)
-    :param naive:  (Default value = True)
-
-    """
+"""Args::
+    num: 
+    tz: (Default value = None)
+    naive: (Default value = True)"""
+    naive: (Default value = True)"""
     return num2date(num, tz=tz, naive=naive).date()
 
 
 def num2time(num, tz=None, naive=True):
-    """
-
-    :param num:
-    :param tz:  (Default value = None)
-    :param naive:  (Default value = True)
-
-    """
+"""Args::
+    num: 
+    tz: (Default value = None)
+    naive: (Default value = True)"""
+    naive: (Default value = True)"""
     return num2date(num, tz=tz, naive=naive).time()
 
 
 def date2num(dt, tz=None):
-    """Convert :mod:`datetime` to the Gregorian date as UTC float days,
-    preserving hours, minutes, seconds and microseconds.  Return value
-    is a :func:`float`.
+"""Convert :mod:`datetime` to the Gregorian date as UTC float days,
+preserving hours, minutes, seconds and microseconds.  Return value
+is a :func:`float`.
 
-    :param dt:
-    :param tz:  (Default value = None)
-
-    """
+Args::
+    dt: 
+    tz: (Default value = None)"""
+    tz: (Default value = None)"""
     if tz is not None:
         dt = tz.localize(dt)
 
@@ -342,12 +198,12 @@ def date2num(dt, tz=None):
 
 
 def time2num(tm):
-    """Converts the hour/minute/second/microsecond part of tm (datetime.datetime
-    or time) to a num
+"""Converts the hour/minute/second/microsecond part of tm (datetime.datetime
+or time) to a num
 
-    :param tm:
-
-    """
+Args::
+    tm:"""
+    tm:"""
     num = (
         tm.hour / HOURS_PER_DAY
         + tm.minute / MINUTES_PER_DAY

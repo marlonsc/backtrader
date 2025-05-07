@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""weekdaysaligner.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -38,65 +41,11 @@ from weekdaysfiller import WeekDaysFiller
 
 
 class St(bt.Strategy):
-    """ """
-
-    params = (("sma", 0),)
-
-    def __init__(self):
-        """ """
-        if self.p.sma:
-            btind.SMA(self.data0, period=self.p.sma)
-            btind.SMA(self.data1, period=self.p.sma)
-
-    def next(self):
-        """ """
-        dtequal = self.data0.datetime.datetime() == self.data1.datetime.datetime()
-
-        txt = ""
-        txt += "%04d, %5s" % (len(self), str(dtequal))
-        txt += ", data0, %s" % self.data0.datetime.datetime().isoformat()
-        txt += ", %s, data1" % self.data1.datetime.datetime().isoformat()
-        print(txt)
-
-
-def runstrat():
-    """ """
-    args = parse_args()
-
-    fromdate = datetime.datetime.strptime(args.fromdate, "%Y-%m-%d")
-    todate = datetime.datetime.strptime(args.todate, "%Y-%m-%d")
-
-    cerebro = bt.Cerebro(stdstats=False)
-
-    DataFeed = btfeeds.YahooFinanceCSVData
-    if args.online:
-        DataFeed = btfeeds.YahooFinanceData
-
-    data0 = DataFeed(dataname=args.data0, fromdate=fromdate, todate=todate)
-
-    if args.data1:
-        data1 = DataFeed(dataname=args.data1, fromdate=fromdate, todate=todate)
-    else:
-        data1 = data0.clone()
-
-    if args.filler or args.filler0:
-        data0.addfilter(WeekDaysFiller, fillclose=args.fillclose)
-
-    if args.filler or args.filler1:
-        data1.addfilter(WeekDaysFiller, fillclose=args.fillclose)
-
-    cerebro.adddata(data0)
-    cerebro.adddata(data1)
-
-    cerebro.addstrategy(St, sma=args.sma)
-    cerebro.run(runonce=True, preload=True)
-
-    if args.plot:
-        cerebro.plot(style="bar")
-
-
-def parse_args():
-    """ """
+""""""
+""""""
+""""""
+""""""
+""""""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Sample for aligning with trade ",

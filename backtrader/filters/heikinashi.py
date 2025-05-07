@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""heikinashi.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -30,28 +33,17 @@ __all__ = ["HeikinAshi"]
 
 class HeikinAshi(object):
     """The filter remodels the open, high, low, close to make HeikinAshi
-    candlesticks
-
-    See:
-      - https://en.wikipedia.org/wiki/Candlestick_chart#Heikin_Ashi_candlesticks
-      - http://stockcharts.com/school/doku.php?id=chart_school:chart_analysis:heikin_ashi
-
-
-    """
+candlesticks
+See:
+- https://en.wikipedia.org/wiki/Candlestick_chart#Heikin_Ashi_candlesticks
+- http://stockcharts.com/school/doku.php?id=chart_school:chart_analysis:heikin_ashi"""
 
     def __init__(self, data):
-        """
-
-        :param data:
-
-        """
-
-    def __call__(self, data):
-        """
-
-        :param data:
-
-        """
+"""Args::
+    data:"""
+"""Args::
+    data:"""
+    data:"""
         o, h, l, c = data.open[0], data.high[0], data.low[0], data.close[0]
 
         data.close[0] = ha_close0 = (o + h + l + c) / 4.0

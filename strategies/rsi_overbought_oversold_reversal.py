@@ -18,96 +18,77 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-"""
-RSI OVERBOUGHT/OVERSOLD REVERSAL STRATEGY WITH POSTGRESQL DATABASE - (rsi-reversal)
+"""RSI OVERBOUGHT/OVERSOLD REVERSAL STRATEGY WITH POSTGRESQL DATABASE - (rsi-reversal)
 ===============================================================================
-
 This strategy implements a mean reversion system based on RSI (Relative Strength Index)
 extremes. It looks for overbought and oversold conditions to identify potential
 price reversals.
-
 STRATEGY LOGIC:
 --------------
 1. Oversold Condition (Buy Signal):
-   - RSI falls below oversold threshold (default: 30)
-   - Wait for RSI to start moving back up (confirmation)
-   - Enter long position
-
+- RSI falls below oversold threshold (default: 30)
+- Wait for RSI to start moving back up (confirmation)
+- Enter long position
 2. Overbought Condition (Sell Signal):
-   - RSI rises above overbought threshold (default: 70)
-   - Wait for RSI to start moving back down (confirmation)
-   - Exit long position
-
+- RSI rises above overbought threshold (default: 70)
+- Wait for RSI to start moving back down (confirmation)
+- Exit long position
 3. Optional Confirmation Indicators:
-   - Support/Resistance levels
-   - Price action (candlestick patterns)
-   - Stochastic Oscillator crossovers
-
+- Support/Resistance levels
+- Price action (candlestick patterns)
+- Stochastic Oscillator crossovers
 MARKET CONDITIONS:
 ----------------
 !!! WARNING: THIS STRATEGY IS SPECIFICALLY DESIGNED FOR SIDEWAYS/RANGING MARKETS ONLY !!!
-
 - PERFORMS BEST: In markets with clear overbought and oversold levels that oscillate between
-  support and resistance zones. The strategy needs price to regularly return to the mean.
-
+support and resistance zones. The strategy needs price to regularly return to the mean.
 - AVOID USING: During strong trending markets where RSI can remain overbought/oversold for
-  extended periods without reverting. Using this strategy in trending markets will lead to
-  multiple false signals and poor performance.
-
+extended periods without reverting. Using this strategy in trending markets will lead to
+multiple false signals and poor performance.
 - IDEAL TIMEFRAMES: 1-hour, 4-hour, and daily charts for stocks that exhibit range-bound behavior
-
 - OPTIMAL MARKET CONDITION: Range-bound markets with clear support and resistance levels and
-  limited breakouts. Stocks with beta near 1.0 and low ADX readings (below 25) typically work best.
-
+limited breakouts. Stocks with beta near 1.0 and low ADX readings (below 25) typically work best.
 The strategy will struggle in strong trends as RSI can remain in extreme territories,
 resulting in premature exit signals or false entry signals. It performs best when
 price oscillates within a defined range, allowing RSI to regularly move between
 overbought and oversold zones.
-
 PARAMETERS ADJUSTMENT:
 --------------------
 - For wider ranges: Increase RSI thresholds (e.g., 25/75)
 - For narrow ranges: Decrease RSI thresholds (e.g., 35/65)
 - For stronger trends: Increase confirmation bars (3+)
 - For quicker signals: Decrease confirmation bars (1)
-
 OPTIMIZED FOR:
 -------------
 - Timeframe: 1-hour data
 - Year: 2024
 - Market: Stocks showing mean reversion tendencies
 - Best Performance: Sideways and ranging markets
-
 USAGE:
 ------
 python strategies/rsi_overbought_oversold_reversal.py --data SYMBOL --fromdate YYYY-MM-DD --todate YYYY-MM-DD [options]
-
 REQUIRED ARGUMENTS:
 ------------------
 --data, -d      : Stock symbol to retrieve data for (e.g., AAPL, MSFT, TSLA)
 --fromdate, -f  : Start date for historical data in YYYY-MM-DD format (default: 2024-01-01)
 --todate, -t    : End date for historical data in YYYY-MM-DD format (default: 2024-12-31)
-
 DATABASE PARAMETERS:
 ------------------
 --dbuser, -u    : PostgreSQL username (default: jason)
 --dbpass, -pw   : PostgreSQL password (default: fsck)
 --dbname, -n    : PostgreSQL database name (default: market_data)
 --cash, -c      : Initial cash for the strategy (default: $100,000)
-
 RSI PARAMETERS:
 --------------
 --rsi-period, -rp     : Period for RSI calculation (default: 14)
 --oversold, -os       : Oversold threshold for RSI (default: 30)
 --overbought, -ob     : Overbought threshold for RSI (default: 70)
 --confirmation, -cf   : Number of bars for confirmation (default: 2)
-
 STOCHASTIC PARAMETERS:
 --------------------
 --use-stoch, -us     : Use Stochastic Oscillator for confirmation (default: False)
 --stoch-period, -sp  : Period for Stochastic calculation (default: 14)
 --stoch-smooth, -ss  : Smoothing period for Stochastic (default: 3)
-
 EXIT PARAMETERS:
 ---------------
 --use-stop, -us     : Use stop loss (default: True)
@@ -115,24 +96,19 @@ EXIT PARAMETERS:
 --use-trail, -ut    : Enable trailing stop loss (default: False)
 --trail-pct, -tp    : Trailing stop percentage (default: 1.0)
 --take-profit, -tkp  : Take profit percentage (default: 4.0)
-
 POSITION SIZING:
 ---------------
 --risk-percent, -rp  : Percentage of equity to risk per trade (default: 1.0)
 --max-position, -mp  : Maximum position size as percentage of equity (default: 20.0)
-
 TRADE THROTTLING:
 ---------------
 --trade-throttle-days, -ttd : Minimum days between trades (default: 1)
-
 OTHER:
 -----
 --plot, -p          : Generate and show a plot of the trading activity
-
 EXAMPLE:
 --------
-python strategies/rsi_overbought_oversold_reversal.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --rsi-period 14 --oversold 30 --overbought 70 --plot
-"""
+python strategies/rsi_overbought_oversold_reversal.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --rsi-period 14 --oversold 30 --overbought 70 --plot"""
 
 from __future__ import (
     absolute_import,
@@ -178,35 +154,26 @@ class StockPriceData(bt.feeds.PandasData):
 
 class RSIOverboughtOversoldStrategy(bt.Strategy, TradeThrottling):
     """RSI Overbought/Oversold Reversal Strategy
-
-    This strategy looks for extreme RSI values to identify potential reversals:
-    - Buy when RSI moves below oversold level and starts to turn up
-    - Sell when RSI moves above overbought level and starts to turn down
-    - Optional confirmation using Stochastic Oscillator
-
-    !!! IMPORTANT MARKET CONDITION WARNING !!!
-
-    This strategy is SPECIFICALLY DESIGNED for SIDEWAYS/RANGING MARKETS ONLY.
-    It performs POORLY in trending markets where RSI can remain in extreme territories
-    for extended periods without reverting.
-
-    BEST MARKET CONDITIONS:
-    - Stocks trading in defined ranges with clear support and resistance
-    - Low ADX readings (below 25) indicating absence of strong trends
-    - Markets with regular mean reversion behavior
-    - Periods of low to moderate volatility
-
-    AVOID USING IN:
-    - Strong bull or bear markets with persistent trends
-    - Breakout situations or after significant news events
-    - Stocks with high momentum characteristics
-    - High volatility environments
-
-    Using this strategy in trending markets will result in numerous false signals,
-    premature exits, and poor overall performance.
-
-
-    """
+This strategy looks for extreme RSI values to identify potential reversals:
+- Buy when RSI moves below oversold level and starts to turn up
+- Sell when RSI moves above overbought level and starts to turn down
+- Optional confirmation using Stochastic Oscillator
+!!! IMPORTANT MARKET CONDITION WARNING !!!
+This strategy is SPECIFICALLY DESIGNED for SIDEWAYS/RANGING MARKETS ONLY.
+It performs POORLY in trending markets where RSI can remain in extreme territories
+for extended periods without reverting.
+BEST MARKET CONDITIONS:
+- Stocks trading in defined ranges with clear support and resistance
+- Low ADX readings (below 25) indicating absence of strong trends
+- Markets with regular mean reversion behavior
+- Periods of low to moderate volatility
+AVOID USING IN:
+- Strong bull or bear markets with persistent trends
+- Breakout situations or after significant news events
+- Stocks with high momentum characteristics
+- High volatility environments
+Using this strategy in trending markets will result in numerous false signals,
+premature exits, and poor overall performance."""
 
     params = (
         # RSI parameters
@@ -232,13 +199,13 @@ class RSIOverboughtOversoldStrategy(bt.Strategy, TradeThrottling):
     )
 
     def log(self, txt, dt=None, level="info"):
-        """Logging function
+"""Logging function
 
-        :param txt:
-        :param dt:  (Default value = None)
-        :param level:  (Default value = "info")
-
-        """
+Args::
+    txt: 
+    dt: (Default value = None)
+    level: (Default value = "info")"""
+    level: (Default value = "info")"""
         if level == "debug" and self.p.logging_level != "debug":
             return
 
@@ -246,49 +213,12 @@ class RSIOverboughtOversoldStrategy(bt.Strategy, TradeThrottling):
         print(f"{dt.isoformat()}: {txt}")
 
     def __init__(self):
-        """ """
-        # Keep track of price data
-        self.dataclose = self.datas[0].close
-        self.datahigh = self.datas[0].high
-        self.datalow = self.datas[0].low
+""""""
+"""Handle order notifications
 
-        # Create RSI indicator
-        self.rsi = bt.indicators.RSI(
-            self.dataclose, period=self.p.rsi_period, plotname="RSI"
-        )
-
-        # Create Stochastic indicator if enabled
-        if self.p.use_stoch:
-            self.stoch = bt.indicators.Stochastic(
-                self.data,
-                period=self.p.stoch_period,
-                period_dfast=self.p.stoch_smooth,
-                plotname="Stochastic",
-            )
-
-        # Trading state variables
-        self.order = None
-        self.buyprice = None
-        self.buycomm = None
-        self.stop_price = None
-        self.take_profit_price = None
-        self.trail_price = None
-        self.highest_price = None
-
-        # Confirmation state variables
-        self.buy_signal_count = 0
-        self.sell_signal_count = 0
-        self.last_rsi = None
-
-        # For trade throttling
-        self.last_trade_date = None
-
-    def notify_order(self, order):
-        """Handle order notifications
-
-        :param order:
-
-        """
+Args::
+    order:"""
+    order:"""
         if order.status in [order.Submitted, order.Accepted]:
             return
 
@@ -344,11 +274,11 @@ class RSIOverboughtOversoldStrategy(bt.Strategy, TradeThrottling):
         self.order = None
 
     def notify_trade(self, trade):
-        """Track completed trades
+"""Track completed trades
 
-        :param trade:
-
-        """
+Args::
+    trade:"""
+    trade:"""
         if not trade.isclosed:
             return
 
@@ -533,64 +463,7 @@ class RSIOverboughtOversoldStrategy(bt.Strategy, TradeThrottling):
         return False
 
     def next(self):
-        """ """
-        # If an order is pending, we cannot send a new one
-        if self.order:
-            return
-
-        # Store the current RSI value for reference
-        if self.is_rsi_valid():
-            self.last_rsi = self.rsi[0]
-
-        # Debug info every 5 bars
-        if len(self) % 5 == 0:
-            rsi_msg = (
-                f"RSI: {self.rsi[0]:.2f}"
-                if self.is_rsi_valid()
-                else "RSI: Initializing"
-            )
-            self.log(
-                f"Close: {self.dataclose[0]:.2f}, {rsi_msg}",
-                level="debug",
-            )
-            if self.p.use_stoch and self.is_stoch_valid():
-                self.log(
-                    f"Stochastic K: {self.stoch.lines.percK[0]:.2f}, "
-                    f"D: {self.stoch.lines.percD[0]:.2f}",
-                    level="debug",
-                )
-
-        # Check if we are in the market
-        if not self.position:
-            # Check for buy signal
-            if self.should_buy():
-                # Check if we can trade now (trade throttling)
-                if not self.can_trade_now():
-                    self.log(
-                        "TRADE THROTTLED: Need to wait"
-                        f" {self.p.trade_throttle_days} days between trades",
-                        level="debug",
-                    )
-                    return
-
-                size = self.calculate_position_size()
-                if size > 0:
-                    self.log(
-                        f"BUY CREATE: Price: {self.dataclose[0]:.2f}, Size: {size},"
-                        f" RSI: {self.rsi[0]:.2f}"
-                    )
-                    self.order = self.buy(size=size)
-
-        else:
-            # Check for sell signal
-            if self.should_sell():
-                self.log(
-                    f"SELL CREATE: Price: {self.dataclose[0]:.2f}, RSI:"
-                    f" {self.rsi[0]:.2f}"
-                )
-                self.order = self.sell(size=self.position.size)
-
-    def stop(self):
+""""""
         """Called when backtest is complete"""
         self.log("RSI Overbought/Oversold Reversal Strategy completed")
         self.log(f"Final Portfolio Value: {self.broker.getvalue():.2f}")

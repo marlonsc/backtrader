@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""pandafeed.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -32,21 +35,14 @@ from backtrader.utils.py3 import filter, integer_types, string_types
 
 class PandasDirectData(feed.DataBase):
     """Uses a Pandas DataFrame as the feed source, iterating directly over the
-    tuples returned by "itertuples".
-
-    This means that all parameters related to lines must have numeric
-    values as indices into the tuples
-
-    Note:
-
-      - The ``dataname`` parameter is a Pandas DataFrame
-
-      - A negative value in any of the parameters for the Data lines
-        indicates it's not present in the DataFrame
-        it is
-
-
-    """
+tuples returned by "itertuples".
+This means that all parameters related to lines must have numeric
+values as indices into the tuples
+Note:
+- The ``dataname`` parameter is a Pandas DataFrame
+- A negative value in any of the parameters for the Data lines
+indicates it's not present in the DataFrame
+it is"""
 
     params = (
         ("datetime", 0),
@@ -69,62 +65,12 @@ class PandasDirectData(feed.DataBase):
     ]
 
     def start(self):
-        """ """
-        super(PandasDirectData, self).start()
-
-        # reset the iterator on each start
-        self._rows = self.p.dataname.itertuples()
-
-    def _load(self):
-        """ """
-        try:
-            row = next(self._rows)
-        except StopIteration:
-            return False
-
-        # Set the standard datafields - except for datetime
-        for datafield in self.getlinealiases():
-            if datafield == "datetime":
-                continue
-
-            # get the column index
-            colidx = getattr(self.params, datafield)
-
-            if colidx < 0:
-                # column not present -- skip
-                continue
-
-            # get the line to be set
-            line = getattr(self.lines, datafield)
-
-            # indexing for pandas: 1st is colum, then row
-            line[0] = row[colidx]
-
-        # datetime
-        colidx = getattr(self.params, "datetime")
-        tstamp = row[colidx]
-
-        # convert to float via datetime and store it
-        dt = tstamp.to_pydatetime()
-        dtnum = date2num(dt)
-
-        # get the line to be set
-        line = getattr(self.lines, "datetime")
-        line[0] = dtnum
-
-        # Done ... return
-        return True
-
-
-class PandasData(feed.DataBase):
+""""""
+""""""
     """Uses a Pandas DataFrame as the feed source, using indices into column
-    names (which can be "numeric")
-
-    This means that all parameters related to lines must have numeric
-    values as indices into the tuples
-
-
-    """
+names (which can be "numeric")
+This means that all parameters related to lines must have numeric
+values as indices into the tuples"""
 
     params = (
         ("nocase", True),
@@ -158,97 +104,9 @@ class PandasData(feed.DataBase):
     ]
 
     def __init__(self):
-        """ """
-        super(PandasData, self).__init__()
-
-        # these "colnames" can be strings or numeric types
-        colnames = list(self.p.dataname.columns.values)
-        if self.p.datetime is None:
-            # datetime is expected as index col and hence not returned
-            pass
-
-        # try to autodetect if all columns are numeric
-        cstrings = filter(lambda x: isinstance(x, string_types), colnames)
-        self.colsnumeric = not len(list(cstrings))
-
-        # Where each datafield find its value
-        self._colmapping = dict()
-
-        if self.colsnumeric:
-            colsextend = [
-                dataname
-                for dataname in self.getlinealiases()
-                if dataname not in self.datafields
-            ]
-            ext_idx_start = len(self.datafields) - 1
-            self._colmapping = dict(zip(self.datafields, [None, 0, 1, 2, 3, 4, 5]))
-            self._colmapping.update(
-                dict(
-                    zip(
-                        colsextend,
-                        range(ext_idx_start, ext_idx_start + len(colsextend)),
-                    )
-                )
-            )
-        else:
-            # Build the column mappings to internal fields in advance
-            for datafield in self.getlinealiases():
-                defmapping = getattr(self.params, datafield)
-
-                if isinstance(defmapping, integer_types) and defmapping < 0:
-                    # autodetection requested
-                    for colname in colnames:
-                        if isinstance(colname, string_types):
-                            if self.p.nocase:
-                                found = datafield.lower() == colname.lower()
-                            else:
-                                found = datafield == colname
-
-                            if found:
-                                self._colmapping[datafield] = colname
-                                break
-
-                    if datafield not in self._colmapping:
-                        # autodetection requested and not found
-                        self._colmapping[datafield] = None
-                        continue
-                else:
-                    # all other cases -- used given index
-                    self._colmapping[datafield] = defmapping
-
-    def start(self):
-        """ """
-        super(PandasData, self).start()
-
-        # reset the length with each start
-        self._idx = -1
-
-        # Transform names (valid for .ix) into indices (good for .iloc)
-        if self.p.nocase and not self.colsnumeric:
-            colnames = [x.lower() for x in self.p.dataname.columns.values]
-        else:
-            colnames = [x for x in self.p.dataname.columns.values]
-
-        for k, v in self._colmapping.items():
-            if v is None:
-                continue  # special marker for datetime
-            if isinstance(v, string_types):
-                try:
-                    if self.p.nocase:
-                        v = colnames.index(v.lower())
-                    else:
-                        v = colnames.index(v)
-                except ValueError as e:
-                    defmap = getattr(self.params, k)
-                    if isinstance(defmap, integer_types) and defmap < 0:
-                        v = None
-                    else:
-                        raise e  # let user now something failed
-
-            self._colmapping[k] = v
-
-    def _load(self):
-        """ """
+""""""
+""""""
+""""""
         self._idx += 1
 
         if self._idx >= len(self.p.dataname):

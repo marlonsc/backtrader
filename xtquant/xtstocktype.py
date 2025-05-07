@@ -1,4 +1,7 @@
-XT_GE_BANK_LOAN = 10051
+"""xtstocktype.py module.
+
+Description of the module functionality."""
+
 XT_GE_BJ = 20002
 XT_GE_BOND_DISTRIBUTION = 100200
 XT_GE_DF_ARBITAGE_FTOPTION = 100056

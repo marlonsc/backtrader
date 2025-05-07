@@ -1,4 +1,7 @@
-from datetime import datetime, timedelta
+"""main.py module.
+
+Description of the module functionality."""
+
 
 import pandas as pd
 import sma
@@ -8,7 +11,7 @@ stocks = {"HS300": "data/hs300_stocks.csv", "ZZ500": "data/zz500_stocks.csv"}
 
 
 def main():
-    """ """
+""""""
     print("Starting SMA Detector")
     end_date = datetime.today()
     start_date = end_date - timedelta(days=365 * 2)

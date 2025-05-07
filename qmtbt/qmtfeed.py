@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""qmtfeed.py module.
+
+Description of the module functionality."""
+
 from __future__ import (
     absolute_import,
     division,
@@ -17,16 +20,14 @@ from .qmtstore import QMTStore
 
 
 class MetaQMTFeed(DataBase.__class__):
-    """ """
+""""""
+"""Class has already been created ... register
 
-    def __init__(cls, name, bases, dct):
-        """Class has already been created ... register
-
-        :param name:
-        :param bases:
-        :param dct:
-
-        """
+Args::
+    name: 
+    bases: 
+    dct:"""
+    dct:"""
         # Initialize the class
         super(MetaQMTFeed, cls).__init__(name, bases, dct)
 
@@ -81,11 +82,7 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
     )
 
     def __init__(self, **kwargs):
-        """
-
-        :param **kwargs:
-
-        """
+        """"""
         self._timeframe = self.p.timeframe
         self._compression = 1
         self.store = kwargs["store"]
@@ -99,90 +96,20 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
     def start(
         self,
     ):
-        """ """
-        DataBase.start(self)
-
-        period_map = {
-            bt.TimeFrame.Days: "1d",
-            bt.TimeFrame.Minutes: "1m",
-            bt.TimeFrame.Ticks: "tick",
-        }
-
-        if not self.p.live:
-            self._history_data(period=period_map[self.p.timeframe])
-            print(f"{self.p.dataname}历史数据装载成功！")
-        else:
-            self._live_data(period=period_map[self.p.timeframe])
-            print(f"{self.p.dataname}实时数据装载成功！")
-
-    def stop(self):
-        """ """
-        DataBase.stop(self)
-
-        if self.p.live:
-            self.store._unsubscribe_live(self._seq)
-
-    def _get_datetime(self, value):
-        """
-
-        :param value:
-
-        """
-        dtime = datetime.datetime.fromtimestamp(value // 1000)
-        return bt.date2num(dtime)
-
-    def _load_current(self, current):
-        """
-
-        :param current:
-
-        """
-        for key in current.keys():
-            try:
-                value = current[key]
-                if key == "time":
-                    self.lines.datetime[0] = self._get_datetime(value)
-
-                elif key == "lastPrice" and self.p.timeframe == bt.TimeFrame.Ticks:
-                    self.lines.close[0] = value
-                    print(value)
-                else:
-                    attr = getattr(self.lines, key)
-                    attr[0] = value
-            except Exception as e:
-                print(e)
-        # print(current, 'current')
-        self.put_notification(int(random.randint(100000, 999999)))
-
-    def _load(self, replace=False):
-        """
-
-        :param replace:  (Default value = False)
-
-        """
-        if len(self._data) > 0:
-            current = self._data.popleft()
-
-            self._load_current(current)
-
-            return True
-        return None
-
-    def haslivedata(self):
-        """ """
-        return self.p.live and self._data
-
-    def islive(self):
-        """ """
-        return self.p.live
-
-    def _format_datetime(self, dt, period="1d"):
-        """
-
-        :param dt:
-        :param period:  (Default value = "1d")
-
-        """
+""""""
+""""""
+"""Args::
+    value:"""
+"""Args::
+    current:"""
+"""Args::
+    replace: (Default value = False)"""
+""""""
+""""""
+"""Args::
+    dt: 
+    period: (Default value = "1d")"""
+    period: (Default value = "1d")"""
         if dt is None:
             return ""
         else:
@@ -193,50 +120,15 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
             return formatted_string
 
     def _append_data(self, item):
-        """
-
-        :param item:
-
-        """
-        self._data.append(item)
-
-    def _history_data(self, period):
-        """
-
-        :param period:
-
-        """
-
-        start_time = self._format_datetime(self.p.fromdate, period)
-        end_time = self._format_datetime(self.p.todate, period)
-
-        res = self.store._fetch_history(
-            symbol=self.p.dataname,
-            period=period,
-            start_time=start_time,
-            end_time=end_time,
-        )
-        result = res.to_dict("records")
-        for item in result:
-            # if item.get('close') != 0 and item.get('lastPrice') != 0:
-            #     self._data.append(item)
-            self._data.append(item)
-
-    def _live_data(self, period):
-        """
-
-        :param period:
-
-        """
-
-        start_time = self._format_datetime(self.p.fromdate, period)
-
-        def on_data(datas):
-            """
-
-            :param datas:
-
-            """
+"""Args::
+    item:"""
+"""Args::
+    period:"""
+"""Args::
+    period:"""
+"""Args::
+    datas:"""
+    datas:"""
             for stock_code in datas:
                 print(stock_code, datas[stock_code])
                 # 遍历该股票的所有数据条目

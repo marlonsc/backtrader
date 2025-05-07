@@ -18,14 +18,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-"""
-RSI DIVERGENCE TRADING STRATEGY - (rsi-divergence)
+"""RSI DIVERGENCE TRADING STRATEGY - (rsi-divergence)
 ==================================================
-
 This strategy identifies and trades on RSI divergences:
 - Bullish divergence: Price makes a lower low while RSI makes a higher low (oversold)
 - Bearish divergence: Price makes a higher high while RSI makes a lower high (overbought)
-
 STRATEGY LOGIC:
 --------------
 - Identify RSI divergences by comparing price lows/highs with RSI lows/highs
@@ -33,13 +30,11 @@ STRATEGY LOGIC:
 - Enter short on bearish divergence when price is in a downtrend or crosses below SMA
 - Apply position sizing based on risk management (ATR-based stops)
 - Use multiple exit mechanisms including trailing stops and RSI thresholds
-
 MARKET CONDITIONS:
 ----------------
 *** THIS STRATEGY PERFORMS BEST IN TRENDING MARKETS WITH PULLBACKS ***
 It looks for price corrections against the main trend that aren't confirmed
 by momentum (RSI), signaling potential trend resumption.
-
 Here are a few initial suggestions for optimizing the RSI divergence strategy for TSLA:
 1. Experiment with different RSI periods between 8-25. The default of 14 may not be optimal for TSLA. Shorter periods will be more sensitive and generate more signals.
 2. Try a few different divergence lookback periods from 15-30 bars. The sweet spot is likely in the 20-25 range for catching meaningful divergences on TSLA.
@@ -49,43 +44,33 @@ Here are a few initial suggestions for optimizing the RSI divergence strategy fo
 6. Backtest different risk per trade levels from 0.5% to 2%. Given TSLA's volatility, taking smaller position sizes with wider stops may improve consistency.
 7. Try a trailing stop that follows the low of the past 5-10 bars in addition to the ATR stop. This can help ride TSLA's momentum.
 8. If trading frequently, tighten up the throttling to 2-3 days between entries to reduce overtrading and whipsaw losses.
-
 The key is finding the parameter combination that best captures TSLA's specific price action and volatility patterns.
-
 EXAMPLE COMMANDS:
 ---------------
 1. Standard configuration - default RSI divergence detection:
-   python strategies/rsi_divergence.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31
-
+python strategies/rsi_divergence.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31
 2. More sensitive RSI settings - faster divergence signals:
-   python strategies/rsi_divergence.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --rsi-period 10 --divergence-lookback 15
-
+python strategies/rsi_divergence.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --rsi-period 10 --divergence-lookback 15
 3. Extreme overbought/oversold thresholds - fewer but stronger signals:
-   python strategies/rsi_divergence.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --rsi-oversold 25 --rsi-overbought 75 --exit-rsi-thresh 40 --exit-rsi-thresh-short 60
-
+python strategies/rsi_divergence.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --rsi-oversold 25 --rsi-overbought 75 --exit-rsi-thresh 40 --exit-rsi-thresh-short 60
 4. Trend-filtered approach - stronger trend confirmation:
-   python strategies/rsi_divergence.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --trend-sma 100
-
+python strategies/rsi_divergence.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --trend-sma 100
 5. Aggressive risk/reward profile - larger position sizing with wider stops:
-   python strategies/rsi_divergence.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --risk-percent 2.0 --stop-atr-multiple 2.5 --tp-sl-ratio 3.0
-
+python strategies/rsi_divergence.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --risk-percent 2.0 --stop-atr-multiple 2.5 --tp-sl-ratio 3.0
 USAGE:
 ------
 python strategies/rsi_divergence.py --data SYMBOL --fromdate YYYY-MM-DD --todate YYYY-MM-DD [options]
-
 REQUIRED ARGUMENTS:
 ------------------
 --data, -d      : Stock symbol to retrieve data for (e.g., AAPL, MSFT, TSLA)
 --fromdate, -f  : Start date for historical data in YYYY-MM-DD format (default: 2018-01-01)
 --todate, -t    : End date for historical data in YYYY-MM-DD format (default: 2023-12-31)
-
 DATABASE PARAMETERS:
 ------------------
 --dbuser, -u    : PostgreSQL username (default: jason)
 --dbpass, -pw   : PostgreSQL password (default: fsck)
 --dbname, -n    : PostgreSQL database name (default: market_data)
 --cash, -c      : Initial cash for the strategy (default: $100,000)
-
 RSI AND DIVERGENCE PARAMETERS:
 ----------------------------
 --rsi-period, -rp        : RSI calculation period (default: 14)
@@ -94,18 +79,15 @@ RSI AND DIVERGENCE PARAMETERS:
 --rsi-overbought, -rob   : RSI overbought level (default: 70)
 --min-rsi-value, -mrv    : Minimum RSI value for bullish divergence (default: 20)
 --max-rsi-value, -maxrv  : Maximum RSI value for bearish divergence (default: 80)
-
 TREND CONFIRMATION:
 -----------------
 --trend-sma, -ts         : SMA period for trend confirmation (default: 50)
 --min-trend-strength, -mts : Minimum consecutive bars in trend direction (default: 0)
 --use-volume, -uv        : Use volume confirmation for entries (default: False)
-
 EXIT PARAMETERS:
 --------------
 --exit-rsi-thresh, -ert   : RSI threshold to exit longs (default: 45)
 --exit-rsi-thresh-short, -erts : RSI threshold to exit shorts (default: 55)
-
 RISK MANAGEMENT:
 --------------
 --risk-percent, -rip      : Risk per trade as percentage of portfolio (default: 1.0)
@@ -117,33 +99,26 @@ RISK MANAGEMENT:
 --trailing-stop-lookback, -tsl : Lookback period for trailing stop in bars (default: 5)
 --use-percent-trailing, -upt  : Use percentage-based trailing stop (default: False)
 --trailing-percent, -tp   : Trailing stop percentage (default: 2.0)
-
 TRADE SETTINGS:
 -------------
 --trade-direction, -td    : Trading direction - long_only, short_only, or both (default: long_only)
 --allow-margin, -am       : Enable margin trading (default: disabled)
-
 TRADE THROTTLING:
 ---------------
 --trade-throttle-days, -ttd : Minimum days between trades (default: 5)
-
 OTHER:
 -----
 --plot, -p      : Generate and show a plot of the trading activity
 --log-level, -ll : Logging level (debug, info, warning, error) (default: info)
-
 EXAMPLE:
 --------
 python strategies/rsi_divergence.py --data AAPL --fromdate 2023-01-01 --todate 2023-12-31 --rsi-period 14 --plot
-
 COMMON PARAMETER COMBINATIONS:
 ---------------------------
 1. Long-only trading with conservative risk:
-   python strategies/rsi_divergence.py --data TSLA --fromdate 2024-01-01 --todate 2024-12-31 --rsi-period 14 --divergence-lookback 25 --trend-sma 50 --rsi-oversold 25 --rsi-overbought 75 --exit-rsi-thresh 60 --risk-percent 0.25 --stop-atr-multiple 2.0 --tp-sl-ratio 2.5 --trailing-stop-lookback 10 --trade-throttle-days 5 --trade-direction long_only --max-position-size 5.0 --min-stop-distance 0.5
-
+python strategies/rsi_divergence.py --data TSLA --fromdate 2024-01-01 --todate 2024-12-31 --rsi-period 14 --divergence-lookback 25 --trend-sma 50 --rsi-oversold 25 --rsi-overbought 75 --exit-rsi-thresh 60 --risk-percent 0.25 --stop-atr-multiple 2.0 --tp-sl-ratio 2.5 --trailing-stop-lookback 10 --trade-throttle-days 5 --trade-direction long_only --max-position-size 5.0 --min-stop-distance 0.5
 2. Both long and short trading (no margin):
-   python strategies/rsi_divergence.py --data TSLA --fromdate 2024-01-01 --todate 2024-12-31 --rsi-period 14 --divergence-lookback 25 --trend-sma 50 --exit-rsi-thresh 60 --exit-rsi-thresh-short 40 --trade-direction both --max-position-size 3.0
-"""
+python strategies/rsi_divergence.py --data TSLA --fromdate 2024-01-01 --todate 2024-12-31 --rsi-period 14 --divergence-lookback 25 --trend-sma 50 --exit-rsi-thresh 60 --exit-rsi-thresh-short 40 --trade-direction both --max-position-size 3.0"""
 
 import argparse
 import datetime
@@ -182,15 +157,10 @@ class StockPriceData(bt.feeds.PandasData):
 
 class RSIDivergenceStrategy(bt.Strategy, TradeThrottling):
     """RSI Divergence Strategy for Backtrader
-
-    This strategy identifies and trades on RSI divergences:
-    - Bullish divergence: Price makes a lower low while RSI makes a higher low (oversold)
-    - Bearish divergence: Price makes a higher high while RSI makes a lower high (overbought)
-
-    Additional filters include RSI overbought/oversold levels and moving average trend confirmation.
-
-
-    """
+This strategy identifies and trades on RSI divergences:
+- Bullish divergence: Price makes a lower low while RSI makes a higher low (oversold)
+- Bearish divergence: Price makes a higher high while RSI makes a lower high (overbought)
+Additional filters include RSI overbought/oversold levels and moving average trend confirmation."""
 
     params = (
         ("rsi_period", 14),  # RSI lookback period
@@ -287,13 +257,13 @@ class RSIDivergenceStrategy(bt.Strategy, TradeThrottling):
         self.trailing_stop = None
 
     def log(self, txt, dt=None, level="info"):
-        """Logging function for this strategy
+"""Logging function for this strategy
 
-        :param txt:
-        :param dt:  (Default value = None)
-        :param level:  (Default value = "info")
-
-        """
+Args::
+    txt: 
+    dt: (Default value = None)
+    level: (Default value = "info")"""
+    level: (Default value = "info")"""
         if level == "debug" and self.p.log_level != "debug":
             return
 
@@ -301,11 +271,11 @@ class RSIDivergenceStrategy(bt.Strategy, TradeThrottling):
         print(f"{dt.isoformat()}: {txt}")
 
     def notify_order(self, order):
-        """Called when an order is placed, filled, or canceled.
+"""Called when an order is placed, filled, or canceled.
 
-        :param order:
-
-        """
+Args::
+    order:"""
+    order:"""
         # Skip if order is not completed
         if order.status in [order.Submitted, order.Accepted]:
             return
@@ -352,11 +322,11 @@ class RSIDivergenceStrategy(bt.Strategy, TradeThrottling):
             self.take_profit = None
 
     def notify_trade(self, trade):
-        """Called when a trade is completed.
+"""Called when a trade is completed.
 
-        :param trade:
-
-        """
+Args::
+    trade:"""
+    trade:"""
         if not trade.isclosed:
             return
 
@@ -375,12 +345,12 @@ class RSIDivergenceStrategy(bt.Strategy, TradeThrottling):
             self.current_consecutive_losses = 0
 
     def set_exit_orders(self, entry_price, is_buy=True):
-        """Set stop loss and take profit orders with improved trailing stop
+"""Set stop loss and take profit orders with improved trailing stop
 
-        :param entry_price:
-        :param is_buy:  (Default value = True)
-
-        """
+Args::
+    entry_price: 
+    is_buy: (Default value = True)"""
+    is_buy: (Default value = True)"""
         # Cancel existing exit orders
         self.cancel_exit_orders()
 
@@ -504,12 +474,12 @@ class RSIDivergenceStrategy(bt.Strategy, TradeThrottling):
             self.trailing_stop = None
 
     def calculate_position_size(self, entry_price, stop_price):
-        """Conservative position sizing with absolute limits to prevent excessive risk
+"""Conservative position sizing with absolute limits to prevent excessive risk
 
-        :param entry_price:
-        :param stop_price:
-
-        """
+Args::
+    entry_price: 
+    stop_price:"""
+    stop_price:"""
         # Set an absolute hard maximum number of shares (no matter what)
         absolute_max_shares = 100  # Never trade more than this many shares
 
@@ -583,22 +553,22 @@ class RSIDivergenceStrategy(bt.Strategy, TradeThrottling):
         return int(size)
 
     def get_safe_price_value(self, idx=0):
-        """Safely get price values without risk of index errors
+"""Safely get price values without risk of index errors
 
-        :param idx:  (Default value = 0)
-
-        """
+Args::
+    idx: (Default value = 0)"""
+    idx: (Default value = 0)"""
         try:
             return self.data.close[idx]
         except IndexError:
             return None
 
     def get_safe_rsi_value(self, idx=0):
-        """Safely get RSI values without risk of index errors
+"""Safely get RSI values without risk of index errors
 
-        :param idx:  (Default value = 0)
-
-        """
+Args::
+    idx: (Default value = 0)"""
+    idx: (Default value = 0)"""
         try:
             return self.rsi[idx]
         except IndexError:

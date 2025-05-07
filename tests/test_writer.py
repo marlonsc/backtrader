@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""test_writer.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -33,21 +36,11 @@ chkdatas = 1
 
 
 class BtTestStrategy(bt.Strategy):
-    """ """
-
-    params = dict(main=False)
-
-    def __init__(self):
-        """ """
-        btind.SMA()
-
-
-def test_run(main=False):
-    """
-
-    :param main: (Default value = False)
-
-    """
+""""""
+""""""
+"""Args::
+    main: (Default value = False)"""
+    main: (Default value = False)"""
     datas = [testcommon.getdata(i) for i in range(chkdatas)]
     cerebros = testcommon.runtest(
         datas,

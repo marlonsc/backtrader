@@ -20,47 +20,35 @@ from .util import UNSET_DOUBLE, UNSET_INTEGER, dataclassAsTuple, getLoop, run
 
 class Client:
     """Replacement for ``ibapi.client.EClient`` that uses asyncio.
-
-    The client is fully asynchronous and has its own
-    event-driven networking code that replaces the
-    networking code of the standard EClient.
-    It also replaces the infinite loop of ``EClient.run()``
-    with the asyncio event loop. It can be used as a drop-in
-    replacement for the standard EClient as provided by IBAPI.
-
-    Compared to the standard EClient this client has the following
-    additional features:
-
-    * ``client.connect()`` will block until the client is ready to
-      serve requests; It is not necessary to wait for ``nextValidId``
-      to start requests as the client has already done that.
-      The reqId is directly available with :py:meth:`.getReqId()`.
-
-    * ``client.connectAsync()`` is a coroutine for connecting asynchronously.
-
-    * When blocking, ``client.connect()`` can be made to time out with
-      the timeout parameter (default 2 seconds).
-
-    * Optional ``wrapper.priceSizeTick(reqId, tickType, price, size)`` that
-      combines price and size instead of the two wrapper methods
-      priceTick and sizeTick.
-
-    * Automatic request throttling.
-
-    * Optional ``wrapper.tcpDataArrived()`` method;
-      If the wrapper has this method it is invoked directly after
-      a network packet has arrived.
-      A possible use is to timestamp all data in the packet with
-      the exact same time.
-
-    * Optional ``wrapper.tcpDataProcessed()`` method;
-      If the wrapper has this method it is invoked after the
-      network packet's data has been handled.
-      A possible use is to write or evaluate the newly arrived data in
-      one batch instead of item by item.
-
-
-    """
+The client is fully asynchronous and has its own
+event-driven networking code that replaces the
+networking code of the standard EClient.
+It also replaces the infinite loop of ``EClient.run()``
+with the asyncio event loop. It can be used as a drop-in
+replacement for the standard EClient as provided by IBAPI.
+Compared to the standard EClient this client has the following
+additional features:
+* ``client.connect()`` will block until the client is ready to
+serve requests; It is not necessary to wait for ``nextValidId``
+to start requests as the client has already done that.
+The reqId is directly available with :py:meth:`.getReqId()`.
+* ``client.connectAsync()`` is a coroutine for connecting asynchronously.
+* When blocking, ``client.connect()`` can be made to time out with
+the timeout parameter (default 2 seconds).
+* Optional ``wrapper.priceSizeTick(reqId, tickType, price, size)`` that
+combines price and size instead of the two wrapper methods
+priceTick and sizeTick.
+* Automatic request throttling.
+* Optional ``wrapper.tcpDataArrived()`` method;
+If the wrapper has this method it is invoked directly after
+a network packet has arrived.
+A possible use is to timestamp all data in the packet with
+the exact same time.
+* Optional ``wrapper.tcpDataProcessed()`` method;
+If the wrapper has this method it is invoked after the
+network packet's data has been handled.
+A possible use is to write or evaluate the newly arrived data in
+one batch instead of item by item."""
 
     events = ("apiStart", "apiEnd", "apiError", "throttleStart", "throttleEnd")
 
@@ -73,86 +61,23 @@ class Client:
     (DISCONNECTED, CONNECTING, CONNECTED) = range(3)
 
     def __init__(self, wrapper):
-        """
-
-        :param wrapper:
-
-        """
-        self.wrapper = wrapper
-        self.decoder = Decoder(wrapper, 0)
-        self.apiStart = Event("apiStart")
-        self.apiEnd = Event("apiEnd")
-        self.apiError = Event("apiError")
-        self.throttleStart = Event("throttleStart")
-        self.throttleEnd = Event("throttleEnd")
-        self._logger = logging.getLogger("ib_insync.client")
-
-        self.conn = Connection()
-        self.conn.hasData += self._onSocketHasData
-        self.conn.disconnected += self._onSocketDisconnected
-
-        # extra optional wrapper methods
-        self._priceSizeTick = getattr(wrapper, "priceSizeTick", None)
-        self._tcpDataArrived = getattr(wrapper, "tcpDataArrived", None)
-        self._tcpDataProcessed = getattr(wrapper, "tcpDataProcessed", None)
-
-        self.host = ""
-        self.port = -1
-        self.clientId = -1
-        self.optCapab = ""
-        self.connectOptions = b""
-        self.reset()
-
-    def reset(self):
-        """ """
-        self.connState = Client.DISCONNECTED
-        self._apiReady = False
-        self._serverVersion = 0
-        self._data = b""
-        self._hasReqId = False
-        self._reqIdSeq = 0
-        self._accounts = []
-        self._startTime = time.time()
-        self._numBytesRecv = 0
-        self._numMsgRecv = 0
-        self._isThrottling = False
-        self._msgQ: Deque[str] = deque()
-        self._timeQ: Deque[float] = deque()
-
-    def serverVersion(self) -> int:
-        """
-
-
-        :rtype: int
-
+"""Args::
+    wrapper:"""
+""""""
+""":rtype: int"""
         """
         return self._serverVersion
 
     def run(self):
-        """ """
-        loop = getLoop()
-        loop.run_forever()
-
-    def isConnected(self):
-        """ """
-        return self.connState == Client.CONNECTED
-
-    def isReady(self) -> bool:
+""""""
+""""""
         """Is the API connection up and running?
-
-
-        :rtype: bool
-
-        """
+:rtype: bool"""
         return self._apiReady
 
     def connectionStats(self) -> ConnectionStats:
         """Get statistics about the connection.
-
-
-        :rtype: ConnectionStats
-
-        """
+:rtype: ConnectionStats"""
         if not self.isReady():
             raise ConnectionError("Not connected")
         return ConnectionStats(
@@ -166,11 +91,7 @@ class Client:
 
     def getReqId(self) -> int:
         """Get new request ID.
-
-
-        :rtype: int
-
-        """
+:rtype: int"""
         if not self.isReady():
             raise ConnectionError("Not connected")
         newId = self._reqIdSeq
@@ -178,32 +99,26 @@ class Client:
         return newId
 
     def updateReqId(self, minReqId):
-        """Update the next reqId to be at least ``minReqId``.
+"""Update the next reqId to be at least ``minReqId``.
 
-        :param minReqId:
-
-        """
+Args::
+    minReqId:"""
+    minReqId:"""
         self._reqIdSeq = max(self._reqIdSeq, minReqId)
 
     def getAccounts(self) -> List[str]:
         """Get the list of account names that are under management.
-
-
-        :rtype: List[str]
-
-        """
+:rtype: List[str]"""
         if not self.isReady():
             raise ConnectionError("Not connected")
         return self._accounts
 
     def setConnectOptions(self, connectOptions: str):
-        """Set additional connect options.
+"""Set additional connect options.
 
-        :param connectOptions: Use "+PACEAPI" to use request-pacing built
-                into TWS/gateway 974+ (obsolete).
-        :type connectOptions: str
-
-        """
+Args::
+    connectOptions: Use "+PACEAPI" to use request-pacing built"""
+    connectOptions: Use "+PACEAPI" to use request-pacing built"""
         self.connectOptions = connectOptions.encode()
 
     def connect(
@@ -213,21 +128,14 @@ class Client:
         clientId: int,
         timeout: Optional[float] = 2.0,
     ):
-        """Connect to a running TWS or IB gateway application.
+"""Connect to a running TWS or IB gateway application.
 
-        :param host: Host name or IP address.
-        :type host: str
-        :param port: Port number.
-        :type port: int
-        :param clientId: ID number to use for this client; must be unique per
-                connection.
-        :type clientId: int
-        :param timeout: If establishing the connection takes longer than
-                ``timeout`` seconds then the ``asyncio.TimeoutError`` exception
-                is raised. Set to 0 to disable timeout. (Default value = 2.0)
-        :type timeout: Optional[float]
-
-        """
+Args::
+    host: Host name or IP address.
+    port: Port number.
+    clientId: ID number to use for this client; must be unique per
+    timeout: If establishing the connection takes longer than"""
+    timeout: If establishing the connection takes longer than"""
         run(self.connectAsync(host, port, clientId, timeout))
 
     async def connectAsync(self, host, port, clientId, timeout=2.0):
@@ -278,12 +186,11 @@ class Client:
         self.reset()
 
     def send(self, *fields, makeEmpty=True):
-        """Serialize and send the given fields using the IB socket protocol.
+"""Serialize and send the given fields using the IB socket protocol.
 
-        :param *fields:
-        :param makeEmpty:  (Default value = True)
-
-        """
+Args::
+    makeEmpty: (Default value = True)"""
+    makeEmpty: (Default value = True)"""
         if not self.isConnected():
             raise ConnectionError("Not connected")
 
@@ -330,156 +237,22 @@ class Client:
         self.sendMsg(msg.getvalue())
 
     def sendMsg(self, msg: str):
-        """
-
-        :param msg:
-        :type msg: str
-
-        """
-        loop = getLoop()
-        t = loop.time()
-        times = self._timeQ
-        msgs = self._msgQ
-        while times and t - times[0] > self.RequestsInterval:
-            times.popleft()
-        if msg:
-            msgs.append(msg)
-        while msgs and (len(times) < self.MaxRequests or not self.MaxRequests):
-            msg = msgs.popleft()
-            self.conn.sendMsg(self._prefix(msg.encode()))
-            times.append(t)
-            if self._logger.isEnabledFor(logging.DEBUG):
-                self._logger.debug(">>> %s", msg[:-1].replace("\0", ","))
-        if msgs:
-            if not self._isThrottling:
-                self._isThrottling = True
-                self.throttleStart.emit()
-                self._logger.debug("Started to throttle requests")
-            loop.call_at(times[0] + self.RequestsInterval, self.sendMsg, None)
-        else:
-            if self._isThrottling:
-                self._isThrottling = False
-                self.throttleEnd.emit()
-                self._logger.debug("Stopped to throttle requests")
-
-    def _prefix(self, msg):
-        """
-
-        :param msg:
-
-        """
-        # prefix a message with its length
-        return struct.pack(">I", len(msg)) + msg
-
-    def _onSocketHasData(self, data):
-        """
-
-        :param data:
-
-        """
-        debug = self._logger.isEnabledFor(logging.DEBUG)
-        if self._tcpDataArrived:
-            self._tcpDataArrived()
-
-        self._data += data
-        self._numBytesRecv += len(data)
-
-        while True:
-            if len(self._data) <= 4:
-                break
-            # 4 byte prefix tells the message length
-            msgEnd = 4 + struct.unpack(">I", self._data[:4])[0]
-            if len(self._data) < msgEnd:
-                # insufficient data for now
-                break
-            msg = self._data[4:msgEnd].decode(errors="backslashreplace")
-            self._data = self._data[msgEnd:]
-            fields = msg.split("\0")
-            fields.pop()  # pop off last empty element
-            self._numMsgRecv += 1
-
-            if debug:
-                self._logger.debug("<<< %s", ",".join(fields))
-
-            if not self._serverVersion and len(fields) == 2:
-                # this concludes the handshake
-                version, _connTime = fields
-                self._serverVersion = int(version)
-                if self._serverVersion < self.MinClientVersion:
-                    self._onSocketDisconnected("TWS/gateway version must be >= 972")
-                    return
-                self.decoder.serverVersion = self._serverVersion
-                self.connState = Client.CONNECTED
-                self.startApi()
-                self.wrapper.connectAck()
-                self._logger.info(f"Logged on to server version {self._serverVersion}")
-            else:
-                if not self._apiReady:
-                    # snoop for nextValidId and managedAccounts response,
-                    # when both are in then the client is ready
-                    msgId = int(fields[0])
-                    if msgId == 9:
-                        _, _, validId = fields
-                        self.updateReqId(int(validId))
-                        self._hasReqId = True
-                    elif msgId == 15:
-                        _, _, accts = fields
-                        self._accounts = [a for a in accts.split(",") if a]
-                    if self._hasReqId and self._accounts:
-                        self._apiReady = True
-                        self.apiStart.emit()
-
-                # decode and handle the message
-                self.decoder.interpret(fields)
-
-        if self._tcpDataProcessed:
-            self._tcpDataProcessed()
-
-    def _onSocketDisconnected(self, msg):
-        """
-
-        :param msg:
-
-        """
-        wasReady = self.isReady()
-        if not self.isConnected():
-            self._logger.info("Disconnected.")
-        elif not msg:
-            msg = "Peer closed connection."
-            if not wasReady:
-                msg += f" clientId {self.clientId} already in use?"
-        if msg:
-            self._logger.error(msg)
-            self.apiError.emit(msg)
-        self.wrapper.setEventsDone()
-        if wasReady:
-            self.wrapper.connectionClosed()
-        self.reset()
-        if wasReady:
-            self.apiEnd.emit()
-
-    # client request methods
-    # the message type id is sent first, often followed by a version number
-
-    def reqMktData(
-        self,
-        reqId,
-        contract,
-        genericTickList,
-        snapshot,
-        regulatorySnapshot,
-        mktDataOptions,
-    ):
-        """
-
-        :param reqId:
-        :param contract:
-        :param genericTickList:
-        :param snapshot:
-        :param regulatorySnapshot:
-        :param mktDataOptions:
-
-        """
+"""Args::
+    msg:"""
+"""Args::
+    msg:"""
+"""Args::
+    data:"""
+"""Args::
+    msg:"""
+"""Args::
+    reqId: 
+    contract: 
+    genericTickList: 
+    snapshot: 
+    regulatorySnapshot: 
+    mktDataOptions:"""
+    mktDataOptions:"""
         fields = [1, 11, reqId, contract]
 
         if contract.secType == "BAG":
@@ -503,21 +276,13 @@ class Client:
         self.send(*fields)
 
     def cancelMktData(self, reqId):
-        """
-
-        :param reqId:
-
-        """
-        self.send(2, 2, reqId)
-
-    def placeOrder(self, orderId, contract, order):
-        """
-
-        :param orderId:
-        :param contract:
-        :param order:
-
-        """
+"""Args::
+    reqId:"""
+"""Args::
+    orderId: 
+    contract: 
+    order:"""
+    order:"""
         version = self.serverVersion()
         fields = [
             3,
@@ -741,37 +506,28 @@ class Client:
         self.send(*fields)
 
     def cancelOrder(self, orderId, manualCancelOrderTime=""):
-        """
-
-        :param orderId:
-        :param manualCancelOrderTime:  (Default value = "")
-
-        """
+"""Args::
+    orderId: 
+    manualCancelOrderTime: (Default value = "")"""
+    manualCancelOrderTime: (Default value = "")"""
         fields = [4, 1, orderId]
         if self.serverVersion() >= 169:
             fields += [manualCancelOrderTime]
         self.send(*fields)
 
     def reqOpenOrders(self):
-        """ """
-        self.send(5, 1)
-
-    def reqAccountUpdates(self, subscribe, acctCode):
-        """
-
-        :param subscribe:
-        :param acctCode:
-
-        """
+""""""
+"""Args::
+    subscribe: 
+    acctCode:"""
+    acctCode:"""
         self.send(6, 2, subscribe, acctCode)
 
     def reqExecutions(self, reqId, execFilter):
-        """
-
-        :param reqId:
-        :param execFilter:
-
-        """
+"""Args::
+    reqId: 
+    execFilter:"""
+    execFilter:"""
         self.send(
             7,
             3,
@@ -786,20 +542,12 @@ class Client:
         )
 
     def reqIds(self, numIds):
-        """
-
-        :param numIds:
-
-        """
-        self.send(8, 1, numIds)
-
-    def reqContractDetails(self, reqId, contract):
-        """
-
-        :param reqId:
-        :param contract:
-
-        """
+"""Args::
+    numIds:"""
+"""Args::
+    reqId: 
+    contract:"""
+    contract:"""
         fields = [
             9,
             8,
@@ -814,15 +562,13 @@ class Client:
         self.send(*fields)
 
     def reqMktDepth(self, reqId, contract, numRows, isSmartDepth, mktDepthOptions):
-        """
-
-        :param reqId:
-        :param contract:
-        :param numRows:
-        :param isSmartDepth:
-        :param mktDepthOptions:
-
-        """
+"""Args::
+    reqId: 
+    contract: 
+    numRows: 
+    isSmartDepth: 
+    mktDepthOptions:"""
+    mktDepthOptions:"""
         self.send(
             10,
             5,
@@ -845,66 +591,29 @@ class Client:
         )
 
     def cancelMktDepth(self, reqId, isSmartDepth):
-        """
-
-        :param reqId:
-        :param isSmartDepth:
-
-        """
+"""Args::
+    reqId: 
+    isSmartDepth:"""
+    isSmartDepth:"""
         self.send(11, 1, reqId, isSmartDepth)
 
     def reqNewsBulletins(self, allMsgs):
-        """
-
-        :param allMsgs:
-
-        """
-        self.send(12, 1, allMsgs)
-
-    def cancelNewsBulletins(self):
-        """ """
-        self.send(13, 1)
-
-    def setServerLogLevel(self, logLevel):
-        """
-
-        :param logLevel:
-
-        """
-        self.send(14, 1, logLevel)
-
-    def reqAutoOpenOrders(self, bAutoBind):
-        """
-
-        :param bAutoBind:
-
-        """
-        self.send(15, 1, bAutoBind)
-
-    def reqAllOpenOrders(self):
-        """ """
-        self.send(16, 1)
-
-    def reqManagedAccts(self):
-        """ """
-        self.send(17, 1)
-
-    def requestFA(self, faData):
-        """
-
-        :param faData:
-
-        """
-        self.send(18, 1, faData)
-
-    def replaceFA(self, reqId, faData, cxml):
-        """
-
-        :param reqId:
-        :param faData:
-        :param cxml:
-
-        """
+"""Args::
+    allMsgs:"""
+""""""
+"""Args::
+    logLevel:"""
+"""Args::
+    bAutoBind:"""
+""""""
+""""""
+"""Args::
+    faData:"""
+"""Args::
+    reqId: 
+    faData: 
+    cxml:"""
+    cxml:"""
         self.send(19, 1, faData, cxml, reqId)
 
     def reqHistoricalData(
@@ -920,20 +629,18 @@ class Client:
         keepUpToDate,
         chartOptions,
     ):
-        """
-
-        :param reqId:
-        :param contract:
-        :param endDateTime:
-        :param durationStr:
-        :param barSizeSetting:
-        :param whatToShow:
-        :param useRTH:
-        :param formatDate:
-        :param keepUpToDate:
-        :param chartOptions:
-
-        """
+"""Args::
+    reqId: 
+    contract: 
+    endDateTime: 
+    durationStr: 
+    barSizeSetting: 
+    whatToShow: 
+    useRTH: 
+    formatDate: 
+    keepUpToDate: 
+    chartOptions:"""
+    chartOptions:"""
         fields = [
             20,
             reqId,
@@ -965,16 +672,14 @@ class Client:
         account,
         override,
     ):
-        """
-
-        :param reqId:
-        :param contract:
-        :param exerciseAction:
-        :param exerciseQuantity:
-        :param account:
-        :param override:
-
-        """
+"""Args::
+    reqId: 
+    contract: 
+    exerciseAction: 
+    exerciseQuantity: 
+    account: 
+    override:"""
+    override:"""
         self.send(
             21,
             2,
@@ -1003,14 +708,12 @@ class Client:
         scannerSubscriptionOptions,
         scannerSubscriptionFilterOptions,
     ):
-        """
-
-        :param reqId:
-        :param subscription:
-        :param scannerSubscriptionOptions:
-        :param scannerSubscriptionFilterOptions:
-
-        """
+"""Args::
+    reqId: 
+    subscription: 
+    scannerSubscriptionOptions: 
+    scannerSubscriptionFilterOptions:"""
+    scannerSubscriptionFilterOptions:"""
         sub = subscription
         self.send(
             22,
@@ -1041,42 +744,20 @@ class Client:
         )
 
     def cancelScannerSubscription(self, reqId):
-        """
-
-        :param reqId:
-
-        """
-        self.send(23, 1, reqId)
-
-    def reqScannerParameters(self):
-        """ """
-        self.send(24, 1)
-
-    def cancelHistoricalData(self, reqId):
-        """
-
-        :param reqId:
-
-        """
-        self.send(25, 1, reqId)
-
-    def reqCurrentTime(self):
-        """ """
-        self.send(49, 1)
-
-    def reqRealTimeBars(
-        self, reqId, contract, barSize, whatToShow, useRTH, realTimeBarsOptions
-    ):
-        """
-
-        :param reqId:
-        :param contract:
-        :param barSize:
-        :param whatToShow:
-        :param useRTH:
-        :param realTimeBarsOptions:
-
-        """
+"""Args::
+    reqId:"""
+""""""
+"""Args::
+    reqId:"""
+""""""
+"""Args::
+    reqId: 
+    contract: 
+    barSize: 
+    whatToShow: 
+    useRTH: 
+    realTimeBarsOptions:"""
+    realTimeBarsOptions:"""
         self.send(
             50,
             3,
@@ -1089,22 +770,14 @@ class Client:
         )
 
     def cancelRealTimeBars(self, reqId):
-        """
-
-        :param reqId:
-
-        """
-        self.send(51, 1, reqId)
-
-    def reqFundamentalData(self, reqId, contract, reportType, fundamentalDataOptions):
-        """
-
-        :param reqId:
-        :param contract:
-        :param reportType:
-        :param fundamentalDataOptions:
-
-        """
+"""Args::
+    reqId:"""
+"""Args::
+    reqId: 
+    contract: 
+    reportType: 
+    fundamentalDataOptions:"""
+    fundamentalDataOptions:"""
         options = fundamentalDataOptions or []
         self.send(
             52,
@@ -1123,25 +796,15 @@ class Client:
         )
 
     def cancelFundamentalData(self, reqId):
-        """
-
-        :param reqId:
-
-        """
-        self.send(53, 1, reqId)
-
-    def calculateImpliedVolatility(
-        self, reqId, contract, optionPrice, underPrice, implVolOptions
-    ):
-        """
-
-        :param reqId:
-        :param contract:
-        :param optionPrice:
-        :param underPrice:
-        :param implVolOptions:
-
-        """
+"""Args::
+    reqId:"""
+"""Args::
+    reqId: 
+    contract: 
+    optionPrice: 
+    underPrice: 
+    implVolOptions:"""
+    implVolOptions:"""
         self.send(
             54,
             3,
@@ -1156,15 +819,13 @@ class Client:
     def calculateOptionPrice(
         self, reqId, contract, volatility, underPrice, optPrcOptions
     ):
-        """
-
-        :param reqId:
-        :param contract:
-        :param volatility:
-        :param underPrice:
-        :param optPrcOptions:
-
-        """
+"""Args::
+    reqId: 
+    contract: 
+    volatility: 
+    underPrice: 
+    optPrcOptions:"""
+    optPrcOptions:"""
         self.send(
             55,
             3,
@@ -1177,187 +838,96 @@ class Client:
         )
 
     def cancelCalculateImpliedVolatility(self, reqId):
-        """
-
-        :param reqId:
-
-        """
-        self.send(56, 1, reqId)
-
-    def cancelCalculateOptionPrice(self, reqId):
-        """
-
-        :param reqId:
-
-        """
-        self.send(57, 1, reqId)
-
-    def reqGlobalCancel(self):
-        """ """
-        self.send(58, 1)
-
-    def reqMarketDataType(self, marketDataType):
-        """
-
-        :param marketDataType:
-
-        """
-        self.send(59, 1, marketDataType)
-
-    def reqPositions(self):
-        """ """
-        self.send(61, 1)
-
-    def reqAccountSummary(self, reqId, groupName, tags):
-        """
-
-        :param reqId:
-        :param groupName:
-        :param tags:
-
-        """
+"""Args::
+    reqId:"""
+"""Args::
+    reqId:"""
+""""""
+"""Args::
+    marketDataType:"""
+""""""
+"""Args::
+    reqId: 
+    groupName: 
+    tags:"""
+    tags:"""
         self.send(62, 1, reqId, groupName, tags)
 
     def cancelAccountSummary(self, reqId):
-        """
-
-        :param reqId:
-
-        """
-        self.send(63, 1, reqId)
-
-    def cancelPositions(self):
-        """ """
-        self.send(64, 1)
-
-    def verifyRequest(self, apiName, apiVersion):
-        """
-
-        :param apiName:
-        :param apiVersion:
-
-        """
+"""Args::
+    reqId:"""
+""""""
+"""Args::
+    apiName: 
+    apiVersion:"""
+    apiVersion:"""
         self.send(65, 1, apiName, apiVersion)
 
     def verifyMessage(self, apiData):
-        """
-
-        :param apiData:
-
-        """
-        self.send(66, 1, apiData)
-
-    def queryDisplayGroups(self, reqId):
-        """
-
-        :param reqId:
-
-        """
-        self.send(67, 1, reqId)
-
-    def subscribeToGroupEvents(self, reqId, groupId):
-        """
-
-        :param reqId:
-        :param groupId:
-
-        """
+"""Args::
+    apiData:"""
+"""Args::
+    reqId:"""
+"""Args::
+    reqId: 
+    groupId:"""
+    groupId:"""
         self.send(68, 1, reqId, groupId)
 
     def updateDisplayGroup(self, reqId, contractInfo):
-        """
-
-        :param reqId:
-        :param contractInfo:
-
-        """
+"""Args::
+    reqId: 
+    contractInfo:"""
+    contractInfo:"""
         self.send(69, 1, reqId, contractInfo)
 
     def unsubscribeFromGroupEvents(self, reqId):
-        """
-
-        :param reqId:
-
-        """
-        self.send(70, 1, reqId)
-
-    def startApi(self):
-        """ """
-        self.send(71, 2, self.clientId, self.optCapab)
-
-    def verifyAndAuthRequest(self, apiName, apiVersion, opaqueIsvKey):
-        """
-
-        :param apiName:
-        :param apiVersion:
-        :param opaqueIsvKey:
-
-        """
+"""Args::
+    reqId:"""
+""""""
+"""Args::
+    apiName: 
+    apiVersion: 
+    opaqueIsvKey:"""
+    opaqueIsvKey:"""
         self.send(72, 1, apiName, apiVersion, opaqueIsvKey)
 
     def verifyAndAuthMessage(self, apiData, xyzResponse):
-        """
-
-        :param apiData:
-        :param xyzResponse:
-
-        """
+"""Args::
+    apiData: 
+    xyzResponse:"""
+    xyzResponse:"""
         self.send(73, 1, apiData, xyzResponse)
 
     def reqPositionsMulti(self, reqId, account, modelCode):
-        """
-
-        :param reqId:
-        :param account:
-        :param modelCode:
-
-        """
+"""Args::
+    reqId: 
+    account: 
+    modelCode:"""
+    modelCode:"""
         self.send(74, 1, reqId, account, modelCode)
 
     def cancelPositionsMulti(self, reqId):
-        """
-
-        :param reqId:
-
-        """
-        self.send(75, 1, reqId)
-
-    def reqAccountUpdatesMulti(self, reqId, account, modelCode, ledgerAndNLV):
-        """
-
-        :param reqId:
-        :param account:
-        :param modelCode:
-        :param ledgerAndNLV:
-
-        """
+"""Args::
+    reqId:"""
+"""Args::
+    reqId: 
+    account: 
+    modelCode: 
+    ledgerAndNLV:"""
+    ledgerAndNLV:"""
         self.send(76, 1, reqId, account, modelCode, ledgerAndNLV)
 
     def cancelAccountUpdatesMulti(self, reqId):
-        """
-
-        :param reqId:
-
-        """
-        self.send(77, 1, reqId)
-
-    def reqSecDefOptParams(
-        self,
-        reqId,
-        underlyingSymbol,
-        futFopExchange,
-        underlyingSecType,
-        underlyingConId,
-    ):
-        """
-
-        :param reqId:
-        :param underlyingSymbol:
-        :param futFopExchange:
-        :param underlyingSecType:
-        :param underlyingConId:
-
-        """
+"""Args::
+    reqId:"""
+"""Args::
+    reqId: 
+    underlyingSymbol: 
+    futFopExchange: 
+    underlyingSecType: 
+    underlyingConId:"""
+    underlyingConId:"""
         self.send(
             78,
             reqId,
@@ -1368,75 +938,43 @@ class Client:
         )
 
     def reqSoftDollarTiers(self, reqId):
-        """
-
-        :param reqId:
-
-        """
-        self.send(79, reqId)
-
-    def reqFamilyCodes(self):
-        """ """
-        self.send(80)
-
-    def reqMatchingSymbols(self, reqId, pattern):
-        """
-
-        :param reqId:
-        :param pattern:
-
-        """
+"""Args::
+    reqId:"""
+""""""
+"""Args::
+    reqId: 
+    pattern:"""
+    pattern:"""
         self.send(81, reqId, pattern)
 
     def reqMktDepthExchanges(self):
-        """ """
-        self.send(82)
-
-    def reqSmartComponents(self, reqId, bboExchange):
-        """
-
-        :param reqId:
-        :param bboExchange:
-
-        """
+""""""
+"""Args::
+    reqId: 
+    bboExchange:"""
+    bboExchange:"""
         self.send(83, reqId, bboExchange)
 
     def reqNewsArticle(self, reqId, providerCode, articleId, newsArticleOptions):
-        """
-
-        :param reqId:
-        :param providerCode:
-        :param articleId:
-        :param newsArticleOptions:
-
-        """
+"""Args::
+    reqId: 
+    providerCode: 
+    articleId: 
+    newsArticleOptions:"""
+    newsArticleOptions:"""
         self.send(84, reqId, providerCode, articleId, newsArticleOptions)
 
     def reqNewsProviders(self):
-        """ """
-        self.send(85)
-
-    def reqHistoricalNews(
-        self,
-        reqId,
-        conId,
-        providerCodes,
-        startDateTime,
-        endDateTime,
-        totalResults,
-        historicalNewsOptions,
-    ):
-        """
-
-        :param reqId:
-        :param conId:
-        :param providerCodes:
-        :param startDateTime:
-        :param endDateTime:
-        :param totalResults:
-        :param historicalNewsOptions:
-
-        """
+""""""
+"""Args::
+    reqId: 
+    conId: 
+    providerCodes: 
+    startDateTime: 
+    endDateTime: 
+    totalResults: 
+    historicalNewsOptions:"""
+    historicalNewsOptions:"""
         self.send(
             86,
             reqId,
@@ -1449,15 +987,13 @@ class Client:
         )
 
     def reqHeadTimeStamp(self, reqId, contract, whatToShow, useRTH, formatDate):
-        """
-
-        :param reqId:
-        :param contract:
-        :param whatToShow:
-        :param useRTH:
-        :param formatDate:
-
-        """
+"""Args::
+    reqId: 
+    contract: 
+    whatToShow: 
+    useRTH: 
+    formatDate:"""
+    formatDate:"""
         self.send(
             87,
             reqId,
@@ -1469,102 +1005,53 @@ class Client:
         )
 
     def reqHistogramData(self, tickerId, contract, useRTH, timePeriod):
-        """
-
-        :param tickerId:
-        :param contract:
-        :param useRTH:
-        :param timePeriod:
-
-        """
+"""Args::
+    tickerId: 
+    contract: 
+    useRTH: 
+    timePeriod:"""
+    timePeriod:"""
         self.send(88, tickerId, contract, contract.includeExpired, useRTH, timePeriod)
 
     def cancelHistogramData(self, tickerId):
-        """
-
-        :param tickerId:
-
-        """
-        self.send(89, tickerId)
-
-    def cancelHeadTimeStamp(self, reqId):
-        """
-
-        :param reqId:
-
-        """
-        self.send(90, reqId)
-
-    def reqMarketRule(self, marketRuleId):
-        """
-
-        :param marketRuleId:
-
-        """
-        self.send(91, marketRuleId)
-
-    def reqPnL(self, reqId, account, modelCode):
-        """
-
-        :param reqId:
-        :param account:
-        :param modelCode:
-
-        """
+"""Args::
+    tickerId:"""
+"""Args::
+    reqId:"""
+"""Args::
+    marketRuleId:"""
+"""Args::
+    reqId: 
+    account: 
+    modelCode:"""
+    modelCode:"""
         self.send(92, reqId, account, modelCode)
 
     def cancelPnL(self, reqId):
-        """
-
-        :param reqId:
-
-        """
-        self.send(93, reqId)
-
-    def reqPnLSingle(self, reqId, account, modelCode, conid):
-        """
-
-        :param reqId:
-        :param account:
-        :param modelCode:
-        :param conid:
-
-        """
+"""Args::
+    reqId:"""
+"""Args::
+    reqId: 
+    account: 
+    modelCode: 
+    conid:"""
+    conid:"""
         self.send(94, reqId, account, modelCode, conid)
 
     def cancelPnLSingle(self, reqId):
-        """
-
-        :param reqId:
-
-        """
-        self.send(95, reqId)
-
-    def reqHistoricalTicks(
-        self,
-        reqId,
-        contract,
-        startDateTime,
-        endDateTime,
-        numberOfTicks,
-        whatToShow,
-        useRth,
-        ignoreSize,
-        miscOptions,
-    ):
-        """
-
-        :param reqId:
-        :param contract:
-        :param startDateTime:
-        :param endDateTime:
-        :param numberOfTicks:
-        :param whatToShow:
-        :param useRth:
-        :param ignoreSize:
-        :param miscOptions:
-
-        """
+"""Args::
+    reqId:"""
+"""Args::
+    reqId: 
+    contract: 
+    startDateTime: 
+    endDateTime: 
+    numberOfTicks: 
+    whatToShow: 
+    useRth: 
+    ignoreSize: 
+    miscOptions:"""
+    miscOptions:"""
         self.send(
             96,
             reqId,
@@ -1580,57 +1067,28 @@ class Client:
         )
 
     def reqTickByTickData(self, reqId, contract, tickType, numberOfTicks, ignoreSize):
-        """
-
-        :param reqId:
-        :param contract:
-        :param tickType:
-        :param numberOfTicks:
-        :param ignoreSize:
-
-        """
+"""Args::
+    reqId: 
+    contract: 
+    tickType: 
+    numberOfTicks: 
+    ignoreSize:"""
+    ignoreSize:"""
         self.send(97, reqId, contract, tickType, numberOfTicks, ignoreSize)
 
     def cancelTickByTickData(self, reqId):
-        """
-
-        :param reqId:
-
-        """
-        self.send(98, reqId)
-
-    def reqCompletedOrders(self, apiOnly):
-        """
-
-        :param apiOnly:
-
-        """
-        self.send(99, apiOnly)
-
-    def reqWshMetaData(self, reqId):
-        """
-
-        :param reqId:
-
-        """
-        self.send(100, reqId)
-
-    def cancelWshMetaData(self, reqId):
-        """
-
-        :param reqId:
-
-        """
-        self.send(101, reqId)
-
-    def reqWshEventData(self, reqId, data: WshEventData):
-        """
-
-        :param reqId:
-        :param data:
-        :type data: WshEventData
-
-        """
+"""Args::
+    reqId:"""
+"""Args::
+    apiOnly:"""
+"""Args::
+    reqId:"""
+"""Args::
+    reqId:"""
+"""Args::
+    reqId: 
+    data:"""
+    data:"""
         fields = [102, reqId, data.conId]
         if self.serverVersion() >= 171:
             fields += [
@@ -1644,17 +1102,9 @@ class Client:
         self.send(*fields, makeEmpty=False)
 
     def cancelWshEventData(self, reqId):
-        """
-
-        :param reqId:
-
-        """
-        self.send(103, reqId)
-
-    def reqUserInfo(self, reqId):
-        """
-
-        :param reqId:
-
-        """
+"""Args::
+    reqId:"""
+"""Args::
+    reqId:"""
+    reqId:"""
         self.send(104, reqId)

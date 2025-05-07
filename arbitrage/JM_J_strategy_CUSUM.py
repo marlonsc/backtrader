@@ -1,4 +1,7 @@
-import argparse
+"""JM_J_strategy_CUSUM.py module.
+
+Description of the module functionality."""
+
 import datetime
 
 import backtrader as bt
@@ -68,10 +71,8 @@ def calculate_rolling_spread(
     window: int = 30,
     fields=("open", "high", "low", "close"),
 ) -> pd.DataFrame:
-    """
-    Calculate rolling β and generate spread for specified price fields:
-        spread_x = price0_x - β_{t-1} * price1_x
-    """
+    """Calculate rolling β and generate spread for specified price fields:
+spread_x = price0_x - β_{t-1} * price1_x"""
     # 1) Align using close prices (β still estimated with close)
     df = (
         df0.set_index("date")[["close"]]
@@ -115,7 +116,9 @@ def calculate_rolling_spread(
 # Create custom data class to support beta column
 
 
-class SpreadData(bt.feeds.PandasData):
+"""SpreadData class.
+
+Description of the class functionality."""
     lines = ("beta",)  # Add beta line
 
     params = (
@@ -126,7 +129,9 @@ class SpreadData(bt.feeds.PandasData):
     )
 
 
-class DynamicSpreadCUSUMStrategy(bt.Strategy):
+"""DynamicSpreadCUSUMStrategy class.
+
+Description of the class functionality."""
     params = (
         ("win", 14),  # rolling window
         ("k_coeff", 0.5),  # κ = k_coeff * σ
@@ -135,7 +140,11 @@ class DynamicSpreadCUSUMStrategy(bt.Strategy):
         ("days_factor", 5.0),  # holding days dynamic adjustment factor
     )
 
-    def __init__(self):
+"""__init__ function.
+
+Returns:
+    Description of return value
+"""
         # Save two cumulative sums
         self.g_pos, self.g_neg = 0.0, 0.0  # CUSUM state
         # Convenient access to recent win spread series
@@ -167,7 +176,15 @@ class DynamicSpreadCUSUMStrategy(bt.Strategy):
         self.trade_start_date = None
 
     # ---------- Trading helpers (original logic retained) ----------
-    def _open_position(self, short, signal_strength):
+"""_open_position function.
+
+Args:
+    short: Description of short
+    signal_strength: Description of signal_strength
+
+Returns:
+    Description of return value
+"""
         if not hasattr(self, "size0"):
             self.size0 = 10
             self.size1 = round(self.data2.beta[0] * 10)
@@ -196,7 +213,11 @@ class DynamicSpreadCUSUMStrategy(bt.Strategy):
         self.total_trades += 1
         self.trade_start_date = self.datetime.date()
 
-    def _close_positions(self):
+"""_close_positions function.
+
+Returns:
+    Description of return value
+"""
         self.close(data=self.data0)
         self.close(data=self.data1)
         self.in_position = False
@@ -211,7 +232,11 @@ class DynamicSpreadCUSUMStrategy(bt.Strategy):
         )
 
     # ---------- Main loop ----------
-    def next(self):
+"""next function.
+
+Returns:
+    Description of return value
+"""
         # Update minimum cash record
         current_cash = self.broker.getcash()
         if current_cash < self.min_cash:
@@ -299,7 +324,14 @@ class DynamicSpreadCUSUMStrategy(bt.Strategy):
                     )
                     self._close_positions()
 
-    def notify_trade(self, trade):
+"""notify_trade function.
+
+Args:
+    trade: Description of trade
+
+Returns:
+    Description of return value
+"""
         if trade.isclosed:
             print(
                 "TRADE %s CLOSED %s, PROFIT: GROSS %.2f, NET %.2f, PRICE %d"
@@ -344,7 +376,11 @@ class DynamicSpreadCUSUMStrategy(bt.Strategy):
         return stats
 
 
-def main():
+"""main function.
+
+Returns:
+    Description of return value
+"""
     # Parse command line arguments
     args = parse_args()
     print(f"Parsed arguments: {args}")

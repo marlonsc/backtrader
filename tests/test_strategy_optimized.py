@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""test_strategy_optimized.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -129,86 +132,23 @@ _chkcash = []
 
 
 class BtTestStrategy(bt.Strategy):
-    """ """
-
-    params = (
-        ("period", 15),
-        ("printdata", True),
-        ("printops", True),
-    )
-
-    def log(self, txt, dt=None):
-        """
-
-        :param txt:
-        :param dt: (Default value = None)
-
-        """
+""""""
+"""Args::
+    txt: 
+    dt: (Default value = None)"""
+    dt: (Default value = None)"""
         dt = dt or self.data.datetime[0]
         dt = bt.num2date(dt)
         print("%s, %s" % (dt.isoformat(), txt))
 
     def __init__(self):
-        """ """
-        # Flag to allow new orders in the system or not
-        self.orderid = None
-
-        self.sma = btind.SMA(self.data, period=self.p.period)
-        self.cross = btind.CrossOver(self.data.close, self.sma, plot=True)
-
-    def start(self):
-        """ """
-        self.broker.setcommission(commission=2.0, mult=10.0, margin=1000.0)
-        self.tstart = time_clock()
-        self.buy_create_idx = itertools.count()
-
-    def stop(self):
-        """ """
-        global _chkvalues
-        global _chkcash
-
-        tused = time_clock() - self.tstart
-        if self.p.printdata:
-            self.log(
-                "Time used: %s  - Period % d - Start value: %.2f - End value: %.2f"
-                % (
-                    str(tused),
-                    self.p.period,
-                    self.broker.startingcash,
-                    self.broker.getvalue(),
-                )
-            )
-
-        value = "%.2f" % self.broker.getvalue()
-        _chkvalues.append(value)
-
-        cash = "%.2f" % self.broker.getcash()
-        _chkcash.append(cash)
-
-    def next(self):
-        """ """
-        # print('self.data.close.array:', self.data.close.array)
-        if self.orderid:
-            # if an order is active, no new orders are allowed
-            return
-
-        if not self.position.size:
-            if self.cross > 0.0:
-                self.orderid = self.buy()
-
-        elif self.cross < 0.0:
-            self.orderid = self.close()
-
-
-chkdatas = 1
-
-
-def test_run(main=False):
-    """
-
-    :param main: (Default value = False)
-
-    """
+""""""
+""""""
+""""""
+""""""
+"""Args::
+    main: (Default value = False)"""
+    main: (Default value = False)"""
     global _chkvalues
     global _chkcash
 

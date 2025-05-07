@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""bt-run.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #

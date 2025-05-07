@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""vctest.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -33,292 +36,30 @@ import backtrader as bt
 
 
 class BtTestStrategy(bt.Strategy):
-    """ """
-
-    params = dict(
-        smaperiod=5,
-        trade=False,
-        stake=10,
-        exectype=bt.Order.Market,
-        stopafter=0,
-        valid=None,
-        cancel=0,
-        donotsell=False,
-        price=None,
-        pstoplimit=None,
-    )
-
-    def __init__(self):
-        """ """
-        # To control operation entries
-        self.orderid = list()
-        self.order = None
-
-        self.counttostop = 0
-        self.datastatus = 0
-
-        # Create SMA on 2nd data
-        self.sma = bt.indicators.MovAv.SMA(self.data, period=self.p.smaperiod)
-
-        print("--------------------------------------------------")
-        print("Strategy Created")
-        print("--------------------------------------------------")
-
-    def notify_data(self, data, status, *args, **kwargs):
-        """
-
-        :param data:
-        :param status:
-        :param *args:
-        :param **kwargs:
-
-        """
+""""""
+""""""
+"""Args::
+    data: 
+    status:"""
+    status:"""
         print("*" * 5, "DATA NOTIF:", data._getstatusname(status), *args)
         if status == data.LIVE:
             self.counttostop = self.p.stopafter
             self.datastatus = 1
 
     def notify_store(self, msg, *args, **kwargs):
-        """
-
-        :param msg:
-        :param *args:
-        :param **kwargs:
-
-        """
-        print("*" * 5, "STORE NOTIF:", msg)
-
-    def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
-        if order.status in [order.Completed, order.Cancelled, order.Rejected]:
-            self.order = None
-
-        print("-" * 50, "ORDER BEGIN", datetime.datetime.now())
-        print(order)
-        print("-" * 50, "ORDER END")
-
-    def notify_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
-        print("-" * 50, "TRADE BEGIN", datetime.datetime.now())
-        print(trade)
-        print("-" * 50, "TRADE END")
-
-    def prenext(self):
-        """ """
-        self.next(frompre=True)
-
-    def next(self, frompre=False):
-        """
-
-        :param frompre:  (Default value = False)
-
-        """
-        txt = list()
-        txt.append("%04d" % len(self))
-        dtfmt = "%Y-%m-%dT%H:%M:%S.%f"
-        txt.append("%s" % self.data.datetime.datetime(0).strftime(dtfmt))
-        txt.append("{}".format(self.data.open[0]))
-        txt.append("{}".format(self.data.high[0]))
-        txt.append("{}".format(self.data.low[0]))
-        txt.append("{}".format(self.data.close[0]))
-        txt.append("{}".format(self.data.volume[0]))
-        txt.append("{}".format(self.data.openinterest[0]))
-        txt.append("{}".format(self.sma[0]))
-        print(", ".join(txt))
-
-        if len(self.datas) > 1:
-            txt = list()
-            txt.append("%04d" % len(self))
-            dtfmt = "%Y-%m-%dT%H:%M:%S.%f"
-            txt.append("%s" % self.data1.datetime.datetime(0).strftime(dtfmt))
-            txt.append("{}".format(self.data1.open[0]))
-            txt.append("{}".format(self.data1.high[0]))
-            txt.append("{}".format(self.data1.low[0]))
-            txt.append("{}".format(self.data1.close[0]))
-            txt.append("{}".format(self.data1.volume[0]))
-            txt.append("{}".format(self.data1.openinterest[0]))
-            txt.append("{}".format(float("NaN")))
-            print(", ".join(txt))
-
-        if self.counttostop:  # stop after x live lines
-            self.counttostop -= 1
-            if not self.counttostop:
-                self.env.runstop()
-                return
-
-        if not self.p.trade:
-            return
-
-        # if True and len(self.orderid) < 1:
-        if self.datastatus and not self.position and len(self.orderid) < 1:
-            self.order = self.buy(
-                size=self.p.stake,
-                exectype=self.p.exectype,
-                price=self.p.price,
-                plimit=self.p.pstoplimit,
-                valid=self.p.valid,
-            )
-
-            self.orderid.append(self.order)
-        elif self.position.size > 0 and not self.p.donotsell:
-            if self.order is None:
-                size = self.p.stake // 2
-                if not size:
-                    size = self.position.size  # use the remaining
-                self.order = self.sell(size=size, exectype=bt.Order.Market)
-
-        elif self.order is not None and self.p.cancel:
-            if self.datastatus > self.p.cancel:
-                self.cancel(self.order)
-
-        if self.datastatus:
-            self.datastatus += 1
-
-    def start(self):
-        """ """
-        header = [
-            "Datetime",
-            "Open",
-            "High",
-            "Low",
-            "Close",
-            "Volume",
-            "OpenInterest",
-            "SMA",
-        ]
-        print(", ".join(header))
-
-        self.done = False
-
-
-def runstrategy():
-    """ """
-    args = parse_args()
-
-    # Create a cerebro
-    cerebro = bt.Cerebro()
-
-    storekwargs = dict()
-
-    if not args.nostore:
-        vcstore = bt.stores.VCStore(**storekwargs)
-
-    if args.broker:
-        brokerargs = dict(account=args.account, **storekwargs)
-        if not args.nostore:
-            broker = vcstore.getbroker(**brokerargs)
-        else:
-            broker = bt.brokers.VCBroker(**brokerargs)
-
-        cerebro.setbroker(broker)
-
-    timeframe = bt.TimeFrame.TFrame(args.timeframe)
-    if args.resample or args.replay:
-        datatf = bt.TimeFrame.Ticks
-        datacomp = 1
-    else:
-        datatf = timeframe
-        datacomp = args.compression
-
-    fromdate = None
-    if args.fromdate:
-        dtformat = "%Y-%m-%d" + ("T%H:%M:%S" * ("T" in args.fromdate))
-        fromdate = datetime.datetime.strptime(args.fromdate, dtformat)
-
-    todate = None
-    if args.todate:
-        dtformat = "%Y-%m-%d" + ("T%H:%M:%S" * ("T" in args.todate))
-        todate = datetime.datetime.strptime(args.todate, dtformat)
-
-    VCDataFactory = vcstore.getdata if not args.nostore else bt.feeds.VCData
-
-    datakwargs = dict(
-        timeframe=datatf,
-        compression=datacomp,
-        fromdate=fromdate,
-        todate=todate,
-        historical=args.historical,
-        qcheck=args.qcheck,
-        tz=args.timezone,
-    )
-
-    if args.nostore and not args.broker:  # neither store nor broker
-        datakwargs.update(storekwargs)  # pass the store args over the data
-
-    data0 = VCDataFactory(dataname=args.data0, tradename=args.tradename, **datakwargs)
-
-    data1 = None
-    if args.data1 is not None:
-        data1 = VCDataFactory(dataname=args.data1, **datakwargs)
-
-    rekwargs = dict(
-        timeframe=timeframe,
-        compression=args.compression,
-        bar2edge=not args.no_bar2edge,
-        adjbartime=not args.no_adjbartime,
-        rightedge=not args.no_rightedge,
-    )
-
-    if args.replay:
-        cerebro.replaydata(data0, **rekwargs)
-
-        if data1 is not None:
-            cerebro.replaydata(data1, **rekwargs)
-
-    elif args.resample:
-        cerebro.resampledata(data0, **rekwargs)
-
-        if data1 is not None:
-            cerebro.resampledata(data1, **rekwargs)
-
-    else:
-        cerebro.adddata(data0)
-        if data1 is not None:
-            cerebro.adddata(data1)
-
-    if args.valid is None:
-        valid = None
-    else:
-        try:
-            valid = float(args.valid)
-        except BaseException:
-            dtformat = "%Y-%m-%d" + ("T%H:%M:%S" * ("T" in args.valid))
-            valid = datetime.datetime.strptime(args.valid, dtformat)
-        else:
-            valid = datetime.timedelta(seconds=args.valid)
-
-    # Add the strategy
-    cerebro.addstrategy(
-        TestStrategy,
-        smaperiod=args.smaperiod,
-        trade=args.trade,
-        exectype=bt.Order.ExecType(args.exectype),
-        stake=args.stake,
-        stopafter=args.stopafter,
-        valid=valid,
-        cancel=args.cancel,
-        donotsell=args.donotsell,
-        price=args.price,
-        pstoplimit=args.pstoplimit,
-    )
-
-    # Live data ... avoid long data accumulation by switching to "exactbars"
-    cerebro.run(exactbars=args.exactbars)
-
-    if args.plot and args.exactbars < 1:  # plot if possible
-        cerebro.plot()
-
-
-def parse_args():
-    """ """
+"""Args::
+    msg:"""
+"""Args::
+    order:"""
+"""Args::
+    trade:"""
+""""""
+"""Args::
+    frompre: (Default value = False)"""
+""""""
+""""""
+""""""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Test Visual Chart 6 integration",

@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""sigsmacross2.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -24,10 +27,8 @@ import backtrader as bt
 
 
 class SmaCross(bt.SignalStrategy):
-    """ """
-
-    def __init__(self):
-        """ """
+""""""
+""""""
         sma1 = bt.ind.SMA(period=10)
         sma2 = bt.ind.SMA(period=30)
         crossover = bt.ind.CrossOver(sma1, sma2)

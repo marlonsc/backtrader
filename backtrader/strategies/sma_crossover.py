@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""sma_crossover.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -31,27 +34,18 @@ import backtrader.indicators as btind
 
 class MA_CrossOver(bt.Strategy):
     """This is a long-only strategy which operates on a moving average cross
-
-    Note:
-      - Although the default
-
-    Buy Logic:
-      - No position is open on the data
-
-      - The ``fast`` moving averagecrosses over the ``slow`` strategy to the
-        upside.
-
-    Sell Logic:
-      - A position exists on the data
-
-      - The ``fast`` moving average crosses over the ``slow`` strategy to the
-        downside
-
-    Order Execution Type:
-      - Market
-
-
-    """
+Note:
+- Although the default
+Buy Logic:
+- No position is open on the data
+- The ``fast`` moving averagecrosses over the ``slow`` strategy to the
+upside.
+Sell Logic:
+- A position exists on the data
+- The ``fast`` moving average crosses over the ``slow`` strategy to the
+downside
+Order Execution Type:
+- Market"""
 
     alias = ("SMA_CrossOver",)
 
@@ -65,14 +59,8 @@ class MA_CrossOver(bt.Strategy):
     )
 
     def __init__(self):
-        """ """
-        sma_fast = self.p._movav(period=self.p.fast)
-        sma_slow = self.p._movav(period=self.p.slow)
-
-        self.buysig = btind.CrossOver(sma_fast, sma_slow)
-
-    def next(self):
-        """ """
+""""""
+""""""
         if self.position.size:
             if self.buysig < 0:
                 self.sell()

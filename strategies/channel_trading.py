@@ -18,39 +18,30 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-"""
-PRICE CHANNEL TRADING STRATEGY WITH POSTGRESQL DATABASE - (channel_trading)
+"""PRICE CHANNEL TRADING STRATEGY WITH POSTGRESQL DATABASE - (channel_trading)
 ===============================================================================
-
 This strategy identifies price channels and trades on rebounds from the channel
 boundaries, using dynamic stop-loss levels based on ATR (Average True Range).
 It is designed to capture reversions to the mean within a defined price channel.
-
 STRATEGY LOGIC:
 --------------
 - GO LONG when price rebounds from the lower channel boundary
-  (when price touches the lower threshold zone then closes above the open)
-
+(when price touches the lower threshold zone then closes above the open)
 - GO SHORT when price rebounds from the upper channel boundary
-  (when price touches the upper threshold zone then closes below the open)
-
+(when price touches the upper threshold zone then closes below the open)
 - EXIT positions based on:
-  1. Take-profit orders at the opposite channel boundary
-  2. Stop-loss orders at a multiple of ATR beyond the channel
-  3. Trailing stops that lock in profits once a specified profit level is reached
-
+1. Take-profit orders at the opposite channel boundary
+2. Stop-loss orders at a multiple of ATR beyond the channel
+3. Trailing stops that lock in profits once a specified profit level is reached
 CHANNEL CALCULATION:
 ------------------
 The price channel is defined by:
 - Upper Boundary: Highest high over a specified lookback period (default: 20)
 - Lower Boundary: Lowest low over the same lookback period
 - Channel Midpoint: (Upper Boundary + Lower Boundary) / 2
-
 A short EMA (default: 3) is applied to the boundaries to smooth out noise.
-
 An adjustable threshold (default: 30% from boundary) defines the "rebound zone"
 where entries are considered once price action confirms a potential reversal.
-
 RISK MANAGEMENT:
 --------------
 The strategy employs multi-layered risk management:
@@ -58,116 +49,91 @@ The strategy employs multi-layered risk management:
 - Initial stop-loss levels are set using ATR (Average True Range) to adapt to volatility
 - Take-profit levels target the opposite channel boundary or 2:1 reward-to-risk ratio
 - Trailing stops lock in profits after a defined profit percentage has been reached
-
 MARKET CONDITIONS:
 ----------------
 - Best suited for range-bound markets with clear support and resistance levels
 - Effectiveness diminishes in strong trending markets or during breakouts
 - Works across multiple timeframes, but best results typically on 1-hour to daily charts
 - Can be applied to various instruments including stocks, forex, and futures
-
 POSITION SIZING:
 ---------------
 The strategy calculates position size dynamically:
 - Risk amount = Account value × Risk percentage
 - Risk per share = Entry price - Stop loss price
 - Position size = Risk amount / Risk per share
-
 This ensures consistent risk exposure regardless of the instrument's volatility
 or price level.
-
 USAGE:
 ------
 python strategies/channel_trading.py --data SYMBOL --fromdate YYYY-MM-DD --todate YYYY-MM-DD [options]
-
 REQUIRED ARGUMENTS:
 ------------------
 --data, -d            : Stock symbol to retrieve data for (e.g., AAPL, MSFT, TSLA)
 --fromdate, -f        : Start date for historical data in YYYY-MM-DD format (default: 2024-01-01)
 --todate, -t          : End date for historical data in YYYY-MM-DD format (default: 2024-12-31)
-
 DATABASE PARAMETERS:
 ------------------
 --dbuser, -u          : PostgreSQL username (default: jason)
 --dbpass, -pw         : PostgreSQL password (default: fsck)
 --dbname, -n          : PostgreSQL database name (default: market_data)
 --cash, -c            : Initial cash for the strategy (default: $100,000)
-
 CHANNEL PARAMETERS:
 -----------------
 --period, -p          : Period for channel calculation (default: 20)
-                        This determines how many bars are used to identify the highest high
-                        and lowest low. Longer periods create wider, more stable channels.
-
+This determines how many bars are used to identify the highest high
+and lowest low. Longer periods create wider, more stable channels.
 --devfactor, -df      : Deviation factor for channel width (default: 2.0)
-                        Multiplier applied to the channel width for breakout detection.
-                        Higher values reduce false breakouts but may miss some opportunities.
-
+Multiplier applied to the channel width for breakout detection.
+Higher values reduce false breakouts but may miss some opportunities.
 --channel-pct, -cp    : How far into channel (0-1) price should reach for signal (default: 0.3)
-                        Defines the "rebound zone" within the channel:
-                        0.5 = midpoint of channel
-                        0.3 = 30% from boundary (closer to edge)
-                        0.0 = exactly at the channel boundary
-
+Defines the "rebound zone" within the channel:
+0.5 = midpoint of channel
+0.3 = 30% from boundary (closer to edge)
+0.0 = exactly at the channel boundary
 --smooth-period, -sp  : EMA period for smoothing channel boundaries (default: 3)
-                        Lower values track the raw channel more closely, higher values
-                        smooth out noise but may lag actual boundaries.
-
+Lower values track the raw channel more closely, higher values
+smooth out noise but may lag actual boundaries.
 ATR PARAMETERS:
 -------------
 --atr-period, -ap     : ATR calculation period (default: 14)
-                        Standard ATR typically uses 14 periods, but can be adjusted
-                        to be more responsive (lower) or more stable (higher).
-
+Standard ATR typically uses 14 periods, but can be adjusted
+to be more responsive (lower) or more stable (higher).
 --atr-multiplier, -am : ATR multiplier for stop-loss distance (default: 2.0)
-                        Sets initial stop-loss at X times the ATR beyond entry price.
-                        Higher values give more room but risk larger losses.
-
+Sets initial stop-loss at X times the ATR beyond entry price.
+Higher values give more room but risk larger losses.
 RISK MANAGEMENT:
 --------------
 --risk-percent, -rp   : Risk per trade as percentage of portfolio (default: 2.0)
-                        Controls position sizing to risk consistent percentage per trade.
-                        Conservative: 0.5-1.0%, Moderate: 1.0-3.0%, Aggressive: >3.0%
-
+Controls position sizing to risk consistent percentage per trade.
+Conservative: 0.5-1.0%, Moderate: 1.0-3.0%, Aggressive: >3.0%
 --trail-percent, -tp  : Percentage of profit at which to start trailing stop (default: 50.0)
-                        Lower values lock in profits earlier but may exit too soon.
-                        Higher values let profits run but risk giving back more gains.
-
+Lower values lock in profits earlier but may exit too soon.
+Higher values let profits run but risk giving back more gains.
 --trail-atr-mult, -tam: ATR multiplier for trailing stop after activation (default: 1.5)
-                        Once trailing begins, this sets how tight the trail follows price.
-                        Lower values trail more closely but risk being stopped out by noise.
-
+Once trailing begins, this sets how tight the trail follows price.
+Lower values trail more closely but risk being stopped out by noise.
 --tp-ratio, -tpr      : Target profit to risk ratio for take-profit level (default: 2.0)
-                        Sets take-profit target as X times the risk amount.
-                        Common settings: 1.5 (conservative), 2.0 (balanced), 3.0 (ambitious)
-
+Sets take-profit target as X times the risk amount.
+Common settings: 1.5 (conservative), 2.0 (balanced), 3.0 (ambitious)
 BACKTESTING OPTIONS:
 ------------------
 --plot, -pl          : Generate and show a plot of the trading activity
-                       Shows price data, channel boundaries, and entry/exit points.
-
+Shows price data, channel boundaries, and entry/exit points.
 --debug, -db         : Enable detailed debug logging of entry/exit decisions
-
 EXAMPLE COMMANDS:
 ---------------
 1. Standard configuration - default channel trading:
-   python strategies/channel_trading.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31
-
+python strategies/channel_trading.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31
 2. Longer timeframe channels - more stable boundaries:
-   python strategies/channel_trading.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --channel-period 40 --smooth-period 5
-
+python strategies/channel_trading.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --channel-period 40 --smooth-period 5
 3. Aggressive trading zone - wider rebound area:
-   python strategies/channel_trading.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --zone-threshold 0.4
-
+python strategies/channel_trading.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --zone-threshold 0.4
 4. Conservative risk management - tighter stops with trailing protection:
-   python strategies/channel_trading.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --atr-period 10 --atr-stop 1.5 --profit-target 1.5 --trailing-percent 1.0 --trail-trigger 0.3
-
+python strategies/channel_trading.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --atr-period 10 --atr-stop 1.5 --profit-target 1.5 --trailing-percent 1.0 --trail-trigger 0.3
 5. High-risk approach - larger position sizing with aggressive targets:
-   python strategies/channel_trading.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --risk-percent 2.5 --profit-target 3.0 --trail-atr 2.0
-
+python strategies/channel_trading.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --risk-percent 2.5 --profit-target 3.0 --trail-atr 2.0
 Channel customization:
-python strategies/channel_trading.py --data AMZN --period 40 --channel-pct 0.2 --smooth-period 5
-"""
+python strategies/channel_trading.py --data AMZN --period 40 --channel-pct 0.2 --smooth-period 5"""
 
 from __future__ import (
     absolute_import,
@@ -213,16 +179,16 @@ class StockPriceData(bt.feeds.PandasData):
 
 
 def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate):
-    """Get historical price data from PostgreSQL database
+"""Get historical price data from PostgreSQL database
 
-    :param symbol:
-    :param dbuser:
-    :param dbpass:
-    :param dbname:
-    :param fromdate:
-    :param todate:
-
-    """
+Args::
+    symbol: 
+    dbuser: 
+    dbpass: 
+    dbname: 
+    fromdate: 
+    todate:"""
+    todate:"""
     # Format dates for database query
     from_str = fromdate.strftime("%Y-%m-%d %H:%M:%S")
     to_str = todate.strftime("%Y-%m-%d %H:%M:%S")
@@ -297,14 +263,10 @@ def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate):
 
 class ChannelStrategy(bt.Strategy):
     """Price Channel Trading Strategy
-
-    This strategy identifies price channels and trades on breakouts and rebounds:
-    - Buy when price rebounds from the lower channel line
-    - Sell when price rebounds from the upper channel line
-    - Uses ATR for dynamic stop-loss and take-profit levels
-
-
-    """
+This strategy identifies price channels and trades on breakouts and rebounds:
+- Buy when price rebounds from the lower channel line
+- Sell when price rebounds from the upper channel line
+- Uses ATR for dynamic stop-loss and take-profit levels"""
 
     params = (
         # Channel parameters
@@ -330,13 +292,13 @@ class ChannelStrategy(bt.Strategy):
     )
 
     def log(self, txt, dt=None, level="info"):
-        """Logging function for the strategy
+"""Logging function for the strategy
 
-        :param txt:
-        :param dt:  (Default value = None)
-        :param level:  (Default value = "info")
-
-        """
+Args::
+    txt: 
+    dt: (Default value = None)
+    level: (Default value = "info")"""
+    level: (Default value = "info")"""
         if level == "debug" and self.p.log_level != "debug":
             return
 
@@ -344,57 +306,12 @@ class ChannelStrategy(bt.Strategy):
         print(f"{dt.isoformat()}: {txt}")
 
     def __init__(self):
-        """ """
-        # Store price references
-        self.dataclose = self.datas[0].close
-        self.datahigh = self.datas[0].high
-        self.datalow = self.datas[0].low
-        self.dataopen = self.datas[0].open
+""""""
+"""Handle order notifications
 
-        # Channel indicators
-        self.highest_high = bt.indicators.Highest(self.datahigh, period=self.p.period)
-        self.lowest_low = bt.indicators.Lowest(self.datalow, period=self.p.period)
-
-        # Apply smoothing to channel boundaries (reduces false signals)
-        self.upper_line = bt.indicators.ExponentialMovingAverage(
-            self.highest_high, period=self.p.smooth_period
-        )
-        self.lower_line = bt.indicators.ExponentialMovingAverage(
-            self.lowest_low, period=self.p.smooth_period
-        )
-
-        # Calculate channel midpoint
-        self.midpoint = (self.upper_line + self.lower_line) / 2
-
-        # Channel width
-        self.channel_width = self.upper_line - self.lower_line
-
-        # ATR for stop-loss calculation
-        self.atr = bt.indicators.ATR(self.datas[0], period=self.p.atr_period)
-
-        # Track orders, stops and positions
-        self.buy_order = None
-        self.sell_order = None
-        self.stop_loss = None
-        self.take_profit = None
-
-        # State tracking
-        self.channel_top = None
-        self.channel_bottom = None
-        self.order_price = None
-        self.position_size = 0
-
-        # Performance tracking
-        self.trade_count = 0
-        self.winning_trades = 0
-        self.losing_trades = 0
-
-    def notify_order(self, order):
-        """Handle order notifications
-
-        :param order:
-
-        """
+Args::
+    order:"""
+    order:"""
         if order.status in [order.Submitted, order.Accepted]:
             # Order pending, do nothing
             return
@@ -435,11 +352,11 @@ class ChannelStrategy(bt.Strategy):
             self.take_profit = None
 
     def notify_trade(self, trade):
-        """Track completed trades
+"""Track completed trades
 
-        :param trade:
-
-        """
+Args::
+    trade:"""
+    trade:"""
         if not trade.isclosed:
             return
 
@@ -456,12 +373,12 @@ class ChannelStrategy(bt.Strategy):
         )
 
     def set_exit_orders(self, entry_price, is_buy=True):
-        """Set stop loss and take profit orders
+"""Set stop loss and take profit orders
 
-        :param entry_price:
-        :param is_buy:  (Default value = True)
-
-        """
+Args::
+    entry_price: 
+    is_buy: (Default value = True)"""
+    is_buy: (Default value = True)"""
         # Cancel existing exit orders
         self.cancel_exit_orders()
 
@@ -549,11 +466,11 @@ class ChannelStrategy(bt.Strategy):
             self.take_profit = None
 
     def calculate_position_size(self, stop_price):
-        """Calculate position size based on risk percentage
+"""Calculate position size based on risk percentage
 
-        :param stop_price:
-
-        """
+Args::
+    stop_price:"""
+    stop_price:"""
         risk_amount = self.broker.getvalue() * (self.p.risk_percent / 100)
         price = self.dataclose[0]
         risk_per_share = abs(price - stop_price)

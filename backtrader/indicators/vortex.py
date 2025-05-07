@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""vortex.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -29,10 +32,8 @@ import backtrader as bt
 
 
 class Vortex(bt.Indicator):
-    """See:
-    - http://www.vortexindicator.com/VFX_VORTEX.PDF
-
-
+"""See:
+    - http://www.vortexindicator.com/VFX_VORTEX.PDF"""
     """
 
     lines = (
@@ -45,7 +46,7 @@ class Vortex(bt.Indicator):
     plotlines = dict(vi_plus=dict(_name="+VI"), vi_minus=dict(_name="-VI"))
 
     def __init__(self):
-        """ """
+""""""
         h0l1 = abs(self.data.high(0) - self.data.low(-1))
         vm_plus = bt.ind.SumN(h0l1, period=self.p.period)
 

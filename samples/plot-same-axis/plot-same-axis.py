@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""plot-same-axis.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -47,65 +50,9 @@ class PlotStrategy(bt.Strategy):
     )
 
     def __init__(self):
-        """ """
-        sma = btind.SMA(subplot=self.params.smasubplot)
-
-        macd = btind.MACD()
-        # In SMA we passed plot directly as kwarg, here the plotinfo.plot
-        # attribute is changed - same effect
-        macd.plotinfo.plot = not self.params.nomacdplot
-
-        # Let's put rsi on stochastic/sma or the other way round
-        stoc = btind.Stochastic()
-        rsi = btind.RSI()
-        if self.params.stocrsi:
-            stoc.plotinfo.plotmaster = rsi
-            stoc.plotinfo.plotlinelabels = self.p.stocrsilabels
-        elif self.params.rsioverstoc:
-            rsi.plotinfo.plotmaster = stoc
-        elif self.params.rsioversma:
-            rsi.plotinfo.plotmaster = sma
-
-
-def runstrategy():
-    """ """
-    args = parse_args()
-
-    # Create a cerebro
-    cerebro = bt.Cerebro()
-
-    # Get the dates from the args
-    fromdate = datetime.datetime.strptime(args.fromdate, "%Y-%m-%d")
-    todate = datetime.datetime.strptime(args.todate, "%Y-%m-%d")
-
-    # Create the 1st data
-    data = btfeeds.BacktraderCSVData(
-        dataname=args.data, fromdate=fromdate, todate=todate
-    )
-
-    # Add the 1st data to cerebro
-    cerebro.adddata(data)
-
-    # Add the strategy
-    cerebro.addstrategy(
-        PlotStrategy,
-        smasubplot=args.smasubplot,
-        nomacdplot=args.nomacdplot,
-        rsioverstoc=args.rsioverstoc,
-        rsioversma=args.rsioversma,
-        stocrsi=args.stocrsi,
-        stocrsilabels=args.stocrsilabels,
-    )
-
-    # And run it
-    cerebro.run(stdstats=args.stdstats)
-
-    # Plot
-    cerebro.plot(numfigs=args.numfigs, volume=False)
-
-
-def parse_args():
-    """ """
+""""""
+""""""
+""""""
     parser = argparse.ArgumentParser(description="Plotting Example")
 
     parser.add_argument(

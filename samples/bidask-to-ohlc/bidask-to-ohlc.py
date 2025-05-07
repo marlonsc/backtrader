@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""bidask-to-ohlc.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -33,59 +36,10 @@ import backtrader.feeds as btfeeds
 
 
 class St(bt.Strategy):
-    """ """
-
-    def next(self):
-        """ """
-        print(
-            ",".join(
-                str(x)
-                for x in [
-                    self.data.datetime.datetime(),
-                    self.data.open[0],
-                    self.data.high[0],
-                    self.data.high[0],
-                    self.data.close[0],
-                    self.data.volume[0],
-                ]
-            )
-        )
-
-
-def runstrat():
-    """ """
-    args = parse_args()
-
-    cerebro = bt.Cerebro()
-
-    data = btfeeds.GenericCSVData(
-        dataname=args.data,
-        dtformat="%d/%m/%y",
-        # tmformat='%H%M%S',  # already the default value
-        # datetime=0,  # position at default
-        time=1,  # position of time
-        open=5,  # position of open
-        high=5,
-        low=5,
-        close=5,
-        volume=7,
-        openinterest=-1,  # -1 for not present
-        timeframe=bt.TimeFrame.Ticks,
-    )
-
-    cerebro.resampledata(
-        data, timeframe=bt.TimeFrame.Ticks, compression=args.compression
-    )
-
-    cerebro.addstrategy(St)
-
-    cerebro.run()
-    if args.plot:
-        cerebro.plot(style="bar")
-
-
-def parse_args():
-    """ """
+""""""
+""""""
+""""""
+""""""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="BidAsk to OHLC",

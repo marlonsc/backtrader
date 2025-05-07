@@ -33,27 +33,24 @@ class Timestamp(object):
     _type_marker = 17
 
     def __init__(self, time, inc):
-        """Create a new :class:`Timestamp`.
+"""Create a new :class:`Timestamp`.
+This class is only for use with the MongoDB opLog. If you need
+to store a regular timestamp, please use a
+:class:`~datetime.datetime`.
+Raises :class:`TypeError` if `time` is not an instance of
+:class: `int` or :class:`~datetime.datetime`, or `inc` is not
+an instance of :class:`int`. Raises :class:`ValueError` if
+`time` or `inc` is not in [0, 2**32).
+:Parameters:
+- `time`: time in seconds since epoch UTC, or a naive UTC
+:class:`~datetime.datetime`, or an aware
+:class:`~datetime.datetime`
+- `inc`: the incrementing counter
 
-        This class is only for use with the MongoDB opLog. If you need
-        to store a regular timestamp, please use a
-        :class:`~datetime.datetime`.
-
-        Raises :class:`TypeError` if `time` is not an instance of
-        :class: `int` or :class:`~datetime.datetime`, or `inc` is not
-        an instance of :class:`int`. Raises :class:`ValueError` if
-        `time` or `inc` is not in [0, 2**32).
-
-        :Parameters:
-          - `time`: time in seconds since epoch UTC, or a naive UTC
-            :class:`~datetime.datetime`, or an aware
-            :class:`~datetime.datetime`
-          - `inc`: the incrementing counter
-
-        :param time:
-        :param inc:
-
-        """
+Args::
+    time: 
+    inc:"""
+    inc:"""
         if isinstance(time, datetime.datetime):
             if time.utcoffset() is not None:
                 time = time - time.utcoffset()
@@ -81,79 +78,21 @@ class Timestamp(object):
         return self.__inc
 
     def __eq__(self, other):
-        """
-
-        :param other:
-
-        """
-        if isinstance(other, Timestamp):
-            return self.__time == other.time and self.__inc == other.inc
-        else:
-            return NotImplemented
-
-    def __hash__(self):
-        """ """
-        return hash(self.time) ^ hash(self.inc)
-
-    def __ne__(self, other):
-        """
-
-        :param other:
-
-        """
-        return not self == other
-
-    def __lt__(self, other):
-        """
-
-        :param other:
-
-        """
-        if isinstance(other, Timestamp):
-            return (self.time, self.inc) < (other.time, other.inc)
-        return NotImplemented
-
-    def __le__(self, other):
-        """
-
-        :param other:
-
-        """
-        if isinstance(other, Timestamp):
-            return (self.time, self.inc) <= (other.time, other.inc)
-        return NotImplemented
-
-    def __gt__(self, other):
-        """
-
-        :param other:
-
-        """
-        if isinstance(other, Timestamp):
-            return (self.time, self.inc) > (other.time, other.inc)
-        return NotImplemented
-
-    def __ge__(self, other):
-        """
-
-        :param other:
-
-        """
-        if isinstance(other, Timestamp):
-            return (self.time, self.inc) >= (other.time, other.inc)
-        return NotImplemented
-
-    def __repr__(self):
-        """ """
-        return "Timestamp(%s, %s)" % (self.__time, self.__inc)
-
-    def as_datetime(self):
-        """
-
-
-        :returns: to the time portion of this :class:`Timestamp`.
-
-        The returned datetime's timezone is UTC.
-
-        """
+"""Args::
+    other:"""
+""""""
+"""Args::
+    other:"""
+"""Args::
+    other:"""
+"""Args::
+    other:"""
+"""Args::
+    other:"""
+"""Args::
+    other:"""
+""""""
+"""Returns::
+    to the time portion of this :class:`Timestamp`."""
+    to the time portion of this :class:`Timestamp`."""
         return datetime.datetime.fromtimestamp(self.__time, utc)

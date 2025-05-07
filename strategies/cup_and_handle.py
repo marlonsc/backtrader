@@ -18,15 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-"""
-CUP AND HANDLE TRADING STRATEGY WITH POSTGRESQL DATABASE - (cup-and-handle)
+"""CUP AND HANDLE TRADING STRATEGY WITH POSTGRESQL DATABASE - (cup-and-handle)
 ==================================================================
-
 This strategy implements the Cup and Handle pattern, a bullish chart formation
 that signals a potential breakout. The pattern consists of a U-shaped "cup"
 followed by a smaller downward drift known as the "handle". A breakout above
 the handle's resistance level is considered a buy signal.
-
 STRATEGY LOGIC:
 --------------
 - Identify the formation of a U-shaped consolidation (the "cup")
@@ -34,7 +31,6 @@ STRATEGY LOGIC:
 - Generate a buy signal when the price breaks out above the handle resistance level
 - Set a target price by measuring the depth of the cup and projecting it upwards
 - Incorporate volume confirmation to validate the pattern
-
 MARKET CONDITIONS:
 ----------------
 *** THIS STRATEGY IS SPECIFICALLY DESIGNED FOR STOCKS FORMING BASE PATTERNS AFTER PULLBACKS ***
@@ -42,29 +38,24 @@ MARKET CONDITIONS:
 - AVOID USING: During bear markets or when stocks are making new lows
 - IDEAL TIMEFRAMES: Daily and weekly charts
 - OPTIMAL MARKET CONDITION: Bullish market conditions with proper sector rotation
-
 This strategy is based on William O'Neil's CANSLIM method and works best when
 the overall market is in an uptrend and the stock has strong fundamentals.
 The cup should form a proper U-shape (not V-shape) and the handle should have
 a gentle downward drift with declining volume.
-
 USAGE:
 ------
 python strategies/cup_and_handle.py --data SYMBOL --fromdate YYYY-MM-DD --todate YYYY-MM-DD [options]
-
 REQUIRED ARGUMENTS:
 ------------------
 --data, -d      : Stock symbol to retrieve data for (e.g., AAPL, MSFT, TSLA)
 --fromdate, -f  : Start date for historical data in YYYY-MM-DD format (default: 2024-01-01)
 --todate, -t    : End date for historical data in YYYY-MM-DD format (default: 2024-12-31)
-
 DATABASE PARAMETERS:
 ------------------
 --dbuser, -u    : PostgreSQL username (default: jason)
 --dbpass, -pw   : PostgreSQL password (default: fsck)
 --dbname, -n    : PostgreSQL database name (default: market_data)
 --cash, -c      : Initial cash for the strategy (default: $100,000)
-
 CUP AND HANDLE PARAMETERS:
 ------------------------
 --cup-length, -cl : Minimum length of the cup in bars (default: 30)
@@ -74,31 +65,25 @@ CUP AND HANDLE PARAMETERS:
 --breakout-threshold, -bt : Percentage above handle high for breakout (default: 3.0)
 --volume-mult, -vm : Volume multiplier for breakout confirmation (default: 1.2)
 --target-mult, -tm : Multiplier for setting the target price (default: 1.0)
-
 EXIT PARAMETERS:
 ---------------
 --use-stop, -us : Whether to use a stop loss (default: False)
 --stop-pct, -sp : Stop loss percentage from entry (default: 10.0)
 --use-rsi-exit, -ure : Use RSI-based exit (default: True)
 --rsi-overbought, -ro : RSI level considered overbought for exit (default: 70)
-
 POSITION SIZING:
 ---------------
 --risk-percent, -rp  : Percentage of equity to risk per trade (default: 1.0)
 --max-position, -mp  : Maximum position size as percentage of equity (default: 20.0)
-
 TRADE THROTTLING:
 ---------------
 --trade-throttle-days, -ttd : Minimum days between trades (default: 5)
-
 OTHER:
 -----
 --plot, -p      : Generate and show a plot of the trading activity
-
 EXAMPLE:
 --------
-python strategies/cup_and_handle.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --cup-length 20 --handle-length 5 --plot
-"""
+python strategies/cup_and_handle.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --cup-length 20 --handle-length 5 --plot"""
 
 from __future__ import (
     absolute_import,
@@ -147,31 +132,24 @@ class StockPriceData(bt.feeds.PandasData):
 
 class CupAndHandleStrategy(bt.Strategy, TradeThrottling):
     """Cup and Handle Strategy with Volume Confirmation
-
-    This strategy identifies the classic Cup and Handle pattern and trades breakouts:
-    1. Identifies a U-shaped consolidation period (the "cup")
-    2. Detects a smaller pullback (the "handle") following the cup formation
-    3. Buys when price breaks out above the handle with volume confirmation
-    4. Sets a profit target based on the depth of the cup
-
-    Exit mechanisms include:
-    - Taking profit at the target price
-    - Stop loss to limit potential losses
-    - RSI-based exit when the stock becomes overbought
-
-    Pattern Validation:
-    - Cup must form a proper U-shape (not V-shape)
-    - Cup depth typically 15-30% (neither too shallow nor too deep)
-    - Handle should be less than 15% of cup depth
-    - Handle must form in the upper half of the cup
-    - Volume should decline during cup formation and handle
-    - Volume should surge during breakout
-
-    ** IMPORTANT: This strategy is designed for stocks forming base patterns after pullbacks **
-    It performs best in bullish markets and should be avoided during bear markets.
-
-
-    """
+This strategy identifies the classic Cup and Handle pattern and trades breakouts:
+1. Identifies a U-shaped consolidation period (the "cup")
+2. Detects a smaller pullback (the "handle") following the cup formation
+3. Buys when price breaks out above the handle with volume confirmation
+4. Sets a profit target based on the depth of the cup
+Exit mechanisms include:
+- Taking profit at the target price
+- Stop loss to limit potential losses
+- RSI-based exit when the stock becomes overbought
+Pattern Validation:
+- Cup must form a proper U-shape (not V-shape)
+- Cup depth typically 15-30% (neither too shallow nor too deep)
+- Handle should be less than 15% of cup depth
+- Handle must form in the upper half of the cup
+- Volume should decline during cup formation and handle
+- Volume should surge during breakout
+** IMPORTANT: This strategy is designed for stocks forming base patterns after pullbacks **
+It performs best in bullish markets and should be avoided during bear markets."""
 
     params = (
         # Cup and Handle parameters
@@ -217,13 +195,13 @@ class CupAndHandleStrategy(bt.Strategy, TradeThrottling):
     )
 
     def log(self, txt, dt=None, level="info"):
-        """Logging function
+"""Logging function
 
-        :param txt:
-        :param dt:  (Default value = None)
-        :param level:  (Default value = "info")
-
-        """
+Args::
+    txt: 
+    dt: (Default value = None)
+    level: (Default value = "info")"""
+    level: (Default value = "info")"""
         if level == "debug" and self.p.log_level != "debug":
             return
 
@@ -231,51 +209,7 @@ class CupAndHandleStrategy(bt.Strategy, TradeThrottling):
         print(f"{dt.isoformat()}: {txt}")
 
     def __init__(self):
-        """ """
-        # Keep track of price data and indicators
-        self.dataclose = self.datas[0].close
-        self.datahigh = self.datas[0].high
-        self.datalow = self.datas[0].low
-        self.dataopen = self.datas[0].open
-        self.datavolume = self.datas[0].volume
-
-        # Create RSI indicator
-        self.rsi = bt.indicators.RSI(self.dataclose, period=self.p.rsi_period)
-
-        # Create volume moving average indicator
-        self.volume_ma = bt.indicators.SimpleMovingAverage(
-            self.datavolume, period=self.p.volume_avg_period
-        )
-
-        # Initialize pattern detection variables
-        self.reset_pattern()
-
-        # Order tracking
-        self.order = None
-        self.buyprice = None
-        self.buycomm = None
-        self.profit_target = None
-        self.stop_price = None
-
-        # For trade throttling
-        self.last_trade_date = None
-
-        # Calculate initial highest high and lowest low
-        self.highest_high = self.datahigh[0]
-        self.lowest_low = self.datalow[0]
-
-        # Store volume data for analysis
-        self.cup_volumes = []
-        self.handle_volumes = []
-
-        # Price points for pattern analysis
-        self.cup_left_price = None  # Price at the left side of the cup
-        self.cup_bottom_price = None  # Price at the bottom of the cup
-        self.cup_right_price = None  # Price at the right side of the cup
-        self.handle_high_price = None  # Price at the top of the handle
-        self.handle_low_price = None  # Price at the bottom of the handle
-
-    def calculate_position_size(self):
+""""""
         """Calculate position size based on risk percentage"""
         cash = self.broker.getcash()
         value = self.broker.getvalue()
@@ -303,64 +237,10 @@ class CupAndHandleStrategy(bt.Strategy, TradeThrottling):
         return min(size, max_size)
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
-        if order.status in [order.Submitted, order.Accepted]:
-            # Order submitted/accepted to/by broker - Nothing to do
-            return
-
-        # Check if an order has been completed
-        if order.status in [order.Completed]:
-            if order.isbuy():
-                self.log(
-                    f"BUY EXECUTED: Price: {order.executed.price:.2f}, Size:"
-                    f" {order.executed.size}, Cost: {order.executed.value:.2f}, Comm:"
-                    f" {order.executed.comm:.2f}"
-                )
-
-                self.buyprice = order.executed.price
-                self.buycomm = order.executed.comm
-
-                # Set stop loss if enabled
-                if self.p.use_stop:
-                    self.stop_price = self.buyprice * (1 - self.p.stop_pct / 100)
-                    self.log(f"STOP LOSS SET at {self.stop_price:.2f}")
-            else:  # Sell
-                self.log(
-                    f"SELL EXECUTED: Price: {order.executed.price:.2f}, Size:"
-                    f" {order.executed.size}, Cost: {order.executed.value:.2f}, Comm:"
-                    f" {order.executed.comm:.2f}"
-                )
-
-            # Record the size of the bar where the trade was executed
-            self.bar_executed = len(self)
-
-        elif order.status in [order.Canceled, order.Margin, order.Rejected]:
-            self.log(f"Order Canceled/Margin/Rejected: {order.status}")
-
-        # Reset order variable
-        self.order = None
-
-    def notify_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
-        if not trade.isclosed:
-            return
-
-        self.log(
-            f"TRADE COMPLETED: PnL: Gross: {trade.pnl:.2f}, Net: {trade.pnlcomm:.2f}"
-        )
-
-        # After a trade is closed, reset pattern variables
-        self.reset_pattern()
-
-    def reset_pattern(self):
+"""Args::
+    order:"""
+"""Args::
+    trade:"""
         """Reset pattern detection variables"""
         self.cup_stage = True  # We start by looking for a cup
         self.handle_stage = False  # Then we look for a handle
@@ -510,227 +390,7 @@ class CupAndHandleStrategy(bt.Strategy, TradeThrottling):
         return valid, breakout_vol_valid
 
     def next(self):
-        """ """
-        # If an order is pending, we cannot send a new one
-        if self.order:
-            return
-
-        # Check if we have a position
-        if self.position:
-            # Check for exit conditions
-
-            # Check for stop loss
-            if self.p.use_stop and self.datalow[0] <= self.stop_price:
-                self.log(f"SELL CREATE (Stop Loss): {self.dataclose[0]:.2f}")
-                self.order = self.sell()
-                return
-
-            # Check for profit target
-            if (
-                self.profit_target is not None
-                and self.datahigh[0] >= self.profit_target
-            ):
-                self.log(f"SELL CREATE (Target): {self.dataclose[0]:.2f}")
-                self.order = self.sell()
-                return
-
-            # Check for RSI-based exit
-            if self.p.use_rsi_exit and self.rsi[0] > self.p.rsi_overbought:
-                self.log(
-                    f"SELL CREATE (RSI Overbought): {self.dataclose[0]:.2f}, RSI:"
-                    f" {self.rsi[0]:.2f}"
-                )
-                self.order = self.sell()
-                return
-
-        else:  # No position, look for entry signals
-            # Check if we can trade now (throttling)
-            if not self.can_trade_now():
-                return
-
-            # Update pattern detection
-            if self.cup_stage:
-                # Looking for a cup formation
-                # Update highest and lowest prices
-                if self.datahigh[0] > self.cup_high:
-                    self.cup_high = self.datahigh[0]
-
-                if self.datalow[0] < self.cup_low:
-                    self.cup_low = self.datalow[0]
-                    self.cup_bottom_idx = len(self)
-                    self.cup_bottom_price = self.datalow[0]
-
-                # Store volume data
-                self.cup_volumes.append(self.datavolume[0])
-
-                # Increment cup bars
-                self.cup_bars += 1
-
-                # If we have enough bars to form a cup
-                if self.cup_bars >= self.p.cup_length:
-                    # Check if cup depth is sufficient
-                    cup_depth_pct = (
-                        (self.cup_high - self.cup_low) / self.cup_high
-                    ) * 100
-
-                    if cup_depth_pct >= self.p.cup_depth:
-                        self.log(
-                            f"Cup formation detected: {self.cup_bars} bars,"
-                            f" {cup_depth_pct:.2f}% depth",
-                            level="debug",
-                        )
-
-                        # Record cup completion details
-                        self.cup_end_idx = len(self)
-                        self.cup_right_price = self.dataclose[0]
-                        self.cup_left_price = self.dataclose[-self.cup_bars]
-
-                        # Check if cup has a proper U-shape
-                        if self.is_valid_cup_shape():
-                            # Transition to handle stage
-                            self.cup_stage = False
-                            self.handle_stage = True
-                            self.handle_high = self.dataclose[0]
-                            self.handle_start_idx = len(self)
-                            self.log("Starting handle detection", level="debug")
-                        else:
-                            # Invalid cup shape, reset pattern detection
-                            self.log(
-                                "Invalid cup shape detected, resetting pattern",
-                                level="warning",
-                            )
-                            self.reset_pattern()
-                    else:
-                        self.log(
-                            f"Cup not deep enough: {cup_depth_pct:.2f}% (minimum:"
-                            f" {self.p.cup_depth}%)",
-                            level="debug",
-                        )
-
-            elif self.handle_stage:
-                # Looking for a handle formation
-                # Update highest and lowest prices in handle
-                if self.datahigh[0] > self.handle_high:
-                    self.handle_high = self.datahigh[0]
-                    self.handle_high_price = self.datahigh[0]
-
-                if self.datalow[0] < self.handle_low:
-                    self.handle_low = self.datalow[0]
-                    self.handle_low_price = self.datalow[0]
-
-                # Store volume data
-                self.handle_volumes.append(self.datavolume[0])
-
-                # Increment handle bars
-                self.handle_bars += 1
-
-                # If handle gets too deep, reset pattern
-                handle_depth_pct = (
-                    (self.handle_high - self.handle_low) / self.handle_high
-                ) * 100
-                if handle_depth_pct > self.p.handle_depth:
-                    self.log(
-                        f"Handle too deep: {handle_depth_pct:.2f}% (maximum:"
-                        f" {self.p.handle_depth}%)",
-                        level="warning",
-                    )
-                    self.reset_pattern()
-                    return
-
-                # If we have enough bars to form a handle
-                if self.handle_bars >= self.p.handle_length:
-                    # Validate handle position in relation to cup
-                    if not self.is_valid_handle_position():
-                        self.log(
-                            "Handle position invalid, resetting pattern",
-                            level="warning",
-                        )
-                        self.reset_pattern()
-                        return
-
-                    # Validate volume pattern
-                    vol_valid, _ = self.is_valid_volume_pattern()
-                    if not vol_valid:
-                        self.log(
-                            "Volume pattern invalid during formation, resetting"
-                            " pattern",
-                            level="warning",
-                        )
-                        self.reset_pattern()
-                        return
-
-                    self.log(
-                        f"Handle formation complete: {self.handle_bars} bars,"
-                        f" {handle_depth_pct:.2f}% depth",
-                        level="debug",
-                    )
-
-                    # Transition to breakout stage
-                    self.handle_stage = False
-                    self.breakout_stage = True
-                    self.log("Looking for breakout", level="debug")
-
-            elif self.breakout_stage:
-                # Looking for a breakout above the handle high
-                breakout_price = self.handle_high * (
-                    1 + self.p.breakout_threshold / 100
-                )
-
-                if self.dataclose[0] >= breakout_price:
-                    # Check volume confirmation for breakout
-                    _, breakout_vol_valid = self.is_valid_volume_pattern()
-
-                    if not breakout_vol_valid:
-                        self.log(
-                            "Breakout without volume confirmation, waiting for higher"
-                            " volume",
-                            level="warning",
-                        )
-                        return
-
-                    self.log(
-                        f"BREAKOUT DETECTED: {self.dataclose[0]:.2f} >"
-                        f" {breakout_price:.2f} with volume confirmation",
-                        level="info",
-                    )
-
-                    # Calculate position size
-                    size = self.calculate_position_size()
-
-                    if size <= 0:
-                        self.log(
-                            "Position size calculation resulted in zero or negative"
-                            " size",
-                            level="warning",
-                        )
-                        return
-
-                    # Calculate profit target based on cup depth
-                    cup_depth = self.cup_high - self.cup_low
-                    self.profit_target = breakout_price + (
-                        cup_depth * self.p.target_mult
-                    )
-
-                    # Calculate stop loss
-                    if self.p.use_stop:
-                        self.stop_price = self.dataclose[0] * (
-                            1 - self.p.stop_pct / 100
-                        )
-
-                    # Create buy order
-                    self.log(f"BUY CREATE: {self.dataclose[0]:.2f}, Size: {size}")
-                    self.log(
-                        f"Target: {self.profit_target:.2f}, Stop: {self.stop_price:.2f}"
-                    )
-                    self.order = self.buy(size=size)
-
-                    # Update last trade date for throttling
-                    self.last_trade_date = self.datas[0].datetime.date(0)
-
-                    # Reset pattern detection
-                    self.reset_pattern()
-
-    def stop(self):
+""""""
         """Called when backtest is complete"""
         self.log("Cup and Handle Strategy completed")
         self.log(f"Final Portfolio Value: {self.broker.getvalue():.2f}")

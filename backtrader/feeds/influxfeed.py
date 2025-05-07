@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""influxfeed.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -45,83 +48,9 @@ TIMEFRAMES = dict(
 
 
 class InfluxDB(feed.DataBase):
-    """ """
-
-    frompackages = (
-        ("influxdb", [("InfluxDBClient", "idbclient")]),
-        ("influxdb.exceptions", "InfluxDBClientError"),
-    )
-
-    params = (
-        ("host", "127.0.0.1"),
-        ("port", "8086"),
-        ("username", None),
-        ("password", None),
-        ("database", None),
-        ("timeframe", bt.TimeFrame.Days),
-        ("startdate", None),
-        ("high", "high_p"),
-        ("low", "low_p"),
-        ("open", "open_p"),
-        ("close", "close_p"),
-        ("volume", "volume"),
-        ("ointerest", "oi"),
-    )
-
-    def start(self):
-        """ """
-        super(InfluxDB, self).start()
-        try:
-            self.ndb = idbclient(
-                self.p.host,
-                self.p.port,
-                self.p.username,
-                self.p.password,
-                self.p.database,
-            )
-        except InfluxDBClientError as err:
-            print("Failed to establish connection to InfluxDB: %s" % err)
-
-        tf = "{multiple}{timeframe}".format(
-            multiple=(self.p.compression if self.p.compression else 1),
-            timeframe=TIMEFRAMES.get(self.p.timeframe, "d"),
-        )
-
-        if not self.p.startdate:
-            st = "<= now()"
-        else:
-            st = ">= '%s'" % self.p.startdate
-
-        # The query could already consider parameters like fromdate and todate
-        # to have the database skip them and not the internal code
-        qstr = (
-            'SELECT mean("{open_f}") AS "open", mean("{high_f}") AS "high", '
-            'mean("{low_f}") AS "low", mean("{close_f}") AS "close", '
-            'mean("{vol_f}") AS "volume", mean("{oi_f}") AS "openinterest" '
-            'FROM "{dataname}" '
-            "WHERE time {begin} "
-            "GROUP BY time({timeframe}) fill(none)"
-        ).format(
-            open_f=self.p.open,
-            high_f=self.p.high,
-            low_f=self.p.low,
-            close_f=self.p.close,
-            vol_f=self.p.volume,
-            oi_f=self.p.ointerest,
-            timeframe=tf,
-            begin=st,
-            dataname=self.p.dataname,
-        )
-
-        try:
-            dbars = list(self.ndb.query(qstr).get_points())
-        except InfluxDBClientError as err:
-            print("InfluxDB query failed: %s" % err)
-
-        self.biter = iter(dbars)
-
-    def _load(self):
-        """ """
+""""""
+""""""
+""""""
         try:
             bar = next(self.biter)
         except StopIteration:

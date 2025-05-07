@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""influxdb-import.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 
 import argparse
@@ -13,32 +16,13 @@ from influxdb.exceptions import InfluxDBClientError
 
 
 class InfluxDBTool(object):
-    """ """
+""""""
+""""""
+"""Write Pandas Dataframe to InfluxDB database
 
-    def __init__(self):
-        """ """
-        self._host = args.host if args.host else "localhost"
-        self._port = args.port if args.port else 8086
-        self._username = args.username if args.username else None
-        self._password = args.password if args.password else None
-        self._database = args.database if args.database else "instruments"
-        self._ticker = args.ticker
-        self._cache = os.path.expanduser(args.sourcepath)
-
-        self.dfdb = dfclient(
-            self._host,
-            self._port,
-            self._username,
-            self._password,
-            self._database,
-        )
-
-    def write_dataframe_to_idb(self, ticker):
-        """Write Pandas Dataframe to InfluxDB database
-
-        :param ticker:
-
-        """
+Args::
+    ticker:"""
+    ticker:"""
         cachepath = self._cache
         cachefile = "%s/%s-1M.csv.gz" % (cachepath, ticker)
 
@@ -60,11 +44,11 @@ class InfluxDBTool(object):
             log.error("Write to database failed: %s" % err)
 
     def get_tickers_from_file(self, filename):
-        """Load ticker list from txt file
+"""Load ticker list from txt file
 
-        :param filename:
-
-        """
+Args::
+    filename:"""
+    filename:"""
         if not os.path.exists(filename):
             log.error("Ticker List file does not exist: %s", filename)
 

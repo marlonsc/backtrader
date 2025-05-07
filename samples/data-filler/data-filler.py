@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""data-filler.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -38,64 +41,8 @@ from relativevolume import RelativeVolume
 
 
 def runstrategy():
-    """ """
-    args = parse_args()
-
-    # Create a cerebro
-    cerebro = bt.Cerebro()
-
-    # Get the dates from the args
-    fromdate = datetime.datetime.strptime(args.fromdate, "%Y-%m-%d")
-    todate = datetime.datetime.strptime(args.todate, "%Y-%m-%d")
-
-    # Get the session times to pass them to the indicator
-    # datetime.time has no strptime ...
-    dtstart = datetime.datetime.strptime(args.tstart, "%H:%M")
-    dtend = datetime.datetime.strptime(args.tend, "%H:%M")
-
-    # Create the 1st data
-    data = btfeeds.BacktraderCSVData(
-        dataname=args.data,
-        fromdate=fromdate,
-        todate=todate,
-        timeframe=bt.TimeFrame.Minutes,
-        compression=1,
-        sessionstart=dtstart,  # internally just the "time" part will be used
-        sessionend=dtend,  # internally just the "time" part will be used
-    )
-
-    if args.filter:
-        data.addfilter(btfilters.SessionFilter)
-
-    if args.filler:
-        data.addfilter(btfilters.SessionFiller, fill_vol=args.fvol)
-
-    # Add the data to cerebro
-    cerebro.adddata(data)
-
-    if args.relvol:
-        # Calculate backward period - tend tstart are in same day
-        # + 1 to include last moment of the interval dstart <-> dtend
-        td = ((dtend - dtstart).seconds // 60) + 1
-        cerebro.addindicator(RelativeVolume, period=td, volisnan=math.isnan(args.fvol))
-
-    # Add an empty strategy
-    cerebro.addstrategy(bt.Strategy)
-
-    # Add a writer with CSV
-    if args.writer:
-        cerebro.addwriter(bt.WriterFile, csv=args.wrcsv)
-
-    # And run it - no trading - disable stdstats
-    cerebro.run(stdstats=False)
-
-    # Plot if requested
-    if args.plot:
-        cerebro.plot(numfigs=args.numfigs, volume=True)
-
-
-def parse_args():
-    """ """
+""""""
+""""""
     parser = argparse.ArgumentParser(description="DataFilter/DataFiller Sample")
 
     parser.add_argument(

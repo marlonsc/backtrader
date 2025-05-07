@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""test_data_resample.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -38,11 +41,9 @@ chkargs = dict()
 
 
 def test_run(main=False):
-    """
-
-    :param main: (Default value = False)
-
-    """
+"""Args::
+    main: (Default value = False)"""
+    main: (Default value = False)"""
     for runonce in [True, False]:
         data = testcommon.getdata(0)
         data.resample(timeframe=bt.TimeFrame.Weeks, compression=1)

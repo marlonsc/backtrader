@@ -1,20 +1,31 @@
+# Copyright (c) 2025 backtrader contributors
+"""Dynamic spread trading strategy for JM/J using Backtrader. This module demonstrates
+how to set up a pair trading strategy with dynamic ratio adjustment and built-in
+analyzers."""
+"""
+
 import datetime
 
-import backtrader as bt
 import pandas as pd
+import backtrader as bt
+from backtrader.indicators.sma import MovingAverageSimple as SimpleMovingAverage
+from backtrader.indicators.deviation import StandardDeviation
+from backtrader.analyzers.drawdown import DrawDown
+from backtrader.analyzers.sharpe import SharpeRatio
+from backtrader.analyzers.returns import Returns
+from backtrader.analyzers.tradeanalyzer import TradeAnalyzer
 
 # https://mp.weixin.qq.com/s/na-5duJiRM1fTJF0WrcptA
 
 
 def calculate_rolling_spread(df0, df1, window: int = 90):
-    """Calculate rolling β and spread
+"""Calculate rolling β and spread
 
-    :param df0:
-    :param df1:
-    :param window:  (Default value = 90)
-    :type window: int
-
-    """
+Args::
+    df0: 
+    df1: 
+    window: (Default value = 90)"""
+    window: (Default value = 90)"""
     # 1. Align and merge prices
     df = (
         df0.set_index("date")["close"]
@@ -65,95 +76,24 @@ todate = datetime.datetime(2025, 1, 1)
 
 
 class SpreadData(bt.feeds.PandasData):
-    """ """
-
-    lines = ("beta",)  # Add beta line
-
-    params = (
-        ("datetime", "date"),  # Date column
-        ("close", "close"),  # Spread column as close
-        ("beta", "beta"),  # Beta column
-        ("nocase", True),  # Column names are case-insensitive
-    )
-
-
-# Filter dataframes by date before passing to Backtrader
-df0_bt = df0[(df0["date"] >= fromdate) & (df0["date"] <= todate)]
-df1_bt = df1[(df1["date"] >= fromdate) & (df1["date"] <= todate)]
-df_spread_bt = df_spread[
-    (df_spread["date"] >= fromdate) & (df_spread["date"] <= todate)
-]
-data0 = bt.feeds.PandasData(dataname=df0_bt, datetime="date")
-data1 = bt.feeds.PandasData(dataname=df1_bt, datetime="date")
-data2 = SpreadData(dataname=df_spread_bt, datetime="date")
-
-
-class DynamicSpreadStrategy(bt.Strategy):
-    """ """
-
-    params = (
-        ("period", 30),
-        ("devfactor", 2),
-    )
-
-    def __init__(self):
-        """ """
-        # Bollinger Bands indicator - using passed spread data
-        self.boll = bt.indicators.BollingerBands(
-            self.data2.close,
-            period=self.p.period,
-            devfactor=self.p.devfactor,
-            subplot=False,
-        )
-
-        # Trading status
+""""""
+""""""
+        """Initialize the strategy and indicators."""
+        super().__init__()
+        self.boll_mid = SimpleMovingAverage(self.data2.close, period=self.p.period)
+        self.boll_std = StandardDeviation(self.data2.close, period=self.p.period)
+        self.boll_top = self.boll_mid + self.p.devfactor * self.boll_std
+        self.boll_bot = self.boll_mid - self.p.devfactor * self.boll_std
         self.order = None
         self.entry_price = 0
 
     def next(self):
-        """ """
-        if self.order:
-            return
+""""""
+"""Place order with dynamic ratio
 
-        # Get current beta value
-        current_beta = self.data2.beta[0]
-
-        # Handle missing beta cases
-        if pd.isna(current_beta) or current_beta <= 0:
-            return
-
-        # Dynamically set trade size
-        self.size0 = 10  # Fixed J size
-        self.size1 = round(current_beta * 10)  # Adjust JM size based on beta
-
-        # Print debug information
-        if len(self) % 20 == 0:  # Print every 20 bars to reduce output
-            print(
-                f"{self.datetime.date()}: beta={current_beta}, J:{self.size0} lots,"
-                f" JM:{self.size1} lots"
-            )
-
-        # Use passed spread data
-        spread = self.data2.close[0]
-        mid = self.boll.lines.mid[0]
-        pos = self.getposition(self.data0).size
-
-        # Open/close position logic
-        if pos == 0:
-            if spread > self.boll.lines.top[0]:
-                self._open_position(short=True)
-            elif spread < self.boll.lines.bot[0]:
-                self._open_position(short=False)
-        else:
-            if (spread <= mid and pos < 0) or (spread >= mid and pos > 0):
-                self._close_positions()
-
-    def _open_position(self, short):
-        """Place order with dynamic ratio
-
-        :param short:
-
-        """
+Args::
+    short:"""
+    short:"""
         # Confirm trade size is valid
         if not hasattr(self, "size0") or not hasattr(self, "size1"):
             self.size0 = 10  # Default value
@@ -174,22 +114,16 @@ class DynamicSpreadStrategy(bt.Strategy):
         self.entry_price = self.data2.close[0]
 
     def _close_positions(self):
-        """ """
-        self.close(data=self.data0)
-        self.close(data=self.data1)
-
-    def notify_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
+""""""
+"""Args::
+    trade:"""
+    trade:"""
         if trade.isclosed:
             print(
-                "TRADE %s CLOSED %s, PROFIT: GROSS %.2f, NET %.2f, PRICE %d"
+                "TRADE %s CLOSED, PROFIT: GROSS %.2f, NET %.2f, PRICE %d"
                 % (
                     trade.ref,
-                    bt.num2date(trade.dtclose),
+                    pd.Timestamp(trade.dtclose),
                     trade.pnl,
                     trade.pnlcomm,
                     trade.value,
@@ -200,7 +134,7 @@ class DynamicSpreadStrategy(bt.Strategy):
                 "TRADE %s OPENED %s  , SIZE %2d, PRICE %d "
                 % (
                     trade.ref,
-                    bt.num2date(trade.dtopen),
+                    pd.Timestamp(trade.dtopen),
                     trade.size,
                     trade.value,
                 )
@@ -243,17 +177,20 @@ cerebro.addstrategy(DynamicSpreadStrategy)
 # Set initial capital
 cerebro.broker.setcash(100000)
 cerebro.broker.set_shortcash(False)
-cerebro.addanalyzer(bt.analyzers.DrawDown)  # Drawdown analyzer
-# ROIAnalyzer and CAGRAnalyzer are not standard Backtrader analyzers;
-# removed for compatibility
+cerebro.addanalyzer(DrawDown, _name="drawdown")
+cerebro.addanalyzer(SharpeRatio, _name="sharperatio")
+cerebro.addanalyzer(Returns, _name="returns")
+cerebro.addanalyzer(TradeAnalyzer, _name="tradeanalyzer")
+
+# cerebro.addobserver(bt.observers.CashValue)
 cerebro.addanalyzer(
-    bt.analyzers.SharpeRatio,
+    SharpeRatio,
     timeframe=bt.TimeFrame.Days,  # Calculate based on daily data
     riskfreerate=0,  # Default annualized 1% risk-free rate
     annualize=True,  # Do not annualize
 )
 cerebro.addanalyzer(
-    bt.analyzers.Returns,
+    Returns,
     tann=bt.TimeFrame.Days,  # Annualization factor, 252 trading days
 )
 cerebro.addanalyzer(bt.analyzers.TradeAnalyzer)

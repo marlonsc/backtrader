@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""tcal-intra.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -32,129 +35,16 @@ import backtrader as bt
 
 
 class NYSE_2016(bt.TradingCalendar):
-    """ """
-
-    params = dict(
-        holidays=[
-            datetime.date(2016, 1, 1),
-            datetime.date(2016, 1, 18),
-            datetime.date(2016, 2, 15),
-            datetime.date(2016, 3, 25),
-            datetime.date(2016, 5, 30),
-            datetime.date(2016, 7, 4),
-            datetime.date(2016, 9, 5),
-            datetime.date(2016, 11, 24),
-            datetime.date(2016, 12, 26),
-        ],
-        earlydays=[
-            (
-                datetime.date(2016, 11, 25),
-                datetime.time(9, 30),
-                datetime.time(13, 1),
-            )
-        ],
-        open=datetime.time(9, 30),
-        close=datetime.time(16, 0),
-    )
-
-
-class St(bt.Strategy):
-    """ """
-
-    params = dict()
-
-    def __init__(self):
-        """ """
-
-    def prenext(self):
-        """ """
-        self.next()
-
-    def next(self):
-        """ """
-        print(
-            "Strategy len {} datetime {}".format(len(self), self.datetime.datetime()),
-            end=" ",
-        )
-
-        print(
-            "Data0 len {} datetime {}".format(
-                len(self.data0), self.data0.datetime.datetime()
-            ),
-            end=" ",
-        )
-
-        if len(self.data1):
-            print(
-                "Data1 len {} datetime {}".format(
-                    len(self.data1), self.data1.datetime.datetime()
-                )
-            )
-        else:
-            print()
-
-
-def runstrat(args=None):
-    """
-
-    :param args: (Default value = None)
-
-    """
-    args = parse_args(args)
-
-    cerebro = bt.Cerebro()
-
-    # Data feed kwargs
-    # kwargs = dict(tz='US/Eastern')
-    # import pytz
-    # tz = tzinput = pytz.timezone('Europe/Berlin')
-    tzinput = "Europe/Berlin"
-    # tz = tzinput
-    tz = "US/Eastern"
-    kwargs = dict(tzinput=tzinput, tz=tz)
-
-    # Parse from/to-date
-    dtfmt, tmfmt = "%Y-%m-%d", "T%H:%M:%S"
-    for a, d in ((getattr(args, x), x) for x in ["fromdate", "todate"]):
-        if a:
-            strpfmt = dtfmt + tmfmt * ("T" in a)
-            kwargs[d] = datetime.datetime.strptime(a, strpfmt)
-
-    # Data feed
-    data0 = bt.feeds.BacktraderCSVData(dataname=args.data0, **kwargs)
-    cerebro.adddata(data0)
-
-    d1 = cerebro.resampledata(data0, timeframe=getattr(bt.TimeFrame, args.timeframe))
-    # d1.plotinfo.plotmaster = data0
-    # d1.plotinfo.sameaxis = False
-
-    if args.pandascal:
-        cerebro.addcalendar(args.pandascal)
-    elif args.owncal:
-        cerebro.addcalendar(NYSE_2016())  # or NYSE_2016() to pass an instance
-
-    # Broker
-    cerebro.broker = bt.brokers.BackBroker(**eval("dict(" + args.broker + ")"))
-
-    # Sizer
-    cerebro.addsizer(bt.sizers.FixedSize, **eval("dict(" + args.sizer + ")"))
-
-    # Strategy
-    cerebro.addstrategy(St, **eval("dict(" + args.strat + ")"))
-
-    # Execute
-    cerebro.run(**eval("dict(" + args.cerebro + ")"))
-
-    if args.plot:  # Plot if requested to
-        cerebro.plot(**eval("dict(" + args.plot + ")"))
-
-
-def parse_args(pargs=None):
-    """
-
-    :param pargs: (Default value = None)
-
-    """
+""""""
+""""""
+""""""
+""""""
+""""""
+"""Args::
+    args: (Default value = None)"""
+"""Args::
+    pargs: (Default value = None)"""
+    pargs: (Default value = None)"""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Trading Calendar Sample",

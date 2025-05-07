@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""observers-default-drawdown.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -30,53 +33,22 @@ import backtrader.indicators as btind
 
 
 class MyStrategy(bt.Strategy):
-    """ """
+""""""
+"""Logging function fot this strategy
 
-    params = (("smaperiod", 15),)
-
-    def log(self, txt, dt=None):
-        """Logging function fot this strategy
-
-        :param txt:
-        :param dt: (Default value = None)
-
-        """
+Args::
+    txt: 
+    dt: (Default value = None)"""
+    dt: (Default value = None)"""
         dt = dt or self.data.datetime[0]
         if isinstance(dt, float):
             dt = bt.num2date(dt)
         print("%s, %s" % (dt.isoformat(), txt))
 
     def __init__(self):
-        """ """
-        # SimpleMovingAverage on main data
-        # Equivalent to -> sma = btind.SMA(self.data, period=self.p.smaperiod)
-        sma = btind.SMA(period=self.p.smaperiod)
-
-        # CrossOver (1: up, -1: down) close / sma
-        self.buysell = btind.CrossOver(self.data.close, sma, plot=True)
-
-        # Sentinel to None: new ordersa allowed
-        self.order = None
-
-    def next(self):
-        """ """
-        # Access -1, because drawdown[0] will be calculated after "next"
-        self.log("DrawDown: %.2f" % self.stats.drawdown.drawdown[-1])
-        self.log("MaxDrawDown: %.2f" % self.stats.drawdown.maxdrawdown[-1])
-
-        # Check if we are in the market
-        if self.position:
-            if self.buysell < 0:
-                self.log("SELL CREATE, %.2f" % self.data.close[0])
-                self.sell()
-
-        elif self.buysell > 0:
-            self.log("BUY CREATE, %.2f" % self.data.close[0])
-            self.buy()
-
-
-def runstrat():
-    """ """
+""""""
+""""""
+""""""
     cerebro = bt.Cerebro()
 
     data = bt.feeds.BacktraderCSVData(dataname="../../datas/2006-day-001.txt")

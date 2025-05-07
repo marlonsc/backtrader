@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""pyfoliotest.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -33,182 +36,15 @@ import backtrader as bt
 
 
 class St(bt.SignalStrategy):
-    """ """
-
-    params = (
-        ("pfast", 13),
-        ("pslow", 50),
-        ("printdata", False),
-        ("stake", 1000),
-        ("short", False),
-    )
-
-    def __init__(self):
-        """ """
-        self.sfast = bt.indicators.SMA(period=self.p.pfast)
-        self.sslow = bt.indicators.SMA(period=self.p.pslow)
-        self.cover = bt.indicators.CrossOver(self.sfast, self.sslow)
-        if self.p.short:
-            self.signal_add(bt.SIGNAL_LONGSHORT, self.cover)
-        else:
-            self.signal_add(bt.SIGNAL_LONG, self.cover)
-
-    def start(self):
-        """ """
-        super(self.__class__, self).start()
-        if self.p.printdata:
-            txtfields = list()
-            txtfields.append("Len")
-            txtfields.append("Datetime")
-            txtfields.append("Open")
-            txtfields.append("High")
-            txtfields.append("Low")
-            txtfields.append("Close")
-            txtfields.append("Volume")
-            txtfields.append("OpenInterest")
-            print(",".join(txtfields))
-
-    def next(self):
-        """ """
-        super(self.__class__, self).next()
-        if self.p.printdata:
-            # Print only 1st data ... is just a check that things are running
-            txtfields = list()
-            txtfields.append("%04d" % len(self))
-            txtfields.append(self.data.datetime.datetime(0).isoformat())
-            txtfields.append("%.2f" % self.data0.open[0])
-            txtfields.append("%.2f" % self.data0.high[0])
-            txtfields.append("%.2f" % self.data0.low[0])
-            txtfields.append("%.2f" % self.data0.close[0])
-            txtfields.append("%.2f" % self.data0.volume[0])
-            txtfields.append("%.2f" % self.data0.openinterest[0])
-            print(",".join(txtfields))
-
-
-_TFRAMES = collections.OrderedDict(
-    (
-        ("minutes", bt.TimeFrame.Minutes),
-        ("days", bt.TimeFrame.Days),
-        ("weeks", bt.TimeFrame.Weeks),
-        ("months", bt.TimeFrame.Months),
-        ("years", bt.TimeFrame.Years),
-    )
-)
-
-_TFS = _TFRAMES.keys()
-
-
-def runstrat(args=None):
-    """
-
-    :param args: (Default value = None)
-
-    """
-    args = parse_args(args)
-
-    cerebro = bt.Cerebro()
-    cerebro.broker.set_cash(args.cash)
-
-    dkwargs = dict()
-    if args.fromdate:
-        fromdate = datetime.datetime.strptime(args.fromdate, "%Y-%m-%d")
-        dkwargs["fromdate"] = fromdate
-
-    if args.todate:
-        todate = datetime.datetime.strptime(args.todate, "%Y-%m-%d")
-        dkwargs["todate"] = todate
-
-    if args.timeframe:
-        dkwargs["timeframe"] = _TFRAMES[args.timeframe]
-
-    if args.compression:
-        dkwargs["compression"] = args.compression
-
-    # data0 = bt.feeds.BacktraderCSVData(dataname=args.data0, **dkwargs)
-    data0 = bt.feeds.VCData(dataname=args.data0, historical=True, **dkwargs)
-    cerebro.adddata(data0, name="Data0")
-
-    cerebro.addstrategy(St, short=args.short, printdata=args.printdata)
-    cerebro.addsizer(bt.sizers.FixedSize, stake=args.stake)
-
-    # Own analyzerset
-    cerebro.addanalyzer(bt.analyzers.TimeReturn, timeframe=bt.TimeFrame.Years)
-    cerebro.addanalyzer(bt.analyzers.SharpeRatio, timeframe=bt.TimeFrame.Years)
-    cerebro.addanalyzer(
-        bt.analyzers.SQN,
-    )
-
-    if args.pyfolio:
-        cerebro.addanalyzer(
-            bt.analyzers.PyFolio,
-            _name="pyfolio",
-            timeframe=_TFRAMES[args.pftimeframe],
-        )
-
-    if args.printout:
-        print("Start run")
-    results = cerebro.run()
-    if args.printout:
-        print("End Run")
-    strat = results[0]
-
-    # Results of own analyzers
-    al = strat.analyzers.timereturn
-    print("-- Time Return:")
-    for k, v in al.get_analysis().items():
-        print("{}: {}".format(k, v))
-
-    al = strat.analyzers.sharperatio
-    print("-- Sharpe Ratio:")
-    for k, v in al.get_analysis().items():
-        print("{}: {}".format(k, v))
-
-    al = strat.analyzers.sqn
-    print("-- SQN:")
-    for k, v in al.get_analysis().items():
-        print("{}: {}".format(k, v))
-
-    if args.pyfolio:
-        pyfoliozer = strat.analyzers.getbyname(
-            "pyfolio",
-        )
-
-        returns, positions, transactions, gross_lev = pyfoliozer.get_pf_items()
-        if args.printout:
-            print("-- RETURNS")
-            print(returns)
-            print("-- POSITIONS")
-            print(positions)
-            print("-- TRANSACTIONS")
-            print(transactions)
-            print("-- GROSS LEVERAGE")
-            print(gross_lev)
-
-        if True:
-            import pyfolio as pf
-
-            pf.create_full_tear_sheet(
-                returns,
-                positions=positions,
-                transactions=transactions,
-                gross_lev=gross_lev,
-                round_trips=True,
-            )
-
-    if args.plot:
-        pkwargs = dict(style="bar")
-        if args.plot is not True:  # evals to True but is not True
-            pkwargs = eval("dict(" + args.plot + ")")  # args were passed
-
-        cerebro.plot(**pkwargs)
-
-
-def parse_args(pargs=None):
-    """
-
-    :param pargs: (Default value = None)
-
-    """
+""""""
+""""""
+""""""
+""""""
+"""Args::
+    args: (Default value = None)"""
+"""Args::
+    pargs: (Default value = None)"""
+    pargs: (Default value = None)"""
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

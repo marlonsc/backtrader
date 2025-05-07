@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""lineplotter.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -32,62 +35,13 @@ import backtrader as bt
 
 
 class St(bt.Strategy):
-    """ """
-
-    params = (("ondata", False),)
-
-    def __init__(self):
-        """ """
-        if not self.p.ondata:
-            a = self.data.high - self.data.low
-        else:
-            a = 1.05 * (self.data.high + self.data.low) / 2.0
-
-        b = bt.LinePlotterIndicator(a, name="hilo")
-        b.plotinfo.subplot = not self.p.ondata
-
-
-def runstrat(pargs=None):
-    """
-
-    :param pargs: (Default value = None)
-
-    """
-    args = parse_args(pargs)
-
-    cerebro = bt.Cerebro()
-
-    dkwargs = dict()
-    # Get the dates from the args
-    if args.fromdate is not None:
-        fromdate = datetime.datetime.strptime(args.fromdate, "%Y-%m-%d")
-        dkwargs["fromdate"] = fromdate
-    if args.todate is not None:
-        todate = datetime.datetime.strptime(args.todate, "%Y-%m-%d")
-        dkwargs["todate"] = todate
-
-    data = bt.feeds.BacktraderCSVData(dataname=args.data, **dkwargs)
-    cerebro.adddata(data)
-
-    cerebro.addstrategy(St, ondata=args.ondata)
-    cerebro.run(stdstats=False)
-
-    # Plot if requested
-    if args.plot:
-        pkwargs = dict(style="bar")
-        if args.plot is not True:  # evals to True but is not True
-            npkwargs = eval("dict(" + args.plot + ")")  # args were passed
-            pkwargs.update(npkwargs)
-
-        cerebro.plot(**pkwargs)
-
-
-def parse_args(pargs=None):
-    """
-
-    :param pargs: (Default value = None)
-
-    """
+""""""
+""""""
+"""Args::
+    pargs: (Default value = None)"""
+"""Args::
+    pargs: (Default value = None)"""
+    pargs: (Default value = None)"""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Fake Indicator",

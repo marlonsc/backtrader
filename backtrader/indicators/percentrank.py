@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""percentrank.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -33,10 +36,8 @@ __all__ = ["PercentRank", "PctRank"]
 
 
 class PercentRank(BaseApplyN):
-    """Measures the percent rank of the current value with respect to that of
-    period bars ago
-
-
+"""Measures the percent rank of the current value with respect to that of
+    period bars ago"""
     """
 
     alias = ("PctRank",)

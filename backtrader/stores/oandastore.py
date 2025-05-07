@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""oandastore.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -41,60 +44,22 @@ from backtrader.utils.py3 import queue, with_metaclass
 
 
 class OandaRequestError(oandapy.OandaError):
-    """ """
-
-    def __init__(self):
-        """ """
-        er = dict(code=599, message="Request Error", description="")
-        super(self.__class__, self).__init__(er)
-
-
-class OandaStreamError(oandapy.OandaError):
-    """ """
-
-    def __init__(self, content=""):
-        """
-
-        :param content:  (Default value = "")
-
-        """
-        er = dict(code=598, message="Failed Streaming", description=content)
-        super(self.__class__, self).__init__(er)
-
-
-class OandaTimeFrameError(oandapy.OandaError):
-    """ """
-
-    def __init__(self, content):
-        """
-
-        :param content:
-
-        """
-        er = dict(code=597, message="Not supported TimeFrame", description="")
-        super(self.__class__, self).__init__(er)
-
-
-class OandaNetworkError(oandapy.OandaError):
-    """ """
-
-    def __init__(self):
-        """ """
-        er = dict(code=596, message="Network Error", description="")
-        super(self.__class__, self).__init__(er)
-
-
-class API(oandapy.API):
-    """ """
-
-    def request(self, endpoint, method="GET", params=None):
-        """
-
-        :param endpoint:
-        :param method:  (Default value = "GET")
-        :param params:  (Default value = None)
-
-        """
+""""""
+""""""
+""""""
+"""Args::
+    content: (Default value = "")"""
+""""""
+"""Args::
+    content:"""
+""""""
+""""""
+""""""
+"""Args::
+    endpoint: 
+    method: (Default value = "GET")
+    params: (Default value = None)"""
+    params: (Default value = None)"""
         # Overriden to make something sensible out of a
         # request.RequestException rather than simply issuing a print(str(e))
         url = "%s/%s" % (self.api_url, endpoint)
@@ -128,17 +93,11 @@ class API(oandapy.API):
 
 
 class Streamer(oandapy.Streamer):
-    """ """
-
-    def __init__(self, q, headers=None, *args, **kwargs):
-        """
-
-        :param q:
-        :param headers:  (Default value = None)
-        :param *args:
-        :param **kwargs:
-
-        """
+""""""
+"""Args::
+    q: 
+    headers: (Default value = None)"""
+    headers: (Default value = None)"""
         # Override to provide headers, which is in the standard API interface
         super(Streamer, self).__init__(*args, **kwargs)
 
@@ -148,12 +107,10 @@ class Streamer(oandapy.Streamer):
         self.q = q
 
     def run(self, endpoint, params=None):
-        """
-
-        :param endpoint:
-        :param params:  (Default value = None)
-
-        """
+"""Args::
+    endpoint: 
+    params: (Default value = None)"""
+    params: (Default value = None)"""
         # Override to better manage exceptions.
         # Kept as much as possible close to the original
         self.connected = True
@@ -197,47 +154,23 @@ class Streamer(oandapy.Streamer):
                 break
 
     def on_success(self, data):
-        """
-
-        :param data:
-
-        """
-        if "tick" in data:
-            self.q.put(data["tick"])
-        elif "transaction" in data:
-            self.q.put(data["transaction"])
-
-    def on_error(self, data):
-        """
-
-        :param data:
-
-        """
-        self.disconnect()
-        self.q.put(OandaStreamError(data).error_response)
-
-
-class MetaSingleton(MetaParams):
+"""Args::
+    data:"""
+"""Args::
+    data:"""
     """Metaclass to make a metaclassed class a singleton"""
 
     def __init__(cls, name, bases, dct):
-        """
-
-        :param name:
-        :param bases:
-        :param dct:
-
-        """
+"""Args::
+    name: 
+    bases: 
+    dct:"""
+    dct:"""
         super(MetaSingleton, cls).__init__(name, bases, dct)
         cls._singleton = None
 
     def __call__(cls, *args, **kwargs):
-        """
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """"""
         if cls._singleton is None:
             cls._singleton = super(MetaSingleton, cls).__call__(*args, **kwargs)
 
@@ -263,56 +196,20 @@ class OandaStore(with_metaclass(MetaSingleton, object)):
 
     @classmethod
     def getdata(cls, *args, **kwargs):
-        """Returns ``DataCls`` with args, kwargs
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Returns ``DataCls`` with args, kwargs"""
         return cls.DataCls(*args, **kwargs)
 
     @classmethod
     def getbroker(cls, *args, **kwargs):
-        """Returns broker with *args, **kwargs from registered ``BrokerCls``
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Returns broker with *args, **kwargs from registered ``BrokerCls``"""
         return cls.BrokerCls(*args, **kwargs)
 
     def __init__(self):
-        """ """
-        super(OandaStore, self).__init__()
-
-        self.notifs = collections.deque()  # store notifications for cerebro
-
-        self._env = None  # reference to cerebro for general notifications
-        self.broker = None  # broker instance
-        self.datas = list()  # datas that have registered over start
-
-        self._orders = collections.OrderedDict()  # map order.ref to oid
-        self._ordersrev = collections.OrderedDict()  # map oid to order.ref
-        self._transpend = collections.defaultdict(collections.deque)
-
-        self._oenv = self._ENVPRACTICE if self.p.practice else self._ENVLIVE
-        self.oapi = API(
-            environment=self._oenv,
-            access_token=self.p.token,
-            headers={"X-Accept-Datetime-Format": "UNIX"},
-        )
-
-        self._cash = 0.0
-        self._value = 0.0
-        self._evt_acct = threading.Event()
-
-    def start(self, data=None, broker=None):
-        """
-
-        :param data:  (Default value = None)
-        :param broker:  (Default value = None)
-
-        """
+""""""
+"""Args::
+    data: (Default value = None)
+    broker: (Default value = None)"""
+    broker: (Default value = None)"""
         # Datas require some processing to kickstart data reception
         if data is None and broker is None:
             self.cash = None
@@ -332,128 +229,35 @@ class OandaStore(with_metaclass(MetaSingleton, object)):
             self.broker_threads()
 
     def stop(self):
-        """ """
-        # signal end of thread
-        if self.broker is not None:
-            self.q_ordercreate.put(None)
-            self.q_orderclose.put(None)
-            self.q_account.put(None)
-
-    def put_notification(self, msg, *args, **kwargs):
-        """
-
-        :param msg:
-        :param *args:
-        :param **kwargs:
-
-        """
-        self.notifs.append((msg, args, kwargs))
-
-    def get_notifications(self):
-        """ """
-        self.notifs.append(None)  # put a mark / threads could still append
-        return [x for x in iter(self.notifs.popleft, None)]
-
-    # Oanda supported granularities
-    _GRANULARITIES = {
-        (bt.TimeFrame.Seconds, 5): "S5",
-        (bt.TimeFrame.Seconds, 10): "S10",
-        (bt.TimeFrame.Seconds, 15): "S15",
-        (bt.TimeFrame.Seconds, 30): "S30",
-        (bt.TimeFrame.Minutes, 1): "M1",
-        (bt.TimeFrame.Minutes, 2): "M3",
-        (bt.TimeFrame.Minutes, 3): "M3",
-        (bt.TimeFrame.Minutes, 4): "M4",
-        (bt.TimeFrame.Minutes, 5): "M5",
-        (bt.TimeFrame.Minutes, 10): "M5",
-        (bt.TimeFrame.Minutes, 15): "M5",
-        (bt.TimeFrame.Minutes, 30): "M5",
-        (bt.TimeFrame.Minutes, 60): "H1",
-        (bt.TimeFrame.Minutes, 120): "H2",
-        (bt.TimeFrame.Minutes, 180): "H3",
-        (bt.TimeFrame.Minutes, 240): "H4",
-        (bt.TimeFrame.Minutes, 360): "H6",
-        (bt.TimeFrame.Minutes, 480): "H8",
-        (bt.TimeFrame.Days, 1): "D",
-        (bt.TimeFrame.Weeks, 1): "W",
-        (bt.TimeFrame.Months, 1): "M",
-    }
-
-    def get_positions(self):
-        """ """
-        try:
-            positions = self.oapi.get_positions(self.p.account)
-        except (
-            oandapy.OandaError,
-            OandaRequestError,
-        ):
-            return None
-
-        poslist = positions.get("positions", [])
-        return poslist
-
-    def get_granularity(self, timeframe, compression):
-        """
-
-        :param timeframe:
-        :param compression:
-
-        """
+""""""
+"""Args::
+    msg:"""
+""""""
+""""""
+"""Args::
+    timeframe: 
+    compression:"""
+    compression:"""
         return self._GRANULARITIES.get((timeframe, compression), None)
 
     def get_instrument(self, dataname):
-        """
-
-        :param dataname:
-
-        """
-        try:
-            insts = self.oapi.get_instruments(self.p.account, instruments=dataname)
-        except (
-            oandapy.OandaError,
-            OandaRequestError,
-        ):
-            return None
-
-        i = insts.get("instruments", [{}])
-        return i[0] or None
-
-    def streaming_events(self, tmout=None):
-        """
-
-        :param tmout:  (Default value = None)
-
-        """
-        q = queue.Queue()
-        kwargs = {"q": q, "tmout": tmout}
-
-        t = threading.Thread(target=self._t_streaming_listener, kwargs=kwargs)
-        t.daemon = True
-        t.start()
-
-        t = threading.Thread(target=self._t_streaming_events, kwargs=kwargs)
-        t.daemon = True
-        t.start()
-        return q
-
-    def _t_streaming_listener(self, q, tmout=None):
-        """
-
-        :param q:
-        :param tmout:  (Default value = None)
-
-        """
+"""Args::
+    dataname:"""
+"""Args::
+    tmout: (Default value = None)"""
+"""Args::
+    q: 
+    tmout: (Default value = None)"""
+    tmout: (Default value = None)"""
         while True:
             trans = q.get()
             self._transaction(trans)
 
     def _t_streaming_events(self, q, tmout=None):
-        """
-
-        :param q:
-        :param tmout:  (Default value = None)
-
-        """
+"""Args::
+    q: 
+    tmout: (Default value = None)"""
+    tmout: (Default value = None)"""
         if tmout is not None:
             _time.sleep(tmout)
 
@@ -476,17 +280,15 @@ class OandaStore(with_metaclass(MetaSingleton, object)):
         candleFormat,
         includeFirst,
     ):
-        """
-
-        :param dataname:
-        :param dtbegin:
-        :param dtend:
-        :param timeframe:
-        :param compression:
-        :param candleFormat:
-        :param includeFirst:
-
-        """
+"""Args::
+    dataname: 
+    dtbegin: 
+    dtend: 
+    timeframe: 
+    compression: 
+    candleFormat: 
+    includeFirst:"""
+    includeFirst:"""
 
         kwargs = locals().copy()
         kwargs.pop("self")
@@ -507,18 +309,16 @@ class OandaStore(with_metaclass(MetaSingleton, object)):
         includeFirst,
         q,
     ):
-        """
-
-        :param dataname:
-        :param dtbegin:
-        :param dtend:
-        :param timeframe:
-        :param compression:
-        :param candleFormat:
-        :param includeFirst:
-        :param q:
-
-        """
+"""Args::
+    dataname: 
+    dtbegin: 
+    dtend: 
+    timeframe: 
+    compression: 
+    candleFormat: 
+    includeFirst: 
+    q:"""
+    q:"""
 
         granularity = self.get_granularity(timeframe, compression)
         if granularity is None:
@@ -552,12 +352,10 @@ class OandaStore(with_metaclass(MetaSingleton, object)):
         q.put({})  # end of transmission
 
     def streaming_prices(self, dataname, tmout=None):
-        """
-
-        :param dataname:
-        :param tmout:  (Default value = None)
-
-        """
+"""Args::
+    dataname: 
+    tmout: (Default value = None)"""
+    tmout: (Default value = None)"""
         q = queue.Queue()
         kwargs = {"q": q, "dataname": dataname, "tmout": tmout}
         t = threading.Thread(target=self._t_streaming_prices, kwargs=kwargs)
@@ -566,13 +364,11 @@ class OandaStore(with_metaclass(MetaSingleton, object)):
         return q
 
     def _t_streaming_prices(self, dataname, q, tmout):
-        """
-
-        :param dataname:
-        :param q:
-        :param tmout:
-
-        """
+"""Args::
+    dataname: 
+    q: 
+    tmout:"""
+    tmout:"""
         if tmout is not None:
             _time.sleep(tmout)
 
@@ -586,74 +382,15 @@ class OandaStore(with_metaclass(MetaSingleton, object)):
         streamer.rates(self.p.account, instruments=dataname)
 
     def get_cash(self):
-        """ """
-        return self._cash
-
-    def get_value(self):
-        """ """
-        return self._value
-
-    _ORDEREXECS = {
-        bt.Order.Market: "market",
-        bt.Order.Limit: "limit",
-        bt.Order.Stop: "stop",
-        bt.Order.StopLimit: "stop",
-    }
-
-    def broker_threads(self):
-        """ """
-        self.q_account = queue.Queue()
-        self.q_account.put(True)  # force an immediate update
-        t = threading.Thread(target=self._t_account)
-        t.daemon = True
-        t.start()
-
-        self.q_ordercreate = queue.Queue()
-        t = threading.Thread(target=self._t_order_create)
-        t.daemon = True
-        t.start()
-
-        self.q_orderclose = queue.Queue()
-        t = threading.Thread(target=self._t_order_cancel)
-        t.daemon = True
-        t.start()
-
-        # Wait once for the values to be set
-        self._evt_acct.wait(self.p.account_tmout)
-
-    def _t_account(self):
-        """ """
-        while True:
-            try:
-                msg = self.q_account.get(timeout=self.p.account_tmout)
-                if msg is None:
-                    break  # end of thread
-            except queue.Empty:  # tmout -> time to refresh
-                pass
-
-            try:
-                accinfo = self.oapi.get_account(self.p.account)
-            except Exception as e:
-                self.put_notification(e)
-                continue
-
-            try:
-                self._cash = accinfo["marginAvail"]
-                self._value = accinfo["balance"]
-            except KeyError:
-                pass
-
-            self._evt_acct.set()
-
-    def order_create(self, order, stopside=None, takeside=None, **kwargs):
-        """
-
-        :param order:
-        :param stopside:  (Default value = None)
-        :param takeside:  (Default value = None)
-        :param **kwargs:
-
-        """
+""""""
+""""""
+""""""
+""""""
+"""Args::
+    order: 
+    stopside: (Default value = None)
+    takeside: (Default value = None)"""
+    takeside: (Default value = None)"""
         okwargs = dict()
         okwargs["instrument"] = order.data._dataname
         okwargs["units"] = abs(order.created.size)
@@ -696,162 +433,16 @@ class OandaStore(with_metaclass(MetaSingleton, object)):
     _OIDMULTIPLE = ["tradesClosed"]
 
     def _t_order_create(self):
-        """ """
-        while True:
-            msg = self.q_ordercreate.get()
-            if msg is None:
-                break
-
-            oref, okwargs = msg
-            try:
-                o = self.oapi.create_order(self.p.account, **okwargs)
-            except Exception as e:
-                self.put_notification(e)
-                self.broker._reject(oref)
-                return
-
-            # Ids are delivered in different fields and all must be fetched to
-            # match them (as executions) to the order generated here
-            oids = list()
-            for oidfield in self._OIDSINGLE:
-                if oidfield in o and "id" in o[oidfield]:
-                    oids.append(o[oidfield]["id"])
-
-            for oidfield in self._OIDMULTIPLE:
-                if oidfield in o:
-                    for suboidfield in o[oidfield]:
-                        oids.append(suboidfield["id"])
-
-            if not oids:
-                self.broker._reject(oref)
-                return
-
-            self._orders[oref] = oids[0]
-            self.broker._submit(oref)
-            if okwargs["type"] == "market":
-                self.broker._accept(oref)  # taken immediately
-
-            for oid in oids:
-                self._ordersrev[oid] = oref  # maps ids to backtrader order
-
-                # An transaction may have happened and was stored
-                tpending = self._transpend[oid]
-                tpending.append(None)  # eom marker
-                while True:
-                    trans = tpending.popleft()
-                    if trans is None:
-                        break
-                    self._process_transaction(oid, trans)
-
-    def order_cancel(self, order):
-        """
-
-        :param order:
-
-        """
-        self.q_orderclose.put(order.ref)
-        return order
-
-    def _t_order_cancel(self):
-        """ """
-        while True:
-            oref = self.q_orderclose.get()
-            if oref is None:
-                break
-
-            oid = self._orders.get(oref, None)
-            if oid is None:
-                continue  # the order is no longer there
-            try:
-                self.oapi.close_order(self.p.account, oid)
-            except Exception:
-                continue  # not cancelled - FIXME: notify
-
-            self.broker._cancel(oref)
-
-    _X_ORDER_CREATE = (
-        "STOP_ORDER_CREATE",
-        "LIMIT_ORDER_CREATE",
-        "MARKET_IF_TOUCHED_ORDER_CREATE",
-    )
-
-    def _transaction(self, trans):
-        """
-
-        :param trans:
-
-        """
-        # Invoked from Streaming Events. May actually receive an event for an
-        # oid which has not yet been returned after creating an order. Hence
-        # store if not yet seen, else forward to processer
-        ttype = trans["type"]
-        if ttype == "MARKET_ORDER_CREATE":
-            try:
-                oid = trans["tradeReduced"]["id"]
-            except KeyError:
-                try:
-                    oid = trans["tradeOpened"]["id"]
-                except KeyError:
-                    return  # cannot do anything else
-
-        elif ttype in self._X_ORDER_CREATE:
-            oid = trans["id"]
-        elif ttype == "ORDER_FILLED":
-            oid = trans["orderId"]
-
-        elif ttype == "ORDER_CANCEL":
-            oid = trans["orderId"]
-
-        elif ttype == "TRADE_CLOSE":
-            oid = trans["id"]
-            pid = trans["tradeId"]
-            if pid in self._orders and False:  # Know nothing about trade
-                return  # can do nothing
-
-            # Skip above - at the moment do nothing
-            # Received directly from an event in the WebGUI for example which
-            # closes an existing position related to order with id -> pid
-            # COULD BE DONE: Generate a fake counter order to gracefully
-            # close the existing position
-            msg = (
-                "Received TRADE_CLOSE for unknown order, possibly generated"
-                " over a different client or GUI"
-            )
-            self.put_notification(msg, trans)
-            return
-
-        else:  # Go aways gracefully
-            try:
-                oid = trans["id"]
-            except KeyError:
-                oid = "None"
-
-            msg = "Received {} with oid {}. Unknown situation"
-            msg = msg.format(ttype, oid)
-            self.put_notification(msg, trans)
-            return
-
-        try:
-            self._ordersrev[oid]
-            self._process_transaction(oid, trans)
-        except KeyError:  # not yet seen, keep as pending
-            self._transpend[oid].append(trans)
-
-    _X_ORDER_FILLED = (
-        "MARKET_ORDER_CREATE",
-        "ORDER_FILLED",
-        "TAKE_PROFIT_FILLED",
-        "STOP_LOSS_FILLED",
-        "TRAILING_STOP_FILLED",
-    )
-
-    def _process_transaction(self, oid, trans):
-        """
-
-        :param oid:
-        :param trans:
-
-        """
+""""""
+"""Args::
+    order:"""
+""""""
+"""Args::
+    trans:"""
+"""Args::
+    oid: 
+    trans:"""
+    trans:"""
         try:
             oref = self._ordersrev.pop(oid)
         except KeyError:

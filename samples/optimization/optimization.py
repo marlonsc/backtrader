@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""optimization.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -36,84 +39,10 @@ from backtrader.utils.py3 import range
 
 
 class OptimizeStrategy(bt.Strategy):
-    """ """
-
-    params = (
-        ("smaperiod", 15),
-        ("macdperiod1", 12),
-        ("macdperiod2", 26),
-        ("macdperiod3", 9),
-    )
-
-    def __init__(self):
-        """ """
-        # Add indicators to add load
-
-        btind.SMA(period=self.p.smaperiod)
-        btind.MACD(
-            period_me1=self.p.macdperiod1,
-            period_me2=self.p.macdperiod2,
-            period_signal=self.p.macdperiod3,
-        )
-
-
-def runstrat():
-    """ """
-    args = parse_args()
-
-    # Create a cerebro entity
-    cerebro = bt.Cerebro(
-        maxcpus=args.maxcpus,
-        runonce=not args.no_runonce,
-        exactbars=args.exactbars,
-        optdatas=not args.no_optdatas,
-        optreturn=not args.no_optreturn,
-    )
-
-    # Add a strategy
-    cerebro.optstrategy(
-        OptimizeStrategy,
-        smaperiod=range(args.ma_low, args.ma_high),
-        macdperiod1=range(args.m1_low, args.m1_high),
-        macdperiod2=range(args.m2_low, args.m2_high),
-        macdperiod3=range(args.m3_low, args.m3_high),
-    )
-
-    # Get the dates from the args
-    fromdate = datetime.datetime.strptime(args.fromdate, "%Y-%m-%d")
-    todate = datetime.datetime.strptime(args.todate, "%Y-%m-%d")
-
-    # Create the 1st data
-    data = btfeeds.BacktraderCSVData(
-        dataname=args.data, fromdate=fromdate, todate=todate
-    )
-
-    # Add the Data Feed to Cerebro
-    cerebro.adddata(data)
-
-    # clock the start of the process
-    tstart = time.clock()
-
-    # Run over everything
-    stratruns = cerebro.run()
-
-    # clock the end of the process
-    tend = time.clock()
-
-    print("==================================================")
-    for stratrun in stratruns:
-        print("**************************************************")
-        for strat in stratrun:
-            print("--------------------------------------------------")
-            print(strat.p._getkwargs())
-    print("==================================================")
-
-    # print out the result
-    print("Time used:", str(tend - tstart))
-
-
-def parse_args():
-    """ """
+""""""
+""""""
+""""""
+""""""
     parser = argparse.ArgumentParser(
         description="Optimization",
         formatter_class=argparse.RawTextHelpFormatter,

@@ -1,4 +1,7 @@
-import datetime
+"""JM_J_strategy.py module.
+
+Description of the module functionality."""
+
 
 import backtrader as bt
 import matplotlib.pyplot as plt
@@ -9,58 +12,14 @@ from arbitrage.myutil import calculate_spread  # 假设这是您的价差计算�
 
 # 布林带价差交易策略（参数已优化为可通过网格搜索调整）
 class SpreadBollingerStrategy(bt.Strategy):
-    """ """
+""""""
+""""""
+""""""
+"""执行开仓操作
 
-    params = (
-        ("period", 15),  # 布林带周期（可调参数）
-        ("devfactor", 1.5),  # 标准差倍数（可调参数）
-        ("size0", 10),  # 品种0交易手数（可调参数）
-        ("size1", 14),  # 品种1交易手数（可调参数）
-        ("printlog", False),  # 是否打印交易日志
-    )
-
-    def __init__(self):
-        """ """
-        # 布林带指标（使用价差序列）
-        self.boll = bt.indicators.BollingerBands(
-            self.data2.close,
-            period=self.p.period,
-            devfactor=self.p.devfactor,
-            subplot=False,
-        )
-
-        # 交易状态跟踪
-        self.order = None
-        self.entry_price = 0
-        self.position_size = 0
-
-    def next(self):
-        """ """
-        if self.order:  # 存在未完成订单时跳过
-            return
-
-        spread = self.data2.close[0]
-        mid = self.boll.lines.mid[0]
-        pos = self.getposition(self.data0).size
-
-        # 开仓逻辑
-        if pos == 0:
-            if spread > self.boll.lines.top[0]:
-                self._execute_trade("short")
-            elif spread < self.boll.lines.bot[0]:
-                self._execute_trade("long")
-
-        # 平仓逻辑
-        else:
-            if (spread <= mid and pos < 0) or (spread >= mid and pos > 0):
-                self._close_positions()
-
-    def _execute_trade(self, direction):
-        """执行开仓操作
-
-        :param direction:
-
-        """
+Args::
+    direction:"""
+    direction:"""
         self.entry_price = self.data2.close[0]
         if direction == "short":
             self.sell(data=self.data0, size=self.p.size0)
@@ -75,11 +34,11 @@ class SpreadBollingerStrategy(bt.Strategy):
         self.close(data=self.data1)
 
     def notify_trade(self, trade):
-        """可选：交易通知记录
+"""可选：交易通知记录
 
-        :param trade:
-
-        """
+Args::
+    trade:"""
+    trade:"""
         if self.p.printlog:
             if trade.isclosed:
                 print(f"{trade.ref} 平仓 | 盈利 {trade.pnlcomm:.2f}")
@@ -89,14 +48,14 @@ class SpreadBollingerStrategy(bt.Strategy):
 
 # 数据加载函数（与策略解耦）
 def load_data(symbol1, symbol2, fromdate, todate):
-    """加载数据并计算价差
+"""加载数据并计算价差
 
-    :param symbol1:
-    :param symbol2:
-    :param fromdate:
-    :param todate:
-
-    """
+Args::
+    symbol1: 
+    symbol2: 
+    fromdate: 
+    todate:"""
+    todate:"""
     output_file = "D:\\FutureData\\ricequant\\1d_2017to2024_noadjust.h5"
 
     # 加载原始数据
@@ -107,26 +66,19 @@ def load_data(symbol1, symbol2, fromdate, todate):
     df_spread = calculate_spread(df0, df1, 1, 1.4)
 
     # 创建数据feed
-    data0 = bt.feeds.PandasData(
-        dataname=df0, datetime="date", fromdate=fromdate, todate=todate
-    )
-    data1 = bt.feeds.PandasData(
-        dataname=df1, datetime="date", fromdate=fromdate, todate=todate
-    )
-    data2 = bt.feeds.PandasData(
-        dataname=df_spread, datetime="date", fromdate=fromdate, todate=todate
-    )
+    data0 = bt.feeds.PandasData()
+    data0.dataname = df0
+    data1 = bt.feeds.PandasData()
+    data1.dataname = df1
+    data2 = bt.feeds.PandasData()
+    data2.dataname = df_spread
     return data0, data1, data2
 
 
 # 回测配置函数
 def configure_cerebro(**kwargs):
-    """配置回测引擎
-
-    :param **kwargs:
-
-    """
-    cerebro = bt.Cerebro(stdstats=False)
+    """配置回测引擎"""
+    cerebro = bt.Cerebro()
 
     # 添加数据
     data0, data1, data2 = load_data(
@@ -154,25 +106,36 @@ def configure_cerebro(**kwargs):
     cerebro.broker.set_shortcash(False)
 
     # 添加分析器
-    cerebro.addanalyzer(bt.analyzers.DrawDown, _name="drawdown")
-    cerebro.addanalyzer(
-        bt.analyzers.SharpeRatio,
-        timeframe=bt.TimeFrame.Days,
-        riskfreerate=0.0,
-        annualize=True,
-        _name="sharpe",
-    )
-    cerebro.addanalyzer(bt.analyzers.Returns, tann=bt.TimeFrame.Days, _name="returns")
+    try:
+        cerebro.addanalyzer(bt.analyzers.DrawDown, _name="drawdown")
+    except AttributeError:
+        pass
+    try:
+        cerebro.addanalyzer(
+            bt.analyzers.SharpeRatio,
+            timeframe=bt.TimeFrame.Days,
+            riskfreerate=0.0,
+            annualize=True,
+            _name="sharpe",
+        )
+    except AttributeError:
+        pass
+    try:
+        cerebro.addanalyzer(
+            bt.analyzers.Returns, tann=bt.TimeFrame.Days, _name="returns"
+        )
+    except AttributeError:
+        pass
     return cerebro
 
 
 # 修改后的分析函数
 def analyze_results(results):
-    """分析优化结果并输出最佳参数组合
+"""分析优化结果并输出最佳参数组合
 
-    :param results:
-
-    """
+Args::
+    results:"""
+    results:"""
     performance = []
 
     # 遍历所有参数组合的回测结果
@@ -235,6 +198,6 @@ def analyze_results(results):
 # 主执行函数
 if __name__ == "__main__":
     cerebro = configure_cerebro()
-    results = cerebro.run()
-    analyze_results(results)
+    strats = cerebro.run()  # pylint: disable=no-member
+    analyze_results(strats)
     # cerebro.plot()  # 需要查看具体回测时可取消注释

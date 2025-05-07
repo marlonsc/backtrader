@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""benchmark.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -31,10 +34,8 @@ from . import TimeReturn
 
 
 class Benchmark(TimeReturn):
-    """This observer stores the *returns* of the strategy and the *return* of a
-    reference asset which is one of the datas passed to the system.
-
-
+"""This observer stores the *returns* of the strategy and the *return* of a
+    reference asset which is one of the datas passed to the system."""
     """
 
     _stclock = True
@@ -51,31 +52,9 @@ class Benchmark(TimeReturn):
     )
 
     def _plotlabel(self):
-        """ """
-        labels = super(Benchmark, self)._plotlabel()
-        labels.append(self.p.data._name)
-        return labels
-
-    def __init__(self):
-        """ """
-        if self.p.data is None:  # use the 1st data in the system if none given
-            self.p.data = self.data0
-
-        super(Benchmark, self).__init__()  # treturn including data parameter
-        # Create a time return object without the data
-        kwargs = self.p._getkwargs()
-        kwargs.update(data=None)  # to create a return for the strategy
-        t = self._owner._addanalyzer_slave(bt.analyzers.TimeReturn, **kwargs)
-
-        # swap for consistency
-        self.treturn, self.tbench = t, self.treturn
-
-    def next(self):
-        """ """
-        super(Benchmark, self).next()
-        self.lines.benchmark[0] = self.tbench.rets.get(self.treturn.dtkey, float("NaN"))
-
-    def prenext(self):
-        """ """
+""""""
+""""""
+""""""
+""""""
         if self.p._doprenext:
             super(TimeReturn, self).prenext()

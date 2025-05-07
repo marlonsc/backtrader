@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""calendardays.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -45,20 +48,17 @@ class CalendarDays(with_metaclass(metabase.MetaParams, object)):
     lastdt = date.max
 
     def __init__(self, data):
-        """
+"""Args::
+    data:"""
+"""If the data has a gap larger than 1 day amongst bars, the missing bars
+are added to the stream.
 
-        :param data:
+Args::
+    data: the data source to filter
 
-        """
-
-    def __call__(self, data):
-        """If the data has a gap larger than 1 day amongst bars, the missing bars
-        are added to the stream.
-
-        :param data: the data source to filter
-        :returns: - False (always): this filter does not remove bars from the stream
-
-        """
+Returns::
+    - False (always): this filter does not remove bars from the stream"""
+    - False (always): this filter does not remove bars from the stream"""
         dt = data.datetime.date()
         if (dt - self.lastdt) > self.ONEDAY:  # gap in place
             self._fillbars(data, dt, self.lastdt)
@@ -67,15 +67,14 @@ class CalendarDays(with_metaclass(metabase.MetaParams, object)):
         return False  # no bar has been removed from the stream
 
     def _fillbars(self, data, dt, lastdt):
-        """Fills one by one bars as needed from time_start to time_end
+"""Fills one by one bars as needed from time_start to time_end
+Invalidates the control dtime_prev if requested
 
-        Invalidates the control dtime_prev if requested
-
-        :param data:
-        :param dt:
-        :param lastdt:
-
-        """
+Args::
+    data: 
+    dt: 
+    lastdt:"""
+    lastdt:"""
         tm = data.datetime.time(0)  # get time part
 
         # Same price for all bars

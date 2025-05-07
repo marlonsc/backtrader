@@ -1,4 +1,7 @@
-from datetime import datetime
+"""models.py module.
+
+Description of the module functionality."""
+
 from typing import Literal, Optional
 
 from pydantic import BaseModel, Field

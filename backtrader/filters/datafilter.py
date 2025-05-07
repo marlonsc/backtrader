@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""datafilter.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -30,39 +33,19 @@ import backtrader as bt
 
 class DataFilter(bt.AbstractDataBase):
     """This class filters out bars from a given data source. In addition to the
-    standard parameters of a DataBase it takes a ``funcfilter`` parameter which
-    can be any callable
-
-    Logic:
-
-      - ``funcfilter`` will be called with the underlying data source
-
-        It can be any callable
-
-        - Return value ``True``: current data source bar values will used
-        - Return value ``False``: current data source bar values will discarded
-
-
-    """
+standard parameters of a DataBase it takes a ``funcfilter`` parameter which
+can be any callable
+Logic:
+- ``funcfilter`` will be called with the underlying data source
+It can be any callable
+- Return value ``True``: current data source bar values will used
+- Return value ``False``: current data source bar values will discarded"""
 
     params = (("funcfilter", None),)
 
     def preload(self):
-        """ """
-        if len(self.p.dataname) == self.p.dataname.buflen():
-            # if data is not preloaded .... do it
-            self.p.dataname.start()
-            self.p.dataname.preload()
-            self.p.dataname.home()
-
-        # Copy timeframe from data after start (some sources do autodetection)
-        self.p.timeframe = self._timeframe = self.p.dataname._timeframe
-        self.p.compression = self._compression = self.p.dataname._compression
-
-        super(DataFilter, self).preload()
-
-    def _load(self):
-        """ """
+""""""
+""""""
         if not len(self.p.dataname):
             self.p.dataname.start()  # start data if not done somewhere else
 

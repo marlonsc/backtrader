@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""flt.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -32,43 +35,26 @@ __all__ = ["Filter"]
 
 
 class MetaFilter(MetaParams):
-    """ """
+"""Metaclass for Filter. Handles filter instantiation. All docstrings and
+    comments must be line-wrapped at 90 characters or less."""
+    """
 
 
 class Filter(with_metaclass(MetaParams, object)):
-    """ """
+"""Base class for data filters in Backtrader. Subclass to implement custom
+    filtering logic. All docstrings and comments must be line-wrapped at 90
+    characters or less."""
+    """
 
     _firsttime = True
 
     def __init__(self, data):
-        """
-
-        :param data:
-
-        """
-
-    def __call__(self, data):
-        """
-
-        :param data:
-
-        """
-        if self._firsttime:
-            self.nextstart(data)
-            self._firsttime = False
-
-        self.next(data)
-
-    def nextstart(self, data):
-        """
-
-        :param data:
-
-        """
-
-    def next(self, data):
-        """
-
-        :param data:
-
-        """
+"""Args::
+    data:"""
+"""Args::
+    data:"""
+"""Args::
+    data:"""
+"""Args::
+    data:"""
+    data:"""

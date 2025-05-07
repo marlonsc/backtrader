@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""vchartfile.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -34,16 +37,14 @@ from backtrader import date2num  # avoid dict lookups
 
 
 class MetaVChartFile(bt.DataBase.__class__):
-    """ """
+""""""
+"""Class has already been created ... register
 
-    def __init__(cls, name, bases, dct):
-        """Class has already been created ... register
-
-        :param name:
-        :param bases:
-        :param dct:
-
-        """
+Args::
+    name: 
+    bases: 
+    dct:"""
+    dct:"""
         # Initialize the class
         super(MetaVChartFile, cls).__init__(name, bases, dct)
 
@@ -53,63 +54,15 @@ class MetaVChartFile(bt.DataBase.__class__):
 
 class VChartFile(bt.with_metaclass(MetaVChartFile, bt.DataBase)):
     """Support for `Visual Chart <www.visualchart.com>`_ binary on-disk files for
-    both daily and intradaily formats.
-
-    Note:
-
-      - ``dataname``: Market code displayed by Visual Chart. Example: 015ES for
-        EuroStoxx 50 continuous future
-
-
-    """
+both daily and intradaily formats.
+Note:
+- ``dataname``: Market code displayed by Visual Chart. Example: 015ES for
+EuroStoxx 50 continuous future"""
 
     def start(self):
-        """ """
-        super(VChartFile, self).start()
-        if self._store is None:
-            self._store = bt.stores.VChartFileStore()
-            self._store.start()
-
-        self._store.start(data=self)
-
-        # Choose extension and extraction/calculation parameters
-        if self.p.timeframe < bt.TimeFrame.Minutes:
-            ext = ".tck"  # seconds will still need resampling
-            # FIXME: find reference to tick counter for format
-        elif self.p.timeframe < bt.TimeFrame.Days:
-            ext = ".min"
-            self._dtsize = 2
-            self._barsize = 32
-            self._barfmt = "IIffffII"
-        else:
-            ext = ".fd"
-            self._barsize = 28
-            self._dtsize = 1
-            self._barfmt = "IffffII"
-
-        # Construct full path
-        basepath = self._store.get_datapath()
-
-        # Example: 01 + 0 + 015ES + .fd -> 010015ES.fd
-        dataname = "01" + "0" + self.p.dataname + ext
-        # 015ES -> 0 + 015 -> 0015
-        mktcode = "0" + self.p.dataname[0:3]
-
-        # basepath/0015/010015ES.fd
-        path = os.path.join(basepath, mktcode, dataname)
-        try:
-            self.f = open(path, "rb")
-        except IOError:
-            self.f = None
-
-    def stop(self):
-        """ """
-        if self.f is not None:
-            self.f.close()
-            self.f = None
-
-    def _load(self):
-        """ """
+""""""
+""""""
+""""""
         if self.f is None:
             return False  # cannot load more
 
@@ -146,7 +99,7 @@ class VChartFile(bt.with_metaclass(MetaVChartFile, bt.DataBase)):
         self.lines.datetime[0] = date2num(dt)  # Store time
 
         # Get the rest of the fields
-        o, h, l, c, v, oi = bdata[self._dtsize:]
+        o, h, l, c, v, oi = bdata[self._dtsize :]
         self.lines.open[0] = o
         self.lines.high[0] = h
         self.lines.low[0] = l

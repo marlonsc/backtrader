@@ -1,4 +1,7 @@
-import datetime
+"""JM_J_strategy_RSI_MACD_GridSearch.py module.
+
+Description of the module functionality."""
+
 
 import backtrader as bt
 import pandas as pd
@@ -10,10 +13,8 @@ def calculate_rolling_spread(
     window: int = 30,
     fields=("open", "high", "low", "close"),
 ) -> pd.DataFrame:
-    """
-    计算滚动 β，并为指定价格字段生成价差 (spread)：
-        spread_x = price0_x - β_{t-1} * price1_x
-    """
+    """计算滚动 β，并为指定价格字段生成价差 (spread)：
+spread_x = price0_x - β_{t-1} * price1_x"""
     # 1) 用收盘价对齐合并（β 仍用 close 估计）
     df = (
         df0.set_index("date")[["close"]]
@@ -54,7 +55,9 @@ def calculate_rolling_spread(
 
 
 # 创建自定义数据类以支持beta列
-class SpreadData(bt.feeds.PandasData):
+"""SpreadData class.
+
+Description of the class functionality."""
     lines = ("beta",)  # 添加beta线
 
     params = (
@@ -65,7 +68,9 @@ class SpreadData(bt.feeds.PandasData):
     )
 
 
-class DynamicSpreadRSI_MACD_Strategy(bt.Strategy):
+"""DynamicSpreadRSI_MACD_Strategy class.
+
+Description of the class functionality."""
     params = (
         ("rsi_period", 14),  # RSI计算窗口
         (
@@ -78,7 +83,11 @@ class DynamicSpreadRSI_MACD_Strategy(bt.Strategy):
         ("verbose", False),  # 是否打印详细信息
     )
 
-    def __init__(self):
+"""__init__ function.
+
+Returns:
+    Description of return value
+"""
         # 方便读取价差
         self.spread_series = self.data2.close
 
@@ -97,7 +106,14 @@ class DynamicSpreadRSI_MACD_Strategy(bt.Strategy):
         self.overbought = 50 + self.p.rsi_threshold
         self.oversold = 50 - self.p.rsi_threshold
 
-    def _open_position(self, short):
+"""_open_position function.
+
+Args:
+    short: Description of short
+
+Returns:
+    Description of return value
+"""
         if not hasattr(self, "size0"):
             self.size0 = 10
             self.size1 = round(self.data2.beta[0] * 10)
@@ -108,11 +124,19 @@ class DynamicSpreadRSI_MACD_Strategy(bt.Strategy):
             self.buy(data=self.data0, size=self.size0)
             self.sell(data=self.data1, size=self.size1)
 
-    def _close_positions(self):
+"""_close_positions function.
+
+Returns:
+    Description of return value
+"""
         self.close(data=self.data0)
         self.close(data=self.data1)
 
-    def next(self):
+"""next function.
+
+Returns:
+    Description of return value
+"""
         # 确保有足够的历史数据
         if (
             len(self.rsi) < self.p.rsi_period + 2
@@ -151,16 +175,23 @@ class DynamicSpreadRSI_MACD_Strategy(bt.Strategy):
             ):
                 self._close_positions()
 
-    def notify_trade(self, trade):
+"""notify_trade function.
+
+Args:
+    trade: Description of trade
+
+Returns:
+    Description of return value
+"""
         if not self.p.verbose:
             return
 
         if trade.isclosed:
             print(
-                "TRADE %s CLOSED %s, PROFIT: GROSS %.2f, NET %.2f, PRICE %d"
+                "TRADE %s CLOSED, PROFIT: GROSS %.2f, NET %.2f, PRICE %d"
                 % (
                     trade.ref,
-                    bt.num2date(trade.dtclose),
+                    pd.Timestamp(trade.dtclose),
                     trade.pnl,
                     trade.pnlcomm,
                     trade.value,
@@ -171,7 +202,7 @@ class DynamicSpreadRSI_MACD_Strategy(bt.Strategy):
                 "TRADE %s OPENED %s  , SIZE %2d, PRICE %d "
                 % (
                     trade.ref,
-                    bt.num2date(trade.dtopen),
+                    pd.Timestamp(trade.dtopen),
                     trade.size,
                     trade.value,
                 )
@@ -191,7 +222,7 @@ def run_strategy(
 ):
     """运行单次回测"""
     # 创建回测引擎
-    cerebro = bt.Cerebro(stdstats=False)
+    cerebro = bt.Cerebro()
     cerebro.adddata(data0, name="data0")
     cerebro.adddata(data1, name="data1")
     cerebro.adddata(data2, name="spread")
@@ -210,18 +241,6 @@ def run_strategy(
     # 设置初始资金
     cerebro.broker.setcash(100000)
     cerebro.broker.set_shortcash(False)
-
-    # 添加分析器
-    cerebro.addanalyzer(
-        bt.analyzers.SharpeRatio,
-        timeframe=bt.TimeFrame.Days,
-        riskfreerate=0,
-        annualize=True,
-    )
-    cerebro.addanalyzer(bt.analyzers.DrawDown)
-    cerebro.addanalyzer(bt.analyzers.Returns)
-    cerebro.addanalyzer(bt.analyzers.ROIAnalyzer, period=bt.TimeFrame.Days)
-    cerebro.addanalyzer(bt.analyzers.TradeAnalyzer)
 
     # 运行回测
     results = cerebro.run()
@@ -290,21 +309,9 @@ def grid_search():
         df_spread = calculate_rolling_spread(df0, df1, window=spread_window)
 
         # 添加数据
-        data0 = bt.feeds.PandasData(
-            dataname=df0,
-            datetime="date",
-            nocase=True,
-            fromdate=fromdate,
-            todate=todate,
-        )
-        data1 = bt.feeds.PandasData(
-            dataname=df1,
-            datetime="date",
-            nocase=True,
-            fromdate=fromdate,
-            todate=todate,
-        )
-        data2 = SpreadData(dataname=df_spread, fromdate=fromdate, todate=todate)
+        data0 = bt.feeds.PandasData(dataframe=df0)
+        data1 = bt.feeds.PandasData(dataframe=df1)
+        data2 = SpreadData(dataframe=df_spread, fromdate=fromdate, todate=todate)
 
         for rsi_period in rsi_period_values:
             for rsi_threshold in rsi_threshold_values:

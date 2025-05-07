@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""volumefilling.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -32,116 +35,14 @@ import backtrader as bt
 
 
 class St(bt.Strategy):
-    """ """
-
-    params = (
-        ("stakeperc", 10.0),
-        ("opbreak", 10),
-    )
-
-    def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
-        print("-- NOTIFY ORDER BEGIN")
-        print(order)
-        print("-- NOTIFY ORDER END")
-        print("-- ORDER REMSIZE:", order.executed.remsize)
-
-        if order.status == order.Completed:
-            print("++ ORDER COMPLETED at data.len:", len(order.data))
-            self.doop = -self.p.opbreak
-
-    def __init__(self):
-        """ """
-
-    def start(self):
-        """ """
-        self.callcounter = 0
-        txtfields = list()
-        txtfields.append("Len")
-        txtfields.append("Datetime")
-        txtfields.append("Open")
-        txtfields.append("High")
-        txtfields.append("Low")
-        txtfields.append("Close")
-        txtfields.append("Volume")
-        txtfields.append("OpenInterest")
-        print(",".join(txtfields))
-
-        self.doop = 0
-
-    def next(self):
-        """ """
-        txtfields = list()
-        txtfields.append("%04d" % len(self))
-        txtfields.append(self.data0.datetime.date(0).isoformat())
-        txtfields.append("%.2f" % self.data0.open[0])
-        txtfields.append("%.2f" % self.data0.high[0])
-        txtfields.append("%.2f" % self.data0.low[0])
-        txtfields.append("%.2f" % self.data0.close[0])
-        txtfields.append("%.2f" % self.data0.volume[0])
-        txtfields.append("%.2f" % self.data0.openinterest[0])
-        print(",".join(txtfields))
-
-        # Single order
-        if self.doop == 0:
-            if not self.position.size:
-                stakevol = (self.data0.volume[0] * self.p.stakeperc) // 100
-                print("++ STAKE VOLUME:", stakevol)
-                self.buy(size=stakevol)
-
-            else:
-                self.close()
-
-        self.doop += 1
-
-
-FILLERS = {
-    "FixedSize": bt.broker.fillers.FixedSize,
-    "FixedBarPerc": bt.broker.fillers.FixedBarPerc,
-    "BarPointPerc": bt.broker.fillers.BarPointPerc,
-}
-
-
-def runstrat():
-    """ """
-    args = parse_args()
-
-    datakwargs = dict()
-    if args.fromdate:
-        fromdate = datetime.datetime.strptime(args.fromdate, "%Y-%m-%d")
-        datakwargs["fromdate"] = fromdate
-
-    if args.todate:
-        todate = datetime.datetime.strptime(args.todate, "%Y-%m-%d")
-        datakwargs["todate"] = todate
-
-    data = bt.feeds.BacktraderCSVData(dataname=args.data, **datakwargs)
-
-    cerebro = bt.Cerebro()
-    cerebro.adddata(data)
-
-    cerebro.broker.set_cash(args.cash)
-    if args.filler is not None:
-        fillerkwargs = dict()
-        if args.filler_args is not None:
-            fillerkwargs = eval("dict(" + args.filler_args + ")")
-
-        filler = FILLERS[args.filler](**fillerkwargs)
-        cerebro.broker.set_filler(filler)
-
-    cerebro.addstrategy(St, stakeperc=args.stakeperc, opbreak=args.opbreak)
-
-    cerebro.run()
-    if args.plot:
-        cerebro.plot(style="bar")
-
-
-def parse_args():
-    """ """
+""""""
+"""Args::
+    order:"""
+""""""
+""""""
+""""""
+""""""
+""""""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Volume Filling Sample",

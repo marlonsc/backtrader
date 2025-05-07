@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""flushfile.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -29,53 +32,16 @@ import sys
 
 
 class flushfile(object):
-    """ """
-
-    def __init__(self, f):
-        """
-
-        :param f:
-
-        """
-        self.f = f
-
-    def write(self, x):
-        """
-
-        :param x:
-
-        """
-        self.f.write(x)
-        self.f.flush()
-
-    def flush(self):
-        """ """
-        self.f.flush()
-
-
-if sys.platform == "win32":
-    sys.stdout = flushfile(sys.stdout)
-    sys.stderr = flushfile(sys.stderr)
-
-
-class StdOutDevNull(object):
-    """ """
-
-    def __init__(self):
-        """ """
-        self.stdout = sys.stdout
-        sys.stdout = self
-
-    def write(self, x):
-        """
-
-        :param x:
-
-        """
-
-    def flush(self):
-        """ """
-
-    def stop(self):
-        """ """
+""""""
+"""Args::
+    f:"""
+"""Args::
+    x:"""
+""""""
+""""""
+""""""
+"""Args::
+    x:"""
+""""""
+""""""
         sys.stdout = self.stdout

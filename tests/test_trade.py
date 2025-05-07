@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""test_trade.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -30,56 +33,34 @@ from backtrader import trade
 
 
 class FakeCommInfo(object):
-    """ """
-
-    def getvaluesize(self, size, price):
-        """
-
-        :param size:
-        :param price:
-
-        """
+""""""
+"""Args::
+    size: 
+    price:"""
+    price:"""
         return 0
 
     def profitandloss(self, size, price, newprice):
-        """
-
-        :param size:
-        :param price:
-        :param newprice:
-
-        """
+"""Args::
+    size: 
+    price: 
+    newprice:"""
+    newprice:"""
         return 0
 
 
 class FakeData(object):
-    """Minimal interface to avoid errors when trade tries to get information from
-    the data during the test
-
-
+"""Minimal interface to avoid errors when trade tries to get information from
+    the data during the test"""
     """
 
     def __len__(self):
-        """ """
-        return 0
-
-    @property
-    def datetime(self):
-        """ """
-        return [0.0]
-
-    @property
-    def close(self):
-        """ """
-        return [0.0]
-
-
-def test_run(main=False):
-    """
-
-    :param main:  (Default value = False)
-
-    """
+""""""
+""""""
+""""""
+"""Args::
+    main: (Default value = False)"""
+    main: (Default value = False)"""
     tr = trade.Trade(data=FakeData())
 
     order = bt.BuyOrder(

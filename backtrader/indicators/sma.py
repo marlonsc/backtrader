@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""sma.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -30,15 +33,10 @@ from . import Average, MovingAverageBase
 
 class MovingAverageSimple(MovingAverageBase):
     """Non-weighted average of the last n periods
-
-    Formula:
-      - movav = Sum(data, period) / period
-
-    See also:
-      - http://en.wikipedia.org/wiki/Moving_average#Simple_moving_average
-
-
-    """
+Formula:
+- movav = Sum(data, period) / period
+See also:
+- http://en.wikipedia.org/wiki/Moving_average#Simple_moving_average"""
 
     alias = (
         "SMA",
@@ -47,7 +45,7 @@ class MovingAverageSimple(MovingAverageBase):
     lines = ("sma",)
 
     def __init__(self):
-        """ """
+""""""
         # Before super to ensure mixins (right-hand side in subclassing)
         # can see the assignment operation and operate on the line
         self.lines[0] = Average(self.data, period=self.p.period)

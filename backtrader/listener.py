@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""listener.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 from __future__ import (
     absolute_import,
@@ -7,25 +10,25 @@ from __future__ import (
     unicode_literals,
 )
 
-import backtrader as bt
-from backtrader.utils.py3 import with_metaclass
+from .metabase import MetaParams
+from .utils.py3 import with_metaclass
 
 
-class ListenerBase(with_metaclass(bt.MetaParams, object)):
-    """ """
+class ListenerBase(with_metaclass(MetaParams, object)):
+"""Base class for event listeners in Backtrader. Subclass to implement
+    custom event handling logic. All docstrings and comments must be line-wrapped
+    at 90 characters or less."""
+    """
 
     def __init__(self):
-        """ """
+""""""
+""""""
+"""Called at the start of the run. Receives the Cerebro instance.
 
-    def next(self):
-        """ """
-
-    def start(self, cerebro):
-        """
-
-        :param cerebro:
-
-        """
+Args::
+    cerebro: The Cerebro engine instance."""
+    cerebro: The Cerebro engine instance."""
 
     def stop(self):
-        """ """
+""""""
+        pass  # Called at the end of the run. Override for cleanup logic.

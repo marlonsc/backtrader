@@ -1,103 +1,187 @@
-# Slim Backtrader
+# backtrader
 
-This is a fork of the original [backtrader](https://github.com/mementum/backtrader) - slimmed down.
-Unnecessary features and updating the package to ensure compatibility with newer Python versions and dependencies.
+Backtrader is a Python framework for backtesting and trading strategy development. It allows you to focus on writing reusable trading strategies, indicators and analyzers instead of having to spend time building infrastructure.
 
-Aims of this project:
+## Navigation
 
-- Slim down unnecessary features
-- Improve performance
-- Update aged implementations
+* [🏠 Root Directory](./README.md)
+* [⬆️ Parent Directory (workspace)](../README.md)
 
-For now the focus is:
+### Subdirectories
 
-- Code clean-up: remove unncessary imports
-- Syntax update: make it more modern
-- Remove deprecated integrations (i.e. pyfolio, IbPy, comtypes)
-- Remove interactive plotting: the backend is heavy and slow
-- Improved support for parallel processing
+* [Tutorials](Tutorials/README.md) - This directory contains various files including 1 md file, 1 py file
+* [arbitrage](arbitrage/README.md) - This directory contains various files including 17 py files, 1 txt file, 2 ipynb files, 1 md file
+* [backtest](backtest/README.md) - This directory contains various files including 1 txt file, 1 md file, 1 py file
+* [backtrader](backtrader/README.md) - This directory contains various files including 36 py files, 1 md file
+* [contrib](contrib/README.md) - This directory contains contributions from the Backtrader community, including additional tools, ...
+* [datas](datas/README.md) - This directory contains various files including 20 txt files, 4 csv files, 1 md file
+* [logs](logs/README.md) - This directory contains various files including 2 csv files, 1 md file
+* [outcome](outcome/README.md) - This directory contains various files including 7 csv files, 1 md file, 1 ipynb file
+* [prompts](prompts/README.md) - This directory contains various files including 3 md files
+* [qmtbt](qmtbt/README.md) - This directory contains various files including 5 py files, 1 md file
+* [reference](reference/README.md) - This directory contains various files including 1 txt file, 1 md file
+* [samples](samples/README.md) - This directory contains various files including 1 md file
+* [sandbox](sandbox/README.md) - This directory contains various files including 6 py files, 1 md file
+* [scripts](scripts/README.md) - This directory contains various files including 3 py files, 1 md file
+* [src](src/README.md) - This directory contains various files including 1 md file
+* [strategies](strategies/README.md) - This directory contains various files including 16 py files, 1 md file
+* [tests](tests/README.md) - This directory contains various files including 94 py files, 1 md file
+* [tools](tools/README.md) - This directory contains various files including 4 py files, 1 md file
+* [turtle](turtle/README.md) - This directory contains various files including 8 py files, 1 md file
+* [xtquant](xtquant/README.md) - This directory contains various files including 13 py files, 5 dll files, 1 md file, 1 ini file, ...
 
-This is an ongoing process that has just started and will hopefully bring life to an excellent project.
+## Files
 
-Feel free to contribute!
+### BackTrader_Multifactors_Backtesting_Framework.ipynb
 
----
+Jupyter notebook
 
-## Features
+### ENV.sh
 
-A Python-based platform for live trading and backtesting, featuring:
+Create Python virtual environment if it doesn't exist
 
-- **Live Data Feed and Trading**:
-  - Interactive Brokers (requires `IbPy`, significantly benefits from installed `pytz`)
-  - *Visual Chart* (requires fork of `comtypes` until pull request integration, benefits from `pytz`)
-  - *Oanda* (requires `oandapy`, REST API only – v20 streaming not supported)
+### LICENSE
 
-- **Data Sources**:
-  - CSV/files, online sources, or via *pandas* and *blaze*
+License file
 
-- **Data Management**:
-  - Filters (e.g., daily bars into intraday chunks, Renko bricks)
-  - Multiple data feeds and strategies supported
-  - Multiple simultaneous timeframes
-  - Integrated resampling and replaying capabilities
+### PLAN.md
 
-- **Backtesting Modes**:
-  - Step-by-step execution or all-at-once (strategy evaluation exception)
+Markdown documentation
 
-- **Indicators**:
-  - Extensive built-in indicators (full list available [here](http://www.backtrader.com/docu/indautoref.html))
-  - *TA-Lib* integration (requires Python *ta-lib*)
-  - Easy creation of custom indicators
+### PLANNING.md
 
-- **Analyzers and Utilities**:
-  - Built-in analyzers (e.g., TimeReturn, Sharpe Ratio, SQN)
-  - `pyfolio` integration (**deprecated**)
+Markdown documentation
 
-- **Broker Simulation**:
-  - Supports multiple order types: *Market*, *Close*, *Limit*, *Stop*, *StopLimit*, *StopTrail*, *StopTrailLimit*, *OCO*, bracket orders, slippage, volume filling strategies, continuous cash adjustments for futures-like instruments
+### README.rst
 
-- **Automated Staking**:
-  - Sizers for position sizing
+reStructuredText documentation
 
-- **Cheating Modes**:
-  - Cheat-on-Close
-  - Cheat-on-Open
+### __init__.py
 
-- **Schedulers and Calendars**
-- **Plotting** *(requires matplotlib)*
+__init__.py module.
 
----
+### agent.py
 
-## Installation
+agent.py module.
 
-Backtrader is self-contained with minimal external dependencies (plotting requires `matplotlib`).
+### changelog.txt
 
-Currently, the installation takes place by navigating to the clone of this repository and running:
+Change log file
 
-```shell script
-pip install -e
-```
+### create_readme_files.py
 
-## Python Compatibility
+Script to create README.md files for all directories in the repository.
 
-Works with:
+### demo.ipynb
 
-- Python version `>= 3.10`
+Jupyter notebook
 
-## Documentation
+### demo_origin.ipynb
 
-- **Original backtrader repository**: <https://github.com/mementum/backtrader>
-- **Blog**: [Backtrader Blog](http://www.backtrader.com/blog)
-- **Docs**: [Full Documentation](http://www.backtrader.com/docu)
-- **Indicators Reference**: [List of Built-in Indicators (122)](http://www.backtrader.com/docu/indautoref.html)
+Jupyter notebook
 
-## Version Numbering
+### enhance_documentation.py
 
-Follows format `X.Y.Z.I` where:
+Documentation Enhancement Script
 
-- `X`: Major version (stable, unless significant overhauls, e.g., numpy integration).
-- `Y`: Minor version (new features or incompatible API changes).
-- `Z`: Revision updates (documentation tweaks, minor changes, bug fixes).
-- `I`: Number of built-in indicators.
+### live_backtrader.py
 
----
+live_backtrader.py module.
+
+### my_backtrader.code-workspace
+
+Text file
+
+### poetry.lock
+
+Text file
+
+### pylint_head.txt
+
+Text file
+
+### pylint_report.txt
+
+Text file
+
+### pypi.sh
+
+Generate pypi wheels universal package and upload
+
+### pyproject.toml
+
+Python project configuration file
+
+### requirements-test.txt
+
+Text file
+
+### rez
+
+Text file
+
+### rsi_arbitrage_plot.png
+
+Binary file (png format)
+
+### sharpe_parameter_heatmap.png
+
+Binary file (png format)
+
+### sharpe_ratio_heatmap.png
+
+Binary file (png format)
+
+### sharpe_ratio_plot.png
+
+Binary file (png format)
+
+### skewness_plot.png
+
+Binary file (png format)
+
+### strategies.py
+
+strategies.py module.
+
+### test_feed.ipynb
+
+Jupyter notebook
+
+### the_backtradersold_setup.py
+
+the_backtradersold_setup.py module.
+
+### tox.ini
+
+Tox configuration file for Python testing
+
+### try.py
+
+try.py module.
+
+### update_readme.py
+
+README.md Generator Script
+
+### zscore_heatmap.png
+
+Binary file (png format)
+
+## Directory Summary
+
+This directory contains 34 files and 20 subdirectories.
+
+### File Types
+
+* .py: 9 files
+* .png: 6 files
+* .ipynb: 4 files
+* .txt: 4 files
+* .sh: 2 files
+* .md: 2 files
+* .rst: 1 files
+* .code-workspace: 1 files
+* .lock: 1 files
+* .toml: 1 files
+* .ini: 1 files

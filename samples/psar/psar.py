@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""psar.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -32,68 +35,14 @@ import backtrader as bt
 
 
 class St(bt.Strategy):
-    """ """
-
-    params = ()
-
-    def __init__(self):
-        """ """
-        self.psar = bt.ind.ParabolicSAR(period=20)
-
-    def next(self):
-        """ """
-        txt = ["{:4d}".format(len(self))]
-        txt.append("{}".format(self.datetime.date()))
-        txt.append("{:.2f}".format(self.psar[0]))
-        print(",".join(txt))
-
-
-def runstrat(args=None):
-    """
-
-    :param args: (Default value = None)
-
-    """
-    args = parse_args(args)
-
-    cerebro = bt.Cerebro()
-
-    # Data feed kwargs
-    kwargs = dict()
-
-    # Parse from/to-date
-    dtfmt, tmfmt = "%Y-%m-%d", "T%H:%M:%S"
-    for a, d in ((getattr(args, x), x) for x in ["fromdate", "todate"]):
-        if a:
-            strpfmt = dtfmt + tmfmt * ("T" in a)
-            kwargs[d] = datetime.datetime.strptime(a, strpfmt)
-
-    # Data feed
-    data0 = bt.feeds.BacktraderCSVData(dataname=args.data0, **kwargs)
-    cerebro.adddata(data0)
-
-    # Broker
-    cerebro.broker = bt.brokers.BackBroker(**eval("dict(" + args.broker + ")"))
-
-    # Sizer
-    cerebro.addsizer(bt.sizers.FixedSize, **eval("dict(" + args.sizer + ")"))
-
-    # Strategy
-    cerebro.addstrategy(St, **eval("dict(" + args.strat + ")"))
-
-    # Execute
-    cerebro.run(**eval("dict(" + args.cerebro + ")"))
-
-    if args.plot:  # Plot if requested to
-        cerebro.plot(**eval("dict(" + args.plot + ")"))
-
-
-def parse_args(pargs=None):
-    """
-
-    :param pargs: (Default value = None)
-
-    """
+""""""
+""""""
+""""""
+"""Args::
+    args: (Default value = None)"""
+"""Args::
+    pargs: (Default value = None)"""
+    pargs: (Default value = None)"""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Sample Skeleton",

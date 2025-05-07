@@ -1,4 +1,7 @@
-# LICENSE AGREEMENT FOR MATPLOTLIB 1.2.0
+"""multicursor.py module.
+
+Description of the module functionality."""
+
 # --------------------------------------
 #
 # 1. This LICENSE AGREEMENT is between John D. Hunter ("JDH"), and the
@@ -71,11 +74,11 @@ class Widget(object):
     _active = True
 
     def set_active(self, active):
-        """Set whether the widget is active.
+"""Set whether the widget is active.
 
-        :param active:
-
-        """
+Args::
+    active:"""
+    active:"""
         self._active = active
 
     def get_active(self):
@@ -90,45 +93,34 @@ class Widget(object):
     )
 
     def ignore(self, event):
-        """
+"""Args::
+    event: 
 
-        :param event:
-        :returns: This method (or a version of it) should be called at the beginning
-        of any event callback.
-
-        """
+Returns::
+    This method (or a version of it) should be called at the beginning"""
+    This method (or a version of it) should be called at the beginning"""
         return not self.active
 
 
 class MultiCursor(Widget):
     """Provide a vertical (default) and/or horizontal line cursor shared between
-    multiple axes.
-
-    For the cursor to remain responsive you much keep a reference to
-    it.
-
-    Example usage::
-
-        from matplotlib.widgets import MultiCursor
-        from pylab import figure, show, np
-
-        t = np.arange(0.0, 2.0, 0.01)
-        s1 = np.sin(2*np.pi*t)
-        s2 = np.sin(4*np.pi*t)
-        fig = figure()
-        ax1 = fig.add_subplot(211)
-        ax1.plot(t, s1)
-
-
-        ax2 = fig.add_subplot(212, sharex=ax1)
-        ax2.plot(t, s2)
-
-        multi = MultiCursor(fig.canvas, (ax1, ax2), color='r', lw=1,
-                            horizOn=False, vertOn=True)
-        show()
-
-
-    """
+multiple axes.
+For the cursor to remain responsive you much keep a reference to
+it.
+Example usage::
+from matplotlib.widgets import MultiCursor
+from pylab import figure, show, np
+t = np.arange(0.0, 2.0, 0.01)
+s1 = np.sin(2*np.pi*t)
+s2 = np.sin(4*np.pi*t)
+fig = figure()
+ax1 = fig.add_subplot(211)
+ax1.plot(t, s1)
+ax2 = fig.add_subplot(212, sharex=ax1)
+ax2.plot(t, s2)
+multi = MultiCursor(fig.canvas, (ax1, ax2), color='r', lw=1,
+horizOn=False, vertOn=True)
+show()"""
 
     def __init__(
         self,
@@ -143,20 +135,17 @@ class MultiCursor(Widget):
         vertShared=False,
         **lineprops,
     ):
-        """
-
-        :param canvas:
-        :param axes:
-        :param useblit:  (Default value = True)
-        :param horizOn:  (Default value = False)
-        :param vertOn:  (Default value = True)
-        :param horizMulti:  (Default value = False)
-        :param vertMulti:  (Default value = True)
-        :param horizShared:  (Default value = True)
-        :param vertShared:  (Default value = False)
-        :param **lineprops:
-
-        """
+"""Args::
+    canvas: 
+    axes: 
+    useblit: (Default value = True)
+    horizOn: (Default value = False)
+    vertOn: (Default value = True)
+    horizMulti: (Default value = False)
+    vertMulti: (Default value = True)
+    horizShared: (Default value = True)
+    vertShared: (Default value = False)"""
+    vertShared: (Default value = False)"""
 
         self.canvas = canvas
         self.axes = axes
@@ -212,11 +201,11 @@ class MultiCursor(Widget):
         self.canvas.mpl_disconnect(self._ciddraw)
 
     def clear(self, event):
-        """clear the cursor
+"""clear the cursor
 
-        :param event:
-
-        """
+Args::
+    event:"""
+    event:"""
         if self.ignore(event):
             return
         if self.useblit:
@@ -225,84 +214,28 @@ class MultiCursor(Widget):
             line.set_visible(False)
 
     def onmove(self, event):
-        """
-
-        :param event:
-
-        """
-        if self.ignore(event):
-            return
-        if event.inaxes is None:
-            return
-        if not self.canvas.widgetlock.available(self):
-            return
-        self.needclear = True
-        if not self.visible:
-            return
-        if self.vertOn:
-            for line in self.vlines:
-                visible = self.visible
-                if not self.vertMulti:
-                    visible = visible and line.axes == event.inaxes
-
-                if visible:
-                    line.set_xdata((event.xdata, event.xdata))
-                    line.set_visible(visible)
-        if self.horizOn:
-            for line in self.hlines:
-                visible = self.visible
-                if not self.horizMulti:
-                    visible = visible and line.axes == event.inaxes
-                if visible:
-                    line.set_ydata((event.ydata, event.ydata))
-                    line.set_visible(self.visible)
-        self._update(event)
-
-    def _update(self, event):
-        """
-
-        :param event:
-
-        """
-        if self.useblit:
-            if self.background is not None:
-                self.canvas.restore_region(self.background)
-            if self.vertOn:
-                for ax, line in zip(self.axes, self.vlines):
-                    if self.vertMulti or event.inaxes == line.axes:
-                        ax.draw_artist(line)
-
-            if self.horizOn:
-                for ax, line in zip(self.axes, self.hlines):
-                    if self.horizMulti or event.inaxes == line.axes:
-                        ax.draw_artist(line)
-            self.canvas.blit(self.canvas.figure.bbox)
-        else:
-            self.canvas.draw_idle()
-
-
-class MultiCursor2(Widget):
+"""Args::
+    event:"""
+"""Args::
+    event:"""
     """Provide a vertical (default) and/or horizontal line cursor shared between
-    multiple axes.
-    For the cursor to remain responsive you much keep a reference to
-    it.
-    Example usage::
-        from matplotlib.widgets import MultiCursor
-        from pylab import figure, show, np
-        t = np.arange(0.0, 2.0, 0.01)
-        s1 = np.sin(2*np.pi*t)
-        s2 = np.sin(4*np.pi*t)
-        fig = figure()
-        ax1 = fig.add_subplot(211)
-        ax1.plot(t, s1)
-        ax2 = fig.add_subplot(212, sharex=ax1)
-        ax2.plot(t, s2)
-        multi = MultiCursor(fig.canvas, (ax1, ax2), color='r', lw=1,
-                            horizOn=False, vertOn=True)
-        show()
-
-
-    """
+multiple axes.
+For the cursor to remain responsive you much keep a reference to
+it.
+Example usage::
+from matplotlib.widgets import MultiCursor
+from pylab import figure, show, np
+t = np.arange(0.0, 2.0, 0.01)
+s1 = np.sin(2*np.pi*t)
+s2 = np.sin(4*np.pi*t)
+fig = figure()
+ax1 = fig.add_subplot(211)
+ax1.plot(t, s1)
+ax2 = fig.add_subplot(212, sharex=ax1)
+ax2.plot(t, s2)
+multi = MultiCursor(fig.canvas, (ax1, ax2), color='r', lw=1,
+horizOn=False, vertOn=True)
+show()"""
 
     def __init__(
         self,
@@ -313,16 +246,13 @@ class MultiCursor2(Widget):
         vertOn=True,
         **lineprops,
     ):
-        """
-
-        :param canvas:
-        :param axes:
-        :param useblit:  (Default value = True)
-        :param horizOn:  (Default value = False)
-        :param vertOn:  (Default value = True)
-        :param **lineprops:
-
-        """
+"""Args::
+    canvas: 
+    axes: 
+    useblit: (Default value = True)
+    horizOn: (Default value = False)
+    vertOn: (Default value = True)"""
+    vertOn: (Default value = True)"""
 
         self.canvas = canvas
         self.axes = axes
@@ -368,11 +298,11 @@ class MultiCursor2(Widget):
         self.canvas.mpl_disconnect(self._ciddraw)
 
     def clear(self, event):
-        """clear the cursor
+"""clear the cursor
 
-        :param event:
-
-        """
+Args::
+    event:"""
+    event:"""
         if self.ignore(event):
             return
         if self.useblit:
@@ -381,39 +311,11 @@ class MultiCursor2(Widget):
             line.set_visible(False)
 
     def onmove(self, event):
-        """
-
-        :param event:
-
-        """
-        if self.ignore(event):
-            return
-        if event.inaxes is None:
-            return
-
-        if not self.canvas.widgetlock.available(self):
-            return
-        self.needclear = True
-        if not self.visible:
-            return
-        if self.vertOn:
-            for line in self.vlines:
-                visible = True or line.axes == event.inaxes
-                line.set_xdata((event.xdata, event.xdata))
-                line.set_visible(visible)
-        if self.horizOn:
-            for line in self.hlines:
-                visible = line.axes == event.inaxes
-                line.set_ydata((event.ydata, event.ydata))
-                line.set_visible(visible)
-        self._update(event)
-
-    def _update(self, event):
-        """
-
-        :param event:
-
-        """
+"""Args::
+    event:"""
+"""Args::
+    event:"""
+    event:"""
         if self.useblit:
             if self.background is not None:
                 self.canvas.restore_region(self.background)

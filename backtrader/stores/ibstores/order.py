@@ -13,11 +13,7 @@ from .util import UNSET_DOUBLE, UNSET_INTEGER, dataclassNonDefaults
 @dataclass
 class Order:
     """Order for trading contracts.
-
-    https://interactivebrokers.github.io/tws-api/available_orders.html
-
-
-    """
+https://interactivebrokers.github.io/tws-api/available_orders.html"""
 
     orderId: int = 0
     clientId: int = 0
@@ -160,46 +156,16 @@ class Order:
     midOffsetAtHalf: float = UNSET_DOUBLE
 
     def __repr__(self):
-        """ """
-        attrs = dataclassNonDefaults(self)
-        if self.__class__ is not Order:
-            attrs.pop("orderType", None)
-        if not self.softDollarTier:
-            attrs.pop("softDollarTier")
-        clsName = self.__class__.__qualname__
-        kwargs = ", ".join(f"{k}={v!r}" for k, v in attrs.items())
-        return f"{clsName}({kwargs})"
-
-    __str__ = __repr__
-
-    def __eq__(self, other):
-        """
-
-        :param other:
-
-        """
-        return self is other
-
-    def __hash__(self):
-        """ """
-        return id(self)
-
-
-class LimitOrder(Order):
-    """ """
-
-    def __init__(self, action: str, totalQuantity: float, lmtPrice: float, **kwargs):
-        """
-
-        :param action:
-        :type action: str
-        :param totalQuantity:
-        :type totalQuantity: float
-        :param lmtPrice:
-        :type lmtPrice: float
-        :param **kwargs:
-
-        """
+""""""
+"""Args::
+    other:"""
+""""""
+""""""
+"""Args::
+    action: 
+    totalQuantity: 
+    lmtPrice:"""
+    lmtPrice:"""
         Order.__init__(
             self,
             orderType="LMT",
@@ -211,18 +177,11 @@ class LimitOrder(Order):
 
 
 class MarketOrder(Order):
-    """ """
-
-    def __init__(self, action: str, totalQuantity: float, **kwargs):
-        """
-
-        :param action:
-        :type action: str
-        :param totalQuantity:
-        :type totalQuantity: float
-        :param **kwargs:
-
-        """
+""""""
+"""Args::
+    action: 
+    totalQuantity:"""
+    totalQuantity:"""
         Order.__init__(
             self,
             orderType="MKT",
@@ -233,20 +192,12 @@ class MarketOrder(Order):
 
 
 class StopOrder(Order):
-    """ """
-
-    def __init__(self, action: str, totalQuantity: float, stopPrice: float, **kwargs):
-        """
-
-        :param action:
-        :type action: str
-        :param totalQuantity:
-        :type totalQuantity: float
-        :param stopPrice:
-        :type stopPrice: float
-        :param **kwargs:
-
-        """
+""""""
+"""Args::
+    action: 
+    totalQuantity: 
+    stopPrice:"""
+    stopPrice:"""
         Order.__init__(
             self,
             orderType="STP",
@@ -258,29 +209,13 @@ class StopOrder(Order):
 
 
 class StopLimitOrder(Order):
-    """ """
-
-    def __init__(
-        self,
-        action: str,
-        totalQuantity: float,
-        lmtPrice: float,
-        stopPrice: float,
-        **kwargs,
-    ):
-        """
-
-        :param action:
-        :type action: str
-        :param totalQuantity:
-        :type totalQuantity: float
-        :param lmtPrice:
-        :type lmtPrice: float
-        :param stopPrice:
-        :type stopPrice: float
-        :param **kwargs:
-
-        """
+""""""
+"""Args::
+    action: 
+    totalQuantity: 
+    lmtPrice: 
+    stopPrice:"""
+    stopPrice:"""
         Order.__init__(
             self,
             orderType="STP LMT",
@@ -294,84 +229,19 @@ class StopLimitOrder(Order):
 
 @dataclass
 class OrderStatus:
-    """ """
-
-    orderId: int = 0
-    status: str = ""
-    filled: float = 0.0
-    remaining: float = 0.0
-    avgFillPrice: float = 0.0
-    permId: int = 0
-    parentId: int = 0
-    lastFillPrice: float = 0.0
-    clientId: int = 0
-    whyHeld: str = ""
-    mktCapPrice: float = 0.0
-
-    PendingSubmit: ClassVar[str] = "PendingSubmit"
-    PendingCancel: ClassVar[str] = "PendingCancel"
-    PreSubmitted: ClassVar[str] = "PreSubmitted"
-    Submitted: ClassVar[str] = "Submitted"
-    ApiPending: ClassVar[str] = "ApiPending"
-    ApiCancelled: ClassVar[str] = "ApiCancelled"
-    Cancelled: ClassVar[str] = "Cancelled"
-    Filled: ClassVar[str] = "Filled"
-    Inactive: ClassVar[str] = "Inactive"
-
-    DoneStates: ClassVar[FrozenSet[str]] = frozenset(
-        ["Filled", "Cancelled", "ApiCancelled"]
-    )
-    ActiveStates: ClassVar[FrozenSet[str]] = frozenset(
-        ["PendingSubmit", "ApiPending", "PreSubmitted", "Submitted"]
-    )
-
-
-@dataclass
-class OrderState:
-    """ """
-
-    status: str = ""
-    initMarginBefore: str = ""
-    maintMarginBefore: str = ""
-    equityWithLoanBefore: str = ""
-    initMarginChange: str = ""
-    maintMarginChange: str = ""
-    equityWithLoanChange: str = ""
-    initMarginAfter: str = ""
-    maintMarginAfter: str = ""
-    equityWithLoanAfter: str = ""
-    commission: float = UNSET_DOUBLE
-    minCommission: float = UNSET_DOUBLE
-    maxCommission: float = UNSET_DOUBLE
-    commissionCurrency: str = ""
-    warningText: str = ""
-    completedTime: str = ""
-    completedStatus: str = ""
-
-
-@dataclass
-class OrderComboLeg:
-    """ """
-
-    price: float = UNSET_DOUBLE
-
-
-@dataclass
-class Trade:
+""""""
+""""""
+""""""
     """Trade keeps track of an order, its status and all its fills.
-
-    Events:
-        * ``statusEvent`` (trade: :class:`.Trade`)
-        * ``modifyEvent`` (trade: :class:`.Trade`)
-        * ``fillEvent`` (trade: :class:`.Trade`, fill: :class:`.Fill`)
-        * ``commissionReportEvent`` (trade: :class:`.Trade`,
-          fill: :class:`.Fill`, commissionReport: :class:`.CommissionReport`)
-        * ``filledEvent`` (trade: :class:`.Trade`)
-        * ``cancelEvent`` (trade: :class:`.Trade`)
-        * ``cancelledEvent`` (trade: :class:`.Trade`)
-
-
-    """
+Events:
+* ``statusEvent`` (trade: :class:`.Trade`)
+* ``modifyEvent`` (trade: :class:`.Trade`)
+* ``fillEvent`` (trade: :class:`.Trade`, fill: :class:`.Fill`)
+* ``commissionReportEvent`` (trade: :class:`.Trade`,
+fill: :class:`.Fill`, commissionReport: :class:`.CommissionReport`)
+* ``filledEvent`` (trade: :class:`.Trade`)
+* ``cancelEvent`` (trade: :class:`.Trade`)
+* ``cancelledEvent`` (trade: :class:`.Trade`)"""
 
     contract: Contract = field(default_factory=Contract)
     order: Order = field(default_factory=Order)
@@ -391,40 +261,19 @@ class Trade:
     )
 
     def __post_init__(self):
-        """ """
-        self.statusEvent = Event("statusEvent")
-        self.modifyEvent = Event("modifyEvent")
-        self.fillEvent = Event("fillEvent")
-        self.commissionReportEvent = Event("commissionReportEvent")
-        self.filledEvent = Event("filledEvent")
-        self.cancelEvent = Event("cancelEvent")
-        self.cancelledEvent = Event("cancelledEvent")
-
-    def isActive(self) -> bool:
+""""""
         """True if eligible for execution, false otherwise.
-
-
-        :rtype: bool
-
-        """
+:rtype: bool"""
         return self.orderStatus.status in OrderStatus.ActiveStates
 
     def isDone(self) -> bool:
         """True if completely filled or cancelled, false otherwise.
-
-
-        :rtype: bool
-
-        """
+:rtype: bool"""
         return self.orderStatus.status in OrderStatus.DoneStates
 
     def filled(self) -> float:
         """Number of shares filled.
-
-
-        :rtype: float
-
-        """
+:rtype: float"""
         fills = self.fills
         if self.contract.secType == "BAG":
             # don't count fills for the leg contracts
@@ -433,113 +282,23 @@ class Trade:
 
     def remaining(self) -> float:
         """Number of shares remaining to be filled.
-
-
-        :rtype: float
-
-        """
+:rtype: float"""
         return self.order.totalQuantity - self.filled()
 
 
 class BracketOrder(NamedTuple):
-    """ """
-
-    parent: Order
-    takeProfit: Order
-    stopLoss: Order
-
-
-@dataclass
-class OrderCondition:
-    """ """
-
-    @staticmethod
-    def createClass(condType):
-        """
-
-        :param condType:
-
-        """
-        d = {
-            1: PriceCondition,
-            3: TimeCondition,
-            4: MarginCondition,
-            5: ExecutionCondition,
-            6: VolumeCondition,
-            7: PercentChangeCondition,
-        }
-        return d[condType]
-
-    def And(self):
-        """ """
-        self.conjunction = "a"
-        return self
-
-    def Or(self):
-        """ """
-        self.conjunction = "o"
-        return self
-
-
-@dataclass
-class PriceCondition(OrderCondition):
-    """ """
-
-    condType: int = 1
-    conjunction: str = "a"
-    isMore: bool = True
-    price: float = 0.0
-    conId: int = 0
-    exch: str = ""
-    triggerMethod: int = 0
-
-
-@dataclass
-class TimeCondition(OrderCondition):
-    """ """
-
-    condType: int = 3
-    conjunction: str = "a"
-    isMore: bool = True
-    time: str = ""
-
-
-@dataclass
-class MarginCondition(OrderCondition):
-    """ """
-
-    condType: int = 4
-    conjunction: str = "a"
-    isMore: bool = True
-    percent: int = 0
-
-
-@dataclass
-class ExecutionCondition(OrderCondition):
-    """ """
-
-    condType: int = 5
-    conjunction: str = "a"
-    secType: str = ""
-    exch: str = ""
-    symbol: str = ""
-
-
-@dataclass
-class VolumeCondition(OrderCondition):
-    """ """
-
-    condType: int = 6
-    conjunction: str = "a"
-    isMore: bool = True
-    volume: int = 0
-    conId: int = 0
-    exch: str = ""
-
-
-@dataclass
-class PercentChangeCondition(OrderCondition):
-    """ """
+""""""
+""""""
+"""Args::
+    condType:"""
+""""""
+""""""
+""""""
+""""""
+""""""
+""""""
+""""""
+""""""
 
     condType: int = 7
     conjunction: str = "a"

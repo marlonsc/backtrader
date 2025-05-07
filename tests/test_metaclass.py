@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""test_metaclass.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -22,27 +25,20 @@ import testcommon
 
 
 class TestFrompackages(testcommon.SampleParamsHolder):
-    """This class is used for testing that inheriting from base class that
+"""This class is used for testing that inheriting from base class that
     uses `frompackages` import mechanism, doesnt brake the functionality
-    of the base class.
-
-
+    of the base class."""
     """
 
     def __init__(self):
-        """ """
-        super(TestFrompackages, self).__init__()
-        # Prepare the lags array
+""""""
+"""Instantiate the TestFrompackages and see that no exception is raised
+Bug Discussion:
+https://community.backtrader.com/topic/2661/frompackages-directive-functionality-seems-to-be-broken-when-using-inheritance
 
-
-def test_run(main=False):
-    """Instantiate the TestFrompackages and see that no exception is raised
-    Bug Discussion:
-    https://community.backtrader.com/topic/2661/frompackages-directive-functionality-seems-to-be-broken-when-using-inheritance
-
-    :param main: (Default value = False)
-
-    """
+Args::
+    main: (Default value = False)"""
+    main: (Default value = False)"""
     TestFrompackages()
 
 

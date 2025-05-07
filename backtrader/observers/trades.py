@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""trades.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -33,14 +36,10 @@ from ..utils.py3 import with_metaclass
 
 class Trades(Observer):
     """This observer keeps track of full trades and plot the PnL level achieved
-    when a trade is closed.
-
-    A trade is open when a position goes from 0 (or crossing over 0) to X and
-    is then closed when it goes back to 0 (or crosses over 0 in the opposite
-    direction)
-
-
-    """
+when a trade is closed.
+A trade is open when a position goes from 0 (or crossing over 0) to X and
+is then closed when it goes back to 0 (or crosses over 0 in the opposite
+direction)"""
 
     _stclock = True
 
@@ -76,58 +75,10 @@ class Trades(Observer):
     )
 
     def __init__(self):
-        """ """
-
-        self.trades = 0
-
-        self.trades_long = 0
-        self.trades_short = 0
-
-        self.trades_plus = 0
-        self.trades_minus = 0
-
-        self.trades_plus_gross = 0
-        self.trades_minus_gross = 0
-
-        self.trades_win = 0
-        self.trades_win_max = 0
-        self.trades_win_min = 0
-
-        self.trades_loss = 0
-        self.trades_loss_max = 0
-        self.trades_loss_min = 0
-
-        self.trades_length = 0
-        self.trades_length_max = 0
-        self.trades_length_min = 0
-
-    def next(self):
-        """ """
-        for trade in self._owner._tradespending:
-            if trade.data not in self.ddatas:
-                continue
-
-            if not trade.isclosed:
-                continue
-
-            pnl = trade.pnlcomm if self.p.pnlcomm else trade.pnl
-
-            if pnl >= 0.0:
-                self.lines.pnlplus[0] = pnl
-            else:
-                self.lines.pnlminus[0] = pnl
-
-
-class MetaDataTrades(Observer.__class__):
-    """ """
-
-    def donew(cls, *args, **kwargs):
-        """
-
-        :param *args:
-        :param **kwargs:
-
-        """
+""""""
+""""""
+""""""
+        """"""
         _obj, args, kwargs = super(MetaDataTrades, cls).donew(*args, **kwargs)
 
         # Recreate the lines dynamically
@@ -207,18 +158,8 @@ class MetaDataTrades(Observer.__class__):
 
 
 class DataTrades(with_metaclass(MetaDataTrades, Observer)):
-    """ """
-
-    _stclock = True
-
-    params = (("usenames", True),)
-
-    plotinfo = dict(plot=True, subplot=True, plothlines=[0.0], plotymargin=0.10)
-
-    plotlines = dict()
-
-    def next(self):
-        """ """
+""""""
+""""""
         for trade in self._owner._tradespending:
             if trade.data not in self.ddatas:
                 continue

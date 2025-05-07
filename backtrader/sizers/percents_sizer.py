@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""percents_sizer.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -39,17 +42,13 @@ class PercentSizer(bt.Sizer):
     )
 
     def __init__(self):
-        """ """
-
-    def _getsizing(self, comminfo, cash, data, isbuy):
-        """
-
-        :param comminfo:
-        :param cash:
-        :param data:
-        :param isbuy:
-
-        """
+""""""
+"""Args::
+    comminfo: 
+    cash: 
+    data: 
+    isbuy:"""
+    isbuy:"""
         position = self.broker.getposition(data)
         if not position:
             size = cash / data.close[0] * (self.params.percents / 100)
@@ -69,10 +68,8 @@ class AllInSizer(PercentSizer):
 
 
 class PercentSizerInt(PercentSizer):
-    """This sizer return percents of available cash in form of size truncated
-    to an int
-
-
+"""This sizer return percents of available cash in form of size truncated
+    to an int"""
     """
 
     # return an int size or rather the float value
@@ -80,10 +77,8 @@ class PercentSizerInt(PercentSizer):
 
 
 class AllInSizerInt(PercentSizerInt):
-    """This sizer return all available cash of broker with the
-    size truncated to an int
-
-
+"""This sizer return all available cash of broker with the
+    size truncated to an int"""
     """
 
     params = (("percents", 100),)

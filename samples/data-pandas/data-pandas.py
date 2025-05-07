@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""data-pandas.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -32,54 +35,8 @@ import pandas
 
 
 def runstrat():
-    """ """
-    args = parse_args()
-
-    # Create a cerebro entity
-    cerebro = bt.Cerebro(stdstats=False)
-
-    # Add a strategy
-    cerebro.addstrategy(bt.Strategy)
-
-    # Get a pandas dataframe
-    datapath = "../../datas/2006-day-001.txt"
-
-    # Simulate the header row isn't there if noheaders requested
-    skiprows = 1 if args.noheaders else 0
-    header = None if args.noheaders else 0
-
-    dataframe = pandas.read_csv(
-        datapath,
-        skiprows=skiprows,
-        header=header,
-        # parse_dates=[0],
-        parse_dates=True,
-        index_col=0,
-    )
-
-    if not args.noprint:
-        print("--------------------------------------------------")
-        print(dataframe)
-        print("--------------------------------------------------")
-
-    # Pass it to the backtrader datafeed and add it to the cerebro
-    data = bt.feeds.PandasData(
-        dataname=dataframe,
-        # datetime='Date',
-        nocase=True,
-    )
-
-    cerebro.adddata(data)
-
-    # Run over everything
-    cerebro.run()
-
-    # Plot the result
-    cerebro.plot(style="bar")
-
-
-def parse_args():
-    """ """
+""""""
+""""""
     parser = argparse.ArgumentParser(description="Pandas test script")
 
     parser.add_argument(

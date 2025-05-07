@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""vcbroker.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -38,52 +41,43 @@ from backtrader.utils.py3 import with_metaclass
 
 class VCCommInfo(CommInfoBase):
     """Commissions are calculated by ib, but the trades calculations in the
-    ```Strategy`` rely on the order carrying a CommInfo object attached for the
-    calculation of the operation cost and value.
-
-    These are non-critical informations, but removing them from the trade could
-    break existing usage and it is better to provide a CommInfo objet which
-    enables those calculations even if with approvimate values.
-
-    The margin calculation is not a known in advance information with IB
-    (margin impact can be gotten from OrderState objects) and therefore it is
-    left as future exercise to get it
-
-
-    """
+```Strategy`` rely on the order carrying a CommInfo object attached for the
+calculation of the operation cost and value.
+These are non-critical informations, but removing them from the trade could
+break existing usage and it is better to provide a CommInfo objet which
+enables those calculations even if with approvimate values.
+The margin calculation is not a known in advance information with IB
+(margin impact can be gotten from OrderState objects) and therefore it is
+left as future exercise to get it"""
 
     def getvaluesize(self, size, price):
-        """
-
-        :param size:
-        :param price:
-
-        """
+"""Args::
+    size: 
+    price:"""
+    price:"""
         # In real life the margin approaches the price
         return abs(size) * price
 
     def getoperationcost(self, size, price):
-        """Returns the needed amount of cash an operation would cost
+"""Returns the needed amount of cash an operation would cost
 
-        :param size:
-        :param price:
-
-        """
+Args::
+    size: 
+    price:"""
+    price:"""
         # Same reasoning as above
         return abs(size) * price
 
 
 class MetaVCBroker(BrokerBase.__class__):
-    """ """
+""""""
+"""Class has already been created ... register
 
-    def __init__(cls, name, bases, dct):
-        """Class has already been created ... register
-
-        :param name:
-        :param bases:
-        :param dct:
-
-        """
+Args::
+    name: 
+    bases: 
+    dct:"""
+    dct:"""
         # Initialize the class
         super(MetaVCBroker, cls).__init__(name, bases, dct)
         vcstore.VCStore.BrokerCls = cls
@@ -91,12 +85,8 @@ class MetaVCBroker(BrokerBase.__class__):
 
 class VCBroker(with_metaclass(MetaVCBroker, BrokerBase)):
     """Broker implementation for VisualChart.
-
-    This class maps the orders/positions from VisualChart to the
-    internal API of ``backtrader``.
-
-
-    """
+This class maps the orders/positions from VisualChart to the
+internal API of ``backtrader``."""
 
     params = (
         ("account", None),
@@ -104,11 +94,7 @@ class VCBroker(with_metaclass(MetaVCBroker, BrokerBase)):
     )
 
     def __init__(self, **kwargs):
-        """
-
-        :param **kwargs:
-
-        """
+        """"""
         super(VCBroker, self).__init__()
 
         self.store = vcstore.VCStore(**kwargs)
@@ -161,51 +147,19 @@ class VCBroker(with_metaclass(MetaVCBroker, BrokerBase)):
         )
 
     def start(self):
-        """ """
-        super(VCBroker, self).start()
-        self.store.start(broker=self)
-
-    def stop(self):
-        """ """
-        super(VCBroker, self).stop()
-        self.store.stop()
-
-    def getcash(self):
-        """ """
-        # This call cannot block if no answer is available from ib
-        return self.cash
-
-    def getvalue(self, datas=None):
-        """
-
-        :param datas:  (Default value = None)
-
-        """
-        return self.value
-
-    def get_notification(self):
-        """ """
-        return self.notifs.popleft()  # at leat a None is present
-
-    def notify(self, order):
-        """
-
-        :param order:
-
-        """
-        self.notifs.append(order.clone())
-
-    def next(self):
-        """ """
-        self.notifs.append(None)  # mark notificatino boundary
-
-    def getposition(self, data, clone=True):
-        """
-
-        :param data:
-        :param clone:  (Default value = True)
-
-        """
+""""""
+""""""
+""""""
+"""Args::
+    datas: (Default value = None)"""
+""""""
+"""Args::
+    order:"""
+""""""
+"""Args::
+    data: 
+    clone: (Default value = True)"""
+    clone: (Default value = True)"""
         with self._lock_pos:
             pos = self.positions[data._tradename]
             if clone:
@@ -214,49 +168,19 @@ class VCBroker(with_metaclass(MetaVCBroker, BrokerBase)):
         return pos
 
     def getcommissioninfo(self, data):
-        """
-
-        :param data:
-
-        """
-        if data._tradename in self.comminfo:
-            return self.comminfo[data._tradename]
-
-        comminfo = self.comminfo[None]
-        if comminfo is not None:
-            return comminfo
-
-        stocklike = data._syminfo.Type in self._futlikes
-
-        return VCCommInfo(mult=data._syminfo.PointValue, stocklike=stocklike)
-
-    def _makeorder(
-        self,
-        ordtype,
-        owner,
-        data,
-        size,
-        price=None,
-        plimit=None,
-        exectype=None,
-        valid=None,
-        tradeid=0,
-        **kwargs,
-    ):
-        """
-
-        :param ordtype:
-        :param owner:
-        :param data:
-        :param size:
-        :param price:  (Default value = None)
-        :param plimit:  (Default value = None)
-        :param exectype:  (Default value = None)
-        :param valid:  (Default value = None)
-        :param tradeid:  (Default value = 0)
-        :param **kwargs:
-
-        """
+"""Args::
+    data:"""
+"""Args::
+    ordtype: 
+    owner: 
+    data: 
+    size: 
+    price: (Default value = None)
+    plimit: (Default value = None)
+    exectype: (Default value = None)
+    valid: (Default value = None)
+    tradeid: (Default value = 0)"""
+    tradeid: (Default value = 0)"""
 
         order = self.store.vcctmod.Order()
         order.Account = self._acc_name
@@ -319,12 +243,10 @@ class VCBroker(with_metaclass(MetaVCBroker, BrokerBase)):
         return order
 
     def submit(self, order, vcorder):
-        """
-
-        :param order:
-        :param vcorder:
-
-        """
+"""Args::
+    order: 
+    vcorder:"""
+    vcorder:"""
         order.submit(self)
 
         vco = vcorder
@@ -361,19 +283,16 @@ class VCBroker(with_metaclass(MetaVCBroker, BrokerBase)):
         tradeid=0,
         **kwargs,
     ):
-        """
-
-        :param owner:
-        :param data:
-        :param size:
-        :param price:  (Default value = None)
-        :param plimit:  (Default value = None)
-        :param exectype:  (Default value = None)
-        :param valid:  (Default value = None)
-        :param tradeid:  (Default value = 0)
-        :param **kwargs:
-
-        """
+"""Args::
+    owner: 
+    data: 
+    size: 
+    price: (Default value = None)
+    plimit: (Default value = None)
+    exectype: (Default value = None)
+    valid: (Default value = None)
+    tradeid: (Default value = 0)"""
+    tradeid: (Default value = 0)"""
 
         order = BuyOrder(
             owner=owner,
@@ -415,19 +334,16 @@ class VCBroker(with_metaclass(MetaVCBroker, BrokerBase)):
         tradeid=0,
         **kwargs,
     ):
-        """
-
-        :param owner:
-        :param data:
-        :param size:
-        :param price:  (Default value = None)
-        :param plimit:  (Default value = None)
-        :param exectype:  (Default value = None)
-        :param valid:  (Default value = None)
-        :param tradeid:  (Default value = 0)
-        :param **kwargs:
-
-        """
+"""Args::
+    owner: 
+    data: 
+    size: 
+    price: (Default value = None)
+    plimit: (Default value = None)
+    exectype: (Default value = None)
+    valid: (Default value = None)
+    tradeid: (Default value = 0)"""
+    tradeid: (Default value = 0)"""
 
         order = SellOrder(
             owner=owner,
@@ -461,87 +377,22 @@ class VCBroker(with_metaclass(MetaVCBroker, BrokerBase)):
     # COM Events implementation
     #
     def __call__(self, trader):
-        """
-
-        :param trader:
-
-        """
-        # Called to start the process, call in sub-thread. only the passed
-        # trader can be used in the thread
-        self.trader = trader
-
-        for acc in trader.Accounts:
-            if self.p.account is None or self.p.account == acc.Account:
-                self.startingcash = self.cash = acc.Balance.Cash
-                self.startingvalue = self.value = acc.Balance.NetWorth
-                self._acc_name = acc.Account
-                break  # found the account
-
-        return self
-
-    def OnChangedBalance(self, Account):
-        """
-
-        :param Account:
-
-        """
-        if self._acc_name is None or self._acc_name != Account:
-            return  # skip notifs for other accounts
-
-        for acc in self.trader.Accounts:
-            if acc.Account == Account:
-                # Update store values
-                self.cash = acc.Balance.Cash
-                self.value = acc.Balance.NetWorth
-                break
-
-    def OnModifiedOrder(self, Order):
-        """
-
-        :param Order:
-
-        """
-        # We are not expecting this: unless backtrader starts implementing
-        # modify order method
-
-    def OnCancelledOrder(self, Order):
-        """
-
-        :param Order:
-
-        """
-        with self._lock_orders:
-            try:
-                border = self.orderbyid[Order.OrderId]
-            except KeyError:
-                return  # possibly external order
-
-        border.cancel()
-        self.notify(border)
-
-    def OnTotalExecutedOrder(self, Order):
-        """
-
-        :param Order:
-
-        """
-        self.OnExecutedOrder(Order, partial=False)
-
-    def OnPartialExecutedOrder(self, Order):
-        """
-
-        :param Order:
-
-        """
-        self.OnExecutedOrder(Order, partial=True)
-
-    def OnExecutedOrder(self, Order, partial):
-        """
-
-        :param Order:
-        :param partial:
-
-        """
+"""Args::
+    trader:"""
+"""Args::
+    Account:"""
+"""Args::
+    Order:"""
+"""Args::
+    Order:"""
+"""Args::
+    Order:"""
+"""Args::
+    Order:"""
+"""Args::
+    Order: 
+    partial:"""
+    partial:"""
         with self._lock_orders:
             try:
                 border = self.orderbyid[Order.OrderId]
@@ -594,56 +445,17 @@ class VCBroker(with_metaclass(MetaVCBroker, BrokerBase)):
         self.notify(border)
 
     def OnOrderInMarket(self, Order):
-        """
-
-        :param Order:
-
-        """
-        # Other is in ther market ... therefore "accepted"
-        with self._lock_orders:
-            try:
-                border = self.orderbyid[Order.OrderId]
-            except KeyError:
-                return  # possibly external order
-
-        border.accept()
-        self.notify(border)
-
-    def OnNewOrderLocation(self, Order):
-        """
-
-        :param Order:
-
-        """
-        # Can be used for "submitted", but the status is set manually
-
-    def OnChangedOpenPositions(self, Account):
-        """
-
-        :param Account:
-
-        """
-        # This would be useful if it reported a position moving back to 0. In
-        # this case the report contains a no-position and this doesn't help in
-        # the accounting. That's why the accounting is delegated to the
-        # reception of order execution
-
-    def OnNewClosedOperations(self, Account):
-        """
-
-        :param Account:
-
-        """
-        # This call-back has not been seen
-
-    def OnServerShutDown(self):
-        """ """
-
-    def OnInternalEvent(self, p1, p2, p3):
-        """
-
-        :param p1:
-        :param p2:
-        :param p3:
-
-        """
+"""Args::
+    Order:"""
+"""Args::
+    Order:"""
+"""Args::
+    Account:"""
+"""Args::
+    Account:"""
+""""""
+"""Args::
+    p1: 
+    p2: 
+    p3:"""
+    p3:"""

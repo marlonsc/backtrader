@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""ibstore.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -46,28 +49,11 @@ bytes = bstr  # py2/3 need for ibpy
 
 
 def _ts2dt(tstamp=None):
-    """
-
-    :param tstamp:  (Default value = None)
-
-    """
-    # Transforms a RTVolume timestamp to a datetime object
-    if not tstamp:
-        return datetime.utcnow()
-
-    sec, msec = divmod(long(tstamp), 1000)
-    usec = msec * 1000
-    return datetime.utcfromtimestamp(sec).replace(microsecond=usec)
-
-
-class RTVolume(object):
+"""Args::
+    tstamp: (Default value = None)"""
     """Parses a tickString tickType 48 (RTVolume) event from the IB API into its
-    constituent fields
-
-    Supports using a "price" to simulate an RTVolume from a tickPrice event
-
-
-    """
+constituent fields
+Supports using a "price" to simulate an RTVolume from a tickPrice event"""
 
     _fields = [
         ("price", float),
@@ -79,13 +65,11 @@ class RTVolume(object):
     ]
 
     def __init__(self, rtvol="", price=None, tmoffset=None):
-        """
-
-        :param rtvol:  (Default value = "")
-        :param price:  (Default value = None)
-        :param tmoffset:  (Default value = None)
-
-        """
+"""Args::
+    rtvol: (Default value = "")
+    price: (Default value = None)
+    tmoffset: (Default value = None)"""
+    tmoffset: (Default value = None)"""
         # Use a provided string or simulate a list of empty tokens
         tokens = iter(rtvol.split(";"))
 
@@ -105,23 +89,16 @@ class MetaSingleton(MetaParams):
     """Metaclass to make a metaclassed class a singleton"""
 
     def __init__(cls, name, bases, dct):
-        """
-
-        :param name:
-        :param bases:
-        :param dct:
-
-        """
+"""Args::
+    name: 
+    bases: 
+    dct:"""
+    dct:"""
         super(MetaSingleton, cls).__init__(name, bases, dct)
         cls._singleton = None
 
     def __call__(cls, *args, **kwargs):
-        """
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """"""
         if cls._singleton is None:
             cls._singleton = super(MetaSingleton, cls).__call__(*args, **kwargs)
 
@@ -130,23 +107,11 @@ class MetaSingleton(MetaParams):
 
 # Decorator to mark methods to register with ib.opt
 def ibregister(f):
-    """
-
-    :param f:
-
-    """
-    f._ibregister = True
-    return f
-
-
-class IBStore(with_metaclass(MetaSingleton, object)):
+"""Args::
+    f:"""
     """Singleton class wrapping an ibpy ibConnection instance.
-
-    The parameters can also be specified in the classes which use this store,
-    like ``IBData`` and ``IBBroker``
-
-
-    """
+The parameters can also be specified in the classes which use this store,
+like ``IBData`` and ``IBBroker``"""
 
     # Set a base for the data requests (historical/realtime) to distinguish the
     # id in the error notifications from orders, where the basis (usually
@@ -171,144 +136,24 @@ class IBStore(with_metaclass(MetaSingleton, object)):
 
     @classmethod
     def getdata(cls, *args, **kwargs):
-        """Returns ``DataCls`` with args, kwargs
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Returns ``DataCls`` with args, kwargs"""
         return cls.DataCls(*args, **kwargs)
 
     @classmethod
     def getbroker(cls, *args, **kwargs):
-        """Returns broker with *args, **kwargs from registered ``BrokerCls``
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Returns broker with *args, **kwargs from registered ``BrokerCls``"""
         return cls.BrokerCls(*args, **kwargs)
 
     def __init__(self):
-        """ """
-        super(IBStore, self).__init__()
-
-        self._lock_q = threading.Lock()  # sync access to _tickerId/Queues
-        self._lock_accupd = threading.Lock()  # sync account updates
-        self._lock_pos = threading.Lock()  # sync account updates
-        self._lock_notif = threading.Lock()  # sync access to notif queue
-
-        # Account list received
-        self._event_managed_accounts = threading.Event()
-        self._event_accdownload = threading.Event()
-
-        self.dontreconnect = False  # for non-recoverable connect errors
-
-        self._env = None  # reference to cerebro for general notifications
-        self.broker = None  # broker instance
-        self.datas = list()  # datas that have registered over start
-        self.ccount = 0  # requests to start (from cerebro or datas)
-
-        self._lock_tmoffset = threading.Lock()
-        self.tmoffset = timedelta()  # to control time difference with server
-
-        # Structures to hold datas requests
-        self.qs = collections.OrderedDict()  # key: tickerId -> queues
-        self.ts = collections.OrderedDict()  # key: queue -> tickerId
-        self.iscash = dict()  # tickerIds from cash products (for ex: EUR.JPY)
-
-        self.histexreq = dict()  # holds segmented historical requests
-        self.histfmt = dict()  # holds datetimeformat for request
-        self.histsend = dict()  # holds sessionend (data time) for request
-        self.histtz = dict()  # holds sessionend (data time) for request
-
-        self.acc_cash = AutoDict()  # current total cash per account
-        self.acc_value = AutoDict()  # current total value per account
-        self.acc_upds = AutoDict()  # current account valueinfos per account
-
-        self.port_update = False  # indicate whether to signal to broker
-
-        self.positions = collections.defaultdict(Position)  # actual positions
-
-        self._tickerId = itertools.count(self.REQIDBASE)  # unique tickerIds
-        self.orderid = None  # next possible orderid (will be itertools.count)
-
-        self.cdetails = collections.defaultdict(list)  # hold cdetails requests
-
-        self.managed_accounts = list()  # received via managedAccounts
-
-        self.notifs = queue.Queue()  # store notifications for cerebro
-
-        # Use the provided clientId or a random one
-        if self.p.clientId is None:
-            self.clientId = random.randint(1, pow(2, 16) - 1)
-        else:
-            self.clientId = self.p.clientId
-
-        # ibpy connection object
-        self.conn = ibopt.ibConnection(
-            host=self.p.host, port=self.p.port, clientId=self.clientId
-        )
-
-        # register a printall method if requested
-        if self.p._debug or self.p.notifyall:
-            self.conn.registerAll(self.watcher)
-
-        # Register decorated methods with the conn
-        methods = inspect.getmembers(self, inspect.ismethod)
-        for name, method in methods:
-            if not getattr(method, "_ibregister", False):
-                continue
-
-            message = getattr(ibopt.message, name)
-            self.conn.register(method, message)
-
-        # This utility key function transforms a barsize into a:
-        #   (Timeframe, Compression) tuple which can be sorted
-        def keyfn(x):
-            """
-
-            :param x:
-
-            """
-            n, t = x.split()
-            tf, comp = self._sizes[t]
-            return (tf, int(n) * comp)
-
-        # This utility key function transforms a duration into a:
-        #   (Timeframe, Compression) tuple which can be sorted
-        def key2fn(x):
-            """
-
-            :param x:
-
-            """
-            n, d = x.split()
-            tf = self._dur2tf[d]
-            return (tf, int(n))
-
-        # Generate a table of reverse durations
-        self.revdur = collections.defaultdict(list)
-        # The table (dict) is a ONE to MANY relation of
-        #   duration -> barsizes
-        # Here it is reversed to get a ONE to MANY relation of
-        #   barsize -> durations
-        for duration, barsizes in self._durations.items():
-            for barsize in barsizes:
-                self.revdur[keyfn(barsize)].append(duration)
-
-        # Once managed, sort the durations according to real duration and not
-        # to the text form using the utility key above
-        for barsize in self.revdur:
-            self.revdur[barsize].sort(key=key2fn)
-
-    def start(self, data=None, broker=None):
-        """
-
-        :param data:  (Default value = None)
-        :param broker:  (Default value = None)
-
-        """
+""""""
+"""Args::
+    x:"""
+"""Args::
+    x:"""
+"""Args::
+    data: (Default value = None)
+    broker: (Default value = None)"""
+    broker: (Default value = None)"""
         self.reconnect(fromstart=True)  # reconnect should be an invariant
 
         # Datas require some processing to kickstart data reception
@@ -325,53 +170,20 @@ class IBStore(with_metaclass(MetaSingleton, object)):
             self.broker = broker
 
     def stop(self):
-        """ """
-        try:
-            self.conn.disconnect()  # disconnect should be an invariant
-        except AttributeError:
-            pass  # conn may have never been connected and lack "disconnect"
-
-    def logmsg(self, *args):
-        """
-
-        :param *args:
-
-        """
+""""""
+        """"""
         # for logging purposes
         if self.p._debug:
             print(*args)
 
     def watcher(self, msg):
-        """
-
-        :param msg:
-
-        """
-        # will be registered to see all messages if debug is requested
-        self.logmsg(str(msg))
-        if self.p.notifyall:
-            self.notifs.put((msg, tuple(msg.values()), dict(msg.items())))
-
-    def connected(self):
-        """ """
-        # The isConnected method is available through __getattr__ indirections
-        # and may not be present, which indicates that no connection has been
-        # made because the subattribute sender has not yet been created, hence
-        # the check for the AttributeError exception
-        try:
-            return self.conn.isConnected()
-        except AttributeError:
-            pass
-
-        return False  # non-connected (including non-initialized)
-
-    def reconnect(self, fromstart=False, resub=False):
-        """
-
-        :param fromstart:  (Default value = False)
-        :param resub:  (Default value = False)
-
-        """
+"""Args::
+    msg:"""
+""""""
+"""Args::
+    fromstart: (Default value = False)
+    resub: (Default value = False)"""
+    resub: (Default value = False)"""
         # This method must be an invariant in that it can be called several
         # times from the same source and must be consistent. An exampler would
         # be 5 datas which are being received simultaneously and all request a
@@ -423,229 +235,28 @@ class IBStore(with_metaclass(MetaSingleton, object)):
         return False  # connection/reconnection failed
 
     def startdatas(self):
-        """ """
-        # kickstrat datas, not returning until all of them have been done
-        ts = list()
-        for data in self.datas:
-            t = threading.Thread(target=data.reqdata)
-            t.start()
-            ts.append(t)
+""""""
+""""""
+""""""
+"""Args::
+    msg:"""
+"""Args::
+    msg:"""
+"""Args::
+    msg:"""
+""""""
+"""Args::
+    msg:"""
+""""""
+""""""
+"""Args::
+    msg:"""
+""""""
+"""Reuses queue for tickerId, returning the new tickerId and q
 
-        for t in ts:
-            t.join()
-
-    def stopdatas(self):
-        """ """
-        # stop subs and force datas out of the loop (in LIFO order)
-        qs = list(self.qs.values())
-        ts = list()
-        for data in self.datas:
-            t = threading.Thread(target=data.canceldata)
-            t.start()
-            ts.append(t)
-
-        for t in ts:
-            t.join()
-
-        for q in reversed(qs):  # datamaster the last one to get a None
-            q.put(None)
-
-    def get_notifications(self):
-        """ """
-        # The background thread could keep on adding notifications. The None
-        # mark allows to identify which is the last notification to deliver
-        self.notifs.put(None)  # put a mark
-        notifs = list()
-        while True:
-            notif = self.notifs.get()
-            if notif is None:  # mark is reached
-                break
-            notifs.append(notif)
-
-        return notifs
-
-    @ibregister
-    def error(self, msg):
-        """
-
-        :param msg:
-
-        """
-        # 100-199 Order/Data/Historical related
-        # 200-203 tickerId and Order Related
-        # 300-399 A mix of things: orders, connectivity, tickers, misc errors
-        # 400-449 Seem order related again
-        # 500-531 Connectivity/Communication Errors
-        # 10000-100027 Mix of special orders/routing
-        # 1100-1102 TWS connectivy to the outside
-        # 1300- Socket dropped in client-TWS communication
-        # 2100-2110 Informative about Data Farm status (id=-1)
-
-        # All errors are logged to the environment (cerebro), because many
-        # errors in Interactive Brokers are actually informational and many may
-        # actually be of interest to the user
-        if not self.p.notifyall:
-            self.notifs.put((msg, tuple(msg.values()), dict(msg.items())))
-
-        # Manage those events which have to do with connection
-        if msg.errorCode is None:
-            # Usually received as an error in connection of just before disconn
-            pass
-        elif msg.errorCode in [200, 203, 162, 320, 321, 322]:
-            # cdetails 200 security not found, notify over right queue
-            # cdetails 203 security not allowed for acct
-            try:
-                q = self.qs[msg.id]
-            except KeyError:
-                pass  # should not happend but it can
-            else:
-                self.cancelQueue(q, True)
-
-        elif msg.errorCode in [354, 420]:
-            # 354 no subscription, 420 no real-time bar for contract
-            # the calling data to let the data know ... it cannot resub
-            try:
-                q = self.qs[msg.id]
-            except KeyError:
-                pass  # should not happend but it can
-            else:
-                q.put(-msg.errorCode)
-                self.cancelQueue(q)
-
-        elif msg.errorCode == 10225:
-            # 10225-Bust event occurred, current subscription is deactivated.
-            # Please resubscribe real-time bars immediately.
-            try:
-                q = self.qs[msg.id]
-            except KeyError:
-                pass  # should not happend but it can
-            else:
-                q.put(-msg.errorCode)
-
-        elif msg.errorCode == 326:  # not recoverable, clientId in use
-            self.dontreconnect = True
-            self.conn.disconnect()
-            self.stopdatas()
-
-        elif msg.errorCode == 502:
-            # Cannot connect to TWS: port, config not open, tws off (504 then)
-            self.conn.disconnect()
-            self.stopdatas()
-
-        elif msg.errorCode == 504:  # Not Connected for data op
-            # Once for each data
-            pass  # don't need to manage it
-
-        elif msg.errorCode == 1300:
-            # TWS has been closed. The port for a new connection is there
-            # newport = int(msg.errorMsg.split('-')[-1])  # bla bla bla -7496
-            self.conn.disconnect()
-            self.stopdatas()
-
-        elif msg.errorCode == 1100:
-            # Connection lost - Notify ... datas will wait on the queue
-            # with no messages arriving
-            for q in self.ts:  # key: queue -> ticker
-                q.put(-msg.errorCode)
-
-        elif msg.errorCode == 1101:
-            # Connection restored and tickerIds are gone
-            for q in self.ts:  # key: queue -> ticker
-                q.put(-msg.errorCode)
-
-        elif msg.errorCode == 1102:
-            # Connection restored and tickerIds maintained
-            for q in self.ts:  # key: queue -> ticker
-                q.put(-msg.errorCode)
-
-        elif msg.errorCode < 500:
-            # Given the myriad of errorCodes, start by assuming is an order
-            # error and if not, the checks there will let it go
-            if msg.id < self.REQIDBASE:
-                if self.broker is not None:
-                    self.broker.push_ordererror(msg)
-            else:
-                # Cancel the queue if a "data" reqId error is given: sanity
-                q = self.qs[msg.id]
-                self.cancelQueue(q, True)
-
-    @ibregister
-    def connectionClosed(self, msg):
-        """
-
-        :param msg:
-
-        """
-        # Sometmes this comes without 1300/502 or any other and will not be
-        # seen in error hence the need to manage the situation independently
-        self.conn.disconnect()
-        self.stopdatas()
-
-    @ibregister
-    def managedAccounts(self, msg):
-        """
-
-        :param msg:
-
-        """
-        # 1st message in the stream
-        self.managed_accounts = msg.accountsList.split(",")
-        self._event_managed_accounts.set()
-
-        # Request time to avoid synchronization issues
-        self.reqCurrentTime()
-
-    def reqCurrentTime(self):
-        """ """
-        self.conn.reqCurrentTime()
-
-    @ibregister
-    def currentTime(self, msg):
-        """
-
-        :param msg:
-
-        """
-        if not self.p.timeoffset:  # only if requested ... apply timeoffset
-            return
-        curtime = datetime.fromtimestamp(float(msg.time))
-        with self._lock_tmoffset:
-            self.tmoffset = curtime - datetime.now()
-
-        threading.Timer(self.p.timerefresh, self.reqCurrentTime).start()
-
-    def timeoffset(self):
-        """ """
-        with self._lock_tmoffset:
-            return self.tmoffset
-
-    def nextTickerId(self):
-        """ """
-        # Get the next ticker using next on the itertools.count
-        return next(self._tickerId)
-
-    @ibregister
-    def nextValidId(self, msg):
-        """
-
-        :param msg:
-
-        """
-        # Create a counter from the TWS notified value to apply to orders
-        self.orderid = itertools.count(msg.orderId)
-
-    def nextOrderId(self):
-        """ """
-        # Get the next ticker using next on the itertools.count made with the
-        # notified value from TWS
-        return next(self.orderid)
-
-    def reuseQueue(self, tickerId):
-        """Reuses queue for tickerId, returning the new tickerId and q
-
-        :param tickerId:
-
-        """
+Args::
+    tickerId:"""
+    tickerId:"""
         with self._lock_q:
             # Invalidate tickerId in qs (where it is a key)
             q = self.qs.pop(tickerId, None)  # invalidate old
@@ -660,11 +271,11 @@ class IBStore(with_metaclass(MetaSingleton, object)):
         return tickerId, q
 
     def getTickerQueue(self, start=False):
-        """Creates ticker/Queue for data delivery to a data feed
+"""Creates ticker/Queue for data delivery to a data feed
 
-        :param start:  (Default value = False)
-
-        """
+Args::
+    start: (Default value = False)"""
+    start: (Default value = False)"""
         q = queue.Queue()
         if start:
             q.put(None)
@@ -679,12 +290,12 @@ class IBStore(with_metaclass(MetaSingleton, object)):
         return tickerId, q
 
     def cancelQueue(self, q, sendnone=False):
-        """Cancels a Queue for data delivery
+"""Cancels a Queue for data delivery
 
-        :param q:
-        :param sendnone:  (Default value = False)
-
-        """
+Args::
+    q: 
+    sendnone: (Default value = False)"""
+    sendnone: (Default value = False)"""
         # pop ts (tickers) and with the result qs (queues)
         tickerId = self.ts.pop(q, None)
         self.qs.pop(tickerId, None)
@@ -695,20 +306,18 @@ class IBStore(with_metaclass(MetaSingleton, object)):
             q.put(None)
 
     def validQueue(self, q):
-        """Returns (bool)  if a queue is still valid
+"""Returns (bool)  if a queue is still valid
 
-        :param q:
-
-        """
+Args::
+    q:"""
+    q:"""
         return q in self.ts  # queue -> ticker
 
     def getContractDetails(self, contract, maxcount=None):
-        """
-
-        :param contract:
-        :param maxcount:  (Default value = None)
-
-        """
+"""Args::
+    contract: 
+    maxcount: (Default value = None)"""
+    maxcount: (Default value = None)"""
         cds = list()
         q = self.reqContractDetails(contract)
         while True:
@@ -725,32 +334,22 @@ class IBStore(with_metaclass(MetaSingleton, object)):
         return cds
 
     def reqContractDetails(self, contract):
-        """
+"""Args::
+    contract:"""
+"""Signal end of contractdetails
 
-        :param contract:
-
-        """
-        # get a ticker/queue for identification/data delivery
-        tickerId, q = self.getTickerQueue()
-        self.conn.reqContractDetails(tickerId, contract)
-        return q
-
-    @ibregister
-    def contractDetailsEnd(self, msg):
-        """Signal end of contractdetails
-
-        :param msg:
-
-        """
+Args::
+    msg:"""
+    msg:"""
         self.cancelQueue(self.qs[msg.reqId], True)
 
     @ibregister
     def contractDetails(self, msg):
-        """Receive answer and pass it to the queue
+"""Receive answer and pass it to the queue
 
-        :param msg:
-
-        """
+Args::
+    msg:"""
+    msg:"""
         self.qs[msg.reqId].put(msg)
 
     def reqHistoricalDataEx(
@@ -766,24 +365,23 @@ class IBStore(with_metaclass(MetaSingleton, object)):
         sessionend=None,
         tickerId=None,
     ):
-        """Extension of the raw reqHistoricalData proxy, which takes two dates
-        rather than a duration, barsize and date
+"""Extension of the raw reqHistoricalData proxy, which takes two dates
+rather than a duration, barsize and date
+It uses the IB published valid duration/barsizes to make a mapping and
+spread a historical request over several historical requests if needed
 
-        It uses the IB published valid duration/barsizes to make a mapping and
-        spread a historical request over several historical requests if needed
-
-        :param contract:
-        :param enddate:
-        :param begindate:
-        :param timeframe:
-        :param compression:
-        :param what:  (Default value = None)
-        :param useRTH:  (Default value = False)
-        :param tz:  (Default value = "")
-        :param sessionend:  (Default value = None)
-        :param tickerId:  (Default value = None)
-
-        """
+Args::
+    contract: 
+    enddate: 
+    begindate: 
+    timeframe: 
+    compression: 
+    what: (Default value = None)
+    useRTH: (Default value = False)
+    tz: (Default value = "")
+    sessionend: (Default value = None)
+    tickerId: (Default value = None)"""
+    tickerId: (Default value = None)"""
         # Keep a copy for error reporting purposes
         kwargs = locals().copy()
         kwargs.pop("self", None)  # remove self, no need to report it
@@ -898,18 +496,18 @@ class IBStore(with_metaclass(MetaSingleton, object)):
         tz="",
         sessionend=None,
     ):
-        """Proxy to reqHistorical Data
+"""Proxy to reqHistorical Data
 
-        :param contract:
-        :param enddate:
-        :param duration:
-        :param barsize:
-        :param what:  (Default value = None)
-        :param useRTH:  (Default value = False)
-        :param tz:  (Default value = "")
-        :param sessionend:  (Default value = None)
-
-        """
+Args::
+    contract: 
+    enddate: 
+    duration: 
+    barsize: 
+    what: (Default value = None)
+    useRTH: (Default value = False)
+    tz: (Default value = "")
+    sessionend: (Default value = None)"""
+    sessionend: (Default value = None)"""
 
         # get a ticker/queue for identification/data delivery
         tickerId, q = self.getTickerQueue()
@@ -943,24 +541,26 @@ class IBStore(with_metaclass(MetaSingleton, object)):
         return q
 
     def cancelHistoricalData(self, q):
-        """Cancels an existing HistoricalData request
+"""Cancels an existing HistoricalData request
 
-        :param q: the Queue returned by reqMktData
-
-        """
+Args::
+    q: the Queue returned by reqMktData"""
+    q: the Queue returned by reqMktData"""
         with self._lock_q:
             self.conn.cancelHistoricalData(self.ts[q])
             self.cancelQueue(q, True)
 
     def reqRealTimeBars(self, contract, useRTH=False, duration=5):
-        """Creates a request for (5 seconds) Real Time Bars
+"""Creates a request for (5 seconds) Real Time Bars
 
-        :param contract: a ib
-        :param useRTH: default
-        :param duration: default
-        :returns: - a Queue the client can wait on to receive a RTVolume instance
+Args::
+    contract: a ib
+    useRTH: default
+    duration: default
 
-        """
+Returns::
+    - a Queue the client can wait on to receive a RTVolume instance"""
+    - a Queue the client can wait on to receive a RTVolume instance"""
         # get a ticker/queue for identification/data delivery
         tickerId, q = self.getTickerQueue()
 
@@ -972,11 +572,11 @@ class IBStore(with_metaclass(MetaSingleton, object)):
         return q
 
     def cancelRealTimeBars(self, q):
-        """Cancels an existing MarketData subscription
+"""Cancels an existing MarketData subscription
 
-        :param q: the Queue returned by reqMktData
-
-        """
+Args::
+    q: the Queue returned by reqMktData"""
+    q: the Queue returned by reqMktData"""
         with self._lock_q:
             tickerId = self.ts.get(q, None)
             if tickerId is not None:
@@ -985,13 +585,15 @@ class IBStore(with_metaclass(MetaSingleton, object)):
             self.cancelQueue(q, True)
 
     def reqMktData(self, contract, what=None):
-        """Creates a MarketData subscription
+"""Creates a MarketData subscription
 
-        :param contract: a ib
-        :param what:  (Default value = None)
-        :returns: - a Queue the client can wait on to receive a RTVolume instance
+Args::
+    contract: a ib
+    what: (Default value = None)
 
-        """
+Returns::
+    - a Queue the client can wait on to receive a RTVolume instance"""
+    - a Queue the client can wait on to receive a RTVolume instance"""
         # get a ticker/queue for identification/data delivery
         tickerId, q = self.getTickerQueue()
         ticks = "233"  # request RTVOLUME tick delivered over tickString
@@ -1008,11 +610,11 @@ class IBStore(with_metaclass(MetaSingleton, object)):
         return q
 
     def cancelMktData(self, q):
-        """Cancels an existing MarketData subscription
+"""Cancels an existing MarketData subscription
 
-        :param q: the Queue returned by reqMktData
-
-        """
+Args::
+    q: the Queue returned by reqMktData"""
+    q: the Queue returned by reqMktData"""
         with self._lock_q:
             tickerId = self.ts.get(q, None)
             if tickerId is not None:
@@ -1022,34 +624,17 @@ class IBStore(with_metaclass(MetaSingleton, object)):
 
     @ibregister
     def tickString(self, msg):
-        """
+"""Args::
+    msg:"""
+"""Cash Markets have no notion of "last_price"/"last_size" and the
+tracking of the price is done (industry de-facto standard at least with
+the IB API) following the BID price
+A RTVolume which will only contain a price is put into the client's
+queue to have a consistent cross-market interface
 
-        :param msg:
-
-        """
-        # Receive and process a tickString message
-        if msg.tickType == 48:  # RTVolume
-            try:
-                rtvol = RTVolume(msg.value)
-            except ValueError:  # price not in message ...
-                pass
-            else:
-                # Don't need to adjust the time, because it is in "timestamp"
-                # form in the message
-                self.qs[msg.tickerId].put(rtvol)
-
-    @ibregister
-    def tickPrice(self, msg):
-        """Cash Markets have no notion of "last_price"/"last_size" and the
-        tracking of the price is done (industry de-facto standard at least with
-        the IB API) following the BID price
-
-        A RTVolume which will only contain a price is put into the client's
-        queue to have a consistent cross-market interface
-
-        :param msg:
-
-        """
+Args::
+    msg:"""
+    msg:"""
         # Used for "CASH" markets
         # The price field has been seen to be missing in some instances even if
         # "field" is 1
@@ -1075,25 +660,24 @@ class IBStore(with_metaclass(MetaSingleton, object)):
 
     @ibregister
     def realtimeBar(self, msg):
-        """Receives x seconds Real Time Bars (at the time of writing only 5
-        seconds are supported)
+"""Receives x seconds Real Time Bars (at the time of writing only 5
+seconds are supported)
+Not valid for cash markets
 
-        Not valid for cash markets
-
-        :param msg:
-
-        """
+Args::
+    msg:"""
+    msg:"""
         # Get a naive localtime object
         msg.time = datetime.utcfromtimestamp(float(msg.time))
         self.qs[msg.reqId].put(msg)
 
     @ibregister
     def historicalData(self, msg):
-        """Receives the events of a historical data request
+"""Receives the events of a historical data request
 
-        :param msg:
-
-        """
+Args::
+    msg:"""
+    msg:"""
         # For multi-tiered downloads we'd need to rebind the queue to a new
         # tickerId (in case tickerIds are not reusable) and instead of putting
         # None, issue a new reqHistData with the new data and move formward
@@ -1486,12 +1070,10 @@ class IBStore(with_metaclass(MetaSingleton, object)):
     }
 
     def getdurations(self, timeframe, compression):
-        """
-
-        :param timeframe:
-        :param compression:
-
-        """
+"""Args::
+    timeframe: 
+    compression:"""
+    compression:"""
         key = (timeframe, compression)
         if key not in self.revdur:
             return []
@@ -1499,12 +1081,10 @@ class IBStore(with_metaclass(MetaSingleton, object)):
         return self.revdur[key]
 
     def getmaxduration(self, timeframe, compression):
-        """
-
-        :param timeframe:
-        :param compression:
-
-        """
+"""Args::
+    timeframe: 
+    compression:"""
+    compression:"""
         key = (timeframe, compression)
         try:
             return self.revdur[key][-1]
@@ -1514,12 +1094,10 @@ class IBStore(with_metaclass(MetaSingleton, object)):
         return None
 
     def tfcomp_to_size(self, timeframe, compression):
-        """
-
-        :param timeframe:
-        :param compression:
-
-        """
+"""Args::
+    timeframe: 
+    compression:"""
+    compression:"""
         if timeframe == TimeFrame.Months:
             return "{} M".format(compression)
 
@@ -1546,12 +1124,10 @@ class IBStore(with_metaclass(MetaSingleton, object)):
         return None
 
     def dt_plus_duration(self, dt, duration):
-        """
-
-        :param dt:
-        :param duration:
-
-        """
+"""Args::
+    dt: 
+    duration:"""
+    duration:"""
         size, dim = duration.split()
         size = int(size)
         if dim == "S":
@@ -1576,12 +1152,12 @@ class IBStore(with_metaclass(MetaSingleton, object)):
         return dt  # could do nothing with it ... return it intact
 
     def calcdurations(self, dtbegin, dtend):
-        """Calculate a duration in between 2 datetimes
+"""Calculate a duration in between 2 datetimes
 
-        :param dtbegin:
-        :param dtend:
-
-        """
+Args::
+    dtbegin: 
+    dtend:"""
+    dtend:"""
         duration = self.histduration(dtbegin, dtend)
 
         if duration[-1] == "M":
@@ -1598,22 +1174,20 @@ class IBStore(with_metaclass(MetaSingleton, object)):
         return duration, sizes
 
     def calcduration(self, dtbegin, dtend):
-        """Calculate a duration in between 2 datetimes. Returns single size
+"""Calculate a duration in between 2 datetimes. Returns single size
 
-        :param dtbegin:
-        :param dtend:
-
-        """
+Args::
+    dtbegin: 
+    dtend:"""
+    dtend:"""
         duration, sizes = self._calcdurations(dtbegin, dtend)
         return duration, sizes[0]
 
     def histduration(self, dt1, dt2):
-        """
-
-        :param dt1:
-        :param dt2:
-
-        """
+"""Args::
+    dt1: 
+    dt2:"""
+    dt2:"""
         # Given two dates calculates the smallest possible duration according
         # to the table from the Historical Data API limitations provided by IB
         #
@@ -1696,18 +1270,18 @@ class IBStore(with_metaclass(MetaSingleton, object)):
         right="",
         mult=1,
     ):
-        """returns a contract from the parameters without check
+"""returns a contract from the parameters without check
 
-        :param symbol:
-        :param sectype:
-        :param exch:
-        :param curr:
-        :param expiry:  (Default value = "")
-        :param strike:  (Default value = 0.0)
-        :param right:  (Default value = "")
-        :param mult:  (Default value = 1)
-
-        """
+Args::
+    symbol: 
+    sectype: 
+    exch: 
+    curr: 
+    expiry: (Default value = "")
+    strike: (Default value = 0.0)
+    right: (Default value = "")
+    mult: (Default value = 1)"""
+    mult: (Default value = 1)"""
 
         contract = Contract()
         contract.m_symbol = bytes(symbol)
@@ -1725,57 +1299,57 @@ class IBStore(with_metaclass(MetaSingleton, object)):
         return contract
 
     def cancelOrder(self, orderid):
-        """Proxy to cancelOrder
+"""Proxy to cancelOrder
 
-        :param orderid:
-
-        """
+Args::
+    orderid:"""
+    orderid:"""
         self.conn.cancelOrder(orderid)
 
     def placeOrder(self, orderid, contract, order):
-        """Proxy to placeOrder
+"""Proxy to placeOrder
 
-        :param orderid:
-        :param contract:
-        :param order:
-
-        """
+Args::
+    orderid: 
+    contract: 
+    order:"""
+    order:"""
         self.conn.placeOrder(orderid, contract, order)
 
     @ibregister
     def openOrder(self, msg):
-        """Receive the event ``openOrder`` events
+"""Receive the event ``openOrder`` events
 
-        :param msg:
-
-        """
+Args::
+    msg:"""
+    msg:"""
         self.broker.push_orderstate(msg)
 
     @ibregister
     def execDetails(self, msg):
-        """Receive execDetails
+"""Receive execDetails
 
-        :param msg:
-
-        """
+Args::
+    msg:"""
+    msg:"""
         self.broker.push_execution(msg.execution)
 
     @ibregister
     def orderStatus(self, msg):
-        """Receive the event ``orderStatus``
+"""Receive the event ``orderStatus``
 
-        :param msg:
-
-        """
+Args::
+    msg:"""
+    msg:"""
         self.broker.push_orderstatus(msg)
 
     @ibregister
     def commissionReport(self, msg):
-        """Receive the event commissionReport
+"""Receive the event commissionReport
 
-        :param msg:
-
-        """
+Args::
+    msg:"""
+    msg:"""
         self.broker.push_commissionreport(msg.commissionReport)
 
     def reqPositions(self):
@@ -1784,23 +1358,22 @@ class IBStore(with_metaclass(MetaSingleton, object)):
 
     @ibregister
     def position(self, msg):
-        """Receive event positions
+"""Receive event positions
 
-        :param msg:
-
-        """
+Args::
+    msg:"""
+    msg:"""
         pass  # Not implemented yet
 
     def reqAccountUpdates(self, subscribe=True, account=None):
-        """Proxy to reqAccountUpdates
+"""Proxy to reqAccountUpdates
+If ``account`` is ``None``, wait for the ``managedAccounts`` message to
+set the account codes
 
-        If ``account`` is ``None``, wait for the ``managedAccounts`` message to
-        set the account codes
-
-        :param subscribe:  (Default value = True)
-        :param account:  (Default value = None)
-
-        """
+Args::
+    subscribe: (Default value = True)
+    account: (Default value = None)"""
+    account: (Default value = None)"""
         if account is None:
             self._event_managed_accounts.wait()
             account = self.managed_accounts[0]
@@ -1809,57 +1382,14 @@ class IBStore(with_metaclass(MetaSingleton, object)):
 
     @ibregister
     def accountDownloadEnd(self, msg):
-        """
-
-        :param msg:
-
-        """
-        # Signals the end of an account update
-        # the event indicates it's over. It's only false once, and can be used
-        # to find out if it has at least been downloaded once
-        self._event_accdownload.set()
-        if False:
-            if self.port_update:
-                self.broker.push_portupdate()
-
-                self.port_update = False
-
-    @ibregister
-    def updatePortfolio(self, msg):
-        """
-
-        :param msg:
-
-        """
-        # Lock access to the position dicts. This is called in sub-thread and
-        # can kick in at any time
-        with self._lock_pos:
-            if not self._event_accdownload.is_set():  # 1st event seen
-                position = Position(msg.position, msg.averageCost)
-                self.positions[msg.contract.m_conId] = position
-            else:
-                position = self.positions[msg.contract.m_conId]
-                if not position.fix(msg.position, msg.averageCost):
-                    err = (
-                        "The current calculated position and "
-                        "the position reported by the broker do not match. "
-                        "Operation can continue, but the trades "
-                        "calculated in the strategy may be wrong"
-                    )
-
-                    self.notifs.put((err, (), {}))
-
-                # Flag signal to broker at the end of account download
-                # self.port_update = True
-                self.broker.push_portupdate()
-
-    def getposition(self, contract, clone=False):
-        """
-
-        :param contract:
-        :param clone:  (Default value = False)
-
-        """
+"""Args::
+    msg:"""
+"""Args::
+    msg:"""
+"""Args::
+    contract: 
+    clone: (Default value = False)"""
+    clone: (Default value = False)"""
         # Lock access to the position dicts. This is called from main thread
         # and updates could be happening in the background
         with self._lock_pos:
@@ -1871,40 +1401,18 @@ class IBStore(with_metaclass(MetaSingleton, object)):
 
     @ibregister
     def updateAccountValue(self, msg):
-        """
+"""Args::
+    msg:"""
+"""Returns all account value infos sent by TWS during regular updates
+Waits for at least 1 successful download
+If ``account`` is ``None`` then a dictionary with accounts as keys will
+be returned containing all accounts
+If account is specified or the system has only 1 account the dictionary
+corresponding to that account is returned
 
-        :param msg:
-
-        """
-        # Lock access to the dicts where values are updated. This happens in a
-        # sub-thread and could kick it at anytime
-        with self._lock_accupd:
-            try:
-                value = float(msg.value)
-            except ValueError:
-                value = msg.value
-
-            self.acc_upds[msg.accountName][msg.key][msg.currency] = value
-
-            if msg.key == "NetLiquidation":
-                # NetLiquidationByCurrency and currency == 'BASE' is the same
-                self.acc_value[msg.accountName] = value
-            elif msg.key == "TotalCashBalance" and msg.currency == "BASE":
-                self.acc_cash[msg.accountName] = value
-
-    def get_acc_values(self, account=None):
-        """Returns all account value infos sent by TWS during regular updates
-        Waits for at least 1 successful download
-
-        If ``account`` is ``None`` then a dictionary with accounts as keys will
-        be returned containing all accounts
-
-        If account is specified or the system has only 1 account the dictionary
-        corresponding to that account is returned
-
-        :param account:  (Default value = None)
-
-        """
+Args::
+    account: (Default value = None)"""
+    account: (Default value = None)"""
         # Wait for at least 1 account update download to have been finished
         # before the account infos can be returned to the calling client
         if self.connected():
@@ -1933,18 +1441,16 @@ class IBStore(with_metaclass(MetaSingleton, object)):
             return self.acc_upds.copy()
 
     def get_acc_value(self, account=None):
-        """Returns the net liquidation value sent by TWS during regular updates
-        Waits for at least 1 successful download
+"""Returns the net liquidation value sent by TWS during regular updates
+Waits for at least 1 successful download
+If ``account`` is ``None`` then a dictionary with accounts as keys will
+be returned containing all accounts
+If account is specified or the system has only 1 account the dictionary
+corresponding to that account is returned
 
-        If ``account`` is ``None`` then a dictionary with accounts as keys will
-        be returned containing all accounts
-
-        If account is specified or the system has only 1 account the dictionary
-        corresponding to that account is returned
-
-        :param account:  (Default value = None)
-
-        """
+Args::
+    account: (Default value = None)"""
+    account: (Default value = None)"""
         # Wait for at least 1 account update download to have been finished
         # before the value can be returned to the calling client
         if self.connected():
@@ -1973,18 +1479,16 @@ class IBStore(with_metaclass(MetaSingleton, object)):
             return float()
 
     def get_acc_cash(self, account=None):
-        """Returns the total cash value sent by TWS during regular updates
-        Waits for at least 1 successful download
+"""Returns the total cash value sent by TWS during regular updates
+Waits for at least 1 successful download
+If ``account`` is ``None`` then a dictionary with accounts as keys will
+be returned containing all accounts
+If account is specified or the system has only 1 account the dictionary
+corresponding to that account is returned
 
-        If ``account`` is ``None`` then a dictionary with accounts as keys will
-        be returned containing all accounts
-
-        If account is specified or the system has only 1 account the dictionary
-        corresponding to that account is returned
-
-        :param account:  (Default value = None)
-
-        """
+Args::
+    account: (Default value = None)"""
+    account: (Default value = None)"""
         # Wait for at least 1 account update download to have been finished
         # before the cash can be returned to the calling client
         if self.connected():

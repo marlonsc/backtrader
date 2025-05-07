@@ -1,4 +1,7 @@
-import datetime as dt
+"""test_stores_ibstore_dt_plus_duration.py module.
+
+Description of the module functionality."""
+
 
 import backtrader as bt
 
@@ -6,7 +9,7 @@ store = bt.stores.IBStore()
 
 
 def test_run():
-    """ """
+""""""
 
     test_cases = [
         (dt.datetime(2020, 7, 31), "2 M", dt.datetime(2020, 10, 1)),

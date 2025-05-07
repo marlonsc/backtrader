@@ -1,4 +1,7 @@
-# coding:utf-8
+"""__init__.py module.
+
+Description of the module functionality."""
+
 
 from . import get_arrow
 

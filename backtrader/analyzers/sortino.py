@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""sortino.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -35,14 +38,9 @@ from backtrader.utils.py3 import itervalues
 
 class SortinoRatio(Analyzer):
     """This analyzer calculates the Sortino Ratio of a strategy using a risk free
-    asset which is simply an interest rate
-
-    See also:
-
-      - https://en.wikipedia.org/wiki/Sortino_ratio
-
-
-    """
+asset which is simply an interest rate
+See also:
+- https://en.wikipedia.org/wiki/Sortino_ratio"""
 
     params = (
         ("timeframe", TimeFrame.Years),
@@ -65,15 +63,8 @@ class SortinoRatio(Analyzer):
     }
 
     def __init__(self):
-        """ """
-        self.timereturn = TimeReturn(
-            timeframe=self.p.timeframe,
-            compression=self.p.compression,
-            fund=self.p.fund,
-        )
-
-    def stop(self):
-        """ """
+""""""
+""""""
         super(SortinoRatio, self).stop()
         ret_free_avg = None
         retdev = None

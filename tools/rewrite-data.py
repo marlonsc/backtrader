@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""rewrite-data.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -48,109 +51,14 @@ DATAFORMATS = dict(
 
 
 class RewriteStrategy(bt.Strategy):
-    """ """
-
-    params = (
-        ("separator", ","),
-        ("outfile", None),
-    )
-
-    def start(self):
-        """ """
-        if self.p.outfile is None:
-            self.f = sys.stdout
-        else:
-            self.f = open(self.p.outfile, "wb")
-
-        if self.data._timeframe < bt.TimeFrame.Days:
-            headers = "Date,Time,Open,High,Low,Close,Volume,OpenInterest"
-        else:
-            headers = "Date,Open,High,Low,Close,Volume,OpenInterest"
-
-        headers += "\n"
-        self.f.write(bytes(headers))
-
-    def next(self):
-        """ """
-        fields = list()
-        dt = self.data.datetime.date(0).strftime("%Y-%m-%d")
-        fields.append(dt)
-        if self.data._timeframe < bt.TimeFrame.Days:
-            tm = self.data.datetime.time(0).strftime("%H:%M:%S")
-            fields.append(tm)
-
-        o = "%.2f" % self.data.open[0]
-        fields.append(o)
-        h = "%.2f" % self.data.high[0]
-        fields.append(h)
-        l = "%.2f" % self.data.low[0]
-        fields.append(l)
-        c = "%.2f" % self.data.close[0]
-        fields.append(c)
-        v = "%d" % self.data.volume[0]
-        fields.append(v)
-        oi = "%d" % self.data.openinterest[0]
-        fields.append(oi)
-
-        txt = self.p.separator.join(fields)
-        txt += "\n"
-        self.f.write(bytes(txt))
-
-
-def runstrat(pargs=None):
-    """
-
-    :param pargs: (Default value = None)
-
-    """
-    args = parse_args(pargs)
-
-    cerebro = bt.Cerebro()
-
-    dfkwargs = dict()
-    if args.format == "yahoo_unreversed":
-        dfkwargs["reverse"] = True
-
-    fmtstr = "%Y-%m-%d"
-    if args.fromdate:
-        dtsplit = args.fromdate.split("T")
-        if len(dtsplit) > 1:
-            fmtstr += "T%H:%M:%S"
-
-        fromdate = datetime.datetime.strptime(args.fromdate, fmtstr)
-        dfkwargs["fromdate"] = fromdate
-
-    fmtstr = "%Y-%m-%d"
-    if args.todate:
-        dtsplit = args.todate.split("T")
-        if len(dtsplit) > 1:
-            fmtstr += "T%H:%M:%S"
-        todate = datetime.datetime.strptime(args.todate, fmtstr)
-        dfkwargs["todate"] = todate
-
-    dfcls = DATAFORMATS[args.format]
-    data = dfcls(dataname=args.infile, **dfkwargs)
-    cerebro.adddata(data)
-
-    cerebro.addstrategy(RewriteStrategy, separator=args.separator, outfile=args.outfile)
-
-    cerebro.run(stdstats=False)
-
-    if args.plot:
-        pkwargs = dict(style="bar")
-        if args.plot is not True:  # evals to True but is not True
-            npkwargs = eval("dict(" + args.plot + ")")  # args were passed
-            pkwargs.update(npkwargs)
-
-        cerebro.plot(**pkwargs)
-
-
-def parse_args(pargs=None):
-    """
-
-    :param pargs: (Default value = None)
-
-    """
+""""""
+""""""
+""""""
+"""Args::
+    pargs: (Default value = None)"""
+"""Args::
+    pargs: (Default value = None)"""
+    pargs: (Default value = None)"""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Rewrite formats to BacktraderCSVData format",

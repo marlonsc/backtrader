@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""spread.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 
 from __future__ import (
@@ -12,21 +15,19 @@ from . import Indicator
 
 
 class SpreadWithSignals(Indicator):
-    """计算两个数据之间的价差并标注买卖信号点
-
-    参数:
-      - data2: 第二个数据源(用于计算价差)
-      - buy_signal: 买入信号数组
-      - sell_signal: 卖出信号数组
-
-
+"""Calculate the price difference between two data sources and mark buy/sell signal points.
+    
+    Parameters:
+    - data2: Second data source (used to calculate the price difference)
+    - buy_signal: Buy signal array
+    - sell_signal: Sell signal array"""
     """
 
-    lines = ("spread",)  # 定义一个spread线
+    lines = ("spread",)  # Define a spread line
     alias = ("Spread",)
     plotinfo = dict(
         plot=True,
-        subplot=True,  # 在单独的子图中显示
+        subplot=True,  # Display in a separate subplot
         plotname="Spread",
         plotlabels=True,
         plotlinelabels=True,
@@ -36,36 +37,36 @@ class SpreadWithSignals(Indicator):
     plotlines = dict(spread=dict(_name="Spread", color="blue", ls="-", _plotskip=False))
 
     def __init__(self):
-        """ """
+        """Initialize the SpreadWithSignals indicator."""
         super(SpreadWithSignals, self).__init__()
 
-        # 计算价差
+        # Calculate the price difference
         self.lines.spread = self.data - self.data1
 
-        # 添加买卖信号的绘制
+        # Add buy/sell signal plotting
         self.plotinfo.plotmarkers = [
             dict(
                 name="buy",
-                marker="^",  # 上三角
-                color="g",  # 绿色
+                marker="^",  # Up triangle
+                color="g",  # Green
                 markersize=8,
                 fillstyle="full",
-                text="buy %(price).2f",  # 标签格式
+                text="buy %(price).2f",  # Label format
                 textsize=8,
                 textcolor="g",
-                ls="",  # 无连线
+                ls="",  # No line
                 _plotskip=False,
             ),
             dict(
                 name="sell",
-                marker="v",  # 下三角
-                color="r",  # 红色
+                marker="v",  # Down triangle
+                color="r",  # Red
                 markersize=8,
                 fillstyle="full",
-                text="sell %(price).2f",  # 标签格式
+                text="sell %(price).2f",  # Label format
                 textsize=8,
                 textcolor="r",
-                ls="",  # 无连线
+                ls="",  # No line
                 _plotskip=False,
             ),
         ]

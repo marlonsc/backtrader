@@ -1,4 +1,7 @@
-import backtrader as bt
+"""caganalyzer.py module.
+
+Description of the module functionality."""
+
 import matplotlib.pyplot as plt
 import numpy as np
 from backtrader import TimeFrameAnalyzerBase
@@ -10,7 +13,7 @@ class CAGRAnalyzer(TimeFrameAnalyzerBase):
     params = (
         ("period", None),
         ("fund", None),
-        ("plot", True),  # 新增参数：是否自动绘图
+        ("plot", True),  # New parameter: whether to automatically plot
     )
 
     _TANN = {
@@ -21,53 +24,9 @@ class CAGRAnalyzer(TimeFrameAnalyzerBase):
     }
 
     def __init__(self):
-        """ """
-        # 初始化数据容器
-        self.dates = []  # 记录每个bar的日期
-        self.cum_returns = []  # 记录每日累计收益率
-        self._returns = []  # 记录每日收益率
-        super(CAGRAnalyzer, self).__init__()
-
-    def start(self):
-        """ """
-        super(CAGRAnalyzer, self).start()
-
-        # 获取初始值（可以是策略的资产值或者基金值）
-
-        self._value_start = self.strategy.broker.getvalue()
-
-        # 初始化累计收益率的初始值
-        self._cum_return = 1.0  # 用1.0来初始化，以便于累乘
-
-        # 用于存储收益率的时间步
-        self._returns = []
-
-    def stop(self):
-        """ """
-        # 计算CAGR和夏普比率
-        annual_factor = self._TANN.get(self.p.period, 252.0)
-
-        # 计算总年数
-        num_years = len(self._returns) / annual_factor  # 数据长度除以年化因子
-
-        # 计算年化复合增长率（CAGR）
-        if num_years > 0:
-            cagr = (self._cum_return) ** (1 / num_years) - 1
-        else:
-            cagr = 0.0  # 如果没有数据，设置为0
-        # 计算sharp self.p.riskfreerate
-        mean_return = np.mean(self._returns) * annual_factor
-        var_return = np.std(self._returns) * np.sqrt(annual_factor)
-        sharpe = mean_return / var_return
-        # 存储结果
-        self.rets["cagr"] = cagr
-        self.rets["sharpe"] = sharpe
-
-        # 如果plot参数为True，则绘制累积收益率图表
-        if self.p.plot and len(self.dates) > 0:
-            self.plot_cumulative_returns()
-
-    def next(self):
+""""""
+""""""
+""""""
         """Calculate returns on each time step"""
         # 计算每个时间步骤的收益率
 

@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8; py-indent-offset:4 -*-
+"""RSI (Relative Strength Index) Indicator Module
+
+This module implements the RSI indicator and its variants as defined by J. Welles Wilder, Jr.
+in his book "New Concepts in Technical Trading Systems" (1978)."""
+"""
 ###############################################################################
 #
 # Copyright (C) 2015-2024 Daniel Rodriguez
@@ -29,145 +34,145 @@ from . import DivZeroByZero, Indicator, Max, MovAv
 
 
 class UpDay(Indicator):
-    """Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
-    Technical Trading Systems"* for the RSI
-
-    Records days which have been "up", i.e.: the close price has been
-    higher than the day before.
-
+"""UpDay indicator for RSI calculation.
+    
+    Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
+    Technical Trading Systems"* for the RSI. Records days which have been "up", 
+    i.e.: the close price has been higher than the day before.
+    
     Formula:
-      - upday = max(close - close_prev, 0)
-
+        - upday = max(close - close_prev, 0)
+    
     See:
-      - http://en.wikipedia.org/wiki/Relative_strength_index
-
-
+        - http://en.wikipedia.org/wiki/Relative_strength_index"""
     """
 
     lines = ("upday",)
     params = (("period", 1),)
 
     def __init__(self):
-        """ """
+"""Initialize the UpDay indicator.
+        
+        Calculates the upday line as the maximum of (current close - previous close) and 0."""
+        """
         self.lines.upday = Max(self.data - self.data(-self.p.period), 0.0)
         super(UpDay, self).__init__()
 
 
 class DownDay(Indicator):
-    """Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
-    Technical Trading Systems"* for the RSI
-
-    Records days which have been "down", i.e.: the close price has been
-    lower than the day before.
-
+"""DownDay indicator for RSI calculation.
+    
+    Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
+    Technical Trading Systems"* for the RSI. Records days which have been "down", 
+    i.e.: the close price has been lower than the day before.
+    
     Formula:
-      - downday = max(close_prev - close, 0)
-
+        - downday = max(close_prev - close, 0)
+    
     See:
-      - http://en.wikipedia.org/wiki/Relative_strength_index
-
-
+        - http://en.wikipedia.org/wiki/Relative_strength_index"""
     """
 
     lines = ("downday",)
     params = (("period", 1),)
 
     def __init__(self):
-        """ """
+"""Initialize the DownDay indicator.
+        
+        Calculates the downday line as the maximum of (previous close - current close) and 0."""
+        """
         self.lines.downday = Max(self.data(-self.p.period) - self.data, 0.0)
         super(DownDay, self).__init__()
 
 
 class UpDayBool(Indicator):
-    """Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
-    Technical Trading Systems"* for the RSI
-
-    Records days which have been "up", i.e.: the close price has been
-    higher than the day before.
-
+"""Boolean UpDay indicator for RSI calculation.
+    
+    Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
+    Technical Trading Systems"* for the RSI. Records days which have been "up", 
+    i.e.: the close price has been higher than the day before.
+    
     Note:
-      - This version returns a bool rather than the difference
-
+        - This version returns a bool rather than the difference
+    
     Formula:
-      - upday = close > close_prev
-
+        - upday = close > close_prev
+    
     See:
-      - http://en.wikipedia.org/wiki/Relative_strength_index
-
-
+        - http://en.wikipedia.org/wiki/Relative_strength_index"""
     """
 
     lines = ("upday",)
     params = (("period", 1),)
 
     def __init__(self):
-        """ """
+"""Initialize the UpDayBool indicator.
+        
+        Sets the upday line to True if current close is greater than previous close."""
+        """
         self.lines.upday = self.data > self.data(-self.p.period)
         super(UpDayBool, self).__init__()
 
 
 class DownDayBool(Indicator):
-    """Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
-    Technical Trading Systems"* for the RSI
-
-    Records days which have been "down", i.e.: the close price has been
-    lower than the day before.
-
+"""Boolean DownDay indicator for RSI calculation.
+    
+    Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
+    Technical Trading Systems"* for the RSI. Records days which have been "down", 
+    i.e.: the close price has been lower than the day before.
+    
     Note:
-      - This version returns a bool rather than the difference
-
+        - This version returns a bool rather than the difference
+    
     Formula:
-      - downday = close_prev > close
-
+        - downday = close_prev > close
+    
     See:
-      - http://en.wikipedia.org/wiki/Relative_strength_index
-
-
+        - http://en.wikipedia.org/wiki/Relative_strength_index"""
     """
 
     lines = ("downday",)
     params = (("period", 1),)
 
     def __init__(self):
-        """ """
+"""Initialize the DownDayBool indicator.
+        
+        Sets the downday line to True if previous close is greater than current close."""
+        """
         self.lines.downday = self.data(-self.p.period) > self.data
         super(DownDayBool, self).__init__()
 
 
 class RelativeStrengthIndex(Indicator):
-    """Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
-    Technical Trading Systems"*.
-
-    It measures momentum by calculating the ration of higher closes and
-    lower closes after having been smoothed by an average, normalizing
-    the result between 0 and 100
-
+"""Relative Strength Index (RSI) indicator.
+    
+    Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
+    Technical Trading Systems"*. It measures momentum by calculating the ratio 
+    of higher closes and lower closes after having been smoothed by an average, 
+    normalizing the result between 0 and 100.
+    
     Formula:
-      - up = upday(data)
-      - down = downday(data)
-      - maup = movingaverage(up, period)
-      - madown = movingaverage(down, period)
-      - rs = maup / madown
-      - rsi = 100 - 100 / (1 + rs)
-
+        - up = upday(data)
+        - down = downday(data)
+        - maup = movingaverage(up, period)
+        - madown = movingaverage(down, period)
+        - rs = maup / madown
+        - rsi = 100 - 100 / (1 + rs)
+    
     The moving average used is the one originally defined by Wilder,
-    the SmoothedMovingAverage
-
+    the SmoothedMovingAverage.
+    
     See:
-      - http://en.wikipedia.org/wiki/Relative_strength_index
-
+        - http://en.wikipedia.org/wiki/Relative_strength_index
+    
     Notes:
-      - ``safediv`` (default: False) If this parameter is True the division
-        rs = maup / madown will be checked for the special cases in which a
-        ``0 / 0`` or ``x / 0`` division will happen
-
-      - ``safehigh`` (default: 100.0) will be used as RSI value for the
-        ``x / 0`` case
-
-      - ``safelow``  (default: 50.0) will be used as RSI value for the
-        ``0 / 0`` case
-
-
+        - ``safediv`` (default: False) If this parameter is True the division
+          rs = maup / madown will be checked for the special cases in which a
+          ``0 / 0`` or ``x / 0`` division will happen
+        - ``safehigh`` (default: 100.0) will be used as RSI value for the
+          ``x / 0`` case
+        - ``safelow``  (default: 50.0) will be used as RSI value for the
+          ``0 / 0`` case"""
     """
 
     alias = (
@@ -189,18 +194,32 @@ class RelativeStrengthIndex(Indicator):
     )
 
     def _plotlabel(self):
-        """ """
+"""Generate plot labels for the indicator.
+        
+Returns::
+            list: A list of labels to be displayed on the plot"""
+        """
         plabels = [self.p.period]
         plabels += [self.p.movav] * self.p.notdefault("movav")
         plabels += [self.p.lookback] * self.p.notdefault("lookback")
         return plabels
 
     def _plotinit(self):
-        """ """
+"""Initialize the plot settings.
+        
+        Sets horizontal lines at the upper and lower band levels."""
+        """
         self.plotinfo.plotyhlines = [self.p.upperband, self.p.lowerband]
 
     def __init__(self):
-        """ """
+"""Initialize the RSI indicator.
+        
+        This method calculates the RSI by:
+        1. Creating UpDay and DownDay indicators
+        2. Applying the moving average to both
+        3. Calculating the relative strength (RS)
+        4. Converting RS to RSI using the formula: RSI = 100 - 100/(1+RS)"""
+        """
         upday = UpDay(self.data, period=self.p.lookback)
         downday = DownDay(self.data, period=self.p.lookback)
         maup = self.p.movav(upday, period=self.p.period)
@@ -216,10 +235,16 @@ class RelativeStrengthIndex(Indicator):
         super(RelativeStrengthIndex, self).__init__()
 
     def _rscalc(self, rsi):
-        """
-
-        :param rsi:
-
+"""Calculate the RS value from a given RSI value.
+        
+        This method performs the inverse calculation of the RSI formula to get
+        the corresponding RS value.
+        
+Args::
+            rsi: The RSI value to convert to RS
+            
+Returns::
+            float: The calculated RS value, or infinity in case of division by zero"""
         """
         try:
             rs = (-100.0 / (rsi - 100.0)) - 1.0
@@ -230,25 +255,26 @@ class RelativeStrengthIndex(Indicator):
 
 
 class RSI_Safe(RSI):
-    """Subclass of RSI which changes parameers ``safediv`` to ``True`` as the
-    default value
-
+"""Safe version of the RSI indicator.
+    
+    Subclass of RSI which changes parameter ``safediv`` to ``True`` as the
+    default value. This ensures that division by zero is handled safely.
+    
     See:
-      - http://en.wikipedia.org/wiki/Relative_strength_index
-
-
+        - http://en.wikipedia.org/wiki/Relative_strength_index"""
     """
 
     params = (("safediv", True),)
 
 
 class RSI_SMA(RSI):
-    """Uses a SimpleMovingAverage as described in Wikipedia and other soures
-
+"""RSI indicator using Simple Moving Average.
+    
+    Uses a SimpleMovingAverage as described in Wikipedia and other sources
+    instead of the default Smoothed Moving Average used by Wilder.
+    
     See:
-      - http://en.wikipedia.org/wiki/Relative_strength_index
-
-
+        - http://en.wikipedia.org/wiki/Relative_strength_index"""
     """
 
     alias = ("RSI_Cutler",)
@@ -257,12 +283,13 @@ class RSI_SMA(RSI):
 
 
 class RSI_EMA(RSI):
-    """Uses an ExponentialMovingAverage as described in Wikipedia
-
+"""RSI indicator using Exponential Moving Average.
+    
+    Uses an ExponentialMovingAverage as described in Wikipedia instead of
+    the default Smoothed Moving Average used by Wilder.
+    
     See:
-      - http://en.wikipedia.org/wiki/Relative_strength_index
-
-
+        - http://en.wikipedia.org/wiki/Relative_strength_index"""
     """
 
     params = (("movav", MovAv.Exponential),)

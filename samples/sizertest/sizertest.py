@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""sizertest.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -32,38 +35,16 @@ import backtrader as bt
 
 
 class CloseSMA(bt.Strategy):
-    """ """
-
-    params = (("period", 15),)
-
-    def __init__(self):
-        """ """
-        sma = bt.indicators.SMA(self.data, period=self.p.period)
-        self.crossover = bt.indicators.CrossOver(self.data, sma)
-
-    def next(self):
-        """ """
-        if self.crossover > 0:
-            self.buy()
-
-        elif self.crossover < 0:
-            self.sell()
-
-
-class LongOnly(bt.Sizer):
-    """ """
-
-    params = (("stake", 1),)
-
-    def _getsizing(self, comminfo, cash, data, isbuy):
-        """
-
-        :param comminfo:
-        :param cash:
-        :param data:
-        :param isbuy:
-
-        """
+""""""
+""""""
+""""""
+""""""
+"""Args::
+    comminfo: 
+    cash: 
+    data: 
+    isbuy:"""
+    isbuy:"""
         if isbuy:
             return self.p.stake
 
@@ -76,69 +57,24 @@ class LongOnly(bt.Sizer):
 
 
 class FixedReverser(bt.Sizer):
-    """ """
-
-    params = (("stake", 1),)
-
-    def _getsizing(self, comminfo, cash, data, isbuy):
-        """
-
-        :param comminfo:
-        :param cash:
-        :param data:
-        :param isbuy:
-
-        """
+""""""
+"""Args::
+    comminfo: 
+    cash: 
+    data: 
+    isbuy:"""
+    isbuy:"""
         position = self.strategy.getposition(data)
         size = self.p.stake * (1 + (position.size != 0))
         return size
 
 
 def runstrat(args=None):
-    """
-
-    :param args:  (Default value = None)
-
-    """
-    args = parse_args(args)
-
-    cerebro = bt.Cerebro()
-    cerebro.broker.set_cash(args.cash)
-
-    dkwargs = dict()
-    if args.fromdate:
-        fromdate = datetime.datetime.strptime(args.fromdate, "%Y-%m-%d")
-        dkwargs["fromdate"] = fromdate
-
-    if args.todate:
-        todate = datetime.datetime.strptime(args.todate, "%Y-%m-%d")
-        dkwargs["todate"] = todate
-
-    data0 = bt.feeds.YahooFinanceCSVData(dataname=args.data0, **dkwargs)
-    cerebro.adddata(data0, name="Data0")
-
-    cerebro.addstrategy(CloseSMA, period=args.period)
-
-    if args.longonly:
-        cerebro.addsizer(LongOnly, stake=args.stake)
-    else:
-        cerebro.addsizer(bt.sizers.FixedReverser, stake=args.stake)
-
-    cerebro.run()
-    if args.plot:
-        pkwargs = dict()
-        if args.plot is not True:  # evals to True but is not True
-            pkwargs = eval("dict(" + args.plot + ")")  # args were passed
-
-        cerebro.plot(**pkwargs)
-
-
-def parse_args(pargs=None):
-    """
-
-    :param pargs:  (Default value = None)
-
-    """
+"""Args::
+    args: (Default value = None)"""
+"""Args::
+    pargs: (Default value = None)"""
+    pargs: (Default value = None)"""
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

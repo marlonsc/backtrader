@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""sigsmacross.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -32,75 +35,17 @@ import backtrader as bt
 
 
 class SmaCross(bt.SignalStrategy):
-    """ """
-
-    params = dict(sma1=10, sma2=20)
-
-    def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
-        if not order.alive():
-            print(
-                "{} {} {}@{}".format(
-                    bt.num2date(order.executed.dt),
-                    "buy" if order.isbuy() else "sell",
-                    order.executed.size,
-                    order.executed.price,
-                )
-            )
-
-    def notify_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
-        if trade.isclosed:
-            print("profit {}".format(trade.pnlcomm))
-
-    def __init__(self):
-        """ """
-        sma1 = bt.ind.SMA(period=self.params.sma1)
-        sma2 = bt.ind.SMA(period=self.params.sma2)
-        crossover = bt.ind.CrossOver(sma1, sma2)
-        self.signal_add(bt.SIGNAL_LONG, crossover)
-
-
-def runstrat(pargs=None):
-    """
-
-    :param pargs:  (Default value = None)
-
-    """
-    args = parse_args(pargs)
-
-    cerebro = bt.Cerebro()
-    cerebro.broker.set_cash(args.cash)
-
-    data0 = bt.feeds.YahooFinanceData(
-        dataname=args.data,
-        fromdate=datetime.datetime.strptime(args.fromdate, "%Y-%m-%d"),
-        todate=datetime.datetime.strptime(args.todate, "%Y-%m-%d"),
-    )
-    cerebro.adddata(data0)
-
-    cerebro.addstrategy(SmaCross, **(eval("dict(" + args.strat + ")")))
-    cerebro.addsizer(bt.sizers.FixedSize, stake=args.stake)
-
-    cerebro.run()
-    if args.plot:
-        cerebro.plot(**(eval("dict(" + args.plot + ")")))
-
-
-def parse_args(pargs=None):
-    """
-
-    :param pargs:  (Default value = None)
-
-    """
+""""""
+"""Args::
+    order:"""
+"""Args::
+    trade:"""
+""""""
+"""Args::
+    pargs: (Default value = None)"""
+"""Args::
+    pargs: (Default value = None)"""
+    pargs: (Default value = None)"""
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

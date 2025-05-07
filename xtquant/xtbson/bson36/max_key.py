@@ -22,68 +22,21 @@ class MaxKey(object):
     _type_marker = 127
 
     def __getstate__(self):
-        """ """
-        return {}
-
-    def __setstate__(self, state):
-        """
-
-        :param state:
-
-        """
-
-    def __eq__(self, other):
-        """
-
-        :param other:
-
-        """
-        return isinstance(other, MaxKey)
-
-    def __hash__(self):
-        """ """
-        return hash(self._type_marker)
-
-    def __ne__(self, other):
-        """
-
-        :param other:
-
-        """
-        return not self == other
-
-    def __le__(self, other):
-        """
-
-        :param other:
-
-        """
-        return isinstance(other, MaxKey)
-
-    def __lt__(self, dummy):
-        """
-
-        :param dummy:
-
-        """
-        return False
-
-    def __ge__(self, dummy):
-        """
-
-        :param dummy:
-
-        """
-        return True
-
-    def __gt__(self, other):
-        """
-
-        :param other:
-
-        """
-        return not isinstance(other, MaxKey)
-
-    def __repr__(self):
-        """ """
+""""""
+"""Args::
+    state:"""
+"""Args::
+    other:"""
+""""""
+"""Args::
+    other:"""
+"""Args::
+    other:"""
+"""Args::
+    dummy:"""
+"""Args::
+    dummy:"""
+"""Args::
+    other:"""
+""""""
         return "MaxKey()"

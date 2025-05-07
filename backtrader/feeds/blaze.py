@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""blaze.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -31,19 +34,12 @@ from backtrader import date2num
 
 class BlazeData(feed.DataBase):
     """Support for `Blaze <blaze.pydata.org>`_ ``Data`` objects.
-
-    Only numeric indices to columns are supported.
-
-    Note:
-
-      - The ``dataname`` parameter is a blaze ``Data`` object
-
-      - A negative value in any of the parameters for the Data lines
-        indicates it's not present in the DataFrame
-        it is
-
-
-    """
+Only numeric indices to columns are supported.
+Note:
+- The ``dataname`` parameter is a blaze ``Data`` object
+- A negative value in any of the parameters for the Data lines
+indicates it's not present in the DataFrame
+it is"""
 
     params = (
         # datetime must be present
@@ -68,14 +64,8 @@ class BlazeData(feed.DataBase):
     ]
 
     def start(self):
-        """ """
-        super(BlazeData, self).start()
-
-        # reset the iterator on each start
-        self._rows = iter(self.p.dataname)
-
-    def _load(self):
-        """ """
+""""""
+""""""
         try:
             row = next(self._rows)
         except StopIteration:

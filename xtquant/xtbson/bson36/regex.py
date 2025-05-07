@@ -20,29 +20,8 @@ from .son import RE_TYPE
 
 
 def str_flags_to_int(str_flags):
-    """
-
-    :param str_flags:
-
-    """
-    flags = 0
-    if "i" in str_flags:
-        flags |= re.IGNORECASE
-    if "l" in str_flags:
-        flags |= re.LOCALE
-    if "m" in str_flags:
-        flags |= re.MULTILINE
-    if "s" in str_flags:
-        flags |= re.DOTALL
-    if "u" in str_flags:
-        flags |= re.UNICODE
-    if "x" in str_flags:
-        flags |= re.VERBOSE
-
-    return flags
-
-
-class Regex(object):
+"""Args::
+    str_flags:"""
     """BSON regular expression data."""
 
     __slots__ = ("pattern", "flags")
@@ -54,32 +33,23 @@ class Regex(object):
 
     @classmethod
     def from_native(cls, regex):
-        """Convert a Python regular expression into a ``Regex`` instance.
+"""Convert a Python regular expression into a ``Regex`` instance.
+Note that in Python 3, a regular expression compiled from a
+:class:`str` has the ``re.UNICODE`` flag set. If it is undesirable
+to store this flag in a BSON regular expression, unset it first::
+:Parameters:
+- `regex`: A regular expression object from ``re.compile()``.
+.. warning::
+Python regular expressions use a different syntax and different
+set of flags than MongoDB, which uses `PCRE`_. A regular
+expression retrieved from the server may not compile in
+Python, or may match a different set of strings in Python than
+when used in a MongoDB query.
+.. _PCRE: http://www.pcre.org/
 
-        Note that in Python 3, a regular expression compiled from a
-        :class:`str` has the ``re.UNICODE`` flag set. If it is undesirable
-        to store this flag in a BSON regular expression, unset it first::
-
-
-        :Parameters:
-          - `regex`: A regular expression object from ``re.compile()``.
-
-        .. warning::
-           Python regular expressions use a different syntax and different
-           set of flags than MongoDB, which uses `PCRE`_. A regular
-           expression retrieved from the server may not compile in
-           Python, or may match a different set of strings in Python than
-           when used in a MongoDB query.
-
-        .. _PCRE: http://www.pcre.org/
-
-        :param regex:
-
-        >>> pattern = re.compile('.*')
-          >>> regex = Regex.from_native(pattern)
-          >>> regex.flags ^= re.UNICODE
-          >>> db.collection.insert_one({'pattern': regex})
-        """
+Args::
+    regex:"""
+    regex:"""
         if not isinstance(regex, RE_TYPE):
             raise TypeError(
                 "regex must be a compiled regular expression, not %s" % type(regex)
@@ -88,20 +58,18 @@ class Regex(object):
         return Regex(regex.pattern, regex.flags)
 
     def __init__(self, pattern, flags=0):
-        """BSON regular expression data.
+"""BSON regular expression data.
+This class is useful to store and retrieve regular expressions that are
+incompatible with Python's regular expression dialect.
+:Parameters:
+- `pattern`: string
+- `flags`: (optional) an integer bitmask, or a string of flag
+characters like "im" for IGNORECASE and MULTILINE
 
-        This class is useful to store and retrieve regular expressions that are
-        incompatible with Python's regular expression dialect.
-
-        :Parameters:
-          - `pattern`: string
-          - `flags`: (optional) an integer bitmask, or a string of flag
-            characters like "im" for IGNORECASE and MULTILINE
-
-        :param pattern:
-        :param flags:  (Default value = 0)
-
-        """
+Args::
+    pattern: 
+    flags: (Default value = 0)"""
+    flags: (Default value = 0)"""
         if not isinstance(pattern, (str, bytes)):
             raise TypeError("pattern must be a string, not %s" % type(pattern))
         self.pattern = pattern
@@ -114,43 +82,18 @@ class Regex(object):
             raise TypeError("flags must be a string or int, not %s" % type(flags))
 
     def __eq__(self, other):
-        """
-
-        :param other:
-
-        """
-        if isinstance(other, Regex):
-            return self.pattern == other.pattern and self.flags == other.flags
-        else:
-            return NotImplemented
-
-    __hash__ = None
-
-    def __ne__(self, other):
-        """
-
-        :param other:
-
-        """
-        return not self == other
-
-    def __repr__(self):
-        """ """
-        return "Regex(%r, %r)" % (self.pattern, self.flags)
-
-    def try_compile(self):
+"""Args::
+    other:"""
+"""Args::
+    other:"""
+""""""
         """Compile this :class:`Regex` as a Python regular expression.
-
-        .. warning::
-           Python regular expressions use a different syntax and different
-           set of flags than MongoDB, which uses `PCRE`_. A regular
-           expression retrieved from the server may not compile in
-           Python, or may match a different set of strings in Python than
-           when used in a MongoDB query. :meth:`try_compile()` may raise
-           :exc:`re.error`.
-
-        .. _PCRE: http://www.pcre.org/
-
-
-        """
+.. warning::
+Python regular expressions use a different syntax and different
+set of flags than MongoDB, which uses `PCRE`_. A regular
+expression retrieved from the server may not compile in
+Python, or may match a different set of strings in Python than
+when used in a MongoDB query. :meth:`try_compile()` may raise
+:exc:`re.error`.
+.. _PCRE: http://www.pcre.org/"""
         return re.compile(self.pattern, self.flags)

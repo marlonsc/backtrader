@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+"""signals-strategy.py module.
+
+Description of the module functionality."""
+
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -46,82 +49,15 @@ EXITSIGNALS = {
 
 
 class SMACloseSignal(bt.Indicator):
-    """ """
-
-    lines = ("signal",)
-    params = (("period", 30),)
-
-    def __init__(self):
-        """ """
-        self.lines.signal = self.data - bt.indicators.SMA(period=self.p.period)
-
-
-class SMAExitSignal(bt.Indicator):
-    """ """
-
-    lines = ("signal",)
-    params = (
-        ("p1", 5),
-        ("p2", 30),
-    )
-
-    def __init__(self):
-        """ """
-        sma1 = bt.indicators.SMA(period=self.p.p1)
-        sma2 = bt.indicators.SMA(period=self.p.p2)
-        self.lines.signal = sma1 - sma2
-
-
-def runstrat(args=None):
-    """
-
-    :param args: (Default value = None)
-
-    """
-    args = parse_args(args)
-
-    cerebro = bt.Cerebro()
-    cerebro.broker.set_cash(args.cash)
-
-    dkwargs = dict()
-    if args.fromdate is not None:
-        fromdate = datetime.datetime.strptime(args.fromdate, "%Y-%m-%d")
-        dkwargs["fromdate"] = fromdate
-
-    if args.todate is not None:
-        todate = datetime.datetime.strptime(args.todate, "%Y-%m-%d")
-        dkwargs["todate"] = todate
-
-    # if dataset is None, args.data has been given
-    data = bt.feeds.BacktraderCSVData(dataname=args.data, **dkwargs)
-    cerebro.adddata(data)
-
-    cerebro.add_signal(MAINSIGNALS[args.signal], SMACloseSignal, period=args.smaperiod)
-
-    if args.exitsignal is not None:
-        cerebro.add_signal(
-            EXITSIGNALS[args.exitsignal],
-            SMAExitSignal,
-            p1=args.exitperiod,
-            p2=args.smaperiod,
-        )
-
-    cerebro.run()
-    if args.plot:
-        pkwargs = dict(style="bar")
-        if args.plot is not True:  # evals to True but is not True
-            npkwargs = eval("dict(" + args.plot + ")")  # args were passed
-            pkwargs.update(npkwargs)
-
-        cerebro.plot(**pkwargs)
-
-
-def parse_args(pargs=None):
-    """
-
-    :param pargs: (Default value = None)
-
-    """
+""""""
+""""""
+""""""
+""""""
+"""Args::
+    args: (Default value = None)"""
+"""Args::
+    pargs: (Default value = None)"""
+    pargs: (Default value = None)"""
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

@@ -1,4 +1,7 @@
-import datetime
+"""fakefeed.py module.
+
+Description of the module functionality."""
+
 import logging
 import math
 from enum import Enum
@@ -9,61 +12,15 @@ _logger = logging.getLogger(__name__)
 
 
 class FakeFeed(bt.DataBase):
-    """ """
-
-    class State(Enum):
-        """ """
-
-        BACKTEST = (0,)
-        BACKFILL = (1,)
-        LIVE = (2,)
-
-    params = (
-        ("starting_value", 200),
-        ("tick_interval", datetime.timedelta(seconds=25)),
-        ("start_delay", 0),
-        (
-            "run_duration",
-            datetime.timedelta(seconds=30),
-        ),  # only used when not backtest mode
-        # number of bars to generate in backtest or backfill mode
-        ("num_gen_bars", 10),
-        ("live", True),
-    )
-
-    def __init__(self):
-        """ """
-        super(FakeFeed, self).__init__()
-
-        self._last_delivered = None
-
-        self._cur_value = None
-        self._current_comp = 0
-        self._num_bars_delivered = 0
-        self._compression_in_effect = None
-        # configure offset cause we are sending slightly delayed ticked data
-        # (of course!)
-        self._tmoffset = datetime.timedelta(seconds=-0.5)
-        self._start_ts = None  # time of the first call to _load to obey start_delay
-
-    def start(self):
-        """ """
-        super(FakeFeed, self).start()
-
-        self._start_ts = datetime.datetime.now()
-        self._cur_value = self.p.starting_value
-
-    def islive(self):
-        """ """
-        return self.p.live
-
-    def _update_line(self, dt, value):
-        """
-
-        :param dt:
-        :param value:
-
-        """
+""""""
+""""""
+""""""
+""""""
+""""""
+"""Args::
+    dt: 
+    value:"""
+    value:"""
         _logger.debug(f"{self._name} - Updating line - Bar Time: {dt} - Value: {value}")
 
         self.lines.datetime[0] = bt.date2num(dt)
@@ -82,15 +39,13 @@ class FakeFeed(bt.DataBase):
         self.lines.openinterest[0] = 0.0
 
     def _update_bar(self, dt, vopen, vlow, vhigh, vclose):
-        """
-
-        :param dt:
-        :param vopen:
-        :param vlow:
-        :param vhigh:
-        :param vclose:
-
-        """
+"""Args::
+    dt: 
+    vopen: 
+    vlow: 
+    vhigh: 
+    vclose:"""
+    vclose:"""
         _logger.debug(f"{self._name} - Updating bar - Bar Time: {dt} - Value: {vclose}")
 
         self.lines.datetime[0] = bt.date2num(dt)
@@ -106,35 +61,11 @@ class FakeFeed(bt.DataBase):
         self.lines.openinterest[0] = 0.0
 
     def _load(self):
-        """ """
-        now = datetime.datetime.now()
-        if now - self._start_ts < datetime.timedelta(seconds=self.p.start_delay):
-            return None
-
-        bars_done = self._num_bars_delivered >= self.p.num_gen_bars
-
-        if self.p.live:
-            if now - self._start_ts > self.p.run_duration:
-                return False
-        else:
-            if bars_done:
-                return False
-
-        if self.p.live:
-            if bars_done:
-                return self._load_live(now)
-            else:
-                return self._load_bar(now, True)
-        else:
-            return self._load_bar(now)
-
-    def _load_bar(self, now, backfill=False):
-        """
-
-        :param now:
-        :param backfill:  (Default value = False)
-
-        """
+""""""
+"""Args::
+    now: 
+    backfill: (Default value = False)"""
+    backfill: (Default value = False)"""
         tf, comp = (
             (self.p.timeframe, self.p.compression)
             if not backfill
@@ -183,13 +114,11 @@ class FakeFeed(bt.DataBase):
 
     @staticmethod
     def _time_floored(now, timeframe, comp=1):
-        """
-
-        :param now:
-        :param timeframe:
-        :param comp:  (Default value = 1)
-
-        """
+"""Args::
+    now: 
+    timeframe: 
+    comp: (Default value = 1)"""
+    comp: (Default value = 1)"""
         t = now
         if timeframe in [bt.TimeFrame.Seconds, bt.TimeFrame.Ticks]:
             t -= datetime.timedelta(seconds=t.second % comp, microseconds=t.microsecond)
@@ -215,11 +144,9 @@ class FakeFeed(bt.DataBase):
         return t
 
     def _load_live(self, now):
-        """
-
-        :param now:
-
-        """
+"""Args::
+    now:"""
+    now:"""
         tf = self.p.timeframe
 
         comp = self.p.compression

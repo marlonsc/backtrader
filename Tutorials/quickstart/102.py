@@ -1,4 +1,7 @@
-# -*- coding: UTF-8 -*-
+"""102.py module.
+
+Description of the module functionality."""
+
 # https://www.backtrader.com/docu/quickstart/quickstart/#adding-a-data-feed
 
 # import
