@@ -38,7 +38,7 @@ from . import (
 from .dataseries import SimpleFilterWrapper, TimeFrame
 from .resamplerfilter import Replayer, Resampler
 from .tradingcal import PandasMarketCalendar
-from .utils.date import Localizer, date2num, num2date, time2num, tzparse
+from .utils.date import localizer, date2num, num2date, time2num, tzparse
 from .utils.py3 import range, string_types, with_metaclass, zip
 
 
@@ -169,7 +169,7 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
         if hasattr(self.lines, "datetime") and hasattr(self.lines.datetime, "_settz"):
             self.lines.datetime._settz(self._tz)
         # This should probably be also called from an override-able method
-        self._tzinput = Localizer(self._gettzinput())
+        self._tzinput = localizer(self._gettzinput())
 
         # Convert user input times to the output timezone (or min/max)
         if self.p.fromdate == "":
@@ -269,7 +269,7 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
 
     def do_qcheck(self, onoff, qlapse):
         """Args:
-    onoff: 
+    onoff:
     qlapse:"""
         # if onoff is True the data will wait p.qcheck for incoming live data
         # on its queue.
@@ -609,7 +609,7 @@ Args:
         """Saves given bar (list of values) to the stack for later retrieval
 
 Args:
-    bar: 
+    bar:
     stash: (Default value = False)"""
         if not stash:
             self._barstack.append(bar)
@@ -638,7 +638,7 @@ Args:
 Returns True if values are present, False otherwise
 
 Args:
-    bar: 
+    bar:
     forward: (Default value = False)
     ago: (Default value = 0)"""
         if forward:

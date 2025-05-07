@@ -46,8 +46,8 @@ class MetaVCData(DataBase.__class__):
         """Class has already been created ... register
 
 Args:
-    name: 
-    bases: 
+    name:
+    bases:
     dct:"""
         # Initialize the class
         super(MetaVCData, cls).__init__(name, bases, dct)
@@ -215,7 +215,7 @@ Args:
         ptz = self.p.tz
         tzstr = isinstance(ptz, string_types)
         if ptz is not None and not tzstr:
-            return bt.utils.date.Localizer(ptz)
+            return bt.utils.date.localizer(ptz)
 
         if self._state == self._ST_NOTFOUND:
             return None  # nothing else can be done
@@ -248,7 +248,7 @@ Args:
                 return None
 
             if isinstance(tzs, tzinfo):
-                return bt.utils.date.Localizer(tzs)
+                return bt.utils.date.localizer(tzs)
 
         if tzs:
             try:
@@ -493,7 +493,7 @@ Args:
 
     def OnNewDataSerieBar(self, DataSerie, forcepush=False):
         """Args:
-    DataSerie: 
+    DataSerie:
     forcepush: (Default value = False)"""
         # Processes the COM Event (also called directly when 1st creating the
         # data serie
@@ -567,8 +567,8 @@ Args:
 
         def OnInternalEvent(self, p1, p2, p3):
             """Args:
-    p1: 
-    p2: 
+    p1:
+    p2:
     p3:"""
             if p1 != 1:  # Apparently "Connection Event"
                 return

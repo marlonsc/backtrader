@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2024 Daniel Rodriguez
+# Copyright (c) 2025 backtrader contributors
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,6 +18,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
+"""
+Commission info module for Backtrader.
+
+Defines base classes for commission schemes and related logic. All commission
+schemes should inherit from CommInfoBase or CommissionInfo. See class and method
+docstrings for usage details.
+"""
 from __future__ import (
     absolute_import,
     division,
@@ -164,7 +171,7 @@ Args:
         """Returns the needed size to meet a cash operation at a given price
 
 Args:
-    price: 
+    price:
     cash:"""
         if not self._stocklike:
             return int(self.p.leverage * (cash // self.get_margin(price)))
@@ -175,7 +182,7 @@ Args:
         """Returns the needed amount of cash an operation would cost
 
 Args:
-    size: 
+    size:
     price:"""
         if not self._stocklike:
             return abs(size) * self.get_margin(price)
@@ -187,7 +194,7 @@ Args:
 objects it is fixed at size * margin
 
 Args:
-    size: 
+    size:
     price:"""
         if not self._stocklike:
             return abs(size) * self.get_margin(price)
@@ -199,7 +206,7 @@ Args:
 objects it is fixed at size * margin
 
 Args:
-    position: 
+    position:
     price:"""
         if not self._stocklike:
             return abs(position.size) * self.get_margin(price)
@@ -218,8 +225,8 @@ Args:
 pseudoexec: if True the operation has not yet been executed
 
 Args:
-    size: 
-    price: 
+    size:
+    price:
     pseudoexec:"""
         if self._commtype == self.COMM_PERC:
             return abs(size) * self.p.commission * price
@@ -230,20 +237,20 @@ Args:
         """Calculates the commission of an operation at a given price
 
 Args:
-    size: 
+    size:
     price:"""
         return self._getcommission(size, price, pseudoexec=True)
 
     def confirmexec(self, size, price):
         """Args:
-    size: 
+    size:
     price:"""
         return self._getcommission(size, price, pseudoexec=False)
 
     def profitandloss(self, size, price, newprice):
         """Args:
-    size: 
-    price: 
+    size:
+    price:
     newprice:"""
         return size * (newprice - price) * self.p.mult
 
@@ -251,8 +258,8 @@ Args:
         """Calculates cash adjustment for a given price difference
 
 Args:
-    size: 
-    price: 
+    size:
+    price:
     newprice:"""
         if not self._stocklike:
             return size * (newprice - price) * self.p.mult
@@ -263,8 +270,8 @@ Args:
         """Calculates the credit due for short selling or product specific
 
 Args:
-    data: 
-    pos: 
+    data:
+    pos:
     dt:"""
         size, price = pos.size, pos.price
 

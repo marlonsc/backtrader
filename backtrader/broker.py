@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2024 Daniel Rodriguez
+# Copyright (c) 2025 backtrader contributors
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,6 +18,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
+"""
+Broker module for Backtrader.
+
+Provides base classes and metaclasses for brokers, which manage commission,
+order handling, and fund mode support. All brokers should inherit from BrokerBase.
+See class and method docstrings for usage details.
+"""
 from __future__ import (
     absolute_import,
     division,
@@ -40,8 +47,8 @@ class MetaBroker(MetaParams):
         """Class has already been created ... fill missing methods if needed be
 
 Args:
-    name: 
-    bases: 
+    name:
+    bases:
     dct:"""
         # Initialize the class
         new_cls = super(MetaBroker, cls).__new__(cls, name, bases, dct)
@@ -88,7 +95,7 @@ class BrokerBase(with_metaclass(MetaBroker, object)):
         """Add order history. See cerebro for details
 
 Args:
-    orders: 
+    orders:
     notify: (Default value = False)"""
         raise NotImplementedError
 
@@ -161,7 +168,7 @@ Args:
 ``name`` is ``None``
 
 Args:
-    comminfo: 
+    comminfo:
     name: (Default value = None)"""
         self.comminfo[name] = comminfo
 
@@ -191,7 +198,7 @@ Args:
 If the argument fundstartval is not ``None``, it will used
 
 Args:
-    fundmode: 
+    fundmode:
     fundstartval: (Default value = None)"""
         pass  # do nothing, not all brokers can support this
 
@@ -232,9 +239,9 @@ Args:
         **kwargs,
     ):
         """Args:
-    owner: 
-    data: 
-    size: 
+    owner:
+    data:
+    size:
     price: (Default value = None)
     plimit: (Default value = None)
     exectype: (Default value = None)
@@ -262,9 +269,9 @@ Args:
         **kwargs,
     ):
         """Args:
-    owner: 
-    data: 
-    size: 
+    owner:
+    data:
+    size:
     price: (Default value = None)
     plimit: (Default value = None)
     exectype: (Default value = None)

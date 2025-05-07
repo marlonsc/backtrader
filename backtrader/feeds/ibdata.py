@@ -49,8 +49,8 @@ class MetaIBData(DataBase.__class__):
         """Class has already been created ... register
 
 Args:
-    name: 
-    bases: 
+    name:
+    bases:
     dct:"""
         # Initialize the class
         super(MetaIBData, cls).__init__(name, bases, dct)
@@ -190,7 +190,7 @@ WAR-GOOG-EUR-FWB-20201117-'001'-15000-C"""
         # documented and one of the abbreviations may fail
         tzstr = isinstance(self.p.tz, string_types)
         if self.p.tz is not None and not tzstr:
-            return bt.utils.date.Localizer(self.p.tz)
+            return bt.utils.date.localizer(self.p.tz)
 
         if self.contractdetails is None:
             return None  # nothing can be done
@@ -520,7 +520,7 @@ Args:
 
     def onliveupdate(self, bars, hasNewBar):
         """Args:
-    bars: 
+    bars:
     hasNewBar:"""
         # 对于hisorical数据，bars保存reqhistoricaEnd开始的所有数据
         # bars长度为0，表示未接收到update数据
@@ -829,7 +829,7 @@ Args:
 
     def _load_rtbar(self, rtbar, hist=False):
         """Args:
-    rtbar: 
+    rtbar:
     hist: (Default value = False)"""
         # A complete 5 second bar made of real-time ticks is delivered and
         # contains open/high/low/close/volume prices
@@ -880,7 +880,7 @@ Args:
 
     def _load_rtticks(self, tick, hist=False):
         """Args:
-    tick: 
+    tick:
     hist: (Default value = False)"""
 
         dt = date2num(tick.datetime if not hist else tick.date)

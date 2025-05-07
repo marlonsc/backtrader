@@ -6241,7 +6241,7 @@ backtrader/utils/autodict.py:228:4: C0112: Empty method docstring (empty-docstri
 ************* Module backtrader.backtrader.utils.dateintern
 backtrader/utils/dateintern.py:1:0: C0114: Missing module docstring (missing-module-docstring)
 backtrader/utils/dateintern.py:65:8: C0415: Import outside toplevel (pytz) (import-outside-toplevel)
-backtrader/utils/dateintern.py:81:0: C0103: Function name "Localizer" doesn't conform to snake_case naming style (invalid-name)
+backtrader/utils/dateintern.py:81:0: C0103: Function name "localizer" doesn't conform to snake_case naming style (invalid-name)
 backtrader/utils/dateintern.py:87:4: C0415: Import outside toplevel (types) (import-outside-toplevel)
 backtrader/utils/dateintern.py:150:8: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
 backtrader/utils/dateintern.py:161:8: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)

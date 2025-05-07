@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+"""This module contains utility functions and classes for the backtrader library.
+"""
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #

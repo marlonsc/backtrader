@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2024 Daniel Rodriguez
+# Copyright (c) 2025 backtrader contributors
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,8 +19,11 @@
 #
 ###############################################################################
 """
-Analyzer module for Backtrader. Provides base classes and metaclasses for analyzers,
-which are used to compute and report statistics and results from strategies.
+Analyzer module for Backtrader.
+
+Provides base classes and metaclasses for analyzers, which are used to compute and
+report statistics and results from strategies. All analyzers should inherit from
+Analyzer. See class and method docstrings for usage details.
 """
 
 from __future__ import (
@@ -169,7 +172,7 @@ implementation dependent)"""
 
     def _notify_cashvalue(self, cash, value):
         """Args:
-    cash: 
+    cash:
     value:"""
         for child in self._children:
             child._notify_cashvalue(cash, value)
@@ -178,9 +181,9 @@ implementation dependent)"""
 
     def _notify_fund(self, cash, value, fundvalue, shares):
         """Args:
-    cash: 
-    value: 
-    fundvalue: 
+    cash:
+    value:
+    fundvalue:
     shares:"""
         for child in self._children:
             child._notify_fund(cash, value, fundvalue, shares)
@@ -235,16 +238,16 @@ implementation dependent)"""
         """Receives the cash/value notification before each next cycle
 
 Args:
-    cash: 
+    cash:
     value:"""
 
     def notify_fund(self, cash, value, fundvalue, shares):
         """Receives the current cash, value, fundvalue and fund shares
 
 Args:
-    cash: 
-    value: 
-    fundvalue: 
+    cash:
+    value:
+    fundvalue:
     shares:"""
 
     def notify_order(self, order):

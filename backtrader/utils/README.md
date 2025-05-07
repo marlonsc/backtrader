@@ -35,6 +35,8 @@ File with .md extension.
 
 ### py3.py
 
+Python 3+ compatibility helpers. Provides utility functions and type aliases to smooth over minor differences between Python 3.x versions. No Python 2 support remains.
+
 ### timer.py
 
 ## Directory Summary

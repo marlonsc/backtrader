@@ -38,8 +38,8 @@ class MetaChainer(bt.DataBase.__class__):
         """Class has already been created ... register
 
 Args:
-    name: 
-    bases: 
+    name:
+    bases:
     dct:"""
         # Initialize the class
         super(MetaChainer, cls).__init__(name, bases, dct)
@@ -101,7 +101,7 @@ class Chainer(bt.with_metaclass(MetaChainer, bt.DataBase)):
         """
         if self._args:
             return self._args[0]._gettz()
-        return bt.utils.date.Localizer(self.p.tz)
+        return bt.utils.date.localizer(self.p.tz)
 
     def _load(self):
         """ """

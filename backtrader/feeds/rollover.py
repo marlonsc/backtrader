@@ -37,8 +37,8 @@ class MetaRollOver(bt.DataBase.__class__):
         """Class has already been created ... register
 
 Args:
-    name: 
-    bases: 
+    name:
+    bases:
     dct:"""
         # Initialize the class
         super(MetaRollOver, cls).__init__(name, bases, dct)
@@ -106,11 +106,11 @@ Returns:
         """
         if self._rolls:
             return self._rolls[0]._gettz()
-        return bt.utils.date.Localizer(self.p.tz)
+        return bt.utils.date.localizer(self.p.tz)
 
     def _checkdate(self, dt, d):
         """Args:
-    dt: 
+    dt:
     d:"""
         if self.p.checkdate is not None:
             return self.p.checkdate(dt, d)
@@ -119,7 +119,7 @@ Returns:
 
     def _checkcondition(self, d0, d1):
         """Args:
-    d0: 
+    d0:
     d1:"""
         if self.p.checkcondition is not None:
             return self.p.checkcondition(d0, d1)
