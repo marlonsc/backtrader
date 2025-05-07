@@ -33,17 +33,13 @@ from backtrader import Order, Position
 
 class Transactions(bt.Analyzer):
     """This analyzer reports the transactions occurred with each an every data in
-    the system
+the system
+It looks at the order execution bits to create a ``Position`` starting from
+0 during each ``next`` cycle.
+The result is used during next to record the transactions
 
-    It looks at the order execution bits to create a ``Position`` starting from
-    0 during each ``next`` cycle.
-
-    The result is used during next to record the transactions
-
-
-    :returns: each return as keys
-
-    """
+Returns:
+    each return as keys"""
 
     params = (
         ("headers", False),
@@ -60,11 +56,8 @@ class Transactions(bt.Analyzer):
         self._idnames = list(enumerate(self.strategy.getdatanames()))
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         # An order could have several partial executions per cycle (unlikely
         # but possible) and therefore: collect each new execution notification
         # and let the work for next

@@ -34,26 +34,23 @@ from .utils.py3 import cmp, range
 
 # Generate a List equivalent which uses "is" for contains
 class List(list):
-    """ """
+    """List subclass using 'is' for contains. All docstrings and comments must be
+    line-wrapped at 90 characters or less.
+    """
 
     def __contains__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return any(x.__hash__() == other.__hash__() for x in self)
 
 
 class Logic(LineActions):
-    """ """
+    """Base class for logic operations on line objects. All docstrings and comments
+    must be line-wrapped at 90 characters or less.
+    """
 
     def __init__(self, *args):
-        """
-
-        :param *args:
-
-        """
+        """"""
         super(Logic, self).__init__()
         self.args = [self.arrayize(arg) for arg in args]
 
@@ -67,13 +64,10 @@ class DivByZero(Logic):
     """
 
     def __init__(self, a, b, zero=0.0):
-        """
-
-        :param a:
-        :param b:
-        :param zero:  (Default value = 0.0)
-
-        """
+        """Args:
+    a: 
+    b: 
+    zero: (Default value = 0.0)"""
         super(DivByZero, self).__init__(a, b)
         self.a = a
         self.b = b
@@ -85,12 +79,9 @@ class DivByZero(Logic):
         self[0] = self.a[0] / b if b else self.zero
 
     def once(self, start, end):
-        """
-
-        :param start:
-        :param end:
-
-        """
+        """Args:
+    start: 
+    end:"""
         # cache python dictionary lookups
         dst = self.array
         srca = self.a.array
@@ -112,14 +103,11 @@ class DivZeroByZero(Logic):
     """
 
     def __init__(self, a, b, single=float("inf"), dual=0.0):
-        """
-
-        :param a:
-        :param b:
-        :param single:  (Default value = float("inf"))
-        :param dual:  (Default value = 0.0)
-
-        """
+        """Args:
+    a: 
+    b: 
+    single: (Default value = float("inf"))
+    dual: (Default value = 0.0)"""
         super(DivZeroByZero, self).__init__(a, b)
         self.a = a
         self.b = b
@@ -136,12 +124,9 @@ class DivZeroByZero(Logic):
             self[0] = self.a[0] / b
 
     def once(self, start, end):
-        """
-
-        :param start:
-        :param end:
-
-        """
+        """Args:
+    start: 
+    end:"""
         # cache python dictionary lookups
         dst = self.array
         srca = self.a.array
@@ -159,15 +144,14 @@ class DivZeroByZero(Logic):
 
 
 class Cmp(Logic):
-    """ """
+    """Compares two line objects element-wise. All docstrings and comments must be
+    line-wrapped at 90 characters or less.
+    """
 
     def __init__(self, a, b):
-        """
-
-        :param a:
-        :param b:
-
-        """
+        """Args:
+    a: 
+    b:"""
         super(Cmp, self).__init__(a, b)
         self.a = self.args[0]
         self.b = self.args[1]
@@ -177,12 +161,9 @@ class Cmp(Logic):
         self[0] = cmp(self.a[0], self.b[0])
 
     def once(self, start, end):
-        """
-
-        :param start:
-        :param end:
-
-        """
+        """Args:
+    start: 
+    end:"""
         # cache python dictionary lookups
         dst = self.array
         srca = self.a.array
@@ -193,18 +174,17 @@ class Cmp(Logic):
 
 
 class CmpEx(Logic):
-    """ """
+    """Extended comparison logic for line objects. All docstrings and comments must
+    be line-wrapped at 90 characters or less.
+    """
 
     def __init__(self, a, b, r1, r2, r3):
-        """
-
-        :param a:
-        :param b:
-        :param r1:
-        :param r2:
-        :param r3:
-
-        """
+        """Args:
+    a: 
+    b: 
+    r1: 
+    r2: 
+    r3:"""
         super(CmpEx, self).__init__(a, b, r1, r2, r3)
         self.a = self.args[0]
         self.b = self.args[1]
@@ -217,12 +197,9 @@ class CmpEx(Logic):
         self[0] = cmp(self.a[0], self.b[0])
 
     def once(self, start, end):
-        """
-
-        :param start:
-        :param end:
-
-        """
+        """Args:
+    start: 
+    end:"""
         # cache python dictionary lookups
         dst = self.array
         srca = self.a.array
@@ -244,16 +221,15 @@ class CmpEx(Logic):
 
 
 class If(Logic):
-    """ """
+    """Implements conditional logic for line objects. All docstrings and comments
+    must be line-wrapped at 90 characters or less.
+    """
 
     def __init__(self, cond, a, b):
-        """
-
-        :param cond:
-        :param a:
-        :param b:
-
-        """
+        """Args:
+    cond: 
+    a: 
+    b:"""
         super(If, self).__init__(a, b)
         self.a = self.args[0]
         self.b = self.args[1]
@@ -264,12 +240,9 @@ class If(Logic):
         self[0] = self.a[0] if self.cond[0] else self.b[0]
 
     def once(self, start, end):
-        """
-
-        :param start:
-        :param end:
-
-        """
+        """Args:
+    start: 
+    end:"""
         # cache python dictionary lookups
         dst = self.array
         srca = self.a.array
@@ -281,80 +254,92 @@ class If(Logic):
 
 
 class MultiLogic(Logic):
-    """ """
+    """Base class for multi-argument logic operations. All docstrings and comments
+    must be line-wrapped at 90 characters or less.
+    """
+
+    flogic = None
 
     def next(self):
         """ """
-        self[0] = self.flogic([arg[0] for arg in self.args])
+        flogic = type(self).flogic
+        if flogic is None or not callable(flogic):
+            raise NotImplementedError(
+                "flogic must be defined in subclass and callable."
+            )
+        self[0] = flogic(*[arg[0] for arg in self.args])
 
     def once(self, start, end):
-        """
-
-        :param start:
-        :param end:
-
-        """
+        """Args:
+    start: 
+    end:"""
         # cache python dictionary lookups
         dst = self.array
         arrays = [arg.array for arg in self.args]
-        flogic = self.flogic
-
+        flogic = type(self).flogic
+        if flogic is None or not callable(flogic):
+            raise NotImplementedError(
+                "flogic must be defined in subclass and callable."
+            )
         for i in range(start, end):
-            dst[i] = flogic([arr[i] for arr in arrays])
+            dst[i] = flogic(*[arr[i] for arr in arrays])
 
 
 class SingleLogic(Logic):
-    """ """
+    """Base class for single-argument logic operations. All docstrings and comments
+    must be line-wrapped at 90 characters or less.
+    """
+
+    flogic = None
 
     def next(self):
         """ """
-        self[0] = self.flogic(self.args[0])
+        flogic = type(self).flogic
+        if flogic is None or not callable(flogic):
+            raise NotImplementedError(
+                "flogic must be defined in subclass and callable."
+            )
+        self[0] = flogic(self.args[0][0])
 
     def once(self, start, end):
-        """
-
-        :param start:
-        :param end:
-
-        """
+        """Args:
+    start: 
+    end:"""
         # cache python dictionary lookups
         dst = self.array
-        flogic = self.flogic
-
+        flogic = type(self).flogic
+        if flogic is None or not callable(flogic):
+            raise NotImplementedError(
+                "flogic must be defined in subclass and callable."
+            )
         for i in range(start, end):
             dst[i] = flogic(self.args[0].array[i])
 
 
 class MultiLogicReduce(MultiLogic):
-    """ """
+    """Base class for multi-argument logic operations with reduction. All docstrings
+    and comments must be line-wrapped at 90 characters or less.
+    """
 
     def __init__(self, *args, **kwargs):
-        """
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """"""
         super(MultiLogicReduce, self).__init__(*args)
         if "initializer" not in kwargs:
-            self.flogic = functools.partial(functools.reduce, self.flogic)
+            self.flogic = lambda *a: functools.reduce(type(self).flogic, a)
         else:
-            self.flogic = functools.partial(
-                functools.reduce, self.flogic, initializer=kwargs["initializer"]
+            self.flogic = lambda *a: functools.reduce(
+                type(self).flogic, a, kwargs["initializer"]
             )
 
 
 class Reduce(MultiLogicReduce):
-    """ """
+    """Reduces multiple arguments using a specified logic function. All docstrings
+    and comments must be line-wrapped at 90 characters or less.
+    """
 
     def __init__(self, flogic, *args, **kwargs):
-        """
-
-        :param flogic:
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Args:
+    flogic:"""
         self.flogic = flogic
         super(Reduce, self).__init__(*args, **kwargs)
 
@@ -362,86 +347,122 @@ class Reduce(MultiLogicReduce):
 # The _xxxlogic functions are defined at module scope to make them
 # pickable and therefore compatible with multiprocessing
 def _andlogic(x, y):
-    """
-
-    :param x:
-    :param y:
-
-    """
+    """Args:
+    x: 
+    y:"""
     return bool(x and y)
 
 
 class And(MultiLogicReduce):
-    """ """
+    """Logical AND reduction for multiple arguments. All docstrings and comments must
+    be line-wrapped at 90 characters or less.
+    """
 
-    flogic = staticmethod(_andlogic)
+    flogic = _andlogic
 
 
 def _orlogic(x, y):
-    """
-
-    :param x:
-    :param y:
-
-    """
+    """Args:
+    x: 
+    y:"""
     return bool(x or y)
 
 
 class Or(MultiLogicReduce):
-    """ """
+    """Logical OR reduction for multiple arguments. All docstrings and comments must
+    be line-wrapped at 90 characters or less.
+    """
 
-    flogic = staticmethod(_orlogic)
+    flogic = _orlogic
+
+
+def _maxlogic(*args):
+    return max(args)
+
+
+def _minlogic(*args):
+    return min(args)
+
+
+def _sumlogic(*args):
+    return math.fsum(args)
+
+
+def _anylogic(*args):
+    return any(args)
+
+
+def _alllogic(*args):
+    return all(args)
 
 
 class Max(MultiLogic):
-    """ """
+    """Element-wise maximum for multiple arguments. All docstrings and comments must
+    be line-wrapped at 90 characters or less.
+    """
 
-    flogic = max
+    flogic = _maxlogic
 
 
 class Min(MultiLogic):
-    """ """
+    """Element-wise minimum for multiple arguments. All docstrings and comments must
+    be line-wrapped at 90 characters or less.
+    """
 
-    flogic = min
+    flogic = _minlogic
 
 
 class Sum(MultiLogic):
-    """ """
+    """Element-wise sum for multiple arguments. All docstrings and comments must be
+    line-wrapped at 90 characters or less.
+    """
 
-    flogic = math.fsum
+    flogic = _sumlogic
 
 
 class Any(MultiLogic):
-    """ """
+    """Element-wise any() for multiple arguments. All docstrings and comments must be
+    line-wrapped at 90 characters or less.
+    """
 
-    flogic = any
+    flogic = _anylogic
 
 
 class All(MultiLogic):
-    """ """
+    """Element-wise all() for multiple arguments. All docstrings and comments must be
+    line-wrapped at 90 characters or less.
+    """
 
-    flogic = all
+    flogic = _alllogic
 
 
 class Log(SingleLogic):
-    """ """
+    """Element-wise log10 for a single argument. All docstrings and comments must be
+    line-wrapped at 90 characters or less.
+    """
 
     flogic = math.log10
 
 
 class Ceiling(SingleLogic):
-    """ """
+    """Element-wise ceiling for a single argument. All docstrings and comments must
+    be line-wrapped at 90 characters or less.
+    """
 
     flogic = math.ceil
 
 
 class Floor(SingleLogic):
-    """ """
+    """Element-wise floor for a single argument. All docstrings and comments must be
+    line-wrapped at 90 characters or less.
+    """
 
     flogic = math.floor
 
 
 class Abs(SingleLogic):
-    """ """
+    """Element-wise absolute value for a single argument. All docstrings and comments
+    must be line-wrapped at 90 characters or less.
+    """
 
     flogic = math.fabs

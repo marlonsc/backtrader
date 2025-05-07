@@ -5,25 +5,20 @@ from polars import Series as plSeries
 
 def calculate_true_range(high: plSeries, low: plSeries, close: plSeries) -> plSeries:
     """The calculate_true_range function calculates the True Range (TR) for a given
-    set of high, low, and close prices.
-    The True Range is a measure of market volatility and is used in the
-    calculation of the Average True Range (ATR).
-    The True Range is the maximum of the following three values:
-    1. The difference between the current high and low prices.
-    2. The absolute value of the difference between the current high and the
-    previous close.
-    3. The absolute value of the difference between the current low and the
-    previous close.
+set of high, low, and close prices.
+The True Range is a measure of market volatility and is used in the
+calculation of the Average True Range (ATR).
+The True Range is the maximum of the following three values:
+1. The difference between the current high and low prices.
+2. The absolute value of the difference between the current high and the
+previous close.
+3. The absolute value of the difference between the current low and the
+previous close.
 
-    :param high:
-    :type high: plSeries
-    :param low:
-    :type low: plSeries
-    :param close:
-    :type close: plSeries
-    :rtype: plSeries
-
-    """
+Args:
+    high: 
+    low: 
+    close:"""
     # Maximum difference between high and low prices
     tr1 = high - low
     # Absolute difference between high and the previous close
@@ -50,19 +45,13 @@ def calculate_atr(
     high: plSeries, low: plSeries, close: plSeries, period: int = 5
 ) -> plSeries:
     """Calculate the Average True Range (ATR) for a given set of high, low, and
-    close prices over a specified period.
+close prices over a specified period.
 
-    :param high:
-    :type high: plSeries
-    :param low:
-    :type low: plSeries
-    :param close:
-    :type close: plSeries
-    :param period:  (Default value = 5)
-    :type period: int
-    :rtype: plSeries
-
-    """
+Args:
+    high: 
+    low: 
+    close: 
+    period: (Default value = 5)"""
     true_range: plSeries = calculate_true_range(high, low, close)
     atr = true_range.select(
         pl.col("true_range").rolling_mean(window_size=period).alias("ATR")

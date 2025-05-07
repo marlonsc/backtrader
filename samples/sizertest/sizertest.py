@@ -56,14 +56,11 @@ class LongOnly(bt.Sizer):
     params = (("stake", 1),)
 
     def _getsizing(self, comminfo, cash, data, isbuy):
-        """
-
-        :param comminfo:
-        :param cash:
-        :param data:
-        :param isbuy:
-
-        """
+        """Args:
+    comminfo: 
+    cash: 
+    data: 
+    isbuy:"""
         if isbuy:
             return self.p.stake
 
@@ -81,25 +78,19 @@ class FixedReverser(bt.Sizer):
     params = (("stake", 1),)
 
     def _getsizing(self, comminfo, cash, data, isbuy):
-        """
-
-        :param comminfo:
-        :param cash:
-        :param data:
-        :param isbuy:
-
-        """
+        """Args:
+    comminfo: 
+    cash: 
+    data: 
+    isbuy:"""
         position = self.strategy.getposition(data)
         size = self.p.stake * (1 + (position.size != 0))
         return size
 
 
 def runstrat(args=None):
-    """
-
-    :param args:  (Default value = None)
-
-    """
+    """Args:
+    args: (Default value = None)"""
     args = parse_args(args)
 
     cerebro = bt.Cerebro()
@@ -134,11 +125,8 @@ def runstrat(args=None):
 
 
 def parse_args(pargs=None):
-    """
-
-    :param pargs:  (Default value = None)
-
-    """
+    """Args:
+    pargs: (Default value = None)"""
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

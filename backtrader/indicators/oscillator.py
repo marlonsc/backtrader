@@ -32,19 +32,13 @@ from . import Indicator, MovingAverage
 
 class OscillatorMixIn(Indicator):
     """MixIn class to create a subclass with another indicator. The main line of
-    that indicator will be substracted from the other base class main line
-    creating an oscillator
-
-    The usage is:
-
-      - Class XXXOscillator(XXX, OscillatorMixIn)
-
-    Formula:
-      - XXX calculates lines[0]
-      - osc = self.data - XXX.lines[0]
-
-
-    """
+that indicator will be substracted from the other base class main line
+creating an oscillator
+The usage is:
+- Class XXXOscillator(XXX, OscillatorMixIn)
+Formula:
+- XXX calculates lines[0]
+- osc = self.data - XXX.lines[0]"""
 
     plotlines = dict(_0=dict(_name="osc"))
 
@@ -64,25 +58,17 @@ class OscillatorMixIn(Indicator):
 
 class Oscillator(Indicator):
     """Oscillation of a given data around another data
-
-    Datas:
-      This indicator can accept 1 or 2 datas for the calculation.
-
-      - If 1 data is provided, it must be a complex "Lines" object (indicator)
-        which also has "datas". Example: A moving average
-
-        The calculated oscillation will be that of the Moving Average (in the
-        example) around the data that was used for the average calculation
-
-      - If 2 datas are provided the calculated oscillation will be that of the
-        2nd data around the 1st data
-
-    Formula:
-      - 1 data -> osc = data.data - data
-      - 2 datas -> osc = data0 - data1
-
-
-    """
+Datas:
+This indicator can accept 1 or 2 datas for the calculation.
+- If 1 data is provided, it must be a complex "Lines" object (indicator)
+which also has "datas". Example: A moving average
+The calculated oscillation will be that of the Moving Average (in the
+example) around the data that was used for the average calculation
+- If 2 datas are provided the calculated oscillation will be that of the
+2nd data around the 1st data
+Formula:
+- 1 data -> osc = data.data - data
+- 2 datas -> osc = data0 - data1"""
 
     lines = ("osc",)
 

@@ -71,12 +71,9 @@ class TheStrategy(bt.Strategy):
 
 
 def checkdate(dt, d):
-    """
-
-    :param dt:
-    :param d:
-
-    """
+    """Args:
+    dt: 
+    d:"""
     # Check if the date is in the week where the 3rd friday of Mar/Jun/Sep/Dec
 
     # EuroStoxx50 expiry codes: MY
@@ -109,21 +106,15 @@ def checkdate(dt, d):
 
 
 def checkvolume(d0, d1):
-    """
-
-    :param d0:
-    :param d1:
-
-    """
+    """Args:
+    d0: 
+    d1:"""
     return d0.volume[0] < d1.volume[0]  # Switch if volume from d0 < d1
 
 
 def runstrat(args=None):
-    """
-
-    :param args:  (Default value = None)
-
-    """
+    """Args:
+    args: (Default value = None)"""
     args = parse_args(args)
 
     cerebro = bt.Cerebro()
@@ -161,11 +152,8 @@ def runstrat(args=None):
 
 
 def parse_args(pargs=None):
-    """
-
-    :param pargs:  (Default value = None)
-
-    """
+    """Args:
+    pargs: (Default value = None)"""
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

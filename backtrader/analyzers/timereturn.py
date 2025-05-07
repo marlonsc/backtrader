@@ -30,12 +30,10 @@ from backtrader import TimeFrameAnalyzerBase
 
 class TimeReturn(TimeFrameAnalyzerBase):
     """This analyzer calculates the Returns by looking at the beginning
-    and end of the timeframe
+and end of the timeframe
 
-
-    :returns: each return as keys
-
-    """
+Returns:
+    each return as keys"""
 
     params = (
         ("data", None),
@@ -61,14 +59,11 @@ class TimeReturn(TimeFrameAnalyzerBase):
                 self._lastvalue = self.strategy.broker.fundvalue
 
     def notify_fund(self, cash, value, fundvalue, shares):
-        """
-
-        :param cash:
-        :param value:
-        :param fundvalue:
-        :param shares:
-
-        """
+        """Args:
+    cash: 
+    value: 
+    fundvalue: 
+    shares:"""
         if not self._fundmode:
             # Record current value
             if self.p.data is None:

@@ -45,11 +45,10 @@ class MetaVCData(DataBase.__class__):
     def __init__(cls, name, bases, dct):
         """Class has already been created ... register
 
-        :param name:
-        :param bases:
-        :param dct:
-
-        """
+Args:
+    name: 
+    bases: 
+    dct:"""
         # Initialize the class
         super(MetaVCData, cls).__init__(name, bases, dct)
 
@@ -202,12 +201,10 @@ class VCData(with_metaclass(MetaVCData, DataBase)):
 
     def _gettz(self, tzin=False):
         """Returns the default output timezone for the data
+This defaults to be the timezone in which the market is traded
 
-        This defaults to be the timezone in which the market is traded
-
-        :param tzin:  (Default value = False)
-
-        """
+Args:
+    tzin: (Default value = False)"""
         # If no object has been provided by the user and a timezone can be
         # found via contractdtails, then try to get it from pytz, which may or
         # may not be available.
@@ -273,11 +270,7 @@ class VCData(with_metaclass(MetaVCData, DataBase)):
         return True
 
     def __init__(self, **kwargs):
-        """
-
-        :param **kwargs:
-
-        """
+        """"""
         self.store = vcstore.VCStore(**kwargs)
 
         # Correct a copy past directly from VisualChart
@@ -297,11 +290,10 @@ class VCData(with_metaclass(MetaVCData, DataBase)):
 
     def setenvironment(self, env):
         """Receives an environment (cerebro) and passes it over to the store it
-        belongs to
+belongs to
 
-        :param env:
-
-        """
+Args:
+    env:"""
         super(VCData, self).setenvironment(env)
         env.addstore(self.store)
 
@@ -413,11 +405,8 @@ class VCData(with_metaclass(MetaVCData, DataBase)):
             self.store._canceldirectdata(self.q)
 
     def _setserie(self, serie):
-        """
-
-        :param serie:
-
-        """
+        """Args:
+    serie:"""
         # Accepts a serie (COM Object) to use in ping events
         self._serie = serie
 
@@ -503,12 +492,9 @@ class VCData(with_metaclass(MetaVCData, DataBase)):
         return self._pingtmout
 
     def OnNewDataSerieBar(self, DataSerie, forcepush=False):
-        """
-
-        :param DataSerie:
-        :param forcepush:  (Default value = False)
-
-        """
+        """Args:
+    DataSerie: 
+    forcepush: (Default value = False)"""
         # Processes the COM Event (also called directly when 1st creating the
         # data serie
         ssize = DataSerie.Size
@@ -580,13 +566,10 @@ class VCData(with_metaclass(MetaVCData, DataBase)):
     if False:
 
         def OnInternalEvent(self, p1, p2, p3):
-            """
-
-            :param p1:
-            :param p2:
-            :param p3:
-
-            """
+            """Args:
+    p1: 
+    p2: 
+    p3:"""
             if p1 != 1:  # Apparently "Connection Event"
                 return
 
@@ -599,11 +582,8 @@ class VCData(with_metaclass(MetaVCData, DataBase)):
             self.store._vcrt_connection(self.store._RT_BASEMSG - p2)
 
     def OnNewTicks(self, ArrayTicks):
-        """
-
-        :param ArrayTicks:
-
-        """
+        """Args:
+    ArrayTicks:"""
         # Process the COM Event for New Ticks. This is only used temporarily
         # for 2 purposes
         #
@@ -654,11 +634,8 @@ class VCData(with_metaclass(MetaVCData, DataBase)):
                 self._vcrt.CancelSymbolFeed(self._dataname, False)
 
     def debug_ticks(self, ticks):
-        """
-
-        :param ticks:
-
-        """
+        """Args:
+    ticks:"""
         print("*" * 50, "DEBUG OnNewTicks")
         for tick in ticks:
             print("-" * 40)

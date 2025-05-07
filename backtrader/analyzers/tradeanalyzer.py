@@ -32,41 +32,24 @@ from backtrader.utils.py3 import MAXINT
 
 class TradeAnalyzer(Analyzer):
     """Provides statistics on closed trades (keeps also the count of open ones)
+- Total Open/Closed Trades
+- Streak Won/Lost Current/Longest
+- ProfitAndLoss Total/Average
+- Won/Lost Count/ Total PNL/ Average PNL / Max PNL
+- Long/Short Count/ Total PNL / Average PNL / Max PNL
+- Won/Lost Count/ Total PNL/ Average PNL / Max PNL
+- Length (bars in the market)
+- Total/Average/Max/Min
+- Won/Lost Total/Average/Max/Min
+- Long/Short Total/Average/Max/Min
+- Won/Lost Total/Average/Max/Min
+Note:
+The analyzer uses an "auto"dict for the fields, which means that if no
+trades are executed, no statistics will be generated.
+In that case there will be a single field/subfield in the dictionary
 
-      - Total Open/Closed Trades
-
-      - Streak Won/Lost Current/Longest
-
-      - ProfitAndLoss Total/Average
-
-      - Won/Lost Count/ Total PNL/ Average PNL / Max PNL
-
-      - Long/Short Count/ Total PNL / Average PNL / Max PNL
-
-          - Won/Lost Count/ Total PNL/ Average PNL / Max PNL
-
-      - Length (bars in the market)
-
-        - Total/Average/Max/Min
-
-        - Won/Lost Total/Average/Max/Min
-
-        - Long/Short Total/Average/Max/Min
-
-          - Won/Lost Total/Average/Max/Min
-
-    Note:
-
-      The analyzer uses an "auto"dict for the fields, which means that if no
-      trades are executed, no statistics will be generated.
-
-      In that case there will be a single field/subfield in the dictionary
-
-
-    :returns: - dictname['total']['total'] which will have a value of 0 (the field is
-          also reachable with dot notation dictname.total.total
-
-    """
+Returns:
+    - dictname['total']['total'] which will have a value of 0 (the field is"""
 
     def create_analysis(self):
         """ """
@@ -205,11 +188,8 @@ class TradeAnalyzer(Analyzer):
         self.rets._close()
 
     def notify_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
+        """Args:
+    trade:"""
         if trade.justopened:
             # Trade just opened
             self.rets.total.total += 1

@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-批量跑 CUSUM 策略 → 导出每日收益 → 汇总
+"""批量跑 CUSUM 策略 → 导出每日收益 → 汇总
 使用方法：
-    python run_pairs_cusum.py
-"""
+python run_pairs_cusum.py"""
 
 import datetime
 import pathlib

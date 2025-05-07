@@ -33,22 +33,16 @@ class FakeCommInfo(object):
     """ """
 
     def getvaluesize(self, size, price):
-        """
-
-        :param size:
-        :param price:
-
-        """
+        """Args:
+    size: 
+    price:"""
         return 0
 
     def profitandloss(self, size, price, newprice):
-        """
-
-        :param size:
-        :param price:
-        :param newprice:
-
-        """
+        """Args:
+    size: 
+    price: 
+    newprice:"""
         return 0
 
 
@@ -75,11 +69,8 @@ class FakeData(object):
 
 
 def test_run(main=False):
-    """
-
-    :param main:  (Default value = False)
-
-    """
+    """Args:
+    main: (Default value = False)"""
     tr = trade.Trade(data=FakeData())
 
     order = bt.BuyOrder(

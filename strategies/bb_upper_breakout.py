@@ -18,20 +18,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-"""
-BOLLINGER BANDS UPPER BREAKOUT STRATEGY - (bb_upper_breakout)
+"""BOLLINGER BANDS UPPER BREAKOUT STRATEGY - (bb_upper_breakout)
 ===============================================================
-
 This strategy is based on the Bollinger Bands breakout concept, where prices breaking
 out above the upper Bollinger Band are considered a sign of strength and momentum,
 potentially signaling the beginning of a new trend.
-
 STRATEGY LOGIC:
 --------------
 - Go LONG when price CLOSES ABOVE the UPPER Bollinger Band
 - Exit LONG when price CLOSES BELOW the LOWER Bollinger Band
 - Uses 100% of available capital for positions
-
 MARKET CONDITIONS:
 ----------------
 *** THIS STRATEGY IS SPECIFICALLY DESIGNED FOR TRENDING MARKETS ***
@@ -39,30 +35,24 @@ MARKET CONDITIONS:
 - AVOID USING: During sideways/ranging/choppy markets which can lead to false breakouts
 - IDEAL TIMEFRAMES: 1-hour, 4-hour, and daily charts
 - OPTIMAL MARKET CONDITION: Markets transitioning from consolidation to trend
-
 The strategy will struggle in sideways markets as breakouts are often false and lead
 to rapid reversals. This strategy aims to capture the beginning of new trends.
-
 BOLLINGER BANDS:
 --------------
 Bollinger Bands consist of:
 - A middle band (typically a 20-period moving average)
 - An upper band (middle band + 2 standard deviations)
 - A lower band (middle band - 2 standard deviations)
-
 These bands adapt to volatility - widening during volatile periods and
 narrowing during less volatile periods.
-
 USAGE:
 ------
 python strategies/bb_upper_breakout.py --data SYMBOL --fromdate YYYY-MM-DD --todate YYYY-MM-DD [options]
-
 REQUIRED ARGUMENTS:
 ------------------
 --data, -d      : Stock symbol to retrieve data for (e.g., AAPL, MSFT, TSLA)
 --fromdate, -f  : Start date for historical data in YYYY-MM-DD format (default: 2024-01-01)
 --todate, -t    : End date for historical data in YYYY-MM-DD format (default: 2024-12-31)
-
 DATABASE PARAMETERS:
 ------------------
 --dbuser, -u    : PostgreSQL username (default: jason)
@@ -71,25 +61,21 @@ DATABASE PARAMETERS:
 --cash, -c      : Initial cash for the strategy (default: $100,000)
 --commission, -cm: Commission percentage per trade (default: 0.0)
 --interval, -i  : Time interval for data ('1h', '4h', '1d') (default: '1h')
-
 BOLLINGER BANDS PARAMETERS:
 -------------------------
 --bb-length, -bl: Period for Bollinger Bands calculation (default: 20)
 --bb-mult, -bm  : Multiplier for standard deviation (default: 2.0)
 --matype, -mt   : Moving average type for Bollinger Bands basis (default: SMA, options: SMA, EMA, WMA, SMMA, VWMA)
 --src, -s       : Source for Bollinger Bands calculation (default: "close", options: "open", "high", "low", "close")
-
 OTHER:
 -----
 --plot, -pl     : Generate and show a plot of the trading activity
-
 EXAMPLE:
 --------
 python strategies/bb_upper_breakout.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --plot
 python strategies/bb_upper_breakout.py --data SPY --fromdate 2024-01-01 --todate 2024-12-31 --commission 0.1 --plot
 python strategies/bb_upper_breakout.py --data SPY --fromdate 2024-01-01 --todate 2024-12-31 --interval 4h --plot
-python strategies/bb_upper_breakout.py --data SPY --fromdate 2024-01-01 --todate 2024-12-31 --interval 1d
-"""
+python strategies/bb_upper_breakout.py --data SPY --fromdate 2024-01-01 --todate 2024-12-31 --interval 1d"""
 
 from __future__ import (
     absolute_import,
@@ -145,27 +131,20 @@ class StockPriceData(bt.feeds.PandasData):
 
 class BBUpperBreakoutStrategy(bt.Strategy, TradeThrottling):
     """Bollinger Bands Upper Breakout Strategy
-
-    This strategy attempts to capture breakouts by:
-    1. Buying when price closes above the upper Bollinger Band
-    2. Selling when price closes below the lower Bollinger Band
-
-    Strategy Logic:
-    - Go LONG when price CLOSES ABOVE the UPPER Bollinger Band
-    - Exit LONG when price CLOSES BELOW the LOWER Bollinger Band
-    - Uses 100% of available capital for positions
-
-    ** IMPORTANT: This strategy is specifically designed for trending markets **
-    It performs poorly in sideways/ranging markets where breakouts are often false.
-
-    Best Market Conditions:
-    - Strong uptrending markets with momentum
-    - Periods following consolidation or base building
-    - Market environments with sector rotation into new leadership
-    - Avoid using in choppy, sideways, or range-bound markets
-
-
-    """
+This strategy attempts to capture breakouts by:
+1. Buying when price closes above the upper Bollinger Band
+2. Selling when price closes below the lower Bollinger Band
+Strategy Logic:
+- Go LONG when price CLOSES ABOVE the UPPER Bollinger Band
+- Exit LONG when price CLOSES BELOW the LOWER Bollinger Band
+- Uses 100% of available capital for positions
+** IMPORTANT: This strategy is specifically designed for trending markets **
+It performs poorly in sideways/ranging markets where breakouts are often false.
+Best Market Conditions:
+- Strong uptrending markets with momentum
+- Periods following consolidation or base building
+- Market environments with sector rotation into new leadership
+- Avoid using in choppy, sideways, or range-bound markets"""
 
     params = (
         # Bollinger Bands parameters
@@ -187,11 +166,10 @@ class BBUpperBreakoutStrategy(bt.Strategy, TradeThrottling):
     def log(self, txt, dt=None, level="info"):
         """Logging function
 
-        :param txt:
-        :param dt:  (Default value = None)
-        :param level:  (Default value = "info")
-
-        """
+Args:
+    txt: 
+    dt: (Default value = None)
+    level: (Default value = "info")"""
         if level == "debug" and self.p.loglevel != "debug":
             return
 
@@ -330,9 +308,8 @@ class BBUpperBreakoutStrategy(bt.Strategy, TradeThrottling):
     def notify_order(self, order):
         """Handle order notifications
 
-        :param order:
-
-        """
+Args:
+    order:"""
         if order.status in [order.Submitted, order.Accepted]:
             # Order pending, do nothing
             return
@@ -381,9 +358,8 @@ class BBUpperBreakoutStrategy(bt.Strategy, TradeThrottling):
     def notify_trade(self, trade):
         """Track completed trades
 
-        :param trade:
-
-        """
+Args:
+    trade:"""
         if not trade.isclosed:
             return
 

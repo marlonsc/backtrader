@@ -17,21 +17,15 @@ class RecorderListener(ListenerBase):
         self.nexts = []
 
     def start(self, cerebro):
-        """
-
-        :param cerebro:
-
-        """
+        """Args:
+    cerebro:"""
         self._cerebro = cerebro
 
     @staticmethod
     def print_line_snapshot(name, snapshot):
-        """
-
-        :param name:
-        :param snapshot:
-
-        """
+        """Args:
+    name: 
+    snapshot:"""
         line = snapshot["array"]
         if name == "datetime":
             line = [bt.num2date(x) for x in line]
@@ -42,12 +36,9 @@ class RecorderListener(ListenerBase):
 
     @staticmethod
     def print_next(idx, next):
-        """
-
-        :param idx:
-        :param next:
-
-        """
+        """Args:
+    idx: 
+    next:"""
         _logger.debug(f"--- Next: {next['prenext']} - #{idx}")
         RecorderListener.print_line_snapshot("datetime", next["strategy"]["datetime"])
 
@@ -68,21 +59,15 @@ class RecorderListener(ListenerBase):
 
     @staticmethod
     def print_nexts(nexts):
-        """
-
-        :param nexts:
-
-        """
+        """Args:
+    nexts:"""
         for i, n in enumerate(nexts):
             RecorderListener.print_next(i, n)
 
     @staticmethod
     def _copy_lines(data):
-        """
-
-        :param data:
-
-        """
+        """Args:
+    data:"""
         lines = {}
 
         for lineidx in range(data.lines.size()):
@@ -97,12 +82,9 @@ class RecorderListener(ListenerBase):
         return lines
 
     def _record_data(self, strat, is_prenext=False):
-        """
-
-        :param strat:
-        :param is_prenext:  (Default value = False)
-
-        """
+        """Args:
+    strat: 
+    is_prenext: (Default value = False)"""
         curbars = []
         for i, d in enumerate(strat.datas):
             curbars.append((d._name, self._copy_lines(d)))

@@ -33,40 +33,28 @@ class FakeCommInfo(object):
     """ """
 
     def getvaluesize(self, size, price):
-        """
-
-        :param size:
-        :param price:
-
-        """
+        """Args:
+    size: 
+    price:"""
         return 0
 
     def profitandloss(self, size, price, newprice):
-        """
-
-        :param size:
-        :param price:
-        :param newprice:
-
-        """
+        """Args:
+    size: 
+    price: 
+    newprice:"""
         return 0
 
     def getoperationcost(self, size, price):
-        """
-
-        :param size:
-        :param price:
-
-        """
+        """Args:
+    size: 
+    price:"""
         return 0.0
 
     def getcommission(self, size, price):
-        """
-
-        :param size:
-        :param price:
-
-        """
+        """Args:
+    size: 
+    price:"""
         return 0.0
 
 
@@ -93,15 +81,12 @@ class FakeData(object):
 
 
 def _execute(position, order, size, price, partial):
-    """
-
-    :param position:
-    :param order:
-    :param size:
-    :param price:
-    :param partial:
-
-    """
+    """Args:
+    position: 
+    order: 
+    size: 
+    price: 
+    partial:"""
     # Find position and do a real update - accounting happens here
     pprice_orig = position.price
     psize, pprice, opened, closed = position.update(size, price)
@@ -139,11 +124,8 @@ def _execute(position, order, size, price, partial):
 
 
 def test_run(main=False):
-    """
-
-    :param main:  (Default value = False)
-
-    """
+    """Args:
+    main: (Default value = False)"""
     position = Position()
     comminfo = FakeCommInfo()
     order = bt.BuyOrder(

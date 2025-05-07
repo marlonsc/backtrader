@@ -33,10 +33,9 @@ def get_lof_list():
 def get_fund_detail(etf_fund_code, down_path=""):
     """Get fund data
 
-    :param etf_fund_code:
-    :param down_path:  (Default value = "")
-
-    """
+Args:
+    etf_fund_code: 
+    down_path: (Default value = "")"""
     fund_detail = ak.fund_etf_hist_sina(symbol=etf_fund_code)
     path = ""
     if down_path == "":
@@ -53,9 +52,8 @@ def get_fund_detail(etf_fund_code, down_path=""):
 def get_open_fund_info(fund_code):
     """Get open fund info
 
-    :param fund_code:
-
-    """
+Args:
+    fund_code:"""
     fund_data = ak.fund_em_open_fund_info(fund=fund_code, indicator="单位净值走势")
     fund_data_new = fund_data.rename(
         columns={
@@ -83,19 +81,14 @@ def download_open_fund():
 
 def download_etf_fund():
     """sh513050 中概互联
-    sz159992 创新药
-
-    sz159952 创业etf
-    sh510500 500etf
-    sz159949 创业板 50
-    sh510310 沪深300
-
-    sz159915 创业板
-    sh518880 黄金ETF
-    sh513100 纳指ETF
-
-
-    """
+sz159992 创新药
+sz159952 创业etf
+sh510500 500etf
+sz159949 创业板 50
+sh510310 沪深300
+sz159915 创业板
+sh518880 黄金ETF
+sh513100 纳指ETF"""
     funds = [
         "sh513050",
         "sz159992",
@@ -112,11 +105,8 @@ def download_etf_fund():
 
 
 def name_list(csv_name):
-    """
-
-    :param csv_name:
-
-    """
+    """Args:
+    csv_name:"""
     import csv
 
     csv_f = os.path.join(mainpath, f"{csv_name}")
@@ -132,12 +122,9 @@ def name_list(csv_name):
 
 
 def download_all_fund(csv_name, down_path=""):
-    """
-
-    :param csv_name:
-    :param down_path:  (Default value = "")
-
-    """
+    """Args:
+    csv_name: 
+    down_path: (Default value = "")"""
 
     from progress.bar import IncrementalBar
 

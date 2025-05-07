@@ -25,7 +25,7 @@ from __future__ import (
     unicode_literals,
 )
 
-import backtrader as bt
+from .indicator import Indicator
 
 (
     SIGNAL_NONE,
@@ -62,8 +62,12 @@ SignalTypes = [
 ]
 
 
-class Signal(bt.Indicator):
-    """ """
+class Signal(Indicator):
+    """Signal indicator for strategy logic. All docstrings and comments must be
+    line-wrapped at 90 characters or less.
+
+
+    """
 
     SignalTypes = SignalTypes
 

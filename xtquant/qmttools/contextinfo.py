@@ -7,11 +7,8 @@ class ContextInfo:
     """ """
 
     def __init__(this):
-        """
-
-        :param this:
-
-        """
+        """Args:
+    this:"""
         # base
         this.request_id = ""
         this.quote_mode = ""  # 'realtime' 'history' 'all'
@@ -65,174 +62,117 @@ class ContextInfo:
 
     @property
     def start(this):
-        """
-
-        :param this:
-
-        """
+        """Args:
+    this:"""
         return this.start_time
 
     @start.setter
     def start(this, value):
-        """
-
-        :param this:
-        :param value:
-
-        """
+        """Args:
+    this: 
+    value:"""
         this.start_time = value
 
     @property
     def end(this):
-        """
-
-        :param this:
-
-        """
+        """Args:
+    this:"""
         return this.end_time
 
     @end.setter
     def end(this, value):
-        """
-
-        :param this:
-        :param value:
-
-        """
+        """Args:
+    this: 
+    value:"""
         this.end_time = value
 
     @property
     def capital(this):
-        """
-
-        :param this:
-
-        """
+        """Args:
+    this:"""
         return this.asset
 
     @capital.setter
     def capital(this, value):
-        """
-
-        :param this:
-        :param value:
-
-        """
+        """Args:
+    this: 
+    value:"""
         this.asset = value
 
     ### qmt strategy frame ###
 
     def init(this):
-        """
-
-        :param this:
-
-        """
+        """Args:
+    this:"""
         return
 
     def after_init(this):
-        """
-
-        :param this:
-
-        """
+        """Args:
+    this:"""
         return
 
     def handlebar(this):
-        """
-
-        :param this:
-
-        """
+        """Args:
+    this:"""
         return
 
     def on_backtest_finished(this):
-        """
-
-        :param this:
-
-        """
+        """Args:
+    this:"""
         return
 
     def stop(this):
-        """
-
-        :param this:
-
-        """
+        """Args:
+    this:"""
         return
 
     def account_callback(this, account_info):
-        """
-
-        :param this:
-        :param account_info:
-
-        """
+        """Args:
+    this: 
+    account_info:"""
         return
 
     def order_callback(this, order_info):
-        """
-
-        :param this:
-        :param order_info:
-
-        """
+        """Args:
+    this: 
+    order_info:"""
         return
 
     def deal_callback(this, deal_info):
-        """
-
-        :param this:
-        :param deal_info:
-
-        """
+        """Args:
+    this: 
+    deal_info:"""
         return
 
     def position_callback(this, position_info):
-        """
-
-        :param this:
-        :param position_info:
-
-        """
+        """Args:
+    this: 
+    position_info:"""
         return
 
     def orderError_callback(this, passorder_info, msg):
-        """
-
-        :param this:
-        :param passorder_info:
-        :param msg:
-
-        """
+        """Args:
+    this: 
+    passorder_info: 
+    msg:"""
         return
 
     ### qmt functions - bar ###
 
     def is_last_bar(this):
-        """
-
-        :param this:
-
-        """
+        """Args:
+    this:"""
         return this.barpos >= len(this.timelist) - 1
 
     def is_new_bar(this):
-        """
-
-        :param this:
-
-        """
+        """Args:
+    this:"""
         return this.barpos > this.lastbarpos
 
     def get_bar_timetag(this, barpos=None):
-        """
-
-        :param this:
-        :param barpos:  (Default value = None)
-
-        """
+        """Args:
+    this: 
+    barpos: (Default value = None)"""
         try:
             return (
                 this.timelist[barpos]
@@ -245,17 +185,14 @@ class ContextInfo:
     ### qmt functions - graph ###
 
     def paint(this, name, value, index=-1, drawstyle=0, color="", limit=""):
-        """
-
-        :param this:
-        :param name:
-        :param value:
-        :param index:  (Default value = -1)
-        :param drawstyle:  (Default value = 0)
-        :param color:  (Default value = "")
-        :param limit:  (Default value = "")
-
-        """
+        """Args:
+    this: 
+    name: 
+    value: 
+    index: (Default value = -1)
+    drawstyle: (Default value = 0)
+    color: (Default value = "")
+    limit: (Default value = "")"""
         vp = {str(this.get_bar_timetag()): value}
 
         if name not in this.result:
@@ -277,16 +214,13 @@ class ContextInfo:
         result_type="",
         callback=None,
     ):
-        """
-
-        :param this:
-        :param stock_code:  (Default value = "")
-        :param period:  (Default value = "")
-        :param dividend_type:  (Default value = "")
-        :param result_type:  (Default value = "")
-        :param callback:  (Default value = None)
-
-        """
+        """Args:
+    this: 
+    stock_code: (Default value = "")
+    period: (Default value = "")
+    dividend_type: (Default value = "")
+    result_type: (Default value = "")
+    callback: (Default value = None)"""
         if not stock_code:
             stock_code = this.stock_code
         if not period or period == "follow":
@@ -298,22 +232,16 @@ class ContextInfo:
         )
 
     def subscribe_whole_quote(this, code_list, callback=None):
-        """
-
-        :param this:
-        :param code_list:
-        :param callback:  (Default value = None)
-
-        """
+        """Args:
+    this: 
+    code_list: 
+    callback: (Default value = None)"""
         return _FUNCS_.subscribe_whole_quote(code_list, callback)
 
     def unsubscribe_quote(this, subscribe_id):
-        """
-
-        :param this:
-        :param subscribe_id:
-
-        """
+        """Args:
+    this: 
+    subscribe_id:"""
         return _FUNCS_.unsubscribe_quote(subscribe_id)
 
     def get_market_data(
@@ -327,19 +255,16 @@ class ContextInfo:
         dividend_type="",
         count=-1,
     ):
-        """
-
-        :param this:
-        :param fields:  (Default value = [])
-        :param stock_code:  (Default value = [])
-        :param start_time:  (Default value = "")
-        :param end_time:  (Default value = "")
-        :param skip_paused:  (Default value = True)
-        :param period:  (Default value = "")
-        :param dividend_type:  (Default value = "")
-        :param count:  (Default value = -1)
-
-        """
+        """Args:
+    this: 
+    fields: (Default value = [])
+    stock_code: (Default value = [])
+    start_time: (Default value = "")
+    end_time: (Default value = "")
+    skip_paused: (Default value = True)
+    period: (Default value = "")
+    dividend_type: (Default value = "")
+    count: (Default value = -1)"""
         if not stock_code:
             stock_code = [this.stock_code]
         if not period or period == "follow":
@@ -385,20 +310,17 @@ class ContextInfo:
         fill_data=True,
         subscribe=True,
     ):
-        """
-
-        :param this:
-        :param fields:  (Default value = [])
-        :param stock_code:  (Default value = [])
-        :param period:  (Default value = "")
-        :param start_time:  (Default value = "")
-        :param end_time:  (Default value = "")
-        :param count:  (Default value = -1)
-        :param dividend_type:  (Default value = "")
-        :param fill_data:  (Default value = True)
-        :param subscribe:  (Default value = True)
-
-        """
+        """Args:
+    this: 
+    fields: (Default value = [])
+    stock_code: (Default value = [])
+    period: (Default value = "")
+    start_time: (Default value = "")
+    end_time: (Default value = "")
+    count: (Default value = -1)
+    dividend_type: (Default value = "")
+    fill_data: (Default value = True)
+    subscribe: (Default value = True)"""
         if not stock_code:
             stock_code = [this.stock_code]
         if not period or period == "follow":
@@ -428,24 +350,18 @@ class ContextInfo:
         )
 
     def get_full_tick(this, stock_code=[]):
-        """
-
-        :param this:
-        :param stock_code:  (Default value = [])
-
-        """
+        """Args:
+    this: 
+    stock_code: (Default value = [])"""
         if not stock_code:
             stock_code = [this.stock_code]
         return _FUNCS_.get_full_tick(stock_code)
 
     def get_divid_factors(this, stock_code="", date=None):
-        """
-
-        :param this:
-        :param stock_code:  (Default value = "")
-        :param date:  (Default value = None)
-
-        """
+        """Args:
+    this: 
+    stock_code: (Default value = "")
+    date: (Default value = None)"""
         if not stock_code:
             stock_code = this.stock_code
         return _FUNCS_.get_divid_factors(stock_code, date)
@@ -460,16 +376,13 @@ class ContextInfo:
         end_date,
         report_type="announce_time",
     ):
-        """
-
-        :param this:
-        :param field_list:
-        :param stock_list:
-        :param start_date:
-        :param end_date:
-        :param report_type:  (Default value = "announce_time")
-
-        """
+        """Args:
+    this: 
+    field_list: 
+    stock_list: 
+    start_date: 
+    end_date: 
+    report_type: (Default value = "announce_time")"""
         raise "not implemented, use get_raw_financial_data instead"
         return
 
@@ -481,16 +394,13 @@ class ContextInfo:
         end_date,
         report_type="announce_time",
     ):
-        """
-
-        :param this:
-        :param field_list:
-        :param stock_list:
-        :param start_date:
-        :param end_date:
-        :param report_type:  (Default value = "announce_time")
-
-        """
+        """Args:
+    this: 
+    field_list: 
+    stock_list: 
+    start_date: 
+    end_date: 
+    report_type: (Default value = "announce_time")"""
         return _FUNCS_.get_raw_financial_data(
             field_list, stock_list, start_date, end_date, report_type
         )
@@ -498,42 +408,30 @@ class ContextInfo:
     ### qmt functions - option ###
 
     def get_option_detail_data(this, optioncode):
-        """
-
-        :param this:
-        :param optioncode:
-
-        """
+        """Args:
+    this: 
+    optioncode:"""
         return _FUNCS_.get_option_detail_data(optioncode)
 
     def get_option_undl_data(this, undl_code_ref):
-        """
-
-        :param this:
-        :param undl_code_ref:
-
-        """
+        """Args:
+    this: 
+    undl_code_ref:"""
         return _FUNCS_.get_option_undl_data(undl_code_ref)
 
     def get_option_list(this, undl_code, dedate, opttype="", isavailavle=False):
-        """
-
-        :param this:
-        :param undl_code:
-        :param dedate:
-        :param opttype:  (Default value = "")
-        :param isavailavle:  (Default value = False)
-
-        """
+        """Args:
+    this: 
+    undl_code: 
+    dedate: 
+    opttype: (Default value = "")
+    isavailavle: (Default value = False)"""
         return _FUNCS_.get_option_list(undl_code, dedate, opttype, isavailavle)
 
     def get_option_iv(this, opt_code):
-        """
-
-        :param this:
-        :param opt_code:
-
-        """
+        """Args:
+    this: 
+    opt_code:"""
         return _FUNCS_.get_opt_iv(opt_code, this.request_id)
 
     def bsm_price(
@@ -546,18 +444,15 @@ class ContextInfo:
         days,
         dividend=0,
     ):
-        """
-
-        :param this:
-        :param optType:
-        :param targetPrice:
-        :param strikePrice:
-        :param riskFree:
-        :param sigma:
-        :param days:
-        :param dividend:  (Default value = 0)
-
-        """
+        """Args:
+    this: 
+    optType: 
+    targetPrice: 
+    strikePrice: 
+    riskFree: 
+    sigma: 
+    days: 
+    dividend: (Default value = 0)"""
         optionType = ""
         if optType.upper() == "C":
             optionType = "CALL"
@@ -603,18 +498,15 @@ class ContextInfo:
         days,
         dividend=0,
     ):
-        """
-
-        :param this:
-        :param optType:
-        :param targetPrice:
-        :param strikePrice:
-        :param optionPrice:
-        :param riskFree:
-        :param days:
-        :param dividend:  (Default value = 0)
-
-        """
+        """Args:
+    this: 
+    optType: 
+    targetPrice: 
+    strikePrice: 
+    optionPrice: 
+    riskFree: 
+    days: 
+    dividend: (Default value = 0)"""
         if optType.upper() == "C":
             optionType = "CALL"
         if optType.upper() == "P":
@@ -635,13 +527,10 @@ class ContextInfo:
     ### qmt functions - static ###
 
     def get_instrument_detail(this, stock_code="", iscomplete=False):
-        """
-
-        :param this:
-        :param stock_code:  (Default value = "")
-        :param iscomplete:  (Default value = False)
-
-        """
+        """Args:
+    this: 
+    stock_code: (Default value = "")
+    iscomplete: (Default value = False)"""
         if not stock_code:
             stock_code = this.stock_code
         return _FUNCS_.get_instrument_detail(stock_code, iscomplete)
@@ -649,27 +538,21 @@ class ContextInfo:
     get_instrumentdetail = get_instrument_detail  # compat
 
     def get_trading_dates(this, stock_code, start_date, end_date, count, period="1d"):
-        """
-
-        :param this:
-        :param stock_code:
-        :param start_date:
-        :param end_date:
-        :param count:
-        :param period:  (Default value = "1d")
-
-        """
+        """Args:
+    this: 
+    stock_code: 
+    start_date: 
+    end_date: 
+    count: 
+    period: (Default value = "1d")"""
         return _FUNCS_.get_trading_dates(
             stock_code, start_date, end_date, count, period
         )
 
     def get_stock_list_in_sector(this, sector_name):
-        """
-
-        :param this:
-        :param sector_name:
-
-        """
+        """Args:
+    this: 
+    sector_name:"""
         return _FUNCS_.get_stock_list_in_sector(sector_name)
 
     def passorder(
@@ -685,21 +568,18 @@ class ContextInfo:
         quickTrade,
         userOrderId,
     ):
-        """
-
-        :param this:
-        :param opType:
-        :param orderType:
-        :param accountid:
-        :param orderCode:
-        :param prType:
-        :param modelprice:
-        :param volume:
-        :param strategyName:
-        :param quickTrade:
-        :param userOrderId:
-
-        """
+        """Args:
+    this: 
+    opType: 
+    orderType: 
+    accountid: 
+    orderCode: 
+    prType: 
+    modelprice: 
+    volume: 
+    strategyName: 
+    quickTrade: 
+    userOrderId:"""
         return _FUNCS_._passorder_impl(
             opType,
             orderType,
@@ -719,53 +599,38 @@ class ContextInfo:
         )
 
     def set_auto_trade_callback(this, enable):
-        """
-
-        :param this:
-        :param enable:
-
-        """
+        """Args:
+    this: 
+    enable:"""
         return _FUNCS_._set_auto_trade_callback_impl(enable, this.request_id)
 
     def set_account(this, accountid):
-        """
-
-        :param this:
-        :param accountid:
-
-        """
+        """Args:
+    this: 
+    accountid:"""
         return _FUNCS_.set_account(accountid, this.request_id)
 
     def get_his_st_data(this, stock_code):
-        """
-
-        :param this:
-        :param stock_code:
-
-        """
+        """Args:
+    this: 
+    stock_code:"""
         return _FUNCS_.get_his_st_data(stock_code)
 
     ### private ###
 
     def trade_callback(this, type, result, error):
-        """
-
-        :param this:
-        :param type:
-        :param result:
-        :param error:
-
-        """
+        """Args:
+    this: 
+    type: 
+    result: 
+    error:"""
 
         class DetailData(object):
             """ """
 
             def __init__(self, _obj):
-                """
-
-                :param _obj:
-
-                """
+                """Args:
+    _obj:"""
                 if _obj:
                     self.__dict__.update(_obj)
 
@@ -785,61 +650,43 @@ class ContextInfo:
         return
 
     def register_callback(this, reqid):
-        """
-
-        :param this:
-        :param reqid:
-
-        """
+        """Args:
+    this: 
+    reqid:"""
         _FUNCS_.register_external_resp_callback(reqid, this.trade_callback)
         return
 
     def get_callback_cache(this, type):
-        """
-
-        :param this:
-        :param type:
-
-        """
+        """Args:
+    this: 
+    type:"""
         return _FUNCS_._get_callback_cache_impl(type, this.request_id)
 
     def get_ipo_info(this, start_time="", end_time=""):
-        """
-
-        :param this:
-        :param start_time:  (Default value = "")
-        :param end_time:  (Default value = "")
-
-        """
+        """Args:
+    this: 
+    start_time: (Default value = "")
+    end_time: (Default value = "")"""
         return _FUNCS_.get_ipo_info(start_time, end_time)
 
     def get_backtest_index(this, path):
-        """
-
-        :param this:
-        :param path:
-
-        """
+        """Args:
+    this: 
+    path:"""
         _FUNCS_.get_backtest_index(this.request_id, path)
 
     def get_group_result(this, path, fields):
-        """
-
-        :param this:
-        :param path:
-        :param fields:
-
-        """
+        """Args:
+    this: 
+    path: 
+    fields:"""
         _FUNCS_.get_group_result(this.request_id, path, fields)
 
     def is_suspended_stock(this, stock_code, type):
-        """
-
-        :param this:
-        :param stock_code:
-        :param type:
-
-        """
+        """Args:
+    this: 
+    stock_code: 
+    type:"""
         if this.barpos > len(this.timelist):
             return False
 

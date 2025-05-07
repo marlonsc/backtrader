@@ -191,10 +191,7 @@ class PlotScheme(object):
         self.fmt_x_data = None
 
     def color(self, idx):
-        """
-
-        :param idx:
-
-        """
+        """Args:
+    idx:"""
         colidx = tab10_index[idx % len(tab10_index)]
         return self.lcolors[colidx]

@@ -1,6 +1,13 @@
 import numpy as np
 import pandas as pd
 
+# Copyright (c) 2025 backtrader contributors
+"""
+Backtest simulation for spread trading between Iron Ore and Rebar using a Bollinger
+Band strategy. Includes data alignment, spread calculation, annualized Sharpe ratio,
+and maximum drawdown computation.
+"""
+
 # 读取数据
 output_file = "D:\\FutureData\\ricequant\\1d_2017to2024_noadjust.h5"
 df_I = pd.read_hdf(output_file, key="/I").reset_index()
@@ -9,13 +16,10 @@ df_RB = pd.read_hdf(output_file, key="/RB").reset_index()
 
 # 检查并对齐数据
 def check_and_align_data(df1, df2, date_column="date"):
-    """
-
-    :param df1:
-    :param df2:
-    :param date_column:  (Default value = "date")
-
-    """
+    """Args:
+    df1: 
+    df2: 
+    date_column: (Default value = "date")"""
     if date_column in df1.columns:
         df1 = df1.set_index(date_column)
     if date_column in df2.columns:
@@ -31,13 +35,10 @@ def check_and_align_data(df1, df2, date_column="date"):
 
 # 计算价差
 def calculate_spread(df_I, df_RB, columns=["open", "high", "low", "close", "volume"]):
-    """
-
-    :param df_I:
-    :param df_RB:
-    :param columns:  (Default value = ["open","high","low","close","volume"])
-
-    """
+    """Args:
+    df_I: 
+    df_RB: 
+    columns: (Default value = ["open","high","low","close","volume"])"""
     df_I_aligned, df_RB_aligned = check_and_align_data(df_I, df_RB)
     df_spread = pd.DataFrame(index=df_I_aligned.index)
 
@@ -50,12 +51,9 @@ def calculate_spread(df_I, df_RB, columns=["open", "high", "low", "close", "volu
 
 # 计算年化夏普比率
 def annualized_sharpe_ratio(returns, risk_free_rate=0.01):
-    """
-
-    :param returns:
-    :param risk_free_rate:  (Default value = 0.01)
-
-    """
+    """Args:
+    returns: 
+    risk_free_rate: (Default value = 0.01)"""
     excess_returns = returns - risk_free_rate / 252  # daily risk-free rate
     mean_return = excess_returns.mean()
     std_dev = excess_returns.std()
@@ -66,11 +64,8 @@ def annualized_sharpe_ratio(returns, risk_free_rate=0.01):
 
 # 计算最大回撤
 def max_drawdown(nav):
-    """
-
-    :param nav:
-
-    """
+    """Args:
+    nav:"""
     running_max = np.maximum.accumulate(nav)
     drawdowns = (nav - running_max) / running_max
     max_drawdown = drawdowns.min()  # 最大回撤
@@ -93,10 +88,11 @@ df_spread["lower"] = df_spread["rolling_mean"] - devfactor * df_spread["rolling_
 # 初始化资金和仓位
 initial_cash = 1000000
 cash = initial_cash
-position = 0  # 0表示没有仓位，1表示多仓，-1表示空仓
-trade_pnl = []  # 记录每次交易的盈亏
+position = 0  # 0 means no position, 1 means long, -1 means short
+trade_pnl = []  # Record PnL for each trade
+entry_price = 0  # Initialize entry_price to avoid use-before-assignment
 
-# 计算每日收益
+# Calculate daily returns
 returns = []
 
 # 模拟交易
@@ -136,6 +132,6 @@ nav = np.array([initial_cash + sum(trade_pnl[: i + 1]) for i in range(len(trade_
 annual_sharpe = annualized_sharpe_ratio(np.array(returns))
 max_dd = max_drawdown(nav)
 
-# 打印结果
-print(f"年化夏普比率: {annual_sharpe:.2f}")
-print(f"最大回撤: {max_dd:.2%}")
+# Print results
+print(f"Annualized Sharpe Ratio: {annual_sharpe:.2f}")
+print(f"Maximum Drawdown: {max_dd:.2%}")

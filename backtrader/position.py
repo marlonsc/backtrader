@@ -28,17 +28,13 @@ from __future__ import (
 
 class Position(object):
     """Keeps and updates the size and price of a position. The object has no
-    relationship to any asset. It only keeps size and price.
-
-    Member Attributes:
-      - size (int): current size of the position
-      - price (float): current price of the position
-
-    The Position instances can be tested using len(position) to see if size
-    is not null
-
-
-    """
+relationship to any asset. All docstrings and comments must be line-wrapped
+at 90 characters or less.
+Member Attributes:
+- size (int): current size of the position
+- price (float): current price of the position
+The Position instances can be tested using len(position) to see if size
+is not null."""
 
     def __str__(self):
         """ """
@@ -54,12 +50,9 @@ class Position(object):
         return "\n".join(items)
 
     def __init__(self, size=0, price=0.0):
-        """
-
-        :param size:  (Default value = 0)
-        :param price:  (Default value = 0.0)
-
-        """
+        """Args:
+    size: (Default value = 0)
+    price: (Default value = 0.0)"""
         self._size = size
         if size:
             self.price = self.price_orig = price
@@ -81,11 +74,8 @@ class Position(object):
 
     @size.setter
     def size(self, value):
-        """
-
-        :param value:
-
-        """
+        """Args:
+    value:"""
         self._size = value
 
     @property
@@ -95,32 +85,23 @@ class Position(object):
 
     @position.setter
     def position(self, value):
-        """
-
-        :param value:
-
-        """
+        """Args:
+    value:"""
         self._size = value
 
     def fix(self, size, price):
-        """
-
-        :param size:
-        :param price:
-
-        """
+        """Args:
+    size: 
+    price:"""
         oldsize = self.size
         self.size = size
         self.price = price
         return self.size == oldsize
 
     def set(self, size, price):
-        """
-
-        :param size:
-        :param price:
-
-        """
+        """Args:
+    size: 
+    price:"""
         if self.size > 0:
             if size > self.size:
                 self.upopened = size - self.size  # new 10 - old 5 -> 5
@@ -171,39 +152,22 @@ class Position(object):
         return Position(size=self.size, price=self.price)
 
     def pseudoupdate(self, size, price):
-        """
-
-        :param size:
-        :param price:
-
-        """
+        """Args:
+    size: 
+    price:"""
         return Position(self.size, self.price).update(size, price)
 
     def update(self, size, price, dt=None):
         """Updates the current position and returns the updated size, price and
-        units used to open/close a position
+units used to open/close a position
 
-        :param size: new position size
-        :param price: new position price
-        :param dt:  (Default value = None)
-        :returns: If a position is reduced the price of the remaining size
-                   does not change
-                   If a position is closed the price is nullified
-                   If a position is reversed the price is the price given as
-                   argument
-               opened - amount of contracts from argument "size" that were used
-                   to open/increase a position.
-                   A position can be opened from 0 or can be a reversal.
-                   If a reversal is performed then opened is less than "size",
-                   because part of "size" will have been used to close the
-                   existing position
-               closed - amount of units from arguments "size" that were used to
-                   close/reduce a position
+Args:
+    size: new position size
+    price: new position price
+    dt: (Default value = None)
 
-            Both opened and closed carry the same sign as the "size" argument
-            because they refer to a part of the "size" argument
-
-        """
+Returns:
+    If a position is reduced the price of the remaining size"""
         self.datetime = dt  # record datetime update (datetime.datetime)
 
         self.price_orig = self.price

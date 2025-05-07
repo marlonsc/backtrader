@@ -25,70 +25,60 @@ from __future__ import (
     unicode_literals,
 )
 
-from backtrader.metabase import MetaParams
-from backtrader.utils.py3 import MAXINT, with_metaclass
+from .metabase import MetaParams
+from .utils.py3 import MAXINT, with_metaclass
 
 
 class FixedSize(with_metaclass(MetaParams, object)):
     """
-
-
-    :returns: volume in a bar.
-
-    This percentage is set with the parameter ``perc``
-
+    Returns the volume in a bar. The maximum size is set with the parameter 'size'.
+    All docstrings and comments must be line-wrapped at 90 characters or less.
     """
 
     params = (("size", None),)
 
     def __call__(self, order, price, ago):
-        """
-
-        :param order:
-        :param price:
-        :param ago:
-
-        """
-        size = self.p.size or MAXINT
+        """Args:
+    order: 
+    price: 
+    ago:"""
+        p = getattr(self, "p", None)
+        size = getattr(p, "size", None)
+        if size is None and hasattr(self, "params"):
+            size = self.params[0][1]
+        size = size or MAXINT
         return min((order.data.volume[ago], abs(order.executed.remsize), size))
 
 
 class FixedBarPerc(with_metaclass(MetaParams, object)):
     """
-
-
-    :returns: volume in a bar.
-
-    This percentage is set with the parameter ``perc``
-
+    Returns the volume in a bar as a percentage set with the parameter 'perc'.
+    All docstrings and comments must be line-wrapped at 90 characters or less.
     """
 
     params = (("perc", 100.0),)
 
     def __call__(self, order, price, ago):
-        """
-
-        :param order:
-        :param price:
-        :param ago:
-
-        """
-        # Get the volume and scale it to the requested perc
-        maxsize = (order.data.volume[ago] * self.p.perc) // 100
+        """Args:
+    order: 
+    price: 
+    ago:"""
+        p = getattr(self, "p", None)
+        perc = getattr(p, "perc", None)
+        if perc is None and hasattr(self, "params"):
+            perc = self.params[0][1]
+        perc = perc if perc is not None else 100.0
+        maxsize = (order.data.volume[ago] * perc) // 100
         # Return the maximum possible executed volume
         return min(maxsize, abs(order.executed.remsize))
 
 
 class BarPointPerc(with_metaclass(MetaParams, object)):
     """
-
-
-    :returns: distributed uniformly in the range *high*-*low* using ``minmov`` to
-    partition.
-
-    From the allocated volume for the given price, the ``perc`` percentage will
-    be used
-
+    Returns the volume distributed uniformly in the range high-low using 'minmov' to
+    partition. The 'perc' percentage will be used from the allocated volume for the
+    given price. All docstrings and comments must be line-wrapped at 90 characters or
+    less.
     """
 
     params = (
@@ -97,22 +87,24 @@ class BarPointPerc(with_metaclass(MetaParams, object)):
     )
 
     def __call__(self, order, price, ago):
-        """
-
-        :param order:
-        :param price:
-        :param ago:
-
-        """
+        """Args:
+    order: 
+    price: 
+    ago:"""
         data = order.data
-        minmov = self.p.minmov
-
+        p = getattr(self, "p", None)
+        minmov = getattr(p, "minmov", None)
+        if minmov is None and hasattr(self, "params"):
+            minmov = self.params[0][1]
         parts = 1
         if minmov:
             # high - low + minmov to account for open ended minus op
             parts = (data.high[ago] - data.low[ago] + minmov) // minmov
-
-        alloc_vol = ((data.volume[ago] / parts) * self.p.perc) // 100.0
+        perc = getattr(p, "perc", None)
+        if perc is None and hasattr(self, "params"):
+            perc = self.params[1][1]
+        perc = perc if perc is not None else 100.0
+        alloc_vol = ((data.volume[ago] / parts) * perc) // 100.0
 
         # return max possible executable volume
         return min(alloc_vol, abs(order.executed.remsize))

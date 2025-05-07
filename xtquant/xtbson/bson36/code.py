@@ -18,43 +18,32 @@ from collections.abc import Mapping as _Mapping
 
 class Code(str):
     """BSON's JavaScript code type.
-
-    Raises :class:`TypeError` if `code` is not an instance of
-    :class:`basestring` (:class:`str` in python 3) or `scope`
-    is not ``None`` or an instance of :class:`dict`.
-
-    Scope variables can be set by passing a dictionary as the `scope`
-    argument or by using keyword arguments. If a variable is set as a
-    keyword argument it will override any setting for that variable in
-    the `scope` dictionary.
-
-    :Parameters:
-      - `code`: A string containing JavaScript code to be evaluated or another
-        instance of Code. In the latter case, the scope of `code` becomes this
-        Code's :attr:`scope`.
-      - `scope` (optional): dictionary representing the scope in which
-        `code` should be evaluated - a mapping from identifiers (as
-        strings) to values. Defaults to ``None``. This is applied after any
-        scope associated with a given `code` above.
-      - `**kwargs` (optional): scope variables can also be passed as
-        keyword arguments. These are applied after `scope` and `code`.
-
-    .. versionchanged:: 3.4
-      The default value for :attr:`scope` is ``None`` instead of ``{}``.
-
-
-    """
+Raises :class:`TypeError` if `code` is not an instance of
+:class:`basestring` (:class:`str` in python 3) or `scope`
+is not ``None`` or an instance of :class:`dict`.
+Scope variables can be set by passing a dictionary as the `scope`
+argument or by using keyword arguments. If a variable is set as a
+keyword argument it will override any setting for that variable in
+the `scope` dictionary.
+:Parameters:
+- `code`: A string containing JavaScript code to be evaluated or another
+instance of Code. In the latter case, the scope of `code` becomes this
+Code's :attr:`scope`.
+- `scope` (optional): dictionary representing the scope in which
+`code` should be evaluated - a mapping from identifiers (as
+strings) to values. Defaults to ``None``. This is applied after any
+scope associated with a given `code` above.
+- `**kwargs` (optional): scope variables can also be passed as
+keyword arguments. These are applied after `scope` and `code`.
+.. versionchanged:: 3.4
+The default value for :attr:`scope` is ``None`` instead of ``{}``."""
 
     _type_marker = 13
 
     def __new__(cls, code, scope=None, **kwargs):
-        """
-
-        :param code:
-        :param scope:  (Default value = None)
-        :param **kwargs:
-
-        """
+        """Args:
+    code: 
+    scope: (Default value = None)"""
         if not isinstance(code, str):
             raise TypeError("code must be an instance of str")
 
@@ -91,11 +80,8 @@ class Code(str):
         return "Code(%s, %r)" % (str.__repr__(self), self.__scope)
 
     def __eq__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         if isinstance(other, Code):
             return (self.__scope, str(self)) == (other.__scope, str(other))
         return False
@@ -103,9 +89,6 @@ class Code(str):
     __hash__ = None
 
     def __ne__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return not self == other

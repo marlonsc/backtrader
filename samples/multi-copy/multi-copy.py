@@ -33,16 +33,10 @@ import backtrader as bt
 
 class TheStrategy(bt.Strategy):
     """This strategy is capable of:
-
-    - Going Long with a Moving Average upwards CrossOver
-
-    - Going Long again with a MACD upwards CrossOver
-
-    - Closing the aforementioned longs with the corresponding downwards
-      crossovers
-
-
-    """
+- Going Long with a Moving Average upwards CrossOver
+- Going Long again with a MACD upwards CrossOver
+- Closing the aforementioned longs with the corresponding downwards
+crossovers"""
 
     params = (
         ("myname", None),
@@ -56,11 +50,8 @@ class TheStrategy(bt.Strategy):
     )
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if not order.alive():
             if not order.isbuy():  # going flat
                 self.order = 0
@@ -159,11 +150,8 @@ class TheStrategy2(TheStrategy):
 
 
 def runstrat(args=None):
-    """
-
-    :param args:  (Default value = None)
-
-    """
+    """Args:
+    args: (Default value = None)"""
     args = parse_args(args)
 
     cerebro = bt.Cerebro()
@@ -216,11 +204,8 @@ def runstrat(args=None):
 
 
 def parse_args(pargs=None):
-    """
-
-    :param pargs:  (Default value = None)
-
-    """
+    """Args:
+    pargs: (Default value = None)"""
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

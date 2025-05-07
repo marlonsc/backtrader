@@ -69,35 +69,22 @@ class BtTestStrategy(bt.Strategy):
         print("--------------------------------------------------")
 
     def notify_data(self, data, status, *args, **kwargs):
-        """
-
-        :param data:
-        :param status:
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Args:
+    data: 
+    status:"""
         print("*" * 5, "DATA NOTIF:", data._getstatusname(status), *args)
         if status == data.LIVE:
             self.counttostop = self.p.stopafter
             self.datastatus = 1
 
     def notify_store(self, msg, *args, **kwargs):
-        """
-
-        :param msg:
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Args:
+    msg:"""
         print("*" * 5, "STORE NOTIF:", msg)
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status in [order.Completed, order.Cancelled, order.Rejected]:
             self.order = None
 
@@ -106,11 +93,8 @@ class BtTestStrategy(bt.Strategy):
         print("-" * 50, "ORDER END")
 
     def notify_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
+        """Args:
+    trade:"""
         print("-" * 50, "TRADE BEGIN", datetime.datetime.now())
         print(trade)
         print("-" * 50, "TRADE END")
@@ -120,11 +104,8 @@ class BtTestStrategy(bt.Strategy):
         self.next(frompre=True)
 
     def next(self, frompre=False):
-        """
-
-        :param frompre:  (Default value = False)
-
-        """
+        """Args:
+    frompre: (Default value = False)"""
         txt = list()
         txt.append("Data0")
         txt.append("%04d" % len(self.data0))
@@ -376,11 +357,8 @@ def runstrategy():
 
 
 def parse_args(pargs=None):
-    """
-
-    :param pargs:  (Default value = None)
-
-    """
+    """Args:
+    pargs: (Default value = None)"""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Test Oanda integration",

@@ -47,11 +47,8 @@ class St(bt.Strategy):
         self.order = None
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status != order.Completed:
             return
 
@@ -65,11 +62,8 @@ class St(bt.Strategy):
         )
 
     def operate(self, fromopen):
-        """
-
-        :param fromopen:
-
-        """
+        """Args:
+    fromopen:"""
         if self.order is not None:
             return
         if self.position:
@@ -103,11 +97,8 @@ class St(bt.Strategy):
 
 
 def runstrat(args=None):
-    """
-
-    :param args:  (Default value = None)
-
-    """
+    """Args:
+    args: (Default value = None)"""
     args = parse_args(args)
 
     cerebro = bt.Cerebro()
@@ -143,11 +134,8 @@ def runstrat(args=None):
 
 
 def parse_args(pargs=None):
-    """
-
-    :param pargs:  (Default value = None)
-
-    """
+    """Args:
+    pargs: (Default value = None)"""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Cheat-On-Open Sample",

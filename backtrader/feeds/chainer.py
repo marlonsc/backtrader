@@ -37,21 +37,15 @@ class MetaChainer(bt.DataBase.__class__):
     def __init__(cls, name, bases, dct):
         """Class has already been created ... register
 
-        :param name:
-        :param bases:
-        :param dct:
-
-        """
+Args:
+    name: 
+    bases: 
+    dct:"""
         # Initialize the class
         super(MetaChainer, cls).__init__(name, bases, dct)
 
     def donew(cls, *args, **kwargs):
-        """Intercept const. to copy timeframe/compression from 1st data
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Intercept const. to copy timeframe/compression from 1st data"""
         # Create the object and set the params in place
         _obj, args, kwargs = super(MetaChainer, cls).donew(*args, **kwargs)
 
@@ -74,11 +68,7 @@ class Chainer(bt.with_metaclass(MetaChainer, bt.DataBase)):
         return True
 
     def __init__(self, *args):
-        """
-
-        :param *args:
-
-        """
+        """"""
         self._args = args
 
     def start(self):

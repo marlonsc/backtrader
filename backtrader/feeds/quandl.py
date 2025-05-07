@@ -45,33 +45,20 @@ __all__ = ["QuandlCSV", "Quandl"]
 
 class QuandlCSV(feed.CSVDataBase):
     """Parses pre-downloaded Quandl CSV Data Feeds (or locally generated if they
-    comply to the Quandl format)
-
-    Specific parameters:
-
-      - ``dataname``: The filename to parse or a file-like object
-
-      - ``reverse`` (default: ``False``)
-
-        It is assumed that locally stored files have already been reversed
-        during the download process
-
-      - ``adjclose`` (default: ``True``)
-
-        Whether to use the dividend/split adjusted close and adjust all
-        values according to it.
-
-      - ``round`` (default: ``False``)
-
-        Whether to round the values to a specific number of decimals after
-        having adjusted the close
-
-      - ``decimals`` (default: ``2``)
-
-        Number of decimals to round to
-
-
-    """
+comply to the Quandl format)
+Specific parameters:
+- ``dataname``: The filename to parse or a file-like object
+- ``reverse`` (default: ``False``)
+It is assumed that locally stored files have already been reversed
+during the download process
+- ``adjclose`` (default: ``True``)
+Whether to use the dividend/split adjusted close and adjust all
+values according to it.
+- ``round`` (default: ``False``)
+Whether to round the values to a specific number of decimals after
+having adjusted the close
+- ``decimals`` (default: ``2``)
+Number of decimals to round to"""
 
     _online = False  # flag to avoid double reversal
 
@@ -103,11 +90,8 @@ class QuandlCSV(feed.CSVDataBase):
         self.f = f
 
     def _loadline(self, linetokens):
-        """
-
-        :param linetokens:
-
-        """
+        """Args:
+    linetokens:"""
         i = itertools.count(0)
 
         dttxt = linetokens[next(i)]  # YYYY-MM-DD
@@ -145,50 +129,30 @@ class QuandlCSV(feed.CSVDataBase):
 
 class Quandl(QuandlCSV):
     """Executes a direct download of data from Quandl servers for the given time
-    range.
-
-    Specific parameters (or specific meaning):
-
-      - ``dataname``
-
-        The ticker to download ('YHOO' for example)
-
-      - ``baseurl``
-
-        The server url. Someone might decide to open a Quandl compatible
-        service in the future.
-
-      - ``proxies``
-
-        A dict indicating which proxy to go through for the download as in
-        {'http': 'http://myproxy.com'} or {'http': 'http://127.0.0.1:8080'}
-
-      - ``buffered``
-
-        If True the entire socket connection wil be buffered locally before
-        parsing starts.
-
-      - ``reverse``
-
-        Quandl returns the value in descending order (newest first). If this is
-        ``True`` (the default), the request will tell Quandl to return in
-        ascending (oldest to newest) format
-
-      - ``adjclose``
-
-        Whether to use the dividend/split adjusted close and adjust all values
-        according to it.
-
-      - ``apikey``
-
-        apikey identification in case it may be needed
-
-      - ``dataset``
-
-        string identifying the dataset to query. Defaults to ``WIKI``
-
-
-    """
+range.
+Specific parameters (or specific meaning):
+- ``dataname``
+The ticker to download ('YHOO' for example)
+- ``baseurl``
+The server url. Someone might decide to open a Quandl compatible
+service in the future.
+- ``proxies``
+A dict indicating which proxy to go through for the download as in
+{'http': 'http://myproxy.com'} or {'http': 'http://127.0.0.1:8080'}
+- ``buffered``
+If True the entire socket connection wil be buffered locally before
+parsing starts.
+- ``reverse``
+Quandl returns the value in descending order (newest first). If this is
+``True`` (the default), the request will tell Quandl to return in
+ascending (oldest to newest) format
+- ``adjclose``
+Whether to use the dividend/split adjusted close and adjust all values
+according to it.
+- ``apikey``
+apikey identification in case it may be needed
+- ``dataset``
+string identifying the dataset to query. Defaults to ``WIKI``"""
 
     _online = True  # flag to avoid double reversal
 

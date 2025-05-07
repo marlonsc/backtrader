@@ -67,11 +67,8 @@ class GenericCSVData(feed.CSVDataBase):
             self._dtconvert = self.p.dtformat
 
     def _loadline(self, linetokens):
-        """
-
-        :param linetokens:
-
-        """
+        """Args:
+    linetokens:"""
         # Datetime needs special treatment
         dtfield = linetokens[self.p.datetime]
         if self._dtstr:

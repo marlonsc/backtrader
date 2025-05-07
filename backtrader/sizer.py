@@ -31,24 +31,15 @@ from .utils.py3 import with_metaclass
 
 class Sizer(with_metaclass(MetaParams, object)):
     """This is the base class for *Sizers*. Any *sizer* should subclass this
-    and override the ``_getsizing`` method
-
-    Member Attribs:
-
-      - ``strategy``: will be set by the strategy in which the sizer is working
-
-        Gives access to the entire api of the strategy, for example if the
-        actual data position would be needed in ``_getsizing``::
-
-           position = self.strategy.getposition(data)
-
-      - ``broker``: will be set by the strategy in which the sizer is working
-
-        Gives access to information some complex sizers may need like portfolio
-        value, ..
-
-
-    """
+and override the ``_getsizing`` method
+Member Attribs:
+- ``strategy``: will be set by the strategy in which the sizer is working
+Gives access to the entire api of the strategy, for example if the
+actual data position would be needed in ``_getsizing``::
+position = self.strategy.getposition(data)
+- ``broker``: will be set by the strategy in which the sizer is working
+Gives access to information some complex sizers may need like portfolio
+value, .."""
 
     strategy = None
     broker = None
@@ -57,34 +48,27 @@ class Sizer(with_metaclass(MetaParams, object)):
         super().__init__()
 
     def getsizing(self, data, isbuy):
-        """
-
-        :param data:
-        :param isbuy:
-
-        """
+        """Args:
+    data: 
+    isbuy:"""
         comminfo = self.broker.getcommissioninfo(data)
         return self._getsizing(comminfo, self.broker.getcash(), data, isbuy)
 
     def _getsizing(self, comminfo, cash, data, isbuy):
         """This method has to be overriden by subclasses of Sizer to provide
-        the sizing functionality
+the sizing functionality
 
-        :param comminfo: The CommissionInfo instance that contains
-        :param cash: current available cash in the
-        :param data: target of the operation
-        :param isbuy: will be
-
-        """
+Args:
+    comminfo: The CommissionInfo instance that contains
+    cash: current available cash in the
+    data: target of the operation
+    isbuy: will be"""
         raise NotImplementedError
 
     def set(self, strategy, broker):
-        """
-
-        :param strategy:
-        :param broker:
-
-        """
+        """Args:
+    strategy: 
+    broker:"""
         self.strategy = strategy
         self.broker = broker
 

@@ -38,34 +38,28 @@ class MyAnalyzer(bt.Analyzer):
     def notify_order(self, order):
         """Notify order information
 
-        :param order:
-
-        """
+Args:
+    order:"""
 
     def notify_trade(self, trade):
         """Notify trade information
 
-        :param trade:
-
-        """
+Args:
+    trade:"""
 
     def notify_cashvalue(self, cash, value):
         """Notify current cash and total asset value
 
-        :param cash:
-        :param value:
-
-        """
+Args:
+    cash: 
+    value:"""
 
     def notify_fund(self, cash, value, fundvalue, shares):
-        """
-
-        :param cash:
-        :param value:
-        :param fundvalue:
-        :param shares:
-
-        """
+        """Args:
+    cash: 
+    value: 
+    fundvalue: 
+    shares:"""
 
     def get_analysis(self):
         """ """

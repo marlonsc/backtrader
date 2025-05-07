@@ -34,30 +34,20 @@ from backtrader.utils import AutoOrderedDict
 
 class SQN(Analyzer):
     """SQN or SystemQualityNumber. Defined by Van K. Tharp to categorize trading
-    systems.
-
-      - 1.6 - 1.9 Below average
-      - 2.0 - 2.4 Average
-      - 2.5 - 2.9 Good
-      - 3.0 - 5.0 Excellent
-      - 5.1 - 6.9 Superb
-      - 7.0 -     Holy Grail?
-
-    The formula:
-
-      - SquareRoot(NumberTrades) * Average(TradesProfit) / StdDev(TradesProfit)
-
-    The sqn value should be deemed reliable when the number of trades >= 30
-
-    Methods:
-
-      - get_analysis
-
-        Returns a dictionary with keys "sqn" and "trades" (number of
-        considered trades)
-
-
-    """
+systems.
+- 1.6 - 1.9 Below average
+- 2.0 - 2.4 Average
+- 2.5 - 2.9 Good
+- 3.0 - 5.0 Excellent
+- 5.1 - 6.9 Superb
+- 7.0 -     Holy Grail?
+The formula:
+- SquareRoot(NumberTrades) * Average(TradesProfit) / StdDev(TradesProfit)
+The sqn value should be deemed reliable when the number of trades >= 30
+Methods:
+- get_analysis
+Returns a dictionary with keys "sqn" and "trades" (number of
+considered trades)"""
 
     alias = ("SystemQualityNumber",)
 
@@ -76,27 +66,23 @@ class SQN(Analyzer):
         self.count = 0
 
     def notify_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
+        """Args:
+    trade:"""
         if trade.status == trade.Closed:
             self.pnl.append(trade.pnlcomm)
             self.count += 1
 
     def grade_dict(self, score):
         """使用字典映射进行分级
-        - 1.6 - 1.9 Below average
-        - 2.0 - 2.4 Average
-        - 2.5 - 2.9 Good
-        - 3.0 - 5.0 Excellent
-        - 5.1 - 6.9 Superb
-        - 7.0 -     Holy Grail?
+- 1.6 - 1.9 Below average
+- 2.0 - 2.4 Average
+- 2.5 - 2.9 Good
+- 3.0 - 5.0 Excellent
+- 5.1 - 6.9 Superb
+- 7.0 -     Holy Grail?
 
-        :param score:
-
-        """
+Args:
+    score:"""
         grade_mapping = {
             (float("-inf"), 1.5): "G0-Invalid",
             (1.6, 1.9): "G1-Below average",

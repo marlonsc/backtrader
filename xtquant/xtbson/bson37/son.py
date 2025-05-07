@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Tools for creating and manipulating SON, the Serialized Ocument Notation.
-
 Regular dictionaries can be used instead of SON objects, but not when the order
 of keys is important. A SON object can be used just like a normal Python
 dictionary."""
@@ -46,11 +45,9 @@ _T = TypeVar("_T")
 
 class SON(Dict[_Key, _Value]):
     """SON data.
-
-    A subclass of dict that maintains ordering of keys and provides a
-    few extra niceties for dealing with SON. SON provides an API
-    similar to collections.OrderedDict.
-    """
+A subclass of dict that maintains ordering of keys and provides a
+few extra niceties for dealing with SON. SON provides an API
+similar to collections.OrderedDict."""
 
     __keys: List[Any]
 
@@ -190,10 +187,8 @@ class SON(Dict[_Key, _Value]):
 
     def to_dict(self) -> Dict[_Key, _Value]:
         """Convert a SON document to a normal Python dictionary instance.
-
-        This is trickier than just *dict(...)* because it needs to be
-        recursive.
-        """
+This is trickier than just *dict(...)* because it needs to be
+recursive."""
 
         def transform_value(value: Any) -> Any:
             if isinstance(value, list):

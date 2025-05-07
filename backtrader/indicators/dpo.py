@@ -31,19 +31,13 @@ from . import Indicator, MovAv
 
 class DetrendedPriceOscillator(Indicator):
     """Defined by Joe DiNapoli in his book *"Trading with DiNapoli levels"*
-
-    It measures the price variations against a Moving Average (the trend)
-    and therefore removes the "trend" factor from the price.
-
-    Formula:
-      - movav = MovingAverage(close, period)
-      - dpo = close - movav(shifted period / 2 + 1)
-
-    See:
-      - http://en.wikipedia.org/wiki/Detrended_price_oscillator
-
-
-    """
+It measures the price variations against a Moving Average (the trend)
+and therefore removes the "trend" factor from the price.
+Formula:
+- movav = MovingAverage(close, period)
+- dpo = close - movav(shifted period / 2 + 1)
+See:
+- http://en.wikipedia.org/wiki/Detrended_price_oscillator"""
 
     # Named alias for invocation
     alias = ("DPO",)

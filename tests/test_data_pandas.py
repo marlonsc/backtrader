@@ -63,12 +63,9 @@ class PandasDataOptix(btfeeds.PandasData):
 
 
 def getdata(index, noheaders=True):
-    """
-
-    :param index:
-    :param noheaders: (Default value = True)
-
-    """
+    """Args:
+    index: 
+    noheaders: (Default value = True)"""
 
     datapath = os.path.join(modpath, dataspath, datafiles[index])
 
@@ -94,11 +91,8 @@ def getdata(index, noheaders=True):
 
 
 def test_run(main=False):
-    """
-
-    :param main: (Default value = False)
-
-    """
+    """Args:
+    main: (Default value = False)"""
     # Create list with bool possibilitys for:
     # PandasData and PandasOptix,
     # no headers,

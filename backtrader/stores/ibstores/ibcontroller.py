@@ -52,11 +52,7 @@ class IBC:
         return self
 
     def __exit__(self, *_exc):
-        """
-
-        :param *_exc:
-
-        """
+        """"""
         self.terminate()
 
     def start(self):
@@ -143,16 +139,12 @@ class IBC:
 
 @dataclass
 class Watchdog:
-    r"""Start, connect and watch over the TWS or gateway app and try to keep it
-    up and running. It is intended to be used in an event-driven
-    application that properly initializes itself upon (re-)connect.
-
-    It is not intended to be used in a notebook or in imperative-style code.
-    Do not expect Watchdog to magically shield you from reality. Do not use
-    Watchdog unless you understand what it does and doesn't do.
-
-
-    """
+    """Start, connect and watch over the TWS or gateway app and try to keep it
+up and running. It is intended to be used in an event-driven
+application that properly initializes itself upon (re-)connect.
+It is not intended to be used in a notebook or in imperative-style code.
+Do not expect Watchdog to magically shield you from reality. Do not use
+Watchdog unless you understand what it does and doesn't do."""
 
     events = [
         "startingEvent",
@@ -213,23 +205,17 @@ class Watchdog:
         """ """
 
         def onTimeout(idlePeriod):
-            """
-
-            :param idlePeriod:
-
-            """
+            """Args:
+    idlePeriod:"""
             if not waiter.done():
                 waiter.set_result(None)
 
         def onError(reqId, errorCode, errorString, contract):
-            """
-
-            :param reqId:
-            :param errorCode:
-            :param errorString:
-            :param contract:
-
-            """
+            """Args:
+    reqId: 
+    errorCode: 
+    errorString: 
+    contract:"""
             if errorCode in {100, 1100} and not waiter.done():
                 waiter.set_exception(Warning(f"Error {errorCode}"))
 

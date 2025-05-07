@@ -30,12 +30,10 @@ import backtrader as bt
 
 class PositionsValue(bt.Analyzer):
     """This analyzer reports the value of the positions of the current set of
-    datas
+datas
 
-
-    :returns: each return as keys
-
-    """
+Returns:
+    each return as keys"""
 
     params = (
         ("headers", False),

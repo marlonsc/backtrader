@@ -38,51 +38,35 @@ __all__ = ["BackBroker", "BrokerBack"]
 
 class BackBroker(bt.BrokerBase):
     """Broker Simulator
-
-    The simulation supports different order types, checking a submitted order
-    cash requirements against current cash, keeping track of cash and value
-    for each iteration of ``cerebro`` and keeping the current position on
-    different datas.
-
-    *cash* is adjusted on each iteration for instruments like ``futures`` for
-     which a price change implies in real brokers the addition/substracion of
-     cash.
-
-    Supported order types:
-
-      - ``Market``: to be executed with the 1st tick of the next bar (namely
-        the ``open`` price)
-
-      - ``Close``: meant for intraday in which the order is executed with the
-        closing price of the last bar of the session
-
-      - ``Limit``: executes if the given limit price is seen during the
-        session
-
-      - ``Stop``: executes a ``Market`` order if the given stop price is seen
-
-      - ``StopLimit``: sets a ``Limit`` order in motion if the given stop
-        price is seen
-
-    Because the broker is instantiated by ``Cerebro`` and there should be
-    (mostly) no reason to replace the broker, the params are not controlled
-    by the user for the instance.  To change this there are two options:
-
-      1. Manually create an instance of this class with the desired params
-         and use ``cerebro.broker = instance`` to set the instance as the
-         broker for the ``run`` execution
-
-      2. Use the ``set_xxx`` to set the value using
-         ``cerebro.broker.set_xxx`` where ```xxx`` stands for the name of the
-         parameter to set
-
-      .. note::
-
-         ``cerebro.broker`` is a *property* supported by the ``getbroker``
-         and ``setbroker`` methods of ``Cerebro``
-
-
-    """
+The simulation supports different order types, checking a submitted order
+cash requirements against current cash, keeping track of cash and value
+for each iteration of ``cerebro`` and keeping the current position on
+different datas.
+*cash* is adjusted on each iteration for instruments like ``futures`` for
+which a price change implies in real brokers the addition/substracion of
+cash.
+Supported order types:
+- ``Market``: to be executed with the 1st tick of the next bar (namely
+the ``open`` price)
+- ``Close``: meant for intraday in which the order is executed with the
+closing price of the last bar of the session
+- ``Limit``: executes if the given limit price is seen during the
+session
+- ``Stop``: executes a ``Market`` order if the given stop price is seen
+- ``StopLimit``: sets a ``Limit`` order in motion if the given stop
+price is seen
+Because the broker is instantiated by ``Cerebro`` and there should be
+(mostly) no reason to replace the broker, the params are not controlled
+by the user for the instance.  To change this there are two options:
+1. Manually create an instance of this class with the desired params
+and use ``cerebro.broker = instance`` to set the instance as the
+broker for the ``run`` execution
+2. Use the ``set_xxx`` to set the value using
+``cerebro.broker.set_xxx`` where ```xxx`` stands for the name of the
+parameter to set
+.. note::
+``cerebro.broker`` is a *property* supported by the ``getbroker``
+and ``setbroker`` methods of ``Cerebro``"""
 
     params = (
         ("cash", 10000.0),
@@ -156,13 +140,11 @@ class BackBroker(bt.BrokerBase):
 
     def set_fundmode(self, fundmode, fundstartval=None):
         """Set the actual fundmode (True or False)
+If the argument fundstartval is not ``None``, it will used
 
-        If the argument fundstartval is not ``None``, it will used
-
-        :param fundmode:
-        :param fundstartval:  (Default value = None)
-
-        """
+Args:
+    fundmode: 
+    fundstartval: (Default value = None)"""
         self.p.fundmode = fundmode
         if fundstartval is not None:
             self.set_fundstartval(fundstartval)
@@ -176,41 +158,36 @@ class BackBroker(bt.BrokerBase):
     def set_fundstartval(self, fundstartval):
         """Set the starting value of the fund-like performance tracker
 
-        :param fundstartval:
-
-        """
+Args:
+    fundstartval:"""
         self.p.fundstartval = fundstartval
 
     def set_int2pnl(self, int2pnl):
         """Configure assignment of interest to profit and loss
 
-        :param int2pnl:
-
-        """
+Args:
+    int2pnl:"""
         self.p.int2pnl = int2pnl
 
     def set_coc(self, coc):
         """Configure the Cheat-On-Close method to buy the close on order bar
 
-        :param coc:
-
-        """
+Args:
+    coc:"""
         self.p.coc = coc
 
     def set_coo(self, coo):
         """Configure the Cheat-On-Open method to buy the close on order bar
 
-        :param coo:
-
-        """
+Args:
+    coo:"""
         self.p.coo = coo
 
     def set_shortcash(self, shortcash):
         """Configure the shortcash parameters
 
-        :param shortcash:
-
-        """
+Args:
+    shortcash:"""
         self.p.shortcash = shortcash
 
     def set_slippage_perc(
@@ -223,13 +200,12 @@ class BackBroker(bt.BrokerBase):
     ):
         """Configure slippage to be percentage based
 
-        :param perc:
-        :param slip_open:  (Default value = True)
-        :param slip_limit:  (Default value = True)
-        :param slip_match:  (Default value = True)
-        :param slip_out:  (Default value = False)
-
-        """
+Args:
+    perc: 
+    slip_open: (Default value = True)
+    slip_limit: (Default value = True)
+    slip_match: (Default value = True)
+    slip_out: (Default value = False)"""
         self.p.slip_perc = perc
         self.p.slip_fixed = 0.0
         self.p.slip_open = slip_open
@@ -247,13 +223,12 @@ class BackBroker(bt.BrokerBase):
     ):
         """Configure slippage to be fixed points based
 
-        :param fixed:
-        :param slip_open:  (Default value = True)
-        :param slip_limit:  (Default value = True)
-        :param slip_match:  (Default value = True)
-        :param slip_out:  (Default value = False)
-
-        """
+Args:
+    fixed: 
+    slip_open: (Default value = True)
+    slip_limit: (Default value = True)
+    slip_match: (Default value = True)
+    slip_out: (Default value = False)"""
         self.p.slip_perc = 0.0
         self.p.slip_fixed = fixed
         self.p.slip_open = slip_open
@@ -264,25 +239,22 @@ class BackBroker(bt.BrokerBase):
     def set_filler(self, filler):
         """Sets a volume filler for volume filling execution
 
-        :param filler:
-
-        """
+Args:
+    filler:"""
         self.p.filler = filler
 
     def set_checksubmit(self, checksubmit):
         """Sets the checksubmit parameter
 
-        :param checksubmit:
-
-        """
+Args:
+    checksubmit:"""
         self.p.checksubmit = checksubmit
 
     def set_eosbar(self, eosbar):
         """Sets the eosbar parameter (alias: ``seteosbar``
 
-        :param eosbar:
-
-        """
+Args:
+    eosbar:"""
         self.p.eosbar = eosbar
 
     seteosbar = set_eosbar
@@ -296,9 +268,8 @@ class BackBroker(bt.BrokerBase):
     def set_cash(self, cash):
         """Sets the cash parameter (alias: ``setcash``)
 
-        :param cash:
-
-        """
+Args:
+    cash:"""
         self.startingcash = self.cash = self.p.cash = cash
         self._value = cash
 
@@ -307,9 +278,8 @@ class BackBroker(bt.BrokerBase):
     def add_cash(self, cash):
         """Add/Remove cash to the system (use a negative value to remove)
 
-        :param cash:
-
-        """
+Args:
+    cash:"""
         self._cash_addition.append(cash)
 
     def get_fundshares(self):
@@ -325,12 +295,9 @@ class BackBroker(bt.BrokerBase):
     fundvalue = property(get_fundvalue)
 
     def cancel(self, order, bracket=False):
-        """
-
-        :param order:
-        :param bracket:  (Default value = False)
-
-        """
+        """Args:
+    order: 
+    bracket: (Default value = False)"""
         try:
             self.pending.remove(order)
         except ValueError:
@@ -346,13 +313,12 @@ class BackBroker(bt.BrokerBase):
 
     def get_value(self, datas=None, mkt=False, lever=False):
         """Returns the portfolio value of the given datas (if datas is ``None``, then
-        the total portfolio value will be returned (alias: ``getvalue``)
+the total portfolio value will be returned (alias: ``getvalue``)
 
-        :param datas:  (Default value = None)
-        :param mkt:  (Default value = False)
-        :param lever:  (Default value = False)
-
-        """
+Args:
+    datas: (Default value = None)
+    mkt: (Default value = False)
+    lever: (Default value = False)"""
         if datas is None:
             if mkt:
                 return self._valuemkt if not lever else self._valuemktlever
@@ -364,21 +330,15 @@ class BackBroker(bt.BrokerBase):
     getvalue = get_value
 
     def get_value_lever(self, datas=None, mkt=False):
-        """
-
-        :param datas:  (Default value = None)
-        :param mkt:  (Default value = False)
-
-        """
+        """Args:
+    datas: (Default value = None)
+    mkt: (Default value = False)"""
         return self.get_value(datas=datas, mkt=mkt)
 
     def _get_value(self, datas=None, lever=False):
-        """
-
-        :param datas:  (Default value = None)
-        :param lever:  (Default value = False)
-
-        """
+        """Args:
+    datas: (Default value = None)
+    lever: (Default value = False)"""
         pos_value = 0.0
         pos_value_unlever = 0.0
         unrealized = 0.0
@@ -452,15 +412,12 @@ class BackBroker(bt.BrokerBase):
 
     def get_orders_open(self, safe=False):
         """Returns an iterable with the orders which are still open (either not
-        executed or partially executed
+executed or partially executed
+The orders returned must not be touched.
+If order manipulation is needed, set the parameter ``safe`` to True
 
-        The orders returned must not be touched.
-
-        If order manipulation is needed, set the parameter ``safe`` to True
-
-        :param safe:  (Default value = False)
-
-        """
+Args:
+    safe: (Default value = False)"""
         if safe:
             os = [x.clone() for x in self.pending]
         else:
@@ -470,19 +427,15 @@ class BackBroker(bt.BrokerBase):
 
     def getposition(self, data):
         """Returns the current position status (a ``Position`` instance) for
-        the given ``data``
+the given ``data``
 
-        :param data:
-
-        """
+Args:
+    data:"""
         return self.positions[data]
 
     def orderstatus(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         try:
             o = self.orders.index(order)
         except ValueError:
@@ -491,11 +444,8 @@ class BackBroker(bt.BrokerBase):
         return o.status
 
     def _take_children(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         oref = order.ref
         pref = getattr(order.parent, "ref", oref)  # parent ref or self
 
@@ -508,12 +458,9 @@ class BackBroker(bt.BrokerBase):
         return pref
 
     def submit(self, order, check=True):
-        """
-
-        :param order:
-        :param check:  (Default value = True)
-
-        """
+        """Args:
+    order: 
+    check: (Default value = True)"""
         pref = self._take_children(order)
         if pref is None:  # order has not been taken
             return order
@@ -529,12 +476,9 @@ class BackBroker(bt.BrokerBase):
         return order
 
     def transmit(self, order, check=True):
-        """
-
-        :param order:
-        :param check:  (Default value = True)
-
-        """
+        """Args:
+    order: 
+    check: (Default value = True)"""
         if check and self.p.checksubmit:
             order.submit()
             self.submitted.append(order)
@@ -575,11 +519,8 @@ class BackBroker(bt.BrokerBase):
             self._bracketize(order, cancel=True)
 
     def submit_accept(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         order.pannotated = None
         order.submit()
         order.accept()
@@ -587,12 +528,9 @@ class BackBroker(bt.BrokerBase):
         self.notify(order)
 
     def _bracketize(self, order, cancel=False):
-        """
-
-        :param order:
-        :param cancel:  (Default value = False)
-
-        """
+        """Args:
+    order: 
+    cancel: (Default value = False)"""
         oref = order.ref
         pref = getattr(order.parent, "ref", oref)
         parent = oref == pref
@@ -610,11 +548,8 @@ class BackBroker(bt.BrokerBase):
                 self._toactivate.append(o)
 
     def _ococheck(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         # ocoref = self._ocos[order.ref] or order.ref  # a parent or self
         parentref = self._ocos[order.ref]
         ocoref = self._ocos.get(parentref, None)
@@ -628,12 +563,9 @@ class BackBroker(bt.BrokerBase):
                     self.notify(o)
 
     def _ocoize(self, order, oco):
-        """
-
-        :param order:
-        :param oco:
-
-        """
+        """Args:
+    order: 
+    oco:"""
         oref = order.ref
         if oco is None:
             self._ocos[oref] = oref  # current order is parent
@@ -644,22 +576,16 @@ class BackBroker(bt.BrokerBase):
             self._ocol[ocoref].append(oref)  # add to group
 
     def add_order_history(self, orders, notify=True):
-        """
-
-        :param orders:
-        :param notify:  (Default value = True)
-
-        """
+        """Args:
+    orders: 
+    notify: (Default value = True)"""
         oiter = iter(orders)
         o = next(oiter, None)
         self._userhist.append([o, oiter, notify])
 
     def set_fund_history(self, fund):
-        """
-
-        :param fund:
-
-        """
+        """Args:
+    fund:"""
         # iterable with the following pro item
         # [datetime, share_value, net asset value]
         fiter = iter(fund)
@@ -688,26 +614,22 @@ class BackBroker(bt.BrokerBase):
         _checksubmit=True,
         **kwargs,
     ):
-        """
-
-        :param owner:
-        :param data:
-        :param size:
-        :param price:  (Default value = None)
-        :param plimit:  (Default value = None)
-        :param exectype:  (Default value = None)
-        :param valid:  (Default value = None)
-        :param tradeid:  (Default value = 0)
-        :param oco:  (Default value = None)
-        :param trailamount:  (Default value = None)
-        :param trailpercent:  (Default value = None)
-        :param parent:  (Default value = None)
-        :param transmit:  (Default value = True)
-        :param histnotify:  (Default value = False)
-        :param _checksubmit:  (Default value = True)
-        :param **kwargs:
-
-        """
+        """Args:
+    owner: 
+    data: 
+    size: 
+    price: (Default value = None)
+    plimit: (Default value = None)
+    exectype: (Default value = None)
+    valid: (Default value = None)
+    tradeid: (Default value = 0)
+    oco: (Default value = None)
+    trailamount: (Default value = None)
+    trailpercent: (Default value = None)
+    parent: (Default value = None)
+    transmit: (Default value = True)
+    histnotify: (Default value = False)
+    _checksubmit: (Default value = True)"""
 
         order = BuyOrder(
             owner=owner,
@@ -749,26 +671,22 @@ class BackBroker(bt.BrokerBase):
         _checksubmit=True,
         **kwargs,
     ):
-        """
-
-        :param owner:
-        :param data:
-        :param size:
-        :param price:  (Default value = None)
-        :param plimit:  (Default value = None)
-        :param exectype:  (Default value = None)
-        :param valid:  (Default value = None)
-        :param tradeid:  (Default value = 0)
-        :param oco:  (Default value = None)
-        :param trailamount:  (Default value = None)
-        :param trailpercent:  (Default value = None)
-        :param parent:  (Default value = None)
-        :param transmit:  (Default value = True)
-        :param histnotify:  (Default value = False)
-        :param _checksubmit:  (Default value = True)
-        :param **kwargs:
-
-        """
+        """Args:
+    owner: 
+    data: 
+    size: 
+    price: (Default value = None)
+    plimit: (Default value = None)
+    exectype: (Default value = None)
+    valid: (Default value = None)
+    tradeid: (Default value = 0)
+    oco: (Default value = None)
+    trailamount: (Default value = None)
+    trailpercent: (Default value = None)
+    parent: (Default value = None)
+    transmit: (Default value = True)
+    histnotify: (Default value = False)
+    _checksubmit: (Default value = True)"""
 
         order = SellOrder(
             owner=owner,
@@ -794,16 +712,13 @@ class BackBroker(bt.BrokerBase):
     def _execute(
         self, order, ago=None, price=None, cash=None, position=None, dtcoc=None
     ):
-        """
-
-        :param order:
-        :param ago:  (Default value = None)
-        :param price:  (Default value = None)
-        :param cash:  (Default value = None)
-        :param position:  (Default value = None)
-        :param dtcoc:  (Default value = None)
-
-        """
+        """Args:
+    order: 
+    ago: (Default value = None)
+    price: (Default value = None)
+    cash: (Default value = None)
+    position: (Default value = None)
+    dtcoc: (Default value = None)"""
         # ago = None is used a flag for pseudo execution
         if ago is not None and price is None:
             return  # no psuedo exec no price - no execution
@@ -969,30 +884,21 @@ class BackBroker(bt.BrokerBase):
             self._bracketize(order, cancel=True)
 
     def notify(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         self.notifs.append(order.clone())
 
     def _try_exec_historical(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         self._execute(order, ago=0, price=order.created.price)
 
     def _try_exec_market(self, order, popen, phigh, plow):
-        """
-
-        :param order:
-        :param popen:
-        :param phigh:
-        :param plow:
-
-        """
+        """Args:
+    order: 
+    popen: 
+    phigh: 
+    plow:"""
         if self.p.coc and order.info.get("coc", True):
             dtcoc = order.created.dt
             exprice = order.created.pclose
@@ -1011,12 +917,9 @@ class BackBroker(bt.BrokerBase):
         self._execute(order, ago=0, price=p, dtcoc=dtcoc)
 
     def _try_exec_close(self, order, pclose):
-        """
-
-        :param order:
-        :param pclose:
-
-        """
+        """Args:
+    order: 
+    pclose:"""
         # pannotated allows to keep track of the closing bar if there is no
         # information which lets us know that the current bar is the closing
         # bar (like matching end of session bar)
@@ -1043,15 +946,12 @@ class BackBroker(bt.BrokerBase):
         order.pannotated = pclose
 
     def _try_exec_limit(self, order, popen, phigh, plow, plimit):
-        """
-
-        :param order:
-        :param popen:
-        :param phigh:
-        :param plow:
-        :param plimit:
-
-        """
+        """Args:
+    order: 
+    popen: 
+    phigh: 
+    plow: 
+    plimit:"""
         if order.isbuy():
             if plimit >= popen:
                 # open smaller/equal than requested - buy cheaper
@@ -1073,16 +973,13 @@ class BackBroker(bt.BrokerBase):
                 self._execute(order, ago=0, price=plimit)
 
     def _try_exec_stop(self, order, popen, phigh, plow, pcreated, pclose):
-        """
-
-        :param order:
-        :param popen:
-        :param phigh:
-        :param plow:
-        :param pcreated:
-        :param pclose:
-
-        """
+        """Args:
+    order: 
+    popen: 
+    phigh: 
+    plow: 
+    pcreated: 
+    pclose:"""
         if order.isbuy():
             if popen >= pcreated:
                 # price penetrated with an open gap - use open
@@ -1108,17 +1005,14 @@ class BackBroker(bt.BrokerBase):
             order.trailadjust(pclose)
 
     def _try_exec_stoplimit(self, order, popen, phigh, plow, pclose, pcreated, plimit):
-        """
-
-        :param order:
-        :param popen:
-        :param phigh:
-        :param plow:
-        :param pclose:
-        :param pcreated:
-        :param plimit:
-
-        """
+        """Args:
+    order: 
+    popen: 
+    phigh: 
+    plow: 
+    pclose: 
+    pcreated: 
+    plimit:"""
         if order.isbuy():
             if popen >= pcreated:
                 order.triggered = True
@@ -1165,14 +1059,11 @@ class BackBroker(bt.BrokerBase):
             order.trailadjust(pclose)
 
     def _slip_up(self, pmax, price, doslip=True, lim=False):
-        """
-
-        :param pmax:
-        :param price:
-        :param doslip:  (Default value = True)
-        :param lim:  (Default value = False)
-
-        """
+        """Args:
+    pmax: 
+    price: 
+    doslip: (Default value = True)
+    lim: (Default value = False)"""
         if not doslip:
             return price
 
@@ -1196,14 +1087,11 @@ class BackBroker(bt.BrokerBase):
         return None  # no price can be returned
 
     def _slip_down(self, pmin, price, doslip=True, lim=False):
-        """
-
-        :param pmin:
-        :param price:
-        :param doslip:  (Default value = True)
-        :param lim:  (Default value = False)
-
-        """
+        """Args:
+    pmin: 
+    price: 
+    doslip: (Default value = True)
+    lim: (Default value = False)"""
         if not doslip:
             return price
 
@@ -1227,11 +1115,8 @@ class BackBroker(bt.BrokerBase):
         return None  # no price can be returned
 
     def _try_exec(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         data = order.data
 
         popen = getattr(data, "tick_open", None)

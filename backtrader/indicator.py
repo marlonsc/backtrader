@@ -32,7 +32,10 @@ from .utils.py3 import range, with_metaclass
 
 
 class MetaIndicator(IndicatorBase.__class__):
-    """ """
+    """Metaclass for Indicator. Handles indicator instantiation, caching, and
+    registration of subclasses. All docstrings and comments must be line-wrapped
+    at 90 characters or less.
+    """
 
     _refname = "_indcol"
     _indcol = dict()
@@ -47,11 +50,8 @@ class MetaIndicator(IndicatorBase.__class__):
 
     @classmethod
     def usecache(cls, onoff):
-        """
-
-        :param onoff:
-
-        """
+        """Args:
+    onoff:"""
         cls._icacheuse = onoff
 
     # Object cache deactivated on 2016-08-17. If the object is being used
@@ -59,12 +59,7 @@ class MetaIndicator(IndicatorBase.__class__):
     # influences the first usage when being modified during the 2nd usage
 
     def __call__(cls, *args, **kwargs):
-        """
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """"""
         if not cls._icacheuse:
             return super(MetaIndicator, cls).__call__(*args, **kwargs)
 
@@ -83,11 +78,10 @@ class MetaIndicator(IndicatorBase.__class__):
     def __init__(cls, name, bases, dct):
         """Class has already been created ... register subclasses
 
-        :param name:
-        :param bases:
-        :param dct:
-
-        """
+Args:
+    name: 
+    bases: 
+    dct:"""
         # Initialize the class
         super(MetaIndicator, cls).__init__(name, bases, dct)
 
@@ -107,30 +101,27 @@ class MetaIndicator(IndicatorBase.__class__):
 
 
 class Indicator(with_metaclass(MetaIndicator, IndicatorBase)):
-    """ """
+    """Base class for all indicators in Backtrader. Provides hooks for advancing
+    data, simulating once/prenext/nextstart logic, and line management. All
+    docstrings and comments must be line-wrapped at 90 characters or less.
+    """
 
     _ltype = LineIterator.IndType
 
     csv = False
 
     def advance(self, size=1):
-        """
-
-        :param size:  (Default value = 1)
-
-        """
+        """Args:
+    size: (Default value = 1)"""
         # Need intercepting this call to support datas with
         # different lengths (timeframes)
         if len(self) < len(self._clock):
             self.lines.advance(size=size)
 
     def preonce_via_prenext(self, start, end):
-        """
-
-        :param start:
-        :param end:
-
-        """
+        """Args:
+    start: 
+    end:"""
         # generic implementation if prenext is overridden but preonce is not
         for i in range(start, end):
             for data in self.datas:
@@ -143,12 +134,9 @@ class Indicator(with_metaclass(MetaIndicator, IndicatorBase)):
             self.prenext()
 
     def oncestart_via_nextstart(self, start, end):
-        """
-
-        :param start:
-        :param end:
-
-        """
+        """Args:
+    start: 
+    end:"""
         # nextstart has been overriden, but oncestart has not and the code is
         # here. call the overriden nextstart
         for i in range(start, end):
@@ -162,12 +150,9 @@ class Indicator(with_metaclass(MetaIndicator, IndicatorBase)):
             self.nextstart()
 
     def once_via_next(self, start, end):
-        """
-
-        :param start:
-        :param end:
-
-        """
+        """Args:
+    start: 
+    end:"""
         # Not overridden, next must be there ...
         for i in range(start, end):
             for data in self.datas:
@@ -181,15 +166,13 @@ class Indicator(with_metaclass(MetaIndicator, IndicatorBase)):
 
 
 class MtLinePlotterIndicator(Indicator.__class__):
-    """ """
+    """Metaclass for single-line plotter indicators. Handles dynamic line and
+    plotlines creation for visualization. All docstrings and comments must be
+    line-wrapped at 90 characters or less.
+    """
 
     def donew(cls, *args, **kwargs):
-        """
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """"""
         lname = kwargs.pop("name")
         name = cls.__name__
 
@@ -201,8 +184,12 @@ class MtLinePlotterIndicator(Indicator.__class__):
         cls.plotlines = plotlines._derive(name, newplotlines, [], recurse=True)
 
         # Create the object and set the params in place
-        _obj, args, kwargs = super(MtLinePlotterIndicator, cls).donew(*args, **kwargs)
-
+        supercls = super(Indicator.__class__, cls)
+        if hasattr(supercls, "donew"):
+            _obj, args, kwargs = supercls.donew(*args, **kwargs)
+        else:
+            _obj = cls.__new__(cls, *args, **kwargs)
+            _obj.__init__(*args, **kwargs)
         _obj.owner = _obj.data.owner._clock
         _obj.data.lines[0].addbinding(_obj.lines[0])
 
@@ -211,4 +198,6 @@ class MtLinePlotterIndicator(Indicator.__class__):
 
 
 class LinePlotterIndicator(with_metaclass(MtLinePlotterIndicator, Indicator)):
-    """ """
+    """Base class for single-line plotter indicators. All docstrings and comments
+    must be line-wrapped at 90 characters or less.
+    """

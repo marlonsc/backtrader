@@ -36,20 +36,12 @@ from ..utils import date2num
 
 class BacktraderCSVData(feed.CSVDataBase):
     """Parses a self-defined CSV Data used for testing.
-
-    Specific parameters:
-
-      - ``dataname``: The filename to parse or a file-like object
-
-
-    """
+Specific parameters:
+- ``dataname``: The filename to parse or a file-like object"""
 
     def _loadline(self, linetokens):
-        """
-
-        :param linetokens:
-
-        """
+        """Args:
+    linetokens:"""
         itoken = iter(linetokens)
 
         dttxt = next(itoken)  # Format is YYYY-MM-DD - skip char 4 and 7
@@ -80,13 +72,8 @@ class BacktraderCSV(feed.CSVFeedBase):
 
 class IBCSVData(feed.CSVDataBase):
     """Parses a self-defined CSV Data used for testing.
-
-    Specific parameters:
-
-      - ``dataname``: The filename to parse or a file-like object
-
-
-    """
+Specific parameters:
+- ``dataname``: The filename to parse or a file-like object"""
 
     params = (
         ("secType", "STK"),  # usual industry value
@@ -110,21 +97,14 @@ class IBCSVData(feed.CSVDataBase):
     _ST_FROM, _ST_START, _ST_LIVE, _ST_HISTORBACK, _ST_OVER = range(5)
 
     def __init__(self, **kwargs):
-        """
-
-        :param **kwargs:
-
-        """
+        """"""
         self.ib = self._store(**kwargs)
         self.precontract = self.parsecontract(self.p.datainfo)
         self.pretradecontract = self.parsecontract(self.p.tradeinfo)
 
     def _loadline(self, linetokens):
-        """
-
-        :param linetokens:
-
-        """
+        """Args:
+    linetokens:"""
         itoken = iter(linetokens)
 
         dttxt = next(itoken)  # Format is YYYY-MM-DD - skip char 4 and 7
@@ -143,11 +123,10 @@ class IBCSVData(feed.CSVDataBase):
 
     def setenvironment(self, env):
         """Receives an environment (cerebro) and passes it over to the store it
-        belongs to
+belongs to
 
-        :param env:
-
-        """
+Args:
+    env:"""
         super(IBCSVData, self).setenvironment(env)
         env.addstore(self.ib)
 
@@ -172,11 +151,8 @@ class IBCSVData(feed.CSVDataBase):
     ]
 
     def parsecontract(self, dataname):
-        """
-
-        :param dataname:
-
-        """
+        """Args:
+    dataname:"""
         # Set defaults for optional tokens in the ticker string
         if dataname is None:
             return None
@@ -305,20 +281,12 @@ class IBCSV(feed.CSVFeedBase):
 
 class IBCSVOnlyData(feed.CSVDataBase):
     """Parses a self-defined CSV Data used for testing.
-
-    Specific parameters:
-
-      - ``dataname``: The filename to parse or a file-like object
-
-
-    """
+Specific parameters:
+- ``dataname``: The filename to parse or a file-like object"""
 
     def _loadline(self, linetokens):
-        """
-
-        :param linetokens:
-
-        """
+        """Args:
+    linetokens:"""
         itoken = iter(linetokens)
 
         dttxt = next(itoken)  # Format is YYYY-MM-DD - skip char 4 and 7

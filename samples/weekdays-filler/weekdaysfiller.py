@@ -36,23 +36,21 @@ class WeekDaysFiller(object):
     lastdt = datetime.date.max - ONEDAY
 
     def __init__(self, data, fillclose=False):
-        """
-
-        :param data:
-        :param fillclose: (Default value = False)
-
-        """
+        """Args:
+    data: 
+    fillclose: (Default value = False)"""
         self.fillclose = fillclose
         self.voidbar = [float("Nan")] * data.size()  # init a void bar
 
     def __call__(self, data):
         """Empty bars (NaN) or with last close price are added for weekdays with no
-        data
+data
 
-        :param data: the data source to filter
-        :returns: True (always): bars are removed (even if put back on the stack)
+Args:
+    data: the data source to filter
 
-        """
+Returns:
+    True (always): bars are removed (even if put back on the stack)"""
         dt = data.datetime.date()  # current date in int format
         lastdt = self.lastdt + self.ONEDAY  # move last seen data once forward
 

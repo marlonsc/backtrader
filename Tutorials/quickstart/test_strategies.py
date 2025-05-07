@@ -62,9 +62,9 @@ class TestStrategy_SMA(bt.Strategy):
         )
 
         # Delayed indexing.
-        # Wenn ich hier self._dataclose[-delay] nehme, wird der *jetzt* aktuelle Wert genommen
-        # Die Formulierung hier ist äquivalent zu self._dataclose[-1] > self._sma in next()
-        # Hier wird ein LineOwnOperation erzeugt, kein Wert (bool)
+        # If I take self._dataclose[-delay] here, the *current* value is taken
+        # The formulation here is equivalent to self._dataclose[-1] > self._sma in next()
+        # Here a LineOwnOperation is created, not a value (bool)
         self._buy_condition: bt.LineOwnOperation = (
             self._dataclose(-self.p.delay) > self._sma
         )
@@ -102,15 +102,11 @@ class TestStrategy_SMA(bt.Strategy):
     def log(self, txt: str, dt=None, caller: str = None, print_it: bool = False):
         """Logging function for this strategy
 
-        :param txt:
-        :type txt: str
-        :param dt:  (Default value = None)
-        :param caller:  (Default value = None)
-        :type caller: str
-        :param print_it:  (Default value = False)
-        :type print_it: bool
-
-        """
+Args:
+    txt: 
+    dt: (Default value = None)
+    caller: (Default value = None)
+    print_it: (Default value = False)"""
         if not print_it and not self.p.log_by_default:
             return
 
@@ -124,10 +120,10 @@ class TestStrategy_SMA(bt.Strategy):
         print(f"{bars_processed:3} {caller:15}\t{formatted_date} {txt}")
 
     def next(self):
-        """Die Methode next() in einer Backtrader-Strategie wird bei jedem neuen Datenpunkt (Bar) aufgerufen und enthält
-        die Handelslogik der Strategie.
-        Die next()-Methode überprüft den aktuellen Marktstatus, entscheidet basierend auf der definierten Handelslogik,
-        ob Kauf- oder Verkaufsorders erstellt werden sollen, und loggt relevante Informationen.
+        """The next() method in a Backtrader strategy is called for each new data point (bar) and contains
+        the trading logic of the strategy.
+        The next() method checks the current market status, decides based on the defined trading logic
+        whether buy or sell orders should be created, and logs relevant information.
 
 
         """
@@ -165,50 +161,48 @@ class TestStrategy_SMA(bt.Strategy):
         # Check if we are in the market. Every completed BUY order creates a
         # position?
         if not self.position:
-            # Noch nicht im Markt ... wir KÖNNTEN kaufen, wenn ...
+            # Not in the market yet... we COULD buy if...
             if self._buy_condition:  # (identisch zu self._buy_condition)
-                # KAUFEN, KAUFEN, KAUFEN!!! (mit allen möglichen
-                # Standardparametern)
+                # BUY, BUY, BUY!!! (with all possible
+                # standard parameters)
                 buy_order_message = (
-                    f"{Fore.GREEN}Erstelle KAUF-Bestellung"
+                    f"{Fore.GREEN}Creating BUY order"
                     f" {self._dataclose[0]:,.2f}{Fore.RESET}"
                 )
                 self.log(buy_order_message, caller="func next")
                 self._order = self.buy()
         else:
-            # Bereits im Markt (Positionen existieren) ... wir könnten
-            # verkaufen
+            # Already in the market (positions exist) ... we could
+            # sell
             if self._sell_condition:
-                # VERKAUFEN, VERKAUFEN, VERKAUFEN!!! (mit allen möglichen
-                # Standardparametern)
+                # SELL, SELL, SELL!!! (with all possible
+                # standard parameters)
                 sell_order_message = (
-                    f"{Fore.YELLOW}Erstelle VERKAUF-Bestellung"
+                    f"{Fore.YELLOW}Creating SELL order"
                     f" {self._dataclose[0]:,.2f}{Fore.RESET}"
                 )
                 self.log(
                     sell_order_message,
                 )
-                # Verfolge die erstellte Bestellung, um eine zweite Bestellung
-                # zu vermeiden
+                # Track the created order to avoid a second order
+                # being placed
                 self._order = self.sell()
 
     def notify_order(self, order):
         """The order lifecycle is managed through the notify_order method,
-        which is called whenever the status of an order changes.
-        This ensures that the strategy can react to order completions, rejections, or cancellations in a controlled manner.
-        Here is a brief overview of how orders are processed:
-            - Order Submission: Orders are submitted within the next method.
-            - Order Notification: The notify_order method is called to update the status of the order.
-            - Order Execution: Orders are executed based on the market data and broker conditions.
-        This synchronous processing ensures that the strategy can manage orders and positions in a
-        predictable and sequential manner.
+which is called whenever the status of an order changes.
+This ensures that the strategy can react to order completions, rejections, or cancellations in a controlled manner.
+Here is a brief overview of how orders are processed:
+- Order Submission: Orders are submitted within the next method.
+- Order Notification: The notify_order method is called to update the status of the order.
+- Order Execution: Orders are executed based on the market data and broker conditions.
+This synchronous processing ensures that the strategy can manage orders and positions in a
+predictable and sequential manner.
+This method will be called whenever an order status changes
+Order details can be analyzed
 
-        This method will be called whenever an order status changes
-        Order details can be analyzed
-
-        :param order:
-
-        """
+Args:
+    order:"""
         action = (
             f"{Fore.GREEN}BUY{Fore.RESET}"
             if order.isbuy()
@@ -252,19 +246,18 @@ class TestStrategy_SMA(bt.Strategy):
     # 105
     def notify_trade(self, trade):
         """The notify_trade method is called whenever there is a change in the status of a trade.
-        This method is used to handle and log trade results, such as when a trade is closed or its status changes.
-        The method has two primary functions:
-            - Logs Trade Results: It logs the results of a trade, including whether it was a profit or loss,
-              and the gross and net profit/loss.
-            - Updates Trade DataFrame: It updates a DataFrame with the trade details, such as date, price, status,
-              and profit/loss.
-        notify_trade is Called:
-            - Trade Closed: When a trade is closed, the method logs the result and updates the DataFrame.
-            - Trade Status Change: When the status of a trade changes, it logs the new status.
+This method is used to handle and log trade results, such as when a trade is closed or its status changes.
+The method has two primary functions:
+- Logs Trade Results: It logs the results of a trade, including whether it was a profit or loss,
+and the gross and net profit/loss.
+- Updates Trade DataFrame: It updates a DataFrame with the trade details, such as date, price, status,
+and profit/loss.
+notify_trade is Called:
+- Trade Closed: When a trade is closed, the method logs the result and updates the DataFrame.
+- Trade Status Change: When the status of a trade changes, it logs the new status.
 
-        :param trade:
-
-        """
+Args:
+    trade:"""
         if trade.isclosed:
             result = "profit" if trade.pnlcomm > 0 else "loss"
             self.log(
@@ -304,7 +297,7 @@ class DelayedIndexing(TestStrategy_SMA):
         self._sma = bt.indicators.SimpleMovingAverage(
             self._dataclose, period=self.p.period
         )
-        # _cmpval wird erst in next() berechnet (verzögert)
+        # _cmpval is only calculated in next() (delayed)
         self._cmpval: bt.linebuffer.LinesOperation = (
             self._dataclose(-self.p.delay) > self._sma
         )
@@ -324,8 +317,8 @@ class DelayedIndexing(TestStrategy_SMA):
         # print(f'Using delayed indexing: {bool(self._cmpval)=}')
 
         # Using __call__ method
-        # Ganz blöde Idee, weil _bei jedem Aufruf_ die Berechnung neu gemacht wird und ein neues
-        # Objekt erzeugt wird. Das ist nicht nur ineffizient, sondern auch fehleranfällig.
+        # Very bad idea, because the calculation is redone _with each call_ and a new
+        # object is created. This is not only inefficient, but also error-prone.
         # buy_condition_call:bt.linebuffer.LinesOperatio = self._dataclose(-self.p.delay) > self._sma
         # if len(buy_condition_call) > 0:
         #     print(f'Using __call__: {buy_condition_call[0]=}')
@@ -477,7 +470,7 @@ class EmptyCall(TestStrategy_SMA):
 
         self._sma0 = bt.indicators.SimpleMovingAverage(self._dataclose_daily, period=20)
         self._sma1 = bt.indicators.SimpleMovingAverage(self._dataclose_weekly, period=5)
-        # Erzeugt einen Indexfehler, weil die Daten unterschiedlich lang sind
+        # Generates an index error because the data has different lengths
         # sma_daily: 255, sma_weekly: 50
         self._buysig = self._sma0 > self._sma1(-1)
 
@@ -502,10 +495,9 @@ class TestStrategy_simple(bt.Strategy):
     def log(self, txt, dt=None):
         """Logging function fot this strategy
 
-        :param txt:
-        :param dt:  (Default value = None)
-
-        """
+Args:
+    txt: 
+    dt: (Default value = None)"""
         dt = dt or self.datas[0].datetime.date(0)
         print("%s, %s" % (dt.isoformat(), txt))
 
@@ -536,10 +528,9 @@ class TestStrategy_104(bt.Strategy):
     def log(self, txt, dt=None):
         """Logging function fot this strategy
 
-        :param txt:
-        :param dt:  (Default value = None)
-
-        """
+Args:
+    txt: 
+    dt: (Default value = None)"""
         dt = dt or self.datas[0].datetime.date(0)
         print("%s, %s" % (dt.isoformat(), txt))
 
@@ -552,11 +543,8 @@ class TestStrategy_104(bt.Strategy):
         self.order = None
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status in [order.Submitted, order.Accepted]:
             # Buy/Sell order submitted/accepted to/by broker - Nothing to do
             return
@@ -617,10 +605,9 @@ class TestStrategy_Commission(bt.Strategy):
     def log(self, txt, dt=None):
         """Logging function fot this strategy
 
-        :param txt:
-        :param dt:  (Default value = None)
-
-        """
+Args:
+    txt: 
+    dt: (Default value = None)"""
         dt = dt or self.datas[0].datetime.date(0)
         print("%s, %s" % (dt.isoformat(), txt))
 
@@ -635,11 +622,8 @@ class TestStrategy_Commission(bt.Strategy):
         self.buycomm = None
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status in [order.Submitted, order.Accepted]:
             # Buy/Sell order submitted/accepted to/by broker - Nothing to do
             return
@@ -677,11 +661,8 @@ class TestStrategy_Commission(bt.Strategy):
         self.order = None
 
     def notify_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
+        """Args:
+    trade:"""
         if not trade.isclosed:
             return
 

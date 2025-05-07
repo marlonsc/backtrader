@@ -2,12 +2,9 @@
 
 
 def run_file(user_script, param={}):
-    """
-
-    :param user_script:
-    :param param:  (Default value = {})
-
-    """
+    """Args:
+    user_script: 
+    param: (Default value = {})"""
     import os
     import sys
     import time
@@ -45,12 +42,9 @@ def run_file(user_script, param={}):
     _C.user_script = user_script
 
     def try_set_func(C, func_name):
-        """
-
-        :param C:
-        :param func_name:
-
-        """
+        """Args:
+    C: 
+    func_name:"""
         func = globals().get(func_name)
         if func:
             C.__setattr__(func_name, types.MethodType(func, C))

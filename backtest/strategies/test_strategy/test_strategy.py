@@ -19,12 +19,9 @@ class TestStrategy(bt.Strategy):
     def log(self, txt, dt=None):
         """Print strategy logs (order/trade records, etc.).
 
-        :param txt: Log message.
-        :type txt: str
-        :param dt: Date for the log. Defaults to None.
-        :type dt: datetime.date
-
-        """
+Args:
+    txt: Log message.
+    dt: Date for the log. Defaults to None."""
         dt = dt or self.datas[0].datetime.date(0)
         print(f"{dt.isoformat()}, {txt}")
 
@@ -44,9 +41,8 @@ class TestStrategy(bt.Strategy):
     def notify_order(self, order):
         """Print order information.
 
-        :param order: Order object.
-
-        """
+Args:
+    order: Order object."""
         if order.status in [order.Submitted, order.Accepted]:
             return
         if order.status in [order.Completed]:
@@ -70,9 +66,8 @@ class TestStrategy(bt.Strategy):
     def notify_trade(self, trade):
         """Print trade information.
 
-        :param trade: Trade object.
-
-        """
+Args:
+    trade: Trade object."""
         if not trade.isclosed:
             return
         self.log(f"OPERATION PROFIT, GROSS {trade.pnl:.2f}, NET {trade.pnlcomm:.2f}")

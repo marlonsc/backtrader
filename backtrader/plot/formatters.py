@@ -37,11 +37,8 @@ class MyVolFormatter(mplticker.Formatter):
     Suffixes = ["", "K", "M", "G", "T", "P"]
 
     def __init__(self, volmax):
-        """
-
-        :param volmax:
-
-        """
+        """Args:
+    volmax:"""
         self.volmax = volmax
         magnitude = 0
         self.divisor = 1.0
@@ -52,12 +49,9 @@ class MyVolFormatter(mplticker.Formatter):
         self.suffix = self.Suffixes[magnitude]
 
     def __call__(self, y, pos=0):
-        """
-
-        :param y:
-        :param pos:  (Default value = 0)
-
-        """
+        """Args:
+    y: 
+    pos: (Default value = 0)"""
 
         if y > self.volmax * 1.20:
             return ""
@@ -70,23 +64,17 @@ class MyDateFormatter(mplticker.Formatter):
     """ """
 
     def __init__(self, dates, fmt="%Y-%m-%d"):
-        """
-
-        :param dates:
-        :param fmt:  (Default value = "%Y-%m-%d")
-
-        """
+        """Args:
+    dates: 
+    fmt: (Default value = "%Y-%m-%d")"""
         self.dates = dates
         self.lendates = len(dates)
         self.fmt = fmt
 
     def __call__(self, x, pos=0):
-        """
-
-        :param x:
-        :param pos:  (Default value = 0)
-
-        """
+        """Args:
+    x: 
+    pos: (Default value = 0)"""
         ind = int(round(x))
         if ind >= self.lendates:
             ind = self.lendates - 1
@@ -98,12 +86,9 @@ class MyDateFormatter(mplticker.Formatter):
 
 
 def patch_locator(locator, xdates):
-    """
-
-    :param locator:
-    :param xdates:
-
-    """
+    """Args:
+    locator: 
+    xdates:"""
 
     def _patched_datalim_to_dt(self):
         """ """
@@ -134,20 +119,14 @@ def patch_locator(locator, xdates):
 
 
 def patch_formatter(formatter, xdates):
-    """
-
-    :param formatter:
-    :param xdates:
-
-    """
+    """Args:
+    formatter: 
+    xdates:"""
 
     def newcall(self, x, pos=0):
-        """
-
-        :param x:
-        :param pos:  (Default value = 0)
-
-        """
+        """Args:
+    x: 
+    pos: (Default value = 0)"""
         if False and x < 0:
             raise ValueError(
                 "DateFormatter found a value of x=0, which is "
@@ -165,13 +144,10 @@ def patch_formatter(formatter, xdates):
 
 
 def getlocator(xdates, numticks=5, tz=None):
-    """
-
-    :param xdates:
-    :param numticks:  (Default value = 5)
-    :param tz:  (Default value = None)
-
-    """
+    """Args:
+    xdates: 
+    numticks: (Default value = 5)
+    tz: (Default value = None)"""
     span = xdates[-1] - xdates[0]
 
     locator, formatter = mdates.date_ticker_factory(span=span, tz=tz, numticks=numticks)

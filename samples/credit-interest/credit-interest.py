@@ -61,11 +61,8 @@ class St(bt.SignalStrategy):
     opcounter = itertools.count(1)
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status == bt.Order.Completed:
             t = ""
             t += "{:02d}".format(next(self.opcounter))
@@ -75,11 +72,8 @@ class St(bt.SignalStrategy):
             print(t.format(order.executed.size, order.executed.price))
 
     def notify_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
+        """Args:
+    trade:"""
         if trade.isclosed:
             print(
                 "Trade closed with P&L: Gross {} Net {}".format(
@@ -89,11 +83,8 @@ class St(bt.SignalStrategy):
 
 
 def runstrat(args=None):
-    """
-
-    :param args:  (Default value = None)
-
-    """
+    """Args:
+    args: (Default value = None)"""
     args = parse_args(args)
 
     cerebro = bt.Cerebro()
@@ -151,11 +142,8 @@ def runstrat(args=None):
 
 
 def parse_args(pargs=None):
-    """
-
-    :param pargs:  (Default value = None)
-
-    """
+    """Args:
+    pargs: (Default value = None)"""
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

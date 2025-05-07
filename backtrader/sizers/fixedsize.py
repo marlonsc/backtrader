@@ -40,25 +40,19 @@ class FixedSize(bt.Sizer):
     params = (("stake", 1), ("tranches", 1))
 
     def _getsizing(self, comminfo, cash, data, isbuy):
-        """
-
-        :param comminfo:
-        :param cash:
-        :param data:
-        :param isbuy:
-
-        """
+        """Args:
+    comminfo: 
+    cash: 
+    data: 
+    isbuy:"""
         if self.p.tranches > 1:
             return abs(int(self.p.stake / self.p.tranches))
         else:
             return self.p.stake
 
     def setsizing(self, stake):
-        """
-
-        :param stake:
-
-        """
+        """Args:
+    stake:"""
         if self.p.tranches > 1:
             self.p.stake = abs(int(self.p.stake / self.p.tranches))
         else:
@@ -70,26 +64,18 @@ SizerFix = FixedSize
 
 class FixedReverser(bt.Sizer):
     """This sizer returns the needes fixed size to reverse an open position or
-    the fixed size to open one
-
-      - To open a position: return the param ``stake``
-
-      - To reverse a position: return 2 * ``stake``
-
-
-    """
+the fixed size to open one
+- To open a position: return the param ``stake``
+- To reverse a position: return 2 * ``stake``"""
 
     params = (("stake", 1),)
 
     def _getsizing(self, comminfo, cash, data, isbuy):
-        """
-
-        :param comminfo:
-        :param cash:
-        :param data:
-        :param isbuy:
-
-        """
+        """Args:
+    comminfo: 
+    cash: 
+    data: 
+    isbuy:"""
         position = self.strategy.getposition(data)
         size = self.p.stake * (1 + (position.size != 0))
         return size
@@ -108,14 +94,11 @@ class FixedSizeTarget(bt.Sizer):
     params = (("stake", 1), ("tranches", 1))
 
     def _getsizing(self, comminfo, cash, data, isbuy):
-        """
-
-        :param comminfo:
-        :param cash:
-        :param data:
-        :param isbuy:
-
-        """
+        """Args:
+    comminfo: 
+    cash: 
+    data: 
+    isbuy:"""
         if self.p.tranches > 1:
             size = abs(int(self.p.stake / self.p.tranches))
             return min((self.strategy.position.size + size), self.p.stake)
@@ -123,11 +106,8 @@ class FixedSizeTarget(bt.Sizer):
             return self.p.stake
 
     def setsizing(self, stake):
-        """
-
-        :param stake:
-
-        """
+        """Args:
+    stake:"""
         if self.p.tranches > 1:
             size = abs(int(self.p.stake / self.p.tranches))
             self.p.stake = min((self.strategy.position.size + size), self.p.stake)

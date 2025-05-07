@@ -56,12 +56,7 @@ class StFetcher(object):
     _STRATS = [St0, St1]
 
     def __new__(cls, *args, **kwargs):
-        """
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """"""
         idx = kwargs.pop("idx")
 
         obj = cls._STRATS[idx](*args, **kwargs)
@@ -69,11 +64,8 @@ class StFetcher(object):
 
 
 def runstrat(pargs=None):
-    """
-
-    :param pargs:  (Default value = None)
-
-    """
+    """Args:
+    pargs: (Default value = None)"""
     args = parse_args(pargs)
 
     cerebro = bt.Cerebro()
@@ -95,11 +87,8 @@ def runstrat(pargs=None):
 
 
 def parse_args(pargs=None):
-    """
-
-    :param pargs:  (Default value = None)
-
-    """
+    """Args:
+    pargs: (Default value = None)"""
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

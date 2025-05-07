@@ -138,12 +138,9 @@ class BtTestStrategy(bt.Strategy):
     )
 
     def log(self, txt, dt=None):
-        """
-
-        :param txt:
-        :param dt: (Default value = None)
-
-        """
+        """Args:
+    txt: 
+    dt: (Default value = None)"""
         dt = dt or self.data.datetime[0]
         dt = bt.num2date(dt)
         print("%s, %s" % (dt.isoformat(), txt))
@@ -204,11 +201,8 @@ chkdatas = 1
 
 
 def test_run(main=False):
-    """
-
-    :param main: (Default value = False)
-
-    """
+    """Args:
+    main: (Default value = False)"""
     global _chkvalues
     global _chkcash
 

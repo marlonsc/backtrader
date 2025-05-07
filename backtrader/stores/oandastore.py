@@ -53,11 +53,8 @@ class OandaStreamError(oandapy.OandaError):
     """ """
 
     def __init__(self, content=""):
-        """
-
-        :param content:  (Default value = "")
-
-        """
+        """Args:
+    content: (Default value = "")"""
         er = dict(code=598, message="Failed Streaming", description=content)
         super(self.__class__, self).__init__(er)
 
@@ -66,11 +63,8 @@ class OandaTimeFrameError(oandapy.OandaError):
     """ """
 
     def __init__(self, content):
-        """
-
-        :param content:
-
-        """
+        """Args:
+    content:"""
         er = dict(code=597, message="Not supported TimeFrame", description="")
         super(self.__class__, self).__init__(er)
 
@@ -88,13 +82,10 @@ class API(oandapy.API):
     """ """
 
     def request(self, endpoint, method="GET", params=None):
-        """
-
-        :param endpoint:
-        :param method:  (Default value = "GET")
-        :param params:  (Default value = None)
-
-        """
+        """Args:
+    endpoint: 
+    method: (Default value = "GET")
+    params: (Default value = None)"""
         # Overriden to make something sensible out of a
         # request.RequestException rather than simply issuing a print(str(e))
         url = "%s/%s" % (self.api_url, endpoint)
@@ -131,14 +122,9 @@ class Streamer(oandapy.Streamer):
     """ """
 
     def __init__(self, q, headers=None, *args, **kwargs):
-        """
-
-        :param q:
-        :param headers:  (Default value = None)
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Args:
+    q: 
+    headers: (Default value = None)"""
         # Override to provide headers, which is in the standard API interface
         super(Streamer, self).__init__(*args, **kwargs)
 
@@ -148,12 +134,9 @@ class Streamer(oandapy.Streamer):
         self.q = q
 
     def run(self, endpoint, params=None):
-        """
-
-        :param endpoint:
-        :param params:  (Default value = None)
-
-        """
+        """Args:
+    endpoint: 
+    params: (Default value = None)"""
         # Override to better manage exceptions.
         # Kept as much as possible close to the original
         self.connected = True
@@ -197,22 +180,16 @@ class Streamer(oandapy.Streamer):
                 break
 
     def on_success(self, data):
-        """
-
-        :param data:
-
-        """
+        """Args:
+    data:"""
         if "tick" in data:
             self.q.put(data["tick"])
         elif "transaction" in data:
             self.q.put(data["transaction"])
 
     def on_error(self, data):
-        """
-
-        :param data:
-
-        """
+        """Args:
+    data:"""
         self.disconnect()
         self.q.put(OandaStreamError(data).error_response)
 
@@ -221,23 +198,15 @@ class MetaSingleton(MetaParams):
     """Metaclass to make a metaclassed class a singleton"""
 
     def __init__(cls, name, bases, dct):
-        """
-
-        :param name:
-        :param bases:
-        :param dct:
-
-        """
+        """Args:
+    name: 
+    bases: 
+    dct:"""
         super(MetaSingleton, cls).__init__(name, bases, dct)
         cls._singleton = None
 
     def __call__(cls, *args, **kwargs):
-        """
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """"""
         if cls._singleton is None:
             cls._singleton = super(MetaSingleton, cls).__call__(*args, **kwargs)
 
@@ -263,22 +232,12 @@ class OandaStore(with_metaclass(MetaSingleton, object)):
 
     @classmethod
     def getdata(cls, *args, **kwargs):
-        """Returns ``DataCls`` with args, kwargs
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Returns ``DataCls`` with args, kwargs"""
         return cls.DataCls(*args, **kwargs)
 
     @classmethod
     def getbroker(cls, *args, **kwargs):
-        """Returns broker with *args, **kwargs from registered ``BrokerCls``
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Returns broker with *args, **kwargs from registered ``BrokerCls``"""
         return cls.BrokerCls(*args, **kwargs)
 
     def __init__(self):
@@ -307,12 +266,9 @@ class OandaStore(with_metaclass(MetaSingleton, object)):
         self._evt_acct = threading.Event()
 
     def start(self, data=None, broker=None):
-        """
-
-        :param data:  (Default value = None)
-        :param broker:  (Default value = None)
-
-        """
+        """Args:
+    data: (Default value = None)
+    broker: (Default value = None)"""
         # Datas require some processing to kickstart data reception
         if data is None and broker is None:
             self.cash = None
@@ -340,13 +296,8 @@ class OandaStore(with_metaclass(MetaSingleton, object)):
             self.q_account.put(None)
 
     def put_notification(self, msg, *args, **kwargs):
-        """
-
-        :param msg:
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Args:
+    msg:"""
         self.notifs.append((msg, args, kwargs))
 
     def get_notifications(self):
@@ -393,20 +344,14 @@ class OandaStore(with_metaclass(MetaSingleton, object)):
         return poslist
 
     def get_granularity(self, timeframe, compression):
-        """
-
-        :param timeframe:
-        :param compression:
-
-        """
+        """Args:
+    timeframe: 
+    compression:"""
         return self._GRANULARITIES.get((timeframe, compression), None)
 
     def get_instrument(self, dataname):
-        """
-
-        :param dataname:
-
-        """
+        """Args:
+    dataname:"""
         try:
             insts = self.oapi.get_instruments(self.p.account, instruments=dataname)
         except (
@@ -419,11 +364,8 @@ class OandaStore(with_metaclass(MetaSingleton, object)):
         return i[0] or None
 
     def streaming_events(self, tmout=None):
-        """
-
-        :param tmout:  (Default value = None)
-
-        """
+        """Args:
+    tmout: (Default value = None)"""
         q = queue.Queue()
         kwargs = {"q": q, "tmout": tmout}
 
@@ -437,23 +379,17 @@ class OandaStore(with_metaclass(MetaSingleton, object)):
         return q
 
     def _t_streaming_listener(self, q, tmout=None):
-        """
-
-        :param q:
-        :param tmout:  (Default value = None)
-
-        """
+        """Args:
+    q: 
+    tmout: (Default value = None)"""
         while True:
             trans = q.get()
             self._transaction(trans)
 
     def _t_streaming_events(self, q, tmout=None):
-        """
-
-        :param q:
-        :param tmout:  (Default value = None)
-
-        """
+        """Args:
+    q: 
+    tmout: (Default value = None)"""
         if tmout is not None:
             _time.sleep(tmout)
 
@@ -476,17 +412,14 @@ class OandaStore(with_metaclass(MetaSingleton, object)):
         candleFormat,
         includeFirst,
     ):
-        """
-
-        :param dataname:
-        :param dtbegin:
-        :param dtend:
-        :param timeframe:
-        :param compression:
-        :param candleFormat:
-        :param includeFirst:
-
-        """
+        """Args:
+    dataname: 
+    dtbegin: 
+    dtend: 
+    timeframe: 
+    compression: 
+    candleFormat: 
+    includeFirst:"""
 
         kwargs = locals().copy()
         kwargs.pop("self")
@@ -507,18 +440,15 @@ class OandaStore(with_metaclass(MetaSingleton, object)):
         includeFirst,
         q,
     ):
-        """
-
-        :param dataname:
-        :param dtbegin:
-        :param dtend:
-        :param timeframe:
-        :param compression:
-        :param candleFormat:
-        :param includeFirst:
-        :param q:
-
-        """
+        """Args:
+    dataname: 
+    dtbegin: 
+    dtend: 
+    timeframe: 
+    compression: 
+    candleFormat: 
+    includeFirst: 
+    q:"""
 
         granularity = self.get_granularity(timeframe, compression)
         if granularity is None:
@@ -552,12 +482,9 @@ class OandaStore(with_metaclass(MetaSingleton, object)):
         q.put({})  # end of transmission
 
     def streaming_prices(self, dataname, tmout=None):
-        """
-
-        :param dataname:
-        :param tmout:  (Default value = None)
-
-        """
+        """Args:
+    dataname: 
+    tmout: (Default value = None)"""
         q = queue.Queue()
         kwargs = {"q": q, "dataname": dataname, "tmout": tmout}
         t = threading.Thread(target=self._t_streaming_prices, kwargs=kwargs)
@@ -566,13 +493,10 @@ class OandaStore(with_metaclass(MetaSingleton, object)):
         return q
 
     def _t_streaming_prices(self, dataname, q, tmout):
-        """
-
-        :param dataname:
-        :param q:
-        :param tmout:
-
-        """
+        """Args:
+    dataname: 
+    q: 
+    tmout:"""
         if tmout is not None:
             _time.sleep(tmout)
 
@@ -646,14 +570,10 @@ class OandaStore(with_metaclass(MetaSingleton, object)):
             self._evt_acct.set()
 
     def order_create(self, order, stopside=None, takeside=None, **kwargs):
-        """
-
-        :param order:
-        :param stopside:  (Default value = None)
-        :param takeside:  (Default value = None)
-        :param **kwargs:
-
-        """
+        """Args:
+    order: 
+    stopside: (Default value = None)
+    takeside: (Default value = None)"""
         okwargs = dict()
         okwargs["instrument"] = order.data._dataname
         okwargs["units"] = abs(order.created.size)
@@ -744,11 +664,8 @@ class OandaStore(with_metaclass(MetaSingleton, object)):
                     self._process_transaction(oid, trans)
 
     def order_cancel(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         self.q_orderclose.put(order.ref)
         return order
 
@@ -776,11 +693,8 @@ class OandaStore(with_metaclass(MetaSingleton, object)):
     )
 
     def _transaction(self, trans):
-        """
-
-        :param trans:
-
-        """
+        """Args:
+    trans:"""
         # Invoked from Streaming Events. May actually receive an event for an
         # oid which has not yet been returned after creating an order. Hence
         # store if not yet seen, else forward to processer
@@ -846,12 +760,9 @@ class OandaStore(with_metaclass(MetaSingleton, object)):
     )
 
     def _process_transaction(self, oid, trans):
-        """
-
-        :param oid:
-        :param trans:
-
-        """
+        """Args:
+    oid: 
+    trans:"""
         try:
             oref = self._ordersrev.pop(oid)
         except KeyError:

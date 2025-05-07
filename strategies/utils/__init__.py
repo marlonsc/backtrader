@@ -10,12 +10,11 @@ import psycopg2
 def print_performance_metrics(cerebro, results, fromdate=None, todate=None):
     """Print standardized performance metrics from Backtrader's analyzers
 
-    :param cerebro: The Cerebro instance
-    :param results: The results returned from cerebro
-    :param fromdate: Start date for the backtest (Default value = None)
-    :param todate: End date for the backtest (Default value = None)
-
-    """
+Args:
+    cerebro: The Cerebro instance
+    results: The results returned from cerebro
+    fromdate: Start date for the backtest (Default value = None)
+    todate: End date for the backtest (Default value = None)"""
     strat = results[0]
 
     # Get key metrics
@@ -327,16 +326,17 @@ def print_performance_metrics(cerebro, results, fromdate=None, todate=None):
 def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate, interval="1h"):
     """Fetch historical price data from PostgreSQL database
 
-    :param symbol: The symbol to fetch data for
-    :param dbuser: PostgreSQL username
-    :param dbpass: PostgreSQL password
-    :param dbname: PostgreSQL database name
-    :param fromdate: Start date as datetime object
-    :param todate: End date as datetime object
-    :param interval: Time interval for data (Default value = "1h")
-    :returns: DataFrame with OHLCV data
+Args:
+    symbol: The symbol to fetch data for
+    dbuser: PostgreSQL username
+    dbpass: PostgreSQL password
+    dbname: PostgreSQL database name
+    fromdate: Start date as datetime object
+    todate: End date as datetime object
+    interval: Time interval for data (Default value = "1h")
 
-    """
+Returns:
+    DataFrame with OHLCV data"""
     # Format dates for database query
     from_str = fromdate.strftime("%Y-%m-%d %H:%M:%S")
     to_str = todate.strftime("%Y-%m-%d %H:%M:%S")
@@ -443,29 +443,19 @@ def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate, interval="1h")
 
 class TradeThrottling:
     """Trade throttling functionality that can be added to any strategy
-
-    This mixin allows setting a minimum number of days between trades to avoid
-    overtrading and to let positions develop. It can be configured through the
-    'trade_throttle_days' parameter.
-
-    Usage in __init__:
-        self.last_trade_date = None
-
-    Usage in next method:
-        if not self.can_trade_now():
-
-
-    """
+This mixin allows setting a minimum number of days between trades to avoid
+overtrading and to let positions develop. It can be configured through the
+'trade_throttle_days' parameter.
+Usage in __init__:
+self.last_trade_date = None
+Usage in next method:
+if not self.can_trade_now():"""
 
     def can_trade_now(self):
         """Check if enough days have passed since the last trade for throttling
 
-
-        :returns: True if a new trade can be entered, False otherwise
-
-        :rtype: bool
-
-        """
+Returns:
+    True if a new trade can be entered, False otherwise"""
         # If throttling is disabled or no previous trade, allow trading
         if (
             not hasattr(self.p, "trade_throttle_days")
@@ -488,9 +478,8 @@ class TradeThrottling:
 def add_standard_analyzers(cerebro):
     """Add the standard set of analyzers to a Cerebro instance
 
-    :param cerebro: The Cerebro instance to add analyzers to
-
-    """
+Args:
+    cerebro: The Cerebro instance to add analyzers to"""
     cerebro.addanalyzer(bt.analyzers.SharpeRatio, _name="sharperatio")
     cerebro.addanalyzer(bt.analyzers.Returns, _name="returns")
     cerebro.addanalyzer(bt.analyzers.DrawDown, _name="drawdown")

@@ -18,33 +18,26 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-"""
-FIBONACCI RETRACEMENT PULLBACK STRATEGY WITH POSTGRESQL DATABASE - (fib-pullback)
+"""FIBONACCI RETRACEMENT PULLBACK STRATEGY WITH POSTGRESQL DATABASE - (fib-pullback)
 =============================================================================
-
 This strategy implements a Fibonacci retracement pullback trading system that identifies
 strong uptrends and enters long positions when price pulls back to key Fibonacci levels.
-
 STRATEGY LOGIC:
 --------------
 1. Trend Identification:
-   - Uses RSI to confirm uptrend strength (RSI > 50 for uptrend)
-   - Requires a minimum price increase over N periods
-
+- Uses RSI to confirm uptrend strength (RSI > 50 for uptrend)
+- Requires a minimum price increase over N periods
 2. Fibonacci Levels:
-   - Calculates retracement levels at 38.2%, 50%, and 61.8%
-   - Uses recent swing high and low points
-
+- Calculates retracement levels at 38.2%, 50%, and 61.8%
+- Uses recent swing high and low points
 3. Entry Conditions:
-   - Price pulls back to a Fibonacci level
-   - RSI shows oversold conditions (< 30)
-   - Volume confirms the bounce
-
+- Price pulls back to a Fibonacci level
+- RSI shows oversold conditions (< 30)
+- Volume confirms the bounce
 4. Exit Conditions:
-   - Stop loss below the retracement level
-   - Take profit at previous swing high
-   - Trailing stop option available
-
+- Stop loss below the retracement level
+- Take profit at previous swing high
+- Trailing stop option available
 MARKET CONDITIONS:
 ----------------
 *** SPECIFICALLY DESIGNED FOR PULLBACKS WITHIN ESTABLISHED UPTRENDS ***
@@ -52,19 +45,16 @@ MARKET CONDITIONS:
 - AVOID USING: In bear markets or during major market corrections
 - IDEAL TIMEFRAMES: 1-hour, 4-hour, and daily charts
 - OPTIMAL MARKET CONDITION: Stocks showing strong momentum with healthy pullbacks
-
 The strategy is designed to catch pullbacks to key support levels within uptrends.
 It will struggle in choppy markets or during major corrections, as it may enter
 positions prematurely. The strategy performs best when price respects Fibonacci
 retracement levels and has strong rebounds from these levels with volume confirmation.
-
 RISK MANAGEMENT CONSIDERATIONS:
 -----------------------------
 - Consider wider stop losses during higher market volatility
 - In choppy markets, more false signals will be generated
 - Using the volume confirmation filter helps avoid false breakouts
 - The strategy might enter too early during corrections, so risk management is essential
-
 FIBONACCI RETRACEMENTS:
 ---------------------
 Fibonacci retracement levels are horizontal lines that indicate potential support and
@@ -73,26 +63,21 @@ and the key levels used in this strategy are:
 - 38.2% retracement
 - 50.0% retracement
 - 61.8% retracement
-
 These levels often act as support during pullbacks in uptrends.
-
 USAGE:
 ------
 python strategies/fibonacci_retracement_pullback.py --data SYMBOL --fromdate YYYY-MM-DD --todate YYYY-MM-DD [options]
-
 REQUIRED ARGUMENTS:
 ------------------
 --data, -d      : Stock symbol to retrieve data for (e.g., AAPL, MSFT, TSLA)
 --fromdate, -f  : Start date for historical data in YYYY-MM-DD format (default: 2024-01-01)
 --todate, -t    : End date for historical data in YYYY-MM-DD format (default: 2024-12-31)
-
 DATABASE PARAMETERS:
 ------------------
 --dbuser, -u    : PostgreSQL username (default: jason)
 --dbpass, -pw   : PostgreSQL password (default: fsck)
 --dbname, -n    : PostgreSQL database name (default: market_data)
 --cash, -c      : Initial cash for the strategy (default: $100,000)
-
 TREND PARAMETERS:
 ----------------
 --trend-period, -tper     : Period for trend calculation (default: 20)
@@ -100,7 +85,6 @@ TREND PARAMETERS:
 --rsi-period, -rp      : RSI period for trend confirmation (default: 14)
 --rsi-upper, -ru       : RSI upper threshold for trend (default: 70)
 --rsi-lower, -rl       : RSI lower threshold for entry (default: 30)
-
 FIBONACCI PARAMETERS:
 -------------------
 --swing-lookback, -swl  : Bars to look back for swing points (default: 50)
@@ -108,7 +92,6 @@ FIBONACCI PARAMETERS:
 --bounce-threshold, -bt : Minimum bounce % from level (default: 0.5)
 --volume-mult, -vm   : Volume increase factor for confirmation (default: 1.5)
 --price-tolerance, -pt  : How close price needs to be to Fibonacci level (%) (default: 0.5)
-
 EXIT PARAMETERS:
 --------------
 --use-stop, -us      : Use stop loss (default: True)
@@ -116,24 +99,19 @@ EXIT PARAMETERS:
 --target-pct, -tp    : Take profit % above entry (default: 5.0)
 --use-trail, -ut  : Use trailing stop (default: False)
 --trail-pct, -trp : Trailing stop % (default: 2.0)
-
 POSITION SIZING:
 --------------
 --risk-percent, -riskp   : Risk percentage per trade (default: 1.0)
 --max-position, -mp   : Maximum position size % of equity (default: 20.0)
-
 TRADE THROTTLING:
 ---------------
 --trade-throttle-days, -ttd : Minimum days between trades (default: 1)
-
 OTHER:
 -----
 --plot, -p          : Generate and show a plot of the trading activity
-
 EXAMPLE:
 --------
-python strategies/fibonacci_retracement_pullback.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --trend-period 20 --rsi-period 14 --plot
-"""
+python strategies/fibonacci_retracement_pullback.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --trend-period 20 --rsi-period 14 --plot"""
 
 from __future__ import (
     absolute_import,
@@ -208,16 +186,11 @@ class FibonacciLevels(bt.Indicator):
 
 class FibonacciPullbackStrategy(bt.Strategy, TradeThrottling):
     """Fibonacci Retracement Pullback Strategy
-
-    This strategy identifies strong uptrends and enters long positions when price
-    pulls back to key Fibonacci retracement levels. It uses RSI to confirm trend
-    direction and oversold conditions, and requires volume confirmation for entries.
-
-    The strategy is specifically designed for catching pullbacks in established uptrends.
-    It will struggle in bear markets or during major corrections.
-
-
-    """
+This strategy identifies strong uptrends and enters long positions when price
+pulls back to key Fibonacci retracement levels. It uses RSI to confirm trend
+direction and oversold conditions, and requires volume confirmation for entries.
+The strategy is specifically designed for catching pullbacks in established uptrends.
+It will struggle in bear markets or during major corrections."""
 
     params = (
         # Trend Parameters
@@ -280,11 +253,10 @@ class FibonacciPullbackStrategy(bt.Strategy, TradeThrottling):
     def log(self, txt, dt=None, level="info"):
         """Logging function
 
-        :param txt:
-        :param dt:  (Default value = None)
-        :param level:  (Default value = "info")
-
-        """
+Args:
+    txt: 
+    dt: (Default value = None)
+    level: (Default value = "info")"""
         if level == "debug" and self.p.log_level != "debug":
             return
 
@@ -292,11 +264,8 @@ class FibonacciPullbackStrategy(bt.Strategy, TradeThrottling):
         print(f"{dt.isoformat()}: {txt}")
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status in [order.Submitted, order.Accepted]:
             return
 
@@ -328,11 +297,8 @@ class FibonacciPullbackStrategy(bt.Strategy, TradeThrottling):
         self.order = None
 
     def notify_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
+        """Args:
+    trade:"""
         if not trade.isclosed:
             return
 

@@ -37,14 +37,11 @@ class TestSizer(bt.Sizer):
     params = dict(stake=1)
 
     def _getsizing(self, comminfo, cash, data, isbuy):
-        """
-
-        :param comminfo:
-        :param cash:
-        :param data:
-        :param isbuy:
-
-        """
+        """Args:
+    comminfo: 
+    cash: 
+    data: 
+    isbuy:"""
         dt, i = self.strategy.datetime.date(), data._id
         s = self.p.stake * (1 + (not isbuy))
         print(
@@ -70,11 +67,8 @@ class St(bt.Strategy):
     )
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status == order.Submitted:
             return
 
@@ -175,11 +169,8 @@ class St(bt.Strategy):
 
 
 def runstrat(args=None):
-    """
-
-    :param args:  (Default value = None)
-
-    """
+    """Args:
+    args: (Default value = None)"""
     args = parse_args(args)
 
     cerebro = bt.Cerebro()
@@ -225,11 +216,8 @@ def runstrat(args=None):
 
 
 def parse_args(pargs=None):
-    """
-
-    :param pargs:  (Default value = None)
-
-    """
+    """Args:
+    pargs: (Default value = None)"""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Multiple Values and Brackets",

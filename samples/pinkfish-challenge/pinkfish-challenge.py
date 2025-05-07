@@ -34,39 +34,25 @@ import backtrader.indicators as btind
 
 class DayStepsCloseFilter(bt.with_metaclass(bt.MetaParams, object)):
     """Replays a bar in 2 steps:
-
-    - In the 1st step the "Open-High-Low" could be evaluated to decide if to
-      act on the close (the close is still there ... should not be evaluated)
-
-    - If a "Close" order has been executed
-
-      In this 1st fragment the "Close" is replaced through the "open" althoug
-      other alternatives would be possible like high - low average, or an
-      algorithm based on where the "close" ac
-
-    and
-
-    - Open-High-Low-Close
-
-
-    """
+- In the 1st step the "Open-High-Low" could be evaluated to decide if to
+act on the close (the close is still there ... should not be evaluated)
+- If a "Close" order has been executed
+In this 1st fragment the "Close" is replaced through the "open" althoug
+other alternatives would be possible like high - low average, or an
+algorithm based on where the "close" ac
+and
+- Open-High-Low-Close"""
 
     params = (("cvol", 0.5),)  # 0 -> 1 amount of volume to keep for close
 
     def __init__(self, data):
-        """
-
-        :param data:
-
-        """
+        """Args:
+    data:"""
         self.pendingbar = None
 
     def __call__(self, data):
-        """
-
-        :param data:
-
-        """
+        """Args:
+    data:"""
         # Make a copy of the new bar and remove it from stream
         closebar = [data.lines[i][0] for i in range(data.size())]
         datadt = data.datetime.date()  # keep the date
@@ -95,12 +81,11 @@ class DayStepsCloseFilter(bt.with_metaclass(bt.MetaParams, object)):
 
     def last(self, data):
         """Called when the data is no longer producing bars
-        Can be called multiple times. It has the chance to (for example)
-        produce extra bars
+Can be called multiple times. It has the chance to (for example)
+produce extra bars
 
-        :param data:
-
-        """
+Args:
+    data:"""
         if self.pendingbar is not None:
             data.backwards()  # remove delivered open bar
             data._add2stack(self.pendingbar)  # add remaining
@@ -112,41 +97,27 @@ class DayStepsCloseFilter(bt.with_metaclass(bt.MetaParams, object)):
 
 class DayStepsReplayFilter(bt.with_metaclass(bt.MetaParams, object)):
     """Replays a bar in 2 steps:
-
-    - In the 1st step the "Open-High-Low" could be evaluated to decide if to
-      act on the close (the close is still there ... should not be evaluated)
-
-    - If a "Close" order has been executed
-
-      In this 1st fragment the "Close" is replaced through the "open" althoug
-      other alternatives would be possible like high - low average, or an
-      algorithm based on where the "close" ac
-
-    and
-
-    - Open-High-Low-Close
-
-
-    """
+- In the 1st step the "Open-High-Low" could be evaluated to decide if to
+act on the close (the close is still there ... should not be evaluated)
+- If a "Close" order has been executed
+In this 1st fragment the "Close" is replaced through the "open" althoug
+other alternatives would be possible like high - low average, or an
+algorithm based on where the "close" ac
+and
+- Open-High-Low-Close"""
 
     params = (("closevol", 0.5),)  # 0 -> 1 amount of volume to keep for close
 
     # replaying = True
 
     def __init__(self, data):
-        """
-
-        :param data:
-
-        """
+        """Args:
+    data:"""
         self.lastdt = None
 
     def __call__(self, data):
-        """
-
-        :param data:
-
-        """
+        """Args:
+    data:"""
         # Make a copy of the new bar and remove it from stream
         datadt = data.datetime.date()  # keep the date
 
@@ -230,11 +201,8 @@ class St(bt.Strategy):
         )
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.isbuy() and order.status == order.Completed:
             print(
                 "-- BUY Completed on:",
@@ -336,11 +304,8 @@ def runstrat():
 
 
 def parse_args(pargs=None):
-    """
-
-    :param pargs:  (Default value = None)
-
-    """
+    """Args:
+    pargs: (Default value = None)"""
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

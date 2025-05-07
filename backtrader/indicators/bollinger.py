@@ -30,18 +30,13 @@ from . import Indicator, MovAv, StdDev
 
 class BollingerBands(Indicator):
     """Defined by John Bollinger in the 80s. It measures volatility by defining
-    upper and lower bands at distance x standard deviations
-
-    Formula:
-      - midband = SimpleMovingAverage(close, period)
-      - topband = midband + devfactor * StandardDeviation(data, period)
-      - botband = midband - devfactor * StandardDeviation(data, period)
-
-    See:
-      - http://en.wikipedia.org/wiki/Bollinger_Bands
-
-
-    """
+upper and lower bands at distance x standard deviations
+Formula:
+- midband = SimpleMovingAverage(close, period)
+- topband = midband + devfactor * StandardDeviation(data, period)
+- botband = midband - devfactor * StandardDeviation(data, period)
+See:
+- http://en.wikipedia.org/wiki/Bollinger_Bands"""
 
     alias = ("BBands",)
 

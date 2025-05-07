@@ -191,32 +191,24 @@ USER_DEFINED_SUBTYPE = 128
 
 class Binary(bytes):
     """Representation of BSON binary data.
-
-    This is necessary because we want to represent Python strings as
-    the BSON string type. We need to wrap binary data so we can tell
-    the difference between what should be considered binary data and
-    what should be considered a string when we encode to BSON.
-
-    Raises TypeError if `data` is not an instance of :class:`bytes`
-    (:class:`str` in python 2) or `subtype` is not an instance of
-    :class:`int`. Raises ValueError if `subtype` is not in [0, 256).
-
-    .. note::
-      In python 3 instances of Binary with subtype 0 will be decoded
-      directly to :class:`bytes`.
-
-    :Parameters:
-      - `data`: the binary data to represent. Can be any bytes-like type
-        that implements the buffer protocol.
-      - `subtype` (optional): the `binary subtype
-        <https://bsonspec.org/spec.html>`_
-        to use
-
-    .. versionchanged:: 3.9
-      Support any bytes-like type that implements the buffer protocol.
-
-
-    """
+This is necessary because we want to represent Python strings as
+the BSON string type. We need to wrap binary data so we can tell
+the difference between what should be considered binary data and
+what should be considered a string when we encode to BSON.
+Raises TypeError if `data` is not an instance of :class:`bytes`
+(:class:`str` in python 2) or `subtype` is not an instance of
+:class:`int`. Raises ValueError if `subtype` is not in [0, 256).
+.. note::
+In python 3 instances of Binary with subtype 0 will be decoded
+directly to :class:`bytes`.
+:Parameters:
+- `data`: the binary data to represent. Can be any bytes-like type
+that implements the buffer protocol.
+- `subtype` (optional): the `binary subtype
+<https://bsonspec.org/spec.html>`_
+to use
+.. versionchanged:: 3.9
+Support any bytes-like type that implements the buffer protocol."""
 
     _type_marker = 5
     __subtype: int
@@ -226,15 +218,9 @@ class Binary(bytes):
         data: Union[memoryview, bytes, "_mmap", "_array"],
         subtype: int = BINARY_SUBTYPE,
     ) -> "Binary":
-        """
-
-        :param data:
-        :type data: Union[memoryview, bytes, "_mmap", "_array"]
-        :param subtype:  (Default value = BINARY_SUBTYPE)
-        :type subtype: int
-        :rtype: "Binary"
-
-        """
+        """Args:
+    data: 
+    subtype: (Default value = BINARY_SUBTYPE)"""
         if not isinstance(subtype, int):
             raise TypeError("subtype must be an instance of int")
         if subtype >= 256 or subtype < 0:
@@ -251,31 +237,23 @@ class Binary(bytes):
         uuid_representation: int = UuidRepresentation.STANDARD,
     ) -> "Binary":
         """Create a BSON Binary object from a Python UUID.
+Creates a :class:`~bson.binary.Binary` object from a
+:class:`uuid.UUID` instance. Assumes that the native
+:class:`uuid.UUID` instance uses the byte-order implied by the
+provided ``uuid_representation``.
+Raises :exc:`TypeError` if `uuid` is not an instance of
+:class:`~uuid.UUID`.
+:Parameters:
+- `uuid`: A :class:`uuid.UUID` instance.
+- `uuid_representation`: A member of
+:class:`~bson.binary.UuidRepresentation`. Default:
+:const:`~bson.binary.UuidRepresentation.STANDARD`.
+See :ref:`handling-uuid-data-example` for details.
+.. versionadded:: 3.11
 
-        Creates a :class:`~bson.binary.Binary` object from a
-        :class:`uuid.UUID` instance. Assumes that the native
-        :class:`uuid.UUID` instance uses the byte-order implied by the
-        provided ``uuid_representation``.
-
-        Raises :exc:`TypeError` if `uuid` is not an instance of
-        :class:`~uuid.UUID`.
-
-        :Parameters:
-          - `uuid`: A :class:`uuid.UUID` instance.
-          - `uuid_representation`: A member of
-            :class:`~bson.binary.UuidRepresentation`. Default:
-            :const:`~bson.binary.UuidRepresentation.STANDARD`.
-            See :ref:`handling-uuid-data-example` for details.
-
-        .. versionadded:: 3.11
-
-        :param uuid:
-        :type uuid: UUID
-        :param uuid_representation:  (Default value = UuidRepresentation.STANDARD)
-        :type uuid_representation: int
-        :rtype: "Binary"
-
-        """
+Args:
+    uuid: 
+    uuid_representation: (Default value = UuidRepresentation.STANDARD)"""
         if not isinstance(uuid, UUID):
             raise TypeError("uuid must be an instance of uuid.UUID")
 
@@ -311,26 +289,19 @@ class Binary(bytes):
 
     def as_uuid(self, uuid_representation: int = UuidRepresentation.STANDARD) -> UUID:
         """Create a Python UUID from this BSON Binary object.
+Decodes this binary object as a native :class:`uuid.UUID` instance
+with the provided ``uuid_representation``.
+Raises :exc:`ValueError` if this :class:`~bson.binary.Binary` instance
+does not contain a UUID.
+:Parameters:
+- `uuid_representation`: A member of
+:class:`~bson.binary.UuidRepresentation`. Default:
+:const:`~bson.binary.UuidRepresentation.STANDARD`.
+See :ref:`handling-uuid-data-example` for details.
+.. versionadded:: 3.11
 
-        Decodes this binary object as a native :class:`uuid.UUID` instance
-        with the provided ``uuid_representation``.
-
-        Raises :exc:`ValueError` if this :class:`~bson.binary.Binary` instance
-        does not contain a UUID.
-
-        :Parameters:
-          - `uuid_representation`: A member of
-            :class:`~bson.binary.UuidRepresentation`. Default:
-            :const:`~bson.binary.UuidRepresentation.STANDARD`.
-            See :ref:`handling-uuid-data-example` for details.
-
-        .. versionadded:: 3.11
-
-        :param uuid_representation:  (Default value = UuidRepresentation.STANDARD)
-        :type uuid_representation: int
-        :rtype: UUID
-
-        """
+Args:
+    uuid_representation: (Default value = UuidRepresentation.STANDARD)"""
         if self.subtype not in ALL_UUID_SUBTYPES:
             raise ValueError("cannot decode subtype %s as a uuid" % (self.subtype,))
 
@@ -363,11 +334,7 @@ class Binary(bytes):
     @property
     def subtype(self) -> int:
         """Subtype of this binary data.
-
-
-        :rtype: int
-
-        """
+:rtype: int"""
         return self.__subtype
 
     def __getnewargs__(self) -> Tuple[bytes, int]:  # type: ignore[override]
@@ -384,13 +351,8 @@ class Binary(bytes):
         return data, self.__subtype
 
     def __eq__(self, other: Any) -> bool:
-        """
-
-        :param other:
-        :type other: Any
-        :rtype: bool
-
-        """
+        """Args:
+    other:"""
         if isinstance(other, Binary):
             return (self.__subtype, bytes(self)) == (
                 other.subtype,
@@ -411,13 +373,8 @@ class Binary(bytes):
         return super(Binary, self).__hash__() ^ hash(self.__subtype)
 
     def __ne__(self, other: Any) -> bool:
-        """
-
-        :param other:
-        :type other: Any
-        :rtype: bool
-
-        """
+        """Args:
+    other:"""
         return not self == other
 
     def __repr__(self):

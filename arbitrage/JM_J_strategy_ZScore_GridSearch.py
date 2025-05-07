@@ -1,10 +1,20 @@
+# Copyright (c) 2025 backtrader contributors
+"""
+Grid search for CUSUM/Z-Score pair trading strategy for J/JM futures. Includes
+rolling beta spread calculation, parameter optimization, and result visualization.
+"""
 import datetime
-
-import backtrader as bt
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+import backtrader as bt
+from backtrader.indicators.deviation import StandardDeviation as StdDev
+from backtrader.analyzers.drawdown import DrawDown
+from backtrader.analyzers.sharpe import SharpeRatio
+from backtrader.analyzers.returns import Returns
+from backtrader.analyzers.roi import ROIAnalyzer
+from backtrader.analyzers.tradeanalyzer import TradeAnalyzer
 
 
 def calculate_rolling_spread(
@@ -13,10 +23,8 @@ def calculate_rolling_spread(
     window: int = 30,
     fields=("open", "high", "low", "close"),
 ) -> pd.DataFrame:
-    """
-    计算滚动 β，并为指定价格字段生成价差 (spread)：
-        spread_x = price0_x - β_{t-1} * price1_x
-    """
+    """计算滚动 β，并为指定价格字段生成价差 (spread)：
+spread_x = price0_x - β_{t-1} * price1_x"""
     # 1) 用收盘价对齐合并（β 仍用 close 估计）
     df = (
         df0.set_index("date")[["close"]]
@@ -146,31 +154,22 @@ class DynamicSpreadZScoreStrategy(bt.Strategy):
 
         if trade.isclosed:
             print(
-                "TRADE %s CLOSED %s, PROFIT: GROSS %.2f, NET %.2f, PRICE %d"
-                % (
-                    trade.ref,
-                    bt.num2date(trade.dtclose),
-                    trade.pnl,
-                    trade.pnlcomm,
-                    trade.value,
-                )
+                f"TRADE {trade.ref} CLOSED, PROFIT: GROSS {trade.pnl:.2f}, NET {
+                    trade.pnlcomm:.2f
+                }, PRICE {trade.value}"
             )
         elif trade.justopened:
             print(
-                "TRADE %s OPENED %s  , SIZE %2d, PRICE %d "
-                % (
-                    trade.ref,
-                    bt.num2date(trade.dtopen),
-                    trade.size,
-                    trade.value,
-                )
+                f"TRADE {trade.ref} OPENED {trade.dtopen}, SIZE {trade.size}, PRICE {
+                    trade.value
+                }"
             )
 
 
 def run_strategy(data0, data1, data2, win, entry_zscore, exit_zscore, spread_window=60):
     """运行单次回测"""
     # 创建回测引擎
-    cerebro = bt.Cerebro(stdstats=False)
+    cerebro = bt.Cerebro()
     cerebro.adddata(data0, name="data0")
     cerebro.adddata(data1, name="data1")
     cerebro.adddata(data2, name="spread")
@@ -344,21 +343,9 @@ def grid_search():
         df_spread = calculate_rolling_spread(df0, df1, window=spread_window)
 
         # 添加数据
-        data0 = bt.feeds.PandasData(
-            dataname=df0,
-            datetime="date",
-            nocase=True,
-            fromdate=fromdate,
-            todate=todate,
-        )
-        data1 = bt.feeds.PandasData(
-            dataname=df1,
-            datetime="date",
-            nocase=True,
-            fromdate=fromdate,
-            todate=todate,
-        )
-        data2 = SpreadData(dataname=df_spread, fromdate=fromdate, todate=todate)
+        data0 = bt.feeds.PandasData(df0)
+        data1 = bt.feeds.PandasData(df1)
+        data2 = SpreadData(df_spread)
 
         for win in win_values:
             for entry_zscore in entry_zscore_values:
