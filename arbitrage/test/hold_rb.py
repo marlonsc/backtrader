@@ -54,13 +54,12 @@ class AlwaysHoldRBStrategy(bt.Strategy):
         """
         if trade.isclosed:
             print(
-                "TRADE CLOSED %s, PROFIT: GROSS %.2f, NET %.2f"
-                % (bt.num2date(trade.dtclose), trade.pnl, trade.pnlcomm)
+                f"TRADE CLOSED {self.data.datetime.date(0)}, PROFIT: GROSS {trade.pnl:.2f}, NET {trade.pnlcomm:.2f}"
             )
 
         elif trade.justopened:
             print(
-                "TRADE OPENED %s  , SIZE %2d" % (bt.num2date(trade.dtopen), trade.size)
+                f"TRADE OPENED {self.data.datetime.date(0)}, SIZE {trade.size}"
             )
 
     def notify_order(self, order):
@@ -77,9 +76,7 @@ class AlwaysHoldRBStrategy(bt.Strategy):
         if order.status in [order.Completed]:
             if order.isbuy():
                 print(
-                    f"executed date {bt.num2date(order.executed.dt)},executed price"
-                    f" {order.executed.price}, created date"
-                    f" {bt.num2date(order.created.dt)}"
+                    f"executed date {self.data.datetime.date(0)},executed price {order.executed.price}, created date {self.data.datetime.date(0)}"
                 )
 
 
@@ -94,7 +91,7 @@ df_RB["date"] = pd.to_datetime(df_RB["date"], errors="coerce")
 print(df_RB.head())
 
 
-data1 = bt.feeds.PandasData(dataname=df_RB, datetime="date", nocase=True)
+data1 = bt.feeds.PandasData(dataname=df_RB)
 
 # 创建回测引擎
 cerebro = bt.Cerebro()
@@ -108,18 +105,10 @@ cerebro.addstrategy(AlwaysHoldRBStrategy)
 cerebro.broker.setcash(1000.0)
 cerebro.broker.set_shortcash(False)
 # 添加分析器：SharpeRatio、DrawDown、AnnualReturn 和 Returns
-cerebro.addanalyzer(
-    bt.analyzers.SharpeRatio,
-    timeframe=bt.TimeFrame.Days,  # 按日数据计算
-    riskfreerate=0,  # 默认年化1%的风险无风险利率
-    annualize=True,  # 不进行年化
-)
-cerebro.addanalyzer(bt.analyzers.AnnualReturn)
-cerebro.addanalyzer(bt.analyzers.DrawDown)  # 回撤分析器
-cerebro.addanalyzer(bt.analyzers.TradeAnalyzer)  # 回撤分析器
-# cerebro.addanalyzer(bt.analyzers.Returns,
-#                     tann=bt.TimeFrame.Days,  # 年化因子，252 个交易日
-#                     )  # 自定义名称
+cerebro.addanalyzer(bt.analyzers.DrawDown, _name="drawdown")
+cerebro.addanalyzer(bt.analyzers.SharpeRatio, _name="sharperatio")
+cerebro.addanalyzer(bt.analyzers.Returns, _name="returns")
+cerebro.addanalyzer(bt.analyzers.TradeAnalyzer, _name="tradeanalyzer")
 
 cerebro.addanalyzer(
     bt.analyzers.CAGRAnalyzer, period=bt.TimeFrame.Days
@@ -130,18 +119,14 @@ results = cerebro.run()
 # 获取分析结果
 sharpe = results[0].analyzers.sharperatio.get_analysis()
 drawdown = results[0].analyzers.drawdown.get_analysis()
-# annual_returns = results[0].analyzers.annualreturn.get_analysis()
-# total_returns = results[0].analyzers.returns.get_analysis()  # 获取总回报率
-cagr = results[0].analyzers.cagranalyzer.get_analysis()
+total_returns = results[0].analyzers.returns.get_analysis()
 trade = results[0].analyzers.tradeanalyzer.get_analysis()
 
 # 打印分析结果
 print("=============回测结果================")
 print(f"\n夏普比率: {sharpe['sharperatio']:.2f}")
 print(f"最大回撤: {drawdown['max']['drawdown']:.2f} %")
-# print(f"总回报率: {total_returns['rnorm100']:.2f}%")  # 打印总回报率
-print(f"年化收益: {cagr['cagr']:.2f} %")
-print(f"sharpe: {cagr['sharpe']:.2f} ")
+print(f"总回报率: {total_returns['rnorm100']:.2f}%")  # 打印总回报率
 
 print(f"交易记录: {trade}")
 

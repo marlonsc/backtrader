@@ -1,16 +1,16 @@
 # Copyright (c) 2025 backtrader contributors
 """
-Classe utilitária OptReturn para encapsular resultados de otimização.
-Docstrings e comentários devem ser line-wrap ≤ 90 caracteres.
+OptReturn utility class for encapsulating optimization results.
+Docstrings and comments should be line-wrapped ≤ 90 characters.
 """
 
 
 class OptReturn(object):
     """
-    Container para resultados de otimização de estratégias.
+    Container for strategy optimization results.
 
-    :param params: Parâmetros da estratégia
-    :param **kwargs: Atributos adicionais a serem armazenados
+    :param params: Strategy parameters
+    :param **kwargs: Additional attributes to be stored
     """
 
     def __init__(self, params, **kwargs):

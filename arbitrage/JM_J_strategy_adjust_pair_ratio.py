@@ -83,9 +83,9 @@ df1_bt = df1[(df1["date"] >= fromdate) & (df1["date"] <= todate)]
 df_spread_bt = df_spread[
     (df_spread["date"] >= fromdate) & (df_spread["date"] <= todate)
 ]
-data0 = bt.feeds.PandasData(dataname=df0_bt, datetime="date")
-data1 = bt.feeds.PandasData(dataname=df1_bt, datetime="date")
-data2 = SpreadData(dataname=df_spread_bt, datetime="date")
+data0 = bt.feeds.PandasData(dataframe=df0_bt)
+data1 = bt.feeds.PandasData(dataframe=df1_bt)
+data2 = SpreadData(dataframe=df_spread_bt)
 
 
 class DynamicSpreadStrategy(bt.Strategy):
@@ -99,12 +99,10 @@ class DynamicSpreadStrategy(bt.Strategy):
     def __init__(self):
         """ """
         # Bollinger Bands indicator - using passed spread data
-        self.boll = bt.indicators.BollingerBands(
-            self.data2.close,
-            period=self.p.period,
-            devfactor=self.p.devfactor,
-            subplot=False,
-        )
+        self.boll_mid = bt.indicators.SimpleMovingAverage(self.data2.close, period=self.p.period)
+        self.boll_std = bt.indicators.StandardDeviation(self.data2.close, period=self.p.period)
+        self.boll_top = self.boll_mid + self.p.devfactor * self.boll_std
+        self.boll_bot = self.boll_mid - self.p.devfactor * self.boll_std
 
         # Trading status
         self.order = None
@@ -135,14 +133,14 @@ class DynamicSpreadStrategy(bt.Strategy):
 
         # Use passed spread data
         spread = self.data2.close[0]
-        mid = self.boll.lines.mid[0]
+        mid = self.boll_mid[0]
         pos = self.getposition(self.data0).size
 
         # Open/close position logic
         if pos == 0:
-            if spread > self.boll.lines.top[0]:
+            if spread > self.boll_top[0]:
                 self._open_position(short=True)
-            elif spread < self.boll.lines.bot[0]:
+            elif spread < self.boll_bot[0]:
                 self._open_position(short=False)
         else:
             if (spread <= mid and pos < 0) or (spread >= mid and pos > 0):
@@ -186,10 +184,10 @@ class DynamicSpreadStrategy(bt.Strategy):
         """
         if trade.isclosed:
             print(
-                "TRADE %s CLOSED %s, PROFIT: GROSS %.2f, NET %.2f, PRICE %d"
+                "TRADE %s CLOSED, PROFIT: GROSS %.2f, NET %.2f, PRICE %d"
                 % (
                     trade.ref,
-                    bt.num2date(trade.dtclose),
+                    pd.Timestamp(trade.dtclose),
                     trade.pnl,
                     trade.pnlcomm,
                     trade.value,
@@ -200,7 +198,7 @@ class DynamicSpreadStrategy(bt.Strategy):
                 "TRADE %s OPENED %s  , SIZE %2d, PRICE %d "
                 % (
                     trade.ref,
-                    bt.num2date(trade.dtopen),
+                    pd.Timestamp(trade.dtopen),
                     trade.size,
                     trade.value,
                 )
@@ -243,9 +241,14 @@ cerebro.addstrategy(DynamicSpreadStrategy)
 # Set initial capital
 cerebro.broker.setcash(100000)
 cerebro.broker.set_shortcash(False)
-cerebro.addanalyzer(bt.analyzers.DrawDown)  # Drawdown analyzer
+cerebro.addanalyzer(bt.analyzers.DrawDown, _name="drawdown")
 # ROIAnalyzer and CAGRAnalyzer are not standard Backtrader analyzers;
 # removed for compatibility
+cerebro.addanalyzer(bt.analyzers.SharpeRatio, _name="sharperatio")
+cerebro.addanalyzer(bt.analyzers.Returns, _name="returns")
+cerebro.addanalyzer(bt.analyzers.TradeAnalyzer, _name="tradeanalyzer")
+
+# cerebro.addobserver(bt.observers.CashValue)
 cerebro.addanalyzer(
     bt.analyzers.SharpeRatio,
     timeframe=bt.TimeFrame.Days,  # Calculate based on daily data

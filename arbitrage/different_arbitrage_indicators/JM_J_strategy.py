@@ -107,15 +107,9 @@ def load_data(symbol1, symbol2, fromdate, todate):
     df_spread = calculate_spread(df0, df1, 1, 1.4)
 
     # 创建数据feed
-    data0 = bt.feeds.PandasData(
-        dataname=df0, datetime="date", fromdate=fromdate, todate=todate
-    )
-    data1 = bt.feeds.PandasData(
-        dataname=df1, datetime="date", fromdate=fromdate, todate=todate
-    )
-    data2 = bt.feeds.PandasData(
-        dataname=df_spread, datetime="date", fromdate=fromdate, todate=todate
-    )
+    data0 = bt.feeds.PandasData(dataframe=df0)
+    data1 = bt.feeds.PandasData(dataframe=df1)
+    data2 = bt.feeds.PandasData(dataframe=df_spread)
     return data0, data1, data2
 
 
@@ -126,7 +120,7 @@ def configure_cerebro(**kwargs):
     :param **kwargs:
 
     """
-    cerebro = bt.Cerebro(stdstats=False)
+    cerebro = bt.Cerebro()
 
     # 添加数据
     data0, data1, data2 = load_data(
@@ -235,6 +229,6 @@ def analyze_results(results):
 # 主执行函数
 if __name__ == "__main__":
     cerebro = configure_cerebro()
-    results = cerebro.run()
-    analyze_results(results)
+    strats = cerebro.run()  # pylint: disable=no-member
+    analyze_results(strats)
     # cerebro.plot()  # 需要查看具体回测时可取消注释

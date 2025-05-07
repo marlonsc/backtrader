@@ -218,7 +218,7 @@ def btrun(pargs=""):
     ans = getfunctions(args.hooks, Cerebro)
     for hook, kwargs in ans:
         hook(cerebro, **kwargs)
-    runsts = cerebro.run()
+    runsts = cerebro.run()  # pylint: disable=no-member
     runst = runsts[0]  # single strategy and no optimization
 
     if args.pranalyzer or args.ppranalyzer:

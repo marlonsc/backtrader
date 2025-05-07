@@ -116,12 +116,8 @@ class KalmanPairTradingStrategy(bt.Strategy):
         self.spread_data = self.datas[2]  # Spread data
 
         # Z-score calculation
-        self.ma = bt.indicators.SimpleMovingAverage(
-            self.spread_data.spread, period=self.p.lookback
-        )
-        self.std = bt.indicators.StandardDeviation(
-            self.spread_data.spread, period=self.p.lookback
-        )
+        self.ma = bt.indicators.SMA(self.spread_data.spread, period=self.p.lookback)
+        self.std = bt.indicators.StdDev(self.spread_data.spread, period=self.p.lookback)
         self.z_score = (self.spread_data.spread - self.ma) / self.std
 
         self.position_type = None
@@ -213,24 +209,12 @@ fromdate = datetime.datetime(2023, 1, 1)
 todate = datetime.datetime(2025, 1, 1)
 
 # Create data feeds
-data0 = bt.feeds.PandasData(
-    dataname=df0, datetime="date", nocase=True, fromdate=fromdate, todate=todate
-)
-data1 = bt.feeds.PandasData(
-    dataname=df1, datetime="date", nocase=True, fromdate=fromdate, todate=todate
-)
-data2 = SpreadData(
-    dataname=df_spread,
-    datetime="date",
-    nocase=True,
-    fromdate=fromdate,
-    todate=todate,
-    hedge_ratio="hedge_ratio",
-    spread="spread",
-)
+data0 = bt.feeds.PandasData(dataname=df0)
+data1 = bt.feeds.PandasData(dataname=df1)
+data2 = SpreadData(dataname=df_spread)
 
 # Create backtrader engine
-cerebro = bt.Cerebro(stdstats=False)
+cerebro = bt.Cerebro()
 cerebro.adddata(data0, name="J")
 cerebro.adddata(data1, name="JM")
 cerebro.adddata(data2, name="spread")
@@ -252,21 +236,10 @@ cerebro.broker.setcash(50000)
 cerebro.broker.set_shortcash(False)
 
 # Add analyzers
-cerebro.addanalyzer(bt.analyzers.DrawDown)
-cerebro.addanalyzer(bt.analyzers.ROIAnalyzer, period=bt.TimeFrame.Days)
-cerebro.addanalyzer(
-    bt.analyzers.SharpeRatio,
-    timeframe=bt.TimeFrame.Days,
-    riskfreerate=0,
-    annualize=True,
-)
-cerebro.addanalyzer(bt.analyzers.Returns, tann=bt.TimeFrame.Days)
-cerebro.addanalyzer(bt.analyzers.CAGRAnalyzer, period=bt.TimeFrame.Days)
-
-# Add observers
-cerebro.addobserver(bt.observers.CashValue)
-cerebro.addobserver(bt.observers.BuySell)
-cerebro.addobserver(bt.observers.CumValue)
+cerebro.addanalyzer(bt.analyzers.DrawDown, _name="drawdown")
+cerebro.addanalyzer(bt.analyzers.SharpeRatio, _name="sharperatio")
+cerebro.addanalyzer(bt.analyzers.Returns, _name="returns")
+cerebro.addanalyzer(bt.analyzers.TradeAnalyzer, _name="tradeanalyzer")
 
 # Run backtest
 results = cerebro.run()
@@ -274,18 +247,15 @@ results = cerebro.run()
 # Get analysis results
 drawdown = results[0].analyzers.drawdown.get_analysis()
 sharpe = results[0].analyzers.sharperatio.get_analysis()
-roi = results[0].analyzers.roianalyzer.get_analysis()
 total_returns = results[0].analyzers.returns.get_analysis()
-cagr = results[0].analyzers.cagranalyzer.get_analysis()
+trade = results[0].analyzers.tradeanalyzer.get_analysis()
 
 # Print results
 print("=============回测结果================")
 print(f"\nSharpe Ratio: {sharpe['sharperatio']:.2f}")
 print(f"Drawdown: {drawdown['max']['drawdown']:.2f} %")
 print(f"Annualized/Normalized return: {total_returns['rnorm100']:.2f}%")
-print(f"Total compound return: {roi['roi100']:.2f}%")
-print(f"年化收益: {cagr['cagr']:.2f}")
-print(f"夏普比率: {cagr['sharpe']:.2f}")
+print(f"Total compound return: {trade['roi100']:.2f}%")
 
 # Plot results
 

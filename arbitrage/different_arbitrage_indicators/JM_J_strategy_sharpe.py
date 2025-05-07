@@ -4,6 +4,12 @@ import backtrader as bt
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import seaborn as sns  # pylint: disable=import-error
+from arbitrage.common_strategy_utils import (
+    init_common_vars,
+    notify_order_default,
+    notify_trade_default,
+)
 
 
 # 夏普差值布林带策略
@@ -20,30 +26,18 @@ class SharpeDiffStrategy(bt.Strategy):
 
     def __init__(self):
         """ """
-        # 存储夏普比率序列用于绘图
-        self.sharpe_j_values = []
-        self.sharpe_jm_values = []
-        self.delta_sharpe_values = []
-        self.dates = []
-
-        # 布林带数据
-        self.delta_sharpe_ma = []  # 移动平均
-        self.delta_sharpe_std = []  # 标准差
-        self.upper_band = []  # 上轨
-        self.lower_band = []  # 下轨
-
-        # 存储J和JM的收益率序列
-        self.returns_j = []
-        self.returns_jm = []
-
-        # 初始化交易相关变量
-        self.order = None
-        self.position_type = None
-        self.entry_day = 0
-
-        # 存储历史价格数据
-        self.j_prices = []
-        self.jm_prices = []
+        extra_vars = {
+            'j_prices': [],
+            'jm_prices': [],
+            'sharpe_j_values': [],
+            'sharpe_jm_values': [],
+            'delta_sharpe_values': [],
+            'delta_sharpe_ma': [],
+            'delta_sharpe_std': [],
+            'upper_band': [],
+            'lower_band': [],
+        }
+        init_common_vars(self, extra_vars)
 
     def next(self):
         """ """
@@ -179,39 +173,10 @@ class SharpeDiffStrategy(bt.Strategy):
                     )
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
-        if order.status in [order.Completed]:
-            if self.p.printlog:
-                if order.isbuy():
-                    print(
-                        f"买入执行: 价格={order.executed.price:.2f},"
-                        f" 成本={order.executed.value:.2f},"
-                        f" 手续费={order.executed.comm:.2f}"
-                    )
-                else:
-                    print(
-                        f"卖出执行: 价格={order.executed.price:.2f},"
-                        f" 成本={order.executed.value:.2f},"
-                        f" 手续费={order.executed.comm:.2f}"
-                    )
-
-        elif order.status in [order.Canceled, order.Margin, order.Rejected]:
-            print("订单被取消/拒绝")
-
-        self.order = None
+        notify_order_default(self, order)
 
     def notify_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
-        if self.p.printlog and trade.isclosed:
-            print(f"平仓盈利: {trade.pnlcomm:.2f}")
+        notify_trade_default(self, trade)
 
     def stop(self):
         """ """
@@ -322,24 +287,8 @@ def load_data(symbol1, symbol2, fromdate, todate):
         df1 = df1.sort_index().loc[fromdate:todate]
 
         # 创建数据feed
-        data0 = bt.feeds.PandasData(
-            dataname=df0,
-            datetime=None,  # 使用索引
-            open="open",
-            high="high",
-            low="low",
-            close="close",
-            volume="volume",
-        )
-        data1 = bt.feeds.PandasData(
-            dataname=df1,
-            datetime=None,
-            open="open",
-            high="high",
-            low="low",
-            close="close",
-            volume="volume",
-        )
+        data0 = bt.feeds.PandasData(dataname=df0)
+        data1 = bt.feeds.PandasData(dataname=df1)
         return data0, data1
     except Exception as e:
         print(f"加载数据时出错: {e}")
@@ -353,7 +302,7 @@ def configure_cerebro(**kwargs):
     :param **kwargs:
 
     """
-    cerebro = bt.Cerebro(stdstats=False)  # 启用标准统计
+    cerebro = bt.Cerebro()
     data0, data1 = load_data(
         "/J",
         "/JM",
@@ -367,31 +316,12 @@ def configure_cerebro(**kwargs):
 
     cerebro.adddata(data0, name="J")
     cerebro.adddata(data1, name="JM")
-    cerebro.addstrategy(SharpeDiffStrategy, printlog=True)  # 启用日志输出
+    cerebro.addstrategy(SharpeDiffStrategy, printlog=True)
     cerebro.broker.setcash(80000)
-    # cerebro.broker.setcommission(0.0003)
     cerebro.broker.set_shortcash(False)
-
-    cerebro.addanalyzer(bt.analyzers.DrawDown)  # 回撤分析器
-    cerebro.addanalyzer(bt.analyzers.ROIAnalyzer, period=bt.TimeFrame.Days)
-    cerebro.addanalyzer(
-        bt.analyzers.SharpeRatio,
-        timeframe=bt.TimeFrame.Days,  # 按日数据计算
-        riskfreerate=0,  # 默认年化1%的风险无风险利率
-        annualize=True,  # 不进行年化
-    )
-    cerebro.addanalyzer(
-        bt.analyzers.Returns,
-        tann=bt.TimeFrame.Days,  # 年化因子，252 个交易日
-    )
-    cerebro.addanalyzer(
-        bt.analyzers.CAGRAnalyzer, period=bt.TimeFrame.Days, plot=True
-    )  # 这里的period可以是daily, weekly, monthly等
-    # cerebro.broker.setcommission(commission=0.001)
-    cerebro.broker.set_shortcash(False)
-    # cerebro.addobserver(bt.observers.Trades)
-    # # cerebro.addobserver(bt.observers.BuySell)
-    # cerebro.addobserver(bt.observers.CumValue)
+    cerebro.addanalyzer(bt.analyzers.DrawDown)
+    cerebro.addanalyzer(bt.analyzers.SharpeRatio)
+    cerebro.addanalyzer(bt.analyzers.TimeReturn)
     return cerebro
 
 
@@ -406,22 +336,13 @@ def analyze_results(results):
         return
 
     try:
-        # 获取分析结果
         drawdown = results[0].analyzers.drawdown.get_analysis()
         sharpe = results[0].analyzers.sharperatio.get_analysis()
-        roi = results[0].analyzers.roianalyzer.get_analysis()
-        total_returns = results[0].analyzers.returns.get_analysis()  # 获取总回报率
-        cagr = results[0].analyzers.cagranalyzer.get_analysis()
-        # # 打印分析结果
+        returns = results[0].analyzers.timereturn.get_analysis()
         print("=============回测结果================")
-        print(f"\nSharpe Ratio: {sharpe.get('sharperatio', 0):.2f}")
+        print(f"Sharpe Ratio: {sharpe.get('sharperatio', 0):.2f}")
         print(f"Drawdown: {drawdown.get('max', {}).get('drawdown', 0):.2f} %")
-        print(
-            f"Annualized/Normalized return: {total_returns.get('rnorm100', 0):.2f}%"
-        )  #
-        print(f"Total compound return: {roi.get('roi100', 0):.2f}%")
-        print(f"年化收益: {cagr.get('cagr', 0):.2f} ")
-        print(f"夏普比率: {cagr.get('sharpe', 0):.2f}")
+        print(f"Total return: {returns.get('rtot', 0):.2%}")
     except Exception as e:
         print(f"分析结果时出错: {e}")
 
@@ -430,6 +351,6 @@ if __name__ == "__main__":
     cerebro = configure_cerebro()
     if cerebro:
         print("开始回测...")
-        results = cerebro.run()
-        analyze_results(results)
+        strats = cerebro.run()  # pylint: disable=no-member
+        analyze_results(strats)
         cerebro.plot()

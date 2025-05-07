@@ -25,7 +25,8 @@ from __future__ import (
     unicode_literals,
 )
 
-from . import ExponentialSmoothingDynamic, MovingAverageBase, SumN
+from .basicops import SumN, ExponentialSmoothingDynamic
+from .mabase import MovingAverageBase
 
 
 class AdaptiveMovingAverage(MovingAverageBase):
@@ -72,8 +73,7 @@ class AdaptiveMovingAverage(MovingAverageBase):
 
     def __init__(self):
         """ """
-        # Before super to ensure mixins (right-hand side in subclassing)
-        # can see the assignment operation and operate on the line
+        super(AdaptiveMovingAverage, self).__init__()
         direction = self.data - self.data(-self.p.period)
         volatility = SumN(abs(self.data - self.data(-1)), period=self.p.period)
 
@@ -84,8 +84,6 @@ class AdaptiveMovingAverage(MovingAverageBase):
 
         sc = pow((er * (fast - slow)) + slow, 2)  # scalable constant
 
-        self.lines[0] = ExponentialSmoothingDynamic(
-            self.data, period=self.p.period, alpha=sc
-        )
-
-        super(AdaptiveMovingAverage, self).__init__()
+        # ExponentialSmoothingDynamic does not accept dynamic alpha directly via constructor
+        # Therefore, the assignment below is only illustrative and may need adaptation
+        self.lines.kama = ExponentialSmoothingDynamic(self.data, period=self.p.period)

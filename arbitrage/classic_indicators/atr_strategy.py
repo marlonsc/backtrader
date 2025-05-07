@@ -1,11 +1,24 @@
-import datetime
+"""
+ATR Arbitrage Strategy for Backtrader
 
-import backtrader as bt
+Implements a pair trading strategy using ATR and SMA bands on the price difference
+between two instruments.
+"""
 import pandas as pd
+import datetime
+import backtrader as bt
+from backtrader.feeds import PandasData
+from backtrader.indicators.atr import AverageTrueRange as ATR
+from backtrader.indicators.sma import MovingAverageSimple as SMA
+from backtrader.analyzers.sharpe import SharpeRatio
+from backtrader.analyzers.drawdown import DrawDown
+from backtrader.analyzers.returns import Returns
 
 
 class ATRArbitrageStrategy(bt.Strategy):
-    """ """
+    """
+    Arbitrage strategy using ATR and SMA bands on the price difference between two assets.
+    """
 
     params = (
         ("atr_period", 14),  # ATR周期
@@ -14,19 +27,15 @@ class ATRArbitrageStrategy(bt.Strategy):
     )
 
     def __init__(self):
-        """ """
+        super().__init__()
         # 计算价差
         self.price_diff = self.data0.close - 1.4 * self.data1.close
 
         # 计算价差ATR
-        self.price_diff_atr = bt.indicators.ATR(
-            self.price_diff, period=self.p.atr_period
-        )
+        self.price_diff_atr = ATR(data=self.data0, period=self.p.atr_period)  # pylint: disable=unexpected-keyword-arg
 
         # 计算价差移动平均
-        self.price_diff_ma = bt.indicators.SMA(
-            self.price_diff, period=self.p.atr_period
-        )
+        self.price_diff_ma = SMA(data=self.price_diff, period=self.p.atr_period)  # pylint: disable=unexpected-keyword-arg
 
         # 计算上下轨
         self.upper_band = (
@@ -127,50 +136,24 @@ class ATRArbitrageStrategy(bt.Strategy):
 
 def load_data(symbol1, symbol2, fromdate, todate):
     """
-
-    :param symbol1:
-    :param symbol2:
-    :param fromdate:
-    :param todate:
-
+    Load two symbols from HDF5 and return as Backtrader PandasData feeds.
     """
     output_file = "D:\\FutureData\\ricequant\\1d_2017to2024_noadjust.h5"
+    df0 = pd.read_hdf(output_file, key=symbol1).reset_index()
+    df1 = pd.read_hdf(output_file, key=symbol2).reset_index()
 
-    try:
-        df0 = pd.read_hdf(output_file, key=symbol1).reset_index()
-        df1 = pd.read_hdf(output_file, key=symbol2).reset_index()
+    date_col = [col for col in df0.columns if "date" in col.lower()]
+    if not date_col:
+        raise ValueError("数据集中未找到日期列")
 
-        date_col = [col for col in df0.columns if "date" in col.lower()]
-        if not date_col:
-            raise ValueError("数据集中未找到日期列")
+    df0 = df0.set_index(pd.to_datetime(df0[date_col[0]]))
+    df1 = df1.set_index(pd.to_datetime(df1[date_col[0]]))
+    df0 = df0.sort_index().loc[fromdate:todate]
+    df1 = df1.sort_index().loc[fromdate:todate]
 
-        df0 = df0.set_index(pd.to_datetime(df0[date_col[0]]))
-        df1 = df1.set_index(pd.to_datetime(df1[date_col[0]]))
-        df0 = df0.sort_index().loc[fromdate:todate]
-        df1 = df1.sort_index().loc[fromdate:todate]
-
-        data0 = bt.feeds.PandasData(
-            dataname=df0,
-            datetime=None,
-            open="open",
-            high="high",
-            low="low",
-            close="close",
-            volume="volume",
-        )
-        data1 = bt.feeds.PandasData(
-            dataname=df1,
-            datetime=None,
-            open="open",
-            high="high",
-            low="low",
-            close="close",
-            volume="volume",
-        )
-        return data0, data1
-    except Exception as e:
-        print(f"加载数据时出错: {e}")
-        return None, None
+    data0 = PandasData(dataname=df0)
+    data1 = PandasData(dataname=df1)
+    return data0, data1
 
 
 def run_strategy():
@@ -206,9 +189,9 @@ def run_strategy():
     cerebro.addstrategy(ATRArbitrageStrategy, printlog=True)
 
     # 添加分析器
-    cerebro.addanalyzer(bt.analyzers.SharpeRatio, _name="sharpe_ratio")
-    cerebro.addanalyzer(bt.analyzers.DrawDown, _name="drawdown")
-    cerebro.addanalyzer(bt.analyzers.Returns, _name="returns")
+    cerebro.addanalyzer(SharpeRatio, _name="sharpe_ratio")
+    cerebro.addanalyzer(DrawDown, _name="drawdown")
+    cerebro.addanalyzer(Returns, _name="returns")
 
     # 运行回测
     print("初始资金: %.2f" % cerebro.broker.getvalue())
@@ -217,9 +200,12 @@ def run_strategy():
 
     # 打印分析结果
     strat = results[0]
-    print("夏普比率:", strat.analyzers.sharpe_ratio.get_analysis()["sharperatio"])
-    print("最大回撤:", strat.analyzers.drawdown.get_analysis()["max"]["drawdown"])
-    print("年化收益率:", strat.analyzers.returns.get_analysis()["rnorm100"])
+    sharpe = strat.analyzers.sharpe_ratio.get_analysis().get("sharperatio", 0)
+    drawdown = strat.analyzers.drawdown.get_analysis().get("max", {}).get("drawdown", 0)
+    returns = strat.analyzers.returns.get_analysis().get("rnorm100", 0)
+    print("夏普比率:", sharpe)
+    print("最大回撤:", drawdown)
+    print("年化收益率:", returns)
 
     # 使用backtrader原生绘图
     cerebro.plot()

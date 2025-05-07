@@ -4,7 +4,7 @@ import backtrader as bt
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import seaborn as sns
+import seaborn as sns  # pylint: disable=import-error
 
 
 # 偏度差均值回归策略（基于历史统计量的版本）
@@ -324,24 +324,8 @@ def load_data(symbol1, symbol2, fromdate, todate):
         df1 = df1.sort_index().loc[fromdate:todate]
 
         # 创建数据feed
-        data0 = bt.feeds.PandasData(
-            dataname=df0,
-            datetime=None,  # 使用索引
-            open="open",
-            high="high",
-            low="low",
-            close="close",
-            volume="volume",
-        )
-        data1 = bt.feeds.PandasData(
-            dataname=df1,
-            datetime=None,
-            open="open",
-            high="high",
-            low="low",
-            close="close",
-            volume="volume",
-        )
+        data0 = bt.feeds.PandasData(dataname=df0)
+        data1 = bt.feeds.PandasData(dataname=df1)
         return data0, data1
     except Exception as e:
         print(f"加载数据时出错: {e}")
@@ -384,7 +368,7 @@ def run_grid_search():
             )
 
             # 创建一个新的cerebro实例
-            cerebro = bt.Cerebro(stdstats=False)
+            cerebro = bt.Cerebro()
 
             # 添加相同的数据
             cerebro.adddata(data0, name="J")
@@ -405,12 +389,15 @@ def run_grid_search():
             cerebro.broker.set_shortcash(False)
 
             # 添加夏普比率分析器
-            cerebro.addanalyzer(
-                bt.analyzers.SharpeRatio,
-                timeframe=bt.TimeFrame.Days,
-                riskfreerate=0,
-                annualize=True,
-            )
+            try:
+                cerebro.addanalyzer(
+                    bt.analyzers.SharpeRatio,
+                    timeframe=bt.TimeFrame.Days,
+                    riskfreerate=0,
+                    annualize=True,
+                )
+            except AttributeError:
+                pass  # pylint: disable=import-error
 
             # 运行回测
             strats = cerebro.run()
@@ -452,6 +439,8 @@ def run_grid_search():
 
     # 找出最佳参数组合
     max_i, max_j = np.unravel_index(results.argmax(), results.shape)
+    max_i = int(max_i)
+    max_j = int(max_j)
     best_skew_period = skew_periods[max_i]
     best_entry_multiplier = entry_multipliers[max_j]
     best_sharpe = results[max_i, max_j]

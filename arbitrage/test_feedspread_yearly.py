@@ -256,9 +256,9 @@ print("\nBasic statistical information:")
 print(df_spread.describe())
 
 # Add data
-data0 = bt.feeds.PandasData(dataname=df_I, datetime="date")
-data1 = bt.feeds.PandasData(dataname=df_RB, datetime="date")
-data2 = bt.feeds.PandasData(dataname=df_spread, datetime="date")
+data0 = bt.feeds.PandasData(dataname=df_I)
+data1 = bt.feeds.PandasData(dataname=df_RB)
+data2 = bt.feeds.PandasData(dataname=df_spread)
 
 # Create backtesting engine
 cerebro = bt.Cerebro()

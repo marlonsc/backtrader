@@ -147,24 +147,11 @@ class DynamicSpreadCUSUMStrategy(bt.Strategy):
 
         if trade.isclosed:
             print(
-                "TRADE %s CLOSED %s, PROFIT: GROSS %.2f, NET %.2f, PRICE %d"
-                % (
-                    trade.ref,
-                    bt.num2date(trade.dtclose),
-                    trade.pnl,
-                    trade.pnlcomm,
-                    trade.value,
-                )
+                f"TRADE {trade.ref} CLOSED, PROFIT: GROSS {trade.pnl:.2f}, NET {trade.pnlcomm:.2f}, PRICE {trade.value}"
             )
         elif trade.justopened:
             print(
-                "TRADE %s OPENED %s  , SIZE %2d, PRICE %d "
-                % (
-                    trade.ref,
-                    bt.num2date(trade.dtopen),
-                    trade.size,
-                    trade.value,
-                )
+                f"TRADE {trade.ref} OPENED {trade.dtopen}, SIZE {trade.size}, PRICE {trade.value}"
             )
 
 
@@ -180,7 +167,7 @@ def run_strategy(
 ):
     """运行单次回测"""
     # 创建回测引擎
-    cerebro = bt.Cerebro(stdstats=False)
+    cerebro = bt.Cerebro()
     cerebro.adddata(data0, name="data0")
     cerebro.adddata(data1, name="data1")
     cerebro.adddata(data2, name="spread")
@@ -218,7 +205,7 @@ def run_strategy(
     sharpe = strat.analyzers.sharperatio.get_analysis().get("sharperatio", 0)
     drawdown = strat.analyzers.drawdown.get_analysis().get("max", {}).get("drawdown", 0)
     returns = strat.analyzers.returns.get_analysis().get("rnorm100", 0)
-    roi = strat.analyzers.roianalyzer.get_analysis().get("roi100", 0)
+    roi = strat.analyzers.tradeanalyzer.get_analysis().get("roi", 0)
     trades = strat.analyzers.tradeanalyzer.get_analysis()
 
     # 获取交易统计
@@ -307,21 +294,9 @@ def grid_search(
         df_spread = calculate_rolling_spread(df0, df1, window=spread_window)
 
         # 添加数据
-        data0 = bt.feeds.PandasData(
-            dataname=df0,
-            datetime="date",
-            nocase=True,
-            fromdate=fromdate,
-            todate=todate,
-        )
-        data1 = bt.feeds.PandasData(
-            dataname=df1,
-            datetime="date",
-            nocase=True,
-            fromdate=fromdate,
-            todate=todate,
-        )
-        data2 = SpreadData(dataname=df_spread, fromdate=fromdate, todate=todate)
+        data0 = bt.feeds.PandasData(dataname=df0)
+        data1 = bt.feeds.PandasData(dataname=df1)
+        data2 = SpreadData(dataname=df_spread)
 
         for win in win_values:
             for k_coeff in k_coeff_values:

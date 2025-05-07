@@ -125,9 +125,9 @@ class my_broker:
         callback = MyXtQuantTraderCallback()
         self.acc = StockAccount("39131771")
         self.xt_trader.register_callback(callback)
-        self.use_real_trading = use_real_trading  # 新增标志位判断是否实盘
+        self.use_real_trading = use_real_trading  # Added flag to determine if it's real trading
 
-        if use_real_trading:  # 如果实盘才连接
+        if use_real_trading:  # Only connect if it's real trading
             self.xt_trader.start()
             connect_result = self.xt_trader.connect()
             if connect_result != 0:
