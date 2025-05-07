@@ -18,15 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-"""
-CUP AND HANDLE TRADING STRATEGY WITH POSTGRESQL DATABASE - (cup-and-handle)
+"""CUP AND HANDLE TRADING STRATEGY WITH POSTGRESQL DATABASE - (cup-and-handle)
 ==================================================================
-
 This strategy implements the Cup and Handle pattern, a bullish chart formation
 that signals a potential breakout. The pattern consists of a U-shaped "cup"
 followed by a smaller downward drift known as the "handle". A breakout above
 the handle's resistance level is considered a buy signal.
-
 STRATEGY LOGIC:
 --------------
 - Identify the formation of a U-shaped consolidation (the "cup")
@@ -34,7 +31,6 @@ STRATEGY LOGIC:
 - Generate a buy signal when the price breaks out above the handle resistance level
 - Set a target price by measuring the depth of the cup and projecting it upwards
 - Incorporate volume confirmation to validate the pattern
-
 MARKET CONDITIONS:
 ----------------
 *** THIS STRATEGY IS SPECIFICALLY DESIGNED FOR STOCKS FORMING BASE PATTERNS AFTER PULLBACKS ***
@@ -42,29 +38,24 @@ MARKET CONDITIONS:
 - AVOID USING: During bear markets or when stocks are making new lows
 - IDEAL TIMEFRAMES: Daily and weekly charts
 - OPTIMAL MARKET CONDITION: Bullish market conditions with proper sector rotation
-
 This strategy is based on William O'Neil's CANSLIM method and works best when
 the overall market is in an uptrend and the stock has strong fundamentals.
 The cup should form a proper U-shape (not V-shape) and the handle should have
 a gentle downward drift with declining volume.
-
 USAGE:
 ------
 python strategies/cup_and_handle.py --data SYMBOL --fromdate YYYY-MM-DD --todate YYYY-MM-DD [options]
-
 REQUIRED ARGUMENTS:
 ------------------
 --data, -d      : Stock symbol to retrieve data for (e.g., AAPL, MSFT, TSLA)
 --fromdate, -f  : Start date for historical data in YYYY-MM-DD format (default: 2024-01-01)
 --todate, -t    : End date for historical data in YYYY-MM-DD format (default: 2024-12-31)
-
 DATABASE PARAMETERS:
 ------------------
 --dbuser, -u    : PostgreSQL username (default: jason)
 --dbpass, -pw   : PostgreSQL password (default: fsck)
 --dbname, -n    : PostgreSQL database name (default: market_data)
 --cash, -c      : Initial cash for the strategy (default: $100,000)
-
 CUP AND HANDLE PARAMETERS:
 ------------------------
 --cup-length, -cl : Minimum length of the cup in bars (default: 30)
@@ -74,31 +65,25 @@ CUP AND HANDLE PARAMETERS:
 --breakout-threshold, -bt : Percentage above handle high for breakout (default: 3.0)
 --volume-mult, -vm : Volume multiplier for breakout confirmation (default: 1.2)
 --target-mult, -tm : Multiplier for setting the target price (default: 1.0)
-
 EXIT PARAMETERS:
 ---------------
 --use-stop, -us : Whether to use a stop loss (default: False)
 --stop-pct, -sp : Stop loss percentage from entry (default: 10.0)
 --use-rsi-exit, -ure : Use RSI-based exit (default: True)
 --rsi-overbought, -ro : RSI level considered overbought for exit (default: 70)
-
 POSITION SIZING:
 ---------------
 --risk-percent, -rp  : Percentage of equity to risk per trade (default: 1.0)
 --max-position, -mp  : Maximum position size as percentage of equity (default: 20.0)
-
 TRADE THROTTLING:
 ---------------
 --trade-throttle-days, -ttd : Minimum days between trades (default: 5)
-
 OTHER:
 -----
 --plot, -p      : Generate and show a plot of the trading activity
-
 EXAMPLE:
 --------
-python strategies/cup_and_handle.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --cup-length 20 --handle-length 5 --plot
-"""
+python strategies/cup_and_handle.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --cup-length 20 --handle-length 5 --plot"""
 
 from __future__ import (
     absolute_import,
@@ -147,31 +132,24 @@ class StockPriceData(bt.feeds.PandasData):
 
 class CupAndHandleStrategy(bt.Strategy, TradeThrottling):
     """Cup and Handle Strategy with Volume Confirmation
-
-    This strategy identifies the classic Cup and Handle pattern and trades breakouts:
-    1. Identifies a U-shaped consolidation period (the "cup")
-    2. Detects a smaller pullback (the "handle") following the cup formation
-    3. Buys when price breaks out above the handle with volume confirmation
-    4. Sets a profit target based on the depth of the cup
-
-    Exit mechanisms include:
-    - Taking profit at the target price
-    - Stop loss to limit potential losses
-    - RSI-based exit when the stock becomes overbought
-
-    Pattern Validation:
-    - Cup must form a proper U-shape (not V-shape)
-    - Cup depth typically 15-30% (neither too shallow nor too deep)
-    - Handle should be less than 15% of cup depth
-    - Handle must form in the upper half of the cup
-    - Volume should decline during cup formation and handle
-    - Volume should surge during breakout
-
-    ** IMPORTANT: This strategy is designed for stocks forming base patterns after pullbacks **
-    It performs best in bullish markets and should be avoided during bear markets.
-
-
-    """
+This strategy identifies the classic Cup and Handle pattern and trades breakouts:
+1. Identifies a U-shaped consolidation period (the "cup")
+2. Detects a smaller pullback (the "handle") following the cup formation
+3. Buys when price breaks out above the handle with volume confirmation
+4. Sets a profit target based on the depth of the cup
+Exit mechanisms include:
+- Taking profit at the target price
+- Stop loss to limit potential losses
+- RSI-based exit when the stock becomes overbought
+Pattern Validation:
+- Cup must form a proper U-shape (not V-shape)
+- Cup depth typically 15-30% (neither too shallow nor too deep)
+- Handle should be less than 15% of cup depth
+- Handle must form in the upper half of the cup
+- Volume should decline during cup formation and handle
+- Volume should surge during breakout
+** IMPORTANT: This strategy is designed for stocks forming base patterns after pullbacks **
+It performs best in bullish markets and should be avoided during bear markets."""
 
     params = (
         # Cup and Handle parameters
@@ -219,11 +197,10 @@ class CupAndHandleStrategy(bt.Strategy, TradeThrottling):
     def log(self, txt, dt=None, level="info"):
         """Logging function
 
-        :param txt:
-        :param dt:  (Default value = None)
-        :param level:  (Default value = "info")
-
-        """
+Args:
+    txt: 
+    dt: (Default value = None)
+    level: (Default value = "info")"""
         if level == "debug" and self.p.log_level != "debug":
             return
 
@@ -303,11 +280,8 @@ class CupAndHandleStrategy(bt.Strategy, TradeThrottling):
         return min(size, max_size)
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status in [order.Submitted, order.Accepted]:
             # Order submitted/accepted to/by broker - Nothing to do
             return
@@ -345,11 +319,8 @@ class CupAndHandleStrategy(bt.Strategy, TradeThrottling):
         self.order = None
 
     def notify_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
+        """Args:
+    trade:"""
         if not trade.isclosed:
             return
 

@@ -36,9 +36,8 @@ class InfluxDBTool(object):
     def write_dataframe_to_idb(self, ticker):
         """Write Pandas Dataframe to InfluxDB database
 
-        :param ticker:
-
-        """
+Args:
+    ticker:"""
         cachepath = self._cache
         cachefile = "%s/%s-1M.csv.gz" % (cachepath, ticker)
 
@@ -62,9 +61,8 @@ class InfluxDBTool(object):
     def get_tickers_from_file(self, filename):
         """Load ticker list from txt file
 
-        :param filename:
-
-        """
+Args:
+    filename:"""
         if not os.path.exists(filename):
             log.error("Ticker List file does not exist: %s", filename)
 

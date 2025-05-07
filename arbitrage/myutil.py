@@ -3,34 +3,42 @@ import pandas as pd
 import statsmodels.api as sm
 
 
+# Copyright (c) 2025 backtrader contributors
+"""
+Utility functions for data alignment, spread calculation, volatility ratio,
+Kalman filter, and cointegration ratio for financial time series analysis.
+"""
+
 # 1. 首先确认两个DataFrame的index是否相同
 def check_and_align_data(df1, df2, date_column="date"):
-    """检查并对齐两个DataFrame的数据
+    """Check and align two DataFrames by date index.
 
-    :param df1:
-    :param df2:
-    :param date_column:  (Default value = "date")
+Args:
+    df1: First DataFrame
+    df2: Second DataFrame
+    date_column: Name of the date column (default: "date")
 
-    """
-    # 确保date列作为index
+Returns:
+    Tuple of aligned DataFrames"""
+    # Ensure the date column is set as index
     if date_column in df1.columns:
         df1 = df1.set_index(date_column)
     if date_column in df2.columns:
         df2 = df2.set_index(date_column)
 
-    # 找出共同的日期
+    # Find common dates
     common_dates = df1.index.intersection(df2.index)
 
-    # 检查是否有缺失的日期
+    # Check for missing dates
     missing_in_df1 = df2.index.difference(df1.index)
     missing_in_df2 = df1.index.difference(df2.index)
 
     if len(missing_in_df1) > 0:
-        print(f"在df_I中缺失的日期数: {len(missing_in_df1)}")
+        print(f"Number of missing dates in df1: {len(missing_in_df1)}")
     if len(missing_in_df2) > 0:
-        print(f"在df_RB中缺失的日期数: {len(missing_in_df2)}")
+        print(f"Number of missing dates in df2: {len(missing_in_df2)}")
 
-    # 对齐数据
+    # Align data
     df1_aligned = df1.loc[common_dates]
     df2_aligned = df2.loc[common_dates]
 
@@ -47,14 +55,15 @@ def calculate_spread(
 ):
     """计算两个DataFrame之间的价差
 
-    :param df1: 第一个DataFrame
-    :param df2: 第二个DataFrame
-    :param factor1:  (Default value = 5)
-    :param factor2:  (Default value = 1)
-    :param columns: 需要计算价差的列 (Default value = ["open","high","low","close","volume"])
-    :returns: 包含价差的DataFrame
+Args:
+    df1: 第一个DataFrame
+    df2: 第二个DataFrame
+    factor1: (Default value = 5)
+    factor2: (Default value = 1)
+    columns: 需要计算价差的列 (Default value = ["open","high","low","close","volume"])
 
-    """
+Returns:
+    包含价差的DataFrame"""
     # 对齐数据
     df1_aligned, df2_aligned = check_and_align_data(df1, df2)
 
@@ -74,13 +83,14 @@ def calculate_spread(
 def calculate_volatility_ratio(price_c, price_d, mc, md):
     """波动率匹配持仓比例（整数版）
 
-    :param price_c: 品种C价格序列（pd.Series）
-    :param price_d: 品种D价格序列（pd.Series）
-    :param mc: 品种C合约乘数
-    :param md: 品种D合约乘数
-    :returns: 整数配比 (Nc, Nd)
+Args:
+    price_c: 品种C价格序列（pd.Series）
+    price_d: 品种D价格序列（pd.Series）
+    mc: 品种C合约乘数
+    md: 品种D合约乘数
 
-    """
+Returns:
+    整数配比 (Nc, Nd)"""
     # 对齐数据
     merged = pd.concat([price_c, price_d], axis=1).dropna()
 
@@ -102,11 +112,12 @@ def calculate_volatility_ratio(price_c, price_d, mc, md):
 def simplify_ratio(ratio, max_denominator=10):
     """将浮点比例转换为最简整数比
 
-    :param ratio: 浮点比例值
-    :param max_denominator: 最大允许的分母值 (Default value = 10)
-    :returns: 分子, 分母) 的元组
+Args:
+    ratio: 浮点比例值
+    max_denominator: 最大允许的分母值 (Default value = 10)
 
-    """
+Returns:
+    分子, 分母) 的元组"""
     from fractions import Fraction
 
     frac = Fraction(ratio).limit_denominator(max_denominator)
@@ -124,11 +135,8 @@ class KalmanFilter:
         self.R = 0.1  # 观测噪声
 
     def update(self, z):
-        """
-
-        :param z:
-
-        """
+        """Args:
+    z:"""
         # 预测步骤
         x_pred = self.x
         P_pred = self.P + self.Q
@@ -141,37 +149,40 @@ class KalmanFilter:
 
 
 def kalman_ratio(df1, df2):
-    """
+    """Calculate Kalman filter ratio and spread for two series.
 
-    :param df1:
-    :param df2:
+Args:
+    df1: First series
+    df2: Second series
 
-    """
+Returns:
+    Tuple of (integer ratio, spread array)"""
     kf = KalmanFilter()
     spreads = []
+    beta = 1.0  # Initialize beta to avoid use-before-assignment
     for p1, p2 in zip(df1, df2):
         if p2 != 0:
-            ratio = p1 / p2  # 实时价格比
+            ratio = p1 / p2  # Real-time price ratio
             beta = kf.update(ratio)
         spreads.append(p1 - beta * p2)
 
-    # 取末段均值确定整数配比
+    # Use the last 30 values of beta for integer ratio if available
     final_beta = np.mean(kf.x[-30:]) if len(df1) > 30 else round(kf.x[-1])
     return simplify_ratio(final_beta), np.array(spreads)
 
 
 def cointegration_ratio(df1, df2):
-    """
+    """Calculate cointegration regression ratio and spread.
 
-    :param df1:
-    :param df2:
+Args:
+    df1: First series
+    df2: Second series
 
-    """
-
-    # 协整回归
+Returns:
+    Tuple of (integer ratio, spread array)"""
+    # Cointegration regression
     X = sm.add_constant(df2)
     model = sm.OLS(df1, X).fit()
-    beta = model.params[1]  # 回归系数整数化
-    spread = df1 - beta * df2  # 价差序列
-
-    return simplify_ratio(beta), spread  # 配比格式(资产1单位:资产β单位)
+    beta = model.params[1]  # Regression coefficient as integer
+    spread = df1 - beta * df2  # Spread series
+    return simplify_ratio(beta), spread  # Format: (asset1 units : asset2 beta units)

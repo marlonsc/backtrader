@@ -28,36 +28,23 @@ from __future__ import (
 
 class BarReplayer_Open(object):
     """This filters splits a bar in two parts:
-
-      - ``Open``: the opening price of the bar will be used to deliver an
-        initial price bar in which the four components (OHLC) are equal
-
-        The volume/openinterest fields are 0 for this initial bar
-
-      - ``OHLC``: the original bar is delivered complete with the original
-        ``volume``/``openinterest``
-
-    The split simulates a replay without the need to use the *replay* filter.
-
-
-    """
+- ``Open``: the opening price of the bar will be used to deliver an
+initial price bar in which the four components (OHLC) are equal
+The volume/openinterest fields are 0 for this initial bar
+- ``OHLC``: the original bar is delivered complete with the original
+``volume``/``openinterest``
+The split simulates a replay without the need to use the *replay* filter."""
 
     def __init__(self, data):
-        """
-
-        :param data:
-
-        """
+        """Args:
+    data:"""
         self.pendingbar = None
         data.resampling = 1
         data.replaying = True
 
     def __call__(self, data):
-        """
-
-        :param data:
-
-        """
+        """Args:
+    data:"""
         ret = True
 
         # Make a copy of the new bar and remove it from stream
@@ -85,12 +72,11 @@ class BarReplayer_Open(object):
 
     def last(self, data):
         """Called when the data is no longer producing bars
-        Can be called multiple times. It has the chance to (for example)
-        produce extra bars
+Can be called multiple times. It has the chance to (for example)
+produce extra bars
 
-        :param data:
-
-        """
+Args:
+    data:"""
         if self.pendingbar is not None:
             data.backwards()  # remove delivered open bar
             data._add2stack(self.pendingbar)  # add remaining

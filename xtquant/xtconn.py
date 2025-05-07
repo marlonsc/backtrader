@@ -12,9 +12,8 @@ status_callback = None
 def try_create_connection(addr):
     """addr: 'localhost:58610'
 
-    :param addr:
-
-    """
+Args:
+    addr:"""
     ip, port = addr.split(":")
     if not ip:
         ip = localhost
@@ -35,11 +34,8 @@ def try_create_connection(addr):
 
 
 def create_connection(addr):
-    """
-
-    :param addr:
-
-    """
+    """Args:
+    addr:"""
     try:
         return try_create_connection(addr)
     except Exception:
@@ -49,18 +45,8 @@ def create_connection(addr):
 def scan_all_server_instance():
     """扫描当前环境下所有XTQuant服务实例
 
-
-    :returns: [ config1, config2,... ]
-
-        config: dict
-            {
-                'ip': '127.0.0.1', 'port': 58610,
-                'is_running': False,
-                'client_type': 'research',
-                'data_dir': 'xtquant_server/datadir',
-            }
-
-    """
+Returns:
+    [ config1, config2,... ]"""
 
     import json
     import os
@@ -117,10 +103,8 @@ def scan_all_server_instance():
 def get_internal_server_addr():
     """获取内部XTQuant服务地址
 
-
-    :returns: '127.0.0.1:58610'
-
-    """
+Returns:
+    '127.0.0.1:58610'"""
     try:
         from .xtdatacenter import get_local_server_port
 
@@ -135,10 +119,8 @@ def get_internal_server_addr():
 def scan_available_server_addr():
     """扫描当前环境下可用的XTQuant服务实例
 
-
-    :returns: [ '0.0.0.0:58610', '0.0.0.0:58611', ... ]
-
-    """
+Returns:
+    [ '0.0.0.0:58610', '0.0.0.0:58611', ... ]"""
 
     import os
     import sys
@@ -187,13 +169,12 @@ def scan_available_server_addr():
 
 def connect_any(addr_list, start_port, end_port):
     """addr_list: [ addr, ... ]
-        addr: 'localhost:58610'
+addr: 'localhost:58610'
 
-    :param addr_list:
-    :param start_port:
-    :param end_port:
-
-    """
+Args:
+    addr_list: 
+    start_port: 
+    end_port:"""
     for addr in addr_list:
         try:
             port = int(addr.split(":")[1])

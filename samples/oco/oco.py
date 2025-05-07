@@ -49,11 +49,8 @@ class St(bt.Strategy):
     )
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         print(
             "{}: Order ref: {} / Type {} / Status {}".format(
                 self.data.datetime.date(0),
@@ -138,11 +135,8 @@ class St(bt.Strategy):
 
 
 def runstrat(args=None):
-    """
-
-    :param args:  (Default value = None)
-
-    """
+    """Args:
+    args: (Default value = None)"""
     args = parse_args(args)
 
     cerebro = bt.Cerebro()
@@ -178,11 +172,8 @@ def runstrat(args=None):
 
 
 def parse_args(pargs=None):
-    """
-
-    :param pargs:  (Default value = None)
-
-    """
+    """Args:
+    pargs: (Default value = None)"""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Sample Skeleton",

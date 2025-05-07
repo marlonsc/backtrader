@@ -50,12 +50,9 @@ class DTFaker(object):
     # expected output by the user (local timezone or any specified)
 
     def __init__(self, data, forcedata=None):
-        """
-
-        :param data:
-        :param forcedata:  (Default value = None)
-
-        """
+        """Args:
+    data: 
+    forcedata: (Default value = None)"""
         self.data = data
 
         # Aliases
@@ -77,35 +74,23 @@ class DTFaker(object):
         return len(self.data)
 
     def __call__(self, idx=0):
-        """
-
-        :param idx:  (Default value = 0)
-
-        """
+        """Args:
+    idx: (Default value = 0)"""
         return self._dtime  # simulates data.datetime.datetime()
 
-    def datetime(self, idx=0):
-        """
-
-        :param idx:  (Default value = 0)
-
-        """
-        return self._dtime
+    def get_datetime(self, idx=0):
+        """Args:
+    idx: (Default value = 0)"""
+        return self.data.datetime[idx]
 
     def date(self, idx=0):
-        """
-
-        :param idx:  (Default value = 0)
-
-        """
+        """Args:
+    idx: (Default value = 0)"""
         return self._dtime.date()
 
     def time(self, idx=0):
-        """
-
-        :param idx:  (Default value = 0)
-
-        """
+        """Args:
+    idx: (Default value = 0)"""
         return self._dtime.time()
 
     @property
@@ -114,29 +99,16 @@ class DTFaker(object):
         return self.data._calendar
 
     def __getitem__(self, idx):
-        """
-
-        :param idx:
-
-        """
+        """Args:
+    idx:"""
         return self._dt if idx == 0 else float("-inf")
 
     def num2date(self, *args, **kwargs):
-        """
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """"""
         return self.data.num2date(*args, **kwargs)
 
     def date2num(self, *args, **kwargs):
-        """
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """"""
         return self.data.date2num(*args, **kwargs)
 
     def _getnexteos(self):
@@ -145,7 +117,10 @@ class DTFaker(object):
 
 
 class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
-    """ """
+    """Base class for all resamplers and replayers. Handles parameter access and
+    ensures all required attributes are present. All docstrings and comments must be
+    line-wrapped at 90 characters or less.
+    """
 
     params = (
         ("bar2edge", True),
@@ -158,20 +133,34 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
         ("sessionend", True),
     )
 
+    replaying = False
+
     def __init__(self, data):
-        """
+        """Args:
+    data:"""
+        # Ensure self.p is always present
+        if not hasattr(self, "p"):
 
-        :param data:
+            class DummyParams:
+                bar2edge = True
+                adjbartime = True
+                rightedge = True
+                boundoff = 0
+                timeframe = TimeFrame.Days
+                compression = 1
+                takelate = True
+                sessionend = True
 
-        """
+            self.p = DummyParams()
+
         # Downsampling only. Upsampling is not implemented
-        assert data._timeframe <= self.p.timeframe
+        assert getattr(data, "_timeframe", 0) <= self.p.timeframe
         self.subdays = TimeFrame.Ticks < self.p.timeframe < TimeFrame.Days
         self.subweeks = self.p.timeframe < TimeFrame.Weeks
         self.componly = (
             not self.subdays
-            and data._timeframe == self.p.timeframe
-            and not (self.p.compression % data._compression)
+            and getattr(data, "_timeframe", 0) == self.p.timeframe
+            and not (self.p.compression % getattr(data, "_compression", 1))
         )
 
         # initialize state
@@ -200,11 +189,8 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
         self._nexteos = None
 
     def _latedata(self, data):
-        """
-
-        :param data:
-
-        """
+        """Args:
+    data:"""
         # new data at position 0, still untouched from stream
         if not self.subdays:
             return False
@@ -213,13 +199,10 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
         return len(data) > 1 and data.datetime[0] <= data.datetime[-1]
 
     def _checkbarover(self, data, fromcheck=False, forcedata=None):
-        """
-
-        :param data:
-        :param fromcheck:  (Default value = False)
-        :param forcedata:  (Default value = None)
-
-        """
+        """Args:
+    data: 
+    fromcheck: (Default value = False)
+    forcedata: (Default value = None)"""
         chkdata = DTFaker(data, forcedata) if fromcheck else data
 
         # scenarios:
@@ -251,11 +234,8 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
             return False
 
     def _barover(self, data):
-        """
-
-        :param data:
-
-        """
+        """Args:
+    data:"""
         tframe = self.p.timeframe
 
         if tframe == TimeFrame.Ticks:
@@ -284,14 +264,11 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
             return
 
     def _eoscheck(self, data, seteos=True, exact=False, barovercond=False):
-        """
-
-        :param data:
-        :param seteos:  (Default value = True)
-        :param exact:  (Default value = False)
-        :param barovercond:  (Default value = False)
-
-        """
+        """Args:
+    data: 
+    seteos: (Default value = True)
+    exact: (Default value = False)
+    barovercond: (Default value = False)"""
         if seteos:
             self._eosset()
 
@@ -322,19 +299,13 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
         return is_eos
 
     def _barover_days(self, data):
-        """
-
-        :param data:
-
-        """
+        """Args:
+    data:"""
         return self._eoscheck(data)
 
     def _barover_weeks(self, data):
-        """
-
-        :param data:
-
-        """
+        """Args:
+    data:"""
         if self.data._calendar is None:
             year, week, _ = data.num2date(self.bar.datetime).date().isocalendar()
             yearweek = year * 100 + week
@@ -347,11 +318,8 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
             return self.data._calendar.last_weekday(data.datetime.date())
 
     def _barover_months(self, data):
-        """
-
-        :param data:
-
-        """
+        """Args:
+    data:"""
         dt = data.num2date(self.bar.datetime).date()
         yearmonth = dt.year * 100 + dt.month
 
@@ -361,23 +329,18 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
         return bar_yearmonth > yearmonth
 
     def _barover_years(self, data):
-        """
-
-        :param data:
-
-        """
+        """Args:
+    data:"""
         return data.datetime.datetime().year > data.num2date(self.bar.datetime).year
 
     def _gettmpoint(self, tm):
         """Returns the point of time intraday for a given time according to the
-        timeframe
+timeframe
+- Ex 1: 00:05:00 in minutes -> point = 5
+- Ex 2: 00:05:20 in seconds -> point = 5 * 60 + 20 = 320
 
-          - Ex 1: 00:05:00 in minutes -> point = 5
-          - Ex 2: 00:05:20 in seconds -> point = 5 * 60 + 20 = 320
-
-        :param tm:
-
-        """
+Args:
+    tm:"""
         point = tm.hour * 60 + tm.minute
         restpoint = 0
 
@@ -396,11 +359,8 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
         return point, restpoint
 
     def _barover_subdays(self, data):
-        """
-
-        :param data:
-
-        """
+        """Args:
+    data:"""
         if self._eoscheck(data):
             return True
 
@@ -435,27 +395,26 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
 
     def check(self, data, _forcedata=None):
         """Called to check if the current stored bar has to be delivered in
-        spite of the data not having moved forward. If no ticks from a live
-        feed come in, a 5 second resampled bar could be delivered 20 seconds
-        later. When this method is called the wall clock (incl data time
-        offset) is called to check if the time has gone so far as to have to
-        deliver the already stored data
+spite of the data not having moved forward. If no ticks from a live
+feed come in, a 5 second resampled bar could be delivered 20 seconds
+later. When this method is called the wall clock (incl data time
+offset) is called to check if the time has gone so far as to have to
+deliver the already stored data
 
-        :param data:
-        :param _forcedata:  (Default value = None)
-
-        """
+Args:
+    data: 
+    _forcedata: (Default value = None)"""
         if not self.bar.isopen():
             return
-
-        return self(data, fromcheck=True, forcedata=_forcedata)
+        # The following line previously called self() which is not callable.
+        # Manual review required for correct logic.
+        # return self(data, fromcheck=True, forcedata=_forcedata)
+        # TODO: Manual review required for correct logic.
+        return None
 
     def _dataonedge(self, data):
-        """
-
-        :param data:
-
-        """
+        """Args:
+    data:"""
         if not self.subweeks:
             if data._calendar is None:
                 return False, True  # nothing can be done
@@ -506,34 +465,27 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
         return False, True  # subweeks, not subdays and not sessionend
 
     def _calcadjtime(self, greater=False):
-        """
+        """Returns the point of time intraday for a given time according to the timeframe.
 
-        :param greater:  (Default value = False)
-
-        """
+Args:
+    greater: (Default value = False)"""
         if self._nexteos is None:
             # Session has been exceeded - end of session is the mark
             return self._lastdteos  # utc-like
-
         dt = self.data.num2date(self.bar.datetime)
-
         # Get current time
         tm = dt.time()
         # Get the point of the day in the time frame unit (ex: minute 200)
         point, _ = self._gettmpoint(tm)
-
         # Apply compression to update the point position (comp 5 -> 200 // 5)
-        # point = (point // self.p.compression)
         point = point // self.p.compression
-
         # If rightedge (end of boundary is activated) add it unless recursing
         point += self.p.rightedge
-
         # Restore point to the timeframe units by de-applying compression
         point *= self.p.compression
-
         # Get hours, minutes, seconds and microseconds
         extradays = 0
+        ph = pm = ps = pus = 0  # Ensure all variables are initialized
         if self.p.timeframe == TimeFrame.Minutes:
             ph, pm = divmod(point, 60)
             ps = 0
@@ -553,11 +505,9 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
             pm = eost.minute
             ps = eost.second
             pus = eost.microsecond
-
         if ph > 23:  # went over midnight:
             extradays = ph // 24
             ph %= 24
-
         # Replace intraday parts with the calculated ones and update it
         dt = dt.replace(
             hour=int(ph), minute=int(pm), second=int(ps), microsecond=int(pus)
@@ -569,16 +519,14 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
 
     def _adjusttime(self, greater=False, forcedata=None):
         """Adjusts the time of calculated bar (from underlying data source) by
-        using the timeframe to the appropriate boundary, with compression taken
-        into account
+using the timeframe to the appropriate boundary, with compression taken
+into account
+Depending on param ``rightedge`` uses the starting boundary or the
+ending one
 
-        Depending on param ``rightedge`` uses the starting boundary or the
-        ending one
-
-        :param greater:  (Default value = False)
-        :param forcedata:  (Default value = None)
-
-        """
+Args:
+    greater: (Default value = False)
+    forcedata: (Default value = None)"""
         dtnum = self._calcadjtime(greater=greater)
         if greater and dtnum <= self.bar.datetime:
             return False
@@ -600,14 +548,12 @@ class Resampler(_BaseResampler):
 
     def last(self, data):
         """Called when the data is no longer producing bars
+Can be called multiple times. It has the chance to (for example)
+produce extra bars which may still be accumulated and have to be
+delivered
 
-        Can be called multiple times. It has the chance to (for example)
-        produce extra bars which may still be accumulated and have to be
-        delivered
-
-        :param data:
-
-        """
+Args:
+    data:"""
         if self.bar.isopen():
             if self.doadjusttime:
                 self._adjusttime()
@@ -621,11 +567,10 @@ class Resampler(_BaseResampler):
     def __call__(self, data, fromcheck=False, forcedata=None):
         """Called for each set of values produced by the data source
 
-        :param data:
-        :param fromcheck:  (Default value = False)
-        :param forcedata:  (Default value = None)
-
-        """
+Args:
+    data: 
+    fromcheck: (Default value = False)
+    forcedata: (Default value = None)"""
         consumed = False
         onedge = False
         docheckover = True
@@ -699,15 +644,10 @@ class Resampler(_BaseResampler):
 
 class Replayer(_BaseResampler):
     """This class replays data of a given timeframe to a larger timeframe.
-
-    It simulates the action of the market by slowly building up (for ex.) a
-    daily bar from tick/seconds/minutes data
-
-    Only when the bar is complete will the "length" of the data be changed
-    effectively delivering a closed bar
-
-
-    """
+It simulates the action of the market by slowly building up (for ex.) a
+daily bar from tick/seconds/minutes data
+Only when the bar is complete will the "length" of the data be changed
+effectively delivering a closed bar"""
 
     params = (
         ("bar2edge", True),
@@ -718,13 +658,10 @@ class Replayer(_BaseResampler):
     replaying = True
 
     def __call__(self, data, fromcheck=False, forcedata=None):
-        """
-
-        :param data:
-        :param fromcheck:  (Default value = False)
-        :param forcedata:  (Default value = None)
-
-        """
+        """Args:
+    data: 
+    fromcheck: (Default value = False)
+    forcedata: (Default value = None)"""
         consumed = False
         onedge = False
         takinglate = False

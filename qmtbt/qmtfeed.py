@@ -22,11 +22,10 @@ class MetaQMTFeed(DataBase.__class__):
     def __init__(cls, name, bases, dct):
         """Class has already been created ... register
 
-        :param name:
-        :param bases:
-        :param dct:
-
-        """
+Args:
+    name: 
+    bases: 
+    dct:"""
         # Initialize the class
         super(MetaQMTFeed, cls).__init__(name, bases, dct)
 
@@ -81,11 +80,7 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
     )
 
     def __init__(self, **kwargs):
-        """
-
-        :param **kwargs:
-
-        """
+        """"""
         self._timeframe = self.p.timeframe
         self._compression = 1
         self.store = kwargs["store"]
@@ -123,20 +118,14 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
             self.store._unsubscribe_live(self._seq)
 
     def _get_datetime(self, value):
-        """
-
-        :param value:
-
-        """
+        """Args:
+    value:"""
         dtime = datetime.datetime.fromtimestamp(value // 1000)
         return bt.date2num(dtime)
 
     def _load_current(self, current):
-        """
-
-        :param current:
-
-        """
+        """Args:
+    current:"""
         for key in current.keys():
             try:
                 value = current[key]
@@ -155,11 +144,8 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
         self.put_notification(int(random.randint(100000, 999999)))
 
     def _load(self, replace=False):
-        """
-
-        :param replace:  (Default value = False)
-
-        """
+        """Args:
+    replace: (Default value = False)"""
         if len(self._data) > 0:
             current = self._data.popleft()
 
@@ -177,12 +163,9 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
         return self.p.live
 
     def _format_datetime(self, dt, period="1d"):
-        """
-
-        :param dt:
-        :param period:  (Default value = "1d")
-
-        """
+        """Args:
+    dt: 
+    period: (Default value = "1d")"""
         if dt is None:
             return ""
         else:
@@ -193,19 +176,13 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
             return formatted_string
 
     def _append_data(self, item):
-        """
-
-        :param item:
-
-        """
+        """Args:
+    item:"""
         self._data.append(item)
 
     def _history_data(self, period):
-        """
-
-        :param period:
-
-        """
+        """Args:
+    period:"""
 
         start_time = self._format_datetime(self.p.fromdate, period)
         end_time = self._format_datetime(self.p.todate, period)
@@ -223,20 +200,14 @@ class QMTFeed(DataBase, metaclass=MetaQMTFeed):
             self._data.append(item)
 
     def _live_data(self, period):
-        """
-
-        :param period:
-
-        """
+        """Args:
+    period:"""
 
         start_time = self._format_datetime(self.p.fromdate, period)
 
         def on_data(datas):
-            """
-
-            :param datas:
-
-            """
+            """Args:
+    datas:"""
             for stock_code in datas:
                 print(stock_code, datas[stock_code])
                 # 遍历该股票的所有数据条目

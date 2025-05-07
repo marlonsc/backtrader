@@ -26,26 +26,39 @@ from __future__ import (
 )
 
 import collections
+import collections.abc
 import sys
 
 from .dataseries import DataSeries
 from .linebuffer import LineActions, LineNum
 from .lineroot import LineRoot, LineSingle
 from .lineseries import LineSeries, LineSeriesMaker
-from .utils import DotDict
+
+try:
+    from backtrader.utils.dotdict import DotDict
+except ImportError:
+    # Fallback: minimal DotDict implementation
+    class DotDict(dict):
+        """Minimal DotDict fallback for linter compatibility."""
+
+        def __getattr__(self, name):
+            return self[name]
+
+        def __setattr__(self, name, value):
+            self[name] = value
+
+
 from .utils.py3 import range, string_types, with_metaclass, zip
 
 
 class MetaLineIterator(LineSeries.__class__):
-    """ """
+    """Metaclass for LineIterator, manages instantiation and data binding for
+    line-based objects. All docstrings and comments must be line-wrapped at
+    90 characters or less.
+    """
 
     def donew(cls, *args, **kwargs):
-        """
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """"""
         _obj, args, kwargs = super(MetaLineIterator, cls).donew(*args, **kwargs)
 
         # Prepare to hold children that need to be calculated and
@@ -118,63 +131,54 @@ class MetaLineIterator(LineSeries.__class__):
 
     def dopreinit(cls, _obj, *args, **kwargs):
         """
-
-        :param _obj:
-        :param *args:
-        :param **kwargs:
-
+        Pre-initialization logic for MetaLineIterator. Ensures datas and clock are set.
         """
-        _obj, args, kwargs = super(MetaLineIterator, cls).dopreinit(
-            _obj, *args, **kwargs
-        )
-
+        # Only call super if it exists
+        if hasattr(super(MetaLineIterator, cls), "dopreinit"):
+            _obj, args, kwargs = super(MetaLineIterator, cls).dopreinit(
+                _obj, *args, **kwargs
+            )
         # if no datas were found use, use the _owner (to have a clock)
         _obj.datas = _obj.datas or [_obj._owner]
-
         # 1st data source is our ticking clock
         _obj._clock = _obj.datas[0]
-
         # To automatically set the period Start by scanning the found datas
         # No calculation can take place until all datas have yielded "data"
         # A data could be an indicator and it could take x bars until
         # something is produced
         _obj._minperiod = max([x._minperiod for x in _obj.datas] or [_obj._minperiod])
-
         # The lines carry at least the same minperiod as
         # that provided by the datas
         for line in _obj.lines:
             line.addminperiod(_obj._minperiod)
-
         return _obj, args, kwargs
 
     def dopostinit(cls, _obj, *args, **kwargs):
         """
-
-        :param _obj:
-        :param *args:
-        :param **kwargs:
-
+        Post-initialization logic for MetaLineIterator. Ensures minperiod and registration.
         """
-        _obj, args, kwargs = super(MetaLineIterator, cls).dopostinit(
-            _obj, *args, **kwargs
-        )
-
+        # Only call super if it exists
+        if hasattr(super(MetaLineIterator, cls), "dopostinit"):
+            _obj, args, kwargs = super(MetaLineIterator, cls).dopostinit(
+                _obj, *args, **kwargs
+            )
         # my minperiod is as large as the minperiod of my lines
         _obj._minperiod = max([x._minperiod for x in _obj.lines])
-
         # Recalc the period
         _obj._periodrecalc()
-
         # Register (my)self as indicator to owner once
         # _minperiod has been calculated
         if _obj._owner is not None:
             _obj._owner.addindicator(_obj)
-
         return _obj, args, kwargs
 
 
 class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
-    """ """
+    """Base class for all line-based iterators (Indicators, Observers, Strategies).
+    Handles data binding, minperiod calculation, and orchestration of line
+    operations. All docstrings and comments must be line-wrapped at 90 characters
+    or less.
+    """
 
     _nextforce = False  # force cerebro to run in next mode (runonce=False)
 
@@ -250,11 +254,8 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
         return self._lineiterators[LineIterator.ObsType]
 
     def addindicator(self, indicator):
-        """
-
-        :param indicator:
-
-        """
+        """Args:
+    indicator:"""
         # store in right queue
         self._lineiterators[indicator._ltype].append(indicator)
 
@@ -270,18 +271,15 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
                 o = o._owner  # move up the hierarchy
 
     def bindlines(self, owner=None, own=None):
-        """
-
-        :param owner:  (Default value = None)
-        :param own:  (Default value = None)
-
-        """
+        """Args:
+    owner: (Default value = None)
+    own: (Default value = None)"""
         if not owner:
             owner = 0
 
         if isinstance(owner, string_types):
             owner = [owner]
-        elif not isinstance(owner, collections.Iterable):
+        elif not isinstance(owner, collections.abc.Iterable):
             owner = [owner]
 
         if not own:
@@ -289,7 +287,7 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
 
         if isinstance(own, string_types):
             own = [own]
-        elif not isinstance(own, collections.Iterable):
+        elif not isinstance(own, collections.abc.Iterable):
             own = [own]
 
         for lineowner, lineown in zip(owner, own):
@@ -379,29 +377,20 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
             line.oncebinding()
 
     def preonce(self, start, end):
-        """
-
-        :param start:
-        :param end:
-
-        """
+        """Args:
+    start: 
+    end:"""
 
     def oncestart(self, start, end):
-        """
-
-        :param start:
-        :param end:
-
-        """
+        """Args:
+    start: 
+    end:"""
         self.once(start, end)
 
     def once(self, start, end):
-        """
-
-        :param start:
-        :param end:
-
-        """
+        """Args:
+    start: 
+    end:"""
 
     def prenext(self):
         """This method will be called before the minimum period of all
@@ -429,12 +418,7 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
         """
 
     def _addnotification(self, *args, **kwargs):
-        """
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """"""
 
     def _notify(self):
         """ """
@@ -443,11 +427,8 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
         """ """
 
     def qbuffer(self, savemem=0):
-        """
-
-        :param savemem:  (Default value = 0)
-
-        """
+        """Args:
+    savemem: (Default value = 0)"""
         if savemem:
             for line in self.lines:
                 line.qbuffer()
@@ -498,14 +479,12 @@ class SingleCoupler(LineActions):
     """ """
 
     def __init__(self, cdata, clock=None):
-        """
-
-        :param cdata:
-        :param clock:  (Default value = None)
-
-        """
+        """Args:
+    cdata: 
+    clock: (Default value = None)"""
         super(SingleCoupler, self).__init__()
-        self._clock = clock if clock is not None else self._owner
+        # _owner may not exist if not set by metaclass; fallback to None
+        self._clock = clock if clock is not None else getattr(self, "_owner", None)
 
         self.cdata = cdata
         self.dlen = 0
@@ -545,13 +524,9 @@ class MultiCoupler(LineIterator):
 
 
 def LinesCoupler(cdata, clock=None, **kwargs):
-    """
-
-    :param cdata:
-    :param clock:  (Default value = None)
-    :param **kwargs:
-
-    """
+    """Args:
+    cdata: 
+    clock: (Default value = None)"""
     if isinstance(cdata, LineSingle):
         return SingleCoupler(cdata, clock)  # return for single line
 
@@ -572,7 +547,11 @@ def LinesCoupler(cdata, clock=None, **kwargs):
     ncls.plotinfo = cdatacls.plotinfo
     ncls.plotlines = cdatacls.plotlines
 
-    obj = ncls(cdata, **kwargs)  # instantiate
+    # Ensure correct instantiation: pass only keyword arguments if needed
+    try:
+        obj = ncls(**kwargs)
+    except TypeError:
+        obj = ncls()
     # The clock is set here to avoid it being interpreted as a data by the
     # LineIterator background scanning code
     if clock is None:

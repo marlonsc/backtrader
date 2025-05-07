@@ -1,0 +1,5 @@
+freezegun
+matplotlib
+pytest
+pytest-timeout
+pandas_market_calendars

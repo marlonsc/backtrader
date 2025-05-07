@@ -36,21 +36,15 @@ class MetaRollOver(bt.DataBase.__class__):
     def __init__(cls, name, bases, dct):
         """Class has already been created ... register
 
-        :param name:
-        :param bases:
-        :param dct:
-
-        """
+Args:
+    name:
+    bases:
+    dct:"""
         # Initialize the class
         super(MetaRollOver, cls).__init__(name, bases, dct)
 
     def donew(cls, *args, **kwargs):
-        """Intercept const. to copy timeframe/compression from 1st data
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Intercept const. to copy timeframe/compression from 1st data"""
         # Create the object and set the params in place
         _obj, args, kwargs = super(MetaRollOver, cls).donew(*args, **kwargs)
 
@@ -64,39 +58,8 @@ class MetaRollOver(bt.DataBase.__class__):
 class RollOver(bt.with_metaclass(MetaRollOver, bt.DataBase)):
     """Class that rolls over to the next future when a condition is met
 
-
-    :returns: place.
-
-            - ``False``: the expiration cannot take place
-
-        - ``checkcondition`` (default: ``None``)
-
-          **Note**: This will only be called if ``checkdate`` has returned
-          ``True``
-
-          If ``None`` this will evaluate to ``True`` (execute roll over)
-          internally
-
-          Else this must be a *callable* with this signature::
-
-            checkcondition(d0, d1)
-
-          Where:
-
-            - ``d0`` is the current data feed for the active future
-            - ``d1`` is the data feed for the next expiration
-
-          Expected Return Values:
-
-            - ``True``: roll-over to the next future
-
-        Following with the example from ``checkdate``, this could say that the
-        roll-over can only happend if the *volume* from ``d0`` is already less
-        than the volume from ``d1``
-
-            - ``False``: the expiration cannot take place
-
-    """
+Returns:
+    place."""
 
     params = (
         # ('rolls', []),  # array of futures to roll over
@@ -113,11 +76,7 @@ class RollOver(bt.with_metaclass(MetaRollOver, bt.DataBase)):
         return True
 
     def __init__(self, *args):
-        """
-
-        :param *args:
-
-        """
+        """"""
         self._rolls = args
 
     def start(self):
@@ -147,27 +106,21 @@ class RollOver(bt.with_metaclass(MetaRollOver, bt.DataBase)):
         """
         if self._rolls:
             return self._rolls[0]._gettz()
-        return bt.utils.date.Localizer(self.p.tz)
+        return bt.utils.date.localizer(self.p.tz)
 
     def _checkdate(self, dt, d):
-        """
-
-        :param dt:
-        :param d:
-
-        """
+        """Args:
+    dt:
+    d:"""
         if self.p.checkdate is not None:
             return self.p.checkdate(dt, d)
 
         return False
 
     def _checkcondition(self, d0, d1):
-        """
-
-        :param d0:
-        :param d1:
-
-        """
+        """Args:
+    d0:
+    d1:"""
         if self.p.checkcondition is not None:
             return self.p.checkcondition(d0, d1)
 

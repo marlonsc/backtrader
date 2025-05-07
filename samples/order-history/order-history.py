@@ -67,11 +67,8 @@ class SmaCross(bt.SignalStrategy):
     params = dict(sma1=10, sma2=20)
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if not order.alive():
             print(
                 ",".join(
@@ -85,11 +82,8 @@ class SmaCross(bt.SignalStrategy):
             )
 
     def notify_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
+        """Args:
+    trade:"""
         if trade.isclosed:
             print("profit {}".format(trade.pnlcomm))
 
@@ -108,11 +102,8 @@ class St(bt.Strategy):
     params = dict()
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if not order.alive():
             print(
                 ",".join(
@@ -126,11 +117,8 @@ class St(bt.Strategy):
             )
 
     def notify_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
+        """Args:
+    trade:"""
         if trade.isclosed:
             print("profit {}".format(trade.pnlcomm))
 
@@ -143,11 +131,8 @@ class St(bt.Strategy):
 
 
 def runstrat(args=None):
-    """
-
-    :param args:  (Default value = None)
-
-    """
+    """Args:
+    args: (Default value = None)"""
     args = parse_args(args)
 
     cerebro = bt.Cerebro()
@@ -190,11 +175,8 @@ def runstrat(args=None):
 
 
 def parse_args(pargs=None):
-    """
-
-    :param pargs:  (Default value = None)
-
-    """
+    """Args:
+    pargs: (Default value = None)"""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Order History Sample",

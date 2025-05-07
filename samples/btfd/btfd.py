@@ -128,11 +128,8 @@ class St(bt.Strategy):
             print(",".join(["DATA", "Action", "Date", "Price", "PctDown"]))
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status in [order.Margin, order.Rejected, order.Canceled]:
             print("ORDER FAILED with status:", order.getstatusname())
         elif order.status == order.Completed:
@@ -156,11 +153,8 @@ class St(bt.Strategy):
                 )
 
     def notify_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
+        """Args:
+    trade:"""
         if not self.p.prtrade:
             return
 
@@ -199,11 +193,8 @@ class St(bt.Strategy):
 
 
 def runstrat(args=None):
-    """
-
-    :param args:  (Default value = None)
-
-    """
+    """Args:
+    args: (Default value = None)"""
     args = parse_args(args)
 
     cerebro = bt.Cerebro()
@@ -245,11 +236,8 @@ def runstrat(args=None):
 
 
 def parse_args(pargs=None):
-    """
-
-    :param pargs:  (Default value = None)
-
-    """
+    """Args:
+    pargs: (Default value = None)"""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description=" - ".join(

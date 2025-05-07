@@ -48,11 +48,10 @@ class MetaIBData(DataBase.__class__):
     def __init__(cls, name, bases, dct):
         """Class has already been created ... register
 
-        :param name:
-        :param bases:
-        :param dct:
-
-        """
+Args:
+    name:
+    bases:
+    dct:"""
         # Initialize the class
         super(MetaIBData, cls).__init__(name, bases, dct)
 
@@ -63,48 +62,37 @@ class MetaIBData(DataBase.__class__):
 
 class IBData(with_metaclass(MetaIBData, DataBase)):
     """Interactive Brokers Data Feed.
-
-    Supports the following contract specifications in parameter ``dataname``:
-
-    Pattern: secType-others
-        BONDS & CFDs & CommoditiesCopy & CryptocurrencyCopy & Continuous Futures *
-        Forex Pairs & IndicesCopy & Mutual Funds & STK & Standard Warrants:
-            secType-symbol-currency-exchange-primaryExchange(only for STK)
-            BOND-912828C57-USD-SMART
-            CFD-IBDE30-EUR-SMART
-            CMDTY-XAUUSD-USD-SMART
-            CRYPTO-ETH-USD-PAXOS
-            CONTFUT-ES-USD-CME
-            CASH-EUR-GBP-IDEALPRO
-            IND-DAX-EUR-EUREX
-            FUND-VINIX-USD-FUNDSERV
-            STK-AAPL-USD-SMART
-            STK-SPY-USD-SMART-ARCA
-            STK-EMCGU-USD-SMART #Stock Contract with IPO price
-            IOPT-B881G-EUR-SBF
-
-
-
-        Contracts specified by CUSIP, FIGI, or ISIN
-            secIdType-secId-exchange
-            FIGI-BBG000B9XRY4-SMART
-
-        Futures
-            secType-symbol-currency-exchange-lastTradeDateOrContractMonth-multiplier-IncludeExpired
-            FUT-ES-USD-CME-'202809'-50-False
-            FUT-ES-USD-CME-'202309'-None-True
-
-        Futures Options
-            secType-symbol-currency-exchange-lastTradeDateOrContractMonth-multiplier-strike-right
-            FOP-GBL-EUR-EUREX-'20230224'-'1000'-138-C
-
-        Options & Dutch Warrants and Structured Products
-            secType-symbol-currency-exchange-lastTradeDateOronth-multiplier-strike-right
-            OPT-GOOG-USD-BOX-'20190315'-'100'-1180-C
-            WAR-GOOG-EUR-FWB-20201117-'001'-15000-C
-
-
-    """
+Supports the following contract specifications in parameter ``dataname``:
+Pattern: secType-others
+BONDS & CFDs & CommoditiesCopy & CryptocurrencyCopy & Continuous Futures *
+Forex Pairs & IndicesCopy & Mutual Funds & STK & Standard Warrants:
+secType-symbol-currency-exchange-primaryExchange(only for STK)
+BOND-912828C57-USD-SMART
+CFD-IBDE30-EUR-SMART
+CMDTY-XAUUSD-USD-SMART
+CRYPTO-ETH-USD-PAXOS
+CONTFUT-ES-USD-CME
+CASH-EUR-GBP-IDEALPRO
+IND-DAX-EUR-EUREX
+FUND-VINIX-USD-FUNDSERV
+STK-AAPL-USD-SMART
+STK-SPY-USD-SMART-ARCA
+STK-EMCGU-USD-SMART #Stock Contract with IPO price
+IOPT-B881G-EUR-SBF
+Contracts specified by CUSIP, FIGI, or ISIN
+secIdType-secId-exchange
+FIGI-BBG000B9XRY4-SMART
+Futures
+secType-symbol-currency-exchange-lastTradeDateOrContractMonth-multiplier-IncludeExpired
+FUT-ES-USD-CME-'202809'-50-False
+FUT-ES-USD-CME-'202309'-None-True
+Futures Options
+secType-symbol-currency-exchange-lastTradeDateOrContractMonth-multiplier-strike-right
+FOP-GBL-EUR-EUREX-'20230224'-'1000'-138-C
+Options & Dutch Warrants and Structured Products
+secType-symbol-currency-exchange-lastTradeDateOronth-multiplier-strike-right
+OPT-GOOG-USD-BOX-'20190315'-'100'-1180-C
+WAR-GOOG-EUR-FWB-20201117-'001'-15000-C"""
 
     params = (
         ("secType", "STK"),  # usual industry value
@@ -202,7 +190,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         # documented and one of the abbreviations may fail
         tzstr = isinstance(self.p.tz, string_types)
         if self.p.tz is not None and not tzstr:
-            return bt.utils.date.Localizer(self.p.tz)
+            return bt.utils.date.localizer(self.p.tz)
 
         if self.contractdetails is None:
             return None  # nothing can be done
@@ -234,11 +222,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         return not self.p.historical
 
     def __init__(self, **kwargs):
-        """
-
-        :param **kwargs:
-
-        """
+        """"""
         self.ib = self._store(**kwargs)
         self.precontract = self.parsecontract(self.p.dataname)
         self.pretradecontract = self.parsecontract(self.p.tradename)
@@ -276,11 +260,10 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
 
     def setenvironment(self, env):
         """Receives an environment (cerebro) and passes it over to the store it
-        belongs to
+belongs to
 
-        :param env:
-
-        """
+Args:
+    env:"""
         super(IBData, self).setenvironment(env)
         env.addstore(self.ib)
 
@@ -306,45 +289,37 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
 
     def parsecontract(self, dataname):
         """Parses dataname generates a default contract
+Pattern: secType-others
+BONDS & CFDs & CommoditiesCopy & CryptocurrencyCopy & Continuous Futures *
+Forex Pairs & IndicesCopy & Mutual Funds & STK & Standard Warrants:
+secType-symbol-currency-exchange-primaryExchange(only for STK)
+BOND-122014AJ2-USD-SMART    #EndData=datetime(2024, 5, 16) / ''
+CFD-IBUS30-USD-SMART    #EndData=datetime(2014, 12, 31) / ''
+CMDTY-XAUUSD-USD-SMART  #EndData=datetime(2024, 5, 16) / ''
+CRYPTO-ETH-USD-PAXOS    #EndData=datetime(2024, 5, 16) / ''
+CONTFUT-ES-USD-CME  #'', Not supoort EndData
+CASH-EUR-GBP-IDEALPRO   #EndData=datetime(2024, 5, 16) / ''
+IND-DAX-EUR-EUREX   #EndData=datetime(2014, 12, 31) / '', not support bid/ask
+FUND-VWELX-USD-FUNDSERV #EndData=datetime(2014, 12, 31) / '', only support trades
+STK-AAPL-USD-SMART  #EndData=datetime(2014, 12, 31) / ''
+STK-SPY-USD-SMART-ARCA  #EndData=datetime(2014, 12, 31) / ''
+STK-EMCGU-USD-SMART #Stock Contract with IPO price  #EndData=datetime(2024, 5, 16) / ''
+IOPT-B881G-EUR-SBF #Not Found suitable example for IOPT
+Contracts specified by CUSIP, FIGI, or ISIN
+secIdType-secId-exchange
+FIGI-BBG000B9XRY4-SMART
+Futures
+secType-symbol-currency-exchange-lastTradeDateOrContractMonth-multiplier-IncludeExpired
+FUT-ES-USD-CME-202809-50-False  #EndData=datetime(2024, 5, 16) / ''
+FUT-ES-USD-CME-202309-None-True #not supported
+Futures Options
+secType-symbol-currency-exchange-lastTradeDateOrContractMonth-multiplier-strike-right
+FOP-GBL-EUR-EUREX-'20230224'-'1000'-138-C
+OPT-GOOG-USD-SMART-20241220-100-180-C #EndData=datetime(2024, 10, 16) / '' 1M 1hour
+WAR-GOOG-EUR-FWB-20201117-001-15000-C
 
-        Pattern: secType-others
-
-        BONDS & CFDs & CommoditiesCopy & CryptocurrencyCopy & Continuous Futures *
-        Forex Pairs & IndicesCopy & Mutual Funds & STK & Standard Warrants:
-            secType-symbol-currency-exchange-primaryExchange(only for STK)
-            BOND-122014AJ2-USD-SMART    #EndData=datetime(2024, 5, 16) / ''
-            CFD-IBUS30-USD-SMART    #EndData=datetime(2014, 12, 31) / ''
-            CMDTY-XAUUSD-USD-SMART  #EndData=datetime(2024, 5, 16) / ''
-            CRYPTO-ETH-USD-PAXOS    #EndData=datetime(2024, 5, 16) / ''
-            CONTFUT-ES-USD-CME  #'', Not supoort EndData
-            CASH-EUR-GBP-IDEALPRO   #EndData=datetime(2024, 5, 16) / ''
-            IND-DAX-EUR-EUREX   #EndData=datetime(2014, 12, 31) / '', not support bid/ask
-            FUND-VWELX-USD-FUNDSERV #EndData=datetime(2014, 12, 31) / '', only support trades
-            STK-AAPL-USD-SMART  #EndData=datetime(2014, 12, 31) / ''
-            STK-SPY-USD-SMART-ARCA  #EndData=datetime(2014, 12, 31) / ''
-            STK-EMCGU-USD-SMART #Stock Contract with IPO price  #EndData=datetime(2024, 5, 16) / ''
-            IOPT-B881G-EUR-SBF #Not Found suitable example for IOPT
-
-
-
-        Contracts specified by CUSIP, FIGI, or ISIN
-            secIdType-secId-exchange
-            FIGI-BBG000B9XRY4-SMART
-
-        Futures
-            secType-symbol-currency-exchange-lastTradeDateOrContractMonth-multiplier-IncludeExpired
-            FUT-ES-USD-CME-202809-50-False  #EndData=datetime(2024, 5, 16) / ''
-            FUT-ES-USD-CME-202309-None-True #not supported
-
-        Futures Options
-            secType-symbol-currency-exchange-lastTradeDateOrContractMonth-multiplier-strike-right
-            FOP-GBL-EUR-EUREX-'20230224'-'1000'-138-C
-            OPT-GOOG-USD-SMART-20241220-100-180-C #EndData=datetime(2024, 10, 16) / '' 1M 1hour
-            WAR-GOOG-EUR-FWB-20201117-001-15000-C
-
-        :param dataname:
-
-        """
+Args:
+    dataname:"""
 
         # Set defaults for optional tokens in the ticker string
         if dataname is None:
@@ -400,11 +375,8 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         return precon
 
     def updatecomminfo(self, contract=None):
-        """
-
-        :param contract:  (Default value = None)
-
-        """
+        """Args:
+    contract: (Default value = None)"""
 
         broker = self.ib.getbroker()
         commparams = dict()
@@ -537,25 +509,19 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         return bool(self._storedmsg or self.qlive)
 
     def updatelivedata(self, step=0, bars=None, hist=True):
-        """
-
-        :param step:  (Default value = 0)
-        :param bars:  (Default value = None)
-        :param hist:  (Default value = True)
-
-        """
+        """Args:
+    step: (Default value = 0)
+    bars: (Default value = None)
+    hist: (Default value = True)"""
         for bar in bars:
             len(self.lines.close)
             self.forward()
             self._load_rtbar(bar, hist=hist)
 
     def onliveupdate(self, bars, hasNewBar):
-        """
-
-        :param bars:
-        :param hasNewBar:
-
-        """
+        """Args:
+    bars:
+    hasNewBar:"""
         # 对于hisorical数据，bars保存reqhistoricaEnd开始的所有数据
         # bars长度为0，表示未接收到update数据
         # bars最后一个数据为临时数据，5秒更新一次，保存最新收到的update数据，只有当timeframe时间到了才后固定
@@ -862,12 +828,9 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         return True  # no return before - implicit continue
 
     def _load_rtbar(self, rtbar, hist=False):
-        """
-
-        :param rtbar:
-        :param hist:  (Default value = False)
-
-        """
+        """Args:
+    rtbar:
+    hist: (Default value = False)"""
         # A complete 5 second bar made of real-time ticks is delivered and
         # contains open/high/low/close/volume prices
         # The historical data has the same data but with 'date' instead of
@@ -892,11 +855,8 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         return True
 
     def _load_rtvolume(self, rtvol):
-        """
-
-        :param rtvol:
-
-        """
+        """Args:
+    rtvol:"""
         # A single tick is delivered and is therefore used for the entire set
         # of prices. Ideally the
         # contains open/high/low/close/volume prices
@@ -919,12 +879,9 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         return True
 
     def _load_rtticks(self, tick, hist=False):
-        """
-
-        :param tick:
-        :param hist:  (Default value = False)
-
-        """
+        """Args:
+    tick:
+    hist: (Default value = False)"""
 
         dt = date2num(tick.datetime if not hist else tick.date)
         if dt < self.lines.datetime[-1] and not self.p.latethrough:

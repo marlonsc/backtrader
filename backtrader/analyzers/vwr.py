@@ -36,23 +36,13 @@ from . import Returns
 
 class VWR(TimeFrameAnalyzerBase):
     """Variability-Weighted Return: Better SharpeRatio with Log Returns
+Alias:
+- VariabilityWeightedReturn
+See:
+- https://www.crystalbull.com/sharpe-ratio-better-with-log-returns/
 
-    Alias:
-
-      - VariabilityWeightedReturn
-
-    See:
-
-      - https://www.crystalbull.com/sharpe-ratio-better-with-log-returns/
-
-
-    :returns: each return as keys
-
-        The returned dict contains the following keys:
-
-          - ``vwr``: Variability-Weighted Return
-
-    """
+Returns:
+    each return as keys"""
 
     params = (
         ("timeframe", bt.TimeFrame.Days),  # Default to Days
@@ -162,14 +152,11 @@ class VWR(TimeFrameAnalyzerBase):
         self.rets["sdev_sortino"] = sdev_sortino
 
     def notify_fund(self, cash, value, fundvalue, shares):
-        """
-
-        :param cash:
-        :param value:
-        :param fundvalue:
-        :param shares:
-
-        """
+        """Args:
+    cash: 
+    value: 
+    fundvalue: 
+    shares:"""
         if not self._fundmode:
             self._pns[-1] = value  # Annotate last seen pn for current period
         else:

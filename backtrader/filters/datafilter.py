@@ -30,20 +30,13 @@ import backtrader as bt
 
 class DataFilter(bt.AbstractDataBase):
     """This class filters out bars from a given data source. In addition to the
-    standard parameters of a DataBase it takes a ``funcfilter`` parameter which
-    can be any callable
-
-    Logic:
-
-      - ``funcfilter`` will be called with the underlying data source
-
-        It can be any callable
-
-        - Return value ``True``: current data source bar values will used
-        - Return value ``False``: current data source bar values will discarded
-
-
-    """
+standard parameters of a DataBase it takes a ``funcfilter`` parameter which
+can be any callable
+Logic:
+- ``funcfilter`` will be called with the underlying data source
+It can be any callable
+- Return value ``True``: current data source bar values will used
+- Return value ``False``: current data source bar values will discarded"""
 
     params = (("funcfilter", None),)
 

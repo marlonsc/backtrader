@@ -18,16 +18,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-"""
-
-.. module:: lineroot
-
+""".. module:: lineroot
 Definition of the base class LineRoot and base classes LineSingle/LineMultiple
 to define interfaces and hierarchy for the real operational classes
-
-.. moduleauthor:: Daniel Rodriguez
-
-"""
+.. moduleauthor:: Daniel Rodriguez"""
 
 from __future__ import (
     absolute_import,
@@ -43,19 +37,13 @@ from .utils.py3 import range, with_metaclass
 
 
 class MetaLineRoot(metabase.MetaParams):
-    """Once the object is created (effectively pre-init) the "owner" of this
-    class is sought
-
-
+    """Metaclass for LineRoot. Handles owner resolution and pre-init logic for
+    line root objects. All docstrings and comments must be line-wrapped at
+    90 characters or less.
     """
 
     def donew(cls, *args, **kwargs):
-        """
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """"""
         _obj, args, kwargs = super(MetaLineRoot, cls).donew(*args, **kwargs)
 
         # Find the owner and store it
@@ -70,15 +58,10 @@ class MetaLineRoot(metabase.MetaParams):
 
 
 class LineRoot(with_metaclass(MetaLineRoot, object)):
-    """Defines a common base and interfaces for Single and Multiple
-    LineXXX instances
-
-        Period management
-        Iteration management
-        Operation (dual/single operand) Management
-        Rich Comparison operator definition
-
-
+    """Defines a common base and interfaces for Single and Multiple LineXXX instances.
+    Handles period management, iteration, and rich operator overloading for line
+    objects. All docstrings and comments must be line-wrapped at 90 characters or
+    less.
     """
 
     _OwnerCls = None
@@ -96,25 +79,19 @@ class LineRoot(with_metaclass(MetaLineRoot, object)):
         self._opstage = 2
 
     def _operation(self, other, operation, r=False, intify=False):
-        """
-
-        :param other:
-        :param operation:
-        :param r:  (Default value = False)
-        :param intify:  (Default value = False)
-
-        """
+        """Args:
+    other: 
+    operation: 
+    r: (Default value = False)
+    intify: (Default value = False)"""
         if self._opstage == 1:
             return self._operation_stage1(other, operation, r=r, intify=intify)
 
         return self._operation_stage2(other, operation, r=r)
 
     def _operationown(self, operation):
-        """
-
-        :param operation:
-
-        """
+        """Args:
+    operation:"""
         if self._opstage == 1:
             return self._operationown_stage1(operation)
 
@@ -123,53 +100,47 @@ class LineRoot(with_metaclass(MetaLineRoot, object)):
     def qbuffer(self, savemem=0):
         """Change the lines to implement a minimum size qbuffer scheme
 
-        :param savemem:  (Default value = 0)
-
-        """
+Args:
+    savemem: (Default value = 0)"""
         raise NotImplementedError
 
     def minbuffer(self, size):
         """Receive notification of how large the buffer must at least be
 
-        :param size:
-
-        """
+Args:
+    size:"""
         raise NotImplementedError
 
     def setminperiod(self, minperiod):
         """Direct minperiod manipulation. It could be used for example
-        by a strategy
-        to not wait for all indicators to produce a value
+by a strategy
+to not wait for all indicators to produce a value
 
-        :param minperiod:
-
-        """
+Args:
+    minperiod:"""
         self._minperiod = minperiod
 
     def updateminperiod(self, minperiod):
         """Update the minperiod if needed. The minperiod will have been
-        calculated elsewhere
-        and has to take over if greater that self's
+calculated elsewhere
+and has to take over if greater that self's
 
-        :param minperiod:
-
-        """
+Args:
+    minperiod:"""
         self._minperiod = max(self._minperiod, minperiod)
 
     def addminperiod(self, minperiod):
         """Add a minperiod to own ... to be defined by subclasses
 
-        :param minperiod:
-
-        """
+Args:
+    minperiod:"""
         raise NotImplementedError
 
     def incminperiod(self, minperiod):
         """Increment the minperiod with no considerations
 
-        :param minperiod:
-
-        """
+Args:
+    minperiod:"""
         raise NotImplementedError
 
     def prenext(self):
@@ -190,81 +161,68 @@ class LineRoot(with_metaclass(MetaLineRoot, object)):
     def preonce(self, start, end):
         """It will be called during the "minperiod" phase of a "once" iteration
 
-        :param start:
-        :param end:
-
-        """
+Args:
+    start: 
+    end:"""
 
     def oncestart(self, start, end):
         """It will be called when the minperiod phase is over for the 1st
-        post-minperiod value
+post-minperiod value
+Only called once and defaults to automatically calling once
 
-        Only called once and defaults to automatically calling once
-
-        :param start:
-        :param end:
-
-        """
+Args:
+    start: 
+    end:"""
         self.once(start, end)
 
     def once(self, start, end):
         """Called to calculate values at "once" when the minperiod is over
 
-        :param start:
-        :param end:
-
-        """
+Args:
+    start: 
+    end:"""
 
     # Arithmetic operators
     def _makeoperation(self, other, operation, r=False, _ownerskip=None):
-        """
-
-        :param other:
-        :param operation:
-        :param r:  (Default value = False)
-        :param _ownerskip:  (Default value = None)
-
-        """
+        """Args:
+    other: 
+    operation: 
+    r: (Default value = False)
+    _ownerskip: (Default value = None)"""
         raise NotImplementedError
 
     def _makeoperationown(self, operation, _ownerskip=None):
-        """
-
-        :param operation:
-        :param _ownerskip:  (Default value = None)
-
-        """
+        """Args:
+    operation: 
+    _ownerskip: (Default value = None)"""
         raise NotImplementedError
 
     def _operationown_stage1(self, operation):
         """Operation with single operand which is "self"
 
-        :param operation:
-
-        """
+Args:
+    operation:"""
         return self._makeoperationown(operation, _ownerskip=self)
 
     def _roperation(self, other, operation, intify=False):
         """Relies on self._operation to and passes "r" True to define a
-        reverse operation
+reverse operation
 
-        :param other:
-        :param operation:
-        :param intify:  (Default value = False)
-
-        """
+Args:
+    other: 
+    operation: 
+    intify: (Default value = False)"""
         return self._operation(other, operation, r=True, intify=intify)
 
     def _operation_stage1(self, other, operation, r=False, intify=False):
         """Two operands' operation. Scanning of other happens to understand
-        if other must be directly an operand or rather a subitem thereof
+if other must be directly an operand or rather a subitem thereof
 
-        :param other:
-        :param operation:
-        :param r:  (Default value = False)
-        :param intify:  (Default value = False)
-
-        """
+Args:
+    other: 
+    operation: 
+    r: (Default value = False)
+    intify: (Default value = False)"""
         if isinstance(other, LineMultiple):
             other = other.lines[0]
 
@@ -272,13 +230,12 @@ class LineRoot(with_metaclass(MetaLineRoot, object)):
 
     def _operation_stage2(self, other, operation, r=False):
         """Rich Comparison operators. Scans other and returns either an
-        operation with other directly or a subitem from other
+operation with other directly or a subitem from other
 
-        :param other:
-        :param operation:
-        :param r:  (Default value = False)
-
-        """
+Args:
+    other: 
+    operation: 
+    r: (Default value = False)"""
         if isinstance(other, LineRoot):
             other = other[0]
 
@@ -289,123 +246,80 @@ class LineRoot(with_metaclass(MetaLineRoot, object)):
         return operation(self[0], other)
 
     def _operationown_stage2(self, operation):
-        """
-
-        :param operation:
-
-        """
+        """Args:
+    operation:"""
         return operation(self[0])
 
     def __add__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return self._operation(other, operator.__add__)
 
     def __radd__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return self._roperation(other, operator.__add__)
 
     def __sub__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return self._operation(other, operator.__sub__)
 
     def __rsub__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return self._roperation(other, operator.__sub__)
 
     def __mul__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return self._operation(other, operator.__mul__)
 
     def __rmul__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return self._roperation(other, operator.__mul__)
 
     def __div__(self, other):
-        """
-
-        :param other:
-
-        """
-        return self._operation(other, operator.__div__)
+        """Args:
+    other:"""
+        # Python 3: use truediv
+        return self._operation(other, operator.truediv)
 
     def __rdiv__(self, other):
-        """
-
-        :param other:
-
-        """
-        return self._roperation(other, operator.__div__)
+        """Args:
+    other:"""
+        # Python 3: use truediv
+        return self._roperation(other, operator.truediv)
 
     def __floordiv__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return self._operation(other, operator.__floordiv__)
 
     def __rfloordiv__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return self._roperation(other, operator.__floordiv__)
 
     def __truediv__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return self._operation(other, operator.__truediv__)
 
     def __rtruediv__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return self._roperation(other, operator.__truediv__)
 
     def __pow__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return self._operation(other, operator.__pow__)
 
     def __rpow__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return self._roperation(other, operator.__pow__)
 
     def __abs__(self):
@@ -417,51 +331,33 @@ class LineRoot(with_metaclass(MetaLineRoot, object)):
         return self._operationown(operator.__neg__)
 
     def __lt__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return self._operation(other, operator.__lt__)
 
     def __gt__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return self._operation(other, operator.__gt__)
 
     def __le__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return self._operation(other, operator.__le__)
 
     def __ge__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return self._operation(other, operator.__ge__)
 
     def __eq__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return self._operation(other, operator.__eq__)
 
     def __ne__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return self._operation(other, operator.__ne__)
 
     def __nonzero__(self):
@@ -476,99 +372,103 @@ class LineRoot(with_metaclass(MetaLineRoot, object)):
 
 
 class LineMultiple(LineRoot):
-    """Base class for LineXXX instances that hold more than one line"""
+    """Represents multiple time series lines. All docstrings and comments must be
+    line-wrapped at 90 characters or less.
+    """
 
     def reset(self):
-        """ """
+        """
+        Reset all lines in this LineMultiple instance.
+        """
+        lines = getattr(self, "lines", None)
+        if lines is not None:
+            lines.reset()
         self._stage1()
-        self.lines.reset()
 
     def _stage1(self):
-        """ """
-        super(LineMultiple, self)._stage1()
-        for line in self.lines:
-            line._stage1()
+        """
+        Set stage 1 for all lines in this LineMultiple instance.
+        """
+        lines = getattr(self, "lines", None)
+        if lines is not None:
+            lines._stage1()
+        self._opstage = 1
 
     def _stage2(self):
-        """ """
-        super(LineMultiple, self)._stage2()
-        for line in self.lines:
-            line._stage2()
+        """
+        Set stage 2 for all lines in this LineMultiple instance.
+        """
+        lines = getattr(self, "lines", None)
+        if lines is not None:
+            lines._stage2()
+        self._opstage = 2
 
     def addminperiod(self, minperiod):
-        """The passed minperiod is fed to the lines
-
-        :param minperiod:
-
         """
-        # pass it down to the lines
-        for line in self.lines:
-            line.addminperiod(minperiod)
+        Add minperiod to all lines in this LineMultiple instance.
+        """
+        lines = getattr(self, "lines", None)
+        if lines is not None:
+            lines.addminperiod(minperiod)
 
     def incminperiod(self, minperiod):
-        """The passed minperiod is fed to the lines
-
-        :param minperiod:
-
         """
-        # pass it down to the lines
-        for line in self.lines:
-            line.incminperiod(minperiod)
+        Increment minperiod for all lines in this LineMultiple instance.
+        """
+        lines = getattr(self, "lines", None)
+        if lines is not None:
+            lines.incminperiod(minperiod)
 
     def _makeoperation(self, other, operation, r=False, _ownerskip=None):
         """
-
-        :param other:
-        :param operation:
-        :param r:  (Default value = False)
-        :param _ownerskip:  (Default value = None)
-
+        Make operation for all lines in this LineMultiple instance.
         """
-        return self.lines[0]._makeoperation(other, operation, r, _ownerskip)
+        lines = getattr(self, "lines", None)
+        if lines is not None:
+            return lines._makeoperation(other, operation, r, _ownerskip)
+        raise AttributeError("No 'lines' attribute in LineMultiple instance")
 
     def _makeoperationown(self, operation, _ownerskip=None):
         """
-
-        :param operation:
-        :param _ownerskip:  (Default value = None)
-
+        Make own operation for all lines in this LineMultiple instance.
         """
-        return self.lines[0]._makeoperationown(operation, _ownerskip)
+        lines = getattr(self, "lines", None)
+        if lines is not None:
+            return lines._makeoperationown(operation, _ownerskip)
+        raise AttributeError("No 'lines' attribute in LineMultiple instance")
 
     def qbuffer(self, savemem=0):
         """
-
-        :param savemem:  (Default value = 0)
-
+        Enable memory saving scheme for all lines in this LineMultiple instance.
         """
-        for line in self.lines:
-            line.qbuffer(savemem=1)
+        lines = getattr(self, "lines", None)
+        if lines is not None:
+            lines.qbuffer(savemem)
 
     def minbuffer(self, size):
         """
-
-        :param size:
-
+        Set minimum buffer size for all lines in this LineMultiple instance.
         """
-        for line in self.lines:
-            line.minbuffer(size)
+        lines = getattr(self, "lines", None)
+        if lines is not None:
+            lines.minbuffer(size)
 
 
 class LineSingle(LineRoot):
-    """Base class for LineXXX instances that hold a single line"""
+    """Represents a single time series line. All docstrings and comments must be
+    line-wrapped at 90 characters or less.
+    """
 
     def addminperiod(self, minperiod):
         """Add the minperiod (substracting the overlapping 1 minimum period)
 
-        :param minperiod:
-
-        """
+Args:
+    minperiod:"""
         self._minperiod += minperiod - 1
 
     def incminperiod(self, minperiod):
         """Increment the minperiod with no considerations
 
-        :param minperiod:
-
-        """
+Args:
+    minperiod:"""
         self._minperiod += minperiod

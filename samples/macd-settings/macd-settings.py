@@ -39,14 +39,11 @@ class FixedPerc(bt.Sizer):
     params = (("perc", 0.20),)  # perc of cash to use for operation
 
     def _getsizing(self, comminfo, cash, data, isbuy):
-        """
-
-        :param comminfo:
-        :param cash:
-        :param data:
-        :param isbuy:
-
-        """
+        """Args:
+    comminfo: 
+    cash: 
+    data: 
+    isbuy:"""
         cashtouse = self.p.perc * cash
         if BTVERSION > (1, 7, 1, 93):
             size = comminfo.getsize(data.close[0], cashtouse)
@@ -57,24 +54,17 @@ class FixedPerc(bt.Sizer):
 
 class TheStrategy(bt.Strategy):
     """This strategy is loosely based on some of the examples from the Van
-    K. Tharp book: *Trade Your Way To Financial Freedom*. The logic:
-
-      - Enter the market if:
-        - The MACD.macd line crosses the MACD.signal line to the upside
-        - The Simple Moving Average has a negative direction in the last x
-          periods (actual value below value x periods ago)
-
-     - Set a stop price x times the ATR value away from the close
-
-     - If in the market:
-
-       - Check if the current close has gone below the stop price. If yes,
-         exit.
-       - If not, update the stop price if the new stop price would be higher
-         than the current
-
-
-    """
+K. Tharp book: *Trade Your Way To Financial Freedom*. The logic:
+- Enter the market if:
+- The MACD.macd line crosses the MACD.signal line to the upside
+- The Simple Moving Average has a negative direction in the last x
+periods (actual value below value x periods ago)
+- Set a stop price x times the ATR value away from the close
+- If in the market:
+- Check if the current close has gone below the stop price. If yes,
+exit.
+- If not, update the stop price if the new stop price would be higher
+than the current"""
 
     params = (
         # Standard MACD Parameters
@@ -88,11 +78,8 @@ class TheStrategy(bt.Strategy):
     )
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status == order.Completed:
             pass
 
@@ -153,11 +140,8 @@ DATASETS = {
 
 
 def runstrat(args=None):
-    """
-
-    :param args:  (Default value = None)
-
-    """
+    """Args:
+    args: (Default value = None)"""
     args = parse_args(args)
 
     cerebro = bt.Cerebro()
@@ -238,11 +222,8 @@ def runstrat(args=None):
 
 
 def parse_args(pargs=None):
-    """
-
-    :param pargs:  (Default value = None)
-
-    """
+    """Args:
+    pargs: (Default value = None)"""
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

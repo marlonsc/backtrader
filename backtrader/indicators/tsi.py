@@ -32,25 +32,19 @@ from . import EMA
 
 class TrueStrengthIndicator(bt.Indicator):
     """The True Strength Indicators was first introduced in Stocks & Commodities
-    Magazine by its author William Blau. It measures momentum with a double
-    exponential (default) of the prices.
-
-    It shows divergence if the extremes keep on growign but closing prices
-    do not in the same manner (distance to the extremes grow)
-
-    Formula:
-      - price_change = close - close(pchange periods ago)
-      - sm1_simple = EMA(price_close_change, period1)
-      - sm1_double = EMA(sm1_simple, period2)
-      - sm2_simple = EMA(abs(price_close_change), period1)
-      - sm2_double = EMA(sm2_simple, period2)
-      - tsi = 100.0 * sm1_double / sm2_double
-
-    See:
-      - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:true_strength_index
-
-
-    """
+Magazine by its author William Blau. It measures momentum with a double
+exponential (default) of the prices.
+It shows divergence if the extremes keep on growign but closing prices
+do not in the same manner (distance to the extremes grow)
+Formula:
+- price_change = close - close(pchange periods ago)
+- sm1_simple = EMA(price_close_change, period1)
+- sm1_double = EMA(sm1_simple, period2)
+- sm2_simple = EMA(abs(price_close_change), period1)
+- sm2_double = EMA(sm2_simple, period2)
+- tsi = 100.0 * sm1_double / sm2_double
+See:
+- http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:true_strength_index"""
 
     alias = ("TSI",)
     params = (

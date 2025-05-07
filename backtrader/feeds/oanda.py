@@ -42,11 +42,10 @@ class MetaOandaData(DataBase.__class__):
     def __init__(cls, name, bases, dct):
         """Class has already been created ... register
 
-        :param name:
-        :param bases:
-        :param dct:
-
-        """
+Args:
+    name: 
+    bases: 
+    dct:"""
         # Initialize the class
         super(MetaOandaData, cls).__init__(name, bases, dct)
 
@@ -92,21 +91,16 @@ class OandaData(with_metaclass(MetaOandaData, DataBase)):
         return True
 
     def __init__(self, **kwargs):
-        """
-
-        :param **kwargs:
-
-        """
+        """"""
         self.o = self._store(**kwargs)
         self._candleFormat = "bidask" if self.p.bidask else "midpoint"
 
     def setenvironment(self, env):
         """Receives an environment (cerebro) and passes it over to the store it
-        belongs to
+belongs to
 
-        :param env:
-
-        """
+Args:
+    env:"""
         super(OandaData, self).setenvironment(env)
         env.addstore(self.o)
 
@@ -151,12 +145,9 @@ class OandaData(with_metaclass(MetaOandaData, DataBase)):
         self._reconns = 0
 
     def _st_start(self, instart=True, tmout=None):
-        """
-
-        :param instart:  (Default value = True)
-        :param tmout:  (Default value = None)
-
-        """
+        """Args:
+    instart: (Default value = True)
+    tmout: (Default value = None)"""
         if self.p.historical:
             self.put_notification(self.DELAYED)
             dtend = None
@@ -349,11 +340,8 @@ class OandaData(with_metaclass(MetaOandaData, DataBase)):
                     return False
 
     def _load_tick(self, msg):
-        """
-
-        :param msg:
-
-        """
+        """Args:
+    msg:"""
         dtobj = datetime.utcfromtimestamp(int(msg["time"]) / 10**6)
         dt = date2num(dtobj)
         if dt <= self.lines.datetime[-1]:
@@ -376,11 +364,8 @@ class OandaData(with_metaclass(MetaOandaData, DataBase)):
         return True
 
     def _load_history(self, msg):
-        """
-
-        :param msg:
-
-        """
+        """Args:
+    msg:"""
         dtobj = datetime.utcfromtimestamp(int(msg["time"]) / 10**6)
         dt = date2num(dtobj)
         if dt <= self.lines.datetime[-1]:

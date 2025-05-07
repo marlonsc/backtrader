@@ -1,8 +1,14 @@
 #!/usr/bin/env python
+"""Internal date utilities.
+
+This module contains internal date utilities that are used throughout the
+backtrader project.
+"""
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2024 Daniel Rodriguez
+# Copyright (c) 2025 backtrader contributors
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,6 +34,9 @@ from __future__ import (
 import datetime
 import math
 import time as _time
+import types
+
+import pytz
 
 from .py3 import string_types
 
@@ -47,24 +56,29 @@ TIME_MAX = datetime.time(23, 59, 59, 999990)
 # To avoid rounding errors taking dates to next day
 TIME_MIN = datetime.time.min
 
+HOURS_PER_DAY = 24.0
+MINUTES_PER_HOUR = 60.0
+SECONDS_PER_MINUTE = 60.0
+MUSECONDS_PER_SECOND = 1e6
+MINUTES_PER_DAY = MINUTES_PER_HOUR * HOURS_PER_DAY
+SECONDS_PER_DAY = SECONDS_PER_MINUTE * MINUTES_PER_DAY
+MUSECONDS_PER_DAY = MUSECONDS_PER_SECOND * SECONDS_PER_DAY
 
 def tzparse(tz):
-    """
+    """Parse a timezone string.
 
-    :param tz:
+    Args:
+        tz: The timezone to parse.
 
+    Returns:
+        datetime.tzinfo: The parsed timezone.
     """
     # If no object has been provided by the user and a timezone can be
     # found via contractdtails, then try to get it from pytz, which may or
     # may not be available.
     tzstr = isinstance(tz, string_types)
     if tz is None or not tzstr:
-        return Localizer(tz)
-
-    try:
-        import pytz  # keep the import very local
-    except ImportError:
-        return Localizer(tz)  # nothing can be done
+        return localizer(tz)
 
     tzs = tz
     if tzs == "CST":  # usual alias
@@ -73,25 +87,24 @@ def tzparse(tz):
     try:
         tz = pytz.timezone(tzs)
     except pytz.UnknownTimeZoneError:
-        return Localizer(tz)  # nothing can be done
+        return localizer(tz)  # nothing can be done
 
     return tz
 
 
-def Localizer(tz):
-    """
+def localizer(tz):
+    """Localize a datetime object to a specific timezone.
 
-    :param tz:
+    Args:
+        tz: The timezone to localize the datetime object to.
 
+    Returns:
+        datetime: The localized datetime object.
     """
-    import types
 
     def localize(self, dt):
-        """
-
-        :param dt:
-
-        """
+        """Args:
+    dt:"""
         return dt.replace(tzinfo=self)
 
     if tz is not None and not hasattr(tz, "localize"):
@@ -103,37 +116,46 @@ def Localizer(tz):
 
 # A UTC class, same as the one in the Python Docs
 class _UTC(datetime.tzinfo):
-    """UTC"""
+    """UTC timezone."""
 
     def utcoffset(self, dt):
         """
+        Args:
+            dt: The datetime object to get the UTC offset for.
 
-        :param dt:
-
+        Returns:
+            datetime.timedelta: The UTC offset.
         """
         return ZERO
 
     def tzname(self, dt):
         """
+        Args:
+            dt: The datetime object to get the timezone name for.
 
-        :param dt:
-
+        Returns:
+            str: The timezone name.
         """
         return "UTC"
 
     def dst(self, dt):
         """
+        Args:
+            dt: The datetime object to get the DST offset for.
 
-        :param dt:
-
+        Returns:
+            datetime.timedelta: The DST offset.
         """
         return ZERO
 
     def localize(self, dt):
-        """
+        """Localize a datetime object to the UTC timezone.
 
-        :param dt:
+        Args:
+            dt: The datetime object to localize.
 
+        Returns:
+            datetime: The localized datetime object.
         """
         return dt.replace(tzinfo=self)
 
@@ -142,10 +164,13 @@ class _LocalTimezone(datetime.tzinfo):
     """ """
 
     def utcoffset(self, dt):
-        """
+        """Get the UTC offset for a datetime object.
 
-        :param dt:
+        Args:
+            dt: The datetime object to get the UTC offset for.
 
+        Returns:
+            datetime.timedelta: The UTC offset.
         """
         if self._isdst(dt):
             return DSTOFFSET
@@ -153,10 +178,13 @@ class _LocalTimezone(datetime.tzinfo):
             return STDOFFSET
 
     def dst(self, dt):
-        """
+        """Get the DST offset for a datetime object.
 
-        :param dt:
+        Args:
+            dt: The datetime object to get the DST offset for.
 
+        Returns:
+            datetime.timedelta: The DST offset.
         """
         if self._isdst(dt):
             return DSTDIFF
@@ -164,18 +192,24 @@ class _LocalTimezone(datetime.tzinfo):
             return ZERO
 
     def tzname(self, dt):
-        """
+        """Get the timezone name for a datetime object.
 
-        :param dt:
+        Args:
+            dt: The datetime object to get the timezone name for.
 
+        Returns:
+            str: The timezone name.
         """
         return _time.tzname[self._isdst(dt)]
 
     def _isdst(self, dt):
-        """
+        """Check if a datetime object is in daylight saving time.
 
-        :param dt:
+        Args:
+            dt: The datetime object to check.
 
+        Returns:
+            bool: True if the datetime object is in daylight saving time, False otherwise.
         """
         tt = (
             dt.year,
@@ -197,10 +231,13 @@ class _LocalTimezone(datetime.tzinfo):
         return tt.tm_isdst > 0
 
     def localize(self, dt):
-        """
+        """Localize a datetime object to the local timezone.
 
-        :param dt:
+        Args:
+            dt: The datetime object to localize.
 
+        Returns:
+            datetime: The localized datetime object.
         """
         return dt.replace(tzinfo=self)
 
@@ -208,37 +245,33 @@ class _LocalTimezone(datetime.tzinfo):
 UTC = _UTC()
 TZLocal = _LocalTimezone()
 
-HOURS_PER_DAY = 24.0
-MINUTES_PER_HOUR = 60.0
-SECONDS_PER_MINUTE = 60.0
-MUSECONDS_PER_SECOND = 1e6
-MINUTES_PER_DAY = MINUTES_PER_HOUR * HOURS_PER_DAY
-SECONDS_PER_DAY = SECONDS_PER_MINUTE * MINUTES_PER_DAY
-MUSECONDS_PER_DAY = MUSECONDS_PER_SECOND * SECONDS_PER_DAY
-
-
 def num2date(x, tz=None, naive=True):
-    """
+    """Convert a float to a datetime object.
 
-    :param x:
-    :param tz:  (Default value = None)
-    :param naive:  (Default value = True)
-
-    """
-    # Same as matplotlib except if tz is None a naive datetime object
-    # will be returned.
-    """
     *x* is a float value which gives the number of days
     (fraction part represents hours, minutes, seconds) since
     0001-01-01 00:00:00 UTC *plus* *one*.
+
     The addition of one here is a historical artifact.  Also, note
     that the Gregorian calendar is assumed; this is not universal
-    practice.  For details, see the module docstring.
+    practice.
+
+    For details, see the module docstring.
     Return value is a :class:`datetime` instance in timezone *tz* (default to
     rcparams TZ value).
+
     If *x* is a sequence, a sequence of :class:`datetime` objects will
     be returned.
-    """
+
+    Args:
+        x: The float to convert.
+        tz: The timezone to convert the float to.
+        naive: Whether to return a naive datetime object.
+
+    Returns:
+        x:
+        tz: (Default value = None)
+        naive: (Default value = True)"""
 
     ix = int(x)
     dt = datetime.datetime.fromordinal(ix)
@@ -283,24 +316,32 @@ def num2date(x, tz=None, naive=True):
 
 
 def num2dt(num, tz=None, naive=True):
-    """
+    """Convert a float to a datetime object.
 
-    :param num:
-    :param tz:  (Default value = None)
-    :param naive:  (Default value = True)
+    Args:
+        num: The float to convert.
+        tz: The timezone to convert the float to.
+        naive: Whether to return a naive datetime object.
 
-    """
+    Returns:
+        num:
+        tz: (Default value = None)
+        naive: (Default value = True)"""
     return num2date(num, tz=tz, naive=naive).date()
 
 
 def num2time(num, tz=None, naive=True):
-    """
+    """Convert a float to a time object.
 
-    :param num:
-    :param tz:  (Default value = None)
-    :param naive:  (Default value = True)
+    Args:
+        num: The float to convert.
+        tz: The timezone to convert the float to.
+        naive: Whether to return a naive time object.
 
-    """
+    Returns:
+        num:
+        tz: (Default value = None)
+        naive: (Default value = True)"""
     return num2date(num, tz=tz, naive=naive).time()
 
 
@@ -309,10 +350,9 @@ def date2num(dt, tz=None):
     preserving hours, minutes, seconds and microseconds.  Return value
     is a :func:`float`.
 
-    :param dt:
-    :param tz:  (Default value = None)
-
-    """
+    Args:
+        dt:
+        tz: (Default value = None)"""
     if tz is not None:
         dt = tz.localize(dt)
 
@@ -345,9 +385,8 @@ def time2num(tm):
     """Converts the hour/minute/second/microsecond part of tm (datetime.datetime
     or time) to a num
 
-    :param tm:
-
-    """
+    Args:
+        tm:"""
     num = (
         tm.hour / HOURS_PER_DAY
         + tm.minute / MINUTES_PER_DAY

@@ -45,12 +45,8 @@ from backtrader.analyzers import (
 
 class LongShortStrategy(bt.Strategy):
     """This strategy buys/sells upong the close price crossing
-    upwards/downwards a Simple Moving Average.
-
-    It can be a long-only strategy by setting the param "onlylong" to True
-
-
-    """
+upwards/downwards a Simple Moving Average.
+It can be a long-only strategy by setting the param "onlylong" to True"""
 
     params = dict(
         period=15,
@@ -67,12 +63,9 @@ class LongShortStrategy(bt.Strategy):
         """ """
 
     def log(self, txt, dt=None):
-        """
-
-        :param txt:
-        :param dt:  (Default value = None)
-
-        """
+        """Args:
+    txt: 
+    dt: (Default value = None)"""
         if self.p.printout:
             dt = dt or self.data.datetime[0]
             dt = bt.num2date(dt)
@@ -112,11 +105,8 @@ class LongShortStrategy(bt.Strategy):
                 self.sell(size=self.p.stake)
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status in [bt.Order.Submitted, bt.Order.Accepted]:
             return  # Await further notifications
 
@@ -136,11 +126,8 @@ class LongShortStrategy(bt.Strategy):
         self.orderid = None
 
     def notify_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
+        """Args:
+    trade:"""
         if trade.isclosed:
             self.log("TRADE PROFIT, GROSS %.2f, NET %.2f" % (trade.pnl, trade.pnlcomm))
 

@@ -1,22 +1,33 @@
+# Copyright (c) 2025 backtrader contributors
+"""
+CUSUM grid search CLI for dynamic spread trading using Backtrader. This module
+performs parameter optimization for a pair trading strategy with CUSUM logic and
+built-in analyzers.
+"""
+
 import argparse
 import datetime
 
 import backtrader as bt
 import numpy as np
 import pandas as pd
+from backtrader.feeds import PandasData
+from backtrader.analyzers.sharpe import SharpeRatio
+from backtrader.analyzers.drawdown import DrawDown
+from backtrader.analyzers.returns import Returns
+from backtrader.analyzers.roi import ROIAnalyzer
+from backtrader.analyzers.tradeanalyzer import TradeAnalyzer
 
 
 def calculate_rolling_spread(
-    df0: pd.DataFrame,  # 必含 'date' 与价格列
+    df0: pd.DataFrame,  # Must contain 'date' and price columns
     df1: pd.DataFrame,
     window: int = 30,
     fields=("open", "high", "low", "close"),
 ) -> pd.DataFrame:
-    """
-    计算滚动 β，并为指定价格字段生成价差 (spread)：
-        spread_x = price0_x - β_{t-1} * price1_x
-    """
-    # 1) 用收盘价对齐合并（β 仍用 close 估计）
+    """Calculate rolling β and generate spread for specified price fields:
+spread_x = price0_x - β_{t-1} * price1_x"""
+    # 1) Align and merge using close price (β is still estimated with close)
     df = (
         df0.set_index("date")[["close"]]
         .rename(columns={"close": "close0"})
@@ -26,21 +37,21 @@ def calculate_rolling_spread(
         )
     )
 
-    # 2) 估计 β_t ，再向前挪一天
+    # 2) Estimate β_t, then shift one day forward
     beta_raw = (
         df["close0"].rolling(window).cov(df["close1"])
         / df["close1"].rolling(window).var()
     )
-    beta_shift = beta_raw.shift(1).round(1)  # 防未来 + 保留 1 位小数
+    beta_shift = beta_raw.shift(1).round(1)  # Prevent lookahead + keep 1 decimal
 
-    # 3) 把 β 拼回主表（便于后面 vectorized 计算）
+    # 3) Merge β back to main table (for vectorized calculation)
     df = df.assign(beta=beta_shift)
 
-    # 4) 对每个字段算 spread
+    # 4) Calculate spread for each field
     out_cols = {"date": df.index, "beta": beta_shift}
     for f in fields:
         if f not in ("open", "high", "low", "close"):
-            raise ValueError(f"未知字段 {f}")
+            raise ValueError(f"Unknown field {f}")
         p0 = df0.set_index("date")[f]
         p1 = df1.set_index("date")[f]
         aligned = p0.to_frame(name=f"price0_{f}").join(
@@ -49,47 +60,47 @@ def calculate_rolling_spread(
         spread_f = aligned[f"price0_{f}"] - beta_shift * aligned[f"price1_{f}"]
         out_cols[f"{f}"] = spread_f
 
-    # 5) 整理输出
+    # 5) Organize output
     out = pd.DataFrame(out_cols).dropna().reset_index(drop=True)
     out["date"] = pd.to_datetime(out["date"])
     return out
 
 
-# 创建自定义数据类以支持beta列
-class SpreadData(bt.feeds.PandasData):
-    lines = ("beta",)  # 添加beta线
+# Custom data class to support beta column
+class SpreadData(PandasData):
+    lines = ("beta",)  # Add beta line
 
     params = (
-        ("datetime", "date"),  # 日期列
-        ("close", "close"),  # 价差列作为close
-        ("beta", "beta"),  # beta列
-        ("nocase", True),  # 列名不区分大小写
+        ("datetime", "date"),  # Date column
+        ("close", "close"),  # Spread column as close
+        ("beta", "beta"),  # Beta column
+        ("nocase", True),  # Column names are case-insensitive
     )
 
 
 class DynamicSpreadCUSUMStrategy(bt.Strategy):
     params = (
-        ("win", 20),  # rolling 窗口
+        ("win", 20),  # rolling window
         ("k_coeff", 0.5),  # κ = k_coeff * σ
         ("h_coeff", 5.0),  # h = h_coeff * σ
-        ("verbose", False),  # 是否打印详细信息
+        ("verbose", False),  # Whether to print detailed info
     )
 
     def __init__(self):
-        # 保存两条累积和
+        # Store two cumulative sums
         self.g_pos, self.g_neg = 0.0, 0.0  # CUSUM state
-        # 方便读取最近 win 根价差
+        # For easy access to the last win spreads
         self.spread_series = self.data2.close
 
-    # ---------- 交易辅助（沿用原有逻辑） ----------
+    # ---------- Trading helpers (same logic as before) ----------
     def _open_position(self, short):
         if not hasattr(self, "size0"):
             self.size0 = 10
             self.size1 = round(self.data2.beta[0] * 10)
-        if short:  # 做空价差
+        if short:  # Short the spread
             self.sell(data=self.data0, size=self.size0)
             self.buy(data=self.data1, size=self.size1)
-        else:  # 做多价差
+        else:  # Long the spread
             self.buy(data=self.data0, size=self.size0)
             self.sell(data=self.data1, size=self.size1)
 
@@ -97,14 +108,14 @@ class DynamicSpreadCUSUMStrategy(bt.Strategy):
         self.close(data=self.data0)
         self.close(data=self.data1)
 
-    # ---------- 主循环 ----------
+    # ---------- Main loop ----------
     def next(self):
-        # 1) 确保有足够历史用于 σ 估计
+        # 1) Ensure enough history for σ estimation
         if len(self.spread_series) < self.p.win + 2:
             return
 
-        # 2) 取"上一 bar"结束时的 rolling σ，避免未来函数
-        hist = self.spread_series.get(size=self.p.win + 1)[:-1]  # 不含当根
+        # 2) Use rolling σ at the end of the previous bar to avoid lookahead
+        hist = self.spread_series.get(size=self.p.win + 1)[:-1]  # Exclude current
         sigma = np.std(hist, ddof=1)
         if np.isnan(sigma) or sigma == 0:
             return
@@ -113,29 +124,29 @@ class DynamicSpreadCUSUMStrategy(bt.Strategy):
         h = self.p.h_coeff * sigma
         s_t = self.spread_series[0]
 
-        # 3) 更新正/负累积和
+        # 3) Update positive/negative cumulative sums
         self.g_pos = max(0, self.g_pos + s_t - kappa)
         self.g_neg = max(0, self.g_neg - s_t - kappa)
 
         position_size = self.getposition(self.data0).size
 
-        # 4) 开仓逻辑——当 g 超过 h
+        # 4) Open position logic—when g exceeds h
         if position_size == 0:
-            # 计算动态配比（与原来一致）
+            # Calculate dynamic ratio (same as before)
             beta_now = self.data2.beta[0]
             if pd.isna(beta_now) or beta_now <= 0:
                 return
             self.size0 = 10
             self.size1 = round(beta_now * 10)
 
-            if self.g_pos > h:  # 价差持续走高 → 做空价差
+            if self.g_pos > h:  # Spread keeps rising → short the spread
                 self._open_position(short=True)
-                self.g_pos = self.g_neg = 0  # 归零累积和
-            elif self.g_neg > h:  # 价差持续走低 → 做多价差
+                self.g_pos = self.g_neg = 0  # Reset cumulative sums
+            elif self.g_neg > h:  # Spread keeps falling → long the spread
                 self._open_position(short=False)
                 self.g_pos = self.g_neg = 0
         else:
-            # 5) 平仓逻辑——价差回到 0 附近
+            # 5) Close position logic—spread returns near 0
             if position_size > 0 and abs(s_t) < kappa:
                 self._close_positions()
             elif position_size < 0 and abs(s_t) < kappa:
@@ -147,24 +158,15 @@ class DynamicSpreadCUSUMStrategy(bt.Strategy):
 
         if trade.isclosed:
             print(
-                "TRADE %s CLOSED %s, PROFIT: GROSS %.2f, NET %.2f, PRICE %d"
-                % (
-                    trade.ref,
-                    bt.num2date(trade.dtclose),
-                    trade.pnl,
-                    trade.pnlcomm,
-                    trade.value,
-                )
+                f"TRADE {trade.ref} CLOSED, PROFIT: GROSS {trade.pnl:.2f}, NET {
+                    trade.pnlcomm:.2f
+                }, PRICE {trade.value}"
             )
         elif trade.justopened:
             print(
-                "TRADE %s OPENED %s  , SIZE %2d, PRICE %d "
-                % (
-                    trade.ref,
-                    bt.num2date(trade.dtopen),
-                    trade.size,
-                    trade.value,
-                )
+                f"TRADE {trade.ref} OPENED {trade.dtopen}, SIZE {trade.size}, PRICE {
+                    trade.value
+                }"
             )
 
 
@@ -178,14 +180,11 @@ def run_strategy(
     spread_window=60,
     initial_cash=100000,
 ):
-    """运行单次回测"""
-    # 创建回测引擎
-    cerebro = bt.Cerebro(stdstats=False)
+    """Run a single backtest iteration."""
+    cerebro = bt.Cerebro()
     cerebro.adddata(data0, name="data0")
     cerebro.adddata(data1, name="data1")
     cerebro.adddata(data2, name="spread")
-
-    # 添加策略
     cerebro.addstrategy(
         DynamicSpreadCUSUMStrategy,
         win=win,
@@ -193,24 +192,13 @@ def run_strategy(
         h_coeff=h_coeff,
         verbose=False,
     )
-
-    # 设置初始资金
     cerebro.broker.setcash(initial_cash)
     cerebro.broker.set_shortcash(False)
-
-    # 添加分析器
-    cerebro.addanalyzer(
-        bt.analyzers.SharpeRatio,
-        timeframe=bt.TimeFrame.Days,
-        riskfreerate=0,
-        annualize=True,
-    )
-    cerebro.addanalyzer(bt.analyzers.DrawDown)
-    cerebro.addanalyzer(bt.analyzers.Returns)
-    cerebro.addanalyzer(bt.analyzers.ROIAnalyzer, period=bt.TimeFrame.Days)
-    cerebro.addanalyzer(bt.analyzers.TradeAnalyzer)
-
-    # 运行回测
+    cerebro.addanalyzer(SharpeRatio, timeframe=bt.TimeFrame.Days, riskfreerate=0, annualize=True)
+    cerebro.addanalyzer(DrawDown)
+    cerebro.addanalyzer(Returns)
+    cerebro.addanalyzer(ROIAnalyzer, period=bt.TimeFrame.Days)
+    cerebro.addanalyzer(TradeAnalyzer)
     results = cerebro.run()
 
     # 获取分析结果
@@ -218,7 +206,7 @@ def run_strategy(
     sharpe = strat.analyzers.sharperatio.get_analysis().get("sharperatio", 0)
     drawdown = strat.analyzers.drawdown.get_analysis().get("max", {}).get("drawdown", 0)
     returns = strat.analyzers.returns.get_analysis().get("rnorm100", 0)
-    roi = strat.analyzers.roianalyzer.get_analysis().get("roi100", 0)
+    roi = strat.analyzers.tradeanalyzer.get_analysis().get("roi", 0)
     trades = strat.analyzers.tradeanalyzer.get_analysis()
 
     # 获取交易统计
@@ -256,18 +244,18 @@ def grid_search(
     spread_windows=None,
     initial_cash=100000,
 ):
-    """执行网格搜索找到最优参数"""
+    """Perform grid search to find the best parameters."""
     data_file = "D:\\FutureData\\ricequant\\1d_2017to2024_noadjust.h5"
-    # 读取数据
-    print(f"从 {data_file} 读取 {contract1} 和 {contract2} 数据...")
+    # Read data
+    print(f"Reading {contract1} and {contract2} from {data_file} ...")
     df0 = pd.read_hdf(data_file, key=contract1).reset_index()
     df1 = pd.read_hdf(data_file, key=contract2).reset_index()
 
-    # 确保日期列格式正确
+    # Ensure date column format is correct
     df0["date"] = pd.to_datetime(df0["date"])
     df1["date"] = pd.to_datetime(df1["date"])
 
-    # 设置回测日期范围
+    # Set backtest date range
     if fromdate_str:
         fromdate = datetime.datetime.strptime(fromdate_str, "%Y-%m-%d")
     else:
@@ -279,11 +267,11 @@ def grid_search(
         todate = datetime.datetime(2025, 1, 1)
 
     print(
-        f"回测日期范围: {fromdate.strftime('%Y-%m-%d')} 至"
+        f"Backtest date range: {fromdate.strftime('%Y-%m-%d')} to"
         f" {todate.strftime('%Y-%m-%d')}"
     )
 
-    # 使用默认值或自定义参数值
+    # Use default or custom parameter values
     if win_values is None:
         win_values = [15, 20, 30]
     if k_coeff_values is None:
@@ -293,35 +281,23 @@ def grid_search(
     if spread_windows is None:
         spread_windows = [20, 30, 60]
 
-    print("网格搜索参数:")
-    print(f"  窗口大小(win): {win_values}")
-    print(f"  k系数(k_coeff): {k_coeff_values}")
-    print(f"  h系数(h_coeff): {h_coeff_values}")
-    print(f"  价差窗口(spread_window): {spread_windows}")
+    print("Grid search parameters:")
+    print(f"  Window size (win): {win_values}")
+    print(f"  k coefficient (k_coeff): {k_coeff_values}")
+    print(f"  h coefficient (h_coeff): {h_coeff_values}")
+    print(f"  Spread window (spread_window): {spread_windows}")
 
-    # 生成参数组合
+    # Generate parameter combinations
     param_combinations = []
     for spread_window in spread_windows:
-        # 计算当前窗口下的滚动价差
-        print(f"计算滚动价差 (window={spread_window})...")
+        # Calculate rolling spread for current window
+        print(f"Calculating rolling spread (window={spread_window}) ...")
         df_spread = calculate_rolling_spread(df0, df1, window=spread_window)
 
-        # 添加数据
-        data0 = bt.feeds.PandasData(
-            dataname=df0,
-            datetime="date",
-            nocase=True,
-            fromdate=fromdate,
-            todate=todate,
-        )
-        data1 = bt.feeds.PandasData(
-            dataname=df1,
-            datetime="date",
-            nocase=True,
-            fromdate=fromdate,
-            todate=todate,
-        )
-        data2 = SpreadData(dataname=df_spread, fromdate=fromdate, todate=todate)
+        # Add data
+        data0 = PandasData(dataname=df0)
+        data1 = PandasData(dataname=df1)
+        data2 = SpreadData(dataname=df_spread)
 
         for win in win_values:
             for k_coeff in k_coeff_values:
@@ -338,11 +314,11 @@ def grid_search(
                         )
                     )
 
-    # 执行网格搜索
+    # Perform grid search
     results = []
     total_combinations = len(param_combinations)
 
-    print(f"开始网格搜索，共{total_combinations}种参数组合...")
+    print(f"Starting grid search, total {total_combinations} parameter combinations ...")
 
     for i, (
         data0,
@@ -354,7 +330,7 @@ def grid_search(
         spread_window,
     ) in enumerate(param_combinations):
         print(
-            f"测试参数组合 {i + 1}/{total_combinations}: win={win},"
+            f"Testing parameter set {i + 1}/{total_combinations}: win={win},"
             f" k_coeff={k_coeff:.1f}, h_coeff={h_coeff:.1f},"
             f" spread_window={spread_window}"
         )
@@ -372,18 +348,18 @@ def grid_search(
             )
             results.append(result)
 
-            # 打印当前结果
+            # Print current result
             print(
-                f"  夏普比率: {result['sharpe']:.4f}, 最大回撤:"
-                f" {result['drawdown']:.2f}%, 年化收益: {result['returns']:.2f}%, 胜率:"
+                f"  Sharpe Ratio: {result['sharpe']:.4f}, Max Drawdown:"
+                f" {result['drawdown']:.2f}%, Annualized Return: {result['returns']:.2f}%, Win Rate:"
                 f" {result['win_rate']:.2f}%"
             )
         except Exception as e:
-            print(f"  参数组合出错: {e}")
+            print(f"  Error in parameter set: {e}")
 
-    # 找出最佳参数组合
+    # Find the best parameter set
     if results:
-        # 按夏普比率排序
+        # Sort by Sharpe Ratio
         sorted_results = sorted(
             results,
             key=lambda x: (x["sharpe"] if x["sharpe"] is not None else -float("inf")),
@@ -391,22 +367,22 @@ def grid_search(
         )
         best_result = sorted_results[0]
 
-        print("\n========= 最佳参数组合 =========")
-        print(f"合约对: {contract1} - {contract2}")
-        print(f"价差计算窗口: {best_result['params']['spread_window']}")
-        print(f"Rolling窗口 (win): {best_result['params']['win']}")
-        print(f"κ系数 (k_coeff): {best_result['params']['k_coeff']:.2f}")
-        print(f"h系数 (h_coeff): {best_result['params']['h_coeff']:.2f}")
-        print(f"夏普比率: {best_result['sharpe']:.4f}")
-        print(f"最大回撤: {best_result['drawdown']:.2f}%")
-        print(f"年化收益: {best_result['returns']:.2f}%")
-        print(f"总收益率: {best_result['roi']:.2f}%")
-        print(f"总交易次数: {best_result['total_trades']}")
-        print(f"胜率: {best_result['win_rate']:.2f}%")
+        print("\n========= Best Parameter Set =========")
+        print(f"Contract pair: {contract1} - {contract2}")
+        print(f"Spread calculation window: {best_result['params']['spread_window']}")
+        print(f"Rolling window (win): {best_result['params']['win']}")
+        print(f"k coefficient (k_coeff): {best_result['params']['k_coeff']:.2f}")
+        print(f"h coefficient (h_coeff): {best_result['params']['h_coeff']:.2f}")
+        print(f"Sharpe Ratio: {best_result['sharpe']:.4f}")
+        print(f"Max Drawdown: {best_result['drawdown']:.2f}%")
+        print(f"Annualized Return: {best_result['returns']:.2f}%")
+        print(f"Total ROI: {best_result['roi']:.2f}%")
+        print(f"Total trades: {best_result['total_trades']}")
+        print(f"Win rate: {best_result['win_rate']:.2f}%")
 
-        # 显示所有结果，按夏普比率排序
-        print("\n========= 所有参数组合结果（按夏普比率排序，仅显示前10个）=========")
-        for i, result in enumerate(sorted_results[:10]):  # 只显示前10个最好的结果
+        # Show all results, sorted by Sharpe Ratio
+        print("\n========= All Parameter Sets (Top 10 by Sharpe Ratio) =========")
+        for i, result in enumerate(sorted_results[:10]):  # Show only top 10
             print(
                 f"{i + 1}. spread_window={result['params']['spread_window']}, "
                 f"win={result['params']['win']}, "
@@ -418,55 +394,55 @@ def grid_search(
                 f"win_rate={result['win_rate']:.2f}%"
             )
 
-        # 返回最佳结果
+        # Return the best result
         return best_result
     else:
-        print("未找到有效的参数组合")
+        print("No valid parameter set found.")
         return None
 
 
 def parse_args():
-    """解析命令行参数"""
-    parser = argparse.ArgumentParser(description="期货合约对CUSUM策略参数优化工具")
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(description="Futures contract pair CUSUM strategy parameter optimization tool")
 
-    # 必需参数
+    # Required arguments
     parser.add_argument(
-        "--contract1", required=True, help="第一个期货合约代码，例如 /OI"
+        "--contract1", required=True, help="First futures contract code, e.g. /OI"
     )
     parser.add_argument(
-        "--contract2", required=True, help="第二个期货合约代码，例如 /Y"
+        "--contract2", required=True, help="Second futures contract code, e.g. /Y"
     )
 
-    # 可选参数 - 日期范围
-    parser.add_argument("--fromdate", help="回测开始日期，格式：YYYY-MM-DD")
-    parser.add_argument("--todate", help="回测结束日期，格式：YYYY-MM-DD")
+    # Optional arguments - date range
+    parser.add_argument("--fromdate", help="Backtest start date, format: YYYY-MM-DD")
+    parser.add_argument("--todate", help="Backtest end date, format: YYYY-MM-DD")
 
-    # 可选参数 - 网格搜索参数
+    # Optional arguments - grid search parameters
     parser.add_argument(
-        "--win", type=int, nargs="+", help="Rolling窗口大小列表，例如：15 20 30"
+        "--win", type=int, nargs="+", help="List of rolling window sizes, e.g.: 15 20 30"
     )
     parser.add_argument(
-        "--k-coeff", type=float, nargs="+", help="k系数列表，例如：0.2 0.5 0.8"
+        "--k-coeff", type=float, nargs="+", help="List of k coefficients, e.g.: 0.2 0.5 0.8"
     )
     parser.add_argument(
-        "--h-coeff", type=float, nargs="+", help="h系数列表，例如：3.0 5.0 8.0"
+        "--h-coeff", type=float, nargs="+", help="List of h coefficients, e.g.: 3.0 5.0 8.0"
     )
     parser.add_argument(
         "--spread-window",
         type=int,
         nargs="+",
-        help="价差计算窗口列表，例如：20 30 60",
+        help="List of spread calculation windows, e.g.: 20 30 60",
     )
 
-    # 输出目录
-    parser.add_argument("--output-dir", help="结果输出目录")
+    # Output directory
+    parser.add_argument("--output-dir", help="Result output directory")
 
-    # 初始资金
+    # Initial cash
     parser.add_argument(
         "--cash",
         type=float,
         default=100000,
-        help="回测初始资金金额，默认：100000",
+        help="Initial backtest cash amount, default: 100000",
     )
 
     return parser.parse_args()

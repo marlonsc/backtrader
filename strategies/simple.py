@@ -18,25 +18,20 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-"""
-BACKTESTING TRADING STRATEGIES WITH POSTGRESQL DATABASE
+"""BACKTESTING TRADING STRATEGIES WITH POSTGRESQL DATABASE
 ===============================================================
-
 This script allows you to backtest multiple trading strategies using historical stock data
 from a PostgreSQL database. It demonstrates the application of various
 technical analysis indicators and trading strategies on any stock symbol with customizable
 date ranges.
-
 USAGE:
 ------
 python strategies/simple.py --data SYMBOL --fromdate YYYY-MM-DD --todate YYYY-MM-DD [options]
-
 REQUIRED ARGUMENTS:
 ------------------
 --data, -d      : Stock symbol to retrieve data for (e.g., AAPL, MSFT, TSLA)
 --fromdate, -f  : Start date for historical data in YYYY-MM-DD format
 --todate, -t    : End date for historical data in YYYY-MM-DD format
-
 OPTIONAL ARGUMENTS:
 ------------------
 --dbuser, -u    : PostgreSQL username (default: jason)
@@ -46,62 +41,49 @@ OPTIONAL ARGUMENTS:
 --commission, -cm: Commission rate as a decimal (default: 0.001 or 0.1%)
 --single, -s    : Run only a single strategy instead of all (options below)
 --plot, -pl     : Plot the results (not currently implemented)
-
 AVAILABLE STRATEGIES:
 -------------------
 1. Linear Combination Signal (--single lincomb)
-   A composite strategy that combines three crossover signals:
-   - Long and Short moving average crossover
-   - Short moving average and price crossover
-   - Long moving average and price crossover
-
-   Parameters:
-   - long_ravg: Period for long moving average (default: 25)
-   - short_ravg: Period for short moving average (default: 12)
-   - spike_window: Window to smooth crossover signals (default: 4)
-   - cls, csr, clr: Weights for each signal component (defaults: 0.5, -0.1, -0.3)
-
-   Trading Logic:
-   - Buy when the combined signal is positive
-   - Sell when the combined signal is negative
-
+A composite strategy that combines three crossover signals:
+- Long and Short moving average crossover
+- Short moving average and price crossover
+- Long moving average and price crossover
+Parameters:
+- long_ravg: Period for long moving average (default: 25)
+- short_ravg: Period for short moving average (default: 12)
+- spike_window: Window to smooth crossover signals (default: 4)
+- cls, csr, clr: Weights for each signal component (defaults: 0.5, -0.1, -0.3)
+Trading Logic:
+- Buy when the combined signal is positive
+- Sell when the combined signal is negative
 2. Relative Strength Index (--single rsi)
-   A momentum oscillator that measures the speed and change of price movements,
-   typically used to identify overbought or oversold conditions.
-
-   Parameters:
-   - min_RSI: Lower threshold for oversold condition (default: 35)
-   - max_RSI: Upper threshold for overbought condition (default: 65)
-   - look_back_period: Period for RSI calculation (default: 14)
-
-   Trading Logic:
-   - Buy when RSI falls below min_RSI (oversold)
-   - Sell when RSI rises above max_RSI (overbought)
-
+A momentum oscillator that measures the speed and change of price movements,
+typically used to identify overbought or oversold conditions.
+Parameters:
+- min_RSI: Lower threshold for oversold condition (default: 35)
+- max_RSI: Upper threshold for overbought condition (default: 65)
+- look_back_period: Period for RSI calculation (default: 14)
+Trading Logic:
+- Buy when RSI falls below min_RSI (oversold)
+- Sell when RSI rises above max_RSI (overbought)
 3. Moving Average Convergence Divergence (--single macd)
-   A trend-following momentum indicator that shows the relationship
-   between two moving averages of a security's price.
-
-   Parameters:
-   - fast_LBP: Period for fast EMA (default: 12)
-   - slow_LBP: Period for slow EMA (default: 26)
-   - signal_LBP: Period for signal line (default: 9)
-
-   Trading Logic:
-   - Buy when MACD line crosses above signal line
-   - Sell when MACD line crosses below signal line
-
+A trend-following momentum indicator that shows the relationship
+between two moving averages of a security's price.
+Parameters:
+- fast_LBP: Period for fast EMA (default: 12)
+- slow_LBP: Period for slow EMA (default: 26)
+- signal_LBP: Period for signal line (default: 9)
+Trading Logic:
+- Buy when MACD line crosses above signal line
+- Sell when MACD line crosses below signal line
 EXAMPLES:
 ---------
 1. Run all strategies on Apple stock for the year 2023:
-   python strategies/simple.py --data AAPL --fromdate 2023-01-01 --todate 2023-12-31
-
+python strategies/simple.py --data AAPL --fromdate 2023-01-01 --todate 2023-12-31
 2. Run only the RSI strategy on Tesla stock for Q1 2023:
-   python strategies/simple.py --data TSLA --fromdate 2023-01-01 --todate 2023-03-31 --single rsi
-
+python strategies/simple.py --data TSLA --fromdate 2023-01-01 --todate 2023-03-31 --single rsi
 3. Run MACD strategy on NVIDIA with a higher initial cash amount:
-   python strategies/simple.py --data NVDA --fromdate 2022-01-01 --todate 2022-12-31 --single macd --cash 200000
-
+python strategies/simple.py --data NVDA --fromdate 2022-01-01 --todate 2022-12-31 --single macd --cash 200000
 OUTPUT:
 -------
 For each strategy, the script will display:
@@ -112,15 +94,12 @@ For each strategy, the script will display:
 - Sharpe ratio (when available)
 - Maximum drawdown
 - A comparison ranking the strategies by performance
-
 NOTES:
 ------
 - The script currently has three fully implemented strategies (lincomb, rsi, macd).
 - Additional strategies are included in the code but are currently disabled.
 - Performance results are based on historical data and do not guarantee future results.
-- No transaction costs or slippage are considered beyond the simple commission rate.
-
-"""
+- No transaction costs or slippage are considered beyond the simple commission rate."""
 
 from __future__ import (
     absolute_import,
@@ -156,14 +135,13 @@ class StockPriceData(bt.feeds.PandasData):
 def get_db_data(symbol, dbuser, dbpass, dbname, fromdate, todate):
     """Get historical price data from PostgreSQL database
 
-    :param symbol:
-    :param dbuser:
-    :param dbpass:
-    :param dbname:
-    :param fromdate:
-    :param todate:
-
-    """
+Args:
+    symbol: 
+    dbuser: 
+    dbpass: 
+    dbname: 
+    fromdate: 
+    todate:"""
     # Format dates for database query
     from_str = fromdate.strftime("%Y-%m-%d %H:%M:%S")
     to_str = todate.strftime("%Y-%m-%d %H:%M:%S")
@@ -253,12 +231,9 @@ class LinComb_Signal(bt.Strategy):
     )
 
     def log(self, txt, dt=None):
-        """
-
-        :param txt:
-        :param dt:  (Default value = None)
-
-        """
+        """Args:
+    txt: 
+    dt: (Default value = None)"""
         if self.params.printlog:
             dt = dt or self.datas[0].datetime.date(0)
             print("%s, %s" % (dt.isoformat(), txt))
@@ -301,11 +276,8 @@ class LinComb_Signal(bt.Strategy):
         )
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status in [order.Submitted, order.Accepted]:
             # Buy/Sell order submitted/accepted to/by broker - Nothing to do
             return
@@ -363,12 +335,9 @@ class RSI(bt.Strategy):
     )
 
     def log(self, txt, dt=None):
-        """
-
-        :param txt:
-        :param dt:  (Default value = None)
-
-        """
+        """Args:
+    txt: 
+    dt: (Default value = None)"""
         if self.params.printlog:
             dt = dt or self.datas[0].datetime.date(0)
             print("%s, %s" % (dt.isoformat(), txt))
@@ -381,11 +350,8 @@ class RSI(bt.Strategy):
         )
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status in [order.Submitted, order.Accepted]:
             # Buy/Sell order submitted/accepted to/by broker - Nothing to do
             return
@@ -430,12 +396,9 @@ class MACD(bt.Strategy):
     )
 
     def log(self, txt, dt=None):
-        """
-
-        :param txt:
-        :param dt:  (Default value = None)
-
-        """
+        """Args:
+    txt: 
+    dt: (Default value = None)"""
         if self.params.printlog:
             dt = dt or self.datas[0].datetime.date(0)
             print("%s, %s" % (dt.isoformat(), txt))
@@ -453,11 +416,8 @@ class MACD(bt.Strategy):
         self.Hist = self.MACD - self.Signal
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status in [order.Submitted, order.Accepted]:
             # Buy/Sell order submitted/accepted to/by broker - Nothing to do
             return
@@ -500,10 +460,9 @@ class Conventional_MA(bt.Strategy):
     def log(self, txt, dt=None):
         """Printing function for the complete strategy
 
-        :param txt:
-        :param dt:  (Default value = None)
-
-        """
+Args:
+    txt: 
+    dt: (Default value = None)"""
         dt = dt or self.datas[0].datetime.date(0)
         print("%s %s" % (dt.isoformat(), txt))
 
@@ -522,11 +481,8 @@ class Conventional_MA(bt.Strategy):
         )
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status in [order.Submitted, order.Accepted]:
             return
 
@@ -562,11 +518,8 @@ class Conventional_MA(bt.Strategy):
         self.order = None
 
     def notify_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
+        """Args:
+    trade:"""
         if not trade.isclosed:
             return
 
@@ -598,10 +551,9 @@ class Crossover_MA(bt.Strategy):
     def log(self, txt, dt=None):
         """Printing function for the complete strategy
 
-        :param txt:
-        :param dt:  (Default value = None)
-
-        """
+Args:
+    txt: 
+    dt: (Default value = None)"""
         dt = dt or self.datas[0].datetime.date(0)
         print("%s %s" % (dt.isoformat(), txt))
 
@@ -623,11 +575,8 @@ class Crossover_MA(bt.Strategy):
         )
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status in [order.Submitted, order.Accepted]:
             return
 
@@ -663,11 +612,8 @@ class Crossover_MA(bt.Strategy):
         self.order = None
 
     def notify_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
+        """Args:
+    trade:"""
         if not trade.isclosed:
             return
 
@@ -699,10 +645,9 @@ class my_EMA(bt.Strategy):
     def log(self, txt, dt=None):
         """Printing function for the complete strategy
 
-        :param txt:
-        :param dt:  (Default value = None)
-
-        """
+Args:
+    txt: 
+    dt: (Default value = None)"""
         dt = dt or self.datas[0].datetime.date(0)
         print("%s %s" % (dt.isoformat(), txt))
 
@@ -721,11 +666,8 @@ class my_EMA(bt.Strategy):
         )
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status in [order.Submitted, order.Accepted]:
             return
 
@@ -761,11 +703,8 @@ class my_EMA(bt.Strategy):
         self.order = None
 
     def notify_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
+        """Args:
+    trade:"""
         if not trade.isclosed:
             return
 
@@ -797,10 +736,9 @@ class WMA(bt.Strategy):
     def log(self, txt, dt=None):
         """Printing function for the complete strategy
 
-        :param txt:
-        :param dt:  (Default value = None)
-
-        """
+Args:
+    txt: 
+    dt: (Default value = None)"""
         dt = dt or self.datas[0].datetime.date(0)
         print("%s %s" % (dt.isoformat(), txt))
 
@@ -819,11 +757,8 @@ class WMA(bt.Strategy):
         )
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status in [order.Submitted, order.Accepted]:
             return
 
@@ -859,11 +794,8 @@ class WMA(bt.Strategy):
         self.order = None
 
     def notify_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
+        """Args:
+    trade:"""
         if not trade.isclosed:
             return
 
@@ -895,10 +827,9 @@ class BB_strat(bt.Strategy):
     def log(self, txt, dt=None):
         """Printing function for the complete strategy
 
-        :param txt:
-        :param dt:  (Default value = None)
-
-        """
+Args:
+    txt: 
+    dt: (Default value = None)"""
         dt = dt or self.datas[0].datetime.date(0)
         print("%s %s" % (dt.isoformat(), txt))
 
@@ -915,11 +846,8 @@ class BB_strat(bt.Strategy):
         self.bbands = bbands = bt.indicators.BBands(self.datas[0])
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status in [order.Submitted, order.Accepted]:
             return
 
@@ -955,11 +883,8 @@ class BB_strat(bt.Strategy):
         self.order = None
 
     def notify_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
+        """Args:
+    trade:"""
         if not trade.isclosed:
             return
 
@@ -991,10 +916,9 @@ class Counter_bb(bt.Strategy):
     def log(self, txt, dt=None):
         """Printing function for the complete strategy
 
-        :param txt:
-        :param dt:  (Default value = None)
-
-        """
+Args:
+    txt: 
+    dt: (Default value = None)"""
         dt = dt or self.datas[0].datetime.date(0)
         print("%s %s" % (dt.isoformat(), txt))
 
@@ -1011,11 +935,8 @@ class Counter_bb(bt.Strategy):
         self.bbands = bbands = bt.indicators.BBands(self.datas[0])
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status in [order.Submitted, order.Accepted]:
             return
 
@@ -1051,11 +972,8 @@ class Counter_bb(bt.Strategy):
         self.order = None
 
     def notify_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
+        """Args:
+    trade:"""
         if not trade.isclosed:
             return
 
@@ -1082,12 +1000,10 @@ class Counter_bb(bt.Strategy):
 def run_strategy(strategy_class, data, strategy_name, **kwargs):
     """Run a backtest for a specific strategy
 
-    :param strategy_class:
-    :param data:
-    :param strategy_name:
-    :param **kwargs:
-
-    """
+Args:
+    strategy_class: 
+    data: 
+    strategy_name:"""
     print("\n" + "=" * 50)
     print(f"Running {strategy_name} Strategy")
     print("=" * 50)

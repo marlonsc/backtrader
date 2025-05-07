@@ -1,8 +1,11 @@
 #!/usr/bin/env python
+"""This module contains date utilities for the backtrader library.
+"""
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2024 Daniel Rodriguez
+# Copyright (c) 2025 backtrader contributors
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,7 +32,7 @@ from .dateintern import (
     TIME_MAX,
     TIME_MIN,
     UTC,
-    Localizer,
+    localizer,
     TZLocal,
     date2num,
     num2date,
@@ -47,7 +50,7 @@ __all__ = (
     "num2time",
     "UTC",
     "TZLocal",
-    "Localizer",
+    "localizer",
     "tzparse",
     "TIME_MAX",
     "TIME_MIN",

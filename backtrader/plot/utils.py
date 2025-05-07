@@ -34,20 +34,18 @@ import matplotlib.path as mplpath
 
 def tag_box_style(x0, y0, width, height, mutation_size, mutation_aspect=1):
     """Given the location and size of the box, return the path of
-    the box around it.
+the box around it.
+- *x0*, *y0*, *width*, *height* : location and size of the box
+- *mutation_size* : a reference scale for the mutation.
+- *aspect_ratio* : aspect-ration for the mutation.
 
-     - *x0*, *y0*, *width*, *height* : location and size of the box
-     - *mutation_size* : a reference scale for the mutation.
-     - *aspect_ratio* : aspect-ration for the mutation.
-
-    :param x0:
-    :param y0:
-    :param width:
-    :param height:
-    :param mutation_size:
-    :param mutation_aspect: (Default value = 1)
-
-    """
+Args:
+    x0: 
+    y0: 
+    width: 
+    height: 
+    mutation_size: 
+    mutation_aspect: (Default value = 1)"""
 
     # note that we are ignoring mutation_aspect. This is okay in general.
     mypad = 0.2
@@ -93,17 +91,15 @@ def tag_box_style(x0, y0, width, height, mutation_size, mutation_aspect=1):
 
 def shade_color(color, percent):
     """Shade Color
-    This color utility function allows the user to easily darken or
-    lighten a color for plotting purposes.
+This color utility function allows the user to easily darken or
+lighten a color for plotting purposes.
 
-    :param color: Any acceptable Matplotlib color value, such as
-        'red', 'slategrey', '#FFEE11', (1,0,0)
-    :type color: string, list, hexvalue
-    :param percent:
-    :returns: color->     tuple representing converted rgb values
-    :rtype: tuple of floats
+Args:
+    color: Any acceptable Matplotlib color value, such as
+    percent: 
 
-    """
+Returns:
+    color->     tuple representing converted rgb values"""
 
     rgb = mplcolors.colorConverter.to_rgb(color)
 

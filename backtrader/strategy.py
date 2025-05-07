@@ -32,17 +32,19 @@ import itertools
 import operator
 
 import backtrader as bt
+from .order import Order
+from .sizers.fixedsize import FixedSize
 
 from .lineiterator import LineIterator, StrategyBase
-from .lineroot import LineSingle
+from .lineroot import (
+    LineSingle,
+)
 from .lineseries import LineSeriesStub
-from .metabase import ItemCollection, findowner
 from .trade import Trade
-from .utils import AutoDictList, AutoOrderedDict
+from .utils.autodict import AutoOrderedDict
 from .utils.py3 import (
     MAXINT,
     filter,
-    integer_types,
     iteritems,
     keys,
     map,
@@ -50,100 +52,12 @@ from .utils.py3 import (
     with_metaclass,
 )
 
+try:
+    from .metastrategy import MetaStrategy
+except ImportError:
 
-class MetaStrategy(StrategyBase.__class__):
-    """ """
-
-    _indcol = dict()
-
-    def __new__(meta, name, bases, dct):
-        """
-
-        :param meta:
-        :param name:
-        :param bases:
-        :param dct:
-
-        """
-        # Hack to support original method name for notify_order
-        if "notify" in dct:
-            # rename 'notify' to 'notify_order'
-            dct["notify_order"] = dct.pop("notify")
-        if "notify_operation" in dct:
-            # rename 'notify' to 'notify_order'
-            dct["notify_trade"] = dct.pop("notify_operation")
-
-        return super(MetaStrategy, meta).__new__(meta, name, bases, dct)
-
-    def __init__(cls, name, bases, dct):
-        """Class has already been created ... register subclasses
-
-        :param name:
-        :param bases:
-        :param dct:
-
-        """
-        # Initialize the class
-        super(MetaStrategy, cls).__init__(name, bases, dct)
-
-        if not cls.aliased and name != "Strategy" and not name.startswith("_"):
-            cls._indcol[name] = cls
-
-    def donew(cls, *args, **kwargs):
-        """
-
-        :param *args:
-        :param **kwargs:
-
-        """
-        _obj, args, kwargs = super(MetaStrategy, cls).donew(*args, **kwargs)
-
-        # Find the owner and store it
-        _obj.env = _obj.cerebro = cerebro = findowner(_obj, bt.Cerebro)
-        _obj._id = cerebro._next_stid()
-
-        return _obj, args, kwargs
-
-    def dopreinit(cls, _obj, *args, **kwargs):
-        """
-
-        :param _obj:
-        :param *args:
-        :param **kwargs:
-
-        """
-        _obj, args, kwargs = super(MetaStrategy, cls).dopreinit(_obj, *args, **kwargs)
-        _obj.broker = _obj.env.broker
-        _obj._sizer = bt.sizers.FixedSize()
-        _obj._orders = list()
-        _obj._orderspending = list()
-        _obj._trades = collections.defaultdict(AutoDictList)
-        _obj._tradespending = list()
-
-        _obj.stats = _obj.observers = ItemCollection()
-        _obj.analyzers = ItemCollection()
-        _obj._alnames = collections.defaultdict(itertools.count)
-        _obj.writers = list()
-
-        _obj._slave_analyzers = list()
-
-        _obj._tradehistoryon = False
-
-        return _obj, args, kwargs
-
-    def dopostinit(cls, _obj, *args, **kwargs):
-        """
-
-        :param _obj:
-        :param *args:
-        :param **kwargs:
-
-        """
-        _obj, args, kwargs = super(MetaStrategy, cls).dopostinit(_obj, *args, **kwargs)
-
-        _obj._sizer.set(_obj, _obj.broker)
-
-        return _obj, args, kwargs
+    class MetaStrategy(type):
+        pass
 
 
 class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
@@ -157,25 +71,30 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
     # keep the latest delivered data date in the line
     lines = ("datetime",)
 
+    def __init__(self, *args, **kwargs):
+        super(Strategy, self).__init__(*args, **kwargs)
+        self._orderspending = []
+        self._tradespending = []
+        self._tradehistoryon = False
+        self._minperiods = []
+        self._minperstatus = 0
+        self._dlens = []
+        self.indobscsv = []
+        self._sizer = None
+
     def qbuffer(self, savemem=0, replaying=False):
         """Enable the memory saving schemes. Possible values for ``savemem``:
+0: No savings. Each lines object keeps in memory all values
+1: All lines objects save memory, using the strictly minimum needed
+Negative values are meant to be used when plotting is required:
+-1: Indicators at Strategy Level and Observers do not enable memory
+savings (but anything declared below it does)
+-2: Same as -1 plus activation of memory saving for any indicators
+which has declared *plotinfo.plot* as False (will not be plotted)
 
-          0: No savings. Each lines object keeps in memory all values
-
-          1: All lines objects save memory, using the strictly minimum needed
-
-        Negative values are meant to be used when plotting is required:
-
-          -1: Indicators at Strategy Level and Observers do not enable memory
-              savings (but anything declared below it does)
-
-          -2: Same as -1 plus activation of memory saving for any indicators
-              which has declared *plotinfo.plot* as False (will not be plotted)
-
-        :param savemem:  (Default value = 0)
-        :param replaying:  (Default value = False)
-
-        """
+Args:
+    savemem: (Default value = 0)
+    replaying: (Default value = False)"""
         if savemem < 0:
             # Get any attribute which labels itself as Indicator
             for ind in self._lineiterators[self.IndType]:
@@ -186,15 +105,28 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
         elif savemem > 0:
             for data in self.datas:
-                data.qbuffer(replaying=replaying)
-
+                if (
+                    not isinstance(data, (str, tuple))
+                    and hasattr(data, "qbuffer")
+                    and callable(data.qbuffer)
+                ):
+                    data.qbuffer(replaying=replaying)
             for line in self.lines:
-                line.qbuffer(savemem=1)
-
+                if (
+                    not isinstance(line, (str, tuple))
+                    and hasattr(line, "qbuffer")
+                    and callable(line.qbuffer)
+                ):
+                    line.qbuffer(savemem=1)
             # Save in all object types depending on the strategy
             for itcls in self._lineiterators:
                 for it in self._lineiterators[itcls]:
-                    it.qbuffer(savemem=1)
+                    if (
+                        not isinstance(it, (str, tuple))
+                        and hasattr(it, "qbuffer")
+                        and callable(it.qbuffer)
+                    ):
+                        it.qbuffer(savemem=1)
 
     def _periodset(self):
         """ """
@@ -206,7 +138,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             # timeframe may place larger time constraints in calling next.
             clk = getattr(lineiter, "_clock", None)
             if clk is None:
-                clk = getattr(lineiter._owner, "_clock", None)
+                clk = getattr(getattr(lineiter, "_owner", None), "_clock", None)
                 if clk is None:
                     continue
 
@@ -217,7 +149,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
                 # See if the current clock has higher level clocks
                 clk2 = getattr(clk, "_clock", None)
                 if clk2 is None:
-                    clk2 = getattr(clk._owner, "_clock", None)
+                    clk2 = getattr(getattr(clk, "_owner", None), "_clock", None)
 
                 if clk2 is None:
                     break  # if no clock found, bail out
@@ -250,66 +182,48 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             # keep the reference to the line if any was found
             _dminperiods[data] = [max(dlminperiods)] if dlminperiods else []
 
-            dminperiod = max(_dminperiods[data] or [data._minperiod])
+            dminperiod = max(_dminperiods[data] or [getattr(data, "_minperiod", 0)])
             self._minperiods.append(dminperiod)
 
         # Set the minperiod
-        minperiods = [x._minperiod for x in self._lineiterators[LineIterator.IndType]]
-        self._minperiod = max(minperiods or [self._minperiod])
+        minperiods = [getattr(x, "_minperiod", 0) for x in self._lineiterators[LineIterator.IndType]]
+        self._minperiod = max(minperiods or [getattr(self, "_minperiod", 0)])
 
     def _addwriter(self, writer):
         """Unlike the other _addxxx functions this one receives an instance
-        because the writer works at cerebro level and is only passed to the
-        strategy to simplify the logic
+because the writer works at cerebro level and is only passed to the
+strategy to simplify the logic
 
-        :param writer:
-
-        """
+Args:
+    writer:"""
         self.writers.append(writer)
 
     def _addindicator(self, indcls, *indargs, **indkwargs):
-        """
-
-        :param indcls:
-        :param *indargs:
-        :param **indkwargs:
-
-        """
+        """Args:
+    indcls:"""
         indcls(*indargs, **indkwargs)
 
     def _addanalyzer_slave(self, ancls, *anargs, **ankwargs):
         """Like _addanalyzer but meant for observers (or other entities) which
-        rely on the output of an analyzer for the data. These analyzers have
-        not been added by the user and are kept separate from the main
-        analyzers
+rely on the output of an analyzer for the data. These analyzers have
+not been added by the user and are kept separate from the main
+analyzers
+Returns the created analyzer
 
-        Returns the created analyzer
-
-        :param ancls:
-        :param *anargs:
-        :param **ankwargs:
-
-        """
+Args:
+    ancls:"""
         analyzer = ancls(*anargs, **ankwargs)
         self._slave_analyzers.append(analyzer)
         return analyzer
 
     def _getanalyzer_slave(self, idx):
-        """
-
-        :param idx:
-
-        """
+        """Args:
+    idx:"""
         return self._slave_analyzers.append[idx]
 
     def _addanalyzer(self, ancls, *anargs, **ankwargs):
-        """
-
-        :param ancls:
-        :param *anargs:
-        :param **ankwargs:
-
-        """
+        """Args:
+    ancls:"""
         anname = ankwargs.pop("_name", "") or ancls.__name__.lower()
         nsuffix = next(self._alnames[anname])
         anname += str(nsuffix or "")  # 0 (first instance) gets no suffix
@@ -317,14 +231,9 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         self.analyzers.append(analyzer, anname)
 
     def _addobserver(self, multi, obscls, *obsargs, **obskwargs):
-        """
-
-        :param multi:
-        :param obscls:
-        :param *obsargs:
-        :param **obskwargs:
-
-        """
+        """Args:
+    multi: 
+    obscls:"""
         obsname = obskwargs.pop("obsname", "")
         if not obsname:
             obsname = obscls.__name__.lower()
@@ -370,11 +279,8 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             self.prenext_open()
 
     def _oncepost(self, dt):
-        """
-
-        :param dt:
-
-        """
+        """Args:
+    dt:"""
         for indicator in self._lineiterators[LineIterator.IndType]:
             if len(indicator._clock) > len(indicator):
                 indicator.advance()
@@ -406,14 +312,28 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         """ """
         if self._oldsync:
             clk_len = super(Strategy, self)._clk_update()
-            self.lines.datetime[0] = max(d.datetime[0] for d in self.datas if len(d))
+            self.lines.datetime[0] = max(
+                d.datetime[0]
+                for d in self.datas
+                if hasattr(d, "datetime")
+                and len(d)
+                and not isinstance(d.datetime, (tuple, str))
+                and hasattr(d.datetime, "__getitem__")
+            )
             return clk_len
 
         newdlens = [len(d) for d in self.datas]
         if any(nl > l for l, nl in zip(self._dlens, newdlens)):
             self.forward()
 
-        self.lines.datetime[0] = max(d.datetime[0] for d in self.datas if len(d))
+        self.lines.datetime[0] = max(
+            d.datetime[0]
+            for d in self.datas
+            if hasattr(d, "datetime")
+            and len(d)
+            and not isinstance(d.datetime, (tuple, str))
+            and hasattr(d.datetime, "__getitem__")
+        )
         self._dlens = newdlens
 
         return len(self)
@@ -439,12 +359,9 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         self.clear()
 
     def _next_observers(self, minperstatus, once=False):
-        """
-
-        :param minperstatus:
-        :param once:  (Default value = False)
-
-        """
+        """Args:
+    minperstatus: 
+    once: (Default value = False)"""
         for observer in self._lineiterators[LineIterator.ObsType]:
             for analyzer in observer._analyzers:
                 if minperstatus < 0:
@@ -471,12 +388,9 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
                 observer._next()
 
     def _next_analyzers(self, minperstatus, once=False):
-        """
-
-        :param minperstatus:
-        :param once:  (Default value = False)
-
-        """
+        """Args:
+    minperstatus: 
+    once: (Default value = False)"""
         for analyzer in self.analyzers:
             if minperstatus < 0:
                 analyzer._next()
@@ -486,11 +400,8 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
                 analyzer._prenext()
 
     def _settz(self, tz):
-        """
-
-        :param tz:
-
-        """
+        """Args:
+    tz:"""
         self.lines.datetime._settz(tz)
 
     def _start(self):
@@ -530,10 +441,16 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
         # prepare the indicators/observers data headers
         for iocsv in self.indobscsv:
-            name = iocsv.plotinfo.plotname or iocsv.__class__.__name__
+            name = (
+                getattr(getattr(iocsv, "plotinfo", None), "plotname", None)
+                or iocsv.__class__.__name__
+            )
             headers.append(name)
             headers.append("len")
-            headers.extend(iocsv.getlinealiases())
+            if hasattr(iocsv, "getlinealiases"):
+                headers.extend(iocsv.getlinealiases())
+            else:
+                headers.extend([])
 
         return headers
 
@@ -542,14 +459,25 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         values = list()
 
         for iocsv in self.indobscsv:
-            name = iocsv.plotinfo.plotname or iocsv.__class__.__name__
+            name = (
+                getattr(getattr(iocsv, "plotinfo", None), "plotname", None)
+                or iocsv.__class__.__name__
+            )
             values.append(name)
             lio = len(iocsv)
             values.append(lio)
-            if lio:
+            if (
+                lio
+                and hasattr(iocsv, "lines")
+                and not isinstance(iocsv.lines, (tuple, str))
+                and hasattr(iocsv.lines, "itersize")
+                and callable(iocsv.lines.itersize)
+            ):
                 values.extend(map(lambda l: l[0], iocsv.lines.itersize()))
-            else:
+            elif hasattr(iocsv, "lines") and hasattr(iocsv.lines, "size"):
                 values.extend([""] * iocsv.lines.size())
+            else:
+                values.extend([])
 
         return values
 
@@ -598,11 +526,8 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         """Called right before the backtesting is about to be stopped"""
 
     def set_tradehistory(self, onoff=True):
-        """
-
-        :param onoff:  (Default value = True)
-
-        """
+        """Args:
+    onoff: (Default value = True)"""
         self._tradehistoryon = onoff
 
     def clear(self):
@@ -612,17 +537,17 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         self._tradespending = list()
 
     def _addnotification(self, order, quicknotify=False):
-        """
-
-        :param order:
-        :param quicknotify:  (Default value = False)
-
-        """
+        """Args:
+    order: 
+    quicknotify: (Default value = False)"""
         if not order.p.simulated:
             self._orderspending.append(order)
 
         if quicknotify:
             qorders = [order]
+            qtrades = []
+        else:
+            qorders = []
             qtrades = []
 
         if not order.executed.size:
@@ -701,17 +626,15 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         if quicknotify:
             self._notify(qorders=qorders, qtrades=qtrades)
 
-    def _notify(self, qorders=[], qtrades=[]):
-        """
-
-        :param qorders:  (Default value = [])
-        :param qtrades:  (Default value = [])
-
-        """
+    def _notify(self, qorders=None, qtrades=None):
+        """Args:
+    qorders: (Default value = None)
+    qtrades: (Default value = None)"""
+        if qorders is None:
+            qorders = []
+        if qtrades is None:
+            qtrades = []
         if self.cerebro.p.quicknotify:
-            # need to know if quicknotify is on, to not reprocess pendingorders
-            # and pendingtrades, which have to exist for things like observers
-            # which look into it
             procorders = qorders
             proctrades = qtrades
         else:
@@ -746,11 +669,11 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
     def add_timer(
         self,
         when,
-        offset=datetime.timedelta(),
-        repeat=datetime.timedelta(),
-        weekdays=[],
+        offset=None,
+        repeat=None,
+        weekdays=None,
         weekcarry=False,
-        monthdays=[],
+        monthdays=None,
         monthcarry=True,
         allow=None,
         tzdata=None,
@@ -759,25 +682,31 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         **kwargs,
     ):
         """**Note**: can be called during ``__init__`` or ``start``
+Schedules a timer to invoke either a specified callback or the
+``notify_timer`` of one or more strategies.
 
-        Schedules a timer to invoke either a specified callback or the
-        ``notify_timer`` of one or more strategies.
+Args:
+    when: can be
+    offset: which must be a (Default value = datetime.timedelta())
+    repeat: which must be a (Default value = datetime.timedelta())
+    weekdays: a (Default value = [])
+    weekcarry: default
+    monthdays: a (Default value = [])
+    monthcarry: default
+    allow: default
+    tzdata: which can be either (Default value = None)
+    cheat: default
 
-        :param when: can be
-        :param offset: which must be a (Default value = datetime.timedelta())
-        :param repeat: which must be a (Default value = datetime.timedelta())
-        :param weekdays: a (Default value = [])
-        :param weekcarry: default
-        :param monthdays: a (Default value = [])
-        :param monthcarry: default
-        :param allow: default
-        :param tzdata: which can be either (Default value = None)
-        :param cheat: default
-        :param *args:
-        :param **kwargs:
-        :returns: - The created timer
-
-        """
+Returns:
+    - The created timer"""
+        if offset is None:
+            offset = datetime.timedelta()
+        if repeat is None:
+            repeat = datetime.timedelta()
+        if weekdays is None:
+            weekdays = []
+        if monthdays is None:
+            monthdays = []
         return self.cerebro._add_timer(
             owner=self,
             when=when,
@@ -798,68 +727,53 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
     def notify_timer(self, timer, when, *args, **kwargs):
         """Receives a timer notification where ``timer`` is the timer which was
 
-        :param timer:
-        :param when:
-        :param *args:
-        :param **kwargs:
-        :returns: and ``kwargs`` are any additional arguments passed to ``add_timer``
+Args:
+    timer: 
+    when: 
 
-        The actual ``when`` time can be later, but the system may have not be
-        able to call the timer before. This value is the timer value and no the
-        system time.
-
-        """
+Returns:
+    and ``kwargs`` are any additional arguments passed to ``add_timer``"""
 
     def notify_cashvalue(self, cash, value):
         """Receives the current fund value, value status of the strategy's broker
 
-        :param cash:
-        :param value:
-
-        """
+Args:
+    cash: 
+    value:"""
 
     def notify_fund(self, cash, value, fundvalue, shares):
         """Receives the current cash, value, fundvalue and fund shares
 
-        :param cash:
-        :param value:
-        :param fundvalue:
-        :param shares:
-
-        """
+Args:
+    cash: 
+    value: 
+    fundvalue: 
+    shares:"""
 
     def notify_order(self, order):
         """Receives an order whenever there has been a change in one
 
-        :param order:
-
-        """
+Args:
+    order:"""
 
     def notify_trade(self, trade):
         """Receives a trade whenever there has been a change in one
 
-        :param trade:
-
-        """
+Args:
+    trade:"""
 
     def notify_store(self, msg, *args, **kwargs):
         """Receives a notification from a store provider
 
-        :param msg:
-        :param *args:
-        :param **kwargs:
-
-        """
+Args:
+    msg:"""
 
     def notify_data(self, data, status, *args, **kwargs):
         """Receives a notification from data
 
-        :param data:
-        :param status:
-        :param *args:
-        :param **kwargs:
-
-        """
+Args:
+    data: 
+    status:"""
 
     def getdatanames(self):
         """Returns a list of the existing data names"""
@@ -868,17 +782,15 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
     def getdatabyname(self, name):
         """Returns a given data by name using the environment (cerebro)
 
-        :param name:
-
-        """
+Args:
+    name:"""
         return self.env.datasbyname[name]
 
     def cancel(self, order):
         """Cancels the order in the broker
 
-        :param order:
-
-        """
+Args:
+    order:"""
         self.broker.cancel(order)
 
     def buy(
@@ -898,151 +810,112 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         **kwargs,
     ):
         """Create a buy (long) order and send it to the broker
+- ``data`` (default: ``None``)
+For which data the order has to be created. If ``None`` then the
+first data in the system, ``self.datas[0] or self.data0`` (aka
+``self.data``) will be used
+- ``size`` (default: ``None``)
+Size to use (positive) of units of data to use for the order.
+If ``None`` the ``sizer`` instance retrieved via ``getsizer`` will
+be used to determine the size.
+- ``price`` (default: ``None``)
+Price to use (live brokers may place restrictions on the actual
+format if it does not comply to minimum tick size requirements)
+``None`` is valid for ``Market`` and ``Close`` orders (the market
+determines the price)
+For ``Limit``, ``Stop`` and ``StopLimit`` orders this value
+determines the trigger point (in the case of ``Limit`` the trigger
+is obviously at which price the order should be matched)
+- ``plimit`` (default: ``None``)
+Only applicable to ``StopLimit`` orders. This is the price at which
+to set the implicit *Limit* order, once the *Stop* has been
+triggered (for which ``price`` has been used)
+- ``trailamount`` (default: ``None``)
+If the order type is StopTrail or StopTrailLimit, this is an
+absolute amount which determines the distance to the price (below
+for a Sell order and above for a buy order) to keep the trailing
+stop
+- ``trailpercent`` (default: ``None``)
+If the order type is StopTrail or StopTrailLimit, this is a
+percentage amount which determines the distance to the price (below
+for a Sell order and above for a buy order) to keep the trailing
+stop (if ``trailamount`` is also specified it will be used)
+- ``exectype`` (default: ``None``)
+Possible values:
+- ``Order.Market`` or ``None``. A market order will be executed
+with the next available price. In backtesting it will be the
+opening price of the next bar
+- ``Order.Limit``. An order which can only be executed at the given
+``price`` or better
+- ``Order.Stop``. An order which is triggered at ``price`` and
+executed like an ``Order.Market`` order
+- ``Order.StopLimit``. An order which is triggered at ``price`` and
+executed as an implicit *Limit* order with price given by
+``pricelimit``
+- ``Order.Close``. An order which can only be executed with the
+closing price of the session (usually during a closing auction)
+- ``Order.StopTrail``. An order which is triggered at ``price``
+minus ``trailamount`` (or ``trailpercent``) and which is updated
+if the price moves away from the stop
+- ``Order.StopTrailLimit``. An order which is triggered at
+``price`` minus ``trailamount`` (or ``trailpercent``) and which
+is updated if the price moves away from the stop
+- ``valid`` (default: ``None``)
+Possible values:
+- ``None``: this generates an order that will not expire (aka
+*Good till cancel*) and remain in the market until matched or
+canceled. In reality brokers tend to impose a temporal limit,
+but this is usually so far away in time to consider it as not
+expiring
+- ``datetime.datetime`` or ``datetime.date`` instance: the date
+will be used to generate an order valid until the given
+datetime (aka *good till date*)
+- ``Order.DAY`` or ``0`` or ``timedelta()``: a day valid until
+the *End of the Session* (aka *day* order) will be generated
+- ``numeric value``: This is assumed to be a value corresponding
+to a datetime in ``matplotlib`` coding (the one used by
+``backtrader``) and will used to generate an order valid until
+that time (*good till date*)
+- ``tradeid`` (default: ``0``)
+This is an internal value applied by ``backtrader`` to keep track
+of overlapping trades on the same asset. This ``tradeid`` is sent
+back to the *strategy* when notifying changes to the status of the
+orders.
+- ``oco`` (default: ``None``)
+Another ``order`` instance. This order will become part of an OCO
+(Order Cancel Others) group. The execution of one of the orders,
+immediately cancels all others in the same group
+- ``parent`` (default: ``None``)
+Controls the relationship of a group of orders, for example a buy
+which is bracketed by a high-side limit sell and a low side stop
+sell. The high/low side orders remain inactive until the parent
+order has been either executed (they become active) or is
+canceled/expires (the children are also canceled) bracket orders
+have the same size
+- ``transmit`` (default: ``True``)
+Indicates if the order has to be **transmitted**, ie: not only
+placed in the broker but also issued. This is meant for example to
+control bracket orders, in which one disables the transmission for
+the parent and 1st set of children and activates it for the last
+children, which triggers the full placement of all bracket orders.
+- ``**kwargs``: additional broker implementations may support extra
 
-          - ``data`` (default: ``None``)
+Args:
+    data: (Default value = None)
+    size: (Default value = None)
+    price: (Default value = None)
+    plimit: (Default value = None)
+    exectype: (Default value = None)
+    valid: (Default value = None)
+    tradeid: (Default value = 0)
+    oco: (Default value = None)
+    trailamount: (Default value = None)
+    trailpercent: (Default value = None)
+    parent: (Default value = None)
+    transmit: (Default value = True)
 
-            For which data the order has to be created. If ``None`` then the
-            first data in the system, ``self.datas[0] or self.data0`` (aka
-            ``self.data``) will be used
-
-          - ``size`` (default: ``None``)
-
-            Size to use (positive) of units of data to use for the order.
-
-            If ``None`` the ``sizer`` instance retrieved via ``getsizer`` will
-            be used to determine the size.
-
-          - ``price`` (default: ``None``)
-
-            Price to use (live brokers may place restrictions on the actual
-            format if it does not comply to minimum tick size requirements)
-
-            ``None`` is valid for ``Market`` and ``Close`` orders (the market
-            determines the price)
-
-            For ``Limit``, ``Stop`` and ``StopLimit`` orders this value
-            determines the trigger point (in the case of ``Limit`` the trigger
-            is obviously at which price the order should be matched)
-
-          - ``plimit`` (default: ``None``)
-
-            Only applicable to ``StopLimit`` orders. This is the price at which
-            to set the implicit *Limit* order, once the *Stop* has been
-            triggered (for which ``price`` has been used)
-
-          - ``trailamount`` (default: ``None``)
-
-            If the order type is StopTrail or StopTrailLimit, this is an
-            absolute amount which determines the distance to the price (below
-            for a Sell order and above for a buy order) to keep the trailing
-            stop
-
-          - ``trailpercent`` (default: ``None``)
-
-            If the order type is StopTrail or StopTrailLimit, this is a
-            percentage amount which determines the distance to the price (below
-            for a Sell order and above for a buy order) to keep the trailing
-            stop (if ``trailamount`` is also specified it will be used)
-
-          - ``exectype`` (default: ``None``)
-
-            Possible values:
-
-            - ``Order.Market`` or ``None``. A market order will be executed
-              with the next available price. In backtesting it will be the
-              opening price of the next bar
-
-            - ``Order.Limit``. An order which can only be executed at the given
-              ``price`` or better
-
-            - ``Order.Stop``. An order which is triggered at ``price`` and
-              executed like an ``Order.Market`` order
-
-            - ``Order.StopLimit``. An order which is triggered at ``price`` and
-              executed as an implicit *Limit* order with price given by
-              ``pricelimit``
-
-            - ``Order.Close``. An order which can only be executed with the
-              closing price of the session (usually during a closing auction)
-
-            - ``Order.StopTrail``. An order which is triggered at ``price``
-              minus ``trailamount`` (or ``trailpercent``) and which is updated
-              if the price moves away from the stop
-
-            - ``Order.StopTrailLimit``. An order which is triggered at
-              ``price`` minus ``trailamount`` (or ``trailpercent``) and which
-              is updated if the price moves away from the stop
-
-          - ``valid`` (default: ``None``)
-
-            Possible values:
-
-              - ``None``: this generates an order that will not expire (aka
-                *Good till cancel*) and remain in the market until matched or
-                canceled. In reality brokers tend to impose a temporal limit,
-                but this is usually so far away in time to consider it as not
-                expiring
-
-              - ``datetime.datetime`` or ``datetime.date`` instance: the date
-                will be used to generate an order valid until the given
-                datetime (aka *good till date*)
-
-              - ``Order.DAY`` or ``0`` or ``timedelta()``: a day valid until
-                the *End of the Session* (aka *day* order) will be generated
-
-              - ``numeric value``: This is assumed to be a value corresponding
-                to a datetime in ``matplotlib`` coding (the one used by
-                ``backtrader``) and will used to generate an order valid until
-                that time (*good till date*)
-
-          - ``tradeid`` (default: ``0``)
-
-            This is an internal value applied by ``backtrader`` to keep track
-            of overlapping trades on the same asset. This ``tradeid`` is sent
-            back to the *strategy* when notifying changes to the status of the
-            orders.
-
-          - ``oco`` (default: ``None``)
-
-            Another ``order`` instance. This order will become part of an OCO
-            (Order Cancel Others) group. The execution of one of the orders,
-            immediately cancels all others in the same group
-
-          - ``parent`` (default: ``None``)
-
-            Controls the relationship of a group of orders, for example a buy
-            which is bracketed by a high-side limit sell and a low side stop
-            sell. The high/low side orders remain inactive until the parent
-            order has been either executed (they become active) or is
-            canceled/expires (the children are also canceled) bracket orders
-            have the same size
-
-          - ``transmit`` (default: ``True``)
-
-            Indicates if the order has to be **transmitted**, ie: not only
-            placed in the broker but also issued. This is meant for example to
-            control bracket orders, in which one disables the transmission for
-            the parent and 1st set of children and activates it for the last
-            children, which triggers the full placement of all bracket orders.
-
-          - ``**kwargs``: additional broker implementations may support extra
-
-        :param data:  (Default value = None)
-        :param size:  (Default value = None)
-        :param price:  (Default value = None)
-        :param plimit:  (Default value = None)
-        :param exectype:  (Default value = None)
-        :param valid:  (Default value = None)
-        :param tradeid:  (Default value = 0)
-        :param oco:  (Default value = None)
-        :param trailamount:  (Default value = None)
-        :param trailpercent:  (Default value = None)
-        :param parent:  (Default value = None)
-        :param transmit:  (Default value = True)
-        :param **kwargs:
-        :returns: - the submitted order
-
-        """
+Returns:
+    - the submitted order"""
         if isinstance(data, string_types):
             data = self.getdatabyname(data)
 
@@ -1170,124 +1043,96 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         size=None,
         price=None,
         plimit=None,
-        exectype=bt.Order.Limit,
+        exectype=Order.Limit,
         valid=None,
         tradeid=0,
         trailamount=None,
         trailpercent=None,
-        oargs={},
+        oargs=None,
         stopprice=None,
-        stopexec=bt.Order.Stop,
-        stopargs={},
+        stopexec=Order.Stop,
+        stopargs=None,
         limitprice=None,
-        limitexec=bt.Order.Limit,
-        limitargs={},
+        limitexec=Order.Limit,
+        limitargs=None,
         **kwargs,
     ):
         """Create a bracket order group (low side - buy order - high side). The
-        default behavior is as follows:
+default behavior is as follows:
+- Issue a **buy** order with execution ``Limit``
+- Issue a *low side* bracket **sell** order with execution ``Stop``
+- Issue a *high side* bracket **sell** order with execution
+``Limit``.
+See below for the different parameters
+- ``data`` (default: ``None``)
+For which data the order has to be created. If ``None`` then the
+first data in the system, ``self.datas[0] or self.data0`` (aka
+``self.data``) will be used
+- ``size`` (default: ``None``)
+Size to use (positive) of units of data to use for the order.
+If ``None`` the ``sizer`` instance retrieved via ``getsizer`` will
+be used to determine the size.
+**Note**: The same size is applied to all 3 orders of the bracket
+- ``price`` (default: ``None``)
+Price to use (live brokers may place restrictions on the actual
+format if it does not comply to minimum tick size requirements)
+``None`` is valid for ``Market`` and ``Close`` orders (the market
+determines the price)
+For ``Limit``, ``Stop`` and ``StopLimit`` orders this value
+determines the trigger point (in the case of ``Limit`` the trigger
+is obviously at which price the order should be matched)
+- ``plimit`` (default: ``None``)
+Only applicable to ``StopLimit`` orders. This is the price at which
+to set the implicit *Limit* order, once the *Stop* has been
+triggered (for which ``price`` has been used)
+- ``trailamount`` (default: ``None``)
+If the order type is StopTrail or StopTrailLimit, this is an
+absolute amount which determines the distance to the price (below
+for a Sell order and above for a buy order) to keep the trailing
+stop
+- ``trailpercent`` (default: ``None``)
+If the order type is StopTrail or StopTrailLimit, this is a
+percentage amount which determines the distance to the price (below
+for a Sell order and above for a buy order) to keep the trailing
+stop (if ``trailamount`` is also specified it will be used)
+- ``exectype`` (default: ``bt.Order.Limit``)
+Possible values: (see the documentation for the method ``buy``
+- ``valid`` (default: ``None``)
+Possible values: (see the documentation for the method ``buy``
+- ``tradeid`` (default: ``0``)
+Possible values: (see the documentation for the method ``buy``
+- ``oargs`` (default: ``{}``)
+Specific keyword arguments (in a ``dict``) to pass to the main side
+order. Arguments from the default ``**kwargs`` will be applied on
+top of this.
+- ``**kwargs``: additional broker implementations may support extra
 
-          - Issue a **buy** order with execution ``Limit``
+Args:
+    data: (Default value = None)
+    size: (Default value = None)
+    price: (Default value = None)
+    plimit: (Default value = None)
+    exectype: (Default value = bt.Order.Limit)
+    valid: (Default value = None)
+    tradeid: (Default value = 0)
+    trailamount: (Default value = None)
+    trailpercent: (Default value = None)
+    oargs: (Default value = {})
+    stopprice: default
+    stopexec: None (Default value = bt.Order.Stop)
+    stopargs: default
+    limitprice: default
+    limitexec: None (Default value = bt.Order.Limit)
+    limitargs: default
 
-          - Issue a *low side* bracket **sell** order with execution ``Stop``
-
-          - Issue a *high side* bracket **sell** order with execution
-            ``Limit``.
-
-        See below for the different parameters
-
-          - ``data`` (default: ``None``)
-
-            For which data the order has to be created. If ``None`` then the
-            first data in the system, ``self.datas[0] or self.data0`` (aka
-            ``self.data``) will be used
-
-          - ``size`` (default: ``None``)
-
-            Size to use (positive) of units of data to use for the order.
-
-            If ``None`` the ``sizer`` instance retrieved via ``getsizer`` will
-            be used to determine the size.
-
-            **Note**: The same size is applied to all 3 orders of the bracket
-
-          - ``price`` (default: ``None``)
-
-            Price to use (live brokers may place restrictions on the actual
-            format if it does not comply to minimum tick size requirements)
-
-            ``None`` is valid for ``Market`` and ``Close`` orders (the market
-            determines the price)
-
-            For ``Limit``, ``Stop`` and ``StopLimit`` orders this value
-            determines the trigger point (in the case of ``Limit`` the trigger
-            is obviously at which price the order should be matched)
-
-          - ``plimit`` (default: ``None``)
-
-            Only applicable to ``StopLimit`` orders. This is the price at which
-            to set the implicit *Limit* order, once the *Stop* has been
-            triggered (for which ``price`` has been used)
-
-          - ``trailamount`` (default: ``None``)
-
-            If the order type is StopTrail or StopTrailLimit, this is an
-            absolute amount which determines the distance to the price (below
-            for a Sell order and above for a buy order) to keep the trailing
-            stop
-
-          - ``trailpercent`` (default: ``None``)
-
-            If the order type is StopTrail or StopTrailLimit, this is a
-            percentage amount which determines the distance to the price (below
-            for a Sell order and above for a buy order) to keep the trailing
-            stop (if ``trailamount`` is also specified it will be used)
-
-          - ``exectype`` (default: ``bt.Order.Limit``)
-
-            Possible values: (see the documentation for the method ``buy``
-
-          - ``valid`` (default: ``None``)
-
-            Possible values: (see the documentation for the method ``buy``
-
-          - ``tradeid`` (default: ``0``)
-
-            Possible values: (see the documentation for the method ``buy``
-
-          - ``oargs`` (default: ``{}``)
-
-            Specific keyword arguments (in a ``dict``) to pass to the main side
-            order. Arguments from the default ``**kwargs`` will be applied on
-            top of this.
-
-          - ``**kwargs``: additional broker implementations may support extra
-
-        :param data:  (Default value = None)
-        :param size:  (Default value = None)
-        :param price:  (Default value = None)
-        :param plimit:  (Default value = None)
-        :param exectype:  (Default value = bt.Order.Limit)
-        :param valid:  (Default value = None)
-        :param tradeid:  (Default value = 0)
-        :param trailamount:  (Default value = None)
-        :param trailpercent:  (Default value = None)
-        :param oargs:  (Default value = {})
-        :param stopprice: default
-        :param stopexec: None (Default value = bt.Order.Stop)
-        :param stopargs: default
-        :param limitprice: default
-        :param limitexec: None (Default value = bt.Order.Limit)
-        :param limitargs: default
-        :param **kwargs:
-        :returns: - A list containing the 3 orders [order, stop side, limit side]
-
-          - If high/low orders have been suppressed the return value will still
-            contain 3 orders, but those suppressed will have a value of
-            ``None``
-
-        """
-
+Returns:
+    - A list containing the 3 orders [order, stop side, limit side]"""
+        if oargs is None:
+            oargs = {}
+        if stopargs is None:
+            stopargs = {}
+        if limitargs is None:
+            limitargs = {}
         kargs = dict(
             size=size,
             data=data,
@@ -1348,61 +1193,56 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         size=None,
         price=None,
         plimit=None,
-        exectype=bt.Order.Limit,
+        exectype=Order.Limit,
         valid=None,
         tradeid=0,
         trailamount=None,
         trailpercent=None,
-        oargs={},
+        oargs=None,
         stopprice=None,
-        stopexec=bt.Order.Stop,
-        stopargs={},
+        stopexec=Order.Stop,
+        stopargs=None,
         limitprice=None,
-        limitexec=bt.Order.Limit,
-        limitargs={},
+        limitexec=Order.Limit,
+        limitargs=None,
         **kwargs,
     ):
         """Create a bracket order group (low side - buy order - high side). The
-        default behavior is as follows:
+default behavior is as follows:
+- Issue a **sell** order with execution ``Limit``
+- Issue a *high side* bracket **buy** order with execution ``Stop``
+- Issue a *low side* bracket **buy** order with execution ``Limit``.
+See ``bracket_buy`` for the meaning of the parameters
+High/Low Side orders can be suppressed by using:
+- ``stopexec=None`` to suppress the *high side*
+- ``limitexec=None`` to suppress the *low side*
 
-          - Issue a **sell** order with execution ``Limit``
+Args:
+    data: (Default value = None)
+    size: (Default value = None)
+    price: (Default value = None)
+    plimit: (Default value = None)
+    exectype: (Default value = bt.Order.Limit)
+    valid: (Default value = None)
+    tradeid: (Default value = 0)
+    trailamount: (Default value = None)
+    trailpercent: (Default value = None)
+    oargs: (Default value = {})
+    stopprice: (Default value = None)
+    stopexec: (Default value = bt.Order.Stop)
+    stopargs: (Default value = {})
+    limitprice: (Default value = None)
+    limitexec: (Default value = bt.Order.Limit)
+    limitargs: (Default value = {})
 
-          - Issue a *high side* bracket **buy** order with execution ``Stop``
-
-          - Issue a *low side* bracket **buy** order with execution ``Limit``.
-
-        See ``bracket_buy`` for the meaning of the parameters
-
-        High/Low Side orders can be suppressed by using:
-
-          - ``stopexec=None`` to suppress the *high side*
-
-          - ``limitexec=None`` to suppress the *low side*
-
-        :param data:  (Default value = None)
-        :param size:  (Default value = None)
-        :param price:  (Default value = None)
-        :param plimit:  (Default value = None)
-        :param exectype:  (Default value = bt.Order.Limit)
-        :param valid:  (Default value = None)
-        :param tradeid:  (Default value = 0)
-        :param trailamount:  (Default value = None)
-        :param trailpercent:  (Default value = None)
-        :param oargs:  (Default value = {})
-        :param stopprice:  (Default value = None)
-        :param stopexec:  (Default value = bt.Order.Stop)
-        :param stopargs:  (Default value = {})
-        :param limitprice:  (Default value = None)
-        :param limitexec:  (Default value = bt.Order.Limit)
-        :param limitargs:  (Default value = {})
-        :param **kwargs:
-        :returns: - A list containing the 3 orders [order, stop side, limit side]
-          - If high/low orders have been suppressed the return value will still
-            contain 3 orders, but those suppressed will have a value of
-            ``None``
-
-        """
-
+Returns:
+    - A list containing the 3 orders [order, stop side, limit side]"""
+        if oargs is None:
+            oargs = {}
+        if stopargs is None:
+            stopargs = {}
+        if limitargs is None:
+            limitargs = {}
         kargs = dict(
             size=size,
             data=data,
@@ -1431,7 +1271,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             kargs.update(stopargs)
             kargs.update(kwargs)
             kargs["parent"] = o
-            kargs["transmit"] = limitexec is None  # transmit if last
+            kargs["transmit"] = limitexec is None
             kargs["size"] = o.size
             ostop = self.buy(**kargs)
         else:
@@ -1459,27 +1299,18 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
     def order_target_size(self, data=None, target=0, **kwargs):
         """Place an order to rebalance a position to have final size of ``target``
+The current ``position`` size is taken into account as the start point
+to achieve ``target``
+- If ``target`` > ``pos.size`` -> buy ``target - pos.size``
+- If ``target`` < ``pos.size`` -> sell ``pos.size - target``
+It returns either:
+- The generated order
+or
+- ``None`` if no order has been issued (``target == position.size``)
 
-        The current ``position`` size is taken into account as the start point
-        to achieve ``target``
-
-          - If ``target`` > ``pos.size`` -> buy ``target - pos.size``
-
-          - If ``target`` < ``pos.size`` -> sell ``pos.size - target``
-
-        It returns either:
-
-          - The generated order
-
-          or
-
-          - ``None`` if no order has been issued (``target == position.size``)
-
-        :param data:  (Default value = None)
-        :param target:  (Default value = 0)
-        :param **kwargs:
-
-        """
+Args:
+    data: (Default value = None)
+    target: (Default value = 0)"""
         if isinstance(data, string_types):
             data = self.getdatabyname(data)
         elif data is None:
@@ -1499,29 +1330,21 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
     def order_target_value(self, data=None, target=0.0, price=None, **kwargs):
         """Place an order to rebalance a position to have final value of
-        ``target``
+``target``
+The current ``value`` is taken into account as the start point to
+achieve ``target``
+- If no ``target`` then close postion on data
+- If ``target`` > ``value`` then buy on data
+- If ``target`` < ``value`` then sell on data
+It returns either:
+- The generated order
+or
+- ``None`` if no order has been issued
 
-        The current ``value`` is taken into account as the start point to
-        achieve ``target``
-
-          - If no ``target`` then close postion on data
-          - If ``target`` > ``value`` then buy on data
-          - If ``target`` < ``value`` then sell on data
-
-        It returns either:
-
-          - The generated order
-
-          or
-
-          - ``None`` if no order has been issued
-
-        :param data:  (Default value = None)
-        :param target:  (Default value = 0.0)
-        :param price:  (Default value = None)
-        :param **kwargs:
-
-        """
+Args:
+    data: (Default value = None)
+    target: (Default value = 0.0)
+    price: (Default value = None)"""
 
         if isinstance(data, string_types):
             data = self.getdatabyname(data)
@@ -1551,46 +1374,31 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
     def order_target_percent(self, data=None, target=0.0, **kwargs):
         """Place an order to rebalance a position to have final value of
-        ``target`` percentage of current portfolio ``value``
+``target`` percentage of current portfolio ``value``
+``target`` is expressed in decimal: ``0.05`` -> ``5%``
+It uses ``order_target_value`` to execute the order.
+Example:
+- ``target=0.05`` and portfolio value is ``100``
+- The ``value`` to be reached is ``0.05 * 100 = 5``
+- ``5`` is passed as the ``target`` value to ``order_target_value``
+The current ``value`` is taken into account as the start point to
+achieve ``target``
+The ``position.size`` is used to determine if a position is ``long`` /
+``short``
+- If ``target`` > ``value``
+- buy if ``pos.size >= 0`` (Increase a long position)
+- sell if ``pos.size < 0`` (Increase a short position)
+- If ``target`` < ``value``
+- sell if ``pos.size >= 0`` (Decrease a long position)
+- buy if ``pos.size < 0`` (Decrease a short position)
+It returns either:
+- The generated order
+or
+- ``None`` if no order has been issued (``target == position.size``)
 
-        ``target`` is expressed in decimal: ``0.05`` -> ``5%``
-
-        It uses ``order_target_value`` to execute the order.
-
-        Example:
-          - ``target=0.05`` and portfolio value is ``100``
-
-          - The ``value`` to be reached is ``0.05 * 100 = 5``
-
-          - ``5`` is passed as the ``target`` value to ``order_target_value``
-
-        The current ``value`` is taken into account as the start point to
-        achieve ``target``
-
-        The ``position.size`` is used to determine if a position is ``long`` /
-        ``short``
-
-          - If ``target`` > ``value``
-            - buy if ``pos.size >= 0`` (Increase a long position)
-            - sell if ``pos.size < 0`` (Increase a short position)
-
-          - If ``target`` < ``value``
-            - sell if ``pos.size >= 0`` (Decrease a long position)
-            - buy if ``pos.size < 0`` (Decrease a short position)
-
-        It returns either:
-
-          - The generated order
-
-          or
-
-          - ``None`` if no order has been issued (``target == position.size``)
-
-        :param data:  (Default value = None)
-        :param target:  (Default value = 0.0)
-        :param **kwargs:
-
-        """
+Args:
+    data: (Default value = None)
+    target: (Default value = 0.0)"""
         if isinstance(data, string_types):
             data = self.getdatabyname(data)
         elif data is None:
@@ -1603,15 +1411,12 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
     def getposition(self, data=None, broker=None):
         """Returns the current position for a given data in a given broker.
+If both are None, the main data and the default broker will be used
+A property ``position`` is also available
 
-        If both are None, the main data and the default broker will be used
-
-        A property ``position`` is also available
-
-        :param data:  (Default value = None)
-        :param broker:  (Default value = None)
-
-        """
+Args:
+    data: (Default value = None)
+    broker: (Default value = None)"""
         data = data if data is not None else self.datas[0]
         broker = broker or self.broker
         return broker.getposition(data)
@@ -1620,15 +1425,12 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
     def getpositionbyname(self, name=None, broker=None):
         """Returns the current position for a given name in a given broker.
+If both are None, the main data and the default broker will be used
+A property ``positionbyname`` is also available
 
-        If both are None, the main data and the default broker will be used
-
-        A property ``positionbyname`` is also available
-
-        :param name:  (Default value = None)
-        :param broker:  (Default value = None)
-
-        """
+Args:
+    name: (Default value = None)
+    broker: (Default value = None)"""
         data = self.datas[0] if not name else self.getdatabyname(name)
         broker = broker or self.broker
         return broker.getposition(data)
@@ -1637,14 +1439,11 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
     def getpositions(self, broker=None):
         """Returns the current by data positions directly from the broker
+If the given ``broker`` is None, the default broker will be used
+A property ``positions`` is also available
 
-        If the given ``broker`` is None, the default broker will be used
-
-        A property ``positions`` is also available
-
-        :param broker:  (Default value = None)
-
-        """
+Args:
+    broker: (Default value = None)"""
         broker = broker or self.broker
         return broker.positions
 
@@ -1652,14 +1451,11 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
     def getpositionsbyname(self, broker=None):
         """Returns the current by name positions directly from the broker
+If the given ``broker`` is None, the default broker will be used
+A property ``positionsbyname`` is also available
 
-        If the given ``broker`` is None, the default broker will be used
-
-        A property ``positionsbyname`` is also available
-
-        :param broker:  (Default value = None)
-
-        """
+Args:
+    broker: (Default value = None)"""
         broker = broker or self.broker
         positions = broker.positions
 
@@ -1672,311 +1468,36 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
     positionsbyname = property(getpositionsbyname)
 
     def _addsizer(self, sizer, *args, **kwargs):
-        """
-
-        :param sizer:
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Args:
+    sizer:"""
         if sizer is None:
-            self.setsizer(bt.sizers.FixedSize())
+            self.setsizer(FixedSize())
         else:
-            self.setsizer(sizer(*args, **kwargs))
+            self.setsizer(sizer, *args, **kwargs)
 
     def setsizer(self, sizer):
         """Replace the default (fixed stake) sizer
 
-        :param sizer:
-
-        """
+Args:
+    sizer:"""
         self._sizer = sizer
         sizer.set(self, self.broker)
         return sizer
 
     def getsizer(self):
         """Returns the sizer which is in used if automatic statke calculation is
-        used
-
-        Also available as ``sizer``
-
-
-        """
+used
+Also available as ``sizer``"""
         return self._sizer
 
     sizer = property(getsizer, setsizer)
 
     def getsizing(self, data=None, isbuy=True):
-        """
+        """Args:
+    data: (Default value = None)
+    isbuy: (Default value = True)
 
-        :param data:  (Default value = None)
-        :param isbuy:  (Default value = True)
-        :returns: situation
-
-        """
+Returns:
+    situation"""
         data = data if data is not None else self.datas[0]
         return self._sizer.getsizing(data, isbuy=isbuy)
-
-
-class MetaSigStrategy(Strategy.__class__):
-    """ """
-
-    def __new__(meta, name, bases, dct):
-        """
-
-        :param meta:
-        :param name:
-        :param bases:
-        :param dct:
-
-        """
-        # map user defined next to custom to be able to call own method before
-        if "next" in dct:
-            dct["_next_custom"] = dct.pop("next")
-
-        cls = super(MetaSigStrategy, meta).__new__(meta, name, bases, dct)
-
-        # after class creation remap _next_catch to be next
-        cls.next = cls._next_catch
-        return cls
-
-    def dopreinit(cls, _obj, *args, **kwargs):
-        """
-
-        :param _obj:
-        :param *args:
-        :param **kwargs:
-
-        """
-        _obj, args, kwargs = super(MetaSigStrategy, cls).dopreinit(
-            _obj, *args, **kwargs
-        )
-
-        _obj._signals = collections.defaultdict(list)
-
-        _data = _obj.p._data
-        if _data is None:
-            _obj._dtarget = _obj.data0
-        elif isinstance(_data, integer_types):
-            _obj._dtarget = _obj.datas[_data]
-        elif isinstance(_data, string_types):
-            _obj._dtarget = _obj.getdatabyname(_data)
-        elif isinstance(_data, bt.LineRoot):
-            _obj._dtarget = _data
-        else:
-            _obj._dtarget = _obj.data0
-
-        return _obj, args, kwargs
-
-    def dopostinit(cls, _obj, *args, **kwargs):
-        """
-
-        :param _obj:
-        :param *args:
-        :param **kwargs:
-
-        """
-        _obj, args, kwargs = super(MetaSigStrategy, cls).dopostinit(
-            _obj, *args, **kwargs
-        )
-
-        for sigtype, sigcls, sigargs, sigkwargs in _obj.p.signals:
-            _obj._signals[sigtype].append(sigcls(*sigargs, **sigkwargs))
-
-        # Record types of signals
-        _obj._longshort = bool(_obj._signals[bt.SIGNAL_LONGSHORT])
-
-        _obj._long = bool(_obj._signals[bt.SIGNAL_LONG])
-        _obj._short = bool(_obj._signals[bt.SIGNAL_SHORT])
-
-        _obj._longexit = bool(_obj._signals[bt.SIGNAL_LONGEXIT])
-        _obj._shortexit = bool(_obj._signals[bt.SIGNAL_SHORTEXIT])
-
-        return _obj, args, kwargs
-
-
-class SignalStrategy(with_metaclass(MetaSigStrategy, Strategy)):
-    """This subclass of ``Strategy`` is meant to to auto-operate using
-    **signals**.
-
-    *Signals* are usually indicators and the expected output values:
-
-      - ``> 0`` is a ``long`` indication
-
-      - ``< 0`` is a ``short`` indication
-
-    There are 5 types of *Signals*, broken in 2 groups.
-
-    **Main Group**:
-
-      - ``LONGSHORT``: both ``long`` and ``short`` indications from this signal
-        are taken
-
-      - ``LONG``:
-        - ``long`` indications are taken to go long
-        - ``short`` indications are taken to *close* the long position. But:
-
-          - If a ``LONGEXIT`` (see below) signal is in the system it will be
-            used to exit the long
-
-          - If a ``SHORT`` signal is available and no ``LONGEXIT`` is available
-            , it will be used to close a ``long`` before opening a ``short``
-
-      - ``SHORT``:
-        - ``short`` indications are taken to go short
-        - ``long`` indications are taken to *close* the short position. But:
-
-          - If a ``SHORTEXIT`` (see below) signal is in the system it will be
-            used to exit the short
-
-          - If a ``LONG`` signal is available and no ``SHORTEXIT`` is available
-            , it will be used to close a ``short`` before opening a ``long``
-
-    **Exit Group**:
-
-      This 2 signals are meant to override others and provide criteria for
-      exitins a ``long``/``short`` position
-
-      - ``LONGEXIT``: ``short`` indications are taken to exit ``long``
-        positions
-
-      - ``SHORTEXIT``: ``long`` indications are taken to exit ``short``
-        positions
-
-    **Order Issuing**
-
-      Orders execution type is ``Market`` and validity is ``None`` (*Good until
-      Canceled*)
-
-
-    """
-
-    params = (
-        ("signals", []),
-        ("_accumulate", False),
-        ("_concurrent", False),
-        ("_data", None),
-    )
-
-    def _start(self):
-        """ """
-        self._sentinel = None  # sentinel for order concurrency
-        super(SignalStrategy, self)._start()
-
-    def signal_add(self, sigtype, signal):
-        """
-
-        :param sigtype:
-        :param signal:
-
-        """
-        self._signals[sigtype].append(signal)
-
-    def _notify(self, qorders=[], qtrades=[]):
-        """
-
-        :param qorders:  (Default value = [])
-        :param qtrades:  (Default value = [])
-
-        """
-        # Nullify the sentinel if done
-        procorders = qorders or self._orderspending
-        if self._sentinel is not None:
-            for order in procorders:
-                if order == self._sentinel and not order.alive():
-                    self._sentinel = None
-                    break
-
-        super(SignalStrategy, self)._notify(qorders=qorders, qtrades=qtrades)
-
-    def _next_catch(self):
-        """ """
-        self._next_signal()
-        if hasattr(self, "_next_custom"):
-            self._next_custom()
-
-    def _next_signal(self):
-        """ """
-        if self._sentinel is not None and not self.p._concurrent:
-            return  # order active and more than 1 not allowed
-
-        sigs = self._signals
-        nosig = [[0.0]]
-
-        # Calculate current status of the signals
-        ls_long = all(x[0] > 0.0 for x in sigs[bt.SIGNAL_LONGSHORT] or nosig)
-        ls_short = all(x[0] < 0.0 for x in sigs[bt.SIGNAL_LONGSHORT] or nosig)
-
-        l_enter0 = all(x[0] > 0.0 for x in sigs[bt.SIGNAL_LONG] or nosig)
-        l_enter1 = all(x[0] < 0.0 for x in sigs[bt.SIGNAL_LONG_INV] or nosig)
-        l_enter2 = all(x[0] for x in sigs[bt.SIGNAL_LONG_ANY] or nosig)
-        l_enter = l_enter0 or l_enter1 or l_enter2
-
-        s_enter0 = all(x[0] < 0.0 for x in sigs[bt.SIGNAL_SHORT] or nosig)
-        s_enter1 = all(x[0] > 0.0 for x in sigs[bt.SIGNAL_SHORT_INV] or nosig)
-        s_enter2 = all(x[0] for x in sigs[bt.SIGNAL_SHORT_ANY] or nosig)
-        s_enter = s_enter0 or s_enter1 or s_enter2
-
-        l_ex0 = all(x[0] < 0.0 for x in sigs[bt.SIGNAL_LONGEXIT] or nosig)
-        l_ex1 = all(x[0] > 0.0 for x in sigs[bt.SIGNAL_LONGEXIT_INV] or nosig)
-        l_ex2 = all(x[0] for x in sigs[bt.SIGNAL_LONGEXIT_ANY] or nosig)
-        l_exit = l_ex0 or l_ex1 or l_ex2
-
-        s_ex0 = all(x[0] > 0.0 for x in sigs[bt.SIGNAL_SHORTEXIT] or nosig)
-        s_ex1 = all(x[0] < 0.0 for x in sigs[bt.SIGNAL_SHORTEXIT_INV] or nosig)
-        s_ex2 = all(x[0] for x in sigs[bt.SIGNAL_SHORTEXIT_ANY] or nosig)
-        s_exit = s_ex0 or s_ex1 or s_ex2
-
-        # Use oppossite signales to start reversal (by closing)
-        # but only if no "xxxExit" exists
-        l_rev = not self._longexit and s_enter
-        s_rev = not self._shortexit and l_enter
-
-        # Opposite of individual long and short
-        l_leav0 = all(x[0] < 0.0 for x in sigs[bt.SIGNAL_LONG] or nosig)
-        l_leav1 = all(x[0] > 0.0 for x in sigs[bt.SIGNAL_LONG_INV] or nosig)
-        l_leav2 = all(x[0] for x in sigs[bt.SIGNAL_LONG_ANY] or nosig)
-        l_leave = l_leav0 or l_leav1 or l_leav2
-
-        s_leav0 = all(x[0] > 0.0 for x in sigs[bt.SIGNAL_SHORT] or nosig)
-        s_leav1 = all(x[0] < 0.0 for x in sigs[bt.SIGNAL_SHORT_INV] or nosig)
-        s_leav2 = all(x[0] for x in sigs[bt.SIGNAL_SHORT_ANY] or nosig)
-        s_leave = s_leav0 or s_leav1 or s_leav2
-
-        # Invalidate long leave if longexit signals are available
-        l_leave = not self._longexit and l_leave
-        # Invalidate short leave if shortexit signals are available
-        s_leave = not self._shortexit and s_leave
-
-        # Take size and start logic
-        size = self.getposition(self._dtarget).size
-        if not size:
-            if ls_long or l_enter:
-                self._sentinel = self.buy(self._dtarget)
-
-            elif ls_short or s_enter:
-                self._sentinel = self.sell(self._dtarget)
-
-        elif size > 0:  # current long position
-            if ls_short or l_exit or l_rev or l_leave:
-                # closing position - not relevant for concurrency
-                self.close(self._dtarget)
-
-            if ls_short or l_rev:
-                self._sentinel = self.sell(self._dtarget)
-
-            if ls_long or l_enter:
-                if self.p._accumulate:
-                    self._sentinel = self.buy(self._dtarget)
-
-        elif size < 0:  # current short position
-            if ls_long or s_exit or s_rev or s_leave:
-                # closing position - not relevant for concurrency
-                self.close(self._dtarget)
-
-            if ls_long or s_rev:
-                self._sentinel = self.buy(self._dtarget)
-
-            if ls_short or s_enter:
-                if self.p._accumulate:
-                    self._sentinel = self.sell(self._dtarget)

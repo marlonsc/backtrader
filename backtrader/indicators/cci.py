@@ -30,21 +30,16 @@ from . import Indicator, MeanDev, MovAv
 
 class CommodityChannelIndex(Indicator):
     """Introduced by Donald Lambert in 1980 to measure variations of the
-    "typical price" (see below) from its mean to identify extremes and
-    reversals
-
-    Formula:
-      - tp = typical_price = (high + low + close) / 3
-      - tpmean = MovingAverage(tp, period)
-      - deviation = tp - tpmean
-      - meandev = MeanDeviation(tp)
-      - cci = deviation / (meandeviation * factor)
-
-    See:
-      - https://en.wikipedia.org/wiki/Commodity_channel_index
-
-
-    """
+"typical price" (see below) from its mean to identify extremes and
+reversals
+Formula:
+- tp = typical_price = (high + low + close) / 3
+- tpmean = MovingAverage(tp, period)
+- deviation = tp - tpmean
+- meandev = MeanDeviation(tp)
+- cci = deviation / (meandeviation * factor)
+See:
+- https://en.wikipedia.org/wiki/Commodity_channel_index"""
 
     alias = ("CCI",)
 

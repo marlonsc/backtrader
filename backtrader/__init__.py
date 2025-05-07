@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2024 Daniel Rodriguez
+# Copyright (c) 2025 backtrader contributors
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,6 +18,23 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
+"""
+backtrader package initialization.
+
+Exposes the main public API for the backtrader framework, including core classes
+such as Cerebro, Analyzer, Strategy, Observer, Indicator, Signal, and SizerFix.
+
+Attributes:
+    feeds: Data feed subpackage.
+    TimeFrame: Time frame enumeration.
+    Cerebro: Main engine for backtesting and live trading.
+    Analyzer: Base class for analyzers.
+    Observer: Base class for observers.
+    Strategy: Base class for strategies.
+    Indicator: Base class for indicators.
+    Signal: Base class for signals.
+    SizerFix: Fixed size position sizer.
+"""
 from __future__ import (
     absolute_import,
     division,

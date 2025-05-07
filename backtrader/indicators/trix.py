@@ -30,25 +30,18 @@ from . import Indicator, MovAv
 
 class Trix(Indicator):
     """Defined by Jack Hutson in the 80s and shows the Rate of Change (%) or slope
-    of a triple exponentially smoothed moving average
-
-    Formula:
-      - ema1 = EMA(data, period)
-      - ema2 = EMA(ema1, period)
-      - ema3 = EMA(ema2, period)
-      - trix = 100 * (ema3 - ema3(-1)) / ema3(-1)
-
-      The final formula can be simplified to: 100 * (ema3 / ema3(-1) - 1)
-
-    The moving average used is the one originally defined by Wilder,
-    the SmoothedMovingAverage
-
-    See:
-      - https://en.wikipedia.org/wiki/Trix_(technical_analysis)
-      - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:trix
-
-
-    """
+of a triple exponentially smoothed moving average
+Formula:
+- ema1 = EMA(data, period)
+- ema2 = EMA(ema1, period)
+- ema3 = EMA(ema2, period)
+- trix = 100 * (ema3 - ema3(-1)) / ema3(-1)
+The final formula can be simplified to: 100 * (ema3 / ema3(-1) - 1)
+The moving average used is the one originally defined by Wilder,
+the SmoothedMovingAverage
+See:
+- https://en.wikipedia.org/wiki/Trix_(technical_analysis)
+- http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:trix"""
 
     alias = ("TRIX",)
     lines = ("trix",)
@@ -82,16 +75,11 @@ class Trix(Indicator):
 
 class TrixSignal(Trix):
     """Extension of Trix with a signal line (ala MACD)
-
-    Formula:
-      - trix = Trix(data, period)
-      - signal = EMA(trix, sigperiod)
-
-    See:
-      - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:trix
-
-
-    """
+Formula:
+- trix = Trix(data, period)
+- signal = EMA(trix, sigperiod)
+See:
+- http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:trix"""
 
     lines = ("signal",)
     params = (("sigperiod", 9),)

@@ -1,11 +1,12 @@
 # Copyright (c) 2025 backtrader contributors
 """
-Funções utilitárias de iteração para uso geral no framework backtrader.
-Todas as funções e docstrings devem ser line-wrap ≤ 90 caracteres.
+Iteration utility functions for general use in the backtrader framework.
+All functions and docstrings should be line-wrapped ≤ 90 characters.
 """
 
-from .py3 import string_types
 import collections
+
+from .py3 import string_types
 
 try:
     collectionsAbc = collections.abc
@@ -14,14 +15,15 @@ except AttributeError:
 
 
 def iterize(iterable):
-    """
-    Transforma elementos em iteráveis, exceto strings, para facilitar loops
-    genéricos. Strings são encapsuladas em tuplas. Outros elementos não
-    iteráveis também são encapsulados em tuplas.
+    """Transforms elements into iterables, except strings, to facilitate generic loops.
+Strings are encapsulated in tuples. Other non-iterable elements are also
+encapsulated in tuples.
 
-    :param iterable: Objeto iterável ou elemento único
-    :return: Lista de iteráveis
-    """
+Args:
+    iterable: Iterable object or single element
+
+Returns:
+    List of iterables"""
     niterable = list()
     for elem in iterable:
         if isinstance(elem, string_types):

@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2024 Daniel Rodriguez
+# Copyright (c) 2025 backtrader contributors
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,6 +18,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
+"""
+Commission info module for Backtrader.
+
+Defines base classes for commission schemes and related logic. All commission
+schemes should inherit from CommInfoBase or CommissionInfo. See class and method
+docstrings for usage details.
+"""
 from __future__ import (
     absolute_import,
     division,
@@ -31,85 +38,59 @@ from .utils.py3 import with_metaclass
 
 class CommInfoBase(with_metaclass(MetaParams)):
     """Base Class for the Commission Schemes.
+Params:
+- ``commission`` (def: ``0.0``): base commission value in percentage or
+monetary units
+- ``mult`` (def ``1.0``): multiplier applied to the asset for
+value/profit
+- ``margin`` (def: ``None``): amount of monetary units needed to
+open/hold an operation. It only applies if the final ``_stocklike``
+attribute in the class is set to ``False``
+- ``automargin`` (def: ``False``): Used by the method ``get_margin``
+to automatically calculate the margin/guarantees needed with the
+following policy
+- Use param ``margin`` if param ``automargin`` evaluates to ``False``
+- Use param ``mult`` * ``price`` if ``automargin < 0``
+- Use param ``automargin`` * ``price`` if ``automargin > 0``
+- ``commtype`` (def: ``None``): Supported values are
+``CommInfoBase.COMM_PERC`` (commission to be understood as %) and
+``CommInfoBase.COMM_FIXED`` (commission to be understood as monetary
+units)
+The default value of ``None`` is a supported value to retain
+compatibility with the legacy ``CommissionInfo`` object. If
+``commtype`` is set to None, then the following applies:
+- ``margin`` is ``None``: Internal ``_commtype`` is set to
+``COMM_PERC`` and ``_stocklike`` is set to ``True`` (Operating
+%-wise with Stocks)
+- ``margin`` is not ``None``: ``_commtype`` set to ``COMM_FIXED`` and
+``_stocklike`` set to ``False`` (Operating with fixed rount-trip
+commission with Futures)
+If this param is set to something else than ``None``, then it will be
+passed to the internal ``_commtype`` attribute and the same will be
+done with the param ``stocklike`` and the internal attribute
+``_stocklike``
+- ``stocklike`` (def: ``False``): Indicates if the instrument is
+Stock-like or Futures-like (see the ``commtype`` discussion above)
+- ``percabs`` (def: ``False``): when ``commtype`` is set to COMM_PERC,
+whether the parameter ``commission`` has to be understood as XX% or
+0.XX
+If this param is ``True``: 0.XX
+If this param is ``False``: XX%
+- ``interest`` (def: ``0.0``)
+If this is non-zero, this is the yearly interest charged for holding a
+short selling position. This is mostly meant for stock short-selling
+The formula: ``days * price * abs(size) * (interest / 365)``
+It must be specified in absolute terms: 0.05 -> 5%
+.. note:: the behavior can be changed by overriding the method:
+``_get_credit_interest``
+- ``interest_long`` (def: ``False``)
+Some products like ETFs get charged on interest for short and long
+positions. If ths is ``True`` and ``interest`` is non-zero the interest
+will be charged on both directions
+- ``leverage`` (def: ``1.0``)
+Amount of leverage for the asset with regards to the needed cash"""
 
-    Params:
-
-      - ``commission`` (def: ``0.0``): base commission value in percentage or
-        monetary units
-
-      - ``mult`` (def ``1.0``): multiplier applied to the asset for
-        value/profit
-
-      - ``margin`` (def: ``None``): amount of monetary units needed to
-        open/hold an operation. It only applies if the final ``_stocklike``
-        attribute in the class is set to ``False``
-
-      - ``automargin`` (def: ``False``): Used by the method ``get_margin``
-        to automatically calculate the margin/guarantees needed with the
-        following policy
-
-          - Use param ``margin`` if param ``automargin`` evaluates to ``False``
-
-          - Use param ``mult`` * ``price`` if ``automargin < 0``
-
-          - Use param ``automargin`` * ``price`` if ``automargin > 0``
-
-      - ``commtype`` (def: ``None``): Supported values are
-        ``CommInfoBase.COMM_PERC`` (commission to be understood as %) and
-        ``CommInfoBase.COMM_FIXED`` (commission to be understood as monetary
-        units)
-
-        The default value of ``None`` is a supported value to retain
-        compatibility with the legacy ``CommissionInfo`` object. If
-        ``commtype`` is set to None, then the following applies:
-
-          - ``margin`` is ``None``: Internal ``_commtype`` is set to
-            ``COMM_PERC`` and ``_stocklike`` is set to ``True`` (Operating
-            %-wise with Stocks)
-
-          - ``margin`` is not ``None``: ``_commtype`` set to ``COMM_FIXED`` and
-            ``_stocklike`` set to ``False`` (Operating with fixed rount-trip
-            commission with Futures)
-
-        If this param is set to something else than ``None``, then it will be
-        passed to the internal ``_commtype`` attribute and the same will be
-        done with the param ``stocklike`` and the internal attribute
-        ``_stocklike``
-
-      - ``stocklike`` (def: ``False``): Indicates if the instrument is
-        Stock-like or Futures-like (see the ``commtype`` discussion above)
-
-      - ``percabs`` (def: ``False``): when ``commtype`` is set to COMM_PERC,
-        whether the parameter ``commission`` has to be understood as XX% or
-        0.XX
-
-        If this param is ``True``: 0.XX
-        If this param is ``False``: XX%
-
-      - ``interest`` (def: ``0.0``)
-
-        If this is non-zero, this is the yearly interest charged for holding a
-        short selling position. This is mostly meant for stock short-selling
-
-        The formula: ``days * price * abs(size) * (interest / 365)``
-
-        It must be specified in absolute terms: 0.05 -> 5%
-
-        .. note:: the behavior can be changed by overriding the method:
-                 ``_get_credit_interest``
-
-      - ``interest_long`` (def: ``False``)
-
-        Some products like ETFs get charged on interest for short and long
-        positions. If ths is ``True`` and ``interest`` is non-zero the interest
-        will be charged on both directions
-
-      - ``leverage`` (def: ``1.0``)
-
-        Amount of leverage for the asset with regards to the needed cash
-
-
-    """
+    # pylint: disable=no-member
 
     COMM_PERC, COMM_FIXED = range(2)
 
@@ -167,17 +148,13 @@ class CommInfoBase(with_metaclass(MetaParams)):
 
     def get_margin(self, price):
         """Returns the actual margin/guarantees needed for a single item of the
-        asset at the given price. The default implementation has this policy:
+asset at the given price. The default implementation has this policy:
+- Use param ``margin`` if param ``automargin`` evaluates to ``False``
+- Use param ``mult`` * ``price`` if ``automargin < 0``
+- Use param ``automargin`` * ``price`` if ``automargin > 0``
 
-          - Use param ``margin`` if param ``automargin`` evaluates to ``False``
-
-          - Use param ``mult`` * ``price`` if ``automargin < 0``
-
-          - Use param ``automargin`` * ``price`` if ``automargin > 0``
-
-        :param price:
-
-        """
+Args:
+    price:"""
         if not self.p.automargin:
             return self.p.margin
 
@@ -193,10 +170,9 @@ class CommInfoBase(with_metaclass(MetaParams)):
     def getsize(self, price, cash):
         """Returns the needed size to meet a cash operation at a given price
 
-        :param price:
-        :param cash:
-
-        """
+Args:
+    price:
+    cash:"""
         if not self._stocklike:
             return int(self.p.leverage * (cash // self.get_margin(price)))
 
@@ -205,10 +181,9 @@ class CommInfoBase(with_metaclass(MetaParams)):
     def getoperationcost(self, size, price):
         """Returns the needed amount of cash an operation would cost
 
-        :param size:
-        :param price:
-
-        """
+Args:
+    size:
+    price:"""
         if not self._stocklike:
             return abs(size) * self.get_margin(price)
 
@@ -216,12 +191,11 @@ class CommInfoBase(with_metaclass(MetaParams)):
 
     def getvaluesize(self, size, price):
         """Returns the value of size for given a price. For future-like
-        objects it is fixed at size * margin
+objects it is fixed at size * margin
 
-        :param size:
-        :param price:
-
-        """
+Args:
+    size:
+    price:"""
         if not self._stocklike:
             return abs(size) * self.get_margin(price)
 
@@ -229,12 +203,11 @@ class CommInfoBase(with_metaclass(MetaParams)):
 
     def getvalue(self, position, price):
         """Returns the value of a position given a price. For future-like
-        objects it is fixed at size * margin
+objects it is fixed at size * margin
 
-        :param position:
-        :param price:
-
-        """
+Args:
+    position:
+    price:"""
         if not self._stocklike:
             return abs(position.size) * self.get_margin(price)
 
@@ -249,14 +222,12 @@ class CommInfoBase(with_metaclass(MetaParams)):
 
     def _getcommission(self, size, price, pseudoexec):
         """Calculates the commission of an operation at a given price
+pseudoexec: if True the operation has not yet been executed
 
-        pseudoexec: if True the operation has not yet been executed
-
-        :param size:
-        :param price:
-        :param pseudoexec:
-
-        """
+Args:
+    size:
+    price:
+    pseudoexec:"""
         if self._commtype == self.COMM_PERC:
             return abs(size) * self.p.commission * price
 
@@ -265,39 +236,31 @@ class CommInfoBase(with_metaclass(MetaParams)):
     def getcommission(self, size, price):
         """Calculates the commission of an operation at a given price
 
-        :param size:
-        :param price:
-
-        """
+Args:
+    size:
+    price:"""
         return self._getcommission(size, price, pseudoexec=True)
 
     def confirmexec(self, size, price):
-        """
-
-        :param size:
-        :param price:
-
-        """
+        """Args:
+    size:
+    price:"""
         return self._getcommission(size, price, pseudoexec=False)
 
     def profitandloss(self, size, price, newprice):
-        """
-
-        :param size:
-        :param price:
-        :param newprice:
-
-        """
+        """Args:
+    size:
+    price:
+    newprice:"""
         return size * (newprice - price) * self.p.mult
 
     def cashadjust(self, size, price, newprice):
         """Calculates cash adjustment for a given price difference
 
-        :param size:
-        :param price:
-        :param newprice:
-
-        """
+Args:
+    size:
+    price:
+    newprice:"""
         if not self._stocklike:
             return size * (newprice - price) * self.p.mult
 
@@ -306,11 +269,10 @@ class CommInfoBase(with_metaclass(MetaParams)):
     def get_credit_interest(self, data, pos, dt):
         """Calculates the credit due for short selling or product specific
 
-        :param data:
-        :param pos:
-        :param dt:
-
-        """
+Args:
+    data:
+    pos:
+    dt:"""
         size, price = pos.size, pos.price
 
         if size > 0 and not self.p.interest_long:
@@ -326,37 +288,28 @@ class CommInfoBase(with_metaclass(MetaParams)):
 
     def _get_credit_interest(self, data, size, price, days, dt0, dt1):
         """This method returns  the cost in terms of credit interest charged by
-        the broker.
+the broker.
+In the case of ``size > 0`` this method will only be called if the
+parameter to the class ``interest_long`` is ``True``
+The formulat for the calculation of the credit interest rate is:
+The formula: ``days * price * abs(size) * (interest / 365)``
 
-        In the case of ``size > 0`` this method will only be called if the
-        parameter to the class ``interest_long`` is ``True``
-
-        The formulat for the calculation of the credit interest rate is:
-
-          The formula: ``days * price * abs(size) * (interest / 365)``
-
-        :param data: data feed for which interest is charged
-        :param size: current position size
-        :param price: current position price
-        :param days: number of days elapsed since last credit calculation
-        :param dt0: and
-        :param dt1: datetime
-
-        """
+Args:
+    data: data feed for which interest is charged
+    size: current position size
+    price: current position price
+    days: number of days elapsed since last credit calculation
+    dt0: and
+    dt1: datetime"""
         return days * self._creditrate * abs(size) * price
 
 
 class CommissionInfo(CommInfoBase):
     """Base Class for the actual Commission Schemes.
-
-    CommInfoBase was created to keep suppor for the original, incomplete,
-    support provided by *backtrader*. New commission schemes derive from this
-    class which subclasses ``CommInfoBase``.
-
-    The default value of ``percabs`` is also changed to ``True``
-
-
-    """
+CommInfoBase was created to keep suppor for the original, incomplete,
+support provided by *backtrader*. New commission schemes derive from this
+class which subclasses ``CommInfoBase``.
+The default value of ``percabs`` is also changed to ``True``"""
 
     # Original CommissionInfo took 0.xx for percentages
     params = (("percabs", True),)

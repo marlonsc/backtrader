@@ -33,14 +33,10 @@ from ..utils.py3 import with_metaclass
 
 class Trades(Observer):
     """This observer keeps track of full trades and plot the PnL level achieved
-    when a trade is closed.
-
-    A trade is open when a position goes from 0 (or crossing over 0) to X and
-    is then closed when it goes back to 0 (or crosses over 0 in the opposite
-    direction)
-
-
-    """
+when a trade is closed.
+A trade is open when a position goes from 0 (or crossing over 0) to X and
+is then closed when it goes back to 0 (or crosses over 0 in the opposite
+direction)"""
 
     _stclock = True
 
@@ -122,12 +118,7 @@ class MetaDataTrades(Observer.__class__):
     """ """
 
     def donew(cls, *args, **kwargs):
-        """
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """"""
         _obj, args, kwargs = super(MetaDataTrades, cls).donew(*args, **kwargs)
 
         # Recreate the lines dynamically

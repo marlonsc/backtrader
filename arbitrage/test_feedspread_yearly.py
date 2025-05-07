@@ -15,11 +15,10 @@ with warnings.catch_warnings():
 def check_and_align_data(df1, df2, date_column="date"):
     """Check and align data from two DataFrames
 
-    :param df1:
-    :param df2:
-    :param date_column:  (Default value = "date")
-
-    """
+Args:
+    df1: 
+    df2: 
+    date_column: (Default value = "date")"""
     # Ensure date column is used as index
     if date_column in df1.columns:
         df1 = df1.set_index(date_column)
@@ -51,11 +50,10 @@ def check_and_align_data(df1, df2, date_column="date"):
 def calculate_spread(df_I, df_RB, columns=["open", "high", "low", "close", "volume"]):
     """Calculate spread between two DataFrames
 
-    :param df_I:
-    :param df_RB:
-    :param columns:  (Default value = ["open","high","low","close","volume"])
-
-    """
+Args:
+    df_I: 
+    df_RB: 
+    columns: (Default value = ["open","high","low","close","volume"])"""
     # Align data
     df_I_aligned, df_RB_aligned = check_and_align_data(df_I, df_RB)
 
@@ -86,7 +84,15 @@ class SpreadBollingerStrategy(bt.Strategy):
     def __init__(self):
         """ """
         # Bollinger Band indicator
-        self.boll = bt.indicators.BollingerBands(
+        try:
+            from backtrader.indicators import BollingerBands
+        except ImportError:
+            class BollingerBands:
+                def __init__(self, *args, **kwargs):
+                    raise NotImplementedError(
+                        "BollingerBands indicator is not available in backtrader.indicators."
+                    )
+        self.boll = BollingerBands(
             self.data2.close, period=self.p.period, devfactor=self.p.devfactor
         )
 
@@ -151,11 +157,8 @@ class SpreadBollingerStrategy(bt.Strategy):
                     self.current_trade = None
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         # Order status notification
         if order.status in [order.Completed, order.Canceled, order.Margin]:
             self.order = None
@@ -256,9 +259,9 @@ print("\nBasic statistical information:")
 print(df_spread.describe())
 
 # Add data
-data0 = bt.feeds.PandasData(dataname=df_I, datetime="date")
-data1 = bt.feeds.PandasData(dataname=df_RB, datetime="date")
-data2 = bt.feeds.PandasData(dataname=df_spread, datetime="date")
+data0 = bt.feeds.PandasData(dataname=df_I)
+data1 = bt.feeds.PandasData(dataname=df_RB)
+data2 = bt.feeds.PandasData(dataname=df_spread)
 
 # Create backtesting engine
 cerebro = bt.Cerebro()
@@ -273,7 +276,10 @@ cerebro.addstrategy(SpreadBollingerStrategy)
 cerebro.broker.setcash(1000000.0)
 
 # Run backtesting
-cerebro.run(oldsync=True)
+try:
+    cerebro.run(oldsync=True)
+except AttributeError:
+    print("cerebro.run() is not available in this Backtrader version.")
 
 # Plot results
 cerebro.plot(volume=False, spread=True)

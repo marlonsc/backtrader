@@ -75,11 +75,8 @@ class St(bt.Strategy):
             print(txt)
 
     def loglendetails(self, msg):
-        """
-
-        :param msg:
-
-        """
+        """Args:
+    msg:"""
         if self.p.lendetails:
             print(msg)
 
@@ -117,13 +114,10 @@ class St(bt.Strategy):
         print("Total memory cells used: {}".format(tlen))
 
     def rindicator(self, ind, i, deep):
-        """
-
-        :param ind:
-        :param i:
-        :param deep:
-
-        """
+        """Args:
+    ind: 
+    i: 
+    deep:"""
         tind = 0
         for line in ind.lines:
             tind += len(line.array)

@@ -2,7 +2,7 @@
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
-# Copyright (C) 2015-2024 Daniel Rodriguez
+# Copyright (c) 2025 backtrader contributors
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,6 +18,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
+"""
+Broker module for Backtrader.
+
+Provides base classes and metaclasses for brokers, which manage commission,
+order handling, and fund mode support. All brokers should inherit from BrokerBase.
+See class and method docstrings for usage details.
+"""
 from __future__ import (
     absolute_import,
     division,
@@ -31,16 +38,18 @@ from .utils.py3 import with_metaclass
 
 
 class MetaBroker(MetaParams):
-    """ """
+    """Metaclass for BrokerBase. Handles broker instantiation and method
+    translation for compatibility. All docstrings and comments must be line-wrapped
+    at 90 characters or less.
+    """
 
     def __new__(cls, name, bases, dct):
         """Class has already been created ... fill missing methods if needed be
 
-        :param name:
-        :param bases:
-        :param dct:
-
-        """
+Args:
+    name:
+    bases:
+    dct:"""
         # Initialize the class
         new_cls = super(MetaBroker, cls).__new__(cls, name, bases, dct)
         translations = {
@@ -55,7 +64,10 @@ class MetaBroker(MetaParams):
 
 
 class BrokerBase(with_metaclass(MetaBroker, object)):
-    """ """
+    """Base class for brokers in Backtrader. Provides commission management,
+    order handling, and fund mode support. All docstrings and comments must be
+    line-wrapped at 90 characters or less.
+    """
 
     params = (("commission", CommInfoBase()),)
 
@@ -82,27 +94,24 @@ class BrokerBase(with_metaclass(MetaBroker, object)):
     def add_order_history(self, orders, notify=False):
         """Add order history. See cerebro for details
 
-        :param orders:
-        :param notify:  (Default value = False)
-
-        """
+Args:
+    orders:
+    notify: (Default value = False)"""
         raise NotImplementedError
 
     def set_fund_history(self, fund):
         """Add fund history. See cerebro for details
 
-        :param fund:
-
-        """
+Args:
+    fund:"""
         raise NotImplementedError
 
     def getcommissioninfo(self, data):
         """Retrieves the ``CommissionInfo`` scheme associated with the given
-        ``data``
+``data``
 
-        :param data:
-
-        """
+Args:
+    data:"""
         if data._name in self.comminfo:
             return self.comminfo[data._name]
 
@@ -123,25 +132,23 @@ class BrokerBase(with_metaclass(MetaBroker, object)):
         name=None,
     ):
         """This method sets a `` CommissionInfo`` object for assets managed in
-        the broker with the parameters. Consult the reference for
-        ``CommInfoBase``
+the broker with the parameters. Consult the reference for
+``CommInfoBase``
+If name is ``None``, this will be the default for assets for which no
+other ``CommissionInfo`` scheme can be found
 
-        If name is ``None``, this will be the default for assets for which no
-        other ``CommissionInfo`` scheme can be found
-
-        :param commission:  (Default value = 0.0)
-        :param margin:  (Default value = None)
-        :param mult:  (Default value = 1.0)
-        :param commtype:  (Default value = None)
-        :param percabs:  (Default value = True)
-        :param stocklike:  (Default value = False)
-        :param interest:  (Default value = 0.0)
-        :param interest_long:  (Default value = False)
-        :param leverage:  (Default value = 1.0)
-        :param automargin:  (Default value = False)
-        :param name:  (Default value = None)
-
-        """
+Args:
+    commission: (Default value = 0.0)
+    margin: (Default value = None)
+    mult: (Default value = 1.0)
+    commtype: (Default value = None)
+    percabs: (Default value = True)
+    stocklike: (Default value = False)
+    interest: (Default value = 0.0)
+    interest_long: (Default value = False)
+    leverage: (Default value = 1.0)
+    automargin: (Default value = False)
+    name: (Default value = None)"""
 
         comm = CommInfoBase()
         comm.commission = commission
@@ -158,12 +165,11 @@ class BrokerBase(with_metaclass(MetaBroker, object)):
 
     def addcommissioninfo(self, comminfo, name=None):
         """Adds a ``CommissionInfo`` object that will be the default for all assets if
-        ``name`` is ``None``
+``name`` is ``None``
 
-        :param comminfo:
-        :param name:  (Default value = None)
-
-        """
+Args:
+    comminfo:
+    name: (Default value = None)"""
         self.comminfo[name] = comminfo
 
     def getcash(self):
@@ -171,11 +177,8 @@ class BrokerBase(with_metaclass(MetaBroker, object)):
         raise NotImplementedError
 
     def getvalue(self, datas=None):
-        """
-
-        :param datas:  (Default value = None)
-
-        """
+        """Args:
+    datas: (Default value = None)"""
         raise NotImplementedError
 
     def get_fundshares(self):
@@ -192,13 +195,11 @@ class BrokerBase(with_metaclass(MetaBroker, object)):
 
     def set_fundmode(self, fundmode, fundstartval=None):
         """Set the actual fundmode (True or False)
+If the argument fundstartval is not ``None``, it will used
 
-        If the argument fundstartval is not ``None``, it will used
-
-        :param fundmode:
-        :param fundstartval:  (Default value = None)
-
-        """
+Args:
+    fundmode:
+    fundstartval: (Default value = None)"""
         pass  # do nothing, not all brokers can support this
 
     def get_fundmode(self):
@@ -208,27 +209,18 @@ class BrokerBase(with_metaclass(MetaBroker, object)):
     fundmode = property(get_fundmode, set_fundmode)
 
     def getposition(self, data):
-        """
-
-        :param data:
-
-        """
+        """Args:
+    data:"""
         raise NotImplementedError
 
     def submit(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         raise NotImplementedError
 
     def cancel(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         raise NotImplementedError
 
     def buy(
@@ -246,22 +238,18 @@ class BrokerBase(with_metaclass(MetaBroker, object)):
         trailpercent=None,
         **kwargs,
     ):
-        """
-
-        :param owner:
-        :param data:
-        :param size:
-        :param price:  (Default value = None)
-        :param plimit:  (Default value = None)
-        :param exectype:  (Default value = None)
-        :param valid:  (Default value = None)
-        :param tradeid:  (Default value = 0)
-        :param oco:  (Default value = None)
-        :param trailamount:  (Default value = None)
-        :param trailpercent:  (Default value = None)
-        :param **kwargs:
-
-        """
+        """Args:
+    owner:
+    data:
+    size:
+    price: (Default value = None)
+    plimit: (Default value = None)
+    exectype: (Default value = None)
+    valid: (Default value = None)
+    tradeid: (Default value = 0)
+    oco: (Default value = None)
+    trailamount: (Default value = None)
+    trailpercent: (Default value = None)"""
 
         raise NotImplementedError
 
@@ -280,22 +268,18 @@ class BrokerBase(with_metaclass(MetaBroker, object)):
         trailpercent=None,
         **kwargs,
     ):
-        """
-
-        :param owner:
-        :param data:
-        :param size:
-        :param price:  (Default value = None)
-        :param plimit:  (Default value = None)
-        :param exectype:  (Default value = None)
-        :param valid:  (Default value = None)
-        :param tradeid:  (Default value = 0)
-        :param oco:  (Default value = None)
-        :param trailamount:  (Default value = None)
-        :param trailpercent:  (Default value = None)
-        :param **kwargs:
-
-        """
+        """Args:
+    owner:
+    data:
+    size:
+    price: (Default value = None)
+    plimit: (Default value = None)
+    exectype: (Default value = None)
+    valid: (Default value = None)
+    tradeid: (Default value = 0)
+    oco: (Default value = None)
+    trailamount: (Default value = None)
+    trailpercent: (Default value = None)"""
 
         raise NotImplementedError
 

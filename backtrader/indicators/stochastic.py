@@ -74,28 +74,21 @@ class _StochasticBase(Indicator):
 
 class StochasticFast(_StochasticBase):
     """By Dr. George Lane in the 50s. It compares a closing price to the price
-    range and tries to show convergence if the closing prices are close to the
-    extremes
-
-      - It will go up if closing prices are close to the highs
-      - It will roughly go down if closing prices are close to the lows
-
-    It shows divergence if the extremes keep on growing but closing prices
-    do not in the same manner (distance to the extremes grow)
-
-    Formula:
-      - hh = highest(data.high, period)
-      - ll = lowest(data.low, period)
-      - knum = data.close - ll
-      - kden = hh - ll
-      - k = 100 * (knum / kden)
-      - d = MovingAverage(k, period_dfast)
-
-    See:
-      - http://en.wikipedia.org/wiki/Stochastic_oscillator
-
-
-    """
+range and tries to show convergence if the closing prices are close to the
+extremes
+- It will go up if closing prices are close to the highs
+- It will roughly go down if closing prices are close to the lows
+It shows divergence if the extremes keep on growing but closing prices
+do not in the same manner (distance to the extremes grow)
+Formula:
+- hh = highest(data.high, period)
+- ll = lowest(data.low, period)
+- knum = data.close - ll
+- kden = hh - ll
+- k = 100 * (knum / kden)
+- d = MovingAverage(k, period_dfast)
+See:
+- http://en.wikipedia.org/wiki/Stochastic_oscillator"""
 
     def __init__(self):
         """ """
@@ -106,21 +99,15 @@ class StochasticFast(_StochasticBase):
 
 class Stochastic(_StochasticBase):
     """The regular (or slow version) adds an additional moving average layer and
-    thus:
-
-      - The percD line of the StochasticFast becomes the percK line
-      - percD becomes a  moving average of period_dslow of the original percD
-
-    Formula:
-      - k = k
-      - d = d
-      - d = MovingAverage(d, period_dslow)
-
-    See:
-      - http://en.wikipedia.org/wiki/Stochastic_oscillator
-
-
-    """
+thus:
+- The percD line of the StochasticFast becomes the percK line
+- percD becomes a  moving average of period_dslow of the original percD
+Formula:
+- k = k
+- d = d
+- d = MovingAverage(d, period_dslow)
+See:
+- http://en.wikipedia.org/wiki/Stochastic_oscillator"""
 
     alias = ("StochasticSlow",)
     params = (("period_dslow", 3),)
@@ -140,21 +127,15 @@ class Stochastic(_StochasticBase):
 
 class StochasticFull(_StochasticBase):
     """This version displays the 3 possible lines:
-
-      - percK
-      - percD
-      - percSlow
-
-    Formula:
-      - k = d
-      - d = MovingAverage(k, period_dslow)
-      - dslow =
-
-    See:
-      - http://en.wikipedia.org/wiki/Stochastic_oscillator
-
-
-    """
+- percK
+- percD
+- percSlow
+Formula:
+- k = d
+- d = MovingAverage(k, period_dslow)
+- dslow =
+See:
+- http://en.wikipedia.org/wiki/Stochastic_oscillator"""
 
     lines = ("percDSlow",)
     params = (("period_dslow", 3),)

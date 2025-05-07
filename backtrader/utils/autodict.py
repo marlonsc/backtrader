@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+"""This module contains classes for creating dictionaries with automatic
+attributes and values.
+"""
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -18,6 +21,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
+# Copyright (c) 2025 backtrader contributors
+
 from __future__ import (
     absolute_import,
     division,
@@ -25,65 +30,86 @@ from __future__ import (
     unicode_literals,
 )
 
-from collections import OrderedDict, defaultdict
-
 from .py3 import values as py3lvalues
+
+from collections import OrderedDict, defaultdict
 
 
 def Tree():
-    """ """
+    """Create a tree of nested dictionaries.
+
+    Returns:
+        defaultdict: A defaultdict of Tree objects.
+    """
     return defaultdict(Tree)
 
 
 class AutoDictList(dict):
-    """ """
+    """Create a list of dictionaries.
+
+    Returns:
+        dict: A dictionary of lists.
+    """
 
     def __missing__(self, key):
-        """
-
-        :param key:
-
-        """
+        """Args:
+    key:"""
         value = self[key] = list()
         return value
 
 
 class DotDict(dict):
-    """ """
+    """Dictionary with attribute-style access (dot notation).
 
-    # If the attribut is not found in the usual places try the dict itself
+    Attributes can be accessed as keys and vice versa. Raises AttributeError for
+    special attributes (dunder names).
+
+    Returns:
+        dict: A dictionary with attribute-style access.
+    """
+
     def __getattr__(self, key):
-        """
-
-        :param key:
-
-        """
+        """Return value for key as attribute, unless dunder name."""
         if key.startswith("__"):
-            return super(DotDict, self).__getattr__(key)
+            raise AttributeError(f"DotDict has no attribute '{key}'")
         return self[key]
 
 
 class AutoDict(dict):
-    """ """
+    """Dictionary with automatic closing and opening.
+
+    Returns:
+        dict: A dictionary with automatic closing and opening.
+    """
 
     _closed = False
 
     def _close(self):
-        """ """
+        """Close the dictionary.
+
+        Returns:
+            dict: The closed dictionary.
+        """
         self._closed = True
         for key, val in self.items():
             if isinstance(val, (AutoDict, AutoOrderedDict)):
                 val._close()
 
     def _open(self):
-        """ """
+        """Open the dictionary.
+
+        Returns:
+            dict: The opened dictionary.
+        """
         self._closed = False
 
     def __missing__(self, key):
-        """
+        """Check if the key is missing.
+        Args:
+            key: The key to check.
 
-        :param key:
-
+        Returns:
+            dict: The dictionary with the key.
         """
         if self._closed:
             raise KeyError
@@ -92,10 +118,13 @@ class AutoDict(dict):
         return value
 
     def __getattr__(self, key):
-        """
+        """Get the value of the key.
 
-        :param key:
+        Args:
+            key: The key to get the value of.
 
+        Returns:
+            dict: The value of the key.
         """
         if False and key.startswith("_"):
             raise AttributeError
@@ -103,11 +132,11 @@ class AutoDict(dict):
         return self[key]
 
     def __setattr__(self, key, value):
-        """
+        """Set the value of the key.
 
-        :param key:
-        :param value:
-
+        Args:
+            key: The key to set the value of.
+            value: The value to set.
         """
         if False and key.startswith("_"):
             self.__dict__[key] = value
@@ -117,26 +146,41 @@ class AutoDict(dict):
 
 
 class AutoOrderedDict(OrderedDict):
-    """ """
+    """Ordered dictionary with automatic closing and opening.
+
+    Returns:
+        OrderedDict: An ordered dictionary with automatic closing and opening.
+    """
 
     _closed = False
 
     def _close(self):
-        """ """
+        """Close the ordered dictionary.
+
+        Returns:
+            OrderedDict: The closed ordered dictionary.
+        """
         self._closed = True
         for key, val in self.items():
             if isinstance(val, (AutoDict, AutoOrderedDict)):
                 val._close()
 
     def _open(self):
-        """ """
+        """Open the ordered dictionary.
+
+        Returns:
+            OrderedDict: The opened ordered dictionary.
+        """
         self._closed = False
 
     def __missing__(self, key):
-        """
+        """Check if the key is missing.
 
-        :param key:
+        Args:
+            key: The key to check.
 
+        Returns:
+            OrderedDict: The ordered dictionary with the key.
         """
         if self._closed:
             raise KeyError
@@ -146,10 +190,13 @@ class AutoOrderedDict(OrderedDict):
         return value
 
     def __getattr__(self, key):
-        """
+        """Get the value of the key.
 
-        :param key:
+        Args:
+            key: The key to get the value of.
 
+        Returns:
+            OrderedDict: The value of the key.
         """
         if key.startswith("_"):
             raise AttributeError
@@ -157,11 +204,11 @@ class AutoOrderedDict(OrderedDict):
         return self[key]
 
     def __setattr__(self, key, value):
-        """
+        """Set the value of the key.
 
-        :param key:
-        :param value:
-
+        Args:
+            key: The key to set the value of.
+            value: The value to set.
         """
         if key.startswith("_"):
             self.__dict__[key] = value
@@ -171,10 +218,13 @@ class AutoOrderedDict(OrderedDict):
 
     # Define math operations
     def __iadd__(self, other):
-        """
+        """Add two dictionaries.
 
-        :param other:
+        Args:
+            other: The other dictionary to add.
 
+        Returns:
+            OrderedDict: The sum of the two dictionaries.
         """
         if not isinstance(self, type(other)):
             return type(other)() + other
@@ -182,10 +232,13 @@ class AutoOrderedDict(OrderedDict):
         return self + other
 
     def __isub__(self, other):
-        """
+        """Subtract two dictionaries.
 
-        :param other:
+        Args:
+            other: The other dictionary to subtract.
 
+        Returns:
+            OrderedDict: The difference of the two dictionaries.
         """
         if not isinstance(self, type(other)):
             return type(other)() - other
@@ -193,10 +246,13 @@ class AutoOrderedDict(OrderedDict):
         return self - other
 
     def __imul__(self, other):
-        """
+        """Multiply two dictionaries.
 
-        :param other:
+        Args:
+            other: The other dictionary to multiply.
 
+        Returns:
+            OrderedDict: The product of the two dictionaries.
         """
         if not isinstance(self, type(other)):
             return type(other)() * other
@@ -204,10 +260,13 @@ class AutoOrderedDict(OrderedDict):
         return self + other
 
     def __idiv__(self, other):
-        """
+        """Divide two dictionaries.
 
-        :param other:
+        Args:
+            other: The other dictionary to divide.
 
+        Returns:
+            OrderedDict: The quotient of the two dictionaries.
         """
         if not isinstance(self, type(other)):
             return type(other)() // other
@@ -215,10 +274,13 @@ class AutoOrderedDict(OrderedDict):
         return self + other
 
     def __itruediv__(self, other):
-        """
+        """Divide two dictionaries.
 
-        :param other:
+        Args:
+            other: The other dictionary to divide.
 
+        Returns:
+            OrderedDict: The quotient of the two dictionaries.
         """
         if not isinstance(self, type(other)):
             return type(other)() / other
@@ -226,5 +288,9 @@ class AutoOrderedDict(OrderedDict):
         return self + other
 
     def lvalues(self):
-        """ """
+        """Get the values of the dictionary.
+
+        Returns:
+            list: The values of the dictionary.
+        """
         return py3lvalues(self)

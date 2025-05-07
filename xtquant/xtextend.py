@@ -2,13 +2,10 @@ class FileLock:
     """ """
 
     def __init__(this, path, auto_lock=False):
-        """
-
-        :param this:
-        :param path:
-        :param auto_lock:  (Default value = False)
-
-        """
+        """Args:
+    this: 
+    path: 
+    auto_lock: (Default value = False)"""
         this.path = path
         this.fhandle = None
         if auto_lock:
@@ -16,11 +13,8 @@ class FileLock:
         return
 
     def is_lock(this):
-        """
-
-        :param this:
-
-        """
+        """Args:
+    this:"""
         import os
 
         if os.path.exists(this.path):
@@ -32,11 +26,8 @@ class FileLock:
         return False
 
     def lock(this):
-        """
-
-        :param this:
-
-        """
+        """Args:
+    this:"""
         if this.fhandle:
             raise this.fhandle
         try:
@@ -46,11 +37,8 @@ class FileLock:
         return True
 
     def unlock(this):
-        """
-
-        :param this:
-
-        """
+        """Args:
+    this:"""
         if not this.fhandle:
             raise this.fhandle
         this.fhandle.close()
@@ -58,11 +46,8 @@ class FileLock:
         return True
 
     def clean(this):
-        """
-
-        :param this:
-
-        """
+        """Args:
+    this:"""
         import os
 
         if not os.path.exists(this.path):
@@ -85,11 +70,8 @@ class Extender:
     rank_type = c_short
 
     def __init__(self, base_dir):
-        """
-
-        :param base_dir:
-
-        """
+        """Args:
+    base_dir:"""
         import os
 
         self.base_dir = os.path.join(base_dir, "EP")
@@ -112,23 +94,20 @@ class Extender:
             self.timedatelist = data["tradedatelist"]
 
     def read_data(self, data, time_indexs, stock_length):
-        """
-
-        :param data:
-        :param time_indexs:
-        :param stock_length:
-
-        """
+        """Args:
+    data: 
+    time_indexs: 
+    stock_length:"""
         from ctypes import POINTER, c_float, c_short, cast, sizeof
 
         res = {}
         num = (sizeof(self.value_type) + sizeof(self.rank_type)) * stock_length
         for time_index in time_indexs:
             index = num * time_index
-            value_data = data[index: index + sizeof(self.value_type) * stock_length]
+            value_data = data[index : index + sizeof(self.value_type) * stock_length]
             values = cast(value_data, POINTER(c_float))
             rank_data = data[
-                index + sizeof(self.value_type) * stock_length: index + num
+                index + sizeof(self.value_type) * stock_length : index + num
             ]
             ranks = cast(rank_data, POINTER(c_short))
             res[self.timedatelist[time_index]] = [
@@ -138,11 +117,8 @@ class Extender:
         return res
 
     def format_time(self, times):
-        """
-
-        :param times:
-
-        """
+        """Args:
+    times:"""
         import time
 
         if isinstance(times, str):
@@ -156,12 +132,9 @@ class Extender:
                 return times
 
     def show_extend_data(self, file, times):
-        """
-
-        :param file:
-        :param times:
-
-        """
+        """Args:
+    file: 
+    times:"""
         import os
         import time
 
@@ -203,12 +176,9 @@ class Extender:
 
 
 def show_extend_data(file, times):
-    """
-
-    :param file:
-    :param times:
-
-    """
+    """Args:
+    file: 
+    times:"""
     import os
 
     from . import xtdata as xd

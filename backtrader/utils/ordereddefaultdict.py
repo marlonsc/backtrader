@@ -3,6 +3,7 @@
 ###############################################################################
 #
 # Copyright (C) 2015-2024 Daniel Rodriguez
+# Copyright (c) 2025 backtrader contributors
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -36,12 +37,7 @@ class OrderedDefaultdict(OrderedDict):
     """ """
 
     def __init__(self, *args, **kwargs):
-        """
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """"""
         if not args:
             self.default_factory = None
         else:
@@ -52,11 +48,8 @@ class OrderedDefaultdict(OrderedDict):
         super(OrderedDefaultdict, self).__init__(*args, **kwargs)
 
     def __missing__(self, key):
-        """
-
-        :param key:
-
-        """
+        """Args:
+    key:"""
         if self.default_factory is None:
             raise KeyError(key)
         self[key] = default = self.default_factory()

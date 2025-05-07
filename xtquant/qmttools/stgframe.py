@@ -8,21 +8,15 @@ class StrategyLoader:
     """ """
 
     def __init__(this):
-        """
-
-        :param this:
-
-        """
+        """Args:
+    this:"""
         this.C = None
         this.main_quote_subid = 0
         return
 
     def init(this):
-        """
-
-        :param this:
-
-        """
+        """Args:
+    this:"""
         import os
         import uuid
 
@@ -111,7 +105,7 @@ class StrategyLoader:
             if "." in C.stock_code:
                 pos = C.stock_code.rfind(".")
                 C.stockcode = C.stock_code[0:pos]
-                C.market = C.stock_code[pos + 1:].upper()
+                C.market = C.stock_code[pos + 1 :].upper()
 
             if C.stockcode and C.market:
                 C.stock_code = C.stockcode + "." + C.market
@@ -189,19 +183,13 @@ class StrategyLoader:
         return
 
     def shutdown(this):
-        """
-
-        :param this:
-
-        """
+        """Args:
+    this:"""
         return
 
     def start(this):
-        """
-
-        :param this:
-
-        """
+        """Args:
+    this:"""
         import time
 
         C = this.C
@@ -221,11 +209,8 @@ class StrategyLoader:
         return
 
     def stop(this):
-        """
-
-        :param this:
-
-        """
+        """Args:
+    this:"""
         if this.main_quote_subid:
             xtdata.unsubscribe_quote(this.main_quote_subid)
 
@@ -233,11 +218,8 @@ class StrategyLoader:
         return
 
     def run(this):
-        """
-
-        :param this:
-
-        """
+        """Args:
+    this:"""
         C = this.C
 
         if C.quote_mode in ["realtime", "all"]:
@@ -245,11 +227,8 @@ class StrategyLoader:
         return
 
     def load_main_history(this):
-        """
-
-        :param this:
-
-        """
+        """Args:
+    this:"""
         C = this.C
 
         data = xtdata.get_market_data_ex(
@@ -266,19 +245,13 @@ class StrategyLoader:
         return
 
     def load_main_realtime(this):
-        """
-
-        :param this:
-
-        """
+        """Args:
+    this:"""
         C = this.C
 
         def on_data(data):
-            """
-
-            :param data:
-
-            """
+            """Args:
+    data:"""
             data = data.get(C.stock_code, [])
             if data:
                 tt = data[-1]["time"]
@@ -296,23 +269,17 @@ class StrategyLoader:
         return
 
     def on_main_quote(this, timetag):
-        """
-
-        :param this:
-        :param timetag:
-
-        """
+        """Args:
+    this: 
+    timetag:"""
         if not this.C.timelist or this.C.timelist[-1] < timetag:
             this.C.timelist.append(timetag)
         this.run_bar()
         return
 
     def run_bar(this):
-        """
-
-        :param this:
-
-        """
+        """Args:
+    this:"""
         C = this.C
 
         push_timelist = []
@@ -348,12 +315,9 @@ class StrategyLoader:
         return
 
     def create_formula(this, callback=None):
-        """
-
-        :param this:
-        :param callback:  (Default value = None)
-
-        """
+        """Args:
+    this: 
+    callback: (Default value = None)"""
         C = this.C
         client = xtdata.get_client()
 
@@ -375,25 +339,19 @@ class StrategyLoader:
         client.subscribeFormula(C.request_id, _BSON_.BSON.encode(data), callback)
 
     def call_formula(this, func, data):
-        """
-
-        :param this:
-        :param func:
-        :param data:
-
-        """
+        """Args:
+    this: 
+    func: 
+    data:"""
         C = this.C
         client = xtdata.get_client()
         bresult = client.callFormula(C.request_id, func, _BSON_.BSON.encode(data))
         return _BSON_.BSON.decode(bresult)
 
     def create_view(this, title):
-        """
-
-        :param this:
-        :param title:
-
-        """
+        """Args:
+    this: 
+    title:"""
         C = this.C
         client = xtdata.get_client()
         data = {
@@ -412,11 +370,8 @@ class BackTestResult:
     """ """
 
     def __init__(self, request_id):
-        """
-
-        :param request_id:
-
-        """
+        """Args:
+    request_id:"""
         self.request_id = request_id
 
     def get_backtest_index(self):
@@ -438,11 +393,8 @@ class BackTestResult:
         return ret
 
     def get_group_result(self, fields=[]):
-        """
-
-        :param fields:  (Default value = [])
-
-        """
+        """Args:
+    fields: (Default value = [])"""
         import os
         import uuid
 
@@ -467,9 +419,6 @@ class RealTimeResult:
     """ """
 
     def __init__(self, request_id):
-        """
-
-        :param request_id:
-
-        """
+        """Args:
+    request_id:"""
         self.request_id = request_id

@@ -32,23 +32,16 @@ from . import Indicator, MovingAverage
 
 class EnvelopeMixIn(object):
     """MixIn class to create a subclass with another indicator. The main line of
-    that indicator will be surrounded by an upper and lower band separated a
-    given "perc"entage from the input main line
-
-    The usage is:
-
-      - Class XXXEnvelope(XXX, EnvelopeMixIn)
-
-    Formula:
-      - 'line' (inherited from XXX))
-      - top = 'line' * (1 + perc)
-      - bot = 'line' * (1 - perc)
-
-    See also:
-      - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:moving_average_envelopes
-
-
-    """
+that indicator will be surrounded by an upper and lower band separated a
+given "perc"entage from the input main line
+The usage is:
+- Class XXXEnvelope(XXX, EnvelopeMixIn)
+Formula:
+- 'line' (inherited from XXX))
+- top = 'line' * (1 + perc)
+- bot = 'line' * (1 - perc)
+See also:
+- http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:moving_average_envelopes"""
 
     lines = (
         "top",
@@ -91,18 +84,13 @@ class _EnvelopeBase(Indicator):
 
 class Envelope(_EnvelopeBase, EnvelopeMixIn):
     """It creates envelopes bands separated from the source data by a given
-    percentage
-
-    Formula:
-      - src = datasource
-      - top = src * (1 + perc)
-      - bot = src * (1 - perc)
-
-    See also:
-      - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:moving_average_envelopes
-
-
-    """
+percentage
+Formula:
+- src = datasource
+- top = src * (1 + perc)
+- bot = src * (1 - perc)
+See also:
+- http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:moving_average_envelopes"""
 
 
 # Automatic creation of Moving Average Envelope classes

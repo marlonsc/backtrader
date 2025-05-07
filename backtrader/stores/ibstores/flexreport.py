@@ -18,27 +18,22 @@ class FlexError(Exception):
 
 class FlexReport:
     """To obtain a token:
-
-    * Login to web portal
-    * Go to Settings
-    * Click on "Configure Flex Web Service"
-    * Generate token
-
-
-    """
+* Login to web portal
+* Go to Settings
+* Click on "Configure Flex Web Service"
+* Generate token"""
 
     data: bytes
     root: et.Element
 
     def __init__(self, token=None, queryId=None, path=None):
         """Download a report by giving a valid ``token`` and ``queryId``,
-        or load from file by giving a valid ``path``.
+or load from file by giving a valid ``path``.
 
-        :param token:  (Default value = None)
-        :param queryId:  (Default value = None)
-        :param path:  (Default value = None)
-
-        """
+Args:
+    token: (Default value = None)
+    queryId: (Default value = None)
+    path: (Default value = None)"""
         if token and queryId:
             self.download(token, queryId)
         elif path:
@@ -50,16 +45,12 @@ class FlexReport:
 
     def extract(self, topic: str, parseNumbers=True) -> list:
         """Extract items of given topic and return as list of objects.
+The topic is a string like TradeConfirm, ChangeInDividendAccrual,
+Order, etc.
 
-        The topic is a string like TradeConfirm, ChangeInDividendAccrual,
-        Order, etc.
-
-        :param topic:
-        :type topic: str
-        :param parseNumbers:  (Default value = True)
-        :rtype: list
-
-        """
+Args:
+    topic: 
+    parseNumbers: (Default value = True)"""
         cls = type(topic, (DynamicObject,), {})
         results = [cls(**node.attrib) for node in self.root.iter(topic)]
         if parseNumbers:
@@ -74,20 +65,17 @@ class FlexReport:
     def df(self, topic: str, parseNumbers=True):
         """Same as extract but return the result as a pandas DataFrame.
 
-        :param topic:
-        :type topic: str
-        :param parseNumbers:  (Default value = True)
-
-        """
+Args:
+    topic: 
+    parseNumbers: (Default value = True)"""
         return util.df(self.extract(topic, parseNumbers))
 
     def download(self, token, queryId):
         """Download report for the given ``token`` and ``queryId``.
 
-        :param token:
-        :param queryId:
-
-        """
+Args:
+    token: 
+    queryId:"""
         url = (
             "https://gdcdyn.interactivebrokers.com"
             "/Universal/servlet/FlexStatementService.SendRequest?"
@@ -132,9 +120,8 @@ class FlexReport:
     def load(self, path):
         """Load report from XML file.
 
-        :param path:
-
-        """
+Args:
+    path:"""
         with open(path, "rb") as f:
             self.data = f.read()
             self.root = et.fromstring(self.data)
@@ -142,9 +129,8 @@ class FlexReport:
     def save(self, path):
         """Save report to XML file.
 
-        :param path:
-
-        """
+Args:
+    path:"""
         with open(path, "wb") as f:
             f.write(self.data)
 

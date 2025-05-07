@@ -1,32 +1,24 @@
 #!/usr/bin/env python
-"""
-Volatility Contraction Pattern (VCP) Strategy
+"""Volatility Contraction Pattern (VCP) Strategy
 =============================================
-
 Description:
 -----------
 This strategy identifies stocks that are poised for a significant breakout after a period of
 decreasing volatility and volume contraction, based on the methodology popularized by Mark Minervini.
 The strategy looks for stocks that meet specific criteria indicating potential breakout situations
 after a consolidation phase where price movements and trading volumes contract.
-
 Strategy Logic:
 --------------
 1. PRICE PATTERN: The strategy identifies stocks that have formed a "volatility contraction pattern"
-   where price movements become progressively tighter, indicating a potential energy build-up before a breakout.
-
+where price movements become progressively tighter, indicating a potential energy build-up before a breakout.
 2. VOLUME PATTERN: Volume should also show contraction during the consolidation phase, followed by
-   expansion as the price breaks out.
-
+expansion as the price breaks out.
 3. TREND ALIGNMENT: The price must remain above longer-term moving averages (like the 250-day SMA)
-   to ensure the stock is in a broader uptrend.
-
+to ensure the stock is in a broader uptrend.
 4. LIQUIDITY FILTER: The stock must have adequate liquidity (volume × price > threshold) to ensure
-   the positions can be entered and exited efficiently.
-
+the positions can be entered and exited efficiently.
 5. NARROW PRICE CHANNEL: Recent price action should form a narrow price channel, indicating a tight
-   trading range that precedes breakouts.
-
+trading range that precedes breakouts.
 MARKET CONDITIONS:
 ----------------
 *** THIS STRATEGY IS SPECIFICALLY DESIGNED FOR STOCKS IN BASE FORMATION BEFORE BREAKOUT ***
@@ -34,36 +26,27 @@ MARKET CONDITIONS:
 - AVOID USING: During market corrections or in strongly downtrending markets
 - IDEAL TIMEFRAMES: Daily charts
 - OPTIMAL MARKET CONDITION: Bull markets with sector rotation
-
 The strategy excels when applied to stocks that are already showing relative strength
 compared to the broader market and are forming consolidation patterns after prior advances.
 It struggles in bear markets or with stocks that lack institutional support.
-
 EXAMPLE COMMANDS:
 ---------------
 1. Standard configuration - default VCP detection:
-   python strategies/vol_contraction.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31
-
+python strategies/vol_contraction.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31
 2. More sensitive volatility detection - shorter lookback periods:
-   python strategies/vol_contraction.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --period-short 8 --period-long 25 --narrow-factor 1.8
-
+python strategies/vol_contraction.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --period-short 8 --period-long 25 --narrow-factor 1.8
 3. Higher liquidity threshold - focus on more actively traded stocks:
-   python strategies/vol_contraction.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --min-dollar-volume 1000000 --max-position 3.0
-
+python strategies/vol_contraction.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --min-dollar-volume 1000000 --max-position 3.0
 4. Trend-focused approach - stronger SMA filters:
-   python strategies/vol_contraction.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --sma-short 50 --sma-long 200
-
+python strategies/vol_contraction.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --sma-short 50 --sma-long 200
 5. Conservative risk management - tighter stop loss with trailing protection:
-   python strategies/vol_contraction.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --stop-loss 3.0 --trail-stop --trail-percent 3.0 --position-percent 1.5
-
+python strategies/vol_contraction.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31 --stop-loss 3.0 --trail-stop --trail-percent 3.0 --position-percent 1.5
 Usage:
 ------
 python strategies/vol_contraction.py --data SYMBOL [parameters]
-
 Required Arguments:
 -----------------
 --data, -d            Stock symbol to trade
-
 Optional Arguments:
 -----------------
 Database Connection:
@@ -73,45 +56,35 @@ Database Connection:
 --fromdate, -f        Start date for data retrieval (default: '2024-01-01')
 --todate, -t          End date for data retrieval (default: '2024-12-31')
 --cash, -c            Initial cash for backtest (default: 100000.0)
-
 VCP Parameters:
 --period-short        Short-term lookback period for volatility (default: 10)
 --period-long         Long-term lookback period for volatility (default: 60)
 --period-long-discount Discount factor for long period (default: 0.7)
 --highest-close       Used in VCP calculation (default: 100)
 --mean-vol            Period for volume average calculation (default: 20)
-
 Moving Averages:
 --sma-long, -sl       Long-term SMA period for trend identification (default: 250)
 --sma-short, -ss      Short-term SMA period for exit signals (default: 60)
-
 Price Channel:
 --recent-price-period, -rpp Period for narrow channel calculation (default: 20)
 --narrow-factor, -nf  Factor for determining narrow channel (default: 0.7)
-
 Liquidity:
 --min-dollar-volume, -mdv Minimum dollar volume for liquidity filter (default: 2000000)
-
 Position Sizing:
 --position-percent, -pp Position size as percentage of equity (default: 20.0)
 --max-position, -mp   Maximum position size as percentage (default: 95.0)
-
 Risk Management:
 --stop-loss, -stl      Stop loss percentage (default: 7.0)
 --trailing-stop, -ts  Enable trailing stop loss (default: False)
 --trail-percent, -tp  Trailing stop percentage (default: 10.0)
-
 Trade Throttling:
 --trade-throttle-days, -ttd Minimum days between trades (default: 5)
-
 Other:
 --plot, -pl          Generate and show a plot of the trading activity
-
 Examples:
 --------
 python strategies/vol_contraction.py --data AAPL --period-short 15 --period-long 50
-python strategies/vol_contraction.py --data MSFT --sma-long 200 --sma-short 50 --min-dollar-volume 3000000
-"""
+python strategies/vol_contraction.py --data MSFT --sma-long 200 --sma-short 50 --min-dollar-volume 3000000"""
 
 import argparse
 import datetime
@@ -148,15 +121,10 @@ class StockPriceData(bt.feeds.PandasData):
 
 class VCPPattern(bt.Indicator):
     """Custom indicator to detect Volatility Contraction Patterns (VCP)
-
-    The VCP indicator identifies periods of decreasing volatility and
-    potential breakout opportunities.
-
-    Lines:
-        - vcp: Value representing the volatility contraction (1 when detected, 0 otherwise)
-
-
-    """
+The VCP indicator identifies periods of decreasing volatility and
+potential breakout opportunities.
+Lines:
+- vcp: Value representing the volatility contraction (1 when detected, 0 otherwise)"""
 
     lines = ("vcp",)
     params = dict(
@@ -216,28 +184,21 @@ class VCPPattern(bt.Indicator):
 
 class VCPStrategy(bt.Strategy, TradeThrottling):
     """Volatility Contraction Pattern (VCP) Strategy
-
-    This strategy seeks to identify and trade volatility contraction patterns,
-    which often precede significant price breakouts. It combines technical indicators
-    with filters for liquidity and trend confirmation.
-
-    ** IMPORTANT: This strategy is specifically designed for stocks forming bases
-    before breakouts, typically in bull markets with sector rotation **
-
-    Strategy Logic:
-    - Looks for periods of contracting volatility (narrowing price ranges)
-    - Confirms pattern with price near recent highs and below-average volume
-    - Enters when volatility contraction is detected in an overall uptrend
-    - Uses risk-based position sizing to manage exposure
-    - Employs trailing stops to protect profits
-
-    Best Market Conditions:
-    - Works best in bull markets or strong sectors during consolidation phases
-    - Most effective when there's sector rotation driving new leadership
-    - Avoid using during market corrections or highly volatile periods
-
-
-    """
+This strategy seeks to identify and trade volatility contraction patterns,
+which often precede significant price breakouts. It combines technical indicators
+with filters for liquidity and trend confirmation.
+** IMPORTANT: This strategy is specifically designed for stocks forming bases
+before breakouts, typically in bull markets with sector rotation **
+Strategy Logic:
+- Looks for periods of contracting volatility (narrowing price ranges)
+- Confirms pattern with price near recent highs and below-average volume
+- Enters when volatility contraction is detected in an overall uptrend
+- Uses risk-based position sizing to manage exposure
+- Employs trailing stops to protect profits
+Best Market Conditions:
+- Works best in bull markets or strong sectors during consolidation phases
+- Most effective when there's sector rotation driving new leadership
+- Avoid using during market corrections or highly volatile periods"""
 
     params = (
         # Pattern detection
@@ -269,11 +230,10 @@ class VCPStrategy(bt.Strategy, TradeThrottling):
     def log(self, txt, dt=None, doprint=False):
         """Logging function for the strategy
 
-        :param txt:
-        :param dt:  (Default value = None)
-        :param doprint:  (Default value = False)
-
-        """
+Args:
+    txt: 
+    dt: (Default value = None)
+    doprint: (Default value = False)"""
         if self.p.print_log or doprint:
             dt = dt or self.datas[0].datetime.date(0)
             print(f"{dt.isoformat()}: {txt}")
@@ -331,9 +291,8 @@ class VCPStrategy(bt.Strategy, TradeThrottling):
     def notify_order(self, order):
         """Process order notifications
 
-        :param order:
-
-        """
+Args:
+    order:"""
         if order.status in [order.Submitted, order.Accepted]:
             return
 
@@ -383,9 +342,8 @@ class VCPStrategy(bt.Strategy, TradeThrottling):
     def notify_trade(self, trade):
         """Process trade notifications
 
-        :param trade:
-
-        """
+Args:
+    trade:"""
         if not trade.isclosed:
             return
 

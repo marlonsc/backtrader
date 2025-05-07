@@ -31,16 +31,10 @@ from . import GenericCSVData
 
 class MT4CSVData(GenericCSVData):
     """Parses a `Metatrader4 <https://www.metaquotes.net/en/metatrader4>`_ History
-    center CSV exported file.
-
-    Specific parameters (or specific meaning):
-
-      - ``dataname``: The filename to parse or a file-like object
-
-      - Uses GenericCSVData and simply modifies the params
-
-
-    """
+center CSV exported file.
+Specific parameters (or specific meaning):
+- ``dataname``: The filename to parse or a file-like object
+- Uses GenericCSVData and simply modifies the params"""
 
     params = (
         ("dtformat", "%Y.%m.%d"),

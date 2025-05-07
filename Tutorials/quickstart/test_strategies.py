@@ -3,10 +3,10 @@
 # import
 
 import inspect
-
-import backtrader as bt
 import pandas as pd
+
 from colorama import Fore, Style
+import backtrader as bt
 
 # from loguru import logger
 # from icecream import ic
@@ -16,7 +16,7 @@ from colorama import Fore, Style
 
 # functions/classes
 class TestStrategy_SMA(bt.Strategy):
-    """Sandbox for different test strategies"""
+    """Sandbox for different test strategies."""
 
     params = (
         ("bars_decline", 3),
@@ -28,7 +28,7 @@ class TestStrategy_SMA(bt.Strategy):
     )
 
     def __init__(self):
-        """ """
+        """Initializes the strategy, indicators, and internal state."""
         # Keep a reference to the "close" line (column) in the data[0] data series
         # self.data is equivalent to self.datas[0] or self.data_0, if there is
         # more than one data feed
@@ -62,9 +62,9 @@ class TestStrategy_SMA(bt.Strategy):
         )
 
         # Delayed indexing.
-        # Wenn ich hier self._dataclose[-delay] nehme, wird der *jetzt* aktuelle Wert genommen
-        # Die Formulierung hier ist äquivalent zu self._dataclose[-1] > self._sma in next()
-        # Hier wird ein LineOwnOperation erzeugt, kein Wert (bool)
+        # If I take self._dataclose[-delay] here, the *current* value is taken
+        # The formulation here is equivalent to self._dataclose[-1] > self._sma in next()
+        # Here a LineOwnOperation is created, not a value (bool)
         self._buy_condition: bt.LineOwnOperation = (
             self._dataclose(-self.p.delay) > self._sma
         )
@@ -91,7 +91,7 @@ class TestStrategy_SMA(bt.Strategy):
         # endregion
 
     def stop(self):
-        """Called when the backtest is finished"""
+        """Called when the backtest is finished. Logs the final portfolio value."""
         final_value = self.broker.getvalue()
         self.log(
             f"(MA Period {self.p.ma_period})\tEnding Value {final_value:,.2f}",
@@ -100,16 +100,14 @@ class TestStrategy_SMA(bt.Strategy):
         )
 
     def log(self, txt: str, dt=None, caller: str = None, print_it: bool = False):
-        """Logging function for this strategy
+        """Logs a message for this strategy.
 
-        :param txt:
-        :type txt: str
-        :param dt:  (Default value = None)
-        :param caller:  (Default value = None)
-        :type caller: str
-        :param print_it:  (Default value = False)
-        :type print_it: bool
-
+        Args:
+            txt (str): The message to log.
+            dt (datetime.date, optional): The date to log. Defaults to current bar date.
+            caller (str, optional): The calling function name. Defaults to None.
+            print_it (bool, optional): Whether to print regardless of log_by_default. Defaults
+                to False.
         """
         if not print_it and not self.p.log_by_default:
             return
@@ -124,12 +122,9 @@ class TestStrategy_SMA(bt.Strategy):
         print(f"{bars_processed:3} {caller:15}\t{formatted_date} {txt}")
 
     def next(self):
-        """Die Methode next() in einer Backtrader-Strategie wird bei jedem neuen Datenpunkt (Bar) aufgerufen und enthält
-        die Handelslogik der Strategie.
-        Die next()-Methode überprüft den aktuellen Marktstatus, entscheidet basierend auf der definierten Handelslogik,
-        ob Kauf- oder Verkaufsorders erstellt werden sollen, und loggt relevante Informationen.
+        """Executes trading logic for each new data point (bar).
 
-
+        Checks market status, decides on buy/sell orders, and logs relevant information.
         """
         # Log the closing price of the series from the reference
         # self.log(f'{Style.DIM}Close {self.dataclose[0]:,.2f}{Style.RESET_ALL}\tNumber of bars processed: {len(self)}')
@@ -165,49 +160,38 @@ class TestStrategy_SMA(bt.Strategy):
         # Check if we are in the market. Every completed BUY order creates a
         # position?
         if not self.position:
-            # Noch nicht im Markt ... wir KÖNNTEN kaufen, wenn ...
+            # Not in the market yet... we COULD buy if...
             if self._buy_condition:  # (identisch zu self._buy_condition)
-                # KAUFEN, KAUFEN, KAUFEN!!! (mit allen möglichen
-                # Standardparametern)
+                # BUY, BUY, BUY!!! (with all possible
+                # standard parameters)
                 buy_order_message = (
-                    f"{Fore.GREEN}Erstelle KAUF-Bestellung"
+                    f"{Fore.GREEN}Creating BUY order"
                     f" {self._dataclose[0]:,.2f}{Fore.RESET}"
                 )
                 self.log(buy_order_message, caller="func next")
                 self._order = self.buy()
         else:
-            # Bereits im Markt (Positionen existieren) ... wir könnten
-            # verkaufen
+            # Already in the market (positions exist) ... we could
+            # sell
             if self._sell_condition:
-                # VERKAUFEN, VERKAUFEN, VERKAUFEN!!! (mit allen möglichen
-                # Standardparametern)
+                # SELL, SELL, SELL!!! (with all possible
+                # standard parameters)
                 sell_order_message = (
-                    f"{Fore.YELLOW}Erstelle VERKAUF-Bestellung"
+                    f"{Fore.YELLOW}Creating SELL order"
                     f" {self._dataclose[0]:,.2f}{Fore.RESET}"
                 )
                 self.log(
                     sell_order_message,
                 )
-                # Verfolge die erstellte Bestellung, um eine zweite Bestellung
-                # zu vermeiden
+                # Track the created order to avoid a second order
+                # being placed
                 self._order = self.sell()
 
     def notify_order(self, order):
-        """The order lifecycle is managed through the notify_order method,
-        which is called whenever the status of an order changes.
-        This ensures that the strategy can react to order completions, rejections, or cancellations in a controlled manner.
-        Here is a brief overview of how orders are processed:
-            - Order Submission: Orders are submitted within the next method.
-            - Order Notification: The notify_order method is called to update the status of the order.
-            - Order Execution: Orders are executed based on the market data and broker conditions.
-        This synchronous processing ensures that the strategy can manage orders and positions in a
-        predictable and sequential manner.
+        """Handles order status changes and logs order events.
 
-        This method will be called whenever an order status changes
-        Order details can be analyzed
-
-        :param order:
-
+        Args:
+            order (bt.Order): The order whose status has changed.
         """
         action = (
             f"{Fore.GREEN}BUY{Fore.RESET}"
@@ -251,19 +235,10 @@ class TestStrategy_SMA(bt.Strategy):
 
     # 105
     def notify_trade(self, trade):
-        """The notify_trade method is called whenever there is a change in the status of a trade.
-        This method is used to handle and log trade results, such as when a trade is closed or its status changes.
-        The method has two primary functions:
-            - Logs Trade Results: It logs the results of a trade, including whether it was a profit or loss,
-              and the gross and net profit/loss.
-            - Updates Trade DataFrame: It updates a DataFrame with the trade details, such as date, price, status,
-              and profit/loss.
-        notify_trade is Called:
-            - Trade Closed: When a trade is closed, the method logs the result and updates the DataFrame.
-            - Trade Status Change: When the status of a trade changes, it logs the new status.
+        """Handles trade status changes and logs trade results.
 
-        :param trade:
-
+        Args:
+            trade (bt.Trade): The trade whose status has changed.
         """
         if trade.isclosed:
             result = "profit" if trade.pnlcomm > 0 else "loss"
@@ -290,7 +265,7 @@ class TestStrategy_SMA(bt.Strategy):
 
 
 class DelayedIndexing(TestStrategy_SMA):
-    """ """
+    """Strategy demonstrating delayed indexing and indicator usage."""
 
     params = (
         ("period", 20),
@@ -299,18 +274,18 @@ class DelayedIndexing(TestStrategy_SMA):
     )
 
     def __init__(self):
-        """ """
+        """Initializes delayed indexing and indicators."""
         self._dataclose = self.data.close
         self._sma = bt.indicators.SimpleMovingAverage(
             self._dataclose, period=self.p.period
         )
-        # _cmpval wird erst in next() berechnet (verzögert)
+        # _cmpval is only calculated in next() (delayed)
         self._cmpval: bt.linebuffer.LinesOperation = (
             self._dataclose(-self.p.delay) > self._sma
         )
 
     def next(self):
-        """ """
+        """Executes logic for each new bar, demonstrating delayed and direct indexing."""
         if len(self) < self.p.delay:
             return
 
@@ -324,8 +299,8 @@ class DelayedIndexing(TestStrategy_SMA):
         # print(f'Using delayed indexing: {bool(self._cmpval)=}')
 
         # Using __call__ method
-        # Ganz blöde Idee, weil _bei jedem Aufruf_ die Berechnung neu gemacht wird und ein neues
-        # Objekt erzeugt wird. Das ist nicht nur ineffizient, sondern auch fehleranfällig.
+        # Very bad idea, because the calculation is redone _with each call_ and a new
+        # object is created. This is not only inefficient, but also error-prone.
         # buy_condition_call:bt.linebuffer.LinesOperatio = self._dataclose(-self.p.delay) > self._sma
         # if len(buy_condition_call) > 0:
         #     print(f'Using __call__: {buy_condition_call[0]=}')
@@ -339,16 +314,17 @@ class DelayedIndexing(TestStrategy_SMA):
 
         # slice = self._dataclose.get(ago = -1, size=5)
         slice_len = 5
+        my_slice = []  # Avoid uninitialized variable
         if len(self) > slice_len + 1:
             my_slice = self._dataclose[-slice_len:]
         self.log(f"Close prices: {my_slice}", caller="next", print_it=True)
 
 
 class TestUsingOperators(TestStrategy_SMA):
-    """ """
+    """Strategy demonstrating operator overloading with indicators."""
 
     def __init__(self):
-        """ """
+        """Initializes operator overload demonstrations for indicators."""
         super().__init__()
 
         # operator > overload
@@ -365,7 +341,7 @@ class TestUsingOperators(TestStrategy_SMA):
         print(f"sell_signal: {type(self._sell_signal)=}")
 
     def next(self):
-        """ """
+        """Logs the action (SELL or HOLD) based on indicator logic."""
         # This strategy does nothing
 
         action = "SELL" if self._sell_signal else "HOLD"
@@ -378,7 +354,7 @@ class TestUsingOperators(TestStrategy_SMA):
 
 
 class MySimpleMovingAverage(bt.indicators.SimpleMovingAverage):
-    """ """
+    """Custom Simple Moving Average indicator with extended logging."""
 
     lines = ("sma",)
 
@@ -388,28 +364,28 @@ class MySimpleMovingAverage(bt.indicators.SimpleMovingAverage):
     )
 
     def __init__(self):
-        """ """
+        """Initializes the custom Simple Moving Average indicator."""
         super().__init__()
         print(
             f"Created SimpleMovingAverage with period {self.p.period}",
         )
 
     def prenext(self):
-        """ """
+        """Called before enough bars are available for the full period."""
         print("MySimpleMovingAverage.prenext:: current period:", len(self))
 
     def nextstart(self):
-        """ """
+        """Called when enough bars are available for the full period."""
         print("MySimpleMovingAverage.nextstart:: current period:", len(self))
         # emulate default behavior ... call next
         self.next()
 
     def next(self):
-        """ """
+        """Called for each new bar after nextstart."""
         print("MySimpleMovingAverage.next:: current period:", len(self))
 
     def start(self):
-        """ """
+        """Logs the start of the indicator."""
         self.log(
             f"Current Bar: {len(self):3}",
             caller="MySimpleMovingAverage.start",
@@ -418,15 +394,15 @@ class MySimpleMovingAverage(bt.indicators.SimpleMovingAverage):
 
 
 class PlayWithIndicators(TestStrategy_SMA):
-    """ """
+    """Strategy to demonstrate usage of custom indicators and logging."""
 
     def __init__(self):
-        """ """
+        """Initializes the strategy and attaches a custom indicator."""
         self.p.log_by_default = True
-        self.sma = MySimpleMovingAverage(self.data, period=20)
+        self.sma = MySimpleMovingAverage(self.data)
 
     def start(self):
-        """ """
+        """Logs the start of the strategy."""
         self.log(
             f"Current Bar: {len(self):3}",
             caller="PlayWithIndicators.start",
@@ -434,7 +410,7 @@ class PlayWithIndicators(TestStrategy_SMA):
         )
 
     def next(self):
-        """ """
+        """Logs each new bar for the strategy."""
         self.log(
             f"Current Bar: {len(self):3}",
             caller="PlayWithIndicators.next",
@@ -442,7 +418,7 @@ class PlayWithIndicators(TestStrategy_SMA):
         )
 
     def prenext(self):
-        """ """
+        """Logs before enough bars are available for the full period."""
         self.log(
             f"Current Bar: {len(self):3}",
             caller="PlayWithIndicators.prenext",
@@ -450,7 +426,7 @@ class PlayWithIndicators(TestStrategy_SMA):
         )
 
     def nextstart(self):
-        """ """
+        """Logs when enough bars are available for the full period."""
         self.log(
             f"Current Bar: {len(self):3}",
             caller="PlayWithIndicators.nextstart",
@@ -461,12 +437,14 @@ class PlayWithIndicators(TestStrategy_SMA):
 
 
 class EmptyCall(TestStrategy_SMA):
-    """ """
+    """Strategy to demonstrate multi-timeframe indicator comparison."""
 
     def __init__(self):
-        """ """
+        """Initializes daily and weekly data and indicators for comparison.
 
-        # self._buysig = self._dataclose_daily(-self.p.delay) > self._sma
+        Raises:
+            Exception: If less than two data feeds are provided.
+        """
         if len(self.datas) < 2:
             raise Exception(
                 "No weekly data to compare with"
@@ -477,12 +455,12 @@ class EmptyCall(TestStrategy_SMA):
 
         self._sma0 = bt.indicators.SimpleMovingAverage(self._dataclose_daily, period=20)
         self._sma1 = bt.indicators.SimpleMovingAverage(self._dataclose_weekly, period=5)
-        # Erzeugt einen Indexfehler, weil die Daten unterschiedlich lang sind
+        # Generates an index error because the data has different lengths
         # sma_daily: 255, sma_weekly: 50
         self._buysig = self._sma0 > self._sma1(-1)
 
     def next(self):
-        """ """
+        """Logs daily and weekly close and SMA values for each bar."""
         # This strategy does nothing
 
         if self._buysig[0] or True:
@@ -497,25 +475,25 @@ class EmptyCall(TestStrategy_SMA):
 
 
 class TestStrategy_simple(bt.Strategy):
-    """ """
+    """Simple strategy for logging and basic buy logic."""
 
     def log(self, txt, dt=None):
-        """Logging function fot this strategy
+        """Logs a message for this strategy.
 
-        :param txt:
-        :param dt:  (Default value = None)
-
+        Args:
+            txt (str): The message to log.
+            dt (datetime.date, optional): The date to log. Defaults to current bar date.
         """
         dt = dt or self.datas[0].datetime.date(0)
         print("%s, %s" % (dt.isoformat(), txt))
 
     def __init__(self):
-        """ """
+        """Initializes the strategy and keeps a reference to the close price."""
         # Keep a reference to the "close" line in the data[0] dataseries
         self.dataclose = self.datas[0].close
 
     def next(self):
-        """ """
+        """Logs the close price and executes a simple buy logic."""
         # Simply log the closing price of the series from the reference
         self.log("Close, %.2f" % self.dataclose[0])
 
@@ -531,20 +509,20 @@ class TestStrategy_simple(bt.Strategy):
 
 
 class TestStrategy_104(bt.Strategy):
-    """ """
+    """Strategy with order tracking and basic buy/sell logic."""
 
     def log(self, txt, dt=None):
-        """Logging function fot this strategy
+        """Logs a message for this strategy.
 
-        :param txt:
-        :param dt:  (Default value = None)
-
+        Args:
+            txt (str): The message to log.
+            dt (datetime.date, optional): The date to log. Defaults to current bar date.
         """
         dt = dt or self.datas[0].datetime.date(0)
         print("%s, %s" % (dt.isoformat(), txt))
 
     def __init__(self):
-        """ """
+        """Initializes the strategy, close price reference, and order tracking."""
         # Keep a reference to the "close" line in the data[0] dataseries
         self.dataclose = self.datas[0].close
 
@@ -552,10 +530,10 @@ class TestStrategy_104(bt.Strategy):
         self.order = None
 
     def notify_order(self, order):
-        """
+        """Handles order status changes and logs order events.
 
-        :param order:
-
+        Args:
+            order (bt.Order): The order whose status has changed.
         """
         if order.status in [order.Submitted, order.Accepted]:
             # Buy/Sell order submitted/accepted to/by broker - Nothing to do
@@ -578,7 +556,7 @@ class TestStrategy_104(bt.Strategy):
         self.order = None
 
     def next(self):
-        """ """
+        """Logs the close price and executes buy/sell logic with order tracking."""
         # Simply log the closing price of the series from the reference
         self.log("Close, %.2f" % self.dataclose[0])
 
@@ -612,20 +590,20 @@ class TestStrategy_104(bt.Strategy):
 
 
 class TestStrategy_Commission(bt.Strategy):
-    """ """
+    """Strategy with commission tracking and extended order/trade logging."""
 
     def log(self, txt, dt=None):
-        """Logging function fot this strategy
+        """Logs a message for this strategy.
 
-        :param txt:
-        :param dt:  (Default value = None)
-
+        Args:
+            txt (str): The message to log.
+            dt (datetime.date, optional): The date to log. Defaults to current bar date.
         """
         dt = dt or self.datas[0].datetime.date(0)
         print("%s, %s" % (dt.isoformat(), txt))
 
     def __init__(self):
-        """ """
+        """Initializes the strategy, close price reference, and commission tracking."""
         # Keep a reference to the "close" line in the data[0] dataseries
         self.dataclose = self.datas[0].close
 
@@ -635,10 +613,10 @@ class TestStrategy_Commission(bt.Strategy):
         self.buycomm = None
 
     def notify_order(self, order):
-        """
+        """Handles order status changes and logs order events.
 
-        :param order:
-
+        Args:
+            order (bt.Order): The order whose status has changed.
         """
         if order.status in [order.Submitted, order.Accepted]:
             # Buy/Sell order submitted/accepted to/by broker - Nothing to do
@@ -677,10 +655,10 @@ class TestStrategy_Commission(bt.Strategy):
         self.order = None
 
     def notify_trade(self, trade):
-        """
+        """Handles trade status changes and logs trade results.
 
-        :param trade:
-
+        Args:
+            trade (bt.Trade): The trade whose status has changed.
         """
         if not trade.isclosed:
             return
@@ -688,7 +666,7 @@ class TestStrategy_Commission(bt.Strategy):
         self.log("OPERATION PROFIT, GROSS %.2f, NET %.2f" % (trade.pnl, trade.pnlcomm))
 
     def next(self):
-        """ """
+        """Logs the close price and executes buy/sell logic with commission tracking."""
         # Simply log the closing price of the series from the reference
         self.log("Close, %.2f" % self.dataclose[0])
 

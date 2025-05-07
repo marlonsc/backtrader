@@ -39,11 +39,10 @@ class MetaVChartFile(bt.DataBase.__class__):
     def __init__(cls, name, bases, dct):
         """Class has already been created ... register
 
-        :param name:
-        :param bases:
-        :param dct:
-
-        """
+Args:
+    name: 
+    bases: 
+    dct:"""
         # Initialize the class
         super(MetaVChartFile, cls).__init__(name, bases, dct)
 
@@ -53,15 +52,10 @@ class MetaVChartFile(bt.DataBase.__class__):
 
 class VChartFile(bt.with_metaclass(MetaVChartFile, bt.DataBase)):
     """Support for `Visual Chart <www.visualchart.com>`_ binary on-disk files for
-    both daily and intradaily formats.
-
-    Note:
-
-      - ``dataname``: Market code displayed by Visual Chart. Example: 015ES for
-        EuroStoxx 50 continuous future
-
-
-    """
+both daily and intradaily formats.
+Note:
+- ``dataname``: Market code displayed by Visual Chart. Example: 015ES for
+EuroStoxx 50 continuous future"""
 
     def start(self):
         """ """
@@ -146,7 +140,7 @@ class VChartFile(bt.with_metaclass(MetaVChartFile, bt.DataBase)):
         self.lines.datetime[0] = date2num(dt)  # Store time
 
         # Get the rest of the fields
-        o, h, l, c, v, oi = bdata[self._dtsize:]
+        o, h, l, c, v, oi = bdata[self._dtsize :]
         self.lines.open[0] = o
         self.lines.high[0] = h
         self.lines.low[0] = l

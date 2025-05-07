@@ -18,13 +18,10 @@ _logger = logging.getLogger(__name__)
 
 
 def _get_trading_calendar(open_hour, close_hour, close_minute):
-    """
-
-    :param open_hour:
-    :param close_hour:
-    :param close_minute:
-
-    """
+    """Args:
+    open_hour: 
+    close_hour: 
+    close_minute:"""
     cal = bt.TradingCalendar(
         open=datetime.time(hour=open_hour),
         close=datetime.time(hour=close_hour, minute=close_minute),
@@ -43,20 +40,16 @@ def _run_resampler(
     tick_interval=datetime.timedelta(seconds=25),
     live=False,
 ) -> bt.Strategy:
-    """
-
-    :param data_timeframe:
-    :param data_compression:
-    :param resample_timeframe:
-    :param resample_compression:
-    :param num_gen_bars:
-    :param runtime_seconds:  (Default value = 27)
-    :param starting_value:  (Default value = 200)
-    :param tick_interval:  (Default value = datetime.timedelta(seconds=25))
-    :param live:  (Default value = False)
-    :rtype: bt.Strategy
-
-    """
+    """Args:
+    data_timeframe: 
+    data_compression: 
+    resample_timeframe: 
+    resample_compression: 
+    num_gen_bars: 
+    runtime_seconds: (Default value = 27)
+    starting_value: (Default value = 200)
+    tick_interval: (Default value = datetime.timedelta(seconds=25))
+    live: (Default value = False)"""
     _logger.info("Constructing Cerebro")
     cerebro = bt.Cerebro(bar_on_exit=False)
     cerebro.addstrategy(bt.strategies.NullStrategy)

@@ -11,11 +11,8 @@ class SlippageImpactAnalyzer(bt.Analyzer):
         self.slip_perc = self.strategy.broker.p.slip_perc
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status == order.Completed:
             # Calculate slippage cost for this specific order
             # For buys, slippage increases cost; for sells, slippage decreases

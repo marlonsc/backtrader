@@ -34,12 +34,10 @@ __all__ = ["Calmar"]
 
 class Calmar(bt.TimeFrameAnalyzerBase):
     """This analyzer calculates the CalmarRatio
-    timeframe which can be different from the one used in the underlying data
+timeframe which can be different from the one used in the underlying data
 
-
-    :returns: corresponding rolling Calmar ratio
-
-    """
+Returns:
+    corresponding rolling Calmar ratio"""
 
     packages = (
         "collections",

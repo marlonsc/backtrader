@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+"""This module contains utility functions for Python 3.
+"""
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
@@ -25,202 +27,129 @@ from __future__ import (
     unicode_literals,
 )
 
-import itertools
 import sys
 
-PY2 = sys.version_info.major == 2
+MAXINT = sys.maxsize
+MININT = -sys.maxsize - 1
 
-if PY2:
-    try:
-        import _winreg as winreg
-    except ImportError:
-        winreg = None
+MAXFLOAT = sys.float_info.max
+MINFLOAT = sys.float_info.min
 
-    MAXINT = sys.maxint
-    MININT = -sys.maxint - 1
+string_types = (str,)
+integer_types = (int,)
 
-    MAXFLOAT = sys.float_info.max
-    MINFLOAT = sys.float_info.min
+long = int # pylint: disable=invalid-name
 
-    string_types = str, unicode
-    integer_types = int, long
+def cmp(a, b):
+    """Args:
+    a:
+    b:"""
+    return (a > b) - (a < b)
 
-    filter = itertools.ifilter
-    map = itertools.imap
-    range = xrange
-    zip = itertools.izip
-    long = long
+def bstr(x):
+    """Convert x to a string.
 
-    cmp = cmp
+    Args:
+        x: The object to convert to a string.
 
-    bytes = bytes
-    bstr = bytes
+    Returns:
+        str: The string representation of x.
+    """
+    return str(x)
 
-    def iterkeys(d):
-        """
+def iterkeys(d):
+    """Iterate over the keys of d.
 
-        :param d:
+    Args:
+        d: The dictionary to iterate over.
 
-        """
-        return d.iterkeys()
+    Returns:
+        iterator: An iterator over the keys of d.
+    """
+    return iter(d.keys())
 
-    def itervalues(d):
-        """
+def itervalues(d):
+    """Iterate over the values of d.
 
-        :param d:
+    Args:
+        d: The dictionary to iterate over.
 
-        """
-        return d.itervalues()
+    Returns:
+        iterator: An iterator over the values of d.
+    """
+    return iter(d.values())
 
-    def iteritems(d):
-        """
+def iteritems(d):
+    """Iterate over the items of d.
 
-        :param d:
+    Args:
+        d: The dictionary to iterate over.
 
-        """
-        return d.iteritems()
+    Returns:
+        iterator: An iterator over the items of d.
+    """
+    return iter(d.items())
 
-    def keys(d):
-        """
+def keys(d):
+    """Get the keys of d.
 
-        :param d:
+    Args:
+        d: The dictionary to get the keys of.
 
-        """
-        return d.keys()
+    Returns:
+        list: A list of the keys of d.
+    """
+    return list(d.keys())
 
-    def values(d):
-        """
+def values(d):
+    """Get the values of d.
 
-        :param d:
+    Args:
+        d: The dictionary to get the values of.
 
-        """
-        return d.values()
+    Returns:
+        list: A list of the values of d.
+    """
+    return list(d.values())
 
-    def items(d):
-        """
+def items(d):
+    """Get the items of d.
 
-        :param d:
+    Args:
+        d: The dictionary to get the items of.
 
-        """
-        return d.items()
-
-else:
-    try:
-        import winreg
-    except ImportError:
-        winreg = None
-
-    MAXINT = sys.maxsize
-    MININT = -sys.maxsize - 1
-
-    MAXFLOAT = sys.float_info.max
-    MINFLOAT = sys.float_info.min
-
-    string_types = (str,)
-    integer_types = (int,)
-
-    filter = filter
-    map = map
-    range = range
-    zip = zip
-    long = int
-
-    def cmp(a, b):
-        """
-
-        :param a:
-        :param b:
-
-        """
-        return (a > b) - (a < b)
-
-    def bytes(x):
-        """
-
-        :param x:
-
-        """
-        return x.encode("utf-8")
-
-    def bstr(x):
-        """
-
-        :param x:
-
-        """
-        return str(x)
-
-    def iterkeys(d):
-        """
-
-        :param d:
-
-        """
-        return iter(d.keys())
-
-    def itervalues(d):
-        """
-
-        :param d:
-
-        """
-        return iter(d.values())
-
-    def iteritems(d):
-        """
-
-        :param d:
-
-        """
-        return iter(d.items())
-
-    def keys(d):
-        """
-
-        :param d:
-
-        """
-        return list(d.keys())
-
-    def values(d):
-        """
-
-        :param d:
-
-        """
-        return list(d.values())
-
-    def items(d):
-        """
-
-        :param d:
-
-        """
-        return list(d.items())
-
+    Returns:
+        list: A list of the items of d.
+    """
+    return list(d.items())
 
 # This is from Armin Ronacher from Flash simplified later by six
 def with_metaclass(meta, *bases):
     """Create a base class with a metaclass.
 
-    :param meta:
-    :param *bases:
+    Args:
+        meta: The metaclass to use.
+        bases: The bases to use.
 
+    Returns:
+        type: A new base class with the metaclass.
     """
 
-    # This requires a bit of explanation: the basic idea is to make a dummy
-    # metaclass for one level of class instantiation that replaces itself with
-    # the actual metaclass.
-    class metaclass(meta):
-        """ """
+    class metaclass(meta): # pylint: disable=invalid-name
+        """This requires a bit of explanation: the basic idea is to make a dummy
+        metaclass for one level of class instantiation that replaces itself with
+        the actual metaclass."""
 
-        def __new__(cls, name, this_bases, d):
-            """
+        def __new__(cls, name, this_bases, d): # pylint: disable=unused-argument
+            """Create a new base class with the metaclass.
 
-            :param name:
-            :param this_bases:
-            :param d:
+            Args:
+                name: The name of the new base class.
+                this_bases: The bases to use.
+                d: The dictionary to use.
 
+            Returns:
+                type: A new base class with the metaclass.
             """
             return meta(name, bases, d)
 

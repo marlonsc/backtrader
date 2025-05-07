@@ -8,16 +8,12 @@ from ib_insync.util import getLoop
 
 class Connection(asyncio.Protocol):
     """Event-driven socket connection.
-
-    Events:
-        * ``hasData`` (data: bytes):
-          Emits the received socket data.
-        * ``disconnected`` (msg: str):
-          Is emitted on socket disconnect, with an error message in case
-          of error, or an empty string in case of a normal disconnect.
-
-
-    """
+Events:
+* ``hasData`` (data: bytes):
+Emits the received socket data.
+* ``disconnected`` (msg: str):
+Is emitted on socket disconnect, with an error message in case
+of error, or an empty string in case of a normal disconnect."""
 
     def __init__(self):
         """ """
@@ -57,30 +53,21 @@ class Connection(asyncio.Protocol):
         return self.transport is not None
 
     def sendMsg(self, msg):
-        """
-
-        :param msg:
-
-        """
+        """Args:
+    msg:"""
         if self.transport:
             self.transport.write(msg)
             self.numBytesSent += len(msg)
             self.numMsgSent += 1
 
     def connection_lost(self, exc):
-        """
-
-        :param exc:
-
-        """
+        """Args:
+    exc:"""
         self.transport = None
         msg = str(exc) if exc else ""
         self.disconnected.emit(msg)
 
     def data_received(self, data):
-        """
-
-        :param data:
-
-        """
+        """Args:
+    data:"""
         self.hasData.emit(data)

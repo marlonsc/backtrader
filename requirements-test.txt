@@ -1,4 +1,0 @@
-freezegun
-matplotlib
-pytest
-pytest-timeout

@@ -33,12 +33,9 @@ from .utils.py3 import string_types, with_metaclass, zip
 
 
 def findbases(kls, topclass):
-    """
-
-    :param kls:
-    :param topclass:
-
-    """
+    """Args:
+    kls: 
+    topclass:"""
     retval = list()
     for base in kls.__bases__:
         if issubclass(base, topclass):
@@ -49,13 +46,10 @@ def findbases(kls, topclass):
 
 
 def findowner(owned, cls, startlevel=2, skip=None):
-    """
-
-    :param owned:
-    :param startlevel:  (Default value = 2)
-    :param skip:  (Default value = None)
-
-    """
+    """Args:
+    owned: 
+    startlevel: (Default value = 2)
+    skip: (Default value = None)"""
     # skip this frame and the caller's -> start at 2
     for framelevel in itertools.count(startlevel):
         try:
@@ -80,65 +74,37 @@ def findowner(owned, cls, startlevel=2, skip=None):
 
 
 class MetaBase(type):
-    """ """
+    """Base metaclass for Backtrader objects. Handles custom instantiation logic.
+    All docstrings and comments must be line-wrapped at 90 characters or less.
+    """
 
     def doprenew(cls, *args, **kwargs):
-        """
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """"""
         return cls, args, kwargs
 
     def donew(cls, *args, **kwargs):
-        """
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """"""
         _obj = cls.__new__(cls, *args, **kwargs)
         return _obj, args, kwargs
 
     def dopreinit(cls, _obj, *args, **kwargs):
-        """
-
-        :param _obj:
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Args:
+    _obj:"""
         return _obj, args, kwargs
 
     def doinit(cls, _obj, *args, **kwargs):
-        """
-
-        :param _obj:
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Args:
+    _obj:"""
         _obj.__init__(*args, **kwargs)
         return _obj, args, kwargs
 
     def dopostinit(cls, _obj, *args, **kwargs):
-        """
-
-        :param _obj:
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Args:
+    _obj:"""
         return _obj, args, kwargs
 
     def __call__(cls, *args, **kwargs):
-        """
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """"""
         cls, args, kwargs = cls.doprenew(*args, **kwargs)
         _obj, args, kwargs = cls.donew(*args, **kwargs)
         _obj, args, kwargs = cls.dopreinit(_obj, *args, **kwargs)
@@ -148,7 +114,9 @@ class MetaBase(type):
 
 
 class AutoInfoClass(object):
-    """ """
+    """Base class for auto-generated info classes (e.g., plotinfo, plotlines).
+    All docstrings and comments must be line-wrapped at 90 characters or less.
+    """
 
     _getpairsbase = classmethod(lambda cls: OrderedDict())
     _getpairs = classmethod(lambda cls: OrderedDict())
@@ -156,26 +124,20 @@ class AutoInfoClass(object):
 
     @classmethod
     def _derive_inst(cls, name, info, otherbases, recurse=False):
-        """
-
-        :param name:
-        :param info:
-        :param otherbases:
-        :param recurse:  (Default value = False)
-
-        """
+        """Args:
+    name: 
+    info: 
+    otherbases: 
+    recurse: (Default value = False)"""
         return cls._derive(name, info, otherbases, recurse)()
 
     @classmethod
     def _derive(cls, name, info, otherbases, recurse=False):
-        """
-
-        :param name:
-        :param info:
-        :param otherbases:
-        :param recurse:  (Default value = False)
-
-        """
+        """Args:
+    name: 
+    info: 
+    otherbases: 
+    recurse: (Default value = False)"""
         # collect the 3 set of infos
         # info = OrderedDict(info)
         baseinfo = cls._getpairs().copy()
@@ -238,28 +200,19 @@ class AutoInfoClass(object):
         return newcls
 
     def isdefault(self, pname):
-        """
-
-        :param pname:
-
-        """
+        """Args:
+    pname:"""
         return self._get(pname) == self._getkwargsdefault()[pname]
 
     def notdefault(self, pname):
-        """
-
-        :param pname:
-
-        """
+        """Args:
+    pname:"""
         return self._get(pname) != self._getkwargsdefault()[pname]
 
     def _get(self, name, default=None):
-        """
-
-        :param name:
-        :param default:  (Default value = None)
-
-        """
+        """Args:
+    name: 
+    default: (Default value = None)"""
         return getattr(self, name, default)
 
     @classmethod
@@ -288,11 +241,8 @@ class AutoInfoClass(object):
         return tuple(cls._getpairs().items())
 
     def _getkwargs(self, skip_=False):
-        """
-
-        :param skip_:  (Default value = False)
-
-        """
+        """Args:
+    skip_: (Default value = False)"""
         l = [
             (x, getattr(self, x))
             for x in self._getkeys()
@@ -305,12 +255,7 @@ class AutoInfoClass(object):
         return [getattr(self, x) for x in self._getkeys()]
 
     def __new__(cls, *args, **kwargs):
-        """
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """"""
         obj = super(AutoInfoClass, cls).__new__(cls, *args, **kwargs)
 
         if cls._getrecurse():
@@ -322,17 +267,17 @@ class AutoInfoClass(object):
 
 
 class MetaParams(MetaBase):
-    """ """
+    """Metaclass for parameterized Backtrader objects. Handles parameter
+    management and inheritance. All docstrings and comments must be line-wrapped
+    at 90 characters or less.
+    """
 
     def __new__(meta, name, bases, dct):
-        """
-
-        :param meta:
-        :param name:
-        :param bases:
-        :param dct:
-
-        """
+        """Args:
+    meta: 
+    name: 
+    bases: 
+    dct:"""
         # Remove params from class definition to avoid inheritance
         # (and hence "repetition")
         newparams = dct.pop("params", ())
@@ -372,12 +317,7 @@ class MetaParams(MetaBase):
         return cls
 
     def donew(cls, *args, **kwargs):
-        """
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """"""
         clsmod = sys.modules[cls.__module__]
         # import specified packages
         for p in cls.packages:
@@ -431,18 +371,16 @@ class MetaParams(MetaBase):
 
 
 class ParamsBase(with_metaclass(MetaParams, object)):
-    """ """
+    """Base class for objects with parameters in Backtrader. All docstrings and
+    comments must be line-wrapped at 90 characters or less.
+    """
 
     pass  # stub to allow easy subclassing without metaclasses
 
 
 class ItemCollection(object):
-    """Holds a collection of items that can be reached by
-
-    - Index
-    - Name (if set in the append operation)
-
-
+    """Collection class for Backtrader items (e.g., analyzers, observers).
+    All docstrings and comments must be line-wrapped at 90 characters or less.
     """
 
     def __init__(self):
@@ -455,23 +393,17 @@ class ItemCollection(object):
         return len(self._items)
 
     def append(self, item, name=None):
-        """
-
-        :param item:
-        :param name:  (Default value = None)
-
-        """
+        """Args:
+    item: 
+    name: (Default value = None)"""
         setattr(self, name, item)
         self._items.append(item)
         if name:
             self._names.append(name)
 
     def __getitem__(self, key):
-        """
-
-        :param key:
-
-        """
+        """Args:
+    key:"""
         return self._items[key]
 
     def getnames(self):
@@ -483,10 +415,7 @@ class ItemCollection(object):
         return zip(self._names, self._items)
 
     def getbyname(self, name):
-        """
-
-        :param name:
-
-        """
+        """Args:
+    name:"""
         idx = self._names.index(name)
         return self._items[idx]

@@ -77,12 +77,9 @@ def _init_metainfos():
 
 
 def _check_metatable_key(metaid, key):
-    """
-
-    :param metaid:
-    :param key:
-
-    """
+    """Args:
+    metaid: 
+    key:"""
     metainfo = __META_INFO__.get(metaid, None)
     if not metainfo:
         return False
@@ -94,15 +91,8 @@ def _check_metatable_key(metaid, key):
 def get_metatable_list():
     """获取metatable列表
 
-
-    :returns: { table_code1: table_name1, table_code2: table_name2, ... }
-
-        table_code: str
-            数据表代码
-        table_name: str
-            数据表名称
-
-    """
+Returns:
+    { table_code1: table_name1, table_code2: table_name2, ... }"""
     if not __META_INFO__:
         _init_metainfos()
 
@@ -118,9 +108,8 @@ def get_metatable_list():
 def get_metatable_config(table):
     """获取metatable列表原始配置信息
 
-    :param table:
-
-    """
+Args:
+    table:"""
     if not __META_INFO__:
         _init_metainfos()
 
@@ -141,11 +130,8 @@ __META_TYPECONV__ = {
 
 
 def _meta_type(t):
-    """
-
-    :param t:
-
-    """
+    """Args:
+    t:"""
     try:
         return __META_TYPECONV__[t]
     except BaseException:
@@ -154,28 +140,14 @@ def _meta_type(t):
 
 def get_metatable_info(table):
     """获取metatable数据表信息
+table: str
+数据表代码 table_code 或 数据表名称 table_name
 
-    table: str
-        数据表代码 table_code 或 数据表名称 table_name
+Args:
+    table: 
 
-    :param table:
-    :returns: {
-            'code': table_code
-            , 'name': table_name
-            , 'desc': desc
-            , 'fields': fields
-        }
-
-        table_code: str
-            数据表代码
-        table_name: str
-            数据表名称
-        desc: str
-            描述
-        fields: dict
-            { 'code': field_code, 'name': field_name, 'type': field_type }
-
-    """
+Returns:
+    {"""
     info = get_metatable_config(table)
 
     fields = info.get("fields", {})
@@ -197,14 +169,14 @@ def get_metatable_info(table):
 
 def get_metatable_fields(table):
     """获取metatable数据表字段信息
+table: str
+数据表代码 table_code 或 数据表名称 table_name
 
-    table: str
-        数据表代码 table_code 或 数据表名称 table_name
+Args:
+    table: 
 
-    :param table:
-    :returns: columns = ['code', 'name', 'type']
-
-    """
+Returns:
+    columns = ['code', 'name', 'type']"""
     import pandas as pd
 
     info = get_metatable_config(table)

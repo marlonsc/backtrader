@@ -34,22 +34,15 @@ __all__ = ["haDelta", "haD"]
 
 class haDelta(bt.Indicator):
     """Heikin Ashi Delta. Defined by Dan Valcu in his book "Heikin-Ashi: How to
-    Trade Without Candlestick Patterns ".
-
-    This indicator measures difference between Heikin Ashi close and open of
-    Heikin Ashi candles, the body of the candle.
-
-    To get signals add haDelta smoothed by 3 period moving average.
-
-    For correct use, the data for the indicator must have been previously
-    passed by the Heikin Ahsi filter.
-
-    Formula:
-      - haDelta = Heikin Ashi close - Heikin Ashi open
-      - smoothed = movav(haDelta, period)
-
-
-    """
+Trade Without Candlestick Patterns ".
+This indicator measures difference between Heikin Ashi close and open of
+Heikin Ashi candles, the body of the candle.
+To get signals add haDelta smoothed by 3 period moving average.
+For correct use, the data for the indicator must have been previously
+passed by the Heikin Ahsi filter.
+Formula:
+- haDelta = Heikin Ashi close - Heikin Ashi open
+- smoothed = movav(haDelta, period)"""
 
     alias = ("haD",)
 

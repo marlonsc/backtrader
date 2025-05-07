@@ -13,11 +13,7 @@ from .util import UNSET_DOUBLE, UNSET_INTEGER, dataclassNonDefaults
 @dataclass
 class Order:
     """Order for trading contracts.
-
-    https://interactivebrokers.github.io/tws-api/available_orders.html
-
-
-    """
+https://interactivebrokers.github.io/tws-api/available_orders.html"""
 
     orderId: int = 0
     clientId: int = 0
@@ -173,11 +169,8 @@ class Order:
     __str__ = __repr__
 
     def __eq__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return self is other
 
     def __hash__(self):
@@ -189,17 +182,10 @@ class LimitOrder(Order):
     """ """
 
     def __init__(self, action: str, totalQuantity: float, lmtPrice: float, **kwargs):
-        """
-
-        :param action:
-        :type action: str
-        :param totalQuantity:
-        :type totalQuantity: float
-        :param lmtPrice:
-        :type lmtPrice: float
-        :param **kwargs:
-
-        """
+        """Args:
+    action: 
+    totalQuantity: 
+    lmtPrice:"""
         Order.__init__(
             self,
             orderType="LMT",
@@ -214,15 +200,9 @@ class MarketOrder(Order):
     """ """
 
     def __init__(self, action: str, totalQuantity: float, **kwargs):
-        """
-
-        :param action:
-        :type action: str
-        :param totalQuantity:
-        :type totalQuantity: float
-        :param **kwargs:
-
-        """
+        """Args:
+    action: 
+    totalQuantity:"""
         Order.__init__(
             self,
             orderType="MKT",
@@ -236,17 +216,10 @@ class StopOrder(Order):
     """ """
 
     def __init__(self, action: str, totalQuantity: float, stopPrice: float, **kwargs):
-        """
-
-        :param action:
-        :type action: str
-        :param totalQuantity:
-        :type totalQuantity: float
-        :param stopPrice:
-        :type stopPrice: float
-        :param **kwargs:
-
-        """
+        """Args:
+    action: 
+    totalQuantity: 
+    stopPrice:"""
         Order.__init__(
             self,
             orderType="STP",
@@ -268,19 +241,11 @@ class StopLimitOrder(Order):
         stopPrice: float,
         **kwargs,
     ):
-        """
-
-        :param action:
-        :type action: str
-        :param totalQuantity:
-        :type totalQuantity: float
-        :param lmtPrice:
-        :type lmtPrice: float
-        :param stopPrice:
-        :type stopPrice: float
-        :param **kwargs:
-
-        """
+        """Args:
+    action: 
+    totalQuantity: 
+    lmtPrice: 
+    stopPrice:"""
         Order.__init__(
             self,
             orderType="STP LMT",
@@ -359,19 +324,15 @@ class OrderComboLeg:
 @dataclass
 class Trade:
     """Trade keeps track of an order, its status and all its fills.
-
-    Events:
-        * ``statusEvent`` (trade: :class:`.Trade`)
-        * ``modifyEvent`` (trade: :class:`.Trade`)
-        * ``fillEvent`` (trade: :class:`.Trade`, fill: :class:`.Fill`)
-        * ``commissionReportEvent`` (trade: :class:`.Trade`,
-          fill: :class:`.Fill`, commissionReport: :class:`.CommissionReport`)
-        * ``filledEvent`` (trade: :class:`.Trade`)
-        * ``cancelEvent`` (trade: :class:`.Trade`)
-        * ``cancelledEvent`` (trade: :class:`.Trade`)
-
-
-    """
+Events:
+* ``statusEvent`` (trade: :class:`.Trade`)
+* ``modifyEvent`` (trade: :class:`.Trade`)
+* ``fillEvent`` (trade: :class:`.Trade`, fill: :class:`.Fill`)
+* ``commissionReportEvent`` (trade: :class:`.Trade`,
+fill: :class:`.Fill`, commissionReport: :class:`.CommissionReport`)
+* ``filledEvent`` (trade: :class:`.Trade`)
+* ``cancelEvent`` (trade: :class:`.Trade`)
+* ``cancelledEvent`` (trade: :class:`.Trade`)"""
 
     contract: Contract = field(default_factory=Contract)
     order: Order = field(default_factory=Order)
@@ -402,29 +363,17 @@ class Trade:
 
     def isActive(self) -> bool:
         """True if eligible for execution, false otherwise.
-
-
-        :rtype: bool
-
-        """
+:rtype: bool"""
         return self.orderStatus.status in OrderStatus.ActiveStates
 
     def isDone(self) -> bool:
         """True if completely filled or cancelled, false otherwise.
-
-
-        :rtype: bool
-
-        """
+:rtype: bool"""
         return self.orderStatus.status in OrderStatus.DoneStates
 
     def filled(self) -> float:
         """Number of shares filled.
-
-
-        :rtype: float
-
-        """
+:rtype: float"""
         fills = self.fills
         if self.contract.secType == "BAG":
             # don't count fills for the leg contracts
@@ -433,11 +382,7 @@ class Trade:
 
     def remaining(self) -> float:
         """Number of shares remaining to be filled.
-
-
-        :rtype: float
-
-        """
+:rtype: float"""
         return self.order.totalQuantity - self.filled()
 
 
@@ -455,11 +400,8 @@ class OrderCondition:
 
     @staticmethod
     def createClass(condType):
-        """
-
-        :param condType:
-
-        """
+        """Args:
+    condType:"""
         d = {
             1: PriceCondition,
             3: TimeCondition,

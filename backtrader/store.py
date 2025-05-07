@@ -27,35 +27,26 @@ from __future__ import (
 
 import collections
 
-from backtrader.metabase import MetaParams
-from backtrader.utils.py3 import with_metaclass
+from .metabase import MetaParams
+from .utils.py3 import with_metaclass
 
 
 class MetaSingleton(MetaParams):
-    """Metaclass to make a metaclassed class a singleton"""
+    """Metaclass to make a metaclassed class a singleton."""
 
-    def __init__(cls, name, bases, dct):
-        """
+    def __init__(self, name, bases, dct):
+        """Args:
+    name: 
+    bases: 
+    dct:"""
+        super().__init__(name, bases, dct)
+        self._singleton = None
 
-        :param name:
-        :param bases:
-        :param dct:
-
-        """
-        super(MetaSingleton, cls).__init__(name, bases, dct)
-        cls._singleton = None
-
-    def __call__(cls, *args, **kwargs):
-        """
-
-        :param *args:
-        :param **kwargs:
-
-        """
-        if cls._singleton is None:
-            cls._singleton = super(MetaSingleton, cls).__call__(*args, **kwargs)
-
-        return cls._singleton
+    def __call__(self, *args, **kwargs):
+        """"""
+        if self._singleton is None:
+            self._singleton = super().__call__(*args, **kwargs)
+        return self._singleton
 
 
 class Store(with_metaclass(MetaSingleton, object)):
@@ -66,24 +57,22 @@ class Store(with_metaclass(MetaSingleton, object)):
     params = ()
 
     def getdata(self, *args, **kwargs):
-        """Returns ``DataCls`` with args, kwargs
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Returns ``DataCls`` with args, kwargs"""
+        if not hasattr(self, "DataCls") or self.DataCls is None:
+            raise RuntimeError("DataCls is not set for this Store.")
+        if not callable(self.DataCls):
+            raise TypeError("DataCls is not callable. Manual review required.")
         data = self.DataCls(*args, **kwargs)
         data._store = self
         return data
 
     @classmethod
     def getbroker(cls, *args, **kwargs):
-        """Returns broker with *args, **kwargs from registered ``BrokerCls``
-
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Returns broker with *args, **kwargs from registered ``BrokerCls``"""
+        if not hasattr(cls, "BrokerCls") or cls.BrokerCls is None:
+            raise RuntimeError("BrokerCls is not set for this Store.")
+        if not callable(cls.BrokerCls):
+            raise TypeError("BrokerCls is not callable. Manual review required.")
         broker = cls.BrokerCls(*args, **kwargs)
         broker._store = cls
         return broker
@@ -92,12 +81,9 @@ class Store(with_metaclass(MetaSingleton, object)):
     DataCls = None  # data class will auto register
 
     def start(self, data=None, broker=None):
-        """
-
-        :param data:  (Default value = None)
-        :param broker:  (Default value = None)
-
-        """
+        """Args:
+    data: (Default value = None)
+    broker: (Default value = None)"""
         if not self._started:
             self._started = True
             self.notifs = collections.deque()
@@ -119,13 +105,8 @@ class Store(with_metaclass(MetaSingleton, object)):
         """ """
 
     def put_notification(self, msg, *args, **kwargs):
-        """
-
-        :param msg:
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Args:
+    msg:"""
         self.notifs.append((msg, args, kwargs))
 
     def get_notifications(self):

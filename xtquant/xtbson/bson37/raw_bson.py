@@ -12,43 +12,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Tools for representing raw BSON documents.
-
 Inserting and Retrieving RawBSONDocuments
 =========================================
-
 Example: Moving a document between different databases/collections
-
 .. doctest::
-
-  >>> import bson
-  >>> from pymongo import MongoClient
-  >>> from .raw_bson import RawBSONDocument
-  >>> client = MongoClient(document_class=RawBSONDocument)
-  >>> client.drop_database('db')
-  >>> client.drop_database('replica_db')
-  >>> db = client.db
-  >>> result = db.test.insert_many([{'_id': 1, 'a': 1},
-  ...                               {'_id': 2, 'b': 1},
-  ...                               {'_id': 3, 'c': 1},
-  ...                               {'_id': 4, 'd': 1}])
-  >>> replica_db = client.replica_db
-  >>> for doc in db.test.find():
-  ...    print(f"raw document: {doc.raw}")
-  ...    print(f"decoded document: {bson.decode(doc.raw)}")
-  ...    result = replica_db.test.insert_one(doc)
-  raw document: b'...'
-  decoded document: {'_id': 1, 'a': 1}
-  raw document: b'...'
-  decoded document: {'_id': 2, 'b': 1}
-  raw document: b'...'
-  decoded document: {'_id': 3, 'c': 1}
-  raw document: b'...'
-  decoded document: {'_id': 4, 'd': 1}
-
+>>> import bson
+>>> from pymongo import MongoClient
+>>> from .raw_bson import RawBSONDocument
+>>> client = MongoClient(document_class=RawBSONDocument)
+>>> client.drop_database('db')
+>>> client.drop_database('replica_db')
+>>> db = client.db
+>>> result = db.test.insert_many([{'_id': 1, 'a': 1},
+...                               {'_id': 2, 'b': 1},
+...                               {'_id': 3, 'c': 1},
+...                               {'_id': 4, 'd': 1}])
+>>> replica_db = client.replica_db
+>>> for doc in db.test.find():
+...    print(f"raw document: {doc.raw}")
+...    print(f"decoded document: {bson.decode(doc.raw)}")
+...    result = replica_db.test.insert_one(doc)
+raw document: b'...'
+decoded document: {'_id': 1, 'a': 1}
+raw document: b'...'
+decoded document: {'_id': 2, 'b': 1}
+raw document: b'...'
+decoded document: {'_id': 3, 'c': 1}
+raw document: b'...'
+decoded document: {'_id': 4, 'd': 1}
 For use cases like moving documents across different databases or writing binary
 blobs to disk, using raw BSON documents provides better speed and avoids the
-overhead of decoding or encoding BSON.
-"""
+overhead of decoding or encoding BSON."""
 
 from typing import Any, ItemsView, Iterator, Mapping, Optional
 
@@ -63,22 +57,16 @@ def _inflate_bson(
     bson_bytes: bytes, codec_options: CodecOptions, raw_array: bool = False
 ) -> Mapping[Any, Any]:
     """Inflates the top level fields of a BSON document.
+:Parameters:
+- `bson_bytes`: the BSON bytes that compose this document
+- `codec_options`: An instance of
+:class:`~bson.codec_options.CodecOptions` whose ``document_class``
+must be :class:`RawBSONDocument`.
 
-    :Parameters:
-      - `bson_bytes`: the BSON bytes that compose this document
-      - `codec_options`: An instance of
-        :class:`~bson.codec_options.CodecOptions` whose ``document_class``
-        must be :class:`RawBSONDocument`.
-
-    :param bson_bytes:
-    :type bson_bytes: bytes
-    :param codec_options:
-    :type codec_options: CodecOptions
-    :param raw_array:  (Default value = False)
-    :type raw_array: bool
-    :rtype: Mapping[Any,Any]
-
-    """
+Args:
+    bson_bytes: 
+    codec_options: 
+    raw_array: (Default value = False)"""
     # Use SON to preserve ordering of elements.
     return _raw_to_dict(
         bson_bytes,
@@ -92,13 +80,9 @@ def _inflate_bson(
 
 class RawBSONDocument(Mapping[str, Any]):
     """Representation for a MongoDB document that provides access to the raw
-    BSON bytes that compose it.
-
-    Only when a field is accessed or modified within the document does
-    RawBSONDocument decode its bytes.
-
-
-    """
+BSON bytes that compose it.
+Only when a field is accessed or modified within the document does
+RawBSONDocument decode its bytes."""
 
     __slots__ = ("__raw", "__inflated_doc", "__codec_options")
     _type_marker = _RAW_BSON_DOCUMENT_MARKER
@@ -107,45 +91,29 @@ class RawBSONDocument(Mapping[str, Any]):
         self, bson_bytes: bytes, codec_options: Optional[CodecOptions] = None
     ) -> None:
         """Create a new :class:`RawBSONDocument`
+:class:`RawBSONDocument` is a representation of a BSON document that
+provides access to the underlying raw BSON bytes. Only when a field is
+accessed or modified within the document does RawBSONDocument decode
+its bytes.
+:class:`RawBSONDocument` implements the ``Mapping`` abstract base
+class from the standard library so it can be used like a read-only
+``dict``::
+:Parameters:
+- `bson_bytes`: the BSON bytes that compose this document
+- `codec_options` (optional): An instance of
+:class:`~bson.codec_options.CodecOptions` whose ``document_class``
+must be :class:`RawBSONDocument`. The default is
+:attr:`DEFAULT_RAW_BSON_OPTIONS`.
+.. versionchanged:: 3.8
+:class:`RawBSONDocument` now validates that the ``bson_bytes``
+passed in represent a single bson document.
+.. versionchanged:: 3.5
+If a :class:`~bson.codec_options.CodecOptions` is passed in, its
+`document_class` must be :class:`RawBSONDocument`.
 
-        :class:`RawBSONDocument` is a representation of a BSON document that
-        provides access to the underlying raw BSON bytes. Only when a field is
-        accessed or modified within the document does RawBSONDocument decode
-        its bytes.
-
-        :class:`RawBSONDocument` implements the ``Mapping`` abstract base
-        class from the standard library so it can be used like a read-only
-        ``dict``::
-
-
-        :Parameters:
-          - `bson_bytes`: the BSON bytes that compose this document
-          - `codec_options` (optional): An instance of
-            :class:`~bson.codec_options.CodecOptions` whose ``document_class``
-            must be :class:`RawBSONDocument`. The default is
-            :attr:`DEFAULT_RAW_BSON_OPTIONS`.
-
-        .. versionchanged:: 3.8
-          :class:`RawBSONDocument` now validates that the ``bson_bytes``
-          passed in represent a single bson document.
-
-        .. versionchanged:: 3.5
-          If a :class:`~bson.codec_options.CodecOptions` is passed in, its
-          `document_class` must be :class:`RawBSONDocument`.
-
-        :param bson_bytes:
-        :type bson_bytes: bytes
-        :param codec_options:  (Default value = None)
-        :type codec_options: Optional[CodecOptions]
-        :rtype: None
-
-        >>> from . import encode
-            >>> raw_doc = RawBSONDocument(encode({'_id': 'my_doc'}))
-            >>> raw_doc.raw
-            b'...'
-            >>> raw_doc['_id']
-            'my_doc'
-        """
+Args:
+    bson_bytes: 
+    codec_options: (Default value = None)"""
         self.__raw = bson_bytes
         self.__inflated_doc: Optional[Mapping[str, Any]] = None
         # Can't default codec_options to DEFAULT_RAW_BSON_OPTIONS in signature,
@@ -164,20 +132,12 @@ class RawBSONDocument(Mapping[str, Any]):
     @property
     def raw(self) -> bytes:
         """The raw BSON bytes composing this document.
-
-
-        :rtype: bytes
-
-        """
+:rtype: bytes"""
         return self.__raw
 
     def items(self) -> ItemsView[str, Any]:
         """Lazily decode and iterate elements in this document.
-
-
-        :rtype: ItemsView[str,Any]
-
-        """
+:rtype: ItemsView[str,Any]"""
         return self.__inflated.items()
 
     @property
@@ -199,25 +159,14 @@ class RawBSONDocument(Mapping[str, Any]):
     def _inflate_bson(
         bson_bytes: bytes, codec_options: CodecOptions
     ) -> Mapping[Any, Any]:
-        """
-
-        :param bson_bytes:
-        :type bson_bytes: bytes
-        :param codec_options:
-        :type codec_options: CodecOptions
-        :rtype: Mapping[Any,Any]
-
-        """
+        """Args:
+    bson_bytes: 
+    codec_options:"""
         return _inflate_bson(bson_bytes, codec_options)
 
     def __getitem__(self, item: str) -> Any:
-        """
-
-        :param item:
-        :type item: str
-        :rtype: Any
-
-        """
+        """Args:
+    item:"""
         return self.__inflated[item]
 
     def __iter__(self) -> Iterator[str]:
@@ -239,13 +188,8 @@ class RawBSONDocument(Mapping[str, Any]):
         return len(self.__inflated)
 
     def __eq__(self, other: Any) -> bool:
-        """
-
-        :param other:
-        :type other: Any
-        :rtype: bool
-
-        """
+        """Args:
+    other:"""
         if isinstance(other, RawBSONDocument):
             return self.__raw == other.raw
         return NotImplemented
@@ -266,15 +210,9 @@ class _RawArrayBSONDocument(RawBSONDocument):
     def _inflate_bson(
         bson_bytes: bytes, codec_options: CodecOptions
     ) -> Mapping[Any, Any]:
-        """
-
-        :param bson_bytes:
-        :type bson_bytes: bytes
-        :param codec_options:
-        :type codec_options: CodecOptions
-        :rtype: Mapping[Any,Any]
-
-        """
+        """Args:
+    bson_bytes: 
+    codec_options:"""
         return _inflate_bson(bson_bytes, codec_options, raw_array=True)
 
 

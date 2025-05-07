@@ -31,28 +31,21 @@ def _run_resampler(
     close_hour=None,
     close_minute=None,
 ) -> bt.Strategy:
-    """
-
-    :param data_timeframe:
-    :param data_compression:
-    :param resample_timeframe:
-    :param resample_compression:
-    :param num_gen_bars:
-    :param runtime_seconds: (Default value = 27)
-    :param starting_value: (Default value = 200)
-    :param tick_interval: (Default value = datetime.timedelta(seconds=25))
-    :param live: (Default value = False)
-    :param use_tcal: (Default value = False)
-    :param open_hour: (Default value = None)
-    :param open_minute: (Default value = None)
-    :param close_hour: (Default value = None)
-    :param close_minute: (Default value = None)
-    :rtype: bt.Strategy
-    :rtype: bt.Strategy
-    :rtype: bt.Strategy
-    :rtype: bt.Strategy
-
-    """
+    """Args:
+    data_timeframe: 
+    data_compression: 
+    resample_timeframe: 
+    resample_compression: 
+    num_gen_bars: 
+    runtime_seconds: (Default value = 27)
+    starting_value: (Default value = 200)
+    tick_interval: (Default value = datetime.timedelta(seconds=25))
+    live: (Default value = False)
+    use_tcal: (Default value = False)
+    open_hour: (Default value = None)
+    open_minute: (Default value = None)
+    close_hour: (Default value = None)
+    close_minute: (Default value = None)"""
     _logger.info("Constructing Cerebro")
     cerebro = bt.Cerebro(bar_on_exit=False)
     cerebro.addstrategy(bt.strategies.NullStrategy)

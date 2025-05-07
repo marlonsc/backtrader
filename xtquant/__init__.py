@@ -4,11 +4,8 @@ __version__ = "xtquant"
 
 
 def check_for_update(package_name):
-    """
-
-    :param package_name:
-
-    """
+    """Args:
+    package_name:"""
     import requests
     from pkg_resources import get_distribution
 

@@ -15,12 +15,9 @@ class MAStrategy(bt.Strategy):
     params = (("ma_period1", 10), ("ma_period2", 60), ("price_period", 50))
 
     def log(self, txt, dt=None):
-        """
-
-        :param txt:
-        :param dt:  (Default value = None)
-
-        """
+        """Args:
+    txt: 
+    dt: (Default value = None)"""
         dt = dt or self.datas[0].datetime.date(0)
         # print('%s, %s' % (dt.isoformat(), txt))
 
@@ -54,11 +51,8 @@ class MAStrategy(bt.Strategy):
         }
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status in [order.Submitted, order.Accepted]:
             # Buy/Sell order submitted/accepted to/by broker - Nothing to do
             return
@@ -84,11 +78,8 @@ class MAStrategy(bt.Strategy):
             self.log("Order Canceled/Margin/Rejected")
 
     def notify_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
+        """Args:
+    trade:"""
         if not trade.isclosed:
             return
 
@@ -134,11 +125,8 @@ class MAStrategy(bt.Strategy):
                 self.sell_order = self.sell()
 
     def check_direction(self, line):
-        """
-
-        :param line:
-
-        """
+        """Args:
+    line:"""
         if line[0] > line[-1] > line[-2]:
             return 1  # up
         elif line[0] < line[-1] < line[-2]:
@@ -151,12 +139,9 @@ class MAStrategy(bt.Strategy):
         return self.isCrossUp[0] > 0 or self.isCrossUp[-1] > 0 or self.isCrossUp[-2] > 0
 
     def get_percentage(self, val1, val2):
-        """
-
-        :param val1:
-        :param val2:
-
-        """
+        """Args:
+    val1: 
+    val2:"""
         return (val1 - val2) / val2 * 100
 
     def is_golden_cross(self):
@@ -184,11 +169,8 @@ class MAStrategy(bt.Strategy):
 
 
 def test_one_stock(file):
-    """
-
-    :param file:
-
-    """
+    """Args:
+    file:"""
     cerebro = bt.Cerebro()
     cerebro.broker.setcash(10000.0)
     cerebro.broker.set_coc(True)

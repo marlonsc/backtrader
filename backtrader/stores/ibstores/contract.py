@@ -10,22 +10,18 @@ import ib_insync.util as util
 @dataclass
 class Contract:
     """``Contract(**kwargs)`` can create any contract using keyword
-    arguments. To simplify working with contracts, there are also more
-    specialized contracts that take optional positional arguments.
-    Some examples::
-
-        Contract(conId=270639)
-        Stock('AMD', 'SMART', 'USD')
-        Stock('INTC', 'SMART', 'USD', primaryExchange='NASDAQ')
-        Forex('EURUSD')
-        CFD('IBUS30')
-        Future('ES', '20180921', 'GLOBEX')
-        Option('SPY', '20170721', 240, 'C', 'SMART')
-        Bond(secIdType='ISIN', secId='US03076KAA60')
-        Crypto('BTC', 'PAXOS', 'USD')
-
-
-    """
+arguments. To simplify working with contracts, there are also more
+specialized contracts that take optional positional arguments.
+Some examples::
+Contract(conId=270639)
+Stock('AMD', 'SMART', 'USD')
+Stock('INTC', 'SMART', 'USD', primaryExchange='NASDAQ')
+Forex('EURUSD')
+CFD('IBUS30')
+Future('ES', '20180921', 'GLOBEX')
+Option('SPY', '20170721', 240, 'C', 'SMART')
+Bond(secIdType='ISIN', secId='US03076KAA60')
+Crypto('BTC', 'PAXOS', 'USD')"""
 
     secType: str = ""
     conId: int = 0
@@ -51,12 +47,7 @@ class Contract:
     @staticmethod
     def create(**kwargs) -> "Contract":
         """Create and a return a specialized contract based on the given secType,
-        or a general Contract if secType is not given.
-
-        :param **kwargs:
-        :rtype: "Contract"
-
-        """
+or a general Contract if secType is not given."""
         secType = kwargs.get("secType", "")
         cls = {
             "": Contract,
@@ -84,21 +75,13 @@ class Contract:
 
     def isHashable(self) -> bool:
         """See if this contract can be hashed by conId.
-
-        Note: Bag contracts always get conId=28812380, so they're not hashable.
-
-
-        :rtype: bool
-
-        """
+Note: Bag contracts always get conId=28812380, so they're not hashable.
+:rtype: bool"""
         return bool(self.conId and self.conId != 28812380 and self.secType != "BAG")
 
     def __eq__(self, other):
-        """
-
-        :param other:
-
-        """
+        """Args:
+    other:"""
         return isinstance(other, Contract) and (
             self.conId
             and self.conId == other.conId
@@ -136,15 +119,10 @@ class Stock(Contract):
     ):
         """Stock contract.
 
-        :param symbol: Symbol name. (Default value = "")
-        :type symbol: str
-        :param exchange: Destination exchange. (Default value = "")
-        :type exchange: str
-        :param currency: Underlying currency. (Default value = "")
-        :type currency: str
-        :param **kwargs:
-
-        """
+Args:
+    symbol: Symbol name. (Default value = "")
+    exchange: Destination exchange. (Default value = "")
+    currency: Underlying currency. (Default value = "")"""
         Contract.__init__(
             self,
             secType="STK",
@@ -171,27 +149,14 @@ class Option(Contract):
     ):
         """Option contract.
 
-        :param symbol: Symbol name. (Default value = "")
-        :type symbol: str
-        :param lastTradeDateOrContractMonth: The option's last trading day
-                or contract month.
-                * YYYYMM format: To specify last month
-                * YYYYMMDD format: To specify last trading day (Default value = "")
-        :type lastTradeDateOrContractMonth: str
-        :param strike: The option's strike price. (Default value = 0.0)
-        :type strike: float
-        :param right: Put or call option.
-                Valid values are 'P', 'PUT', 'C' or 'CALL'. (Default value = "")
-        :type right: str
-        :param exchange: Destination exchange. (Default value = "")
-        :type exchange: str
-        :param multiplier: The contract multiplier. (Default value = "")
-        :type multiplier: str
-        :param currency: Underlying currency. (Default value = "")
-        :type currency: str
-        :param **kwargs:
-
-        """
+Args:
+    symbol: Symbol name. (Default value = "")
+    lastTradeDateOrContractMonth: The option's last trading day
+    strike: The option's strike price. (Default value = 0.0)
+    right: Put or call option.
+    exchange: Destination exchange. (Default value = "")
+    multiplier: The contract multiplier. (Default value = "")
+    currency: Underlying currency. (Default value = "")"""
         Contract.__init__(
             self,
             "OPT",
@@ -221,24 +186,13 @@ class Future(Contract):
     ):
         """Future contract.
 
-        :param symbol: Symbol name. (Default value = "")
-        :type symbol: str
-        :param lastTradeDateOrContractMonth: The option's last trading day
-                or contract month.
-                * YYYYMM format: To specify last month
-                * YYYYMMDD format: To specify last trading day (Default value = "")
-        :type lastTradeDateOrContractMonth: str
-        :param exchange: Destination exchange. (Default value = "")
-        :type exchange: str
-        :param localSymbol: The contract's symbol within its primary exchange. (Default value = "")
-        :type localSymbol: str
-        :param multiplier: The contract multiplier. (Default value = "")
-        :type multiplier: str
-        :param currency: Underlying currency. (Default value = "")
-        :type currency: str
-        :param **kwargs:
-
-        """
+Args:
+    symbol: Symbol name. (Default value = "")
+    lastTradeDateOrContractMonth: The option's last trading day
+    exchange: Destination exchange. (Default value = "")
+    localSymbol: The contract's symbol within its primary exchange. (Default value = "")
+    multiplier: The contract multiplier. (Default value = "")
+    currency: Underlying currency. (Default value = "")"""
         Contract.__init__(
             self,
             "FUT",
@@ -266,19 +220,12 @@ class ContFuture(Contract):
     ):
         """Continuous future contract.
 
-        :param symbol: Symbol name. (Default value = "")
-        :type symbol: str
-        :param exchange: Destination exchange. (Default value = "")
-        :type exchange: str
-        :param localSymbol: The contract's symbol within its primary exchange. (Default value = "")
-        :type localSymbol: str
-        :param multiplier: The contract multiplier. (Default value = "")
-        :type multiplier: str
-        :param currency: Underlying currency. (Default value = "")
-        :type currency: str
-        :param **kwargs:
-
-        """
+Args:
+    symbol: Symbol name. (Default value = "")
+    exchange: Destination exchange. (Default value = "")
+    localSymbol: The contract's symbol within its primary exchange. (Default value = "")
+    multiplier: The contract multiplier. (Default value = "")
+    currency: Underlying currency. (Default value = "")"""
         Contract.__init__(
             self,
             "CONTFUT",
@@ -304,17 +251,11 @@ class Forex(Contract):
     ):
         """Foreign exchange currency pair.
 
-        :param pair: Shortcut for specifying symbol and currency, like 'EURUSD'. (Default value = "")
-        :type pair: str
-        :param exchange: Destination exchange. (Default value = "IDEALPRO")
-        :type exchange: str
-        :param symbol: Base currency. (Default value = "")
-        :type symbol: str
-        :param currency: Quote currency. (Default value = "")
-        :type currency: str
-        :param **kwargs:
-
-        """
+Args:
+    pair: Shortcut for specifying symbol and currency, like 'EURUSD'. (Default value = "")
+    exchange: Destination exchange. (Default value = "IDEALPRO")
+    symbol: Base currency. (Default value = "")
+    currency: Quote currency. (Default value = "")"""
         if pair:
             assert len(pair) == 6
             symbol = symbol or pair[:3]
@@ -345,11 +286,7 @@ class Forex(Contract):
 
     def pair(self) -> str:
         """Short name of pair.
-
-
-        :rtype: str
-
-        """
+:rtype: str"""
         return self.symbol + self.currency
 
 
@@ -361,15 +298,10 @@ class Index(Contract):
     ):
         """Index.
 
-        :param symbol: Symbol name. (Default value = "")
-        :type symbol: str
-        :param exchange: Destination exchange. (Default value = "")
-        :type exchange: str
-        :param currency: Underlying currency. (Default value = "")
-        :type currency: str
-        :param **kwargs:
-
-        """
+Args:
+    symbol: Symbol name. (Default value = "")
+    exchange: Destination exchange. (Default value = "")
+    currency: Underlying currency. (Default value = "")"""
         Contract.__init__(
             self,
             "IND",
@@ -388,15 +320,10 @@ class CFD(Contract):
     ):
         """Contract For Difference.
 
-        :param symbol: Symbol name. (Default value = "")
-        :type symbol: str
-        :param exchange: Destination exchange. (Default value = "")
-        :type exchange: str
-        :param currency: Underlying currency. (Default value = "")
-        :type currency: str
-        :param **kwargs:
-
-        """
+Args:
+    symbol: Symbol name. (Default value = "")
+    exchange: Destination exchange. (Default value = "")
+    currency: Underlying currency. (Default value = "")"""
         Contract.__init__(
             self,
             "CFD",
@@ -415,15 +342,10 @@ class Commodity(Contract):
     ):
         """Commodity.
 
-        :param symbol: Symbol name. (Default value = "")
-        :type symbol: str
-        :param exchange: Destination exchange. (Default value = "")
-        :type exchange: str
-        :param currency: Underlying currency. (Default value = "")
-        :type currency: str
-        :param **kwargs:
-
-        """
+Args:
+    symbol: Symbol name. (Default value = "")
+    exchange: Destination exchange. (Default value = "")
+    currency: Underlying currency. (Default value = "")"""
         Contract.__init__(
             self,
             "CMDTY",
@@ -438,11 +360,7 @@ class Bond(Contract):
     """ """
 
     def __init__(self, **kwargs):
-        """Bond.
-
-        :param **kwargs:
-
-        """
+        """Bond."""
         Contract.__init__(self, "BOND", **kwargs)
 
 
@@ -462,27 +380,14 @@ class FuturesOption(Contract):
     ):
         """Option on a futures contract.
 
-        :param symbol: Symbol name. (Default value = "")
-        :type symbol: str
-        :param lastTradeDateOrContractMonth: The option's last trading day
-                or contract month.
-                * YYYYMM format: To specify last month
-                * YYYYMMDD format: To specify last trading day (Default value = "")
-        :type lastTradeDateOrContractMonth: str
-        :param strike: The option's strike price. (Default value = 0.0)
-        :type strike: float
-        :param right: Put or call option.
-                Valid values are 'P', 'PUT', 'C' or 'CALL'. (Default value = "")
-        :type right: str
-        :param exchange: Destination exchange. (Default value = "")
-        :type exchange: str
-        :param multiplier: The contract multiplier. (Default value = "")
-        :type multiplier: str
-        :param currency: Underlying currency. (Default value = "")
-        :type currency: str
-        :param **kwargs:
-
-        """
+Args:
+    symbol: Symbol name. (Default value = "")
+    lastTradeDateOrContractMonth: The option's last trading day
+    strike: The option's strike price. (Default value = 0.0)
+    right: Put or call option.
+    exchange: Destination exchange. (Default value = "")
+    multiplier: The contract multiplier. (Default value = "")
+    currency: Underlying currency. (Default value = "")"""
         Contract.__init__(
             self,
             "FOP",
@@ -501,11 +406,7 @@ class MutualFund(Contract):
     """ """
 
     def __init__(self, **kwargs):
-        """Mutual fund.
-
-        :param **kwargs:
-
-        """
+        """Mutual fund."""
         Contract.__init__(self, "FUND", **kwargs)
 
 
@@ -513,11 +414,7 @@ class Warrant(Contract):
     """ """
 
     def __init__(self, **kwargs):
-        """Warrant option.
-
-        :param **kwargs:
-
-        """
+        """Warrant option."""
         Contract.__init__(self, "WAR", **kwargs)
 
 
@@ -525,11 +422,7 @@ class Bag(Contract):
     """ """
 
     def __init__(self, **kwargs):
-        """Bag contract.
-
-        :param **kwargs:
-
-        """
+        """Bag contract."""
         Contract.__init__(self, "BAG", **kwargs)
 
 
@@ -541,15 +434,10 @@ class Crypto(Contract):
     ):
         """Crypto currency contract.
 
-        :param symbol: Symbol name. (Default value = "")
-        :type symbol: str
-        :param exchange: Destination exchange. (Default value = "")
-        :type exchange: str
-        :param currency: Underlying currency. (Default value = "")
-        :type currency: str
-        :param **kwargs:
-
-        """
+Args:
+    symbol: Symbol name. (Default value = "")
+    exchange: Destination exchange. (Default value = "")
+    currency: Underlying currency. (Default value = "")"""
         Contract.__init__(
             self,
             secType="CRYPTO",
@@ -666,13 +554,8 @@ class ContractDetails:
         return self._parseSessions(self.liquidHours)
 
     def _parseSessions(self, s: str) -> List[TradingSession]:
-        """
-
-        :param s:
-        :type s: str
-        :rtype: List[TradingSession]
-
-        """
+        """Args:
+    s:"""
         tz = util.ZoneInfo(self.timeZoneId)
         sessions = []
         for sess in s.split(";"):

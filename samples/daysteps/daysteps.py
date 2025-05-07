@@ -98,11 +98,8 @@ def runstrat():
 
 
 def parse_args(pargs=None):
-    """
-
-    :param pargs: (Default value = None)
-
-    """
+    """Args:
+    pargs: (Default value = None)"""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Sample for pivot point and cross plotting",

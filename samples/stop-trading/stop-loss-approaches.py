@@ -57,11 +57,8 @@ class ManualStopOrStopTrail(BaseStrategy):
     )
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if not order.status == order.Completed:
             return  # discard any other notification
 
@@ -99,11 +96,8 @@ class ManualStopOrStopTrailCheat(BaseStrategy):
         self.broker.set_coc(True)
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if not order.status == order.Completed:
             return  # discard any other notification
 
@@ -139,11 +133,8 @@ class AutoStopOrStopTrail(BaseStrategy):
     buy_order = None  # default value for a potential buy_order
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status == order.Cancelled:
             print(
                 "CANCEL@price: {:.2f} {}".format(
@@ -203,11 +194,8 @@ APPROACHES = dict(
 
 
 def runstrat(args=None):
-    """
-
-    :param args:  (Default value = None)
-
-    """
+    """Args:
+    args: (Default value = None)"""
     args = parse_args(args)
 
     cerebro = bt.Cerebro()
@@ -243,11 +231,8 @@ def runstrat(args=None):
 
 
 def parse_args(pargs=None):
-    """
-
-    :param pargs:  (Default value = None)
-
-    """
+    """Args:
+    pargs: (Default value = None)"""
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Stop-Loss Approaches",

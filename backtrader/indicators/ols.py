@@ -34,12 +34,8 @@ __all__ = ["OLS_Slope_InterceptN", "OLS_TransformationN", "OLS_BetaN", "CointN"]
 
 class OLS_Slope_InterceptN(PeriodN):
     """Calculates a linear regression using ``statsmodel.OLS`` (Ordinary least
-    squares) of data1 on data0
-
-    Uses ``pandas`` and ``statsmodels``
-
-
-    """
+squares) of data1 on data0
+Uses ``pandas`` and ``statsmodels``"""
 
     _mindatas = 2  # ensure at least 2 data feeds are passed
 
@@ -95,11 +91,7 @@ class OLS_TransformationN(PeriodN):
 
 class OLS_BetaN(PeriodN):
     """Calculates a regression of data1 on data0 using ``statsmodels.api.ols``
-
-    Uses ``pandas`` and ``statsmodels``
-
-
-    """
+Uses ``pandas`` and ``statsmodels``"""
 
     _mindatas = 2  # ensure at least 2 data feeds are passed
 
@@ -122,12 +114,8 @@ class OLS_BetaN(PeriodN):
 
 class CointN(PeriodN):
     """Calculates the score (coint_t) and pvalue for a given ``period`` for the
-    data feeds
-
-    Uses ``pandas`` and ``statsmodels`` (for ``coint``)
-
-
-    """
+data feeds
+Uses ``pandas`` and ``statsmodels`` (for ``coint``)"""
 
     _mindatas = 2  # ensure at least 2 data feeds are passed
 

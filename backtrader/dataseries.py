@@ -65,12 +65,9 @@ class TimeFrame(object):
 
     @classmethod
     def getname(cls, tframe, compression=None):
-        """
-
-        :param tframe:
-        :param compression:  (Default value = None)
-
-        """
+        """Args:
+    tframe: 
+    compression: (Default value = None)"""
         tname = cls.Names[tframe]
         if compression > 1 or tname == cls.Names[-1]:
             return tname  # for plural or 'NoTimeFrame' return plain entry
@@ -80,20 +77,14 @@ class TimeFrame(object):
 
     @classmethod
     def TFrame(cls, name):
-        """
-
-        :param name:
-
-        """
+        """Args:
+    name:"""
         return getattr(cls, name)
 
     @classmethod
     def TName(cls, tframe):
-        """
-
-        :param tframe:
-
-        """
+        """Args:
+    tframe:"""
         return cls.Names[tframe]
 
 
@@ -124,7 +115,7 @@ class DataSeries(LineSeries):
         for lo in self.LineOrder:
             headers.append(self._getlinealias(lo))
 
-        morelines = self.getlinealiases()[len(self.LineOrder):]
+        morelines = self.getlinealiases()[len(self.LineOrder) :]
         headers.extend(morelines)
 
         return headers
@@ -177,29 +168,18 @@ class OHLCDateTime(OHLC):
 
 class SimpleFilterWrapper(object):
     """Wrapper for filters added via .addfilter to turn them
-    into processors.
-
-    Filters are callables which
-
-      - Take a ``data`` as an argument
-      - Return False if the current bar has not triggered the filter
-      - Return True if the current bar must be filtered
-
-    The wrapper takes the return value and executes the bar removal
-    if needed be
-
-
-    """
+into processors.
+Filters are callables which
+- Take a ``data`` as an argument
+- Return False if the current bar has not triggered the filter
+- Return True if the current bar must be filtered
+The wrapper takes the return value and executes the bar removal
+if needed be"""
 
     def __init__(self, data, ffilter, *args, **kwargs):
-        """
-
-        :param data:
-        :param ffilter:
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Args:
+    data: 
+    ffilter:"""
         if inspect.isclass(ffilter):
             ffilter = ffilter(data, *args, **kwargs)
             args = []
@@ -210,11 +190,8 @@ class SimpleFilterWrapper(object):
         self.kwargs = kwargs
 
     def __call__(self, data):
-        """
-
-        :param data:
-
-        """
+        """Args:
+    data:"""
         if self.ffilter(data, *self.args, **self.kwargs):
             data.backwards()
             return True
@@ -224,16 +201,11 @@ class SimpleFilterWrapper(object):
 
 class _Bar(AutoOrderedDict):
     """This class is a placeholder for the values of the standard lines of a
-    DataBase class (from OHLCDateTime)
-
-    It inherits from AutoOrderedDict to be able to easily return the values as
-    an iterable and address the keys as attributes
-
-    Order of definition is important and must match that of the lines
-    definition in DataBase (which directly inherits from OHLCDateTime)
-
-
-    """
+DataBase class (from OHLCDateTime)
+It inherits from AutoOrderedDict to be able to easily return the values as
+an iterable and address the keys as attributes
+Order of definition is important and must match that of the lines
+definition in DataBase (which directly inherits from OHLCDateTime)"""
 
     replaying = False
 
@@ -242,20 +214,16 @@ class _Bar(AutoOrderedDict):
     MAXDATE = date2num(_datetime.datetime.max) - 2
 
     def __init__(self, maxdate=False):
-        """
-
-        :param maxdate:  (Default value = False)
-
-        """
+        """Args:
+    maxdate: (Default value = False)"""
         super(_Bar, self).__init__()
         self.bstart(maxdate=maxdate)
 
     def bstart(self, maxdate=False):
         """Initializes a bar to the default not-updated vaues
 
-        :param maxdate:  (Default value = False)
-
-        """
+Args:
+    maxdate: (Default value = False)"""
         # Order is important: defined in DataSeries/OHLC/OHLCDateTime
         self.close = float("NaN")
         self.low = float("inf")
@@ -267,26 +235,19 @@ class _Bar(AutoOrderedDict):
 
     def isopen(self):
         """Returns if a bar has already been updated
-
-        Uses the fact that NaN is the value which is not equal to itself
-        and ``open`` is initialized to NaN
-
-
-        """
+Uses the fact that NaN is the value which is not equal to itself
+and ``open`` is initialized to NaN"""
         o = self.open
         return o == o  # False if NaN, True in other cases
 
     def bupdate(self, data, reopen=False):
         """Updates a bar with the values from data
+Returns True if the update was the 1st on a bar (just opened)
+Returns False otherwise
 
-        Returns True if the update was the 1st on a bar (just opened)
-
-        Returns False otherwise
-
-        :param data:
-        :param reopen:  (Default value = False)
-
-        """
+Args:
+    data: 
+    reopen: (Default value = False)"""
         if reopen:
             self.bstart()
 

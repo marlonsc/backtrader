@@ -35,20 +35,13 @@ from ..utils import date2num
 
 class VChartData(feed.DataBase):
     """Support for `Visual Chart <www.visualchart.com>`_ binary on-disk files for
-    both daily and intradaily formats.
-
-    Note:
-
-      - ``dataname``: to file or open file-like object
-
-        If a file-like object is passed, the ``timeframe`` parameter will be
-        used to determine which is the actual timeframe.
-
-        Else the file extension (``.fd`` for daily and ``.min`` for intraday)
-        will be used.
-
-
-    """
+both daily and intradaily formats.
+Note:
+- ``dataname``: to file or open file-like object
+If a file-like object is passed, the ``timeframe`` parameter will be
+used to determine which is the actual timeframe.
+Else the file extension (``.fd`` for daily and ``.min`` for intraday)
+will be used."""
 
     def start(self):
         """ """
@@ -121,7 +114,7 @@ class VChartData(feed.DataBase):
 
         self.lines.datetime[0] = date2num(dt)
 
-        o, h, l, c, v, oi = bdata[self.dtsize:]
+        o, h, l, c, v, oi = bdata[self.dtsize :]
         self.lines.open[0] = o
         self.lines.high[0] = h
         self.lines.low[0] = l
@@ -140,12 +133,8 @@ class VChartFeed(feed.FeedBase):
     params = (("basepath", ""),) + DataCls.params._gettuple()
 
     def _getdata(self, dataname, **kwargs):
-        """
-
-        :param dataname:
-        :param **kwargs:
-
-        """
+        """Args:
+    dataname:"""
         maincode = dataname[0:2]
         subcode = dataname[2:6]
 

@@ -40,14 +40,9 @@ class Decoder:
     """Decode IB messages and invoke corresponding wrapper methods."""
 
     def __init__(self, wrapper: Wrapper, serverVersion: int):
-        """
-
-        :param wrapper:
-        :type wrapper: Wrapper
-        :param serverVersion:
-        :type serverVersion: int
-
-        """
+        """Args:
+    wrapper: 
+    serverVersion:"""
         self.wrapper = wrapper
         self.serverVersion = serverVersion
         self.logger = logging.getLogger("ib_insync.Decoder")
@@ -164,21 +159,17 @@ class Decoder:
 
     def wrap(self, methodName, types, skip=2):
         """Create a message handler that invokes a wrapper method
-        with the in-order message fields as parameters, skipping over
-        the first ``skip`` fields, and parsed according to the ``types`` list.
+with the in-order message fields as parameters, skipping over
+the first ``skip`` fields, and parsed according to the ``types`` list.
 
-        :param methodName:
-        :param types:
-        :param skip:  (Default value = 2)
-
-        """
+Args:
+    methodName: 
+    types: 
+    skip: (Default value = 2)"""
 
         def handler(fields):
-            """
-
-            :param fields:
-
-            """
+            """Args:
+    fields:"""
             method = getattr(self.wrapper, methodName, None)
             if method:
                 try:
@@ -207,9 +198,8 @@ class Decoder:
     def interpret(self, fields):
         """Decode fields and invoke corresponding wrapper method.
 
-        :param fields:
-
-        """
+Args:
+    fields:"""
         try:
             msgId = int(fields[0])
             handler = self.handlers[msgId]
@@ -220,9 +210,8 @@ class Decoder:
     def parse(self, obj):
         """Parse the object's properties according to its default types.
 
-        :param obj:
-
-        """
+Args:
+    obj:"""
         for field in dataclasses.fields(obj):
             typ = type(field.default)
             if typ is str:
@@ -236,11 +225,8 @@ class Decoder:
                 setattr(obj, field.name, bool(int(v)) if v else field.default)
 
     def priceSizeTick(self, fields):
-        """
-
-        :param fields:
-
-        """
+        """Args:
+    fields:"""
         _, _, reqId, tickType, price, size, _ = fields
 
         if price:
@@ -249,11 +235,8 @@ class Decoder:
             )
 
     def errorMsg(self, fields):
-        """
-
-        :param fields:
-
-        """
+        """Args:
+    fields:"""
         _, _, reqId, errorCode, errorString, *fields = fields
         advancedOrderRejectJson = ""
         if self.serverVersion >= 166:
@@ -263,11 +246,8 @@ class Decoder:
         )
 
     def updatePortfolio(self, fields):
-        """
-
-        :param fields:
-
-        """
+        """Args:
+    fields:"""
         c = Contract()
         (
             _,
@@ -305,11 +285,8 @@ class Decoder:
         )
 
     def contractDetails(self, fields):
-        """
-
-        :param fields:
-
-        """
+        """Args:
+    fields:"""
         cd = ContractDetails()
         cd.contract = c = Contract()
         if self.serverVersion < 164:
@@ -394,11 +371,8 @@ class Decoder:
         self.wrapper.contractDetails(int(reqId), cd)
 
     def bondContractDetails(self, fields):
-        """
-
-        :param fields:
-
-        """
+        """Args:
+    fields:"""
         cd = ContractDetails()
         cd.contract = c = Contract()
         if self.serverVersion < 164:
@@ -473,11 +447,8 @@ class Decoder:
         self.wrapper.bondContractDetails(int(reqId), cd)
 
     def execDetails(self, fields):
-        """
-
-        :param fields:
-
-        """
+        """Args:
+    fields:"""
         c = Contract()
         ex = Execution()
         (
@@ -528,11 +499,8 @@ class Decoder:
         self.wrapper.execDetails(int(reqId), c, ex)
 
     def historicalData(self, fields):
-        """
-
-        :param fields:
-
-        """
+        """Args:
+    fields:"""
         _, reqId, startDateStr, endDateStr, numBars, *fields = fields
         get = iter(fields).__next__
 
@@ -552,11 +520,8 @@ class Decoder:
         self.wrapper.historicalDataEnd(int(reqId), startDateStr, endDateStr)
 
     def historicalDataUpdate(self, fields):
-        """
-
-        :param fields:
-
-        """
+        """Args:
+    fields:"""
         _, reqId, *fields = fields
         get = iter(fields).__next__
 
@@ -574,11 +539,8 @@ class Decoder:
         self.wrapper.historicalDataUpdate(int(reqId), bar)
 
     def scannerData(self, fields):
-        """
-
-        :param fields:
-
-        """
+        """Args:
+    fields:"""
         _, _, reqId, n, *fields = fields
 
         for _ in range(int(n)):
@@ -619,11 +581,8 @@ class Decoder:
         self.wrapper.scannerDataEnd(int(reqId))
 
     def tickOptionComputation(self, fields):
-        """
-
-        :param fields:
-
-        """
+        """Args:
+    fields:"""
         _, reqId, tickTypeInt, tickAttrib, *fields = fields
         (
             impliedVol,
@@ -651,11 +610,8 @@ class Decoder:
         )
 
     def deltaNeutralValidation(self, fields):
-        """
-
-        :param fields:
-
-        """
+        """Args:
+    fields:"""
         _, _, reqId, conId, delta, price = fields
 
         self.wrapper.deltaNeutralValidation(
@@ -664,11 +620,8 @@ class Decoder:
         )
 
     def commissionReport(self, fields):
-        """
-
-        :param fields:
-
-        """
+        """Args:
+    fields:"""
         (
             _,
             _,
@@ -692,11 +645,8 @@ class Decoder:
         )
 
     def position(self, fields):
-        """
-
-        :param fields:
-
-        """
+        """Args:
+    fields:"""
         c = Contract()
         (
             _,
@@ -721,11 +671,8 @@ class Decoder:
         self.wrapper.position(account, c, float(position or 0), float(avgCost or 0))
 
     def positionMulti(self, fields):
-        """
-
-        :param fields:
-
-        """
+        """Args:
+    fields:"""
         c = Contract()
         (
             _,
@@ -759,11 +706,8 @@ class Decoder:
         )
 
     def securityDefinitionOptionParameter(self, fields):
-        """
-
-        :param fields:
-
-        """
+        """Args:
+    fields:"""
         (
             _,
             reqId,
@@ -777,7 +721,7 @@ class Decoder:
         n = int(n)
 
         expirations = fields[:n]
-        strikes = [float(field) for field in fields[n + 1:]]
+        strikes = [float(field) for field in fields[n + 1 :]]
 
         self.wrapper.securityDefinitionOptionParameter(
             int(reqId),
@@ -790,11 +734,8 @@ class Decoder:
         )
 
     def softDollarTiers(self, fields):
-        """
-
-        :param fields:
-
-        """
+        """Args:
+    fields:"""
         _, reqId, n, *fields = fields
         get = iter(fields).__next__
 
@@ -806,11 +747,8 @@ class Decoder:
         self.wrapper.softDollarTiers(int(reqId), tiers)
 
     def familyCodes(self, fields):
-        """
-
-        :param fields:
-
-        """
+        """Args:
+    fields:"""
         _, n, *fields = fields
         get = iter(fields).__next__
 
@@ -821,11 +759,8 @@ class Decoder:
         self.wrapper.familyCodes(familyCodes)
 
     def symbolSamples(self, fields):
-        """
-
-        :param fields:
-
-        """
+        """Args:
+    fields:"""
         _, reqId, n, *fields = fields
 
         cds = []
@@ -852,11 +787,8 @@ class Decoder:
         self.wrapper.symbolSamples(int(reqId), cds)
 
     def smartComponents(self, fields):
-        """
-
-        :param fields:
-
-        """
+        """Args:
+    fields:"""
         _, reqId, n, *fields = fields
         get = iter(fields).__next__
 
@@ -868,11 +800,8 @@ class Decoder:
         self.wrapper.smartComponents(int(reqId), components)
 
     def mktDepthExchanges(self, fields):
-        """
-
-        :param fields:
-
-        """
+        """Args:
+    fields:"""
         _, n, *fields = fields
         get = iter(fields).__next__
 
@@ -890,11 +819,8 @@ class Decoder:
         self.wrapper.mktDepthExchanges(descriptions)
 
     def newsProviders(self, fields):
-        """
-
-        :param fields:
-
-        """
+        """Args:
+    fields:"""
         _, n, *fields = fields
         get = iter(fields).__next__
 
@@ -903,11 +829,8 @@ class Decoder:
         self.wrapper.newsProviders(providers)
 
     def histogramData(self, fields):
-        """
-
-        :param fields:
-
-        """
+        """Args:
+    fields:"""
         _, reqId, n, *fields = fields
         get = iter(fields).__next__
 
@@ -918,11 +841,8 @@ class Decoder:
         self.wrapper.histogramData(int(reqId), histogram)
 
     def marketRule(self, fields):
-        """
-
-        :param fields:
-
-        """
+        """Args:
+    fields:"""
         _, marketRuleId, n, *fields = fields
         get = iter(fields).__next__
 
@@ -934,11 +854,8 @@ class Decoder:
         self.wrapper.marketRule(int(marketRuleId), increments)
 
     def historicalTicks(self, fields):
-        """
-
-        :param fields:
-
-        """
+        """Args:
+    fields:"""
         _, reqId, n, *fields = fields
         get = iter(fields).__next__
 
@@ -955,11 +872,8 @@ class Decoder:
         self.wrapper.historicalTicks(int(reqId), ticks, done)
 
     def historicalTicksBidAsk(self, fields):
-        """
-
-        :param fields:
-
-        """
+        """Args:
+    fields:"""
         _, reqId, n, *fields = fields
         get = iter(fields).__next__
 
@@ -983,11 +897,8 @@ class Decoder:
         self.wrapper.historicalTicksBidAsk(int(reqId), ticks, done)
 
     def historicalTicksLast(self, fields):
-        """
-
-        :param fields:
-
-        """
+        """Args:
+    fields:"""
         _, reqId, n, *fields = fields
         get = iter(fields).__next__
 
@@ -1009,11 +920,8 @@ class Decoder:
         self.wrapper.historicalTicksLast(int(reqId), ticks, done)
 
     def tickByTick(self, fields):
-        """
-
-        :param fields:
-
-        """
+        """Args:
+    fields:"""
         _, reqId, tickType, time, *fields = fields
         reqId = int(reqId)
         tickType = int(tickType)
@@ -1060,11 +968,8 @@ class Decoder:
             self.wrapper.tickByTickMidPoint(reqId, time, float(midPoint))
 
     def openOrder(self, fields):
-        """
-
-        :param fields:
-
-        """
+        """Args:
+    fields:"""
         o = Order()
         c = Contract()
         st = OrderState()
@@ -1326,11 +1231,8 @@ class Decoder:
         self.wrapper.openOrder(o.orderId, c, o, st)
 
     def completedOrder(self, fields):
-        """
-
-        :param fields:
-
-        """
+        """Args:
+    fields:"""
         o = Order()
         c = Contract()
         st = OrderState()
@@ -1547,11 +1449,8 @@ class Decoder:
         self.wrapper.completedOrder(c, o, st)
 
     def historicalSchedule(self, fields):
-        """
-
-        :param fields:
-
-        """
+        """Args:
+    fields:"""
         (_, reqId, startDateTime, endDateTime, timeZone, count, *fields) = fields
         get = iter(fields).__next__
         sessions = [

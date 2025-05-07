@@ -18,40 +18,33 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-"""
-RISK AVERSE STRATEGY WITH POSTGRESQL DATABASE - (risk_adverse)
+"""RISK AVERSE STRATEGY WITH POSTGRESQL DATABASE - (risk_adverse)
 ===============================================================================
-
 This strategy is designed to buy stocks that exhibit specific characteristics of stability
 and controlled momentum. It identifies securities with:
 - Low volatility (stable price movement)
 - Recent new highs (positive momentum)
 - High trading volume (market interest)
 - Small difference between high and low prices (price consolidation)
-
 These combined factors aim to find stocks that are stable but still have upward
 momentum, reducing the risk associated with high volatility while still capturing
 growth opportunities.
-
 STRATEGY LOGIC:
 --------------
 - GO LONG when ALL of the following conditions are met:
-  1. Volatility is below a specified threshold
-  2. Price has recently made a new high
-  3. Volume is above a minimum threshold
-  4. The high-low price difference is below a specified threshold
-
+1. Volatility is below a specified threshold
+2. Price has recently made a new high
+3. Volume is above a minimum threshold
+4. The high-low price difference is below a specified threshold
 - EXIT LONG when TWO OR MORE of the above conditions are no longer valid
-  This ensures we exit positions when the stock no longer exhibits the
-  favorable risk-reward characteristics we seek.
-
+This ensures we exit positions when the stock no longer exhibits the
+favorable risk-reward characteristics we seek.
 MARKET CONDITIONS:
 ----------------
 - Best used in moderately bullish markets
 - Works well for stocks in consolidation phases that are preparing to move higher
 - Avoids highly volatile stocks that may experience sharp price drops
 - Most effective in sectors with steady growth rather than cyclical or highly speculative areas
-
 VOLATILITY ASSESSMENT:
 -------------------
 The strategy calculates average volatility over a specified period to assess price stability.
@@ -59,120 +52,98 @@ Low volatility suggests:
 - More predictable price action
 - Lower risk of sharp adverse price movements
 - Better potential risk-reward ratio
-
 NEW HIGH DETECTION:
 ----------------
 The strategy monitors when a security makes a new high within a lookback period:
 - Indicates positive momentum
 - Suggests underlying strength
 - Identifies potential breakout candidates
-
 VOLUME ANALYSIS:
 -------------
 High trading volume is required as it:
 - Indicates market interest in the security
 - Provides liquidity for entries and exits
 - Validates price movement as significant
-
 HIGH-LOW DIFFERENTIAL:
 -------------------
 Small differences between high and low prices indicate:
 - Controlled price movement (not erratic)
 - Potential consolidation before further movement
 - Reduced intraday volatility
-
 RISK MANAGEMENT:
 --------------
 The strategy employs a unique exit criterion that monitors multiple factors:
 - Exits when 2+ conditions are no longer favorable
 - Responsive to changing market conditions
 - Adapts to deteriorating security-specific metrics
-
 USAGE:
 ------
 python strategies/risk_adverse.py --data SYMBOL --fromdate YYYY-MM-DD --todate YYYY-MM-DD [options]
-
 REQUIRED ARGUMENTS:
 ------------------
 --data, -d            : Stock symbol to retrieve data for (e.g., AAPL, MSFT, TSLA)
 --fromdate, -f        : Start date for historical data in YYYY-MM-DD format (default: 2024-01-01)
 --todate, -t          : End date for historical data in YYYY-MM-DD format (default: 2024-12-31)
-
 DATABASE PARAMETERS:
 ------------------
 --dbuser, -u          : PostgreSQL username (default: jason)
 --dbpass, -pw         : PostgreSQL password (default: fsck)
 --dbname, -n          : PostgreSQL database name (default: market_data)
 --cash, -c            : Initial cash for the strategy (default: $100,000)
-
 VOLATILITY PARAMETERS:
 -------------------
 --volatility-period, -vp   : Period for volatility calculation (default: 20)
-                            This determines how many bars are used to calculate average volatility.
-                            Longer periods provide more stable measurements but may be less responsive
-                            to recent market changes.
-
+This determines how many bars are used to calculate average volatility.
+Longer periods provide more stable measurements but may be less responsive
+to recent market changes.
 --volatility-threshold, -vt : Maximum allowed volatility (default: 8.0)
-                            Lower values create stricter entry criteria requiring more stable stocks.
-                            Higher values are more permissive, allowing more volatile stocks.
-                            The value represents percentage volatility (e.g., 8.0 = 8% average volatility).
-
+Lower values create stricter entry criteria requiring more stable stocks.
+Higher values are more permissive, allowing more volatile stocks.
+The value represents percentage volatility (e.g., 8.0 = 8% average volatility).
 HIGH-LOW PARAMETERS:
 -----------------
 --high-low-period, -hlp    : Period for high-low difference calculation (default: 60)
-                            This determines how many bars are used to assess the high-low price range.
-                            Longer periods capture longer-term price behavior.
-
+This determines how many bars are used to assess the high-low price range.
+Longer periods capture longer-term price behavior.
 --high-low-threshold, -hlt : Maximum allowed high-low difference (default: 0.3)
-                            Expressed as a ratio of the difference to price.
-                            Lower values require more consolidated price action.
-                            Higher values allow wider price ranges.
-
+Expressed as a ratio of the difference to price.
+Lower values require more consolidated price action.
+Higher values allow wider price ranges.
 VOLUME PARAMETERS:
 ---------------
 --vol-period, -volp        : Period for volume moving average (default: 5)
-                            Determines how many bars are used to calculate average volume.
-                            Shorter periods make the strategy more responsive to recent volume changes.
-
+Determines how many bars are used to calculate average volume.
+Shorter periods make the strategy more responsive to recent volume changes.
 --vol-threshold, -volt     : Minimum required volume (default: 100000)
-                            Sets the minimum trading volume required for entry.
-                            Should be adjusted based on the typical volume of the target stock.
-                            Higher values ensure greater liquidity.
-
+Sets the minimum trading volume required for entry.
+Should be adjusted based on the typical volume of the target stock.
+Higher values ensure greater liquidity.
 EXIT PARAMETERS:
 ---------------
 --exit-count, -ec          : Number of failed conditions required for exit (default: 2)
-                            Higher values make exits more conservative (require more conditions to fail).
-                            Lower values make exits more aggressive (fewer conditions need to fail).
-
+Higher values make exits more conservative (require more conditions to fail).
+Lower values make exits more aggressive (fewer conditions need to fail).
 POSITION SIZING:
 ---------------
 --position-percent, -pp    : Percentage of equity to use per trade (default: 20.0)
-                            Controls how much of your account to risk on each position.
-                            Higher values increase potential returns but also increase risk.
-
+Controls how much of your account to risk on each position.
+Higher values increase potential returns but also increase risk.
 --max-position, -mp        : Maximum position size as percentage of equity (default: 95.0)
-                            Prevents over-leveraging by limiting the maximum position size.
-
+Prevents over-leveraging by limiting the maximum position size.
 OTHER:
 -----
 --plot, -pl               : Generate and show a plot of the trading activity
-                           Shows price data, indicators, and entry/exit points.
-
+Shows price data, indicators, and entry/exit points.
 EXAMPLE COMMANDS:
 ---------------
 Basic usage:
 python strategies/risk_adverse.py --data AAPL --fromdate 2024-01-01 --todate 2024-12-31
-
 Conservative settings:
 python strategies/risk_adverse.py --data MSFT --volatility-threshold 5.0 --high-low-threshold 0.2 --vol-threshold 150000
-
 More permissive settings:
 python strategies/risk_adverse.py --data TSLA --volatility-threshold 12.0 --high-low-threshold 0.5 --exit-count 3
-
 Adjusting lookback periods:
-python strategies/risk_adverse.py --data GOOGL --volatility-period 15 --high-low-period 40 --vol-period 3
-"""
+python strategies/risk_adverse.py --data GOOGL --volatility-period 15 --high-low-period 40 --vol-period 3"""
 
 from __future__ import (
     absolute_import,
@@ -218,15 +189,10 @@ class StockPriceData(bt.feeds.PandasData):
 
 class AverageVolatility(bt.Indicator):
     """Average Volatility Indicator
-
-    Calculates the average volatility over a specified period as percentage change
-    from close to close.
-
-    Lines:
-        - avg_volatility: Average volatility as a percentage
-
-
-    """
+Calculates the average volatility over a specified period as percentage change
+from close to close.
+Lines:
+- avg_volatility: Average volatility as a percentage"""
 
     lines = ("avg_volatility",)
     params = dict(period=20)
@@ -249,14 +215,9 @@ class AverageVolatility(bt.Indicator):
 
 class RecentHigh(bt.Indicator):
     """Recent High Indicator
-
-    Detects if the current price is a new high within a specified lookback period.
-
-    Lines:
-        - new_high: 1 if current price is a new high, 0 otherwise
-
-
-    """
+Detects if the current price is a new high within a specified lookback period.
+Lines:
+- new_high: 1 if current price is a new high, 0 otherwise"""
 
     lines = ("new_high",)
     params = dict(lookback=20)
@@ -274,15 +235,10 @@ class RecentHigh(bt.Indicator):
 
 class DiffHighLow(bt.Indicator):
     """Difference High Low Indicator
-
-    Calculates the ratio of the difference between the highest high and lowest low
-    to the average price over a specified period.
-
-    Lines:
-        - diff: The ratio of high-low difference to average price
-
-
-    """
+Calculates the ratio of the difference between the highest high and lowest low
+to the average price over a specified period.
+Lines:
+- diff: The ratio of high-low difference to average price"""
 
     lines = ("diff",)
     params = dict(period=60)
@@ -302,28 +258,21 @@ class DiffHighLow(bt.Indicator):
 
 class RiskAverseStrategy(bt.Strategy, TradeThrottling):
     """Risk Averse Strategy
-
-    This strategy seeks to buy stocks with low volatility, recent new highs, high volume,
-    and small differences between high and low prices. It exits positions when multiple
-    conditions deteriorate.
-
-    The goal is to find stable stocks with controlled upward momentum while minimizing
-    exposure to erratic price movements.
-
-    Strategy Logic:
-    - Buy when volatility is low, price is near highs, and volume is strong
-    - Exit when conditions deteriorate (high volatility, price weakness)
-    - Uses risk-based position sizing for proper money management
-    - Implements cool down period to avoid overtrading
-
-    Best Market Conditions:
-    - Stable bull markets with low volatility
-    - Sectors with steady growth rather than erratic momentum
-    - Quality stocks with consistent institutional buying
-    - Avoid using in highly volatile or bear markets
-
-
-    """
+This strategy seeks to buy stocks with low volatility, recent new highs, high volume,
+and small differences between high and low prices. It exits positions when multiple
+conditions deteriorate.
+The goal is to find stable stocks with controlled upward momentum while minimizing
+exposure to erratic price movements.
+Strategy Logic:
+- Buy when volatility is low, price is near highs, and volume is strong
+- Exit when conditions deteriorate (high volatility, price weakness)
+- Uses risk-based position sizing for proper money management
+- Implements cool down period to avoid overtrading
+Best Market Conditions:
+- Stable bull markets with low volatility
+- Sectors with steady growth rather than erratic momentum
+- Quality stocks with consistent institutional buying
+- Avoid using in highly volatile or bear markets"""
 
     params = (
         # Volatility parameters
@@ -358,11 +307,10 @@ class RiskAverseStrategy(bt.Strategy, TradeThrottling):
     def log(self, txt, dt=None, level="info"):
         """Logging function for the strategy
 
-        :param txt:
-        :param dt:  (Default value = None)
-        :param level:  (Default value = "info")
-
-        """
+Args:
+    txt: 
+    dt: (Default value = None)
+    level: (Default value = "info")"""
         if level == "debug" and self.params.log_level != "debug":
             return
 
@@ -425,9 +373,8 @@ class RiskAverseStrategy(bt.Strategy, TradeThrottling):
     def calculate_position_size(self, price):
         """Calculate how many shares to buy based on position sizing rules
 
-        :param price:
-
-        """
+Args:
+    price:"""
         available_cash = self.broker.get_cash()
         value = self.broker.getvalue()
         current_price = price
@@ -638,9 +585,8 @@ class RiskAverseStrategy(bt.Strategy, TradeThrottling):
     def notify_order(self, order):
         """Handle order notifications
 
-        :param order:
-
-        """
+Args:
+    order:"""
         if order.status in [order.Submitted, order.Accepted]:
             # Order pending, do nothing
             return
@@ -669,9 +615,8 @@ class RiskAverseStrategy(bt.Strategy, TradeThrottling):
     def notify_trade(self, trade):
         """Track completed trades
 
-        :param trade:
-
-        """
+Args:
+    trade:"""
         if not trade.isclosed:
             return
 

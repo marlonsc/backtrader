@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Tools for using Python's :mod:`json` module with BSON documents.
-
 This module provides two helper methods `dumps` and `loads` that wrap the
 native :mod:`json` methods and provide explicit BSON conversion to and from
 JSON. :class:`~bson.json_util.JSONOptions` provides a way to control how JSON
@@ -20,70 +19,54 @@ is emitted and parsed, with the default being the Relaxed Extended JSON format.
 :mod:`~bson.json_util` can also generate Canonical or legacy `Extended JSON`_
 when :const:`CANONICAL_JSON_OPTIONS` or :const:`LEGACY_JSON_OPTIONS` is
 provided, respectively.
-
 .. _Extended JSON: https://github.com/mongodb/specifications/blob/master/source/extended-json.rst
-
 Example usage (deserialization):
-
 .. doctest::
-
-   >>> from .json_util import loads
-   >>> loads('[{"foo": [1, 2]}, {"bar": {"hello": "world"}}, {"code": {"$scope": {}, "$code": "function x() { return 1; }"}}, {"bin": {"$type": "80", "$binary": "AQIDBA=="}}]')
-   [{'foo': [1, 2]}, {'bar': {'hello': 'world'}}, {'code': Code('function x() { return 1; }', {})}, {'bin': Binary(b'...', 128)}]
-
+>>> from .json_util import loads
+>>> loads('[{"foo": [1, 2]}, {"bar": {"hello": "world"}}, {"code": {"$scope": {}, "$code": "function x() { return 1; }"}}, {"bin": {"$type": "80", "$binary": "AQIDBA=="}}]')
+[{'foo': [1, 2]}, {'bar': {'hello': 'world'}}, {'code': Code('function x() { return 1; }', {})}, {'bin': Binary(b'...', 128)}]
 Example usage with :const:`RELAXED_JSON_OPTIONS` (the default):
-
 .. doctest::
-
-   >>> from . import Binary, Code
-   >>> from .json_util import dumps
-   >>> dumps([{'foo': [1, 2]},
-   ...        {'bar': {'hello': 'world'}},
-   ...        {'code': Code("function x() { return 1; }")},
-   ...        {'bin': Binary(b"\x01\x02\x03\x04")}])
-   '[{"foo": [1, 2]}, {"bar": {"hello": "world"}}, {"code": {"$code": "function x() { return 1; }"}}, {"bin": {"$binary": {"base64": "AQIDBA==", "subType": "00"}}}]'
-
+>>> from . import Binary, Code
+>>> from .json_util import dumps
+>>> dumps([{'foo': [1, 2]},
+...        {'bar': {'hello': 'world'}},
+...        {'code': Code("function x() { return 1; }")},
+...        {'bin': Binary(b"")}])
+'[{"foo": [1, 2]}, {"bar": {"hello": "world"}}, {"code": {"$code": "function x() { return 1; }"}}, {"bin": {"$binary": {"base64": "AQIDBA==", "subType": "00"}}}]'
 Example usage (with :const:`CANONICAL_JSON_OPTIONS`):
-
 .. doctest::
-
-   >>> from . import Binary, Code
-   >>> from .json_util import dumps, CANONICAL_JSON_OPTIONS
-   >>> dumps([{'foo': [1, 2]},
-   ...        {'bar': {'hello': 'world'}},
-   ...        {'code': Code("function x() { return 1; }")},
-   ...        {'bin': Binary(b"\x01\x02\x03\x04")}],
-   ...       json_options=CANONICAL_JSON_OPTIONS)
-   '[{"foo": [{"$numberInt": "1"}, {"$numberInt": "2"}]}, {"bar": {"hello": "world"}}, {"code": {"$code": "function x() { return 1; }"}}, {"bin": {"$binary": {"base64": "AQIDBA==", "subType": "00"}}}]'
-
+>>> from . import Binary, Code
+>>> from .json_util import dumps, CANONICAL_JSON_OPTIONS
+>>> dumps([{'foo': [1, 2]},
+...        {'bar': {'hello': 'world'}},
+...        {'code': Code("function x() { return 1; }")},
+...        {'bin': Binary(b"")}],
+...       json_options=CANONICAL_JSON_OPTIONS)
+'[{"foo": [{"$numberInt": "1"}, {"$numberInt": "2"}]}, {"bar": {"hello": "world"}}, {"code": {"$code": "function x() { return 1; }"}}, {"bin": {"$binary": {"base64": "AQIDBA==", "subType": "00"}}}]'
 Example usage (with :const:`LEGACY_JSON_OPTIONS`):
-
 .. doctest::
-
-   >>> from . import Binary, Code
-   >>> from .json_util import dumps, LEGACY_JSON_OPTIONS
-   >>> dumps([{'foo': [1, 2]},
-   ...        {'bar': {'hello': 'world'}},
-   ...        {'code': Code("function x() { return 1; }", {})},
-   ...        {'bin': Binary(b"\x01\x02\x03\x04")}],
-   ...       json_options=LEGACY_JSON_OPTIONS)
-   '[{"foo": [1, 2]}, {"bar": {"hello": "world"}}, {"code": {"$code": "function x() { return 1; }", "$scope": {}}}, {"bin": {"$binary": "AQIDBA==", "$type": "00"}}]'
-
+>>> from . import Binary, Code
+>>> from .json_util import dumps, LEGACY_JSON_OPTIONS
+>>> dumps([{'foo': [1, 2]},
+...        {'bar': {'hello': 'world'}},
+...        {'code': Code("function x() { return 1; }", {})},
+...        {'bin': Binary(b"")}],
+...       json_options=LEGACY_JSON_OPTIONS)
+'[{"foo": [1, 2]}, {"bar": {"hello": "world"}}, {"code": {"$code": "function x() { return 1; }", "$scope": {}}}, {"bin": {"$binary": "AQIDBA==", "$type": "00"}}]'
 Alternatively, you can manually pass the `default` to :func:`json.dumps`.
 It won't handle :class:`~bson.binary.Binary` and :class:`~bson.code.Code`
 instances (as they are extended strings you can't provide custom defaults),
 but it will be faster as there is less recursion.
-
 .. note::
-   If your application does not need the flexibility offered by
-   :class:`JSONOptions` and spends a large amount of time in the `json_util`
-   module, look to
-   `python-bsonjs <https://pypi.python.org/pypi/python-bsonjs>`_ for a nice
-   performance improvement. `python-bsonjs` is a fast BSON to MongoDB
-   Extended JSON converter for Python built on top of
-   `libbson <https://github.com/mongodb/libbson>`_. `python-bsonjs` works best
-   with PyMongo when using :class:`~bson.raw_bson.RawBSONDocument`.
-"""
+If your application does not need the flexibility offered by
+:class:`JSONOptions` and spends a large amount of time in the `json_util`
+module, look to
+`python-bsonjs <https://pypi.python.org/pypi/python-bsonjs>`_ for a nice
+performance improvement. `python-bsonjs` is a fast BSON to MongoDB
+Extended JSON converter for Python built on top of
+`libbson <https://github.com/mongodb/libbson>`_. `python-bsonjs` works best
+with PyMongo when using :class:`~bson.raw_bson.RawBSONDocument`."""
 
 import base64
 import datetime
@@ -203,53 +186,45 @@ class JSONMode:
 
 class JSONOptions(CodecOptions):
     """Encapsulates JSON options for :func:`dumps` and :func:`loads`.
-
-    :Parameters:
-      - `strict_number_long`: If ``True``, :class:`~bson.int64.Int64` objects
-        are encoded to MongoDB Extended JSON's *Strict mode* type
-        `NumberLong`, ie ``'{"$numberLong": "<number>" }'``. Otherwise they
-        will be encoded as an `int`. Defaults to ``False``.
-      - `datetime_representation`: The representation to use when encoding
-        instances of :class:`datetime.datetime`. Defaults to
-        :const:`~DatetimeRepresentation.LEGACY`.
-      - `strict_uuid`: If ``True``, :class:`uuid.UUID` object are encoded to
-        MongoDB Extended JSON's *Strict mode* type `Binary`. Otherwise it
-        will be encoded as ``'{"$uuid": "<hex>" }'``. Defaults to ``False``.
-      - `json_mode`: The :class:`JSONMode` to use when encoding BSON types to
-        Extended JSON. Defaults to :const:`~JSONMode.LEGACY`.
-      - `document_class`: BSON documents returned by :func:`loads` will be
-        decoded to an instance of this class. Must be a subclass of
-        :class:`collections.MutableMapping`. Defaults to :class:`dict`.
-      - `uuid_representation`: The :class:`~bson.binary.UuidRepresentation`
-        to use when encoding and decoding instances of :class:`uuid.UUID`.
-        Defaults to :const:`~bson.binary.UuidRepresentation.UNSPECIFIED`.
-      - `tz_aware`: If ``True``, MongoDB Extended JSON's *Strict mode* type
-        `Date` will be decoded to timezone aware instances of
-        :class:`datetime.datetime`. Otherwise they will be naive. Defaults
-        to ``False``.
-      - `tzinfo`: A :class:`datetime.tzinfo` subclass that specifies the
-        timezone from which :class:`~datetime.datetime` objects should be
-        decoded. Defaults to :const:`~bson.tz_util.utc`.
-      - `args`: arguments to :class:`~bson.codec_options.CodecOptions`
-      - `kwargs`: arguments to :class:`~bson.codec_options.CodecOptions`
-
-    .. seealso:: The specification for Relaxed and Canonical `Extended JSON`_.
-
-    .. versionchanged:: 4.0
-       The default for `json_mode` was changed from :const:`JSONMode.LEGACY`
-       to :const:`JSONMode.RELAXED`.
-       The default for `uuid_representation` was changed from
-       :const:`~bson.binary.UuidRepresentation.PYTHON_LEGACY` to
-       :const:`~bson.binary.UuidRepresentation.UNSPECIFIED`.
-
-    .. versionchanged:: 3.5
-       Accepts the optional parameter `json_mode`.
-
-    .. versionchanged:: 4.0
-       Changed default value of `tz_aware` to False.
-
-
-    """
+:Parameters:
+- `strict_number_long`: If ``True``, :class:`~bson.int64.Int64` objects
+are encoded to MongoDB Extended JSON's *Strict mode* type
+`NumberLong`, ie ``'{"$numberLong": "<number>" }'``. Otherwise they
+will be encoded as an `int`. Defaults to ``False``.
+- `datetime_representation`: The representation to use when encoding
+instances of :class:`datetime.datetime`. Defaults to
+:const:`~DatetimeRepresentation.LEGACY`.
+- `strict_uuid`: If ``True``, :class:`uuid.UUID` object are encoded to
+MongoDB Extended JSON's *Strict mode* type `Binary`. Otherwise it
+will be encoded as ``'{"$uuid": "<hex>" }'``. Defaults to ``False``.
+- `json_mode`: The :class:`JSONMode` to use when encoding BSON types to
+Extended JSON. Defaults to :const:`~JSONMode.LEGACY`.
+- `document_class`: BSON documents returned by :func:`loads` will be
+decoded to an instance of this class. Must be a subclass of
+:class:`collections.MutableMapping`. Defaults to :class:`dict`.
+- `uuid_representation`: The :class:`~bson.binary.UuidRepresentation`
+to use when encoding and decoding instances of :class:`uuid.UUID`.
+Defaults to :const:`~bson.binary.UuidRepresentation.UNSPECIFIED`.
+- `tz_aware`: If ``True``, MongoDB Extended JSON's *Strict mode* type
+`Date` will be decoded to timezone aware instances of
+:class:`datetime.datetime`. Otherwise they will be naive. Defaults
+to ``False``.
+- `tzinfo`: A :class:`datetime.tzinfo` subclass that specifies the
+timezone from which :class:`~datetime.datetime` objects should be
+decoded. Defaults to :const:`~bson.tz_util.utc`.
+- `args`: arguments to :class:`~bson.codec_options.CodecOptions`
+- `kwargs`: arguments to :class:`~bson.codec_options.CodecOptions`
+.. seealso:: The specification for Relaxed and Canonical `Extended JSON`_.
+.. versionchanged:: 4.0
+The default for `json_mode` was changed from :const:`JSONMode.LEGACY`
+to :const:`JSONMode.RELAXED`.
+The default for `uuid_representation` was changed from
+:const:`~bson.binary.UuidRepresentation.PYTHON_LEGACY` to
+:const:`~bson.binary.UuidRepresentation.UNSPECIFIED`.
+.. versionchanged:: 3.5
+Accepts the optional parameter `json_mode`.
+.. versionchanged:: 4.0
+Changed default value of `tz_aware` to False."""
 
     def __new__(
         cls,
@@ -260,16 +235,11 @@ class JSONOptions(CodecOptions):
         *args,
         **kwargs,
     ):
-        """
-
-        :param strict_number_long:  (Default value = None)
-        :param datetime_representation:  (Default value = None)
-        :param strict_uuid:  (Default value = None)
-        :param json_mode:  (Default value = JSONMode.RELAXED)
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Args:
+    strict_number_long: (Default value = None)
+    datetime_representation: (Default value = None)
+    strict_uuid: (Default value = None)
+    json_mode: (Default value = JSONMode.RELAXED)"""
         kwargs["tz_aware"] = kwargs.get("tz_aware", False)
         if kwargs["tz_aware"]:
             kwargs["tzinfo"] = kwargs.get("tzinfo", utc)
@@ -377,19 +347,7 @@ class JSONOptions(CodecOptions):
 
     def with_options(self, **kwargs):
         """Make a copy of this JSONOptions, overriding some options::
-
-
-        .. versionadded:: 3.12
-
-        :param **kwargs:
-
-        >>> from .json_util import CANONICAL_JSON_OPTIONS
-            >>> CANONICAL_JSON_OPTIONS.tz_aware
-            True
-            >>> json_options = CANONICAL_JSON_OPTIONS.with_options(tz_aware=False, tzinfo=None)
-            >>> json_options.tz_aware
-            False
-        """
+.. versionadded:: 3.12"""
         opts = self._options_dict()
         for opt in (
             "strict_number_long",
@@ -441,57 +399,42 @@ The same as :const:`RELAXED_JSON_OPTIONS`.
 
 def dumps(obj, *args, **kwargs):
     """Helper function that wraps :func:`json.dumps`.
+Recursive function that handles all BSON types including
+:class:`~bson.binary.Binary` and :class:`~bson.code.Code`.
+:Parameters:
+- `json_options`: A :class:`JSONOptions` instance used to modify the
+encoding of MongoDB Extended JSON types. Defaults to
+:const:`DEFAULT_JSON_OPTIONS`.
+.. versionchanged:: 4.0
+Now outputs MongoDB Relaxed Extended JSON by default (using
+:const:`DEFAULT_JSON_OPTIONS`).
+.. versionchanged:: 3.4
+Accepts optional parameter `json_options`. See :class:`JSONOptions`.
 
-    Recursive function that handles all BSON types including
-    :class:`~bson.binary.Binary` and :class:`~bson.code.Code`.
-
-    :Parameters:
-      - `json_options`: A :class:`JSONOptions` instance used to modify the
-        encoding of MongoDB Extended JSON types. Defaults to
-        :const:`DEFAULT_JSON_OPTIONS`.
-
-    .. versionchanged:: 4.0
-       Now outputs MongoDB Relaxed Extended JSON by default (using
-       :const:`DEFAULT_JSON_OPTIONS`).
-
-    .. versionchanged:: 3.4
-       Accepts optional parameter `json_options`. See :class:`JSONOptions`.
-
-    :param obj:
-    :param *args:
-    :param **kwargs:
-
-    """
+Args:
+    obj:"""
     json_options = kwargs.pop("json_options", DEFAULT_JSON_OPTIONS)
     return json.dumps(_json_convert(obj, json_options), *args, **kwargs)
 
 
 def loads(s, *args, **kwargs):
     """Helper function that wraps :func:`json.loads`.
+Automatically passes the object_hook for BSON type conversion.
+Raises ``TypeError``, ``ValueError``, ``KeyError``, or
+:exc:`~bson.errors.InvalidId` on invalid MongoDB Extended JSON.
+:Parameters:
+- `json_options`: A :class:`JSONOptions` instance used to modify the
+decoding of MongoDB Extended JSON types. Defaults to
+:const:`DEFAULT_JSON_OPTIONS`.
+.. versionchanged:: 3.5
+Parses Relaxed and Canonical Extended JSON as well as PyMongo's legacy
+format. Now raises ``TypeError`` or ``ValueError`` when parsing JSON
+type wrappers with values of the wrong type or any extra keys.
+.. versionchanged:: 3.4
+Accepts optional parameter `json_options`. See :class:`JSONOptions`.
 
-    Automatically passes the object_hook for BSON type conversion.
-
-    Raises ``TypeError``, ``ValueError``, ``KeyError``, or
-    :exc:`~bson.errors.InvalidId` on invalid MongoDB Extended JSON.
-
-    :Parameters:
-      - `json_options`: A :class:`JSONOptions` instance used to modify the
-        decoding of MongoDB Extended JSON types. Defaults to
-        :const:`DEFAULT_JSON_OPTIONS`.
-
-    .. versionchanged:: 3.5
-       Parses Relaxed and Canonical Extended JSON as well as PyMongo's legacy
-       format. Now raises ``TypeError`` or ``ValueError`` when parsing JSON
-       type wrappers with values of the wrong type or any extra keys.
-
-    .. versionchanged:: 3.4
-       Accepts optional parameter `json_options`. See :class:`JSONOptions`.
-
-    :param s:
-    :param *args:
-    :param **kwargs:
-
-    """
+Args:
+    s:"""
     json_options = kwargs.pop("json_options", DEFAULT_JSON_OPTIONS)
     kwargs["object_pairs_hook"] = lambda pairs: object_pairs_hook(pairs, json_options)
     return json.loads(s, *args, **kwargs)
@@ -499,12 +442,11 @@ def loads(s, *args, **kwargs):
 
 def _json_convert(obj, json_options=DEFAULT_JSON_OPTIONS):
     """Recursive helper method that converts BSON types so they can be
-    converted into json.
+converted into json.
 
-    :param obj:
-    :param json_options:  (Default value = DEFAULT_JSON_OPTIONS)
-
-    """
+Args:
+    obj: 
+    json_options: (Default value = DEFAULT_JSON_OPTIONS)"""
     if hasattr(obj, "items"):
         return SON(((k, _json_convert(v, json_options)) for k, v in obj.items()))
     elif hasattr(obj, "__iter__") and not isinstance(obj, (str, bytes)):
@@ -516,22 +458,16 @@ def _json_convert(obj, json_options=DEFAULT_JSON_OPTIONS):
 
 
 def object_pairs_hook(pairs, json_options=DEFAULT_JSON_OPTIONS):
-    """
-
-    :param pairs:
-    :param json_options:  (Default value = DEFAULT_JSON_OPTIONS)
-
-    """
+    """Args:
+    pairs: 
+    json_options: (Default value = DEFAULT_JSON_OPTIONS)"""
     return object_hook(json_options.document_class(pairs), json_options)
 
 
 def object_hook(dct, json_options=DEFAULT_JSON_OPTIONS):
-    """
-
-    :param dct:
-    :param json_options:  (Default value = DEFAULT_JSON_OPTIONS)
-
-    """
+    """Args:
+    dct: 
+    json_options: (Default value = DEFAULT_JSON_OPTIONS)"""
     if "$oid" in dct:
         return _parse_canonical_oid(dct)
     if (
@@ -580,11 +516,8 @@ def object_hook(dct, json_options=DEFAULT_JSON_OPTIONS):
 
 
 def _parse_legacy_regex(doc):
-    """
-
-    :param doc:
-
-    """
+    """Args:
+    doc:"""
     pattern = doc["$regex"]
     # Check if this is the $regex query operator.
     if not isinstance(pattern, (str, bytes)):
@@ -599,10 +532,9 @@ def _parse_legacy_regex(doc):
 def _parse_legacy_uuid(doc, json_options):
     """Decode a JSON legacy $uuid to Python UUID.
 
-    :param doc:
-    :param json_options:
-
-    """
+Args:
+    doc: 
+    json_options:"""
     if len(doc) != 1:
         raise TypeError("Bad $uuid, extra field(s): %s" % (doc,))
     if not isinstance(doc["$uuid"], str):
@@ -614,13 +546,10 @@ def _parse_legacy_uuid(doc, json_options):
 
 
 def _binary_or_uuid(data, subtype, json_options):
-    """
-
-    :param data:
-    :param subtype:
-    :param json_options:
-
-    """
+    """Args:
+    data: 
+    subtype: 
+    json_options:"""
     # special handling for UUID
     if subtype in ALL_UUID_SUBTYPES:
         uuid_representation = json_options.uuid_representation
@@ -642,12 +571,9 @@ def _binary_or_uuid(data, subtype, json_options):
 
 
 def _parse_legacy_binary(doc, json_options):
-    """
-
-    :param doc:
-    :param json_options:
-
-    """
+    """Args:
+    doc: 
+    json_options:"""
     if isinstance(doc["$type"], int):
         doc["$type"] = "%02x" % doc["$type"]
     subtype = int(doc["$type"], 16)
@@ -658,12 +584,9 @@ def _parse_legacy_binary(doc, json_options):
 
 
 def _parse_canonical_binary(doc, json_options):
-    """
-
-    :param doc:
-    :param json_options:
-
-    """
+    """Args:
+    doc: 
+    json_options:"""
     binary = doc["$binary"]
     b64 = binary["base64"]
     subtype = binary["subType"]
@@ -685,10 +608,9 @@ def _parse_canonical_binary(doc, json_options):
 def _parse_canonical_datetime(doc, json_options):
     """Decode a JSON datetime to python datetime.datetime.
 
-    :param doc:
-    :param json_options:
-
-    """
+Args:
+    doc: 
+    json_options:"""
     dtm = doc["$date"]
     if len(doc) != 1:
         raise TypeError("Bad $date, extra field(s): %s" % (doc,))
@@ -749,9 +671,8 @@ def _parse_canonical_datetime(doc, json_options):
 def _parse_canonical_oid(doc):
     """Decode a JSON ObjectId to bson.objectid.ObjectId.
 
-    :param doc:
-
-    """
+Args:
+    doc:"""
     if len(doc) != 1:
         raise TypeError("Bad $oid, extra field(s): %s" % (doc,))
     return ObjectId(doc["$oid"])
@@ -760,9 +681,8 @@ def _parse_canonical_oid(doc):
 def _parse_canonical_symbol(doc):
     """Decode a JSON symbol to Python string.
 
-    :param doc:
-
-    """
+Args:
+    doc:"""
     symbol = doc["$symbol"]
     if len(doc) != 1:
         raise TypeError("Bad $symbol, extra field(s): %s" % (doc,))
@@ -772,9 +692,8 @@ def _parse_canonical_symbol(doc):
 def _parse_canonical_code(doc):
     """Decode a JSON code to bson.code.Code.
 
-    :param doc:
-
-    """
+Args:
+    doc:"""
     for key in doc:
         if key not in ("$code", "$scope"):
             raise TypeError("Bad $code, extra field(s): %s" % (doc,))
@@ -784,9 +703,8 @@ def _parse_canonical_code(doc):
 def _parse_canonical_regex(doc):
     """Decode a JSON regex to bson.regex.Regex.
 
-    :param doc:
-
-    """
+Args:
+    doc:"""
     regex = doc["$regularExpression"]
     if len(doc) != 1:
         raise TypeError("Bad $regularExpression, extra field(s): %s" % (doc,))
@@ -807,18 +725,16 @@ def _parse_canonical_regex(doc):
 def _parse_canonical_dbref(doc):
     """Decode a JSON DBRef to bson.dbref.DBRef.
 
-    :param doc:
-
-    """
+Args:
+    doc:"""
     return DBRef(doc.pop("$ref"), doc.pop("$id"), database=doc.pop("$db", None), **doc)
 
 
 def _parse_canonical_dbpointer(doc):
     """Decode a JSON (deprecated) DBPointer to bson.dbref.DBRef.
 
-    :param doc:
-
-    """
+Args:
+    doc:"""
     dbref = doc["$dbPointer"]
     if len(doc) != 1:
         raise TypeError("Bad $dbPointer, extra field(s): %s" % (doc,))
@@ -843,9 +759,8 @@ def _parse_canonical_dbpointer(doc):
 def _parse_canonical_int32(doc):
     """Decode a JSON int32 to python int.
 
-    :param doc:
-
-    """
+Args:
+    doc:"""
     i_str = doc["$numberInt"]
     if len(doc) != 1:
         raise TypeError("Bad $numberInt, extra field(s): %s" % (doc,))
@@ -857,9 +772,8 @@ def _parse_canonical_int32(doc):
 def _parse_canonical_int64(doc):
     """Decode a JSON int64 to bson.int64.Int64.
 
-    :param doc:
-
-    """
+Args:
+    doc:"""
     l_str = doc["$numberLong"]
     if len(doc) != 1:
         raise TypeError("Bad $numberLong, extra field(s): %s" % (doc,))
@@ -869,9 +783,8 @@ def _parse_canonical_int64(doc):
 def _parse_canonical_double(doc):
     """Decode a JSON double to python float.
 
-    :param doc:
-
-    """
+Args:
+    doc:"""
     d_str = doc["$numberDouble"]
     if len(doc) != 1:
         raise TypeError("Bad $numberDouble, extra field(s): %s" % (doc,))
@@ -883,9 +796,8 @@ def _parse_canonical_double(doc):
 def _parse_canonical_decimal128(doc):
     """Decode a JSON decimal128 to bson.decimal128.Decimal128.
 
-    :param doc:
-
-    """
+Args:
+    doc:"""
     d_str = doc["$numberDecimal"]
     if len(doc) != 1:
         raise TypeError("Bad $numberDecimal, extra field(s): %s" % (doc,))
@@ -897,9 +809,8 @@ def _parse_canonical_decimal128(doc):
 def _parse_canonical_minkey(doc):
     """Decode a JSON MinKey to bson.min_key.MinKey.
 
-    :param doc:
-
-    """
+Args:
+    doc:"""
     if type(doc["$minKey"]) is not int or doc["$minKey"] != 1:
         raise TypeError("$minKey value must be 1: %s" % (doc,))
     if len(doc) != 1:
@@ -910,9 +821,8 @@ def _parse_canonical_minkey(doc):
 def _parse_canonical_maxkey(doc):
     """Decode a JSON MaxKey to bson.max_key.MaxKey.
 
-    :param doc:
-
-    """
+Args:
+    doc:"""
     if type(doc["$maxKey"]) is not int or doc["$maxKey"] != 1:
         raise TypeError("$maxKey value must be 1: %s", (doc,))
     if len(doc) != 1:
@@ -921,13 +831,10 @@ def _parse_canonical_maxkey(doc):
 
 
 def _encode_binary(data, subtype, json_options):
-    """
-
-    :param data:
-    :param subtype:
-    :param json_options:
-
-    """
+    """Args:
+    data: 
+    subtype: 
+    json_options:"""
     if json_options.json_mode == JSONMode.LEGACY:
         return SON(
             [
@@ -946,12 +853,9 @@ def _encode_binary(data, subtype, json_options):
 
 
 def default(obj, json_options=DEFAULT_JSON_OPTIONS):
-    """
-
-    :param obj:
-    :param json_options:  (Default value = DEFAULT_JSON_OPTIONS)
-
-    """
+    """Args:
+    obj: 
+    json_options: (Default value = DEFAULT_JSON_OPTIONS)"""
     # We preserve key order when rendering SON, DBRef, etc. as JSON by
     # returning a SON for those types instead of a dict.
     if isinstance(obj, ObjectId):

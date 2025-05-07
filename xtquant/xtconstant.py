@@ -1039,11 +1039,8 @@ DIRECTION_FLAG_SELL = 49  # 卖出
 
 
 def getDirectionByOpType(opt):
-    """
-
-    :param opt:
-
-    """
+    """Args:
+    opt:"""
     if opt in (
         OPT_BUY,
         OPT_OPEN_LONG,

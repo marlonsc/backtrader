@@ -18,28 +18,22 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-"""
-BOLLINGER BANDS RSI WITH ATR STRATEGY - (bb_rsi_atr)
+"""BOLLINGER BANDS RSI WITH ATR STRATEGY - (bb_rsi_atr)
 ===================================================
-
 Translated from PineScript to Backtrader. Buys when price closes at/below lower
 Bollinger Band, RSI < 30, and ATR < ATR_avg * 5.0; exits when price closes at/above
 upper Bollinger Band and RSI > 70.
-
 STRATEGY LOGIC:
 --------------
 - LONG Entry: Price <= Lower BB, RSI < 30, ATR < ATR_avg * 5.0
 - LONG Exit: Price >= Upper BB and RSI > 70
 - Position: 100% of equity
-
 MARKET CONDITIONS:
 -----------------
 Designed for range-bound markets. Avoid strong trends.
-
 USAGE:
 ------
-python strategies/bb_rsi_atr.py --data SPY --fromdate 2024-01-01 --todate 2024-12-31 --plot
-"""
+python strategies/bb_rsi_atr.py --data SPY --fromdate 2024-01-01 --todate 2024-12-31 --plot"""
 
 from __future__ import (
     absolute_import,
@@ -116,13 +110,10 @@ class BBRSIATRStrategy(bt.Strategy, TradeThrottling):
     )
 
     def log(self, txt, dt=None, level="info"):
-        """
-
-        :param txt:
-        :param dt:  (Default value = None)
-        :param level:  (Default value = "info")
-
-        """
+        """Args:
+    txt: 
+    dt: (Default value = None)
+    level: (Default value = "info")"""
         if level == "debug" and self.p.loglevel != "debug":
             return
         dt = dt or self.datas[0].datetime.date(0)
@@ -246,11 +237,8 @@ class BBRSIATRStrategy(bt.Strategy, TradeThrottling):
             self.entry_bar = self.data.datetime[0]  # Record entry bar
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status in [order.Submitted, order.Accepted]:
             return
 
@@ -297,11 +285,8 @@ class BBRSIATRStrategy(bt.Strategy, TradeThrottling):
         self.order = None
 
     def notify_trade(self, trade):
-        """
-
-        :param trade:
-
-        """
+        """Args:
+    trade:"""
         if trade.isclosed:
             self.log(
                 f"TRADE CLOSED: Gross PnL {trade.pnl:.2f}, Net PnL {trade.pnlcomm:.2f}"

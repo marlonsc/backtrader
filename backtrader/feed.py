@@ -31,114 +31,64 @@ import inspect
 import io
 import os.path
 
-import backtrader as bt
-from backtrader import (
-    TimeFrame,
+from . import (
     dataseries,
-    date2num,
     metabase,
-    num2date,
-    time2num,
 )
-from backtrader.utils import tzparse
-from backtrader.utils.py3 import range, string_types, with_metaclass, zip
-
-from .dataseries import SimpleFilterWrapper
+from .dataseries import SimpleFilterWrapper, TimeFrame
 from .resamplerfilter import Replayer, Resampler
 from .tradingcal import PandasMarketCalendar
+from .utils.date import localizer, date2num, num2date, time2num, tzparse
+from .utils.py3 import range, string_types, with_metaclass, zip
 
 
-class MetaAbstractDataBase(dataseries.OHLCDateTime.__class__):
-    """ """
+class MetaAbstractDataBase(type):
+    """Metaclass for registering and initializing data feed subclasses."""
 
     _indcol = dict()
 
-    def __init__(cls, name, bases, dct):
-        """Class has already been created ... register subclasses
+    def __init__(self, name, bases, dct):
+        super().__init__(name, bases, dct)
+        if (
+            not getattr(self, "aliased", False)
+            and name != "DataBase"
+            and not name.startswith("_")
+        ):
+            self._indcol[name] = self
 
-        :param name:
-        :param bases:
-        :param dct:
-
-        """
-        # Initialize the class
-        super(MetaAbstractDataBase, cls).__init__(name, bases, dct)
-
-        if not cls.aliased and name != "DataBase" and not name.startswith("_"):
-            cls._indcol[name] = cls
-
-    def dopreinit(cls, _obj, *args, **kwargs):
-        """
-
-        :param _obj:
-        :param *args:
-        :param **kwargs:
-
-        """
-        _obj, args, kwargs = super(MetaAbstractDataBase, cls).dopreinit(
-            _obj, *args, **kwargs
-        )
-
-        # Find the owner and store it
+    def dopreinit(self, _obj, *args, **kwargs):
         _obj._feed = metabase.findowner(_obj, FeedBase)
-
         _obj.notifs = collections.deque()  # store notifications for cerebro
-
         _obj._dataname = _obj.p.dataname
         _obj._name = ""
         return _obj, args, kwargs
 
-    def dopostinit(cls, _obj, *args, **kwargs):
-        """
-
-        :param _obj:
-        :param *args:
-        :param **kwargs:
-
-        """
-        _obj, args, kwargs = super(MetaAbstractDataBase, cls).dopostinit(
-            _obj, *args, **kwargs
-        )
-
-        # Either set by subclass or the parameter or use the dataname (ticker)
+    def dopostinit(self, _obj, *args, **kwargs):
         _obj._name = _obj._name or _obj.p.name
         if not _obj._name and isinstance(_obj.p.dataname, string_types):
             _obj._name = _obj.p.dataname
         _obj._compression = _obj.p.compression
         _obj._timeframe = _obj.p.timeframe
-
         if isinstance(_obj.p.sessionstart, datetime.datetime):
             _obj.p.sessionstart = _obj.p.sessionstart.time()
-
         elif _obj.p.sessionstart is None:
             _obj.p.sessionstart = datetime.time.min
-
         if isinstance(_obj.p.sessionend, datetime.datetime):
             _obj.p.sessionend = _obj.p.sessionend.time()
-
         elif _obj.p.sessionend is None:
-            # remove 9 to avoid precision rounding errors
             _obj.p.sessionend = datetime.time(23, 59, 59, 999990)
-
         if isinstance(_obj.p.fromdate, datetime.date):
-            # push it to the end of the day, or else intraday
-            # values before the end of the day would be gone
             if not hasattr(_obj.p.fromdate, "hour"):
                 _obj.p.fromdate = datetime.datetime.combine(
                     _obj.p.fromdate, _obj.p.sessionstart
                 )
-
         if isinstance(_obj.p.todate, datetime.date):
-            # push it to the end of the day, or else intraday
-            # values before the end of the day would be gone
             if not hasattr(_obj.p.todate, "hour"):
                 _obj.p.todate = datetime.datetime.combine(
                     _obj.p.todate, _obj.p.sessionend
                 )
-
         _obj._barstack = collections.deque()  # for filter operations
         _obj._barstash = collections.deque()  # for filter operations
-
         _obj._filters = list()
         _obj._ffilters = list()
         for fp in _obj.p.filters:
@@ -146,14 +96,12 @@ class MetaAbstractDataBase(dataseries.OHLCDateTime.__class__):
                 fp = fp(_obj)
                 if hasattr(fp, "last"):
                     _obj._ffilters.append((fp, [], {}))
-
             _obj._filters.append((fp, [], {}))
-
         return _obj, args, kwargs
 
 
 class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateTime)):
-    """ """
+    """Abstract base class for all data feeds."""
 
     params = (
         ("dataname", None),
@@ -195,11 +143,8 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
 
     @classmethod
     def _getstatusname(cls, status):
-        """
-
-        :param status:
-
-        """
+        """Args:
+    status:"""
         return cls._NOTIFNAMES[status]
 
     _compensate = None
@@ -219,16 +164,12 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
 
     def _start_finish(self):
         """ """
-        # A live feed (for example) may have learnt something about the
-        # timezones after the start and that's why the date/time related
-        # parameters are converted at this late stage
-        # Get the output timezone (if any)
         self._tz = self._gettz()
-        # Lines have already been create, set the tz
-        self.lines.datetime._settz(self._tz)
-
+        # Ensure self.lines is the correct object type before accessing .datetime
+        if hasattr(self.lines, "datetime") and hasattr(self.lines.datetime, "_settz"):
+            self.lines.datetime._settz(self._tz)
         # This should probably be also called from an override-able method
-        self._tzinput = bt.utils.date.Localizer(self._gettzinput())
+        self._tzinput = localizer(self._gettzinput())
 
         # Convert user input times to the output timezone (or min/max)
         if self.p.fromdate == "":
@@ -268,25 +209,27 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
         """Returns the next eos using a trading calendar if available"""
         if self._clone:
             return self.data._getnexteos()
-
         if not len(self):
             return datetime.datetime.min, 0.0
-
-        dt = self.lines.datetime[0]
+        # Ensure self.lines is the correct object type before accessing .datetime
+        if hasattr(self.lines, "datetime"):
+            dt = self.lines.datetime[0]
+        else:
+            dt = 0.0
         dtime = num2date(dt)
         if self._calendar is None:
             nexteos = datetime.datetime.combine(dtime, self.p.sessionend)
-            nextdteos = self.date2num(nexteos)  # locl'ed -> utc-like
-            nexteos = num2date(nextdteos)  # utc
+            nextdteos = self.date2num(nexteos)
+            nexteos = num2date(nextdteos)
             while dtime > nexteos:
-                nexteos += datetime.timedelta(days=1)  # already utc-like
-
-            nextdteos = date2num(nexteos)  # -> utc-like
-
+                nexteos += datetime.timedelta(days=1)
+            nextdteos = date2num(nexteos)
         else:
-            # returns times in utc
+            # Remove 'calendar' keyword argument if present
+            if isinstance(self._calendar, str):
+                self._calendar = PandasMarketCalendar(self._calendar)
             _, nexteos = self._calendar.schedule(dtime, self._tz)
-            nextdteos = date2num(nexteos)  # nextos is already utc
+            nextdteos = date2num(nexteos)
         return nexteos, nextdteos
 
     def _gettzinput(self):
@@ -302,27 +245,22 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
         return tzparse(self.p.tz)
 
     def date2num(self, dt):
-        """
-
-        :param dt:
-
-        """
+        """Args:
+    dt:"""
         if self._tz is not None:
             return date2num(self._tz.localize(dt))
 
         return date2num(dt)
 
     def num2date(self, dt=None, tz=None, naive=True):
-        """
-
-        :param dt:  (Default value = None)
-        :param tz:  (Default value = None)
-        :param naive:  (Default value = True)
-
-        """
+        """Args:
+    dt: (Default value = None)
+    tz: (Default value = None)
+    naive: (Default value = True)"""
         if dt is None:
-            return num2date(self.lines.datetime[0], tz or self._tz, naive)
-
+            if hasattr(self.lines, "datetime"):
+                return num2date(self.lines.datetime[0], tz or self._tz, naive)
+            return num2date(0.0, tz or self._tz, naive)
         return num2date(dt, tz or self._tz, naive)
 
     def haslivedata(self):
@@ -330,12 +268,9 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
         return False  # must be overriden for those that can
 
     def do_qcheck(self, onoff, qlapse):
-        """
-
-        :param onoff:
-        :param qlapse:
-
-        """
+        """Args:
+    onoff:
+    qlapse:"""
         # if onoff is True the data will wait p.qcheck for incoming live data
         # on its queue.
         qwait = self.p.qcheck if onoff else 0.0
@@ -354,11 +289,8 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
     def put_notification(self, status, *args, **kwargs):
         """Add arguments to notification queue
 
-        :param status:
-        :param *args:
-        :param **kwargs:
-
-        """
+Args:
+    status:"""
         if self._laststatus != status:
             self.notifs.append((status, args, kwargs))
             self._laststatus = status
@@ -382,15 +314,14 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
         return self._feed
 
     def qbuffer(self, savemem=0, replaying=False):
-        """
-
-        :param savemem:  (Default value = 0)
-        :param replaying:  (Default value = False)
-
-        """
+        """Args:
+    savemem: (Default value = 0)
+    replaying: (Default value = False)"""
         extrasize = self.resampling or replaying
-        for line in self.lines:
-            line.qbuffer(savemem=savemem, extrasize=extrasize)
+        # Ensure self.lines is iterable and its elements have qbuffer
+        for line in self.lines if hasattr(self.lines, "__iter__") else []:
+            if hasattr(line, "qbuffer"):
+                line.qbuffer(savemem=savemem, extrasize=extrasize)
 
     def start(self):
         """ """
@@ -408,21 +339,17 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
         """ """
 
     def clone(self, **kwargs):
-        """
-
-        :param **kwargs:
-
-        """
-        return DataClone(dataname=self, **kwargs)
+        """"""
+        # Remove 'dataname' from kwargs if present
+        kwargs.pop("dataname", None)
+        return DataClone(**kwargs)
 
     def copyas(self, _dataname, **kwargs):
-        """
-
-        :param _dataname:
-        :param **kwargs:
-
-        """
-        d = DataClone(dataname=self, **kwargs)
+        """Args:
+    _dataname:"""
+        # Remove 'dataname' from kwargs if present
+        kwargs.pop("dataname", None)
+        d = DataClone(**kwargs)
         d._dataname = _dataname
         d._name = _dataname
         return d
@@ -430,9 +357,8 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
     def setenvironment(self, env):
         """Keep a reference to the environment
 
-        :param env:
-
-        """
+Args:
+    env:"""
         self._env = env
 
     def getenvironment(self):
@@ -440,24 +366,14 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
         return self._env
 
     def addfilter_simple(self, f, *args, **kwargs):
-        """
-
-        :param f:
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Args:
+    f:"""
         fp = SimpleFilterWrapper(self, f, *args, **kwargs)
         self._filters.append((fp, fp.args, fp.kwargs))
 
     def addfilter(self, p, *args, **kwargs):
-        """
-
-        :param p:
-        :param *args:
-        :param **kwargs:
-
-        """
+        """Args:
+    p:"""
         if inspect.isclass(p):
             pobj = p(self, *args, **kwargs)
             self._filters.append((pobj, [], {}))
@@ -470,11 +386,10 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
 
     def compensate(self, other):
         """Call it to let the broker know that actions on this asset will
-        compensate open positions in another
+compensate open positions in another
 
-        :param other:
-
-        """
+Args:
+    other:"""
 
         self._compensate = other
 
@@ -491,11 +406,8 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
         self.tick_last = None
 
     def _tick_fill(self, force=False):
-        """
-
-        :param force:  (Default value = False)
-
-        """
+        """Args:
+    force: (Default value = False)"""
         # If nothing filled the tick_xxx attributes, the bar is the tick
         alias0 = self._getlinealias(0)
         if force or getattr(self, "tick_" + alias0, None) is None:
@@ -513,13 +425,10 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
         return float("inf")  # max date else
 
     def advance(self, size=1, datamaster=None, ticks=True):
-        """
-
-        :param size:  (Default value = 1)
-        :param datamaster:  (Default value = None)
-        :param ticks:  (Default value = True)
-
-        """
+        """Args:
+    size: (Default value = 1)
+    datamaster: (Default value = None)
+    ticks: (Default value = True)"""
         if ticks:
             self._tick_nullify()
 
@@ -545,12 +454,9 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
                 self._tick_fill()
 
     def next(self, datamaster=None, ticks=True):
-        """
-
-        :param datamaster:  (Default value = None)
-        :param ticks:  (Default value = True)
-
-        """
+        """Args:
+    datamaster: (Default value = None)
+    ticks: (Default value = True)"""
 
         if len(self) >= self.buflen():
             if ticks:
@@ -597,11 +503,8 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
         self.home()
 
     def _last(self, datamaster=None):
-        """
-
-        :param datamaster:  (Default value = None)
-
-        """
+        """Args:
+    datamaster: (Default value = None)"""
         # Last chance for filters to deliver something
         ret = 0
         for ff, fargs, fkwargs in self._ffilters:
@@ -621,11 +524,8 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
         return bool(ret)
 
     def _check(self, forcedata=None):
-        """
-
-        :param forcedata:  (Default value = None)
-
-        """
+        """Args:
+    forcedata: (Default value = None)"""
         for ff, fargs, fkwargs in self._filters:
             if not hasattr(ff, "check"):
                 continue
@@ -708,10 +608,9 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
     def _add2stack(self, bar, stash=False):
         """Saves given bar (list of values) to the stack for later retrieval
 
-        :param bar:
-        :param stash:  (Default value = False)
-
-        """
+Args:
+    bar:
+    stash: (Default value = False)"""
         if not stash:
             self._barstack.append(bar)
         else:
@@ -719,14 +618,12 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
 
     def _save2stack(self, erase=False, force=False, stash=False):
         """Saves current bar to the bar stack for later retrieval
+Parameter ``erase`` determines removal from the data stream
 
-        Parameter ``erase`` determines removal from the data stream
-
-        :param erase:  (Default value = False)
-        :param force:  (Default value = False)
-        :param stash:  (Default value = False)
-
-        """
+Args:
+    erase: (Default value = False)
+    force: (Default value = False)
+    stash: (Default value = False)"""
         bar = [line[0] for line in self.itersize()]
         if not stash:
             self._barstack.append(bar)
@@ -738,14 +635,12 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
 
     def _updatebar(self, bar, forward=False, ago=0):
         """Load a value from the stack onto the lines to form the new bar
+Returns True if values are present, False otherwise
 
-        Returns True if values are present, False otherwise
-
-        :param bar:
-        :param forward:  (Default value = False)
-        :param ago:  (Default value = 0)
-
-        """
+Args:
+    bar:
+    forward: (Default value = False)
+    ago: (Default value = 0)"""
         if forward:
             self.forward()
 
@@ -754,13 +649,11 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
 
     def _fromstack(self, forward=False, stash=False):
         """Load a value from the stack onto the lines to form the new bar
+Returns True if values are present, False otherwise
 
-        Returns True if values are present, False otherwise
-
-        :param forward:  (Default value = False)
-        :param stash:  (Default value = False)
-
-        """
+Args:
+    forward: (Default value = False)
+    stash: (Default value = False)"""
 
         coll = self._barstack if not stash else self._barstash
 
@@ -776,19 +669,11 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateT
         return False
 
     def resample(self, **kwargs):
-        """
-
-        :param **kwargs:
-
-        """
+        """"""
         self.addfilter(Resampler, **kwargs)
 
     def replay(self, **kwargs):
-        """
-
-        :param **kwargs:
-
-        """
+        """"""
         self.addfilter(Replayer, **kwargs)
 
 
@@ -796,95 +681,57 @@ class DataBase(AbstractDataBase):
     """ """
 
 
-class FeedBase(with_metaclass(metabase.MetaParams, object)):
-    """ """
+class FeedBase(object):
+    """Base class for all feed containers."""
 
-    params = () + DataBase.params._gettuple()
+    params = getattr(DataBase.params, "_gettuple", lambda: DataBase.params)()
+    DataCls = None  # Ensure DataCls is always present
 
     def __init__(self):
-        """ """
         self.datas = list()
 
     def start(self):
-        """ """
         for data in self.datas:
             data.start()
 
     def stop(self):
-        """ """
         for data in self.datas:
             data.stop()
 
     def getdata(self, dataname, name=None, **kwargs):
-        """
-
-        :param dataname:
-        :param name:  (Default value = None)
-        :param **kwargs:
-
-        """
-        for pname, pvalue in self.p._getitems():
-            kwargs.setdefault(pname, getattr(self.p, pname))
-
+        # Only access self.p if it exists
+        if hasattr(self, "p"):
+            for pname, pvalue in self.p._getitems():
+                kwargs.setdefault(pname, getattr(self.p, pname))
         kwargs["dataname"] = dataname
         data = self._getdata(**kwargs)
-
-        data._name = name
-
-        self.datas.append(data)
+        if data is not None:
+            data._name = name
+            self.datas.append(data)
         return data
 
     def _getdata(self, dataname, **kwargs):
-        """
-
-        :param dataname:
-        :param **kwargs:
-
-        """
-        for pname, pvalue in self.p._getitems():
-            kwargs.setdefault(pname, getattr(self.p, pname))
-
+        if hasattr(self, "p"):
+            for pname, pvalue in self.p._getitems():
+                kwargs.setdefault(pname, getattr(self.p, pname))
         kwargs["dataname"] = dataname
-        return self.DataCls(**kwargs)
+        if hasattr(self, "DataCls") and self.DataCls is not None:
+            return self.DataCls(**kwargs)
+        return None
 
 
-class MetaCSVDataBase(DataBase.__class__):
-    """ """
+class MetaCSVDataBase(type):
+    """Metaclass for CSVDataBase."""
 
     def dopostinit(cls, _obj, *args, **kwargs):
-        """
-
-        :param _obj:
-        :param *args:
-        :param **kwargs:
-
-        """
-        # Before going to the base class to make sure it overrides the default
         if not _obj.p.name and not _obj._name:
             _obj._name, _ = os.path.splitext(os.path.basename(_obj.p.dataname))
-
-        _obj, args, kwargs = super(MetaCSVDataBase, cls).dopostinit(
-            _obj, *args, **kwargs
-        )
-
+        # No super().dopostinit, as base type does not have it
         return _obj, args, kwargs
 
 
 class CSVDataBase(with_metaclass(MetaCSVDataBase, DataBase)):
-    """Base class for classes implementing CSV DataFeeds
-
-    The class takes care of opening the file, reading the lines and
-    tokenizing them.
-
-    Subclasses do only need to override:
-
-      - _loadline(tokens)
-
-    The return value of ``_loadline`` (True/False) will be the return value
-    of ``_load`` which has been overriden by this base class
-
-
-    """
+    """Base class for classes implementing CSV DataFeeds."""
 
     f = None
     params = (
@@ -959,18 +806,18 @@ class CSVDataBase(with_metaclass(MetaCSVDataBase, DataBase)):
 
 
 class CSVFeedBase(FeedBase):
-    """ """
+    """Base class for CSV feed containers."""
 
-    params = (("basepath", ""),) + CSVDataBase.params._gettuple()
+    params = ("basepath", "") + tuple(
+        getattr(CSVDataBase.params, "_gettuple", lambda: CSVDataBase.params)()
+    )
 
     def _getdata(self, dataname, **kwargs):
-        """
-
-        :param dataname:
-        :param **kwargs:
-
-        """
-        return self.DataCls(dataname=self.p.basepath + dataname, **self.p._getkwargs())
+        return (
+            self.DataCls(dataname=self.p.basepath + dataname, **self.p._getkwargs())
+            if hasattr(self, "DataCls") and hasattr(self, "p")
+            else None
+        )
 
 
 class DataClone(AbstractDataBase):
@@ -999,7 +846,8 @@ class DataClone(AbstractDataBase):
 
         # Copy tz infos
         self._tz = self.data._tz
-        self.lines.datetime._settz(self._tz)
+        if hasattr(self.lines, "datetime") and hasattr(self.lines.datetime, "_settz"):
+            self.lines.datetime._settz(self._tz)
 
         self._calendar = self.data._calendar
 
@@ -1056,12 +904,9 @@ class DataClone(AbstractDataBase):
         return True
 
     def advance(self, size=1, datamaster=None, ticks=True):
-        """
-
-        :param size:  (Default value = 1)
-        :param datamaster:  (Default value = None)
-        :param ticks:  (Default value = True)
-
-        """
+        """Args:
+    size: (Default value = 1)
+    datamaster: (Default value = None)
+    ticks: (Default value = True)"""
         self._dlen += size
         super(DataClone, self).advance(size, datamaster, ticks=ticks)

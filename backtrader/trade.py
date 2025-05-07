@@ -27,18 +27,21 @@ from __future__ import (
 
 import itertools
 
-from .utils import AutoOrderedDict
+try:
+    from .utils import AutoOrderedDict
+except ImportError:
+
+    class AutoOrderedDict(dict):
+        pass
+
+
 from .utils.date import num2date
 from .utils.py3 import range
 
 
 class TradeHistory(AutoOrderedDict):
     """Represents the status and update event for each update a Trade has
-
-    This object is a dictionary which allows '.' notation
-
-
-    """
+This object is a dictionary which allows '.' notation"""
 
     def __init__(
         self,
@@ -55,18 +58,17 @@ class TradeHistory(AutoOrderedDict):
     ):
         """Initializes the object to the current status of the Trade
 
-        :param status:
-        :param dt:
-        :param barlen:
-        :param size:
-        :param price:
-        :param value:
-        :param pnl:
-        :param pnlcomm:
-        :param tz:
-        :param event:  (Default value = None)
-
-        """
+Args:
+    status: 
+    dt: 
+    barlen: 
+    size: 
+    price: 
+    value: 
+    pnl: 
+    pnlcomm: 
+    tz: 
+    event: (Default value = None)"""
         super(TradeHistory, self).__init__()
         self.status.status = status
         self.status.dt = dt
@@ -101,12 +103,11 @@ class TradeHistory(AutoOrderedDict):
     def doupdate(self, order, size, price, commission):
         """Used to fill the ``update`` part of the history entry
 
-        :param order:
-        :param size:
-        :param price:
-        :param commission:
-
-        """
+Args:
+    order: 
+    size: 
+    price: 
+    commission:"""
         self.event.order = order
         self.event.size = size
         self.event.price = price
@@ -118,67 +119,51 @@ class TradeHistory(AutoOrderedDict):
     def datetime(self, tz=None, naive=True):
         """Returns a datetime for the time the update event happened
 
-        :param tz:  (Default value = None)
-        :param naive:  (Default value = True)
-
-        """
+Args:
+    tz: (Default value = None)
+    naive: (Default value = True)"""
         return num2date(self.status.dt, tz or self.status.tz, naive)
 
 
 class Trade(object):
     """Keeps track of the life of an trade: size, price,
-    commission (and value?)
-
-    An trade starts at 0 can be increased and reduced and can
-    be considered closed if it goes back to 0.
-
-    The trade can be long (positive size) or short (negative size)
-
-    An trade is not meant to be reversed (no support in the logic for it)
-
-    Member Attributes:
-
-      - ``ref``: unique trade identifier
-      - ``status`` (``int``): one of Created, Open, Closed
-      - ``tradeid``: grouping tradeid passed to orders during creation
-        The default in orders is 0
-      - ``size`` (``int``): current size of the trade
-      - ``price`` (``float``): current price of the trade
-      - ``value`` (``float``): current value of the trade
-      - ``commission`` (``float``): current accumulated commission
-      - ``pnl`` (``float``): current profit and loss of the trade (gross pnl)
-      - ``pnlcomm`` (``float``): current profit and loss of the trade minus
-        commission (net pnl)
-      - ``isclosed`` (``bool``): records if the last update closed (set size to
-        null the trade
-      - ``isopen`` (``bool``): records if any update has opened the trade
-      - ``justopened`` (``bool``): if the trade was just opened
-      - ``baropen`` (``int``): bar in which this trade was opened
-
-      - ``dtopen`` (``float``): float coded datetime in which the trade was
-        opened
-
-        - Use method ``open_datetime`` to get a Python datetime.datetime
-          or use the platform provided ``num2date`` method
-
-      - ``barclose`` (``int``): bar in which this trade was closed
-
-      - ``dtclose`` (``float``): float coded datetime in which the trade was
-        closed
-
-        - Use method ``close_datetime`` to get a Python datetime.datetime
-          or use the platform provided ``num2date`` method
-
-      - ``barlen`` (``int``): number of bars this trade was open
-      - ``historyon`` (``bool``): whether history has to be recorded
-      - ``history`` (``list``): holds a list updated with each "update" event
-        containing the resulting status and parameters used in the update
-
-        The first entry in the history is the Opening Event
-        The last entry in the history is the Closing Event
-
-
-    """
+commission (and value?)
+An trade starts at 0 can be increased and reduced and can
+be considered closed if it goes back to 0.
+The trade can be long (positive size) or short (negative size)
+An trade is not meant to be reversed (no support in the logic for it)
+Member Attributes:
+- ``ref``: unique trade identifier
+- ``status`` (``int``): one of Created, Open, Closed
+- ``tradeid``: grouping tradeid passed to orders during creation
+The default in orders is 0
+- ``size`` (``int``): current size of the trade
+- ``price`` (``float``): current price of the trade
+- ``value`` (``float``): current value of the trade
+- ``commission`` (``float``): current accumulated commission
+- ``pnl`` (``float``): current profit and loss of the trade (gross pnl)
+- ``pnlcomm`` (``float``): current profit and loss of the trade minus
+commission (net pnl)
+- ``isclosed`` (``bool``): records if the last update closed (set size to
+null the trade
+- ``isopen`` (``bool``): records if any update has opened the trade
+- ``justopened`` (``bool``): if the trade was just opened
+- ``baropen`` (``int``): bar in which this trade was opened
+- ``dtopen`` (``float``): float coded datetime in which the trade was
+opened
+- Use method ``open_datetime`` to get a Python datetime.datetime
+or use the platform provided ``num2date`` method
+- ``barclose`` (``int``): bar in which this trade was closed
+- ``dtclose`` (``float``): float coded datetime in which the trade was
+closed
+- Use method ``close_datetime`` to get a Python datetime.datetime
+or use the platform provided ``num2date`` method
+- ``barlen`` (``int``): number of bars this trade was open
+- ``historyon`` (``bool``): whether history has to be recorded
+- ``history`` (``list``): holds a list updated with each "update" event
+containing the resulting status and parameters used in the update
+The first entry in the history is the Opening Event
+The last entry in the history is the Closing Event"""
 
     refbasis = itertools.count(1)
 
@@ -222,17 +207,14 @@ class Trade(object):
         value=0.0,
         commission=0.0,
     ):
-        """
-
-        :param data:  (Default value = None)
-        :param tradeid:  (Default value = 0)
-        :param historyon:  (Default value = False)
-        :param size:  (Default value = 0)
-        :param price:  (Default value = 0.0)
-        :param value:  (Default value = 0.0)
-        :param commission:  (Default value = 0.0)
-
-        """
+        """Args:
+    data: (Default value = None)
+    tradeid: (Default value = 0)
+    historyon: (Default value = False)
+    size: (Default value = 0)
+    price: (Default value = 0.0)
+    value: (Default value = 0.0)
+    commission: (Default value = 0.0)"""
 
         self.ref = next(self.refbasis)
         self.data = data
@@ -278,58 +260,40 @@ class Trade(object):
 
     def open_datetime(self, tz=None, naive=True):
         """Returns a datetime.datetime object with the datetime in which
-        the trade was opened
+the trade was opened
 
-        :param tz:  (Default value = None)
-        :param naive:  (Default value = True)
-
-        """
+Args:
+    tz: (Default value = None)
+    naive: (Default value = True)"""
         return self.data.num2date(self.dtopen, tz=tz, naive=naive)
 
     def close_datetime(self, tz=None, naive=True):
         """Returns a datetime.datetime object with the datetime in which
-        the trade was closed
+the trade was closed
 
-        :param tz:  (Default value = None)
-        :param naive:  (Default value = True)
-
-        """
+Args:
+    tz: (Default value = None)
+    naive: (Default value = True)"""
         return self.data.num2date(self.dtclose, tz=tz, naive=naive)
 
     def update(self, order, size, price, value, commission, pnl, comminfo):
         """Updates the current trade. The logic does not check if the
-        trade is reversed, which is not conceptually supported by the
-        object.
+trade is reversed, which is not conceptually supported by the
+object.
+If an update sets the size attribute to 0, "closed" will be
+set to true
+Updates may be received twice for each order, once for the existing
+size which has been closed (sell undoing a buy) and a second time for
+the the opening part (sell reversing a buy)
 
-        If an update sets the size attribute to 0, "closed" will be
-        set to true
-
-        Updates may be received twice for each order, once for the existing
-        size which has been closed (sell undoing a buy) and a second time for
-        the the opening part (sell reversing a buy)
-
-        :param order: the order object which has (completely or partially)
-                generated this update
-        :param size: amount to update the order
-                if size has the same sign as the current trade a
-                position increase will happen
-                if size has the opposite sign as current op size a
-                reduction/close will happen
-        :type size: int
-        :param price: always be positive to ensure consistency
-        :type price: float
-        :param value: (unused) cost incurred in new size/price op
-                           Not used because the value is calculated for the
-                           trade
-        :type value: float
-        :param commission: incurred commission in the new size/price op
-        :type commission: float
-        :param pnl: (unused) generated by the executed part
-                         Not used because the trade has an independent pnl
-        :type pnl: float
-        :param comminfo:
-
-        """
+Args:
+    order: the order object which has (completely or partially)
+    size: amount to update the order
+    price: always be positive to ensure consistency
+    value: (unused) cost incurred in new size/price op
+    commission: incurred commission in the new size/price op
+    pnl: (unused) generated by the executed part
+    comminfo:"""
         if not size:
             return  # empty update, skip all other calculations
 

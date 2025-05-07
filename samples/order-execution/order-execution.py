@@ -47,21 +47,17 @@ class OrderExecutionStrategy(bt.Strategy):
     def log(self, txt, dt=None):
         """Logging function fot this strategy
 
-        :param txt:
-        :param dt:  (Default value = None)
-
-        """
+Args:
+    txt: 
+    dt: (Default value = None)"""
         dt = dt or self.data.datetime[0]
         if isinstance(dt, float):
             dt = bt.num2date(dt)
         print("%s, %s" % (dt.isoformat(), txt))
 
     def notify_order(self, order):
-        """
-
-        :param order:
-
-        """
+        """Args:
+    order:"""
         if order.status in [order.Submitted, order.Accepted]:
             # Buy/Sell order submitted/accepted to/by broker - Nothing to do
             self.log("ORDER ACCEPTED/SUBMITTED", dt=order.created.dt)
@@ -210,11 +206,8 @@ def runstrat():
 
 
 def getdata(args):
-    """
-
-    :param args:
-
-    """
+    """Args:
+    args:"""
 
     dataformat = dict(
         bt=btfeeds.BacktraderCSVData,
