@@ -18,7 +18,8 @@
 #
 ###############################################################################
 
-from . import ExponentialSmoothingDynamic, MovingAverageBase, SumN
+from .basicops import ExponentialSmoothingDynamic, SumN
+from .mabase import MovingAverageBase
 
 
 class AdaptiveMovingAverage(MovingAverageBase):

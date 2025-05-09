@@ -19,11 +19,12 @@
 ###############################################################################
 
 
-import backtrader as bt
-from backtrader.indicators import SumN, TrueLow, TrueRange
+from backtrader.indicator import Indicator
+from backtrader.indicators.basicops import SumN
+from backtrader.indicators.atr import TrueLow, TrueRange
 
 
-class UltimateOscillator(bt.Indicator):
+class UltimateOscillator(Indicator):
     """
     Formula:
       # Buying Pressure = Close - TrueLow

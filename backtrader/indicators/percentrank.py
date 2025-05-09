@@ -20,9 +20,9 @@
 
 from math import fsum
 
-from . import BaseApplyN
+from .basicops import BaseApplyN
 
-__all__ = ["PercentRank", "PctRank"]
+__all__ = ["PercentRank"]
 
 
 class PercentRank(BaseApplyN):

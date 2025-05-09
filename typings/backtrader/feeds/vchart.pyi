@@ -1,6 +1,7 @@
-from .. import TimeFrame as TimeFrame, feed as feed
-from ..utils import date2num as date2num
+from .. import feed as feed
 from _typeshed import Incomplete
+from backtrader.dataseries import TimeFrame as TimeFrame
+from backtrader.utils.dateintern import date2num as date2num
 
 class VChartData(feed.DataBase):
     ext: str

@@ -23,11 +23,11 @@ from datetime import datetime
 from struct import unpack
 
 import backtrader as bt
-from backtrader import date2num  # avoid dict lookups
+from backtrader.utils.dateintern import date2num
 
 
 class MetaVChartFile(bt.DataBase.__class__):
-    def __init__(cls, name, bases, dct):
+    def __init__(self, name, bases, dct):
         """Class has already been created ...
 
         register
@@ -36,7 +36,7 @@ class MetaVChartFile(bt.DataBase.__class__):
         super().__init__(name, bases, dct)
 
         # Register with the store
-        bt.stores.VChartFile.DataCls = cls
+        bt.stores.VChartFile.DataCls = self
 
 
 class VChartFile(bt.with_metaclass(MetaVChartFile, bt.DataBase)):
@@ -49,7 +49,13 @@ class VChartFile(bt.with_metaclass(MetaVChartFile, bt.DataBase)):
         EuroStoxx 50 continuous future
     """
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._store = None
+
     def start(self):
+        if not hasattr(self, '_store'):
+            self._store = None
         super().start()
         if self._store is None:
             self._store = bt.stores.VChartFile()
@@ -129,10 +135,10 @@ class VChartFile(bt.with_metaclass(MetaVChartFile, bt.DataBase)):
         self.lines.datetime[0] = date2num(dt)  # Store time
 
         # Get the rest of the fields
-        o, h, l, c, v, oi = bdata[self._dtsize :]
+        o, h, low, c, v, oi = bdata[self._dtsize:]
         self.lines.open[0] = o
         self.lines.high[0] = h
-        self.lines.low[0] = l
+        self.lines.low[0] = low
         self.lines.close[0] = c
         self.lines.volume[0] = v
         self.lines.openinterest[0] = oi

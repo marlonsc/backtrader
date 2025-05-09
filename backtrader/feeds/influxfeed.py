@@ -23,7 +23,9 @@ import datetime as dt
 import backtrader as bt
 import backtrader.feed as feed
 
-from ..utils import date2num
+from backtrader.utils.dateintern import date2num
+from influxdb import InfluxDBClient as idbclient
+from influxdb.exceptions import InfluxDBClientError
 
 TIMEFRAMES = dict(
     (

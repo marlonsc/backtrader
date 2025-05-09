@@ -18,7 +18,7 @@
 #
 ###############################################################################
 
-from . import Indicator
+from backtrader.indicator import Indicator
 
 
 class Momentum(Indicator):
@@ -93,6 +93,10 @@ class RateOfChange(Indicator):
         dperiod = self.data(-self.p.period)
         self.l.roc = (self.data - dperiod) / dperiod
         super().__init__()
+
+
+# Alias for RateOfChange to ROC for use in RateOfChange100
+ROC = RateOfChange
 
 
 class RateOfChange100(Indicator):

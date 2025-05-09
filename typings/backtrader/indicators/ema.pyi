@@ -1,4 +1,5 @@
-from . import ExponentialSmoothing as ExponentialSmoothing, MovingAverageBase as MovingAverageBase
+from .basicops import ExponentialSmoothing as ExponentialSmoothing
+from .mabase import MovAv as MovAv, MovingAverageBase as MovingAverageBase
 from _typeshed import Incomplete
 
 class ExponentialMovingAverage(MovingAverageBase):

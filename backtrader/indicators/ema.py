@@ -18,7 +18,8 @@
 #
 ###############################################################################
 
-from . import ExponentialSmoothing, MovingAverageBase
+from .basicops import ExponentialSmoothing
+from .mabase import MovingAverageBase, MovAv
 
 
 class ExponentialMovingAverage(MovingAverageBase):
@@ -45,10 +46,10 @@ class ExponentialMovingAverage(MovingAverageBase):
     def __init__(self):
         # Before super to ensure mixins (right-hand side in subclassing)
         # can see the assignment operation and operate on the line
-        self.lines[0] = es = ExponentialSmoothing(
-            self.data, period=self.p.period, alpha=2.0 / (1.0 + self.p.period)
-        )
-
+        es = ExponentialSmoothing(data=self.data, period=self.p.period, alpha=2.0 / (1.0 + self.p.period))
+        self.l.ema = es
         self.alpha, self.alpha1 = es.alpha, es.alpha1
-
         super().__init__()
+
+for alias in ExponentialMovingAverage.alias:
+    setattr(MovAv, alias, ExponentialMovingAverage)

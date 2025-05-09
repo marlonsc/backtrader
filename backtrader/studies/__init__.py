@@ -17,3 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
+
+from .contrib.fractal import Fractal
+
+__all__ = ["Fractal"]

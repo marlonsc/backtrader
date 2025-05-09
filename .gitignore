@@ -70,3 +70,6 @@ samples2/
 datas/*.py
 
 .idea/
+
+check.logmake
+check

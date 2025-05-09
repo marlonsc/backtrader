@@ -18,12 +18,11 @@
 #
 ###############################################################################
 
-import backtrader as bt
+from backtrader.indicator import Indicator
+from .basicops import Highest, Lowest
 
-from . import Highest, Lowest
 
-
-class Ichimoku(bt.Indicator):
+class Ichimoku(Indicator):
     """Developed and published in his book in 1969 by journalist Goichi Hosoda.
 
     Formula:

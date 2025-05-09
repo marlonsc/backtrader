@@ -19,7 +19,7 @@
 ###############################################################################
 
 
-from . import MovAv, MovingAverageBase
+from .mabase import MovAv, MovingAverageBase
 
 
 class DoubleExponentialMovingAverage(MovingAverageBase):
@@ -84,3 +84,6 @@ class TripleExponentialMovingAverage(MovingAverageBase):
 
         self.lines.tema = 3.0 * ema1 - 3.0 * ema2 + ema3
         super().__init__()
+
+DEMA = DoubleExponentialMovingAverage
+TEMA = TripleExponentialMovingAverage

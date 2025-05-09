@@ -33,3 +33,8 @@ try:
     pass
 except ImportError:
     pass  # The user may not have something installed
+
+from .btcsv import BacktraderCSVData
+
+__all__ = ["BacktraderCSVData"]
+

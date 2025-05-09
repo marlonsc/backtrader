@@ -1,5 +1,6 @@
-from . import Indicator as Indicator, MovAv as MovAv
+from .mabase import MovAv as MovAv
 from _typeshed import Incomplete
+from backtrader.indicator import Indicator as Indicator
 
 class StandardDeviation(Indicator):
     alias: Incomplete

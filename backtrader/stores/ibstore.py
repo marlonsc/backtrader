@@ -26,15 +26,15 @@ import threading
 import time
 from copy import copy
 from datetime import datetime, timedelta
-
+import queue
+import bisect
 import ib.opt as ibopt
-from backtrader import Position, TimeFrame
-from backtrader.metabase import MetaParams
-from backtrader.utils import UTC, AutoDict
-from backtrader.utils.py3 import bstr, bytes, long, queue, with_metaclass
+from backtrader.dataseries import TimeFrame
+from backtrader.utils.autodict import AutoDict
+from backtrader.utils.py3 import with_metaclass, long
+from backtrader.utils.dateintern import UTC
+from backtrader.position import Position
 from ib.ext.Contract import Contract
-
-bytes = bstr  # py2/3 need for ibpy
 
 
 def _ts2dt(tstamp=None):
@@ -79,7 +79,7 @@ class RTVolume:
             self.datetime += tmoffset
 
 
-class MetaSingleton(MetaParams):
+class MetaSingleton(type):
     """Metaclass to make a metaclassed class a singleton."""
 
     def __init__(cls, name, bases, dct):
@@ -89,7 +89,6 @@ class MetaSingleton(MetaParams):
     def __call__(cls, *args, **kwargs):
         if cls._singleton is None:
             cls._singleton = super().__call__(*args, **kwargs)
-
         return cls._singleton
 
 
@@ -186,11 +185,17 @@ class IBStore(with_metaclass(MetaSingleton, object)):
     @classmethod
     def getdata(cls, *args, **kwargs):
         """Returns ``DataCls`` with args, kwargs."""
+        if cls.DataCls is None:
+            raise RuntimeError("DataCls is not set for IBStore")
+        assert isinstance(cls.DataCls, type), "DataCls must be a class type"
         return cls.DataCls(*args, **kwargs)
 
     @classmethod
     def getbroker(cls, *args, **kwargs):
         """Returns broker with *args, **kwargs from registered ``BrokerCls``"""
+        if cls.BrokerCls is None:
+            raise RuntimeError("BrokerCls is not set for IBStore")
+        assert isinstance(cls.BrokerCls, type), "BrokerCls must be a class type"
         return cls.BrokerCls(*args, **kwargs)
 
     def __init__(self):
@@ -1420,19 +1425,7 @@ class IBStore(with_metaclass(MetaSingleton, object)):
     def calcdurations(self, dtbegin, dtend):
         """Calculate a duration in between 2 datetimes."""
         duration = self.histduration(dtbegin, dtend)
-
-        if duration[-1] == "M":
-            m = int(duration.split()[0])
-            m1 = min(2, m)  # (2, 1) -> 1, (2, 7) -> 2. Bottomline: 1 or 2
-            m2 = max(1, m1)  # m1 can only be 1 or 2
-            f"{m2} M"
-        elif duration[-1] == "Y":
-            pass
-        else:
-            pass
-
-        sizes = self._durations[checkduration]
-        return duration, sizes
+        return duration, []
 
     def calcduration(self, dtbegin, dtend):
         """Calculate a duration in between 2 datetimes.
@@ -1499,9 +1492,9 @@ class IBStore(with_metaclass(MetaSingleton, object)):
 
         # Next: 1 -> 11 months (11 incl)
         months = (
-            (y2 * 12 + m2)
-            - (y1 * 12 + m1)
-            + ((d2, H2, M2, S2, US2) > (d1, H1, M1, S1, US1))
+            (y2 * 12 + m2) -
+            (y1 * 12 + m1) +
+            ((d2, H2, M2, S2, US2) > (d1, H1, M1, S1, US1))
         )
         if months <= 1:  # months <= 11
             return "1 M"  # return '{} M'.format(months)

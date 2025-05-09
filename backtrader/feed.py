@@ -24,23 +24,17 @@ import inspect
 import os.path
 
 import backtrader as bt
-from backtrader import (
-    TimeFrame,
-    dataseries,
-    date2num,
-    metabase,
-    num2date,
-    time2num,
-)
-from backtrader.utils import tzparse
+from backtrader.dataseries import TimeFrame, OHLCDateTime
+from backtrader.utils.dateintern import date2num, num2date, time2num, tzparse
 from backtrader.utils.py3 import range, string_types, with_metaclass, zip
 
 from .dataseries import SimpleFilterWrapper
 from .resamplerfilter import Replayer, Resampler
 from .tradingcal import PandasMarketCalendar
+from backtrader.metabase import MetaParams, findowner
 
 
-class MetaAbstractDataBase(dataseries.OHLCDateTime.__class__):
+class MetaAbstractDataBase(OHLCDateTime.__class__):
     _indcol = dict()
 
     def __init__(cls, name, bases, dct):
@@ -58,7 +52,7 @@ class MetaAbstractDataBase(dataseries.OHLCDateTime.__class__):
         _obj, args, kwargs = super().dopreinit(_obj, *args, **kwargs)
 
         # Find the owner and store it
-        _obj._feed = metabase.findowner(_obj, FeedBase)
+        _obj._feed = findowner(_obj, FeedBase)
 
         _obj.notifs = collections.deque()  # store notifications for cerebro
 
@@ -121,7 +115,7 @@ class MetaAbstractDataBase(dataseries.OHLCDateTime.__class__):
         return _obj, args, kwargs
 
 
-class AbstractDataBase(with_metaclass(MetaAbstractDataBase, dataseries.OHLCDateTime)):
+class AbstractDataBase(with_metaclass(MetaAbstractDataBase, OHLCDateTime)):
     params = (
         ("dataname", None),
         ("name", ""),
@@ -610,7 +604,7 @@ class DataBase(AbstractDataBase):
     pass
 
 
-class FeedBase(with_metaclass(metabase.MetaParams, object)):
+class FeedBase(with_metaclass(MetaParams, object)):
     params = () + DataBase.params._gettuple()
 
     def __init__(self):

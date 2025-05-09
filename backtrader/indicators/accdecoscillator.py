@@ -18,14 +18,14 @@
 #
 ###############################################################################
 
-import backtrader as bt
+from backtrader.indicator import Indicator
+from .awesomeoscillator import AwesomeOscillator
+from .mabase import MovAv
 
-from . import AwesomeOscillator, MovAv
-
-__all__ = ["AccelerationDecelerationOscillator", "AccDeOsc"]
+__all__ = ["AccelerationDecelerationOscillator"]
 
 
-class AccelerationDecelerationOscillator(bt.Indicator):
+class AccelerationDecelerationOscillator(Indicator):
     """Acceleration/Deceleration Technical Indicator (AC) measures acceleration and
     deceleration of the current driving force. This indicator will change direction before
     any changes in the driving force, which, it its turn, will change its direction before

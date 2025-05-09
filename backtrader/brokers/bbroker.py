@@ -21,7 +21,7 @@
 import collections
 import datetime
 
-import backtrader as bt
+from backtrader.broker import BrokerBase
 from backtrader.order import BuyOrder, Order, SellOrder
 from backtrader.position import Position
 from backtrader.utils.py3 import integer_types, string_types
@@ -29,7 +29,7 @@ from backtrader.utils.py3 import integer_types, string_types
 __all__ = ["BackBroker", "BrokerBack"]
 
 
-class BackBroker(bt.BrokerBase):
+class BackBroker(BrokerBase):
     """Broker Simulator.
 
     The simulation supports different order types, checking a submitted order

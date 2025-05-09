@@ -19,8 +19,10 @@
 ###############################################################################
 
 import backtrader as bt
+import collections
+import math
 
-from . import TimeDrawDown
+from .drawdown import TimeDrawDown
 
 __all__ = ["Calmar"]
 
@@ -98,14 +100,14 @@ class Calmar(bt.TimeFrameAnalyzerBase):
         if not self._fundmode:
             self._values.append(self.strategy.broker.getvalue())
         else:
-            self._values.append(self.strategy.broker.fundvalue)
+            self._values.append(self.strategy.broker.fundvalue())
 
     def on_dt_over(self):
         self._mdd = max(self._mdd, self._maxdd.maxdd)
         if not self._fundmode:
             self._values.append(self.strategy.broker.getvalue())
         else:
-            self._values.append(self.strategy.broker.fundvalue)
+            self._values.append(self.strategy.broker.fundvalue())
         rann = math.log(self._values[-1] / self._values[0]) / len(self._values)
         self.calmar = calmar = rann / (self._mdd or float("Inf"))
 

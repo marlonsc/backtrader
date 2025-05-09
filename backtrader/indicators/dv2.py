@@ -19,7 +19,9 @@
 ###############################################################################
 
 
-from . import SMA, Indicator, PercentRank
+from backtrader.indicator import Indicator
+from .sma import MovingAverageSimple as SMA
+from .percentrank import PercentRank
 
 __all__ = ["DV2"]
 

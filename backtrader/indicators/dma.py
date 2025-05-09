@@ -19,7 +19,8 @@
 ###############################################################################
 
 
-from . import MovAv, MovingAverageBase, ZeroLagIndicator
+from .mabase import MovAv, MovingAverageBase
+from .zlind import ZeroLagIndicator
 
 
 class DicksonMovingAverage(MovingAverageBase):
@@ -78,3 +79,5 @@ class DicksonMovingAverage(MovingAverageBase):
 
         # To make mixins work - super at the end for cooperative inheritance
         super().__init__()
+
+DMA = DicksonMovingAverage

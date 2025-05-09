@@ -20,7 +20,8 @@
 
 import sys
 
-from . import Indicator, MovingAverage
+from backtrader.indicator import Indicator
+from .mabase import MovingAverage
 
 
 class EnvelopeMixIn:

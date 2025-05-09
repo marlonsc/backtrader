@@ -22,9 +22,35 @@ import functools
 import math
 import operator
 
-from ..utils.py3 import map, range
-from . import Indicator
+from ..utils.py3 import range
+from backtrader.indicator import Indicator
 
+__all__ = [
+    "PeriodN",
+    "OperationN",
+    "BaseApplyN",
+    "ApplyN",
+    "Highest",
+    "Lowest",
+    "ReduceN",
+    "SumN",
+    "AnyN",
+    "AllN",
+    "FindFirstIndex",
+    "FindFirstIndexHighest",
+    "FindFirstIndexLowest",
+    "FindLastIndex",
+    "FindLastIndexHighest",
+    "FindLastIndexLowest",
+    "Accum",
+    "Average",
+    "ExponentialSmoothing",
+    "ExponentialSmoothingDynamic",
+    "WeightedAverage",
+    "Max",
+]
+
+Max = max
 
 class PeriodN(Indicator):
     """Base class for indicators which take a period (__init__ has to be called either via
@@ -63,7 +89,7 @@ class OperationN(PeriodN):
         func = self.func
 
         for i in range(start, end):
-            dst[i] = func(src[i - period + 1 : i + 1])
+            dst[i] = func(src[i - period + 1: i + 1])
 
 
 class BaseApplyN(OperationN):
@@ -362,7 +388,7 @@ class Average(PeriodN):
         period = self.p.period
 
         for i in range(start, end):
-            dst[i] = math.fsum(src[i - period + 1 : i + 1]) / period
+            dst[i] = math.fsum(src[i - period + 1: i + 1]) / period
 
 
 class ExponentialSmoothing(Average):
@@ -493,5 +519,12 @@ class WeightedAverage(PeriodN):
         weights = self.p.weights
 
         for i in range(start, end):
-            data = darray[i - period + 1 : i + 1]
+            data = darray[i - period + 1: i + 1]
             larray[i] = coef * math.fsum(map(operator.mul, data, weights))
+
+
+def And(*args):
+    return all(args)
+
+def If(cond, true_val, false_val):
+    return true_val if cond else false_val

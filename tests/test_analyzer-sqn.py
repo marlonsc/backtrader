@@ -27,6 +27,7 @@ except BaseException:
 
 
 import backtrader as bt
+from backtrader.order import Order, BuyOrder
 import backtrader.indicators as btind
 import testcommon
 
@@ -53,11 +54,11 @@ class TestStrategy(bt.Strategy):
             self.tradecount += 1
 
     def notify_order(self, order):
-        if order.status in [bt.Order.Submitted, bt.Order.Accepted]:
+        if order.status in [Order.Submitted, Order.Accepted]:
             return  # Await further notifications
 
-        if order.status == order.Completed:
-            if isinstance(order, bt.BuyOrder):
+        if order.status == Order.Completed:
+            if isinstance(order, BuyOrder):
                 if self.p.printops:
                     txt = "BUY, %.2f" % order.executed.price
                     self.log(txt, order.executed.dt)
@@ -82,8 +83,8 @@ class TestStrategy(bt.Strategy):
         # Flag to allow new orders in the system or not
         self.orderid = None
 
-        self.sma = btind.SMA(self.data, period=self.p.period)
-        self.cross = btind.CrossOver(self.data.close, self.sma, plot=True)
+        self.sma = btind.SMA(data=self.data, period=self.p.period)
+        self.cross = btind.CrossOver(data=self.data.close, data1=self.sma, plot=True)
 
     def start(self):
         if not self.p.stocklike:

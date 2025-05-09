@@ -1,4 +1,4 @@
-from . import MovAv as MovAv, MovingAverageBase as MovingAverageBase
+from .mabase import MovAv as MovAv, MovingAverageBase as MovingAverageBase
 from _typeshed import Incomplete
 from backtrader.utils.py3 import MAXINT as MAXINT
 

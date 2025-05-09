@@ -18,7 +18,10 @@
 #
 ###############################################################################
 
-from . import ATR, And, If, Indicator, MovAv
+from .atr import AverageTrueRange as ATR
+from .basicops import And, If
+from backtrader.indicator import Indicator
+from .mabase import MovAv
 
 
 class UpMove(Indicator):
@@ -82,7 +85,7 @@ class _DirectionalIndicator(Indicator):
         return plabels
 
     def __init__(self, _plus=True, _minus=True):
-        atr = ATR(self.data, period=self.p.period, movav=self.p.movav)
+        atr = ATR(data=self.data, period=self.p.period, movav=self.p.movav)
 
         upmove = self.data.high - self.data.high(-1)
         downmove = self.data.low(-1) - self.data.low

@@ -28,7 +28,6 @@ except BaseException:
 import backtrader as bt
 import backtrader.indicators as btind
 import testcommon
-from backtrader.utils.py3 import PY2
 
 
 class TestStrategy(bt.Strategy):
@@ -77,8 +76,8 @@ class TestStrategy(bt.Strategy):
         # Flag to allow new orders in the system or not
         self.orderid = None
 
-        self.sma = btind.SMA(self.data, period=self.p.period)
-        self.cross = btind.CrossOver(self.data.close, self.sma, plot=True)
+        self.sma = btind.SMA(data=self.data, period=self.p.period)
+        self.cross = btind.CrossOver(data=self.data.close, data1=self.sma, plot=True)
 
     def start(self):
         if not self.p.stocklike:
@@ -167,10 +166,7 @@ def test_run(main=False):
             print(str(analysis[next(iter(analysis.keys()))]))
         else:
             # Handle different precision
-            if PY2:
-                sval = "0.2795"
-            else:
-                sval = "0.2794999999999983"
+            sval = "0.2794999999999983"
 
             assert str(analysis[next(iter(analysis.keys()))]) == sval
 

@@ -1,5 +1,5 @@
-from . import Indicator
 from _typeshed import Incomplete
+from backtrader.indicator import Indicator
 
 __all__ = ['DV2']
 

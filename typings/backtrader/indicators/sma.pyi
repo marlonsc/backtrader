@@ -1,4 +1,5 @@
-from . import Average as Average, MovingAverageBase as MovingAverageBase
+from .basicops import Average as Average
+from .mabase import MovAv as MovAv, MovingAverageBase as MovingAverageBase
 from _typeshed import Incomplete
 
 class MovingAverageSimple(MovingAverageBase):

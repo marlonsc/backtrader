@@ -1,14 +1,11 @@
-import backtrader as bt
 from _typeshed import Incomplete
+from backtrader.indicator import Indicator
 
-__all__ = ['AccelerationDecelerationOscillator', 'AccDeOsc']
+__all__ = ['AccelerationDecelerationOscillator']
 
-class AccelerationDecelerationOscillator(bt.Indicator):
+class AccelerationDecelerationOscillator(Indicator):
     alias: Incomplete
     lines: Incomplete
     params: Incomplete
     plotlines: Incomplete
     def __init__(self) -> None: ...
-
-# Names in __all__ with no definition:
-#   AccDeOsc

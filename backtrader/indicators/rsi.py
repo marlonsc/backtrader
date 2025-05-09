@@ -18,7 +18,9 @@
 #
 ###############################################################################
 
-from . import DivZeroByZero, Indicator, Max, MovAv
+from backtrader.functions import DivZeroByZero
+from backtrader.indicator import Indicator
+from .mabase import MovAv
 
 
 class UpDay(Indicator):
@@ -39,7 +41,7 @@ class UpDay(Indicator):
     params = (("period", 1),)
 
     def __init__(self):
-        self.lines.upday = Max(self.data - self.data(-self.p.period), 0.0)
+        self.lines.upday = max(self.data - self.data(-self.p.period), 0.0)
         super().__init__()
 
 
@@ -61,7 +63,7 @@ class DownDay(Indicator):
     params = (("period", 1),)
 
     def __init__(self):
-        self.lines.downday = Max(self.data(-self.p.period) - self.data, 0.0)
+        self.lines.downday = max(self.data(-self.p.period) - self.data, 0.0)
         super().__init__()
 
 

@@ -3,3 +3,5 @@
 # (e.g., .p in MetaParams), which static analysis cannot detect.
 [MESSAGES CONTROL]
 disable=no-member,unexpected-keyword-arg,useless-import-alias,missing-function-docstring,no-member,unexpected-keyword-arg
+disable=missing-class-docstring,missing-module-docstring,too-many-files,protected-access,unused-variable
+disable=protected-access,line-too-long,unused-import,invalid-name

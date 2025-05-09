@@ -1,16 +1,15 @@
 from _typeshed import Incomplete
-from backtrader import Position as Position, TimeFrame as TimeFrame
-from backtrader.metabase import MetaParams as MetaParams
-from backtrader.utils import AutoDict as AutoDict, UTC as UTC
-from backtrader.utils.py3 import bstr as bstr, bytes as bytes, long as long, queue as queue, with_metaclass as with_metaclass
-
-bytes = bstr
+from backtrader.dataseries import TimeFrame as TimeFrame
+from backtrader.position import Position as Position
+from backtrader.utils.autodict import AutoDict as AutoDict
+from backtrader.utils.dateintern import UTC as UTC
+from backtrader.utils.py3 import long as long, with_metaclass as with_metaclass
 
 class RTVolume:
     price: Incomplete
     def __init__(self, rtvol: str = '', price: Incomplete | None = None, tmoffset: Incomplete | None = None) -> None: ...
 
-class MetaSingleton(MetaParams):
+class MetaSingleton(type):
     def __init__(cls, name, bases, dct) -> None: ...
     def __call__(cls, *args, **kwargs): ...
 

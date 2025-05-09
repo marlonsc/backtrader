@@ -19,7 +19,7 @@
 ###############################################################################
 
 
-from . import MovAv, MovingAverageBase
+from .mabase import MovAv, MovingAverageBase
 
 
 # Inherits from MovingAverageBase to auto-register as MovingAverage type
@@ -65,3 +65,6 @@ class HullMovingAverage(MovingAverageBase):
 
         # Done after calc to ensure coop inheritance and composition work
         super().__init__()
+
+for alias in HullMovingAverage.alias:
+    setattr(MovAv, alias, HullMovingAverage)

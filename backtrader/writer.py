@@ -28,7 +28,8 @@ try:  # For new Python versions
 except AttributeError:  # For old Python versions
     collectionsAbc = collections  # Используем collections.Iterable
 
-import backtrader as bt
+from backtrader.metabase import MetaParams
+from backtrader.lineseries import LineSeries
 from backtrader.utils.py3 import (
     integer_types,
     map,
@@ -37,7 +38,7 @@ from backtrader.utils.py3 import (
 )
 
 
-class WriterBase(with_metaclass(bt.MetaParams, object)):
+class WriterBase(with_metaclass(MetaParams, object)):
     pass
 
 
@@ -104,7 +105,9 @@ class WriterFile(WriterBase):
         ("rounding", None),
     )
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.out = None
         self._len = itertools.count(1)
         self.headers = list()
         self.values = list()
@@ -186,7 +189,7 @@ class WriterFile(WriterBase):
             kline += str(key) + ":"
 
             try:
-                sclass = issubclass(val, bt.LineSeries)
+                sclass = issubclass(val, LineSeries)
             except TypeError:
                 sclass = False
 

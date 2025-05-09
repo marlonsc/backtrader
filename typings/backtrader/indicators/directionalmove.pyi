@@ -1,5 +1,7 @@
-from . import ATR as ATR, And as And, If as If, Indicator as Indicator, MovAv as MovAv
+from .basicops import And as And, If as If
+from .mabase import MovAv as MovAv
 from _typeshed import Incomplete
+from backtrader.indicator import Indicator as Indicator
 
 class UpMove(Indicator):
     lines: Incomplete

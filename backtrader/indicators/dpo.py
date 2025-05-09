@@ -19,7 +19,8 @@
 ###############################################################################
 # Python 2/3 compatibility imports
 
-from . import Indicator, MovAv
+from backtrader.indicator import Indicator
+from .mabase import MovAv
 
 
 class DetrendedPriceOscillator(Indicator):
@@ -63,3 +64,5 @@ class DetrendedPriceOscillator(Indicator):
         self.lines.dpo = self.data - ma(-self.p.period // 2 + 1)
 
         super().__init__()
+
+DPO = DetrendedPriceOscillator

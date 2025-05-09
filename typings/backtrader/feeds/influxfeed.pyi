@@ -1,6 +1,6 @@
 import backtrader.feed as feed
-from ..utils import date2num as date2num
 from _typeshed import Incomplete
+from backtrader.utils.dateintern import date2num as date2num
 
 TIMEFRAMES: Incomplete
 

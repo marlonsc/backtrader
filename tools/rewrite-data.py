@@ -72,8 +72,8 @@ class RewriteStrategy(bt.Strategy):
         fields.append(o)
         h = "%.2f" % self.data.high[0]
         fields.append(h)
-        l = "%.2f" % self.data.low[0]
-        fields.append(l)
+        low_str = "%.2f" % self.data.low[0]
+        fields.append(low_str)
         c = "%.2f" % self.data.close[0]
         fields.append(c)
         v = "%d" % self.data.volume[0]

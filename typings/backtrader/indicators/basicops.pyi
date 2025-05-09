@@ -1,7 +1,7 @@
 import math
-from . import Indicator as Indicator
-from ..utils.py3 import map as map, range as range
+from ..utils.py3 import range as range
 from _typeshed import Incomplete
+from backtrader.indicator import Indicator as Indicator
 
 class PeriodN(Indicator):
     params: Incomplete
@@ -107,3 +107,6 @@ class WeightedAverage(PeriodN):
     def __init__(self) -> None: ...
     def next(self) -> None: ...
     def once(self, start, end) -> None: ...
+
+def And(*args): ...
+def If(cond, true_val, false_val): ...

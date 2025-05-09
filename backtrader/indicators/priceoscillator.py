@@ -18,7 +18,8 @@
 #
 ###############################################################################
 
-from . import Indicator, MovAv
+from backtrader.indicator import Indicator
+from .mabase import MovAv
 
 
 class _PriceOscBase(Indicator):

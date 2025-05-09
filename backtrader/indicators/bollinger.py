@@ -18,7 +18,9 @@
 #
 ###############################################################################
 
-from . import Indicator, MovAv, StdDev
+from backtrader.indicator import Indicator
+from .mabase import MovAv
+from .deviation import StandardDeviation as StdDev
 
 
 class BollingerBands(Indicator):
@@ -62,7 +64,7 @@ class BollingerBands(Indicator):
     def __init__(self):
         self.lines.mid = ma = self.p.movav(self.data, period=self.p.period)
         stddev = self.p.devfactor * StdDev(
-            self.data, ma, period=self.p.period, movav=self.p.movav
+            data=self.data, data1=ma, period=self.p.period, movav=self.p.movav
         )
         self.lines.top = ma + stddev
         self.lines.bot = ma - stddev

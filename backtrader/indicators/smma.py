@@ -18,10 +18,11 @@
 #
 ###############################################################################
 
-from . import ExponentialSmoothing, MovingAverageBase
+from .basicops import ExponentialSmoothing
+from .mabase import MovingAverageBase, MetaMovAvBase, MovAv
 
 
-class SmoothedMovingAverage(MovingAverageBase):
+class SmoothedMovingAverage(MovingAverageBase, metaclass=MetaMovAvBase):
     """Smoothing Moving Average used by Wilder in his 1978 book `New Concepts in Technical
     Trading`
 
@@ -47,13 +48,16 @@ class SmoothedMovingAverage(MovingAverageBase):
         "MovingAverageSmoothed",
         "MovingAverageWilder",
         "ModifiedMovingAverage",
+        "Smoothed",
     )
     lines = ("smma",)
 
     def __init__(self):
         # Before super to ensure mixins (right-hand side in subclassing)
         # can see the assignment operation and operate on the line
-        self.lines[0] = ExponentialSmoothing(
-            self.data, period=self.p.period, alpha=1.0 / self.p.period
-        )
+        self.l.smma = ExponentialSmoothing(data=self.data, period=self.p.period, alpha=1.0 / self.p.period)
         super().__init__()
+
+# Force registration of SmoothedMovingAverage with MovAv for all aliases
+for alias in SmoothedMovingAverage.alias:
+    setattr(MovAv, alias, SmoothedMovingAverage)

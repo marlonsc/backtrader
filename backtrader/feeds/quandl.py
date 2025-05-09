@@ -23,15 +23,11 @@ import io
 import itertools
 from datetime import date, datetime
 
+from urllib.request import ProxyHandler, build_opener, install_opener, urlopen
+from urllib.parse import quote as urlquote
+
+from backtrader.utils.dateintern import date2num
 from .. import feed
-from ..utils import date2num
-from ..utils.py3 import (
-    ProxyHandler,
-    build_opener,
-    install_opener,
-    urlopen,
-    urlquote,
-)
 
 __all__ = ["QuandlCSV", "Quandl"]
 
@@ -106,7 +102,7 @@ class QuandlCSV(feed.CSVDataBase):
 
         o = float(linetokens[next(i)])
         h = float(linetokens[next(i)])
-        l = float(linetokens[next(i)])
+        low = float(linetokens[next(i)])
         c = float(linetokens[next(i)])
         v = float(linetokens[next(i)])
         self.lines.openinterest[0] = 0.0
@@ -115,13 +111,13 @@ class QuandlCSV(feed.CSVDataBase):
             decimals = self.p.decimals
             o = round(o, decimals)
             h = round(h, decimals)
-            l = round(l, decimals)
+            low = round(low, decimals)
             c = round(c, decimals)
             v = round(v, decimals)
 
         self.lines.open[0] = o
         self.lines.high[0] = h
-        self.lines.low[0] = l
+        self.lines.low[0] = low
         self.lines.close[0] = c
         self.lines.volume[0] = v
 

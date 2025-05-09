@@ -19,7 +19,7 @@
 ###############################################################################
 
 from ..utils.py3 import with_metaclass
-from . import Indicator
+from backtrader.indicator import Indicator
 
 
 class MovingAverage:
@@ -62,6 +62,10 @@ class MovingAverage:
 
         if clsalias:
             setattr(cls, clsalias, regcls)
+
+        # Register all aliases in the class's 'alias' attribute
+        for alias in getattr(regcls, "alias", []):
+            setattr(cls, alias, regcls)
 
 
 class MovAv(MovingAverage):

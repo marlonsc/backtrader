@@ -1,6 +1,6 @@
-from . import Indicator as Indicator
 from ..utils.py3 import with_metaclass as with_metaclass
 from _typeshed import Incomplete
+from backtrader.indicator import Indicator as Indicator
 
 class MovingAverage:
     @classmethod

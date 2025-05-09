@@ -18,7 +18,8 @@
 #
 ###############################################################################
 
-from . import FindFirstIndexHighest, FindFirstIndexLowest, Indicator
+from .basicops import FindFirstIndexHighest, FindFirstIndexLowest
+from backtrader.indicator import Indicator
 
 
 class _AroonBase(Indicator):
@@ -56,11 +57,11 @@ class _AroonBase(Indicator):
         idxperiod = self.p.period + 1
 
         if self._up:
-            hhidx = FindFirstIndexHighest(self.data.high, period=idxperiod)
+            hhidx = FindFirstIndexHighest(data=self.data.high, period=idxperiod)
             self.up = (100.0 / self.p.period) * (self.p.period - hhidx)
 
         if self._down:
-            llidx = FindFirstIndexLowest(self.data.low, period=idxperiod)
+            llidx = FindFirstIndexLowest(data=self.data.low, period=idxperiod)
             self.down = (100.0 / self.p.period) * (self.p.period - llidx)
 
         super().__init__()

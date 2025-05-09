@@ -18,7 +18,7 @@
 #
 ###############################################################################
 
-from . import Indicator
+from backtrader.indicator import Indicator
 
 __all__ = ["PercentChange", "PctChange"]
 

@@ -1,12 +1,9 @@
-from . import BaseApplyN
+from .basicops import BaseApplyN
 from _typeshed import Incomplete
 
-__all__ = ['PercentRank', 'PctRank']
+__all__ = ['PercentRank']
 
 class PercentRank(BaseApplyN):
     alias: Incomplete
     lines: Incomplete
     params: Incomplete
-
-# Names in __all__ with no definition:
-#   PctRank

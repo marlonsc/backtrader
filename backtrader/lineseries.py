@@ -185,7 +185,7 @@ class Lines:
         return cls._getlines()
 
     def itersize(self):
-        return iter(self.lines[0 : self.size()])
+        return iter(self.lines[0: self.size()])
 
     def __init__(self, initlines=None):
         """Create the lines recording during "_derive" or else use the provided
@@ -289,8 +289,7 @@ class MetaLineSeries(LineMultiple.__class__):
 
     def __new__(meta, name, bases, dct):
         """Intercept class creation, identifiy lines/plotinfo/plotlines class attributes
-        and create corresponding classes for them which take over the class attributes.
-        """
+        and create corresponding classes for them which take over the class attributes."""
 
         # Get the aliases - don't leave it there for subclasses
         aliases = dct.setdefault("alias", ())

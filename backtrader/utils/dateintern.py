@@ -247,10 +247,10 @@ def time2num(tm):
     """Converts the hour/minute/second/microsecond part of tm (datetime.datetime or time)
     to a num."""
     num = (
-        tm.hour / HOURS_PER_DAY
-        + tm.minute / MINUTES_PER_DAY
-        + tm.second / SECONDS_PER_DAY
-        + tm.microsecond / MUSECONDS_PER_DAY
+        tm.hour / HOURS_PER_DAY +
+        tm.minute / MINUTES_PER_DAY +
+        tm.second / SECONDS_PER_DAY +
+        tm.microsecond / MUSECONDS_PER_DAY
     )
 
     return num

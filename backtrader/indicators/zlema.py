@@ -19,7 +19,7 @@
 ###############################################################################
 
 
-from . import MovAv, MovingAverageBase
+from .mabase import MovAv, MovingAverageBase
 
 
 class ZeroLagExponentialMovingAverage(MovingAverageBase):

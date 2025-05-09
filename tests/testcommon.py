@@ -170,13 +170,14 @@ class TestStrategy(bt.Strategy):
         self.nextcalls = 0
 
     def stop(self):
-        l = len(self.ind)
+        length = len(self.ind)
         mp = self.chkmin
-        chkpts = [0, -l + mp, (-l + mp) // 2]
+        chkpts = [0, -length + mp, (-length + mp) // 2]
+        print("len ind %d == %d len self" % (length, len(self)))
+        assert length == len(self)
 
         if self.p.main:
             print("----------------------------------------")
-            print("len ind %d == %d len self" % (l, len(self)))
             print("minperiod %d" % self.chkmin)
             print("self.p.chknext %d nextcalls %d" % (self.p.chknext, self.nextcalls))
 
@@ -206,7 +207,6 @@ class TestStrategy(bt.Strategy):
                 print(chkval)
 
         else:
-            assert l == len(self)
             if self.p.chknext:
                 assert self.p.chknext == self.nextcalls
             assert mp == self.p.chkmin
@@ -224,8 +224,7 @@ class TestStrategy(bt.Strategy):
 
 class SampleParamsHolder(ParamsBase):
     """This class is used as base for tests that check the proper handling of meta
-    parameters like `frompackages`, `packages`, `params`, `lines` in inherited classes.
-    """
+    parameters like `frompackages`, `packages`, `params`, `lines` in inherited classes."""
 
     frompackages = (("math", ("factorial")),)
 

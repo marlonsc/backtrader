@@ -25,6 +25,7 @@ import itertools
 import operator
 
 import backtrader as bt
+from backtrader.order import Order
 
 from .lineiterator import LineIterator, StrategyBase
 from .lineroot import LineSingle
@@ -486,6 +487,10 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         self._tradehistoryon = onoff
 
     def clear(self):
+        if not hasattr(self, '_orderspending'):
+            self._orderspending = list()
+        if not hasattr(self, '_tradespending'):
+            self._tradespending = list()
         self._orders.extend(self._orderspending)
         self._orderspending = list()
         self._tradespending = list()
@@ -1031,17 +1036,17 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         size=None,
         price=None,
         plimit=None,
-        exectype=bt.Order.Limit,
+        exectype=Order.Limit,
         valid=None,
         tradeid=0,
         trailamount=None,
         trailpercent=None,
         oargs={},
         stopprice=None,
-        stopexec=bt.Order.Stop,
+        stopexec=Order.Stop,
         stopargs={},
         limitprice=None,
-        limitexec=bt.Order.Limit,
+        limitexec=Order.Limit,
         limitargs={},
         **kwargs,
     ):
@@ -1105,7 +1110,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             for a Sell order and above for a buy order) to keep the trailing
             stop (if ``trailamount`` is also specified it will be used)
 
-          - ``exectype`` (default: ``bt.Order.Limit``)
+          - ``exectype`` (default: ``Order.Limit``)
 
             Possible values: (see the documentation for the method ``buy``
 
@@ -1137,7 +1142,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
             Specific price for the *low side* stop order
 
-          - ``stopexec`` (default: ``bt.Order.Stop``)
+          - ``stopexec`` (default: ``Order.Stop``)
 
             Specific execution type for the *low side* order
 
@@ -1151,7 +1156,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
             Specific price for the *high side* stop order
 
-          - ``stopexec`` (default: ``bt.Order.Limit``)
+          - ``stopexec`` (default: ``Order.Limit``)
 
             Specific execution type for the *high side* order
 
@@ -1236,17 +1241,17 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         size=None,
         price=None,
         plimit=None,
-        exectype=bt.Order.Limit,
+        exectype=Order.Limit,
         valid=None,
         tradeid=0,
         trailamount=None,
         trailpercent=None,
         oargs={},
         stopprice=None,
-        stopexec=bt.Order.Stop,
+        stopexec=Order.Stop,
         stopargs={},
         limitprice=None,
-        limitexec=bt.Order.Limit,
+        limitexec=Order.Limit,
         limitargs={},
         **kwargs,
     ):

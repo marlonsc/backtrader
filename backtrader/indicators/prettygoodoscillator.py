@@ -19,7 +19,9 @@
 ###############################################################################
 
 
-from . import ATR, Indicator, MovAv
+from backtrader.indicator import Indicator
+from .atr import AverageTrueRange as ATR
+from .mabase import MovAv
 
 
 class PrettyGoodOscillator(Indicator):

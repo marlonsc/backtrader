@@ -106,9 +106,9 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
         self.subdays = TimeFrame.Ticks < self.p.timeframe < TimeFrame.Days
         self.subweeks = self.p.timeframe < TimeFrame.Weeks
         self.componly = (
-            not self.subdays
-            and data._timeframe == self.p.timeframe
-            and not (self.p.compression % data._compression)
+            not self.subdays and
+            data._timeframe == self.p.timeframe and
+            not (self.p.compression % data._compression)
         )
 
         self.bar = _Bar(maxdate=True)  # bar holder

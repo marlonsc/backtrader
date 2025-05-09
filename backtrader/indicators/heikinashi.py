@@ -19,12 +19,12 @@
 ###############################################################################
 
 
-import backtrader as bt
+from backtrader.indicator import Indicator
 
 __all__ = ["HeikinAshi"]
 
 
-class HeikinAshi(bt.Indicator):
+class HeikinAshi(Indicator):
     """Heikin Ashi candlesticks in the forms of lines.
 
     Formula:
@@ -76,8 +76,8 @@ class HeikinAshi(bt.Indicator):
 
         self.l.ha_close = ha_close = (o + h + l + c) / 4.0
         self.l.ha_open = ha_open = (self.l.ha_open(-1) + ha_close(-1)) / 2.0
-        self.l.ha_high = bt.Max(h, ha_open, ha_close)
-        self.l.ha_low = bt.Min(l, ha_open, ha_close)
+        self.l.ha_high = max(h, ha_open, ha_close)
+        self.l.ha_low = min(l, ha_open, ha_close)
 
         super().__init__()
 

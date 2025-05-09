@@ -18,16 +18,16 @@
 #
 ###############################################################################
 
-import backtrader as bt
+from backtrader.indicator import Indicator
 
-from . import MovAv
+from .mabase import MovAv
 
-__all__ = ["AwesomeOscillator", "AwesomeOsc", "AO"]
+__all__ = ["AwesomeOscillator"]
 
 
-class AwesomeOscillator(bt.Indicator):
+class AwesomeOscillator(Indicator):
     """Awesome Oscillator (AO) is a momentum indicator reflecting the precise changes in
-    the market driving force which helps to identify the trend’s strength up to the points
+    the market driving force which helps to identify the trend's strength up to the points
     of formation and reversal.
 
     Formula:

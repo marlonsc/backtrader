@@ -18,8 +18,9 @@
 #
 ###############################################################################
 
-from . import Indicator, MeanDev, MovAv
-
+from backtrader.indicator import Indicator
+from .deviation import MeanDeviation as MeanDev
+from .mabase import MovAv
 
 class CommodityChannelIndex(Indicator):
     """Introduced by Donald Lambert in 1980 to measure variations of the "typical price"
@@ -61,8 +62,10 @@ class CommodityChannelIndex(Indicator):
         tpmean = self.p.movav(tp, period=self.p.period)
 
         dev = tp - tpmean
-        meandev = MeanDev(tp, tpmean, period=self.p.period)
+        meandev = MeanDev(data=tp, data1=tpmean, period=self.p.period)
 
         self.lines.cci = dev / (self.p.factor * meandev)
 
         super().__init__()
+
+CCI = CommodityChannelIndex

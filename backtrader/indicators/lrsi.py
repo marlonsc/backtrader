@@ -18,7 +18,7 @@
 #
 ###############################################################################
 
-from . import PeriodN
+from .basicops import PeriodN
 
 __all__ = ["LaguerreRSI", "LRSI", "LaguerreFilter", "LAGF"]
 

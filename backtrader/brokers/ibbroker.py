@@ -21,21 +21,16 @@
 import collections
 import threading
 import uuid
+import queue
 from datetime import date, datetime, timedelta
 
 import ib.ext.Order
-from backtrader import (
-    BrokerBase,
-    Order,
-    OrderBase,
-    date2num,
-    num2date,
-)
+from backtrader.broker import BrokerBase
+from backtrader.order import Order, OrderBase
+from backtrader.utils.dateintern import date2num, num2date
 from backtrader.comminfo import CommInfoBase
 from backtrader.stores import ibstore
-from backtrader.utils.py3 import bstr, bytes, queue, with_metaclass
-
-bytes = bstr  # py2/3 need for ibpy
+from backtrader.utils.py3 import with_metaclass
 
 
 class IBOrderState:
@@ -230,14 +225,14 @@ class IBCommInfo(CommInfoBase):
 
 
 class MetaIBBroker(BrokerBase.__class__):
-    def __init__(cls, name, bases, dct):
+    def __init__(self, name, bases, dct):
         """Class has already been created ...
 
         register
         """
         # Initialize the class
         super().__init__(name, bases, dct)
-        ibstore.IBStore.BrokerCls = cls
+        ibstore.IBStore.BrokerCls = self
 
 
 class IBBroker(with_metaclass(MetaIBBroker, BrokerBase)):

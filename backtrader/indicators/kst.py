@@ -18,12 +18,12 @@
 #
 ###############################################################################
 
-import backtrader as bt
+from backtrader.indicator import Indicator
+from .momentum import RateOfChange100 as ROC100
+from .sma import MovingAverageSimple as SMA
 
-from . import ROC100, SMA
 
-
-class KnowSureThing(bt.Indicator):
+class KnowSureThing(Indicator):
     """It is a "summed" momentum indicator. Developed by Martin Pring and published in
     1992 in Stocks & Commodities.
 

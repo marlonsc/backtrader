@@ -18,7 +18,35 @@
 #
 ###############################################################################
 
-
-from .sizers import SizerFix  # old sizer for compatibility
+__all__ = [
+    "feeds",
+    "Strategy",
+    "Order",
+    "Position",
+    "ind",
+    "studies",
+    "analyzers",
+    "Cerebro",
+    "BrokerBase",
+    "MetaParams",
+    "LineSeries",
+    "Sizer",
+    "sizers",
+    "errors",
+]
 
 # Load contributed indicators and studies
+import backtrader.feeds as feeds
+from backtrader.strategy import Strategy
+from backtrader.order import Order
+from backtrader.position import Position
+import backtrader.indicators as ind
+import backtrader.studies as studies
+import backtrader.analyzers as analyzers
+from backtrader.cerebro import Cerebro
+from backtrader.broker import BrokerBase
+from backtrader.metabase import MetaParams
+from backtrader.lineseries import LineSeries
+import backtrader.sizers as sizers
+import backtrader.errors as errors
+from backtrader.sizer import Sizer

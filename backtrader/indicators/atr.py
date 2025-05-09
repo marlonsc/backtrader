@@ -18,7 +18,9 @@
 #
 ###############################################################################
 
-from . import Indicator, Max, Min, MovAv
+from backtrader.indicator import Indicator
+from .basicops import Highest, Lowest
+from .smma import SmoothedMovingAverage
 
 
 class TrueHigh(Indicator):
@@ -38,7 +40,7 @@ class TrueHigh(Indicator):
     lines = ("truehigh",)
 
     def __init__(self):
-        self.lines.truehigh = Max(self.data.high, self.data.close(-1))
+        self.lines.truehigh = Highest(data=self.data.high, period=1)
         super().__init__()
 
 
@@ -59,7 +61,7 @@ class TrueLow(Indicator):
     lines = ("truelow",)
 
     def __init__(self):
-        self.lines.truelow = Min(self.data.low, self.data.close(-1))
+        self.lines.truelow = Lowest(data=self.data.low, period=1)
         super().__init__()
 
 
@@ -86,7 +88,7 @@ class TrueRange(Indicator):
     lines = ("tr",)
 
     def __init__(self):
-        self.lines.tr = TrueHigh(self.data) - TrueLow(self.data)
+        self.lines.tr = TrueHigh(data=self.data) - TrueLow(data=self.data)
         super().__init__()
 
 
@@ -107,7 +109,7 @@ class AverageTrueRange(Indicator):
     alias = ("ATR",)
 
     lines = ("atr",)
-    params = (("period", 14), ("movav", MovAv.Smoothed))
+    params = (("period", 14), ("movav", SmoothedMovingAverage))
 
     def _plotlabel(self):
         plabels = [self.p.period]
@@ -115,5 +117,7 @@ class AverageTrueRange(Indicator):
         return plabels
 
     def __init__(self):
-        self.lines.atr = self.p.movav(TR(self.data), period=self.p.period)
+        self.lines.atr = self.p.movav(TrueRange(data=self.data), period=self.p.period)
         super().__init__()
+
+ATR = AverageTrueRange

@@ -20,7 +20,7 @@
 
 import math
 
-from backtrader import Analyzer
+from backtrader.analyzer import Analyzer
 from backtrader.mathsupport import average, standarddev
 from backtrader.utils import AutoOrderedDict
 

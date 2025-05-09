@@ -1,4 +1,5 @@
-from . import MovAv as MovAv, MovingAverageBase as MovingAverageBase, ZeroLagIndicator as ZeroLagIndicator
+from .mabase import MovAv as MovAv, MovingAverageBase as MovingAverageBase
+from .zlind import ZeroLagIndicator as ZeroLagIndicator
 from _typeshed import Incomplete
 
 class DicksonMovingAverage(MovingAverageBase):
@@ -6,3 +7,4 @@ class DicksonMovingAverage(MovingAverageBase):
     lines: Incomplete
     params: Incomplete
     def __init__(self) -> None: ...
+DMA = DicksonMovingAverage

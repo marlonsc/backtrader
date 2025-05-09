@@ -18,7 +18,10 @@
 #
 ###############################################################################
 
-from . import And, Indicator
+from backtrader.indicator import Indicator
+from backtrader.indicators.basicops import And
+from backtrader.dataseries import DataSeries
+from backtrader.indicator import Indicator as BaseIndicator
 
 
 class NonZeroDifference(Indicator):
@@ -62,7 +65,8 @@ class _CrossBase(Indicator):
 
     plotinfo = dict(plotymargin=0.05, plotyhlines=[0.0, 1.0])
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         nzd = NonZeroDifference(self.data0, self.data1)
 
         if self._crossup:
@@ -127,8 +131,36 @@ class CrossOver(Indicator):
 
     plotinfo = dict(plotymargin=0.05, plotyhlines=[-1.0, 1.0])
 
-    def __init__(self):
-        upcross = CrossUp(self.data, self.data1)
-        downcross = CrossDown(self.data, self.data1)
-
+    def __init__(self, *args, **kwargs):
+        # Accept only two positional or keyword arguments for data and data1
+        if 'data' in kwargs and 'data1' in kwargs:
+            data0 = kwargs.pop('data')
+            data1 = kwargs.pop('data1')
+        elif len(args) == 2:
+            data0, data1 = args
+        else:
+            raise TypeError("CrossOver requires two data inputs: data and data1")
+        # Wrap lines in a minimal indicator if needed
+        def ensure_indicator(x):
+            if isinstance(x, DataSeries) or isinstance(x, BaseIndicator):
+                return x
+            # Wrap line in a minimal indicator
+            class _LineIndicator(BaseIndicator):
+                lines = ('line',)
+                def __init__(self, line, *args, **kwargs):
+                    super().__init__(line, *args, **kwargs)
+                    self.lines.line = line
+            return _LineIndicator(x)
+        data0 = ensure_indicator(data0)
+        data1 = ensure_indicator(data1)
+        if data0 is None or data1 is None:
+            raise ValueError("CrossOver requires two non-None data inputs: data and data1")
+        super().__init__(data0, data1, **kwargs)
+        # Ensure data0 and data1 are set for sub-indicators
+        if len(self.datas) < 2:
+            raise ValueError("CrossOver failed to initialize with two data inputs. datas: %r" % self.datas)
+        self.data0 = self.datas[0]
+        self.data1 = self.datas[1]
+        upcross = CrossUp(self.data0, self.data1)
+        downcross = CrossDown(self.data0, self.data1)
         self.lines.crossover = upcross - downcross

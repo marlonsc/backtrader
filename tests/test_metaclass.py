@@ -22,8 +22,7 @@ import testcommon
 
 class TestFrompackages(testcommon.SampleParamsHolder):
     """This class is used for testing that inheriting from base class that uses
-    `frompackages` import mechanism, doesnt brake the functionality of the base class.
-    """
+    `frompackages` import mechanism, doesnt brake the functionality of the base class."""
 
     def __init__(self):
         super().__init__()

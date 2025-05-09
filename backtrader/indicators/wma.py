@@ -19,7 +19,8 @@
 ###############################################################################
 
 from ..utils.py3 import range
-from . import AverageWeighted, MovingAverageBase
+from .mabase import MovAv, MovingAverageBase
+from .basicops import WeightedAverage
 
 
 class WeightedMovingAverage(MovingAverageBase):
@@ -47,8 +48,9 @@ class WeightedMovingAverage(MovingAverageBase):
 
         # Before super to ensure mixins (right-hand side in subclassing)
         # can see the assignment operation and operate on the line
-        self.lines[0] = AverageWeighted(
-            self.data, period=self.p.period, coef=coef, weights=weights
-        )
+        self.lines.wma = WeightedAverage(data=self.data, period=self.p.period, coef=coef, weights=weights)
 
         super().__init__()
+
+for alias in WeightedMovingAverage.alias:
+    setattr(MovAv, alias, WeightedMovingAverage)

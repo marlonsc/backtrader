@@ -1,5 +1,6 @@
-from . import FindFirstIndexHighest as FindFirstIndexHighest, FindFirstIndexLowest as FindFirstIndexLowest, Indicator as Indicator
+from .basicops import FindFirstIndexHighest as FindFirstIndexHighest, FindFirstIndexLowest as FindFirstIndexLowest
 from _typeshed import Incomplete
+from backtrader.indicator import Indicator as Indicator
 
 class _AroonBase(Indicator):
     params: Incomplete

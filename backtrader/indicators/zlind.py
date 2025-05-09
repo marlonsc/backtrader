@@ -21,7 +21,7 @@
 
 from backtrader.utils.py3 import MAXINT
 
-from . import MovAv, MovingAverageBase
+from .mabase import MovAv, MovingAverageBase
 
 
 class ZeroLagIndicator(MovingAverageBase):

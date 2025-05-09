@@ -2,11 +2,12 @@ from .dataseries import SimpleFilterWrapper as SimpleFilterWrapper
 from .resamplerfilter import Replayer as Replayer, Resampler as Resampler
 from .tradingcal import PandasMarketCalendar as PandasMarketCalendar
 from _typeshed import Incomplete
-from backtrader import TimeFrame as TimeFrame, dataseries as dataseries, date2num as date2num, metabase as metabase, num2date as num2date, time2num as time2num
-from backtrader.utils import tzparse as tzparse
+from backtrader.dataseries import OHLCDateTime as OHLCDateTime, TimeFrame as TimeFrame
+from backtrader.metabase import MetaParams as MetaParams
+from backtrader.utils.dateintern import date2num as date2num, num2date as num2date, time2num as time2num, tzparse as tzparse
 from backtrader.utils.py3 import range as range, string_types as string_types, with_metaclass as with_metaclass, zip as zip
 
-class MetaAbstractDataBase(dataseries.OHLCDateTime.__class__):
+class MetaAbstractDataBase(OHLCDateTime.__class__):
     def __init__(cls, name, bases, dct) -> None: ...
     def dopreinit(cls, _obj, *args, **kwargs): ...
     def dopostinit(cls, _obj, *args, **kwargs): ...

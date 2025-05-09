@@ -1,11 +1,11 @@
 import ib.ext.Order
 from _typeshed import Incomplete
-from backtrader import BrokerBase as BrokerBase, Order as Order, OrderBase as OrderBase, date2num as date2num, num2date as num2date
+from backtrader.broker import BrokerBase as BrokerBase
 from backtrader.comminfo import CommInfoBase as CommInfoBase
+from backtrader.order import Order as Order, OrderBase as OrderBase
 from backtrader.stores import ibstore as ibstore
-from backtrader.utils.py3 import bstr as bstr, bytes as bytes, queue as queue, with_metaclass as with_metaclass
-
-bytes = bstr
+from backtrader.utils.dateintern import date2num as date2num, num2date as num2date
+from backtrader.utils.py3 import with_metaclass as with_metaclass
 
 class IBOrderState:
     def __init__(self, orderstate) -> None: ...
@@ -32,7 +32,7 @@ class IBCommInfo(CommInfoBase):
     def getoperationcost(self, size, price): ...
 
 class MetaIBBroker(BrokerBase.__class__):
-    def __init__(cls, name, bases, dct) -> None: ...
+    def __init__(self, name, bases, dct) -> None: ...
 
 class IBBroker(Incomplete):
     params: Incomplete

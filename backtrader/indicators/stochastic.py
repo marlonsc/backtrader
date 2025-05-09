@@ -18,7 +18,10 @@
 #
 ###############################################################################
 
-from . import DivByZero, Highest, Indicator, Lowest, MovAv
+from backtrader.indicator import Indicator
+from backtrader.functions import DivByZero
+from .basicops import Highest, Lowest
+from .mabase import MovAv
 
 
 class _StochasticBase(Indicator):

@@ -18,17 +18,10 @@
 #
 ###############################################################################
 
-from . import (
-    Accum,
-    DownDay,
-    Highest,
-    If,
-    Indicator,
-    Lowest,
-    TrueHigh,
-    TrueLow,
-    UpDay,
-)
+from backtrader.indicator import Indicator
+from backtrader.indicators.basicops import Accum, Highest, Lowest, If
+from backtrader.indicators.rsi import UpDay, DownDay
+from backtrader.indicators.atr import TrueHigh, TrueLow
 
 
 class WilliamsR(Indicator):

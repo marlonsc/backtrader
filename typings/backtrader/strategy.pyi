@@ -6,6 +6,7 @@ from .trade import Trade as Trade
 from .utils import AutoDictList as AutoDictList, AutoOrderedDict as AutoOrderedDict
 from .utils.py3 import MAXINT as MAXINT, filter as filter, integer_types as integer_types, iteritems as iteritems, keys as keys, map as map, string_types as string_types, with_metaclass as with_metaclass
 from _typeshed import Incomplete
+from backtrader.order import Order as Order
 
 class MetaStrategy(StrategyBase.__class__):
     def __new__(meta, name, bases, dct): ...

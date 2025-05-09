@@ -24,11 +24,12 @@ import pprint as pp
 from collections import OrderedDict
 
 import backtrader as bt
-from backtrader import TimeFrame
+from backtrader.dataseries import TimeFrame
+from backtrader.metabase import MetaParams
 from backtrader.utils.py3 import MAXINT, with_metaclass
 
 
-class MetaAnalyzer(bt.MetaParams):
+class MetaAnalyzer(MetaParams):
     def donew(cls, *args, **kwargs):
         """Intercept the strategy parameter."""
         # Create the object and set the params in place

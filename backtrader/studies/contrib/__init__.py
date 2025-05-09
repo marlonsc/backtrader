@@ -18,9 +18,3 @@
 #
 ###############################################################################
 
-import backtrader as bt
-
-from . import fractal as fractal
-
-for name in fractal.__all__:
-    setattr(bt.studies, name, getattr(fractal, name))
