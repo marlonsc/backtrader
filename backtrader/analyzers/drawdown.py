@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,20 +17,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
 import backtrader as bt
 from backtrader.utils import AutoOrderedDict
 
-
-__all__ = ['DrawDown', 'TimeDrawDown']
+__all__ = ["DrawDown", "TimeDrawDown"]
 
 
 class DrawDown(bt.Analyzer):
-    '''This analyzer calculates trading system drawdowns stats such as drawdown
-    values in %s and in dollars, max drawdown in %s and in dollars, drawdown
-    length and drawdown max length
+    """This analyzer calculates trading system drawdowns stats such as drawdown values in
+    %s and in dollars, max drawdown in %s and in dollars, drawdown length and drawdown max
+    length.
 
     Params:
 
@@ -58,14 +54,12 @@ class DrawDown(bt.Analyzer):
         - ``max.drawdown`` - max drawdown value in 0.xx %
         - ``max.moneydown`` - max drawdown value in monetary units
         - ``max.len`` - max drawdown length
-    '''
+    """
 
-    params = (
-        ('fund', None),
-    )
+    params = (("fund", None),)
 
     def start(self):
-        super(DrawDown, self).start()
+        super().start()
         if self.p.fund is None:
             self._fundmode = self.strategy.broker.fundmode
         else:
@@ -82,7 +76,7 @@ class DrawDown(bt.Analyzer):
         self.rets.max.drawdown = 0.0
         self.rets.max.moneydown = 0.0
 
-        self._maxvalue = float('-inf')  # any value will outdo it
+        self._maxvalue = float("-inf")  # any value will outdo it
 
     def stop(self):
         self.rets._close()  # . notation cannot create more keys
@@ -104,14 +98,14 @@ class DrawDown(bt.Analyzer):
 
         # maxximum drawdown values
         r.max.moneydown = max(r.max.moneydown, moneydown)
-        r.max.drawdown = maxdrawdown = max(r.max.drawdown, drawdown)
+        r.max.drawdown = max(r.max.drawdown, drawdown)
 
         r.len = r.len + 1 if drawdown else 0
         r.max.len = max(r.max.len, r.len)
 
 
 class TimeDrawDown(bt.TimeFrameAnalyzerBase):
-    '''This analyzer calculates trading system drawdowns on the chosen
+    """This analyzer calculates trading system drawdowns on the chosen
     timeframe which can be different from the one used in the underlying data
     Params:
 
@@ -155,14 +149,12 @@ class TimeDrawDown(bt.TimeFrameAnalyzerBase):
         - ``dd``
         - ``maxdd``
         - ``maxddlen``
-    '''
+    """
 
-    params = (
-        ('fund', None),
-    )
+    params = (("fund", None),)
 
     def start(self):
-        super(TimeDrawDown, self).start()
+        super().start()
         if self.p.fund is None:
             self._fundmode = self.strategy.broker.fundmode
         else:
@@ -170,7 +162,7 @@ class TimeDrawDown(bt.TimeFrameAnalyzerBase):
         self.dd = 0.0
         self.maxdd = 0.0
         self.maxddlen = 0
-        self.peak = float('-inf')
+        self.peak = float("-inf")
         self.ddlen = 0
 
     def on_dt_over(self):
@@ -193,5 +185,5 @@ class TimeDrawDown(bt.TimeFrameAnalyzerBase):
         self.maxddlen = max(self.maxddlen, self.ddlen)
 
     def stop(self):
-        self.rets['maxdrawdown'] = self.maxdd
-        self.rets['maxdrawdownperiod'] = self.maxddlen
+        self.rets["maxdrawdown"] = self.maxdd
+        self.rets["maxdrawdownperiod"] = self.maxddlen

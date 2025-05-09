@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,8 +17,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
 import datetime
 
@@ -27,7 +24,7 @@ import backtrader as bt
 
 
 class DaySplitter_Close(bt.with_metaclass(bt.MetaParams, object)):
-    '''
+    """
     Splits a daily bar in two parts simulating 2 ticks which will be used to
     replay the data:
 
@@ -54,10 +51,9 @@ class DaySplitter_Close(bt.with_metaclass(bt.MetaParams, object)):
 
     **This filter is meant to be used together with** ``cerebro.replaydata``
 
-    '''
-    params = (
-        ('closevol', 0.5),  # 0 -> 1 amount of volume to keep for close
-    )
+    """
+
+    params = (("closevol", 0.5),)  # 0 -> 1 amount of volume to keep for close
 
     # replaying = True
 

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,16 +17,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
 from . import PeriodN
 
+__all__ = ["ParabolicSAR", "PSAR"]
 
-__all__ = ['ParabolicSAR', 'PSAR']
 
-
-class _SarStatus(object):
+class _SarStatus:
     sar = None
     tr = None
     af = 0.0
@@ -35,17 +31,16 @@ class _SarStatus(object):
 
     def __str__(self):
         txt = []
-        txt.append('sar: {}'.format(self.sar))
-        txt.append('tr: {}'.format(self.tr))
-        txt.append('af: {}'.format(self.af))
-        txt.append('ep: {}'.format(self.ep))
-        return '\n'.join(txt)
+        txt.append(f"sar: {self.sar}")
+        txt.append(f"tr: {self.tr}")
+        txt.append(f"af: {self.af}")
+        txt.append(f"ep: {self.ep}")
+        return "\n".join(txt)
 
 
 class ParabolicSAR(PeriodN):
-    '''
-    Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
-    Technical Trading Systems"* for the RSI
+    """Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in Technical
+    Trading Systems"* for the RSI.
 
     SAR stands for *Stop and Reverse* and the indicator was meant as a signal
     for entry (and reverse)
@@ -56,20 +51,19 @@ class ParabolicSAR(PeriodN):
     See:
       - https://en.wikipedia.org/wiki/Parabolic_SAR
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:parabolic_sar
-    '''
-    alias = ('PSAR',)
-    lines = ('psar',)
+    """
+
+    alias = ("PSAR",)
+    lines = ("psar",)
     params = (
-        ('period', 2),  # when to start showing values
-        ('af', 0.02),
-        ('afmax', 0.20),
+        ("period", 2),  # when to start showing values
+        ("af", 0.02),
+        ("afmax", 0.20),
     )
 
     plotinfo = dict(subplot=False)
     plotlines = dict(
-        psar=dict(
-            marker='.', markersize=4.0, color='black', fillstyle='full', ls=''
-        ),
+        psar=dict(marker=".", markersize=4.0, color="black", fillstyle="full", ls=""),
     )
 
     def prenext(self):
@@ -82,7 +76,7 @@ class ParabolicSAR(PeriodN):
         else:
             self.next()  # regular calc
 
-        self.lines.psar[0] = float('NaN')  # no return yet still prenext
+        self.lines.psar[0] = float("NaN")  # no return yet still prenext
 
     def nextstart(self):
         if self._status:  # some states have been calculated

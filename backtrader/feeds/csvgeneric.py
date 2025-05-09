@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,20 +17,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
 from datetime import datetime
-import itertools
 
-from .. import feed, TimeFrame
+from .. import TimeFrame, feed
 from ..utils import date2num
 from ..utils.py3 import integer_types, string_types
 
 
 class GenericCSVData(feed.CSVDataBase):
-    '''Parses a CSV file according to the order and field presence defined by the
-    parameters
+    """Parses a CSV file according to the order and field presence defined by the
+    parameters.
 
     Specific parameters (or specific meaning):
 
@@ -66,26 +62,24 @@ class GenericCSVData(feed.CSVDataBase):
 
       - ``tmformat``: Format used to parse the time CSV field if "present"
         (the default for the "time" CSV field is not to be present)
-
-    '''
+    """
 
     params = (
-        ('nullvalue', float('NaN')),
-        ('dtformat', '%Y-%m-%d %H:%M:%S'),
-        ('tmformat', '%H:%M:%S'),
-
-        ('datetime', 0),
-        ('time', -1),
-        ('open', 1),
-        ('high', 2),
-        ('low', 3),
-        ('close', 4),
-        ('volume', 5),
-        ('openinterest', 6),
+        ("nullvalue", float("NaN")),
+        ("dtformat", "%Y-%m-%d %H:%M:%S"),
+        ("tmformat", "%H:%M:%S"),
+        ("datetime", 0),
+        ("time", -1),
+        ("open", 1),
+        ("high", 2),
+        ("low", 3),
+        ("close", 4),
+        ("volume", 5),
+        ("openinterest", 6),
     )
 
     def start(self):
-        super(GenericCSVData, self).start()
+        super().start()
 
         self._dtstr = False
         if isinstance(self.p.dtformat, string_types):
@@ -108,8 +102,8 @@ class GenericCSVData(feed.CSVDataBase):
 
             if self.p.time >= 0:
                 # add time value and format if it's in a separate field
-                dtfield += 'T' + linetokens[self.p.time]
-                dtformat += 'T' + self.p.tmformat
+                dtfield += "T" + linetokens[self.p.time]
+                dtformat += "T" + self.p.tmformat
 
             dt = datetime.strptime(dtfield, dtformat)
         else:
@@ -136,7 +130,7 @@ class GenericCSVData(feed.CSVDataBase):
             self.lines.datetime[0] = date2num(dt)
 
         # The rest of the fields can be done with the same procedure
-        for linefield in (x for x in self.getlinealiases() if x != 'datetime'):
+        for linefield in (x for x in self.getlinealiases() if x != "datetime"):
             # Get the index created from the passed params
             csvidx = getattr(self.params, linefield)
 
@@ -147,7 +141,7 @@ class GenericCSVData(feed.CSVDataBase):
                 # get it from the token
                 csvfield = linetokens[csvidx]
 
-            if csvfield == '':
+            if csvfield == "":
                 # if empty ... assign the "nullvalue"
                 csvfield = self.p.nullvalue
 

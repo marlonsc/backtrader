@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import argparse
 import datetime
@@ -34,14 +33,14 @@ import backtrader.indicators as btind
 
 
 class MyStrategy(bt.Strategy):
-    params = (('smaperiod', 15),)
+    params = (("smaperiod", 15),)
 
     def log(self, txt, dt=None):
-        ''' Logging function fot this strategy'''
+        """Logging function fot this strategy"""
         dt = dt or self.data.datetime[0]
         if isinstance(dt, float):
             dt = bt.num2date(dt)
-        print('%s, %s' % (dt.isoformat(), txt))
+        print("%s, %s" % (dt.isoformat(), txt))
 
     def __init__(self):
         # SimpleMovingAverage on main data
@@ -56,24 +55,24 @@ class MyStrategy(bt.Strategy):
 
     def next(self):
         # Access -1, because drawdown[0] will be calculated after "next"
-        self.log('DrawDown: %.2f' % self.stats.drawdown.drawdown[-1])
-        self.log('MaxDrawDown: %.2f' % self.stats.drawdown.maxdrawdown[-1])
+        self.log("DrawDown: %.2f" % self.stats.drawdown.drawdown[-1])
+        self.log("MaxDrawDown: %.2f" % self.stats.drawdown.maxdrawdown[-1])
 
         # Check if we are in the market
         if self.position:
             if self.buysell < 0:
-                self.log('SELL CREATE, %.2f' % self.data.close[0])
+                self.log("SELL CREATE, %.2f" % self.data.close[0])
                 self.sell()
 
         elif self.buysell > 0:
-            self.log('BUY CREATE, %.2f' % self.data.close[0])
+            self.log("BUY CREATE, %.2f" % self.data.close[0])
             self.buy()
 
 
 def runstrat():
     cerebro = bt.Cerebro()
 
-    data = bt.feeds.BacktraderCSVData(dataname='../../datas/2006-day-001.txt')
+    data = bt.feeds.BacktraderCSVData(dataname="../../datas/2006-day-001.txt")
     cerebro.adddata(data)
 
     cerebro.addobserver(bt.observers.DrawDown)
@@ -85,5 +84,5 @@ def runstrat():
     cerebro.plot()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     runstrat()

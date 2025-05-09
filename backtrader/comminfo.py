@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,17 +17,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
-import datetime
 
-from .utils.py3 import with_metaclass
 from .metabase import MetaParams
+from .utils.py3 import with_metaclass
 
 
 class CommInfoBase(with_metaclass(MetaParams)):
-    '''Base Class for the Commission Schemes.
+    """Base Class for the Commission Schemes.
 
     Params:
 
@@ -114,24 +110,25 @@ class CommInfoBase(with_metaclass(MetaParams)):
       This two are used internally instead of the declared params to enable the
       compatibility check described above for the legacy ``CommissionInfo``
       object
-
-    '''
+    """
 
     COMM_PERC, COMM_FIXED = range(2)
 
     params = (
-        ('commission', 0.0), ('mult', 1.0), ('margin', None),
-        ('commtype', None),
-        ('stocklike', False),
-        ('percabs', False),
-        ('interest', 0.0),
-        ('interest_long', False),
-        ('leverage', 1.0),
-        ('automargin', False),
+        ("commission", 0.0),
+        ("mult", 1.0),
+        ("margin", None),
+        ("commtype", None),
+        ("stocklike", False),
+        ("percabs", False),
+        ("interest", 0.0),
+        ("interest_long", False),
+        ("leverage", 1.0),
+        ("automargin", False),
     )
 
     def __init__(self):
-        super(CommInfoBase, self).__init__()
+        super().__init__()
 
         self._stocklike = self.p.stocklike
         self._commtype = self.p.commtype
@@ -167,15 +164,15 @@ class CommInfoBase(with_metaclass(MetaParams)):
         return self._stocklike
 
     def get_margin(self, price):
-        '''Returns the actual margin/guarantees needed for a single item of the
-        asset at the given price. The default implementation has this policy:
+        """Returns the actual margin/guarantees needed for a single item of the asset at
+        the given price. The default implementation has this policy:
 
-          - Use param ``margin`` if param ``automargin`` evaluates to ``False``
+        - Use param ``margin`` if param ``automargin`` evaluates to ``False``
 
-          - Use param ``mult`` * ``price`` if ``automargin < 0``
+        - Use param ``mult`` * ``price`` if ``automargin < 0``
 
-          - Use param ``automargin`` * ``price`` if ``automargin > 0``
-        '''
+        - Use param ``automargin`` * ``price`` if ``automargin > 0``
+        """
         if not self.p.automargin:
             return self.p.margin
 
@@ -185,35 +182,38 @@ class CommInfoBase(with_metaclass(MetaParams)):
         return price * self.p.automargin  # int/float expected
 
     def get_leverage(self):
-
-        '''Returns the level of leverage allowed for this comission scheme'''
+        """Returns the level of leverage allowed for this comission scheme."""
         return self.p.leverage
 
     def getsize(self, price, cash):
-        '''Returns the needed size to meet a cash operation at a given price'''
+        """Returns the needed size to meet a cash operation at a given price."""
         if not self._stocklike:
             return int(self.p.leverage * (cash // self.get_margin(price)))
 
         return int(self.p.leverage * (cash // price))
 
     def getoperationcost(self, size, price):
-        '''Returns the needed amount of cash an operation would cost'''
+        """Returns the needed amount of cash an operation would cost."""
         if not self._stocklike:
             return abs(size) * self.get_margin(price)
 
         return abs(size) * price
 
     def getvaluesize(self, size, price):
-        '''Returns the value of size for given a price. For future-like
-        objects it is fixed at size * margin'''
+        """Returns the value of size for given a price.
+
+        For future-like objects it is fixed at size * margin
+        """
         if not self._stocklike:
             return abs(size) * self.get_margin(price)
 
         return size * price
 
     def getvalue(self, position, price):
-        '''Returns the value of a position given a price. For future-like
-        objects it is fixed at size * margin'''
+        """Returns the value of a position given a price.
+
+        For future-like objects it is fixed at size * margin
+        """
         if not self._stocklike:
             return abs(position.size) * self.get_margin(price)
 
@@ -227,36 +227,35 @@ class CommInfoBase(with_metaclass(MetaParams)):
         return value
 
     def _getcommission(self, size, price, pseudoexec):
-        '''Calculates the commission of an operation at a given price
+        """Calculates the commission of an operation at a given price.
 
         pseudoexec: if True the operation has not yet been executed
-        '''
+        """
         if self._commtype == self.COMM_PERC:
             return abs(size) * self.p.commission * price
 
         return abs(size) * self.p.commission
 
     def getcommission(self, size, price):
-        '''Calculates the commission of an operation at a given price
-        '''
+        """Calculates the commission of an operation at a given price."""
         return self._getcommission(size, price, pseudoexec=True)
 
     def confirmexec(self, size, price):
         return self._getcommission(size, price, pseudoexec=False)
 
     def profitandloss(self, size, price, newprice):
-        '''Return actual profit and loss a position has'''
+        """Return actual profit and loss a position has."""
         return size * (newprice - price) * self.p.mult
 
     def cashadjust(self, size, price, newprice):
-        '''Calculates cash adjustment for a given price difference'''
+        """Calculates cash adjustment for a given price difference."""
         if not self._stocklike:
             return size * (newprice - price) * self.p.mult
 
         return 0.0
 
     def get_credit_interest(self, data, pos, dt):
-        '''Calculates the credit due for short selling or product specific'''
+        """Calculates the credit due for short selling or product specific."""
         size, price = pos.size, pos.price
 
         if size > 0 and not self.p.interest_long:
@@ -268,13 +267,11 @@ class CommInfoBase(with_metaclass(MetaParams)):
         if dt0 <= dt1:
             return 0.0
 
-        return self._get_credit_interest(data, size, price,
-                                         (dt0 - dt1).days, dt0, dt1)
+        return self._get_credit_interest(data, size, price, (dt0 - dt1).days, dt0, dt1)
 
     def _get_credit_interest(self, data, size, price, days, dt0, dt1):
-        '''
-        This method returns  the cost in terms of credit interest charged by
-        the broker.
+        """This method returns  the cost in terms of credit interest charged by the
+        broker.
 
         In the case of ``size > 0`` this method will only be called if the
         parameter to the class ``interest_long`` is ``True``
@@ -301,12 +298,12 @@ class CommInfoBase(with_metaclass(MetaParams)):
 
         ``dt0`` and ``dt1`` are not used in the default implementation and are
         provided as extra input for overridden methods
-        '''
+        """
         return days * self._creditrate * abs(size) * price
 
 
 class CommissionInfo(CommInfoBase):
-    '''Base Class for the actual Commission Schemes.
+    """Base Class for the actual Commission Schemes.
 
     CommInfoBase was created to keep suppor for the original, incomplete,
     support provided by *backtrader*. New commission schemes derive from this
@@ -321,8 +318,6 @@ class CommissionInfo(CommInfoBase):
 
         If this param is True: 0.XX
         If this param is False: XX%
+    """
 
-    '''
-    params = (
-        ('percabs', True),  # Original CommissionInfo took 0.xx for percentages
-    )
+    params = (("percabs", True),)  # Original CommissionInfo took 0.xx for percentages

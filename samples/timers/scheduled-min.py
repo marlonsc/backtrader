@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import argparse
 import datetime
@@ -73,27 +72,37 @@ class St(bt.Strategy):
 
     def next(self):
         _, isowk, isowkday = self.datetime.date().isocalendar()
-        txt = '{}, {}, Week {}, Day {}, O {}, H {}, L {}, C {}'.format(
-            len(self), self.datetime.datetime(),
-            isowk, isowkday,
-            self.data.open[0], self.data.high[0],
-            self.data.low[0], self.data.close[0])
+        txt = "{}, {}, Week {}, Day {}, O {}, H {}, L {}, C {}".format(
+            len(self),
+            self.datetime.datetime(),
+            isowk,
+            isowkday,
+            self.data.open[0],
+            self.data.high[0],
+            self.data.low[0],
+            self.data.close[0],
+        )
 
         print(txt)
 
     def notify_timer(self, timer, when, *args, **kwargs):
-        print('strategy notify_timer with tid {}, when {} cheat {}'.
-              format(timer.p.tid, when, timer.p.cheat))
+        print(
+            "strategy notify_timer with tid {}, when {} cheat {}".format(
+                timer.p.tid, when, timer.p.cheat
+            )
+        )
 
         if self.order is None and timer.params.cheat:
-            print('-- {} Create buy order'.format(
-                self.data.datetime.datetime()))
+            print("-- {} Create buy order".format(self.data.datetime.datetime()))
             self.order = self.buy()
 
     def notify_order(self, order):
         if order.status == order.Completed:
-            print('-- {} Buy Exec @ {}'.format(
-                self.data.datetime.datetime(), order.executed.price))
+            print(
+                "-- {} Buy Exec @ {}".format(
+                    self.data.datetime.datetime(), order.executed.price
+                )
+            )
 
 
 def runstrat(args=None):
@@ -109,10 +118,10 @@ def runstrat(args=None):
     )
 
     # Parse from/to-date
-    dtfmt, tmfmt = '%Y-%m-%d', 'T%H:%M:%S'
-    for a, d in ((getattr(args, x), x) for x in ['fromdate', 'todate']):
+    dtfmt, tmfmt = "%Y-%m-%d", "T%H:%M:%S"
+    for a, d in ((getattr(args, x), x) for x in ["fromdate", "todate"]):
         if a:
-            strpfmt = dtfmt + tmfmt * ('T' in a)
+            strpfmt = dtfmt + tmfmt * ("T" in a)
             kwargs[d] = datetime.datetime.strptime(a, strpfmt)
 
     # Data feed
@@ -120,57 +129,93 @@ def runstrat(args=None):
     cerebro.adddata(data0)
 
     # Broker
-    cerebro.broker = bt.brokers.BackBroker(**eval('dict(' + args.broker + ')'))
+    cerebro.broker = bt.brokers.BackBroker(**eval("dict(" + args.broker + ")"))
 
     # Sizer
-    cerebro.addsizer(bt.sizers.FixedSize, **eval('dict(' + args.sizer + ')'))
+    cerebro.addsizer(bt.sizers.FixedSize, **eval("dict(" + args.sizer + ")"))
 
     # Strategy
-    cerebro.addstrategy(St, **eval('dict(' + args.strat + ')'))
+    cerebro.addstrategy(St, **eval("dict(" + args.strat + ")"))
 
     # Execute
-    cerebro.run(**eval('dict(' + args.cerebro + ')'))
+    cerebro.run(**eval("dict(" + args.cerebro + ")"))
 
     if args.plot:  # Plot if requested to
-        cerebro.plot(**eval('dict(' + args.plot + ')'))
+        cerebro.plot(**eval("dict(" + args.plot + ")"))
 
 
 def parse_args(pargs=None):
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        description=(
-            'Timer Test Intraday'
-        )
+        description=("Timer Test Intraday"),
     )
 
-    parser.add_argument('--data0', default='../../datas/2006-min-005.txt',
-                        required=False, help='Data to read in')
+    parser.add_argument(
+        "--data0",
+        default="../../datas/2006-min-005.txt",
+        required=False,
+        help="Data to read in",
+    )
 
     # Defaults for dates
-    parser.add_argument('--fromdate', required=False, default='',
-                        help='Date[time] in YYYY-MM-DD[THH:MM:SS] format')
+    parser.add_argument(
+        "--fromdate",
+        required=False,
+        default="",
+        help="Date[time] in YYYY-MM-DD[THH:MM:SS] format",
+    )
 
-    parser.add_argument('--todate', required=False, default='',
-                        help='Date[time] in YYYY-MM-DD[THH:MM:SS] format')
+    parser.add_argument(
+        "--todate",
+        required=False,
+        default="",
+        help="Date[time] in YYYY-MM-DD[THH:MM:SS] format",
+    )
 
-    parser.add_argument('--cerebro', required=False, default='',
-                        metavar='kwargs', help='kwargs in key=value format')
+    parser.add_argument(
+        "--cerebro",
+        required=False,
+        default="",
+        metavar="kwargs",
+        help="kwargs in key=value format",
+    )
 
-    parser.add_argument('--broker', required=False, default='',
-                        metavar='kwargs', help='kwargs in key=value format')
+    parser.add_argument(
+        "--broker",
+        required=False,
+        default="",
+        metavar="kwargs",
+        help="kwargs in key=value format",
+    )
 
-    parser.add_argument('--sizer', required=False, default='',
-                        metavar='kwargs', help='kwargs in key=value format')
+    parser.add_argument(
+        "--sizer",
+        required=False,
+        default="",
+        metavar="kwargs",
+        help="kwargs in key=value format",
+    )
 
-    parser.add_argument('--strat', required=False, default='',
-                        metavar='kwargs', help='kwargs in key=value format')
+    parser.add_argument(
+        "--strat",
+        required=False,
+        default="",
+        metavar="kwargs",
+        help="kwargs in key=value format",
+    )
 
-    parser.add_argument('--plot', required=False, default='',
-                        nargs='?', const='{}',
-                        metavar='kwargs', help='kwargs in key=value format')
+    parser.add_argument(
+        "--plot",
+        required=False,
+        default="",
+        nargs="?",
+        const="{}",
+        metavar="kwargs",
+        help="kwargs in key=value format",
+    )
 
     return parser.parse_args(pargs)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     runstrat()

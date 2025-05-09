@@ -1,5 +1,6 @@
 1.9.78.123:
   - PR#479 Fix errors for simulated orders
+
 1.9.77.123:
   - PR#472
     - Added posibitity for Black theme for charts

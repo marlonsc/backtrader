@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,13 +17,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
 import calendar
-from collections import OrderedDict
 import datetime
 import pprint as pp
+from collections import OrderedDict
 
 import backtrader as bt
 from backtrader import TimeFrame
@@ -33,11 +30,9 @@ from backtrader.utils.py3 import MAXINT, with_metaclass
 
 class MetaAnalyzer(bt.MetaParams):
     def donew(cls, *args, **kwargs):
-        '''
-        Intercept the strategy parameter
-        '''
+        """Intercept the strategy parameter."""
         # Create the object and set the params in place
-        _obj, args, kwargs = super(MetaAnalyzer, cls).donew(*args, **kwargs)
+        _obj, args, kwargs = super().donew(*args, **kwargs)
 
         _obj._children = list()
 
@@ -55,20 +50,20 @@ class MetaAnalyzer(bt.MetaParams):
         if _obj.datas:
             _obj.data = data = _obj.datas[0]
 
-            for l, line in enumerate(data.lines):
-                linealias = data._getlinealias(l)
+            for line_idx, line in enumerate(data.lines):
+                linealias = data._getlinealias(line_idx)
                 if linealias:
-                    setattr(_obj, 'data_%s' % linealias, line)
-                setattr(_obj, 'data_%d' % l, line)
+                    setattr(_obj, linealias, line)
+                setattr(_obj, "data_%d" % line_idx, line)
 
             for d, data in enumerate(_obj.datas):
-                setattr(_obj, 'data%d' % d, data)
+                setattr(_obj, "data%d" % d, data)
 
-                for l, line in enumerate(data.lines):
-                    linealias = data._getlinealias(l)
+                for line_idx, line in enumerate(data.lines):
+                    linealias = data._getlinealias(line_idx)
                     if linealias:
-                        setattr(_obj, 'data%d_%s' % (d, linealias), line)
-                    setattr(_obj, 'data%d_%d' % (d, l), line)
+                        setattr(_obj, linealias, line)
+                    setattr(_obj, "data%d_%d" % (d, line_idx), line)
 
         _obj.create_analysis()
 
@@ -76,8 +71,7 @@ class MetaAnalyzer(bt.MetaParams):
         return _obj, args, kwargs
 
     def dopostinit(cls, _obj, *args, **kwargs):
-        _obj, args, kwargs = \
-            super(MetaAnalyzer, cls).dopostinit(_obj, *args, **kwargs)
+        _obj, args, kwargs = super().dopostinit(_obj, *args, **kwargs)
 
         if _obj._parent is not None:
             _obj._parent._register(_obj)
@@ -87,7 +81,7 @@ class MetaAnalyzer(bt.MetaParams):
 
 
 class Analyzer(with_metaclass(MetaAnalyzer, object)):
-    '''Analyzer base class. All analyzers are subclass of this one
+    """Analyzer base class. All analyzers are subclass of this one.
 
     An Analyzer instance operates in the frame of a strategy and provides an
     analysis for that strategy.
@@ -133,13 +127,13 @@ class Analyzer(with_metaclass(MetaAnalyzer, object)):
     The important thing is to override ``get_analysis`` to return a *dict-like*
     object containing the results of the analysis (the actual format is
     implementation dependent)
+    """
 
-    '''
     csv = True
 
     def __len__(self):
-        '''Support for invoking ``len`` on analyzers by actually returning the
-        current length of the strategy the analyzer operates on'''
+        """Support for invoking ``len`` on analyzers by actually returning the current
+        length of the strategy the analyzer operates on."""
         return len(self.strategy)
 
     def _register(self, child):
@@ -200,60 +194,52 @@ class Analyzer(with_metaclass(MetaAnalyzer, object)):
         self.stop()
 
     def notify_cashvalue(self, cash, value):
-        '''Receives the cash/value notification before each next cycle'''
-        pass
+        """Receives the cash/value notification before each next cycle."""
 
     def notify_fund(self, cash, value, fundvalue, shares):
-        '''Receives the current cash, value, fundvalue and fund shares'''
-        pass
+        """Receives the current cash, value, fundvalue and fund shares."""
 
     def notify_order(self, order):
-        '''Receives order notifications before each next cycle'''
-        pass
+        """Receives order notifications before each next cycle."""
 
     def notify_trade(self, trade):
-        '''Receives trade notifications before each next cycle'''
-        pass
+        """Receives trade notifications before each next cycle."""
 
     def next(self):
-        '''Invoked for each next invocation of the strategy, once the minum
-        preiod of the strategy has been reached'''
-        pass
+        """Invoked for each next invocation of the strategy, once the minum preiod of the
+        strategy has been reached."""
 
     def prenext(self):
-        '''Invoked for each prenext invocation of the strategy, until the minimum
-        period of the strategy has been reached
+        """Invoked for each prenext invocation of the strategy, until the minimum period
+        of the strategy has been reached.
 
         The default behavior for an analyzer is to invoke ``next``
-        '''
+        """
         self.next()
 
     def nextstart(self):
-        '''Invoked exactly once for the nextstart invocation of the strategy,
-        when the minimum period has been first reached
-        '''
+        """Invoked exactly once for the nextstart invocation of the strategy, when the
+        minimum period has been first reached."""
         self.next()
 
     def start(self):
-        '''Invoked to indicate the start of operations, giving the analyzer
-        time to setup up needed things'''
-        pass
+        """Invoked to indicate the start of operations, giving the analyzer time to setup
+        up needed things."""
 
     def stop(self):
-        '''Invoked to indicate the end of operations, giving the analyzer
-        time to shut down needed things'''
-        pass
+        """Invoked to indicate the end of operations, giving the analyzer time to shut
+        down needed things."""
 
     def create_analysis(self):
-        '''Meant to be overriden by subclasses. Gives a chance to create the
-        structures that hold the analysis.
+        """Meant to be overriden by subclasses. Gives a chance to create the structures
+        that hold the analysis.
 
         The default behaviour is to create a ``OrderedDict`` named ``rets``
-        '''
+        """
         self.rets = OrderedDict()
 
     def get_analysis(self):
-        '''Returns a *dict-like* object with the results of the analysis
+        """Returns a *dict-like* object with the results of the analysis.
 
         The keys and format of analysis results in the dictionary is
         implementation dependent.
@@ -263,15 +249,12 @@ class Analyzer(with_metaclass(MetaAnalyzer, object)):
 
         The default implementation returns the default OrderedDict ``rets``
         created by the default ``create_analysis`` method
-
-        '''
+        """
         return self.rets
 
     def print(self, *args, **kwargs):
-        '''Prints the results returned by ``get_analysis`` via a standard
-        ``Writerfile`` object, which defaults to writing things to standard
-        output
-        '''
+        """Prints the results returned by ``get_analysis`` via a standard ``Writerfile``
+        object, which defaults to writing things to standard output."""
         writer = bt.WriterFile(*args, **kwargs)
         writer.start()
         pdct = dict()
@@ -280,28 +263,25 @@ class Analyzer(with_metaclass(MetaAnalyzer, object)):
         writer.stop()
 
     def pprint(self, *args, **kwargs):
-        '''Prints the results returned by ``get_analysis`` using the pretty
-        print Python module (*pprint*)
-        '''
+        """Prints the results returned by ``get_analysis`` using the pretty print Python
+        module (*pprint*)"""
         pp.pprint(self.get_analysis(), *args, **kwargs)
 
 
 class MetaTimeFrameAnalyzerBase(Analyzer.__class__):
     def __new__(meta, name, bases, dct):
         # Hack to support original method name
-        if '_on_dt_over' in dct:
-            dct['on_dt_over'] = dct.pop('_on_dt_over')  # rename method
+        if "_on_dt_over" in dct:
+            dct["on_dt_over"] = dct.pop("_on_dt_over")  # rename method
 
-        return super(MetaTimeFrameAnalyzerBase, meta).__new__(meta, name,
-                                                              bases, dct)
+        return super().__new__(meta, name, bases, dct)
 
 
-class TimeFrameAnalyzerBase(with_metaclass(MetaTimeFrameAnalyzerBase,
-                                           Analyzer)):
+class TimeFrameAnalyzerBase(with_metaclass(MetaTimeFrameAnalyzerBase, Analyzer)):
     params = (
-        ('timeframe', None),
-        ('compression', None),
-        ('_doprenext', True),
+        ("timeframe", None),
+        ("compression", None),
+        ("_doprenext", True),
     )
 
     def _start(self):
@@ -310,7 +290,7 @@ class TimeFrameAnalyzerBase(with_metaclass(MetaTimeFrameAnalyzerBase,
         self.compression = self.p.compression or self.data._compression
 
         self.dtcmp, self.dtkey = self._get_dt_cmpkey(datetime.datetime.min)
-        super(TimeFrameAnalyzerBase, self)._start()
+        super()._start()
 
     def _prenext(self):
         for child in self._children:
@@ -432,7 +412,8 @@ class TimeFrameAnalyzerBase(with_metaclass(MetaTimeFrameAnalyzerBase,
         tadjust = datetime.timedelta(
             minutes=self.timeframe == TimeFrame.Minutes,
             seconds=self.timeframe == TimeFrame.Seconds,
-            microseconds=self.timeframe == TimeFrame.MicroSeconds)
+            microseconds=self.timeframe == TimeFrame.MicroSeconds,
+        )
 
         # Add extra day if present
         if extradays:

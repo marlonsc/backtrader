@@ -1,0 +1,9 @@
+from .py3 import iteritems as iteritems
+from _typeshed import Incomplete
+from collections import OrderedDict
+
+class OrderedDefaultdict(OrderedDict):
+    default_factory: Incomplete
+    def __init__(self, *args, **kwargs) -> None: ...
+    def __missing__(self, key): ...
+    def __reduce__(self): ...

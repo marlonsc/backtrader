@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import argparse
 import random
@@ -34,8 +33,10 @@ def close_changer(data, *args, **kwargs):
 
 # override the standard markers
 class BuySellArrows(bt.observers.BuySell):
-    plotlines = dict(buy=dict(marker='$\u21E7$', markersize=12.0),
-                     sell=dict(marker='$\u21E9$', markersize=12.0))
+    plotlines = dict(
+        buy=dict(marker="$\u21e7$", markersize=12.0),
+        sell=dict(marker="$\u21e9$", markersize=12.0),
+    )
 
 
 class St(bt.Strategy):
@@ -58,12 +59,12 @@ def runstrat(args=None):
     args = parse_args(args)
     cerebro = bt.Cerebro()
 
-    dataname = '../../datas/2006-day-001.txt'  # data feed
+    dataname = "../../datas/2006-day-001.txt"  # data feed
 
-    data0 = bt.feeds.BacktraderCSVData(dataname=dataname, name='data0')
+    data0 = bt.feeds.BacktraderCSVData(dataname=dataname, name="data0")
     cerebro.adddata(data0)
 
-    data1 = bt.feeds.BacktraderCSVData(dataname=dataname, name='data1')
+    data1 = bt.feeds.BacktraderCSVData(dataname=dataname, name="data1")
     data1.addfilter(close_changer)
     if not args.no_comp:
         data1.compensate(data0)
@@ -85,12 +86,13 @@ def runstrat(args=None):
 def parse_args(pargs=None):
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        description=('Compensation example'))
+        description=("Compensation example"),
+    )
 
-    parser.add_argument('--no-comp', required=False, action='store_true')
-    parser.add_argument('--sameaxis', required=False, action='store_true')
+    parser.add_argument("--no-comp", required=False, action="store_true")
+    parser.add_argument("--sameaxis", required=False, action="store_true")
     return parser.parse_args(pargs)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     runstrat()

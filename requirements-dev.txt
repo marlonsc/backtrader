@@ -1,0 +1,22 @@
+# Copyright (c) 2025 backtrader contributors
+# Development and test dependencies for backtrader
+# Includes runtime requirements
+
+-r requirements.txt
+
+ruff>=0.3         # Linter for Python code
+black>=24.0       # Code formatter
+autopep8>=2.0     # Auto-formatting for PEP8 compliance
+pytest>=7.0       # Test runner
+pytest-cov>=4.0   # Coverage reporting for pytest
+ipython>=8.0      # Interactive Python shell (optional, for dev)
+jupyter>=1.0      # Jupyter notebook support (optional, for dev)
+tox>=4.0          # Multi-environment test automation
+mypy>=1.8         # Static type checker and stubgen provider
+flake8
+isort
+bandit
+autoflake
+docformatter
+vulture
+pyupgrade

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,18 +17,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
 
 from . import Filter
 
-
-__all__ = ['Renko']
+__all__ = ["Renko"]
 
 
 class Renko(Filter):
-    '''Modify the data stream to draw Renko bars (or bricks)
+    """Modify the data stream to draw Renko bars (or bricks)
 
     Params:
 
@@ -60,16 +56,15 @@ class Renko(Filter):
 
     See:
       - http://stockcharts.com/school/doku.php?id=chart_school:chart_analysis:renko
-
-    '''
+    """
 
     params = (
-        ('hilo', False),
-        ('size', None),
-        ('autosize', 20.0),
-        ('dynamic', False),
-        ('align', 1.0),
-        ('roundstart', True),
+        ("hilo", False),
+        ("size", None),
+        ("autosize", 20.0),
+        ("dynamic", False),
+        ("align", 1.0),
+        ("roundstart", True),
     )
 
     def nextstart(self, data):

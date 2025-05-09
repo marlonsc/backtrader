@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,8 +17,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
 
 from datetime import datetime
@@ -30,14 +27,20 @@ from backtrader.utils.py3 import range
 
 class MetaChainer(bt.DataBase.__class__):
     def __init__(cls, name, bases, dct):
-        '''Class has already been created ... register'''
+        """Class has already been created ...
+
+        register
+        """
         # Initialize the class
-        super(MetaChainer, cls).__init__(name, bases, dct)
+        super().__init__(name, bases, dct)
 
     def donew(cls, *args, **kwargs):
-        '''Intercept const. to copy timeframe/compression from 1st data'''
+        """Intercept const.
+
+        to copy timeframe/compression from 1st data
+        """
         # Create the object and set the params in place
-        _obj, args, kwargs = super(MetaChainer, cls).donew(*args, **kwargs)
+        _obj, args, kwargs = super().donew(*args, **kwargs)
 
         if args:
             _obj.p.timeframe = args[0]._timeframe
@@ -47,18 +50,18 @@ class MetaChainer(bt.DataBase.__class__):
 
 
 class Chainer(bt.with_metaclass(MetaChainer, bt.DataBase)):
-    '''Class that chains datas'''
+    """Class that chains datas."""
 
     def islive(self):
-        '''Returns ``True`` to notify ``Cerebro`` that preloading and runonce
-        should be deactivated'''
+        """Returns ``True`` to notify ``Cerebro`` that preloading and runonce should be
+        deactivated."""
         return True
 
     def __init__(self, *args):
         self._args = args
 
     def start(self):
-        super(Chainer, self).start()
+        super().start()
         for d in self._args:
             d.setenvironment(self._env)
             d._start()
@@ -69,7 +72,7 @@ class Chainer(bt.with_metaclass(MetaChainer, bt.DataBase)):
         self._lastdt = datetime.min
 
     def stop(self):
-        super(Chainer, self).stop()
+        super().stop()
         for d in self._args:
             d.stop()
 
@@ -77,8 +80,7 @@ class Chainer(bt.with_metaclass(MetaChainer, bt.DataBase)):
         return [] if self._d is None else self._d.get_notifications()
 
     def _gettz(self):
-        '''To be overriden by subclasses which may auto-calculate the
-        timezone'''
+        """To be overriden by subclasses which may auto-calculate the timezone."""
         if self._args:
             return self._args[0]._gettz()
         return bt.utils.date.Localizer(self.p.tz)

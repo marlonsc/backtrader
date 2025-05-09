@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import argparse
 import collections
@@ -30,8 +29,11 @@ import backtrader as bt
 
 
 class SMACrossOver(bt.Indicator):
-    lines = ('signal',)
-    params = (('p1', 10), ('p2', 30),)
+    lines = ("signal",)
+    params = (
+        ("p1", 10),
+        ("p2", 30),
+    )
 
     def __init__(self):
         sma1 = bt.indicators.SMA(period=self.p.p1)
@@ -44,11 +46,11 @@ class SlipSt(bt.SignalStrategy):
 
     def notify_order(self, order):
         if order.status == bt.Order.Completed:
-            t = ''
-            t += '{:02d}'.format(next(self.opcounter))
-            t += ' {}'.format(order.data.datetime.datetime())
-            t += ' BUY ' * order.isbuy() or ' SELL'
-            t += ' Size: {:+d} / Price: {:.2f}'
+            t = ""
+            t += "{:02d}".format(next(self.opcounter))
+            t += " {}".format(order.data.datetime.datetime())
+            t += " BUY " * order.isbuy() or " SELL"
+            t += " Size: {:+d} / Price: {:.2f}"
             print(t.format(order.executed.size, order.executed.price))
 
 
@@ -60,12 +62,12 @@ def runstrat(args=None):
 
     dkwargs = dict()
     if args.fromdate is not None:
-        fromdate = datetime.datetime.strptime(args.fromdate, '%Y-%m-%d')
-        dkwargs['fromdate'] = fromdate
+        fromdate = datetime.datetime.strptime(args.fromdate, "%Y-%m-%d")
+        dkwargs["fromdate"] = fromdate
 
     if args.todate is not None:
-        todate = datetime.datetime.strptime(args.todate, '%Y-%m-%d')
-        dkwargs['todate'] = todate
+        todate = datetime.datetime.strptime(args.todate, "%Y-%m-%d")
+        dkwargs["todate"] = todate
 
     # if dataset is None, args.data has been given
     data = bt.feeds.BacktraderCSVData(dataname=args.data, **dkwargs)
@@ -80,84 +82,143 @@ def runstrat(args=None):
     cerebro.add_signal(stype, SMACrossOver, p1=args.period1, p2=args.period2)
 
     if args.slip_perc is not None:
-        cerebro.broker.set_slippage_perc(args.slip_perc,
-                                         slip_open=args.slip_open,
-                                         slip_match=not args.no_slip_match,
-                                         slip_out=args.slip_out)
+        cerebro.broker.set_slippage_perc(
+            args.slip_perc,
+            slip_open=args.slip_open,
+            slip_match=not args.no_slip_match,
+            slip_out=args.slip_out,
+        )
 
     elif args.slip_fixed is not None:
-        cerebro.broker.set_slippage_fixed(args.slip_fixed,
-                                          slip_open=args.slip_open,
-                                          slip_match=not args.no_slip_match,
-                                          slip_out=args.slip_out)
+        cerebro.broker.set_slippage_fixed(
+            args.slip_fixed,
+            slip_open=args.slip_open,
+            slip_match=not args.no_slip_match,
+            slip_out=args.slip_out,
+        )
 
     cerebro.run()
     if args.plot:
-        pkwargs = dict(style='bar')
+        pkwargs = dict(style="bar")
         if args.plot is not True:  # evals to True but is not True
-            npkwargs = eval('dict(' + args.plot + ')')  # args were passed
+            npkwargs = eval("dict(" + args.plot + ")")  # args were passed
             pkwargs.update(npkwargs)
 
         cerebro.plot(**pkwargs)
 
 
 def parse_args(pargs=None):
-
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        description='Sample for Slippage')
+        description="Sample for Slippage",
+    )
 
-    parser.add_argument('--data', required=False,
-                        default='../../datas/2005-2006-day-001.txt',
-                        help='Specific data to be read in')
+    parser.add_argument(
+        "--data",
+        required=False,
+        default="../../datas/2005-2006-day-001.txt",
+        help="Specific data to be read in",
+    )
 
-    parser.add_argument('--fromdate', required=False, default=None,
-                        help='Starting date in YYYY-MM-DD format')
+    parser.add_argument(
+        "--fromdate",
+        required=False,
+        default=None,
+        help="Starting date in YYYY-MM-DD format",
+    )
 
-    parser.add_argument('--todate', required=False, default=None,
-                        help='Ending date in YYYY-MM-DD format')
+    parser.add_argument(
+        "--todate",
+        required=False,
+        default=None,
+        help="Ending date in YYYY-MM-DD format",
+    )
 
-    parser.add_argument('--cash', required=False, action='store',
-                        type=float, default=50000,
-                        help=('Cash to start with'))
+    parser.add_argument(
+        "--cash",
+        required=False,
+        action="store",
+        type=float,
+        default=50000,
+        help=("Cash to start with"),
+    )
 
-    parser.add_argument('--period1', required=False, action='store',
-                        type=int, default=10,
-                        help=('Fast moving average period'))
+    parser.add_argument(
+        "--period1",
+        required=False,
+        action="store",
+        type=int,
+        default=10,
+        help=("Fast moving average period"),
+    )
 
-    parser.add_argument('--period2', required=False, action='store',
-                        type=int, default=30,
-                        help=('Slow moving average period'))
+    parser.add_argument(
+        "--period2",
+        required=False,
+        action="store",
+        type=int,
+        default=30,
+        help=("Slow moving average period"),
+    )
 
-    parser.add_argument('--longonly', required=False, action='store_true',
-                        help=('Long only strategy'))
+    parser.add_argument(
+        "--longonly", required=False, action="store_true", help=("Long only strategy")
+    )
 
     pgroup = parser.add_mutually_exclusive_group(required=False)
-    pgroup.add_argument('--slip_perc', required=False, default=None,
-                        type=float,
-                        help='Set the value for commission percentage')
+    pgroup.add_argument(
+        "--slip_perc",
+        required=False,
+        default=None,
+        type=float,
+        help="Set the value for commission percentage",
+    )
 
-    pgroup.add_argument('--slip_fixed', required=False, default=None,
-                        type=float,
-                        help='Set the value for commission percentage')
+    pgroup.add_argument(
+        "--slip_fixed",
+        required=False,
+        default=None,
+        type=float,
+        help="Set the value for commission percentage",
+    )
 
-    parser.add_argument('--no-slip_match', required=False, action='store_true',
-                        help=('Match by capping slippage at bar ends'))
+    parser.add_argument(
+        "--no-slip_match",
+        required=False,
+        action="store_true",
+        help=("Match by capping slippage at bar ends"),
+    )
 
-    parser.add_argument('--slip_out', required=False, action='store_true',
-                        help=('Disable capping and return non-real prices'))
+    parser.add_argument(
+        "--slip_out",
+        required=False,
+        action="store_true",
+        help=("Disable capping and return non-real prices"),
+    )
 
-    parser.add_argument('--slip_open', required=False, action='store_true',
-                        help=('Slip even if match price is next open'))
+    parser.add_argument(
+        "--slip_open",
+        required=False,
+        action="store_true",
+        help=("Slip even if match price is next open"),
+    )
 
     # Plot options
-    parser.add_argument('--plot', '-p', nargs='?', required=False,
-                        metavar='kwargs', const=True,
-                        help=('Plot the read data applying any kwargs passed\n'
-                              '\n'
-                              'For example:\n'
-                              '\n'
-                              '  --plot style="candle" (to plot candles)\n'))
+    parser.add_argument(
+        "--plot",
+        "-p",
+        nargs="?",
+        required=False,
+        metavar="kwargs",
+        const=True,
+        help=(
+            "Plot the read data applying any kwargs passed\n"
+            "\n"
+            "For example:\n"
+            "\n"
+            '  --plot style="candle" (to plot candles)\n'
+        ),
+    )
 
     if pargs is not None:
         return parser.parse_args(pargs)
@@ -165,5 +226,5 @@ def parse_args(pargs=None):
     return parser.parse_args()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     runstrat()

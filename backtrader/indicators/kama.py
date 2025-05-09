@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,15 +17,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
-from . import (SumN, MovingAverageBase, ExponentialSmoothingDynamic)
+from . import ExponentialSmoothingDynamic, MovingAverageBase, SumN
 
 
 class AdaptiveMovingAverage(MovingAverageBase):
-    '''
-    Defined by Perry Kaufman in his book `"Smarter Trading"`.
+    """Defined by Perry Kaufman in his book `"Smarter Trading"`.
 
     It is A Moving Average with a continuously scaled smoothing factor by
     taking into account market direction and volatility. The smoothing factor
@@ -56,10 +52,14 @@ class AdaptiveMovingAverage(MovingAverageBase):
       - http://fxcodebase.com/wiki/index.php/Kaufman's_Adaptive_Moving_Average_(KAMA)
       - http://www.metatrader5.com/en/terminal/help/analytics/indicators/trend_indicators/ama
       - http://help.cqg.com/cqgic/default.htm#!Documents/adaptivemovingaverag2.htm
-    '''
-    alias = ('KAMA', 'MovingAverageAdaptive',)
-    lines = ('kama',)
-    params = (('fast', 2), ('slow', 30))
+    """
+
+    alias = (
+        "KAMA",
+        "MovingAverageAdaptive",
+    )
+    lines = ("kama",)
+    params = (("fast", 2), ("slow", 30))
 
     def __init__(self):
         # Before super to ensure mixins (right-hand side in subclassing)
@@ -74,8 +74,8 @@ class AdaptiveMovingAverage(MovingAverageBase):
 
         sc = pow((er * (fast - slow)) + slow, 2)  # scalable constant
 
-        self.lines[0] = ExponentialSmoothingDynamic(self.data,
-                                                    period=self.p.period,
-                                                    alpha=sc)
+        self.lines[0] = ExponentialSmoothingDynamic(
+            self.data, period=self.p.period, alpha=sc
+        )
 
-        super(AdaptiveMovingAverage, self).__init__()
+        super().__init__()

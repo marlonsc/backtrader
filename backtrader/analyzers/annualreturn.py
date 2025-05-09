@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,19 +17,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
 from collections import OrderedDict
 
-from backtrader.utils.py3 import range
 from backtrader import Analyzer
+from backtrader.utils.py3 import range
 
 
 class AnnualReturn(Analyzer):
-    '''
-    This analyzer calculates the AnnualReturns by looking at the beginning
-    and end of the year
+    """This analyzer calculates the AnnualReturns by looking at the beginning and end of
+    the year.
 
     Params:
 
@@ -45,7 +41,7 @@ class AnnualReturn(Analyzer):
     **get_analysis**:
 
       - Returns a dictionary of annual returns (key: year)
-    '''
+    """
 
     def stop(self):
         # Must have stats.broker

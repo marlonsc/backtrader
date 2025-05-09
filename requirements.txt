@@ -1,0 +1,21 @@
+# Copyright (c) 2025 backtrader contributors
+# Runtime dependencies for backtrader
+# Pin minimum versions for stability, allow latest for compatibility
+
+pandas>=1.3        # Data handling and analysis
+numpy>=1.21        # Numerical computations
+pytz>=2021.1       # Timezone support
+matplotlib>=3.4    # Plotting (required for plot module)
+requests>=2.25     # HTTP requests (Yahoo, Oanda, etc.)
+# Optional: TA-Lib for technical indicators (used in backtrader.talib)
+ta-lib>=0.4        # Technical Analysis Library (optional, recommended)
+# Optional: statsmodels for OLS/coint indicators
+statsmodels>=0.13  # Statistical models (optional, for OLS/Coint indicators)
+# Optional: InfluxDB support (for contrib/utils/influxdb-import.py, feeds/influxfeed)
+influxdb>=5.3      # InfluxDB client (optional, for InfluxDB feeds)
+# Optional: Interactive Brokers support (for IBStore/IBBroker)
+ibpy2>=0.8         # Interactive Brokers Python API (optional)
+# Optional: Oanda support (for OandaStore/OandaBroker)
+oandapy>=0.0.8     # Oanda Python API (optional)
+# Optional: VisualChart support (for VCStore/VCBroker)
+comtypes>=1.1      # Windows COM support (optional, for VisualChart)

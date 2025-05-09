@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,57 +17,55 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
 import collections
-from datetime import date, datetime, timedelta
 import threading
+from datetime import date, datetime, timedelta
 
-from backtrader import BrokerBase, Order, BuyOrder, SellOrder
+from backtrader import BrokerBase, BuyOrder, Order, SellOrder
 from backtrader.comminfo import CommInfoBase
-from backtrader.feed import DataBase
-from backtrader.metabase import MetaParams
 from backtrader.position import Position
-from backtrader.utils.py3 import with_metaclass
-
 from backtrader.stores import vcstore
+from backtrader.utils.py3 import with_metaclass
 
 
 class VCCommInfo(CommInfoBase):
-    '''
-    Commissions are calculated by ib, but the trades calculations in the
-    ```Strategy`` rely on the order carrying a CommInfo object attached for the
-    calculation of the operation cost and value.
+    """Commissions are calculated by ib, but the trades calculations in the ```Strategy``
+    rely on the order carrying a CommInfo object attached for the calculation of the
+    operation cost and value.
 
-    These are non-critical informations, but removing them from the trade could
-    break existing usage and it is better to provide a CommInfo objet which
-    enables those calculations even if with approvimate values.
+    These are non-critical informations, but removing them from the trade could break
+    existing usage and it is better to provide a CommInfo objet which enables those
+    calculations even if with approvimate values.
 
-    The margin calculation is not a known in advance information with IB
-    (margin impact can be gotten from OrderState objects) and therefore it is
-    left as future exercise to get it'''
+    The margin calculation is not a known in advance information with IB (margin impact
+    can be gotten from OrderState objects) and therefore it is left as future exercise to
+    get it
+    """
 
     def getvaluesize(self, size, price):
         # In real life the margin approaches the price
         return abs(size) * price
 
     def getoperationcost(self, size, price):
-        '''Returns the needed amount of cash an operation would cost'''
+        """Returns the needed amount of cash an operation would cost."""
         # Same reasoning as above
         return abs(size) * price
 
 
 class MetaVCBroker(BrokerBase.__class__):
     def __init__(cls, name, bases, dct):
-        '''Class has already been created ... register'''
+        """Class has already been created ...
+
+        register
+        """
         # Initialize the class
-        super(MetaVCBroker, cls).__init__(name, bases, dct)
+        super().__init__(name, bases, dct)
         vcstore.VCStore.BrokerCls = cls
 
 
 class VCBroker(with_metaclass(MetaVCBroker, BrokerBase)):
-    '''Broker implementation for VisualChart.
+    """Broker implementation for VisualChart.
 
     This class maps the orders/positions from VisualChart to the
     internal API of ``backtrader``.
@@ -122,14 +119,15 @@ class VCBroker(with_metaclass(MetaVCBroker, BrokerBase)):
         At the moment no heuristic is in place to determine when a cancelled
         order has been cancelled due to expiration. And therefore expired
         orders are reported as cancelled.
-    '''
+    """
+
     params = (
-        ('account', None),
-        ('commission', None),
+        ("account", None),
+        ("commission", None),
     )
 
     def __init__(self, **kwargs):
-        super(VCBroker, self).__init__()
+        super().__init__()
 
         self.store = vcstore.VCStore(**kwargs)
 
@@ -175,16 +173,17 @@ class VCBroker(with_metaclass(MetaVCBroker, BrokerBase)):
         }
 
         self._futlikes = (
-            self.store.vcdsmod.IT_Future, self.store.vcdsmod.IT_Option,
+            self.store.vcdsmod.IT_Future,
+            self.store.vcdsmod.IT_Option,
             self.store.vcdsmod.IT_Fund,
         )
 
     def start(self):
-        super(VCBroker, self).start()
+        super().start()
         self.store.start(broker=self)
 
     def stop(self):
-        super(VCBroker, self).stop()
+        super().stop()
         self.store.stop()
 
     def getcash(self):
@@ -223,11 +222,19 @@ class VCBroker(with_metaclass(MetaVCBroker, BrokerBase)):
 
         return VCCommInfo(mult=data._syminfo.PointValue, stocklike=stocklike)
 
-    def _makeorder(self, ordtype, owner, data,
-                   size, price=None, plimit=None,
-                   exectype=None, valid=None,
-                   tradeid=0, **kwargs):
-
+    def _makeorder(
+        self,
+        ordtype,
+        owner,
+        data,
+        size,
+        price=None,
+        plimit=None,
+        exectype=None,
+        valid=None,
+        tradeid=0,
+        **kwargs,
+    ):
         order = self.store.vcctmod.Order()
         order.Account = self._acc_name
         order.SymbolCode = data._tradename
@@ -240,11 +247,11 @@ class VCBroker(with_metaclass(MetaVCBroker, BrokerBase)):
 
         # order.UserName = 'danjrod'  # str(tradeid)
         # order.OrderId = 'a' * 50  # str(tradeid)
-        order.UserOrderId = ''
+        order.UserOrderId = ""
         if tradeid:
-            order.ExtendedInfo = 'TradeId {}'.format(tradeid)
+            order.ExtendedInfo = f"TradeId {tradeid}"
         else:
-            order.ExtendedInfo = ''
+            order.ExtendedInfo = ""
 
         order.Volume = abs(size)
 
@@ -293,10 +300,16 @@ class VCBroker(with_metaclass(MetaVCBroker, BrokerBase)):
 
         vco = vcorder
         oid = self.store.vcct.SendOrder(
-            vco.Account, vco.SymbolCode,
-            vco.OrderType, vco.OrderSide, vco.Volume, vco.Price, vco.StopPrice,
-            vco.VolumeRestriction, vco.TimeRestriction,
-            ValidDate=vco.ValidDate
+            vco.Account,
+            vco.SymbolCode,
+            vco.OrderType,
+            vco.OrderSide,
+            vco.Volume,
+            vco.Price,
+            vco.StopPrice,
+            vco.VolumeRestriction,
+            vco.TimeRestriction,
+            ValidDate=vco.ValidDate,
         )
 
         order.vcorder = oid
@@ -307,37 +320,83 @@ class VCBroker(with_metaclass(MetaVCBroker, BrokerBase)):
         self.notify(order)
         return order
 
-    def buy(self, owner, data,
-            size, price=None, plimit=None,
-            exectype=None, valid=None, tradeid=0,
-            **kwargs):
-
-        order = BuyOrder(owner=owner, data=data,
-                         size=size, price=price, pricelimit=plimit,
-                         exectype=exectype, valid=valid, tradeid=tradeid)
+    def buy(
+        self,
+        owner,
+        data,
+        size,
+        price=None,
+        plimit=None,
+        exectype=None,
+        valid=None,
+        tradeid=0,
+        **kwargs,
+    ):
+        order = BuyOrder(
+            owner=owner,
+            data=data,
+            size=size,
+            price=price,
+            pricelimit=plimit,
+            exectype=exectype,
+            valid=valid,
+            tradeid=tradeid,
+        )
 
         order.addinfo(**kwargs)
 
-        vcorder = self._makeorder(order.ordtype, owner, data, size, price,
-                                  plimit, exectype, valid, tradeid,
-                                  **kwargs)
+        vcorder = self._makeorder(
+            order.ordtype,
+            owner,
+            data,
+            size,
+            price,
+            plimit,
+            exectype,
+            valid,
+            tradeid,
+            **kwargs,
+        )
 
         return self.submit(order, vcorder)
 
-    def sell(self, owner, data,
-             size, price=None, plimit=None,
-             exectype=None, valid=None, tradeid=0,
-             **kwargs):
-
-        order = SellOrder(owner=owner, data=data,
-                          size=size, price=price, pricelimit=plimit,
-                          exectype=exectype, valid=valid, tradeid=tradeid)
+    def sell(
+        self,
+        owner,
+        data,
+        size,
+        price=None,
+        plimit=None,
+        exectype=None,
+        valid=None,
+        tradeid=0,
+        **kwargs,
+    ):
+        order = SellOrder(
+            owner=owner,
+            data=data,
+            size=size,
+            price=price,
+            pricelimit=plimit,
+            exectype=exectype,
+            valid=valid,
+            tradeid=tradeid,
+        )
 
         order.addinfo(**kwargs)
 
-        vcorder = self._makeorder(order.ordtype, owner, data, size, price,
-                                  plimit, exectype, valid, tradeid,
-                                  **kwargs)
+        vcorder = self._makeorder(
+            order.ordtype,
+            owner,
+            data,
+            size,
+            price,
+            plimit,
+            exectype,
+            valid,
+            tradeid,
+            **kwargs,
+        )
 
         return self.submit(order, vcorder)
 
@@ -419,12 +478,21 @@ class VCBroker(with_metaclass(MetaVCBroker, BrokerBase)):
 
         # NOTE: No commission information available in the Trader interface
         # CHECK: Use reported time instead of last data time?
-        border.execute(border.data.datetime[0],
-                       size, price,
-                       closed, closedvalue, closedcomm,
-                       opened, openedvalue, openedcomm,
-                       margin, pnl,
-                       psize, pprice)  # pnl
+        border.execute(
+            border.data.datetime[0],
+            size,
+            price,
+            closed,
+            closedvalue,
+            closedcomm,
+            opened,
+            openedvalue,
+            openedcomm,
+            margin,
+            pnl,
+            psize,
+            pprice,
+        )  # pnl
 
         if partial:
             border.partial()

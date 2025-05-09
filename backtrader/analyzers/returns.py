@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,8 +17,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
 import math
 
@@ -28,8 +25,8 @@ from backtrader import TimeFrameAnalyzerBase
 
 
 class Returns(TimeFrameAnalyzerBase):
-    '''Total, Average, Compound and Annualized Returns calculated using a
-    logarithmic approach
+    """Total, Average, Compound and Annualized Returns calculated using a logarithmic
+    approach.
 
     See:
 
@@ -86,12 +83,11 @@ class Returns(TimeFrameAnalyzerBase):
           - ``ravg``: Average return for the entire period (timeframe specific)
           - ``rnorm``: Annualized/Normalized return
           - ``rnorm100``: Annualized/Normalized return expressed in 100%
-
-    '''
+    """
 
     params = (
-        ('tann', None),
-        ('fund', None),
+        ("tann", None),
+        ("fund", None),
     )
 
     _TANN = {
@@ -102,7 +98,7 @@ class Returns(TimeFrameAnalyzerBase):
     }
 
     def start(self):
-        super(Returns, self).start()
+        super().start()
         if self.p.fund is None:
             self._fundmode = self.strategy.broker.fundmode
         else:
@@ -116,7 +112,7 @@ class Returns(TimeFrameAnalyzerBase):
         self._tcount = 0
 
     def stop(self):
-        super(Returns, self).stop()
+        super().stop()
 
         if not self._fundmode:
             self._value_end = self.strategy.broker.getvalue()
@@ -127,29 +123,29 @@ class Returns(TimeFrameAnalyzerBase):
         try:
             nlrtot = self._value_end / self._value_start
         except ZeroDivisionError:
-            rtot = float('-inf')
+            rtot = float("-inf")
         else:
             if nlrtot < 0.0:
-                rtot = float('-inf')
+                rtot = float("-inf")
             else:
                 rtot = math.log(nlrtot)
 
-        self.rets['rtot'] = rtot
+        self.rets["rtot"] = rtot
 
         # Average return
-        self.rets['ravg'] = ravg = rtot / self._tcount
+        self.rets["ravg"] = ravg = rtot / self._tcount
 
         # Annualized normalized return
         tann = self.p.tann or self._TANN.get(self.timeframe, None)
         if tann is None:
             tann = self._TANN.get(self.data._timeframe, 1.0)  # assign default
 
-        if ravg > float('-inf'):
-            self.rets['rnorm'] = rnorm = math.expm1(ravg * tann)
+        if ravg > float("-inf"):
+            self.rets["rnorm"] = rnorm = math.expm1(ravg * tann)
         else:
-            self.rets['rnorm'] = rnorm = ravg
+            self.rets["rnorm"] = rnorm = ravg
 
-        self.rets['rnorm100'] = rnorm * 100.0  # human readable %
+        self.rets["rnorm100"] = rnorm * 100.0  # human readable %
 
     def _on_dt_over(self):
         self._tcount += 1  # count the subperiod

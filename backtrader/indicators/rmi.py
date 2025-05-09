@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,14 +17,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
 from . import RSI
 
 
 class RelativeMomentumIndex(RSI):
-    '''
+    """
     Description:
     The Relative Momentum Index was developed by Roger Altman and was
     introduced in his article in the February, 1993 issue of Technical Analysis
@@ -44,20 +41,26 @@ class RelativeMomentumIndex(RSI):
       - https://www.tradingview.com/script/UCm7fIvk-FREE-INDICATOR-Relative-Momentum-Index-RMI/
       - https://www.prorealcode.com/prorealtime-indicators/relative-momentum-index-rmi/
 
-    '''
-    alias = ('RMI', )
+    """
 
-    linealias = (('rsi', 'rmi',),)  # add an alias for this class rmi -> rsi
-    plotlines = dict(rsi=dict(_name='rmi'))  # change line plotting name
+    alias = ("RMI",)
+
+    linealias = (
+        (
+            "rsi",
+            "rmi",
+        ),
+    )  # add an alias for this class rmi -> rsi
+    plotlines = dict(rsi=dict(_name="rmi"))  # change line plotting name
 
     params = (
-        ('period', 20),
-        ('lookback', 5),
+        ("period", 20),
+        ("lookback", 5),
     )
 
     def _plotlabel(self):
         # override to always print the lookback label and do it before movav
         plabels = [self.p.period]
         plabels += [self.p.lookback]
-        plabels += [self.p.movav] * self.p.notdefault('movav')
+        plabels += [self.p.movav] * self.p.notdefault("movav")
         return plabels

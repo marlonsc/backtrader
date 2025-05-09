@@ -1,0 +1,13 @@
+import backtrader as bt
+from _typeshed import Incomplete
+
+__all__ = ['Calmar']
+
+class Calmar(bt.TimeFrameAnalyzerBase):
+    packages: Incomplete
+    params: Incomplete
+    def __init__(self) -> None: ...
+    def start(self) -> None: ...
+    calmar: Incomplete
+    def on_dt_over(self) -> None: ...
+    def stop(self) -> None: ...

@@ -1,0 +1,9 @@
+import backtrader as bt
+from _typeshed import Incomplete
+from backtrader import Order as Order, Position as Position
+
+class Transactions(bt.Analyzer):
+    params: Incomplete
+    def start(self) -> None: ...
+    def notify_order(self, order) -> None: ...
+    def next(self) -> None: ...

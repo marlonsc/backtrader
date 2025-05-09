@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 
 import backtrader as bt
@@ -29,10 +28,10 @@ import backtrader.indicators as btind
 class RelativeVolume(bt.Indicator):
     csv = True  # show up in csv output (default for indicators is False)
 
-    lines = ('relvol',)
+    lines = ("relvol",)
     params = (
-        ('period', 20),
-        ('volisnan', True),
+        ("period", 20),
+        ("volisnan", True),
     )
 
     def __init__(self):
@@ -43,8 +42,7 @@ class RelativeVolume(bt.Indicator):
         else:
             # Else do a controlled Div with a built-in function
             relvol = bt.DivByZero(
-                self.data.volume(-self.p.period),
-                self.data.volume,
-                zero=0.0)
+                self.data.volume(-self.p.period), self.data.volume, zero=0.0
+            )
 
         self.lines.relvol = relvol

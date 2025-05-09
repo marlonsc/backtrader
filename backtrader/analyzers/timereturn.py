@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,15 +17,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
 from backtrader import TimeFrameAnalyzerBase
 
 
 class TimeReturn(TimeFrameAnalyzerBase):
-    '''This analyzer calculates the Returns by looking at the beginning
-    and end of the timeframe
+    """This analyzer calculates the Returns by looking at the beginning and end of the
+    timeframe.
 
     Params:
 
@@ -85,16 +82,16 @@ class TimeReturn(TimeFrameAnalyzerBase):
 
         Returns a dictionary with returns as values and the datetime points for
         each return as keys
-    '''
+    """
 
     params = (
-        ('data', None),
-        ('firstopen', True),
-        ('fund', None),
+        ("data", None),
+        ("firstopen", True),
+        ("fund", None),
     )
 
     def start(self):
-        super(TimeReturn, self).start()
+        super().start()
         if self.p.fund is None:
             self._fundmode = self.strategy.broker.fundmode
         else:
@@ -137,6 +134,6 @@ class TimeReturn(TimeFrameAnalyzerBase):
 
     def next(self):
         # Calculate the return
-        super(TimeReturn, self).next()
+        super().next()
         self.rets[self.dtkey] = (self._value / self._value_start) - 1.0
         self._lastvalue = self._value  # keep last value

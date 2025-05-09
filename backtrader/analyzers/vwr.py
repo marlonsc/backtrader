@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,19 +17,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
 import math
 
 import backtrader as bt
 from backtrader import TimeFrameAnalyzerBase
-from . import Returns
+
 from ..mathsupport import standarddev
+from . import Returns
 
 
 class VWR(TimeFrameAnalyzerBase):
-    '''Variability-Weighted Return: Better SharpeRatio with Log Returns
+    """Variability-Weighted Return: Better SharpeRatio with Log Returns
 
     Alias:
 
@@ -95,13 +93,13 @@ class VWR(TimeFrameAnalyzerBase):
         The returned dict contains the following keys:
 
           - ``vwr``: Variability-Weighted Return
-    '''
+    """
 
     params = (
-        ('tann', None),
-        ('tau', 0.20),
-        ('sdev_max', 2.0),
-        ('fund', None),
+        ("tann", None),
+        ("tau", 0.20),
+        ("sdev_max", 2.0),
+        ("fund", None),
     )
 
     _TANN = {
@@ -113,12 +111,12 @@ class VWR(TimeFrameAnalyzerBase):
 
     def __init__(self):
         # Children log return analyzer
-        self._returns = Returns(timeframe=self.p.timeframe,
-                                compression=self.p.compression,
-                                tann=self.p.tann)
+        self._returns = Returns(
+            timeframe=self.p.timeframe, compression=self.p.compression, tann=self.p.tann
+        )
 
     def start(self):
-        super(VWR, self).start()
+        super().start()
         # Add an initial placeholder for [-1] operation
         if self.p.fund is None:
             self._fundmode = self.strategy.broker.fundmode
@@ -133,7 +131,7 @@ class VWR(TimeFrameAnalyzerBase):
         self._pns = [None]  # keep final prices (value)
 
     def stop(self):
-        super(VWR, self).stop()
+        super().stop()
         # Check if no value has been seen after the last 'dt_over'
         # If so, there is one 'pi' out of place and a None 'pn'. Purge
         if self._pns[-1] is None:
@@ -142,8 +140,8 @@ class VWR(TimeFrameAnalyzerBase):
 
         # Get results from children
         rs = self._returns.get_analysis()
-        ravg = rs['ravg']
-        rnorm100 = rs['rnorm100']
+        ravg = rs["ravg"]
+        rnorm100 = rs["rnorm100"]
 
         # make n 1 based in enumerate (number of periods and not index)
         # skip initial placeholders for synchronization
@@ -157,7 +155,7 @@ class VWR(TimeFrameAnalyzerBase):
         sdev_p = standarddev(dts, bessel=True)
 
         vwr = rnorm100 * (1.0 - pow(sdev_p / self.p.sdev_max, self.p.tau))
-        self.rets['vwr'] = vwr
+        self.rets["vwr"] = vwr
 
     def notify_fund(self, cash, value, fundvalue, shares):
         if not self._fundmode:

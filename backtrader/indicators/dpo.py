@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -19,15 +18,12 @@
 #
 ###############################################################################
 # Python 2/3 compatibility imports
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
 from . import Indicator, MovAv
 
 
 class DetrendedPriceOscillator(Indicator):
-    '''
-    Defined by Joe DiNapoli in his book *"Trading with DiNapoli levels"*
+    """Defined by Joe DiNapoli in his book *"Trading with DiNapoli levels"*
 
     It measures the price variations against a Moving Average (the trend)
     and therefore removes the "trend" factor from the price.
@@ -38,16 +34,17 @@ class DetrendedPriceOscillator(Indicator):
 
     See:
       - http://en.wikipedia.org/wiki/Detrended_price_oscillator
-    '''
+    """
+
     # Named alias for invocation
-    alias = ('DPO',)
+    alias = ("DPO",)
 
     # Named output lines
-    lines = ('dpo',)
+    lines = ("dpo",)
 
     # Accepted parameters (and defaults) -
     # MovAvg also parameter to allow experimentation
-    params = (('period', 20), ('movav', MovAv.Simple))
+    params = (("period", 20), ("movav", MovAv.Simple))
 
     # Emphasize central 0.0 line in plot
     plotinfo = dict(plothlines=[0.0])
@@ -55,7 +52,7 @@ class DetrendedPriceOscillator(Indicator):
     # Indicator information after the name (in brackets)
     def _plotlabel(self):
         plabels = [self.p.period]
-        plabels += [self.p.movav] * self.p.notdefault('movav')
+        plabels += [self.p.movav] * self.p.notdefault("movav")
         return plabels
 
     def __init__(self):
@@ -65,4 +62,4 @@ class DetrendedPriceOscillator(Indicator):
         # Calculate value (look back period/2 + 1 in MA) and bind to 'dpo' line
         self.lines.dpo = self.data - ma(-self.p.period // 2 + 1)
 
-        super(DetrendedPriceOscillator, self).__init__()
+        super().__init__()

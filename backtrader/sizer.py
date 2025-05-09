@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,17 +17,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-
-from .utils.py3 import with_metaclass
 
 from .metabase import MetaParams
+from .utils.py3 import with_metaclass
 
 
 class Sizer(with_metaclass(MetaParams, object)):
-    '''This is the base class for *Sizers*. Any *sizer* should subclass this
-    and override the ``_getsizing`` method
+    """This is the base class for *Sizers*. Any *sizer* should subclass this and override
+    the ``_getsizing`` method.
 
     Member Attribs:
 
@@ -43,7 +39,8 @@ class Sizer(with_metaclass(MetaParams, object)):
 
         Gives access to information some complex sizers may need like portfolio
         value, ..
-    '''
+    """
+
     strategy = None
     broker = None
 
@@ -52,8 +49,8 @@ class Sizer(with_metaclass(MetaParams, object)):
         return self._getsizing(comminfo, self.broker.getcash(), data, isbuy)
 
     def _getsizing(self, comminfo, cash, data, isbuy):
-        '''This method has to be overriden by subclasses of Sizer to provide
-        the sizing functionality
+        """This method has to be overriden by subclasses of Sizer to provide the sizing
+        functionality.
 
         Params:
           - ``comminfo``: The CommissionInfo instance that contains
@@ -72,8 +69,7 @@ class Sizer(with_metaclass(MetaParams, object)):
         ``0`` is returned nothing will be executed.
 
         The absolute value of the returned value will be used
-
-        '''
+        """
         raise NotImplementedError
 
     def set(self, strategy, broker):

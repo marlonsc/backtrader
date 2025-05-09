@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,15 +17,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
-from collections import OrderedDict
 import itertools
 import sys
+from collections import OrderedDict
 
-import backtrader as bt
-from .utils.py3 import zip, string_types, with_metaclass
+from .utils.py3 import string_types, with_metaclass, zip
 
 
 def findbases(kls, topclass):
@@ -49,13 +45,13 @@ def findowner(owned, cls, startlevel=2, skip=None):
             break
 
         # 'self' in regular code
-        self_ = frame.f_locals.get('self', None)
+        self_ = frame.f_locals.get("self", None)
         if skip is not self_:
             if self_ is not owned and isinstance(self_, cls):
                 return self_
 
         # '_obj' in metaclasses
-        obj_ = frame.f_locals.get('_obj', None)
+        obj_ = frame.f_locals.get("_obj", None)
         if skip is not obj_:
             if obj_ is not owned and isinstance(obj_, cls):
                 return obj_
@@ -90,7 +86,7 @@ class MetaBase(type):
         return _obj
 
 
-class AutoInfoClass(object):
+class AutoInfoClass:
     _getpairsbase = classmethod(lambda cls: OrderedDict())
     _getpairs = classmethod(lambda cls: OrderedDict())
     _getrecurse = classmethod(lambda cls: False)
@@ -120,7 +116,7 @@ class AutoInfoClass(object):
         info2add.update(info)
 
         clsmodule = sys.modules[cls.__module__]
-        newclsname = str(cls.__name__ + '_' + name)  # str - Python 2/3 compat
+        newclsname = str(cls.__name__ + "_" + name)  # str - Python 2/3 compat
 
         # This loop makes sure that if the name has already been defined, a new
         # unique name is found. A collision example is in the plotlines names
@@ -135,17 +131,14 @@ class AutoInfoClass(object):
         newcls = type(newclsname, (cls,), {})
         setattr(clsmodule, newclsname, newcls)
 
-        setattr(newcls, '_getpairsbase',
-                classmethod(lambda cls: baseinfo.copy()))
-        setattr(newcls, '_getpairs', classmethod(lambda cls: clsinfo.copy()))
-        setattr(newcls, '_getrecurse', classmethod(lambda cls: recurse))
+        setattr(newcls, "_getpairsbase", classmethod(lambda cls: baseinfo.copy()))
+        setattr(newcls, "_getpairs", classmethod(lambda cls: clsinfo.copy()))
+        setattr(newcls, "_getrecurse", classmethod(lambda cls: recurse))
 
         for infoname, infoval in info2add.items():
             if recurse:
                 recursecls = getattr(newcls, infoname, AutoInfoClass)
-                infoval = recursecls._derive(name + '_' + infoname,
-                                             infoval,
-                                             [])
+                infoval = recursecls._derive(name + "_" + infoname, infoval, [])
 
             setattr(newcls, infoname, infoval)
 
@@ -181,16 +174,18 @@ class AutoInfoClass(object):
         return tuple(cls._getpairs().items())
 
     def _getkwargs(self, skip_=False):
-        l = [
+        items = [
             (x, getattr(self, x))
-            for x in self._getkeys() if not skip_ or not x.startswith('_')]
-        return OrderedDict(l)
+            for x in self._getkeys()
+            if hasattr(self, x)
+        ]
+        return OrderedDict(items)
 
     def _getvalues(self):
         return [getattr(self, x) for x in self._getkeys()]
 
     def __new__(cls, *args, **kwargs):
-        obj = super(AutoInfoClass, cls).__new__(cls, *args, **kwargs)
+        obj = super().__new__(cls, *args, **kwargs)
 
         if cls._getrecurse():
             for infoname in obj._getkeys():
@@ -204,26 +199,26 @@ class MetaParams(MetaBase):
     def __new__(meta, name, bases, dct):
         # Remove params from class definition to avoid inheritance
         # (and hence "repetition")
-        newparams = dct.pop('params', ())
+        newparams = dct.pop("params", ())
 
-        packs = 'packages'
+        packs = "packages"
         newpackages = tuple(dct.pop(packs, ()))  # remove before creation
 
-        fpacks = 'frompackages'
+        fpacks = "frompackages"
         fnewpackages = tuple(dct.pop(fpacks, ()))  # remove before creation
 
         # Create the new class - this pulls predefined "params"
-        cls = super(MetaParams, meta).__new__(meta, name, bases, dct)
+        cls = super().__new__(meta, name, bases, dct)
 
         # Pulls the param class out of it - default is the empty class
-        params = getattr(cls, 'params', AutoInfoClass)
+        params = getattr(cls, "params", AutoInfoClass)
 
         # Pulls the packages class out of it - default is the empty class
         packages = tuple(getattr(cls, packs, ()))
         fpackages = tuple(getattr(cls, fpacks, ()))
 
         # get extra (to the right) base classes which have a param attribute
-        morebasesparams = [x.params for x in bases[1:] if hasattr(x, 'params')]
+        morebasesparams = [x.params for x in bases[1:] if hasattr(x, "params")]
 
         # Get extra packages, add them to the packages and put all in the class
         for y in [x.packages for x in bases[1:] if hasattr(x, packs)]:
@@ -251,7 +246,7 @@ class MetaParams(MetaBase):
 
             pmod = __import__(p)
 
-            plevels = p.split('.')
+            plevels = p.split(".")
             if p == palias and len(plevels) > 1:  # 'os.path' not aliased
                 setattr(clsmod, pmod.__name__, pmod)  # set 'os' in module
 
@@ -285,7 +280,7 @@ class MetaParams(MetaBase):
             setattr(params, pname, kwargs.pop(pname, pdef))
 
         # Create the object and set the params in place
-        _obj, args, kwargs = super(MetaParams, cls).donew(*args, **kwargs)
+        _obj, args, kwargs = super().donew(*args, **kwargs)
         _obj.params = params
         _obj.p = params  # shorter alias
 
@@ -297,13 +292,13 @@ class ParamsBase(with_metaclass(MetaParams, object)):
     pass  # stub to allow easy subclassing without metaclasses
 
 
-class ItemCollection(object):
-    '''
-    Holds a collection of items that can be reached by
+class ItemCollection:
+    """Holds a collection of items that can be reached by.
 
-      - Index
-      - Name (if set in the append operation)
-    '''
+    - Index
+    - Name (if set in the append operation)
+    """
+
     def __init__(self):
         self._items = list()
         self._names = list()

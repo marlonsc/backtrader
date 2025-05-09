@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,19 +17,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
 
-from . import Indicator, MovAv, ATR
+from . import ATR, Indicator, MovAv
 
 
 class PrettyGoodOscillator(Indicator):
-    '''
-    The "Pretty Good Oscillator" (PGO) by Mark Johnson measures the distance of
-    the current close from its simple moving average of period
-    Average), expressed in terms of an average true range (see Average True
-    Range) over a similar period.
+    """The "Pretty Good Oscillator" (PGO) by Mark Johnson measures the distance of the
+    current close from its simple moving average of period Average), expressed in terms of
+    an average true range (see Average True Range) over a similar period.
 
     So for instance a PGO value of +2.5 would mean the current close is 2.5
     average days' range above the SMA.
@@ -45,16 +40,22 @@ class PrettyGoodOscillator(Indicator):
 
     See also:
       - http://user42.tuxfamily.org/chart/manual/Pretty-Good-Oscillator.html
+    """
 
-    '''
-    alias = ('PGO', 'PrettyGoodOsc',)
-    lines = ('pgo',)
+    alias = (
+        "PGO",
+        "PrettyGoodOsc",
+    )
+    lines = ("pgo",)
 
-    params = (('period', 14), ('_movav', MovAv.Simple),)
+    params = (
+        ("period", 14),
+        ("_movav", MovAv.Simple),
+    )
 
     def __init__(self):
         movav = self.p._movav(self.data, period=self.p.period)
         atr = ATR(self.data, period=self.p.period)
 
         self.lines.pgo = (self.data - movav) / atr
-        super(PrettyGoodOscillator, self).__init__()
+        super().__init__()

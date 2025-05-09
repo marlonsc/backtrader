@@ -1,0 +1,13 @@
+from _typeshed import Incomplete
+
+__all__ = ['BacktraderError', 'StrategySkipError']
+
+class BacktraderError(Exception): ...
+class StrategySkipError(BacktraderError): ...
+
+class ModuleImportError(BacktraderError):
+    args: Incomplete
+    def __init__(self, message, *args) -> None: ...
+
+class FromModuleImportError(ModuleImportError):
+    def __init__(self, message, *args) -> None: ...

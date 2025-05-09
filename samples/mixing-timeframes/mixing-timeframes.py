@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import argparse
 
@@ -43,14 +42,17 @@ class St(bt.Strategy):
             self.sellsignal = self.data0.close < pp.s1()
 
     def next(self):
-        txt = ','.join(
-            ['%04d' % len(self),
-             '%04d' % len(self.data0),
-             '%04d' % len(self.data1),
-             self.data.datetime.date(0).isoformat(),
-             '%.2f' % self.data0.close[0],
-             '%.2f' % self.pp.s1[0],
-             '%.2f' % self.sellsignal[0]])
+        txt = ",".join(
+            [
+                "%04d" % len(self),
+                "%04d" % len(self.data0),
+                "%04d" % len(self.data1),
+                self.data.datetime.date(0).isoformat(),
+                "%.2f" % self.data0.close[0],
+                "%.2f" % self.pp.s1[0],
+                "%.2f" % self.sellsignal[0],
+            ]
+        )
 
         print(txt)
 
@@ -67,26 +69,35 @@ def runstrat():
 
     cerebro.run(stdstats=False, runonce=False)
     if args.plot:
-        cerebro.plot(style='bar')
+        cerebro.plot(style="bar")
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        description='Sample for pivot point and cross plotting')
+        description="Sample for pivot point and cross plotting",
+    )
 
-    parser.add_argument('--data', required=False,
-                        default='../../datas/2005-2006-day-001.txt',
-                        help='Data to be read in')
+    parser.add_argument(
+        "--data",
+        required=False,
+        default="../../datas/2005-2006-day-001.txt",
+        help="Data to be read in",
+    )
 
-    parser.add_argument('--multi', required=False, action='store_true',
-                        help='Couple all lines of the indicator')
+    parser.add_argument(
+        "--multi",
+        required=False,
+        action="store_true",
+        help="Couple all lines of the indicator",
+    )
 
-    parser.add_argument('--plot', required=False, action='store_true',
-                        help=('Plot the result'))
+    parser.add_argument(
+        "--plot", required=False, action="store_true", help=("Plot the result")
+    )
 
     return parser.parse_args()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     runstrat()

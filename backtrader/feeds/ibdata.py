@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,32 +17,36 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
 import datetime
 
 import backtrader as bt
-from backtrader.feed import DataBase
 from backtrader import TimeFrame, date2num, num2date
-from backtrader.utils.py3 import (integer_types, queue, string_types,
-                                  with_metaclass)
-from backtrader.metabase import MetaParams
+from backtrader.feed import DataBase
 from backtrader.stores import ibstore
+from backtrader.utils.py3 import (
+    integer_types,
+    queue,
+    string_types,
+    with_metaclass,
+)
 
 
 class MetaIBData(DataBase.__class__):
     def __init__(cls, name, bases, dct):
-        '''Class has already been created ... register'''
+        """Class has already been created ...
+
+        register
+        """
         # Initialize the class
-        super(MetaIBData, cls).__init__(name, bases, dct)
+        super().__init__(name, bases, dct)
 
         # Register with the store
         ibstore.IBStore.DataCls = cls
 
 
 class IBData(with_metaclass(MetaIBData, DataBase)):
-    '''Interactive Brokers Data Feed.
+    """Interactive Brokers Data Feed.
 
     Supports the following contract specifications in parameter ``dataname``:
 
@@ -114,7 +117,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
           - 'TRADES' for any other
 
         Use 'ASK' for the Ask quote of cash assets
-        
+
         Check the IB API docs if another value is wished
 
       - ``rtbar`` (default: ``False``)
@@ -191,21 +194,22 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         Or else: ``IBData`` as ``IBData(dataname='AAPL', currency='USD')``
         which uses the default values (``STK`` and ``SMART``) and overrides
         the currency to be ``USD``
-    '''
+    """
+
     params = (
-        ('sectype', 'STK'),  # usual industry value
-        ('exchange', 'SMART'),  # usual industry value
-        ('currency', ''),
-        ('rtbar', False),  # use RealTime 5 seconds bars
-        ('historical', False),  # only historical download
-        ('what', None),  # historical - what to show
-        ('useRTH', False),  # historical - download only Regular Trading Hours
-        ('qcheck', 0.5),  # timeout in seconds (float) to check for events
-        ('backfill_start', True),  # do backfilling at the start
-        ('backfill', True),  # do backfilling when reconnecting
-        ('backfill_from', None),  # additional data source to do backfill from
-        ('latethrough', False),  # let late samples through
-        ('tradename', None),  # use a different asset as order target
+        ("sectype", "STK"),  # usual industry value
+        ("exchange", "SMART"),  # usual industry value
+        ("currency", ""),
+        ("rtbar", False),  # use RealTime 5 seconds bars
+        ("historical", False),  # only historical download
+        ("what", None),  # historical - what to show
+        ("useRTH", False),  # historical - download only Regular Trading Hours
+        ("qcheck", 0.5),  # timeout in seconds (float) to check for events
+        ("backfill_start", True),  # do backfilling at the start
+        ("backfill", True),  # do backfilling when reconnecting
+        ("backfill_from", None),  # additional data source to do backfill from
+        ("latethrough", False),  # let late samples through
+        ("tradename", None),  # use a different asset as order target
     )
 
     _store = ibstore.IBStore
@@ -241,8 +245,8 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
 
         tzs = self.p.tz if tzstr else self.contractdetails.m_timeZoneId
 
-        if tzs == 'CST':  # reported by TWS, not compatible with pytz. patch it
-            tzs = 'CST6CDT'
+        if tzs == "CST":  # reported by TWS, not compatible with pytz. patch it
+            tzs = "CST6CDT"
 
         try:
             tz = pytz.timezone(tzs)
@@ -253,8 +257,8 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         return tz
 
     def islive(self):
-        '''Returns ``True`` to notify ``Cerebro`` that preloading and runonce
-        should be deactivated'''
+        """Returns ``True`` to notify ``Cerebro`` that preloading and runonce should be
+        deactivated."""
         return not self.p.historical
 
     def __init__(self, **kwargs):
@@ -263,26 +267,26 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         self.pretradecontract = self.parsecontract(self.p.tradename)
 
     def setenvironment(self, env):
-        '''Receives an environment (cerebro) and passes it over to the store it
-        belongs to'''
-        super(IBData, self).setenvironment(env)
+        """Receives an environment (cerebro) and passes it over to the store it belongs
+        to."""
+        super().setenvironment(env)
         env.addstore(self.ib)
 
     def parsecontract(self, dataname):
-        '''Parses dataname generates a default contract'''
+        """Parses dataname generates a default contract."""
         # Set defaults for optional tokens in the ticker string
         if dataname is None:
             return None
 
         exch = self.p.exchange
         curr = self.p.currency
-        expiry = ''
+        expiry = ""
         strike = 0.0
-        right = ''
-        mult = ''
+        right = ""
+        mult = ""
 
         # split the ticker string
-        tokens = iter(dataname.split('-'))
+        tokens = iter(dataname.split("-"))
 
         # Symbol and security type are compulsory
         symbol = next(tokens)
@@ -296,19 +300,19 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
             expiry = sectype  # save the expiration ate
 
             if len(sectype) == 6:  # YYYYMM
-                sectype = 'FUT'
+                sectype = "FUT"
             else:  # Assume OPTIONS - YYYYMMDD
-                sectype = 'OPT'
+                sectype = "OPT"
 
-        if sectype == 'CASH':  # need to address currency for Forex
-            symbol, curr = symbol.split('.')
+        if sectype == "CASH":  # need to address currency for Forex
+            symbol, curr = symbol.split(".")
 
         # See if the optional tokens were provided
         try:
             exch = next(tokens)  # on exception it will be the default
             curr = next(tokens)  # on exception it will be the default
 
-            if sectype == 'FUT':
+            if sectype == "FUT":
                 if not expiry:
                     expiry = next(tokens)
                 mult = next(tokens)
@@ -316,12 +320,12 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
                 # Try to see if this is FOP - Futures on OPTIONS
                 right = next(tokens)
                 # if still here this is a FOP and not a FUT
-                sectype = 'FOP'
-                strike, mult = float(mult), ''  # assign to strike and void
+                sectype = "FOP"
+                strike, mult = float(mult), ""  # assign to strike and void
 
                 mult = next(tokens)  # try again to see if there is any
 
-            elif sectype == 'OPT':
+            elif sectype == "OPT":
                 if not expiry:
                     expiry = next(tokens)
                 strike = float(next(tokens))  # on exception - default
@@ -334,15 +338,22 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
 
         # Make the initial contract
         precon = self.ib.makecontract(
-            symbol=symbol, sectype=sectype, exch=exch, curr=curr,
-            expiry=expiry, strike=strike, right=right, mult=mult)
+            symbol=symbol,
+            sectype=sectype,
+            exch=exch,
+            curr=curr,
+            expiry=expiry,
+            strike=strike,
+            right=right,
+            mult=mult,
+        )
 
         return precon
 
     def start(self):
-        '''Starts the IB connecction and gets the real contract and
-        contractdetails if it exists'''
-        super(IBData, self).start()
+        """Starts the IB connecction and gets the real contract and contractdetails if it
+        exists."""
+        super().start()
         # Kickstart store and get queue to wait on
         self.qlive = self.ib.start(data=self)
         self.qhist = None
@@ -405,12 +416,15 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
             self._st_start()
 
     def stop(self):
-        '''Stops and tells the store to stop'''
-        super(IBData, self).stop()
+        """Stops and tells the store to stop."""
+        super().stop()
         self.ib.stop()
 
     def reqdata(self):
-        '''request real-time data. checks cash vs non-cash) and param useRT'''
+        """Request real-time data.
+
+        checks cash vs non-cash) and param useRT
+        """
         if self.contract is None or self._subcription_valid:
             return
 
@@ -423,7 +437,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         return self.qlive
 
     def canceldata(self):
-        '''Cancels Market Data subscription, checking asset type and rtbar'''
+        """Cancels Market Data subscription, checking asset type and rtbar."""
         if self.contract is None:
             return
 
@@ -442,13 +456,14 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         while True:
             if self._state == self._ST_LIVE:
                 try:
-                    msg = (self._storedmsg.pop(None, None) or
-                           self.qlive.get(timeout=self._qcheck))
+                    msg = self._storedmsg.pop(None, None) or self.qlive.get(
+                        timeout=self._qcheck
+                    )
                 except queue.Empty:
                     if True:
                         return None
 
-                # Code invalidated until further checking is done
+                    # Code invalidated until further checking is done
                     if not self._statelivereconn:
                         return None  # indicate timeout situation
 
@@ -460,11 +475,15 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
 
                     self.qhist = self.ib.reqHistoricalDataEx(
                         contract=self.contract,
-                        enddate=dtend, begindate=dtbegin,
+                        enddate=dtend,
+                        begindate=dtbegin,
                         timeframe=self._timeframe,
                         compression=self._compression,
-                        what=self.p.what, useRTH=self.p.useRTH, tz=self._tz,
-                        sessionend=self.p.sessionend)
+                        what=self.p.what,
+                        useRTH=self.p.useRTH,
+                        tz=self._tz,
+                        sessionend=self.p.sessionend,
+                    )
 
                     if self._laststatus != self.DELAYED:
                         self.put_notification(self.DELAYED)
@@ -510,7 +529,9 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
                         self.reqdata()  # resubscribe
                     continue
 
-                elif msg == -10225:  # Bust event occurred, current subscription is deactivated.
+                elif (
+                    msg == -10225
+                ):  # Bust event occurred, current subscription is deactivated.
                     self._subcription_valid = False
                     if not self._statelivereconn:
                         self._statelivereconn = self.p.backfill
@@ -551,7 +572,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
                     # len == 1 ... forwarded for the 1st time
                     # get begin date in utc-like format like msg.datetime
                     dtbegin = num2date(self.datetime[-1])
-                elif self.fromdate > float('-inf'):
+                elif self.fromdate > float("-inf"):
                     dtbegin = num2date(self.fromdate)
                 else:  # 1st bar and no begin set
                     # passing None to fetch max possible in 1 request
@@ -560,10 +581,16 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
                 dtend = msg.datetime if self._usertvol else msg.time
 
                 self.qhist = self.ib.reqHistoricalDataEx(
-                    contract=self.contract, enddate=dtend, begindate=dtbegin,
-                    timeframe=self._timeframe, compression=self._compression,
-                    what=self.p.what, useRTH=self.p.useRTH, tz=self._tz,
-                    sessionend=self.p.sessionend)
+                    contract=self.contract,
+                    enddate=dtend,
+                    begindate=dtbegin,
+                    timeframe=self._timeframe,
+                    compression=self._compression,
+                    what=self.p.what,
+                    useRTH=self.p.useRTH,
+                    tz=self._tz,
+                    sessionend=self.p.sessionend,
+                )
 
                 self._state = self._ST_HISTORBACK
                 self._statelivereconn = False  # no longer in live
@@ -632,18 +659,24 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         if self.p.historical:
             self.put_notification(self.DELAYED)
             dtend = None
-            if self.todate < float('inf'):
+            if self.todate < float("inf"):
                 dtend = num2date(self.todate)
 
             dtbegin = None
-            if self.fromdate > float('-inf'):
+            if self.fromdate > float("-inf"):
                 dtbegin = num2date(self.fromdate)
 
             self.qhist = self.ib.reqHistoricalDataEx(
-                contract=self.contract, enddate=dtend, begindate=dtbegin,
-                timeframe=self._timeframe, compression=self._compression,
-                what=self.p.what, useRTH=self.p.useRTH, tz=self._tz,
-                sessionend=self.p.sessionend)
+                contract=self.contract,
+                enddate=dtend,
+                begindate=dtbegin,
+                timeframe=self._timeframe,
+                compression=self._compression,
+                what=self.p.what,
+                useRTH=self.p.useRTH,
+                tz=self._tz,
+                sessionend=self.p.sessionend,
+            )
 
             self._state = self._ST_HISTORBACK
             return True  # continue before

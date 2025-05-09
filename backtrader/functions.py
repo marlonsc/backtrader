@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,8 +17,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
 import functools
 import math
@@ -36,23 +33,23 @@ class List(list):
 
 class Logic(LineActions):
     def __init__(self, *args):
-        super(Logic, self).__init__()
+        super().__init__()
         self.args = [self.arrayize(arg) for arg in args]
 
 
 class DivByZero(Logic):
-    '''This operation is a Lines object and fills it values by executing a
-    division on the numerator / denominator arguments and avoiding a division
-    by zero exception by checking the denominator
+    """This operation is a Lines object and fills it values by executing a division on the
+    numerator / denominator arguments and avoiding a division by zero exception by
+    checking the denominator.
 
     Params:
       - a: numerator (numeric or iterable object ... mostly a Lines object)
       - b: denominator (numeric or iterable object ... mostly a Lines object)
       - zero (def: 0.0): value to apply if division by zero would be raised
+    """
 
-    '''
     def __init__(self, a, b, zero=0.0):
-        super(DivByZero, self).__init__(a, b)
+        super().__init__(a, b)
         self.a = a
         self.b = b
         self.zero = zero
@@ -74,19 +71,19 @@ class DivByZero(Logic):
 
 
 class DivZeroByZero(Logic):
-    '''This operation is a Lines object and fills it values by executing a
-    division on the numerator / denominator arguments and avoiding a division
-    by zero exception or an indetermination by checking the
-    denominator/numerator pair
+    """This operation is a Lines object and fills it values by executing a division on the
+    numerator / denominator arguments and avoiding a division by zero exception or an
+    indetermination by checking the denominator/numerator pair.
 
     Params:
       - a: numerator (numeric or iterable object ... mostly a Lines object)
       - b: denominator (numeric or iterable object ... mostly a Lines object)
       - single (def: +inf): value to apply if division is x / 0
       - dual (def: 0.0): value to apply if division is 0 / 0
-    '''
-    def __init__(self, a, b, single=float('inf'), dual=0.0):
-        super(DivZeroByZero, self).__init__(a, b)
+    """
+
+    def __init__(self, a, b, single=float("inf"), dual=0.0):
+        super().__init__(a, b)
         self.a = a
         self.b = b
         self.single = single
@@ -119,7 +116,7 @@ class DivZeroByZero(Logic):
 
 class Cmp(Logic):
     def __init__(self, a, b):
-        super(Cmp, self).__init__(a, b)
+        super().__init__(a, b)
         self.a = self.args[0]
         self.b = self.args[1]
 
@@ -138,7 +135,7 @@ class Cmp(Logic):
 
 class CmpEx(Logic):
     def __init__(self, a, b, r1, r2, r3):
-        super(CmpEx, self).__init__(a, b, r1, r2, r3)
+        super().__init__(a, b, r1, r2, r3)
         self.a = self.args[0]
         self.b = self.args[1]
         self.r1 = self.args[2]
@@ -171,7 +168,7 @@ class CmpEx(Logic):
 
 class If(Logic):
     def __init__(self, cond, a, b):
-        super(If, self).__init__(a, b)
+        super().__init__(a, b)
         self.a = self.args[0]
         self.b = self.args[1]
         self.cond = self.arrayize(cond)
@@ -206,18 +203,19 @@ class MultiLogic(Logic):
 
 class MultiLogicReduce(MultiLogic):
     def __init__(self, *args, **kwargs):
-        super(MultiLogicReduce, self).__init__(*args)
-        if 'initializer' not in kwargs:
+        super().__init__(*args)
+        if "initializer" not in kwargs:
             self.flogic = functools.partial(functools.reduce, self.flogic)
         else:
-            self.flogic = functools.partial(functools.reduce, self.flogic,
-                                            initializer=kwargs['initializer'])
+            self.flogic = functools.partial(
+                functools.reduce, self.flogic, initializer=kwargs["initializer"]
+            )
 
 
 class Reduce(MultiLogicReduce):
     def __init__(self, flogic, *args, **kwargs):
         self.flogic = flogic
-        super(Reduce, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 # The _xxxlogic functions are defined at module scope to make them

@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import argparse
 
@@ -35,17 +34,17 @@ class St(bt.Strategy):
     def start(self):
         self.callcounter = 0
         txtfields = list()
-        txtfields.append('Calls')
-        txtfields.append('Len Strat')
-        txtfields.append('Len Data')
-        txtfields.append('Datetime')
-        txtfields.append('Open')
-        txtfields.append('High')
-        txtfields.append('Low')
-        txtfields.append('Close')
-        txtfields.append('Volume')
-        txtfields.append('OpenInterest')
-        print(','.join(txtfields))
+        txtfields.append("Calls")
+        txtfields.append("Len Strat")
+        txtfields.append("Len Data")
+        txtfields.append("Datetime")
+        txtfields.append("Open")
+        txtfields.append("High")
+        txtfields.append("Low")
+        txtfields.append("Close")
+        txtfields.append("Volume")
+        txtfields.append("OpenInterest")
+        print(",".join(txtfields))
 
         self.lcontrol = 0
 
@@ -53,20 +52,20 @@ class St(bt.Strategy):
         self.callcounter += 1
 
         txtfields = list()
-        txtfields.append('%04d' % self.callcounter)
-        txtfields.append('%04d' % len(self))
-        txtfields.append('%04d' % len(self.data0))
+        txtfields.append("%04d" % self.callcounter)
+        txtfields.append("%04d" % len(self))
+        txtfields.append("%04d" % len(self.data0))
         txtfields.append(self.data.datetime.datetime(0).isoformat())
-        txtfields.append('%.2f' % self.data0.open[0])
-        txtfields.append('%.2f' % self.data0.high[0])
-        txtfields.append('%.2f' % self.data0.low[0])
-        txtfields.append('%.2f' % self.data0.close[0])
-        txtfields.append('%.2f' % self.data0.volume[0])
-        txtfields.append('%.2f' % self.data0.openinterest[0])
-        print(','.join(txtfields))
+        txtfields.append("%.2f" % self.data0.open[0])
+        txtfields.append("%.2f" % self.data0.high[0])
+        txtfields.append("%.2f" % self.data0.low[0])
+        txtfields.append("%.2f" % self.data0.close[0])
+        txtfields.append("%.2f" % self.data0.volume[0])
+        txtfields.append("%.2f" % self.data0.openinterest[0])
+        print(",".join(txtfields))
 
         if len(self.data) > self.lcontrol:
-            print('- I could issue a buy order during the Opening')
+            print("- I could issue a buy order during the Opening")
 
         self.lcontrol = len(self.data)
 
@@ -83,29 +82,44 @@ def runstrat():
     cerebro.addstrategy(St)
 
     cerebro._doreplay = True
-    cerebro.run(**(eval('dict(' + args.cerebro + ')')))
+    cerebro.run(**(eval("dict(" + args.cerebro + ")")))
     if args.plot:
-        cerebro.plot(**(eval('dict(' + args.plot + ')')))
+        cerebro.plot(**(eval("dict(" + args.plot + ")")))
 
 
 def parse_args(pargs=None):
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        description='Sample for pivot point and cross plotting')
+        description="Sample for pivot point and cross plotting",
+    )
 
-    parser.add_argument('--data', required=False,
-                        default='../../datas/2005-2006-day-001.txt',
-                        help='Data to be read in')
+    parser.add_argument(
+        "--data",
+        required=False,
+        default="../../datas/2005-2006-day-001.txt",
+        help="Data to be read in",
+    )
 
-    parser.add_argument('--cerebro', required=False, action='store',
-                        default='', help=('Arguments for cerebro'))
+    parser.add_argument(
+        "--cerebro",
+        required=False,
+        action="store",
+        default="",
+        help=("Arguments for cerebro"),
+    )
 
-    parser.add_argument('--plot', '-p', nargs='?', required=False,
-                        metavar='kwargs', const='{}',
-                        help=('Plot (with additional args if passed'))
+    parser.add_argument(
+        "--plot",
+        "-p",
+        nargs="?",
+        required=False,
+        metavar="kwargs",
+        const="{}",
+        help=("Plot (with additional args if passed"),
+    )
 
     return parser.parse_args(pargs)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     runstrat()

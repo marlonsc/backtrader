@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,12 +17,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
-import testcommon
 
-import backtrader as bt
 from backtrader import position
 
 
@@ -40,8 +35,8 @@ def test_run(main=False):
     nsize, nprice, opened, closed = pos.update(size=upsize, price=upprice)
 
     if main:
-        print('pos.size/price', pos.size, pos.price)
-        print('nsize, nprice, opened, closed', nsize, nprice, opened, closed)
+        print("pos.size/price", pos.size, pos.price)
+        print("nsize, nprice, opened, closed", nsize, nprice, opened, closed)
 
     assert pos.size == size + upsize
     assert pos.size == nsize
@@ -58,8 +53,8 @@ def test_run(main=False):
     nsize, nprice, opened, closed = pos.update(size=upsize, price=upprice)
 
     if main:
-        print('pos.size/price', pos.size, pos.price)
-        print('nsize, nprice, opened, closed', nsize, nprice, opened, closed)
+        print("pos.size/price", pos.size, pos.price)
+        print("nsize, nprice, opened, closed", nsize, nprice, opened, closed)
 
     assert pos.size == size + upsize
 
@@ -77,8 +72,8 @@ def test_run(main=False):
     nsize, nprice, opened, closed = pos.update(size=upsize, price=upprice)
 
     if main:
-        print('pos.size/price', pos.size, pos.price)
-        print('nsize, nprice, opened, closed', nsize, nprice, opened, closed)
+        print("pos.size/price", pos.size, pos.price)
+        print("nsize, nprice, opened, closed", nsize, nprice, opened, closed)
 
     assert pos.size == size + upsize
     assert pos.size == nsize
@@ -88,5 +83,5 @@ def test_run(main=False):
     assert closed == -size
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test_run(main=True)

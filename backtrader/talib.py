@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,8 +17,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
 # The modules below should/must define __all__ with the objects wishes
 # or prepend an "_" (underscore) to private classes/variables
@@ -28,7 +25,6 @@ import sys
 
 import backtrader as bt
 from backtrader.utils.py3 import with_metaclass
-
 
 try:
     import talib
@@ -42,16 +38,19 @@ else:
 
     # Reverse TA_FUNC_FLAGS dict
     R_TA_FUNC_FLAGS = dict(
-        zip(talib.abstract.TA_FUNC_FLAGS.values(),
-            talib.abstract.TA_FUNC_FLAGS.keys()))
+        zip(talib.abstract.TA_FUNC_FLAGS.values(), talib.abstract.TA_FUNC_FLAGS.keys())
+    )
 
     FUNC_FLAGS_SAMESCALE = 16777216
     FUNC_FLAGS_UNSTABLE = 134217728
     FUNC_FLAGS_CANDLESTICK = 268435456
 
     R_TA_OUTPUT_FLAGS = dict(
-        zip(talib.abstract.TA_OUTPUT_FLAGS.values(),
-            talib.abstract.TA_OUTPUT_FLAGS.keys()))
+        zip(
+            talib.abstract.TA_OUTPUT_FLAGS.values(),
+            talib.abstract.TA_OUTPUT_FLAGS.keys(),
+        )
+    )
 
     OUT_FLAGS_LINE = 1
     OUT_FLAGS_DOTTED = 2
@@ -63,15 +62,14 @@ else:
     # Generate all indicators as subclasses
 
     class _MetaTALibIndicator(bt.Indicator.__class__):
-        _refname = '_taindcol'
+        _refname = "_taindcol"
         _taindcol = dict()
 
-        _KNOWN_UNSTABLE = ['SAR']
+        _KNOWN_UNSTABLE = ["SAR"]
 
         def dopostinit(cls, _obj, *args, **kwargs):
             # Go to parent
-            res = super(_MetaTALibIndicator, cls).dopostinit(_obj,
-                                                             *args, **kwargs)
+            res = super().dopostinit(_obj, *args, **kwargs)
             _obj, args, kwargs = res
 
             # Get the minimum period by using the abstract interface and params
@@ -84,9 +82,9 @@ else:
             elif cls.__name__ in cls._KNOWN_UNSTABLE:
                 _obj._lookback = 0
 
-            cerebro = bt.metabase.findowner(_obj, bt.Cerebro)
+            bt.metabase.findowner(_obj, bt.Cerebro)
             tafuncinfo = _obj._tabstract.info
-            _obj._tafunc = getattr(talib, tafuncinfo['name'], None)
+            _obj._tafunc = getattr(talib, tafuncinfo["name"], None)
             return _obj, args, kwargs  # return the object and args
 
     class _TALibIndicator(with_metaclass(_MetaTALibIndicator, bt.Indicator)):
@@ -111,12 +109,12 @@ else:
             for fflag in fflags:
                 rfflag = R_TA_FUNC_FLAGS[fflag]
                 if rfflag == FUNC_FLAGS_SAMESCALE:
-                    plotinfo['subplot'] = False
+                    plotinfo["subplot"] = False
                 elif rfflag == FUNC_FLAGS_UNSTABLE:
                     unstable = True
                 elif rfflag == FUNC_FLAGS_CANDLESTICK:
-                    plotinfo['subplot'] = False
-                    plotinfo['plotlinelabels'] = True
+                    plotinfo["subplot"] = False
+                    plotinfo["plotlinelabels"] = True
                     iscandle = True
 
             # Prepare plotlines
@@ -131,19 +129,19 @@ else:
                     orflag = R_TA_OUTPUT_FLAGS[oflag]
                     if orflag & OUT_FLAGS_LINE:
                         if not iscandle:
-                            pline['ls'] = '-'
+                            pline["ls"] = "-"
                         else:
-                            pline['_plotskip'] = True  # do not plot candles
+                            pline["_plotskip"] = True  # do not plot candles
 
                     elif orflag & OUT_FLAGS_DASH:
-                        pline['ls'] = '--'
+                        pline["ls"] = "--"
                     elif orflag & OUT_FLAGS_DOTTED:
-                        pline['ls'] = ':'
+                        pline["ls"] = ":"
                     elif orflag & OUT_FLAGS_HISTO:
-                        pline['_method'] = 'bar'
+                        pline["_method"] = "bar"
 
                     if samecolor:
-                        pline['_samecolor'] = True
+                        pline["_samecolor"] = True
 
                     if orflag & OUT_FLAGS_LOWER:
                         samecolor = False
@@ -160,26 +158,26 @@ else:
                 # used to plot a sign above the maximum of the bar which
                 # produces the candle
                 pline = dict()
-                pline['_name'] = name  # plotted name
-                lname = '_candleplot'  # change name
+                pline["_name"] = name  # plotted name
+                lname = "_candleplot"  # change name
                 lines.append(lname)
-                pline['ls'] = ''
-                pline['marker'] = 'd'
-                pline['markersize'] = '7.0'
-                pline['fillstyle'] = 'full'
+                pline["ls"] = ""
+                pline["marker"] = "d"
+                pline["markersize"] = "7.0"
+                pline["fillstyle"] = "full"
                 plotlines[lname] = pline
 
             # Prepare dictionary for subclassing
             clsdict = {
-                '__module__': cls.__module__,
-                '__doc__': str(_tabstract),
-                '_tabstract': _tabstract,  # keep ref for lookback calcs
-                '_iscandle': iscandle,
-                '_unstable': unstable,
-                'params': _tabstract.get_parameters(),
-                'lines': tuple(lines),
-                'plotinfo': plotinfo,
-                'plotlines': plotlines,
+                "__module__": cls.__module__,
+                "__doc__": str(_tabstract),
+                "_tabstract": _tabstract,  # keep ref for lookback calcs
+                "_iscandle": iscandle,
+                "_unstable": unstable,
+                "params": _tabstract.get_parameters(),
+                "lines": tuple(lines),
+                "plotinfo": plotinfo,
+                "plotlines": plotlines,
             }
             newcls = type(str(name), (cls,), clsdict)  # subclass
             setattr(clsmodule, str(name), newcls)  # add to module
@@ -198,16 +196,16 @@ else:
             fsize = self.size()
             lsize = fsize - self._iscandle
             if lsize == 1:  # only 1 output, no tuple returned
-                self.lines[0].array = array.array(str('d'), output)
+                self.lines[0].array = array.array("d", output)
 
                 if fsize > lsize:  # candle is present
                     candleref = narrays[self.CANDLEREF] * self.CANDLEOVER
                     output2 = candleref * (output / 100.0)
-                    self.lines[1].array = array.array(str('d'), output2)
+                    self.lines[1].array = array.array("d", output2)
 
             else:
                 for i, o in enumerate(output):
-                    self.lines[i].array = array.array(str('d'), o)
+                    self.lines[i].array = array.array("d", o)
 
         def next(self):
             # prepare the data arrays - single shot
@@ -235,4 +233,4 @@ else:
     for tafunc in tafunctions:
         _TALibIndicator._subclass(tafunc)
 
-    __all__ = tafunctions + ['MA_Type', '_TALibIndicator']
+    __all__ = tafunctions + ["MA_Type", "_TALibIndicator"]

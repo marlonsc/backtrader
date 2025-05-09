@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,7 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-'''
+"""
 
 .. module:: lineroot
 
@@ -27,47 +26,40 @@ to define interfaces and hierarchy for the real operational classes
 
 .. moduleauthor:: Daniel Rodriguez
 
-'''
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+"""
+
 
 import operator
 
-from .utils.py3 import range, with_metaclass
-
 from . import metabase
+from .utils.py3 import range, with_metaclass
 
 
 class MetaLineRoot(metabase.MetaParams):
-    '''
-    Once the object is created (effectively pre-init) the "owner" of this
-    class is sought
-    '''
+    """Once the object is created (effectively pre-init) the "owner" of this class is
+    sought."""
 
     def donew(cls, *args, **kwargs):
-        _obj, args, kwargs = super(MetaLineRoot, cls).donew(*args, **kwargs)
+        _obj, args, kwargs = super().donew(*args, **kwargs)
 
         # Find the owner and store it
         # startlevel = 4 ... to skip intermediate call stacks
-        ownerskip = kwargs.pop('_ownerskip', None)
-        _obj._owner = metabase.findowner(_obj,
-                                         _obj._OwnerCls or LineMultiple,
-                                         skip=ownerskip)
+        ownerskip = kwargs.pop("_ownerskip", None)
+        _obj._owner = metabase.findowner(
+            _obj, _obj._OwnerCls or LineMultiple, skip=ownerskip
+        )
 
         # Parameter values have now been set before __init__
         return _obj, args, kwargs
 
 
 class LineRoot(with_metaclass(MetaLineRoot, object)):
-    '''
-    Defines a common base and interfaces for Single and Multiple
-    LineXXX instances
+    """Defines a common base and interfaces for Single and Multiple LineXXX instances.
 
-        Period management
-        Iteration management
-        Operation (dual/single operand) Management
-        Rich Comparison operator definition
-    '''
+    Period management Iteration management Operation (dual/single operand) Management Rich
+    Comparison operator definition
+    """
+
     _OwnerCls = None
     _minperiod = 1
     _opstage = 1
@@ -82,8 +74,7 @@ class LineRoot(with_metaclass(MetaLineRoot, object)):
 
     def _operation(self, other, operation, r=False, intify=False):
         if self._opstage == 1:
-            return self._operation_stage1(
-                other, operation, r=r, intify=intify)
+            return self._operation_stage1(other, operation, r=r, intify=intify)
 
         return self._operation_stage2(other, operation, r=r)
 
@@ -94,81 +85,67 @@ class LineRoot(with_metaclass(MetaLineRoot, object)):
         return self._operationown_stage2(operation)
 
     def qbuffer(self, savemem=0):
-        '''Change the lines to implement a minimum size qbuffer scheme'''
+        """Change the lines to implement a minimum size qbuffer scheme."""
         raise NotImplementedError
 
     def minbuffer(self, size):
-        '''Receive notification of how large the buffer must at least be'''
+        """Receive notification of how large the buffer must at least be."""
         raise NotImplementedError
 
     def setminperiod(self, minperiod):
-        '''
-        Direct minperiod manipulation. It could be used for example
-        by a strategy
-        to not wait for all indicators to produce a value
-        '''
+        """Direct minperiod manipulation.
+
+        It could be used for example by a strategy to not wait for all indicators to
+        produce a value
+        """
         self._minperiod = minperiod
 
     def updateminperiod(self, minperiod):
-        '''
-        Update the minperiod if needed. The minperiod will have been
-        calculated elsewhere
-        and has to take over if greater that self's
-        '''
+        """Update the minperiod if needed.
+
+        The minperiod will have been calculated elsewhere and has to take over if greater
+        that self's
+        """
         self._minperiod = max(self._minperiod, minperiod)
 
     def addminperiod(self, minperiod):
-        '''
-        Add a minperiod to own ... to be defined by subclasses
-        '''
+        """Add a minperiod to own ...
+
+        to be defined by subclasses
+        """
         raise NotImplementedError
 
     def incminperiod(self, minperiod):
-        '''
-        Increment the minperiod with no considerations
-        '''
+        """Increment the minperiod with no considerations."""
         raise NotImplementedError
 
     def prenext(self):
-        '''
-        It will be called during the "minperiod" phase of an iteration.
-        '''
-        pass
+        """It will be called during the "minperiod" phase of an iteration."""
 
     def nextstart(self):
-        '''
-        It will be called when the minperiod phase is over for the 1st
-        post-minperiod value. Only called once and defaults to automatically
-        calling next
-        '''
+        """It will be called when the minperiod phase is over for the 1st post-minperiod
+        value.
+
+        Only called once and defaults to automatically calling next
+        """
         self.next()
 
     def next(self):
-        '''
-        Called to calculate values when the minperiod is over
-        '''
-        pass
+        """Called to calculate values when the minperiod is over."""
 
     def preonce(self, start, end):
-        '''
-        It will be called during the "minperiod" phase of a "once" iteration
-        '''
-        pass
+        """It will be called during the "minperiod" phase of a "once" iteration."""
 
     def oncestart(self, start, end):
-        '''
-        It will be called when the minperiod phase is over for the 1st
-        post-minperiod value
+        """It will be called when the minperiod phase is over for the 1st post-minperiod
+        value.
 
         Only called once and defaults to automatically calling once
-        '''
+        """
         self.once(start, end)
 
     def once(self, start, end):
-        '''
-        Called to calculate values at "once" when the minperiod is over
-        '''
-        pass
+        """Called to calculate values at "once" when the minperiod is over."""
 
     # Arithmetic operators
     def _makeoperation(self, other, operation, r=False, _ownerskip=None):
@@ -178,33 +155,31 @@ class LineRoot(with_metaclass(MetaLineRoot, object)):
         raise NotImplementedError
 
     def _operationown_stage1(self, operation):
-        '''
-        Operation with single operand which is "self"
-        '''
+        """Operation with single operand which is "self"."""
         return self._makeoperationown(operation, _ownerskip=self)
 
     def _roperation(self, other, operation, intify=False):
-        '''
-        Relies on self._operation to and passes "r" True to define a
-        reverse operation
-        '''
+        """Relies on self._operation to and passes "r" True to define a reverse
+        operation."""
         return self._operation(other, operation, r=True, intify=intify)
 
     def _operation_stage1(self, other, operation, r=False, intify=False):
-        '''
-        Two operands' operation. Scanning of other happens to understand
-        if other must be directly an operand or rather a subitem thereof
-        '''
+        """Two operands' operation.
+
+        Scanning of other happens to understand if other must be directly an operand or
+        rather a subitem thereof
+        """
         if isinstance(other, LineMultiple):
             other = other.lines[0]
 
         return self._makeoperation(other, operation, r, self)
 
     def _operation_stage2(self, other, operation, r=False):
-        '''
-        Rich Comparison operators. Scans other and returns either an
-        operation with other directly or a subitem from other
-        '''
+        """Rich Comparison operators.
+
+        Scans other and returns either an operation with other directly or a subitem from
+        other
+        """
         if isinstance(other, LineRoot):
             other = other[0]
 
@@ -294,35 +269,30 @@ class LineRoot(with_metaclass(MetaLineRoot, object)):
 
 
 class LineMultiple(LineRoot):
-    '''
-    Base class for LineXXX instances that hold more than one line
-    '''
+    """Base class for LineXXX instances that hold more than one line."""
+
     def reset(self):
         self._stage1()
         self.lines.reset()
 
     def _stage1(self):
-        super(LineMultiple, self)._stage1()
+        super()._stage1()
         for line in self.lines:
             line._stage1()
 
     def _stage2(self):
-        super(LineMultiple, self)._stage2()
+        super()._stage2()
         for line in self.lines:
             line._stage2()
 
     def addminperiod(self, minperiod):
-        '''
-        The passed minperiod is fed to the lines
-        '''
+        """The passed minperiod is fed to the lines."""
         # pass it down to the lines
         for line in self.lines:
             line.addminperiod(minperiod)
 
     def incminperiod(self, minperiod):
-        '''
-        The passed minperiod is fed to the lines
-        '''
+        """The passed minperiod is fed to the lines."""
         # pass it down to the lines
         for line in self.lines:
             line.incminperiod(minperiod)
@@ -343,17 +313,12 @@ class LineMultiple(LineRoot):
 
 
 class LineSingle(LineRoot):
-    '''
-    Base class for LineXXX instances that hold a single line
-    '''
+    """Base class for LineXXX instances that hold a single line."""
+
     def addminperiod(self, minperiod):
-        '''
-        Add the minperiod (substracting the overlapping 1 minimum period)
-        '''
+        """Add the minperiod (substracting the overlapping 1 minimum period)"""
         self._minperiod += minperiod - 1
 
     def incminperiod(self, minperiod):
-        '''
-        Increment the minperiod with no considerations
-        '''
+        """Increment the minperiod with no considerations."""
         self._minperiod += minperiod

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,16 +17,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
 import backtrader as bt
+
 from .. import Observer
 
 
 class DrawDown(Observer):
-    '''This observer keeps track of the current drawdown level (plotted) and
-    the maxdrawdown (not plotted) levels
+    """This observer keeps track of the current drawdown level (plotted) and the
+    maxdrawdown (not plotted) levels.
 
     Params:
 
@@ -39,24 +37,28 @@ class DrawDown(Observer):
         documentation
 
         Set it to ``True`` or ``False`` for a specific behavior
+    """
 
-    '''
     _stclock = True
 
-    params = (
-        ('fund', None),
-    )
+    params = (("fund", None),)
 
-    lines = ('drawdown', 'maxdrawdown',)
+    lines = (
+        "drawdown",
+        "maxdrawdown",
+    )
 
     plotinfo = dict(plot=True, subplot=True)
 
-    plotlines = dict(maxdrawdown=dict(_plotskip=True,))
+    plotlines = dict(
+        maxdrawdown=dict(
+            _plotskip=True,
+        )
+    )
 
     def __init__(self):
         kwargs = self.p._getkwargs()
-        self._dd = self._owner._addanalyzer_slave(bt.analyzers.DrawDown,
-                                                  **kwargs)
+        self._dd = self._owner._addanalyzer_slave(bt.analyzers.DrawDown, **kwargs)
 
     def next(self):
         self.lines.drawdown[0] = self._dd.rets.drawdown  # update drawdown
@@ -64,18 +66,26 @@ class DrawDown(Observer):
 
 
 class DrawDownLength(Observer):
-    '''This observer keeps track of the current drawdown length (plotted) and
-    the drawdown max length (not plotted)
+    """This observer keeps track of the current drawdown length (plotted) and the drawdown
+    max length (not plotted)
 
     Params: None
-    '''
+    """
+
     _stclock = True
 
-    lines = ('len', 'maxlen',)
+    lines = (
+        "len",
+        "maxlen",
+    )
 
     plotinfo = dict(plot=True, subplot=True)
 
-    plotlines = dict(maxlength=dict(_plotskip=True,))
+    plotlines = dict(
+        maxlength=dict(
+            _plotskip=True,
+        )
+    )
 
     def __init__(self):
         self._dd = self._owner._addanalyzer_slave(bt.analyzers.DrawDown)
@@ -86,24 +96,32 @@ class DrawDownLength(Observer):
 
 
 class DrawDown_Old(Observer):
-    '''This observer keeps track of the current drawdown level (plotted) and
-    the maxdrawdown (not plotted) levels
+    """This observer keeps track of the current drawdown level (plotted) and the
+    maxdrawdown (not plotted) levels.
 
     Params: None
-    '''
+    """
+
     _stclock = True
 
-    lines = ('drawdown', 'maxdrawdown',)
+    lines = (
+        "drawdown",
+        "maxdrawdown",
+    )
 
     plotinfo = dict(plot=True, subplot=True)
 
-    plotlines = dict(maxdrawdown=dict(_plotskip='True',))
+    plotlines = dict(
+        maxdrawdown=dict(
+            _plotskip="True",
+        )
+    )
 
     def __init__(self):
-        super(DrawDown_Old, self).__init__()
+        super().__init__()
 
         self.maxdd = 0.0
-        self.peak = float('-inf')
+        self.peak = float("-inf")
 
     def next(self):
         value = self._owner.broker.getvalue()

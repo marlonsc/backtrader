@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,8 +17,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
 import collections
 from datetime import datetime, timedelta
@@ -28,8 +25,8 @@ from backtrader import AbstractDataBase, TimeFrame
 
 
 class DataFiller(AbstractDataBase):
-    '''This class will fill gaps in the source data using the following
-    information bits from the underlying data source
+    """This class will fill gaps in the source data using the following information bits
+    from the underlying data source.
 
       - timeframe and compression to dimension the output bars
 
@@ -50,16 +47,16 @@ class DataFiller(AbstractDataBase):
       - ``fill_vol`` (def: NaN): used to fill the volume of missing bars
 
       - ``fill_oi`` (def: NaN): used to fill the openinterest of missing bars
-    '''
+    """
 
     params = (
-        ('fill_price', None),
-        ('fill_vol', float('NaN')),
-        ('fill_oi', float('NaN')),
-        )
+        ("fill_price", None),
+        ("fill_vol", float("NaN")),
+        ("fill_oi", float("NaN")),
+    )
 
     def start(self):
-        super(DataFiller, self).start()
+        super().start()
         self._fillbars = collections.deque()
         self._dbar = False
 
@@ -74,7 +71,7 @@ class DataFiller(AbstractDataBase):
         self.p.timeframe = self._timeframe = self.p.dataname._timeframe
         self.p.compression = self._compression = self.p.dataname._compression
 
-        super(DataFiller, self).preload()
+        super().preload()
 
     def _copyfromdata(self):
         # Data is allowed - Copy size which is "number of lines"
@@ -152,8 +149,7 @@ class DataFiller(AbstractDataBase):
                 dtime_prev += self._tdunit
 
             # Calculate session start for new bar
-            sstart = datetime.combine(
-                dtime_cur.date(), self.p.dataname.sessionstart)
+            sstart = datetime.combine(dtime_cur.date(), self.p.dataname.sessionstart)
 
             # 2. check for missing bars from new boundary (start)
             # check gap from new sessionstart

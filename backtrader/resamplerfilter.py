@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,19 +17,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
 
-from datetime import datetime, date, timedelta
+from datetime import datetime, timedelta
 
-from .dataseries import TimeFrame, _Bar
-from .utils.py3 import with_metaclass
 from . import metabase
+from .dataseries import TimeFrame, _Bar
 from .utils.date import date2num, num2date
+from .utils.py3 import with_metaclass
 
 
-class DTFaker(object):
+class DTFaker:
     # This will only be used for data sources which at some point in time
     # return None from _load to indicate that a check of the resampler and/or
     # notification queue is needed
@@ -81,7 +78,7 @@ class DTFaker(object):
         return self.data._calendar
 
     def __getitem__(self, idx):
-        return self._dt if idx == 0 else float('-inf')
+        return self._dt if idx == 0 else float("-inf")
 
     def num2date(self, *args, **kwargs):
         return self.data.num2date(*args, **kwargs)
@@ -95,31 +92,29 @@ class DTFaker(object):
 
 class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
     params = (
-        ('bar2edge', True),
-        ('adjbartime', True),
-        ('rightedge', True),
-        ('boundoff', 0),
-
-        ('timeframe', TimeFrame.Days),
-        ('compression', 1),
-
-        ('takelate', True),
-
-        ('sessionend', True),
+        ("bar2edge", True),
+        ("adjbartime", True),
+        ("rightedge", True),
+        ("boundoff", 0),
+        ("timeframe", TimeFrame.Days),
+        ("compression", 1),
+        ("takelate", True),
+        ("sessionend", True),
     )
 
     def __init__(self, data):
         self.subdays = TimeFrame.Ticks < self.p.timeframe < TimeFrame.Days
         self.subweeks = self.p.timeframe < TimeFrame.Weeks
-        self.componly = (not self.subdays and
-                         data._timeframe == self.p.timeframe and
-                         not (self.p.compression % data._compression))
+        self.componly = (
+            not self.subdays
+            and data._timeframe == self.p.timeframe
+            and not (self.p.compression % data._compression)
+        )
 
         self.bar = _Bar(maxdate=True)  # bar holder
         self.compcount = 0  # count of produced bars to control compression
         self._firstbar = True
-        self.doadjusttime = (self.p.bar2edge and self.p.adjbartime and
-                             self.subweeks)
+        self.doadjusttime = self.p.bar2edge and self.p.adjbartime and self.subweeks
 
         self._nexteos = None
 
@@ -198,8 +193,7 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
             # end of session. It could be a weekend and nothing was delivered
             # until Monday
             if grter:
-                ret = (self.bar.isopen() and
-                       self.bar.datetime <= self._nextdteos)
+                ret = self.bar.isopen() and self.bar.datetime <= self._nextdteos
             else:
                 ret = equal
 
@@ -207,7 +201,7 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
             self._lasteos = self._nexteos
             self._lastdteos = self._nextdteos
             self._nexteos = None
-            self._nextdteos = float('-inf')
+            self._nextdteos = float("-inf")
 
         return ret
 
@@ -236,16 +230,14 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
         return bar_yearmonth > yearmonth
 
     def _barover_years(self, data):
-        return (data.datetime.datetime().year >
-                data.num2date(self.bar.datetime).year)
+        return data.datetime.datetime().year > data.num2date(self.bar.datetime).year
 
     def _gettmpoint(self, tm):
-        '''Returns the point of time intraday for a given time according to the
-        timeframe
+        """Returns the point of time intraday for a given time according to the timeframe.
 
-          - Ex 1: 00:05:00 in minutes -> point = 5
-          - Ex 2: 00:05:20 in seconds -> point = 5 * 60 + 20 = 320
-        '''
+        - Ex 1: 00:05:00 in minutes -> point = 5
+        - Ex 2: 00:05:20 in seconds -> point = 5 * 60 + 20 = 320
+        """
         point = tm.hour * 60 + tm.minute
         restpoint = 0
 
@@ -297,13 +289,14 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
         return ret
 
     def check(self, data, _forcedata=None):
-        '''Called to check if the current stored bar has to be delivered in
-        spite of the data not having moved forward. If no ticks from a live
-        feed come in, a 5 second resampled bar could be delivered 20 seconds
-        later. When this method is called the wall clock (incl data time
-        offset) is called to check if the time has gone so far as to have to
-        deliver the already stored data
-        '''
+        """Called to check if the current stored bar has to be delivered in spite of the
+        data not having moved forward.
+
+        If no ticks from a live feed come in, a 5 second resampled bar could be delivered
+        20 seconds later. When this method is called the wall clock (incl data time
+        offset) is called to check if the time has gone so far as to have to deliver the
+        already stored data
+        """
         if not self.bar.isopen():
             return
 
@@ -408,22 +401,21 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
             ph %= 24
 
         # Replace intraday parts with the calculated ones and update it
-        dt = dt.replace(hour=int(ph), minute=int(pm),
-                        second=int(ps), microsecond=int(pus))
+        dt = dt.replace(
+            hour=int(ph), minute=int(pm), second=int(ps), microsecond=int(pus)
+        )
         if extradays:
             dt += timedelta(days=extradays)
         dtnum = self.data.date2num(dt)
         return dtnum
 
     def _adjusttime(self, greater=False, forcedata=None):
-        '''
-        Adjusts the time of calculated bar (from underlying data source) by
-        using the timeframe to the appropriate boundary, with compression taken
-        into account
+        """Adjusts the time of calculated bar (from underlying data source) by using the
+        timeframe to the appropriate boundary, with compression taken into account.
 
         Depending on param ``rightedge`` uses the starting boundary or the
         ending one
-        '''
+        """
         dtnum = self._calcadjtime(greater=greater)
         if greater and dtnum <= self.bar.datetime:
             return False
@@ -433,7 +425,7 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
 
 
 class Resampler(_BaseResampler):
-    '''This class resamples data of a given timeframe to a larger timeframe.
+    """This class resamples data of a given timeframe to a larger timeframe.
 
     Params
 
@@ -466,22 +458,22 @@ class Resampler(_BaseResampler):
 
         If True the used boundary for the time will be hh:mm:05 (the ending
         boundary)
-    '''
+    """
+
     params = (
-        ('bar2edge', True),
-        ('adjbartime', True),
-        ('rightedge', True),
+        ("bar2edge", True),
+        ("adjbartime", True),
+        ("rightedge", True),
     )
 
     replaying = False
 
     def last(self, data):
-        '''Called when the data is no longer producing bars
+        """Called when the data is no longer producing bars.
 
-        Can be called multiple times. It has the chance to (for example)
-        produce extra bars which may still be accumulated and have to be
-        delivered
-        '''
+        Can be called multiple times. It has the chance to (for example) produce extra
+        bars which may still be accumulated and have to be delivered
+        """
         if self.bar.isopen():
             if self.doadjusttime:
                 self._adjusttime()
@@ -493,7 +485,7 @@ class Resampler(_BaseResampler):
         return False
 
     def __call__(self, data, fromcheck=False, forcedata=None):
-        '''Called for each set of values produced by the data source'''
+        """Called for each set of values produced by the data source."""
         consumed = False
         onedge = False
         docheckover = True
@@ -527,8 +519,9 @@ class Resampler(_BaseResampler):
         if cond:  # original is and, the 2nd term must also be true
             if not onedge:  # onedge true is sufficient
                 if docheckover:
-                    cond = self._checkbarover(data, fromcheck=fromcheck,
-                                              forcedata=forcedata)
+                    cond = self._checkbarover(
+                        data, fromcheck=fromcheck, forcedata=forcedata
+                    )
         if cond:
             dodeliver = False
             if forcedata is not None:
@@ -561,7 +554,7 @@ class Resampler(_BaseResampler):
 
 
 class Replayer(_BaseResampler):
-    '''This class replays data of a given timeframe to a larger timeframe.
+    """This class replays data of a given timeframe to a larger timeframe.
 
     It simulates the action of the market by slowly building up (for ex.) a
     daily bar from tick/seconds/minutes data
@@ -603,11 +596,12 @@ class Replayer(_BaseResampler):
 
         If True the used boundary for the time will be hh:mm:05 (the ending
         boundary)
-    '''
+    """
+
     params = (
-        ('bar2edge', True),
-        ('adjbartime', False),
-        ('rightedge', True),
+        ("bar2edge", True),
+        ("adjbartime", False),
+        ("rightedge", True),
     )
 
     replaying = True
@@ -701,52 +695,52 @@ class Replayer(_BaseResampler):
 
 
 class ResamplerTicks(Resampler):
-    params = (('timeframe', TimeFrame.Ticks),)
+    params = (("timeframe", TimeFrame.Ticks),)
 
 
 class ResamplerSeconds(Resampler):
-    params = (('timeframe', TimeFrame.Seconds),)
+    params = (("timeframe", TimeFrame.Seconds),)
 
 
 class ResamplerMinutes(Resampler):
-    params = (('timeframe', TimeFrame.Minutes),)
+    params = (("timeframe", TimeFrame.Minutes),)
 
 
 class ResamplerDaily(Resampler):
-    params = (('timeframe', TimeFrame.Days),)
+    params = (("timeframe", TimeFrame.Days),)
 
 
 class ResamplerWeekly(Resampler):
-    params = (('timeframe', TimeFrame.Weeks),)
+    params = (("timeframe", TimeFrame.Weeks),)
 
 
 class ResamplerMonthly(Resampler):
-    params = (('timeframe', TimeFrame.Months),)
+    params = (("timeframe", TimeFrame.Months),)
 
 
 class ResamplerYearly(Resampler):
-    params = (('timeframe', TimeFrame.Years),)
+    params = (("timeframe", TimeFrame.Years),)
 
 
 class ReplayerTicks(Replayer):
-    params = (('timeframe', TimeFrame.Ticks),)
+    params = (("timeframe", TimeFrame.Ticks),)
 
 
 class ReplayerSeconds(Replayer):
-    params = (('timeframe', TimeFrame.Seconds),)
+    params = (("timeframe", TimeFrame.Seconds),)
 
 
 class ReplayerMinutes(Replayer):
-    params = (('timeframe', TimeFrame.Minutes),)
+    params = (("timeframe", TimeFrame.Minutes),)
 
 
 class ReplayerDaily(Replayer):
-    params = (('timeframe', TimeFrame.Days),)
+    params = (("timeframe", TimeFrame.Days),)
 
 
 class ReplayerWeekly(Replayer):
-    params = (('timeframe', TimeFrame.Weeks),)
+    params = (("timeframe", TimeFrame.Weeks),)
 
 
 class ReplayerMonthly(Replayer):
-    params = (('timeframe', TimeFrame.Months),)
+    params = (("timeframe", TimeFrame.Months),)

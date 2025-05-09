@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import argparse
 import datetime
@@ -37,14 +36,13 @@ def runstrat(pargs=None):
         cerebro.broker.set_cash(args.cash)
 
     # Get the dates from the args
-    fromdate = datetime.datetime.strptime(args.fromdate, '%Y-%m-%d')
-    todate = datetime.datetime.strptime(args.todate, '%Y-%m-%d')
+    fromdate = datetime.datetime.strptime(args.fromdate, "%Y-%m-%d")
+    todate = datetime.datetime.strptime(args.todate, "%Y-%m-%d")
 
     # Create the 1st data
     data = bt.feeds.BacktraderCSVData(
-        dataname=args.data,
-        fromdate=fromdate,
-        todate=todate)
+        dataname=args.data, fromdate=fromdate, todate=todate
+    )
 
     cerebro.adddata(data)  # Add the data to cerebro
 
@@ -55,31 +53,31 @@ def runstrat(pargs=None):
         days=bt.TimeFrame.Days,
         weeks=bt.TimeFrame.Weeks,
         months=bt.TimeFrame.Months,
-        years=bt.TimeFrame.Years)
+        years=bt.TimeFrame.Years,
+    )
 
     # Add the Analyzers
-    cerebro.addanalyzer(bt.analyzers.TimeReturn,
-                        timeframe=tframes[args.tframe])
+    cerebro.addanalyzer(bt.analyzers.TimeReturn, timeframe=tframes[args.tframe])
 
     shkwargs = dict()
     if args.annualize:
-        shkwargs['annualize'] = True
+        shkwargs["annualize"] = True
 
     if args.riskfreerate is not None:
-        shkwargs['riskfreerate'] = args.riskfreerate
+        shkwargs["riskfreerate"] = args.riskfreerate
 
     if args.factor is not None:
-        shkwargs['factor'] = args.factor
+        shkwargs["factor"] = args.factor
 
     if args.stddev_sample:
-        shkwargs['stddev_sample'] = True
+        shkwargs["stddev_sample"] = True
 
     if args.no_convertrate:
-        shkwargs['convertrate'] = False
+        shkwargs["convertrate"] = False
 
-    cerebro.addanalyzer(bt.analyzers.SharpeRatio,
-                        timeframe=tframes[args.tframe],
-                        **shkwargs)
+    cerebro.addanalyzer(
+        bt.analyzers.SharpeRatio, timeframe=tframes[args.tframe], **shkwargs
+    )
 
     # Add a writer to get output
     cerebro.addwriter(bt.WriterFile, csv=args.writercsv, rounding=4)
@@ -88,9 +86,9 @@ def runstrat(pargs=None):
 
     # Plot if requested
     if args.plot:
-        pkwargs = dict(style='bar')
+        pkwargs = dict(style="bar")
         if args.plot is not True:  # evals to True but is not True
-            npkwargs = eval('dict(' + args.plot + ')')  # args were passed
+            npkwargs = eval("dict(" + args.plot + ")")  # args were passed
             pkwargs.update(npkwargs)
 
         cerebro.plot(**pkwargs)
@@ -99,59 +97,111 @@ def runstrat(pargs=None):
 def parse_args(pargs=None):
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        description='TimeReturns and SharpeRatio')
+        description="TimeReturns and SharpeRatio",
+    )
 
-    parser.add_argument('--data', '-d',
-                        default='../../datas/2005-2006-day-001.txt',
-                        help='data to add to the system')
+    parser.add_argument(
+        "--data",
+        "-d",
+        default="../../datas/2005-2006-day-001.txt",
+        help="data to add to the system",
+    )
 
-    parser.add_argument('--cash', default=None, type=float, required=False,
-                        help='Starting Cash')
+    parser.add_argument(
+        "--cash", default=None, type=float, required=False, help="Starting Cash"
+    )
 
-    parser.add_argument('--fromdate', '-f',
-                        default='2005-01-01',
-                        help='Starting date in YYYY-MM-DD format')
+    parser.add_argument(
+        "--fromdate",
+        "-f",
+        default="2005-01-01",
+        help="Starting date in YYYY-MM-DD format",
+    )
 
-    parser.add_argument('--todate', '-t',
-                        default='2006-12-31',
-                        help='Starting date in YYYY-MM-DD format')
+    parser.add_argument(
+        "--todate",
+        "-t",
+        default="2006-12-31",
+        help="Starting date in YYYY-MM-DD format",
+    )
 
-    parser.add_argument('--writercsv', '-wcsv', action='store_true',
-                        help='Tell the writer to produce a csv stream')
+    parser.add_argument(
+        "--writercsv",
+        "-wcsv",
+        action="store_true",
+        help="Tell the writer to produce a csv stream",
+    )
 
-    parser.add_argument('--tframe', '--timeframe', default='years',
-                        required=False,
-                        choices=['days', 'weeks', 'months', 'years'],
-                        help='TimeFrame for the Returns/Sharpe calculations')
+    parser.add_argument(
+        "--tframe",
+        "--timeframe",
+        default="years",
+        required=False,
+        choices=["days", "weeks", "months", "years"],
+        help="TimeFrame for the Returns/Sharpe calculations",
+    )
 
-    parser.add_argument('--annualize', required=False, action='store_true',
-                        help='Annualize Sharpe Ratio')
+    parser.add_argument(
+        "--annualize",
+        required=False,
+        action="store_true",
+        help="Annualize Sharpe Ratio",
+    )
 
-    parser.add_argument('--riskfreerate', required=False, action='store',
-                        type=float, default=None,
-                        help='Riskfree Rate (annual) for Sharpe')
+    parser.add_argument(
+        "--riskfreerate",
+        required=False,
+        action="store",
+        type=float,
+        default=None,
+        help="Riskfree Rate (annual) for Sharpe",
+    )
 
-    parser.add_argument('--factor', required=False, action='store',
-                        type=float, default=None,
-                        help=('Riskfree Rate conversion factor for Sharpe '
-                              'to downgrade riskfree rate to timeframe'))
+    parser.add_argument(
+        "--factor",
+        required=False,
+        action="store",
+        type=float,
+        default=None,
+        help=(
+            "Riskfree Rate conversion factor for Sharpe "
+            "to downgrade riskfree rate to timeframe"
+        ),
+    )
 
-    parser.add_argument('--stddev-sample', required=False, action='store_true',
-                        help='Consider Bessels correction for stddeviation')
+    parser.add_argument(
+        "--stddev-sample",
+        required=False,
+        action="store_true",
+        help="Consider Bessels correction for stddeviation",
+    )
 
-    parser.add_argument('--no-convertrate', required=False,
-                        action='store_true',
-                        help=('Upgrade returns to target timeframe rather than'
-                              'downgrading the riskfreerate'))
+    parser.add_argument(
+        "--no-convertrate",
+        required=False,
+        action="store_true",
+        help=(
+            "Upgrade returns to target timeframe rather than"
+            "downgrading the riskfreerate"
+        ),
+    )
 
     # Plot options
-    parser.add_argument('--plot', '-p', nargs='?', required=False,
-                        metavar='kwargs', const=True,
-                        help=('Plot the read data applying any kwargs passed\n'
-                              '\n'
-                              'For example:\n'
-                              '\n'
-                              '  --plot style="candle" (to plot candles)\n'))
+    parser.add_argument(
+        "--plot",
+        "-p",
+        nargs="?",
+        required=False,
+        metavar="kwargs",
+        const=True,
+        help=(
+            "Plot the read data applying any kwargs passed\n"
+            "\n"
+            "For example:\n"
+            "\n"
+            '  --plot style="candle" (to plot candles)\n'
+        ),
+    )
 
     if pargs is not None:
         return parser.parse_args(pargs)
@@ -159,5 +209,5 @@ def parse_args(pargs=None):
     return parser.parse_args()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     runstrat()

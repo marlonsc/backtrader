@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,8 +17,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
 import math
 
@@ -27,10 +24,8 @@ from ..observer import Observer
 
 
 class BuySell(Observer):
-    '''
-    This observer keeps track of the individual buy/sell orders (individual
-    executions) and will plot them on the chart along the data around the
-    execution price level
+    """This observer keeps track of the individual buy/sell orders (individual executions)
+    and will plot them on the chart along the data around the execution price level.
 
     Params:
       - ``barplot`` (default: ``False``) Plot buy signals below the minimum and
@@ -41,20 +36,22 @@ class BuySell(Observer):
 
       - ``bardist`` (default: ``0.015`` 1.5%) Distance to max/min when
         ``barplot`` is ``True``
-    '''
-    lines = ('buy', 'sell',)
+    """
+
+    lines = (
+        "buy",
+        "sell",
+    )
 
     plotinfo = dict(plot=True, subplot=False, plotlinelabels=True)
     plotlines = dict(
-        buy=dict(marker='^', markersize=8.0, color='lime',
-                 fillstyle='full', ls=''),
-        sell=dict(marker='v', markersize=8.0, color='red',
-                  fillstyle='full', ls='')
+        buy=dict(marker="^", markersize=8.0, color="lime", fillstyle="full", ls=""),
+        sell=dict(marker="v", markersize=8.0, color="red", fillstyle="full", ls=""),
     )
 
     params = (
-        ('barplot', False),  # plot above/below max/min for clarity in bar plot
-        ('bardist', 0.015),  # distance to max/min in absolute perc
+        ("barplot", False),  # plot above/below max/min for clarity in bar plot
+        ("bardist", 0.015),  # distance to max/min in absolute perc
     )
 
     def next(self):
@@ -81,10 +78,10 @@ class BuySell(Observer):
         else:
             curbuylen = self.curbuylen
 
-        buyops = (curbuy + math.fsum(buy))
+        buyops = curbuy + math.fsum(buy)
         buylen = curbuylen + len(buy)
 
-        value = buyops / float(buylen or 'NaN')
+        value = buyops / float(buylen or "NaN")
         if not self.p.barplot:
             self.lines.buy[0] = value
         elif value == value:  # Not NaN
@@ -103,10 +100,10 @@ class BuySell(Observer):
         else:
             curselllen = self.curselllen
 
-        sellops = (cursell + math.fsum(sell))
+        sellops = cursell + math.fsum(sell)
         selllen = curselllen + len(sell)
 
-        value = sellops / float(selllen or 'NaN')
+        value = sellops / float(selllen or "NaN")
         if not self.p.barplot:
             self.lines.sell[0] = value
         elif value == value:  # Not NaN

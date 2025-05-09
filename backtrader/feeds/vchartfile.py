@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,12 +17,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
+import os.path
 from datetime import datetime
 from struct import unpack
-import os.path
 
 import backtrader as bt
 from backtrader import date2num  # avoid dict lookups
@@ -31,27 +28,29 @@ from backtrader import date2num  # avoid dict lookups
 
 class MetaVChartFile(bt.DataBase.__class__):
     def __init__(cls, name, bases, dct):
-        '''Class has already been created ... register'''
+        """Class has already been created ...
+
+        register
+        """
         # Initialize the class
-        super(MetaVChartFile, cls).__init__(name, bases, dct)
+        super().__init__(name, bases, dct)
 
         # Register with the store
         bt.stores.VChartFile.DataCls = cls
 
 
 class VChartFile(bt.with_metaclass(MetaVChartFile, bt.DataBase)):
-    '''
-    Support for `Visual Chart <www.visualchart.com>`_ binary on-disk files for
-    both daily and intradaily formats.
+    """Support for `Visual Chart <www.visualchart.com>`_ binary on-disk files for both
+    daily and intradaily formats.
 
     Note:
 
       - ``dataname``: Market code displayed by Visual Chart. Example: 015ES for
         EuroStoxx 50 continuous future
-    '''
+    """
 
     def start(self):
-        super(VChartFile, self).start()
+        super().start()
         if self._store is None:
             self._store = bt.stores.VChartFile()
             self._store.start()
@@ -60,32 +59,32 @@ class VChartFile(bt.with_metaclass(MetaVChartFile, bt.DataBase)):
 
         # Choose extension and extraction/calculation parameters
         if self.p.timeframe < bt.TimeFrame.Minutes:
-            ext = '.tck'  # seconds will still need resampling
+            ext = ".tck"  # seconds will still need resampling
             # FIXME: find reference to tick counter for format
         elif self.p.timeframe < bt.TimeFrame.Days:
-            ext = '.min'
+            ext = ".min"
             self._dtsize = 2
             self._barsize = 32
-            self._barfmt = 'IIffffII'
+            self._barfmt = "IIffffII"
         else:
-            ext = '.fd'
+            ext = ".fd"
             self._barsize = 28
             self._dtsize = 1
-            self._barfmt = 'IffffII'
+            self._barfmt = "IffffII"
 
         # Construct full path
         basepath = self._store.get_datapath()
 
         # Example: 01 + 0 + 015ES + .fd -> 010015ES.fd
-        dataname = '01' + '0' + self.p.dataname + ext
+        dataname = "01" + "0" + self.p.dataname + ext
         # 015ES -> 0 + 015 -> 0015
-        mktcode = '0' + self.p.dataname[0:3]
+        mktcode = "0" + self.p.dataname[0:3]
 
         # basepath/0015/010015ES.fd
         path = os.path.join(basepath, mktcode, dataname)
         try:
-            self.f = open(path, 'rb')
-        except IOError:
+            self.f = open(path, "rb")
+        except OSError:
             self.f = None
 
     def stop(self):
@@ -99,7 +98,7 @@ class VChartFile(bt.with_metaclass(MetaVChartFile, bt.DataBase)):
 
         try:
             bardata = self.f.read(self._barsize)
-        except IOError:
+        except OSError:
             self.f = None  # cannot return, nullify file
             return False  # cannot load more
 
@@ -109,7 +108,7 @@ class VChartFile(bt.with_metaclass(MetaVChartFile, bt.DataBase)):
 
         try:
             bdata = unpack(self._barfmt, bardata)
-        except:
+        except BaseException:
             self.f = None
             return False
 
@@ -130,7 +129,7 @@ class VChartFile(bt.with_metaclass(MetaVChartFile, bt.DataBase)):
         self.lines.datetime[0] = date2num(dt)  # Store time
 
         # Get the rest of the fields
-        o, h, l, c, v, oi = bdata[self._dtsize:]
+        o, h, l, c, v, oi = bdata[self._dtsize :]
         self.lines.open[0] = o
         self.lines.high[0] = h
         self.lines.low[0] = l

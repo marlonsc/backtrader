@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,16 +17,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
-from . import MovingAverageBase, ExponentialSmoothing
+from . import ExponentialSmoothing, MovingAverageBase
 
 
 class SmoothedMovingAverage(MovingAverageBase):
-    '''
-    Smoothing Moving Average used by Wilder in his 1978 book `New Concepts in
-    Technical Trading`
+    """Smoothing Moving Average used by Wilder in his 1978 book `New Concepts in Technical
+    Trading`
 
     Defined in his book originally as:
 
@@ -43,16 +39,21 @@ class SmoothedMovingAverage(MovingAverageBase):
 
     See also:
       - http://en.wikipedia.org/wiki/Moving_average#Modified_moving_average
-    '''
-    alias = ('SMMA', 'WilderMA', 'MovingAverageSmoothed',
-             'MovingAverageWilder', 'ModifiedMovingAverage',)
-    lines = ('smma',)
+    """
+
+    alias = (
+        "SMMA",
+        "WilderMA",
+        "MovingAverageSmoothed",
+        "MovingAverageWilder",
+        "ModifiedMovingAverage",
+    )
+    lines = ("smma",)
 
     def __init__(self):
         # Before super to ensure mixins (right-hand side in subclassing)
         # can see the assignment operation and operate on the line
         self.lines[0] = ExponentialSmoothing(
-            self.data,
-            period=self.p.period,
-            alpha=1.0 / self.p.period)
-        super(SmoothedMovingAverage, self).__init__()
+            self.data, period=self.p.period, alpha=1.0 / self.p.period
+        )
+        super().__init__()

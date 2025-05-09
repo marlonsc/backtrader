@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,20 +17,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
 import sys
-
 
 from . import Indicator, MovingAverage
 
 
 class OscillatorMixIn(Indicator):
-    '''
-    MixIn class to create a subclass with another indicator. The main line of
-    that indicator will be substracted from the other base class main line
-    creating an oscillator
+    """MixIn class to create a subclass with another indicator. The main line of that
+    indicator will be substracted from the other base class main line creating an
+    oscillator.
 
     The usage is:
 
@@ -40,24 +35,24 @@ class OscillatorMixIn(Indicator):
     Formula:
       - XXX calculates lines[0]
       - osc = self.data - XXX.lines[0]
-    '''
-    plotlines = dict(_0=dict(_name='osc'))
+    """
+
+    plotlines = dict(_0=dict(_name="osc"))
 
     def _plotinit(self):
         try:
             lname = self.lines._getlinealias(0)
-            self.plotlines._0._name = lname + '_osc'
+            self.plotlines._0._name = lname + "_osc"
         except AttributeError:
             pass
 
     def __init__(self):
         self.lines[0] = self.data - self.lines[0]
-        super(OscillatorMixIn, self).__init__()
+        super().__init__()
 
 
 class Oscillator(Indicator):
-    '''
-    Oscillation of a given data around another data
+    """Oscillation of a given data around another data.
 
     Datas:
       This indicator can accept 1 or 2 datas for the calculation.
@@ -74,21 +69,22 @@ class Oscillator(Indicator):
     Formula:
       - 1 data -> osc = data.data - data
       - 2 datas -> osc = data0 - data1
-    '''
-    lines = ('osc',)
+    """
+
+    lines = ("osc",)
 
     # Have a default value which can be later modified if needed
-    plotlines = dict(_0=dict(_name='osc'))
+    plotlines = dict(_0=dict(_name="osc"))
 
     def _plotinit(self):
         try:
             lname = self.dataosc._getlinealias(0)
-            self.plotlines._0._name = lname + '_osc'
+            self.plotlines._0._name = lname + "_osc"
         except AttributeError:
             pass
 
     def __init__(self):
-        super(Oscillator, self).__init__()
+        super().__init__()
 
         if len(self.datas) > 1:
             datasrc = self.data
@@ -103,27 +99,29 @@ class Oscillator(Indicator):
 # Automatic creation of Oscillating Lines
 
 for movav in MovingAverage._movavs[1:]:
-    _newclsdoc = '''
+    _newclsdoc = """
     Oscillation of a %s around its data
-    '''
+    """
     # Skip aliases - they will be created automatically
-    if getattr(movav, 'aliased', ''):
+    if getattr(movav, "aliased", ""):
         continue
 
     movname = movav.__name__
     linename = movav.lines._getlinealias(0)
-    newclsname = movname + 'Oscillator'
+    newclsname = movname + "Oscillator"
 
-    newaliases = [movname + 'Osc']
-    for alias in getattr(movav, 'alias', []):
-        for suffix in ['Oscillator', 'Osc']:
+    newaliases = [movname + "Osc"]
+    for alias in getattr(movav, "alias", []):
+        for suffix in ["Oscillator", "Osc"]:
             newaliases.append(alias + suffix)
 
     newclsdoc = _newclsdoc % movname
-    newclsdct = {'__doc__': newclsdoc,
-                 '__module__': OscillatorMixIn.__module__,
-                 '_notregister': True,
-                 'alias': newaliases}
+    newclsdct = {
+        "__doc__": newclsdoc,
+        "__module__": OscillatorMixIn.__module__,
+        "_notregister": True,
+        "alias": newaliases,
+    }
 
     newcls = type(str(newclsname), (movav, OscillatorMixIn), newclsdct)
     module = sys.modules[OscillatorMixIn.__module__]

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,16 +17,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
 import backtrader as bt
+
 from . import Highest, Lowest
 
 
 class Ichimoku(bt.Indicator):
-    '''
-    Developed and published in his book in 1969 by journalist Goichi Hosoda
+    """Developed and published in his book in 1969 by journalist Goichi Hosoda.
 
     Formula:
       - tenkan_sen = (Highest(High, tenkan) + Lowest(Low, tenkan)) / 2.0
@@ -46,22 +43,28 @@ class Ichimoku(bt.Indicator):
 
     See:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:ichimoku_cloud
+    """
 
-    '''
-    lines = ('tenkan_sen', 'kijun_sen',
-             'senkou_span_a', 'senkou_span_b', 'chikou_span',)
+    lines = (
+        "tenkan_sen",
+        "kijun_sen",
+        "senkou_span_a",
+        "senkou_span_b",
+        "chikou_span",
+    )
     params = (
-        ('tenkan', 9),
-        ('kijun', 26),
-        ('senkou', 52),
-        ('senkou_lead', 26),  # forward push
-        ('chikou', 26),  # backwards push
+        ("tenkan", 9),
+        ("kijun", 26),
+        ("senkou", 52),
+        ("senkou_lead", 26),  # forward push
+        ("chikou", 26),  # backwards push
     )
 
     plotinfo = dict(subplot=False)
     plotlines = dict(
-        senkou_span_a=dict(_fill_gt=('senkou_span_b', 'g'),
-                           _fill_lt=('senkou_span_b', 'r')),
+        senkou_span_a=dict(
+            _fill_gt=("senkou_span_b", "g"), _fill_lt=("senkou_span_b", "r")
+        ),
     )
 
     def __init__(self):
@@ -83,4 +86,4 @@ class Ichimoku(bt.Indicator):
 
         self.l.chikou_span = self.data.close(self.p.chikou)
 
-        super(Ichimoku, self).__init__()
+        super().__init__()

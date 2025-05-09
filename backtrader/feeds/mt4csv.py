@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -19,15 +18,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
 
 from . import GenericCSVData
 
 
 class MT4CSVData(GenericCSVData):
-    '''
+    """
     Parses a `Metatrader4 <https://www.metaquotes.net/en/metatrader4>`_ History
     center CSV exported file.
 
@@ -36,17 +33,17 @@ class MT4CSVData(GenericCSVData):
       - ``dataname``: The filename to parse or a file-like object
 
       - Uses GenericCSVData and simply modifies the params
-    '''
+    """
 
     params = (
-        ('dtformat', '%Y.%m.%d'),
-        ('tmformat', '%H:%M'),
-        ('datetime', 0),
-        ('time',  1),
-        ('open',  2),
-        ('high',  3),
-        ('low',   4),
-        ('close', 5),
-        ('volume', 6),
-        ('openinterest', -1),
+        ("dtformat", "%Y.%m.%d"),
+        ("tmformat", "%H:%M"),
+        ("datetime", 0),
+        ("time", 1),
+        ("open", 2),
+        ("high", 3),
+        ("low", 4),
+        ("close", 5),
+        ("volume", 6),
+        ("openinterest", -1),
     )

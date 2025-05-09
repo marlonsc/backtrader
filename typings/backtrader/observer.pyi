@@ -1,0 +1,13 @@
+from .lineiterator import LineIterator as LineIterator, ObserverBase as ObserverBase, StrategyBase as StrategyBase
+from _typeshed import Incomplete
+from backtrader.utils.py3 import with_metaclass as with_metaclass
+
+class MetaObserver(ObserverBase.__class__):
+    def donew(cls, *args, **kwargs): ...
+    def dopreinit(cls, _obj, *args, **kwargs): ...
+
+class Observer(Incomplete):
+    csv: bool
+    plotinfo: Incomplete
+    def prenext(self) -> None: ...
+    def start(self) -> None: ...

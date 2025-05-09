@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import argparse
 
@@ -30,8 +29,8 @@ import backtrader.indicators as btind
 
 class SMAStrategy(bt.Strategy):
     params = (
-        ('period', 10),
-        ('onlydaily', False),
+        ("period", 10),
+        ("onlydaily", False),
     )
 
     def __init__(self):
@@ -42,11 +41,11 @@ class SMAStrategy(bt.Strategy):
 
     def prenext(self):
         self.counter += 1
-        print('prenext len %d - counter %d' % (len(self), self.counter))
+        print("prenext len %d - counter %d" % (len(self), self.counter))
 
     def next(self):
         self.counter += 1
-        print('---next len %d - counter %d' % (len(self), self.counter))
+        print("---next len %d - counter %d" % (len(self), self.counter))
 
 
 def runstrat():
@@ -62,14 +61,12 @@ def runstrat():
     )
 
     # Load the Data
-    datapath = args.dataname or '../../datas//2006-day-001.txt'
-    data = btfeeds.BacktraderCSVData(
-        dataname=datapath)
+    datapath = args.dataname or "../../datas//2006-day-001.txt"
+    data = btfeeds.BacktraderCSVData(dataname=datapath)
 
     tframes = dict(
-        daily=bt.TimeFrame.Days,
-        weekly=bt.TimeFrame.Weeks,
-        monthly=bt.TimeFrame.Months)
+        daily=bt.TimeFrame.Days, weekly=bt.TimeFrame.Weeks, monthly=bt.TimeFrame.Months
+    )
 
     # Handy dictionary for the argument timeframe conversion
     # Resample the data
@@ -77,11 +74,10 @@ def runstrat():
         data = bt.DataReplayer(
             dataname=data,
             timeframe=tframes[args.timeframe],
-            compression=args.compression)
+            compression=args.compression,
+        )
     else:
-        data.replay(
-            timeframe=tframes[args.timeframe],
-            compression=args.compression)
+        data.replay(timeframe=tframes[args.timeframe], compression=args.compression)
 
     # First add the original data - smaller timeframe
     cerebro.adddata(data)
@@ -90,31 +86,49 @@ def runstrat():
     cerebro.run(preload=False)
 
     # Plot the result
-    cerebro.plot(style='bar')
+    cerebro.plot(style="bar")
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(
-        description='Pandas test script')
+    parser = argparse.ArgumentParser(description="Pandas test script")
 
-    parser.add_argument('--dataname', default='', required=False,
-                        help='File Data to Load')
+    parser.add_argument(
+        "--dataname", default="", required=False, help="File Data to Load"
+    )
 
-    parser.add_argument('--oldrp', required=False, action='store_true',
-                        help='Use deprecated DataReplayer')
+    parser.add_argument(
+        "--oldrp",
+        required=False,
+        action="store_true",
+        help="Use deprecated DataReplayer",
+    )
 
-    parser.add_argument('--timeframe', default='weekly', required=False,
-                        choices=['daily', 'weekly', 'monthly'],
-                        help='Timeframe to resample to')
+    parser.add_argument(
+        "--timeframe",
+        default="weekly",
+        required=False,
+        choices=["daily", "weekly", "monthly"],
+        help="Timeframe to resample to",
+    )
 
-    parser.add_argument('--compression', default=1, required=False, type=int,
-                        help='Compress n bars into 1')
+    parser.add_argument(
+        "--compression",
+        default=1,
+        required=False,
+        type=int,
+        help="Compress n bars into 1",
+    )
 
-    parser.add_argument('--period', default=10, required=False, type=int,
-                        help='Period to apply to indicator')
+    parser.add_argument(
+        "--period",
+        default=10,
+        required=False,
+        type=int,
+        help="Period to apply to indicator",
+    )
 
     return parser.parse_args()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     runstrat()

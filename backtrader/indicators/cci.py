@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,17 +17,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
-from . import Indicator, Max, MovAv, MeanDev
+from . import Indicator, MeanDev, MovAv
 
 
 class CommodityChannelIndex(Indicator):
-    '''
-    Introduced by Donald Lambert in 1980 to measure variations of the
-    "typical price" (see below) from its mean to identify extremes and
-    reversals
+    """Introduced by Donald Lambert in 1980 to measure variations of the "typical price"
+    (see below) from its mean to identify extremes and reversals.
 
     Formula:
       - tp = typical_price = (high + low + close) / 3
@@ -39,20 +34,23 @@ class CommodityChannelIndex(Indicator):
 
     See:
       - https://en.wikipedia.org/wiki/Commodity_channel_index
-    '''
-    alias = ('CCI',)
+    """
 
-    lines = ('cci',)
+    alias = ("CCI",)
 
-    params = (('period', 20),
-              ('factor', 0.015),
-              ('movav', MovAv.Simple),
-              ('upperband', 100.0),
-              ('lowerband', -100.0),)
+    lines = ("cci",)
+
+    params = (
+        ("period", 20),
+        ("factor", 0.015),
+        ("movav", MovAv.Simple),
+        ("upperband", 100.0),
+        ("lowerband", -100.0),
+    )
 
     def _plotlabel(self):
         plabels = [self.p.period, self.p.factor]
-        plabels += [self.p.movav] * self.p.notdefault('movav')
+        plabels += [self.p.movav] * self.p.notdefault("movav")
         return plabels
 
     def _plotinit(self):
@@ -67,4 +65,4 @@ class CommodityChannelIndex(Indicator):
 
         self.lines.cci = dev / (self.p.factor * meandev)
 
-        super(CommodityChannelIndex, self).__init__()
+        super().__init__()

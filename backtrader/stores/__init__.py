@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,26 +17,21 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
 # The modules below should/must define __all__ with the objects wishes
 # or prepend an "_" (underscore) to private classes/variables
 
 try:
-    from .ibstore import IBStore
+    pass
 except ImportError:
     pass  # The user may not have ibpy installed
 
 try:
-    from .vcstore import VCStore
+    pass
 except ImportError:
     pass  # The user may not have a module installed
 
 try:
-    from .oandastore import OandaStore
+    pass
 except ImportError:
     pass  # The user may not have a module installed
-
-
-from .vchartfile import VChartFile

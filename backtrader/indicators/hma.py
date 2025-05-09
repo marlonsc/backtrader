@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,16 +17,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
 
-from . import MovingAverageBase, MovAv
+from . import MovAv, MovingAverageBase
 
 
 # Inherits from MovingAverageBase to auto-register as MovingAverage type
 class HullMovingAverage(MovingAverageBase):
-    '''By Alan Hull
+    """By Alan Hull.
 
     The Hull Moving Average solves the age old dilemma of making a moving
     average more responsive to current price activity whilst maintaining curve
@@ -48,12 +45,16 @@ class HullMovingAverage(MovingAverageBase):
 
         In the default case of ``30`` the final minimum period before the
         moving average produces a non-NAN value is ``34``
-    '''
-    alias = ('HMA', 'HullMA',)
-    lines = ('hma',)
+    """
+
+    alias = (
+        "HMA",
+        "HullMA",
+    )
+    lines = ("hma",)
 
     # param 'period' is inherited from MovingAverageBase
-    params = (('_movav', MovAv.WMA),)
+    params = (("_movav", MovAv.WMA),)
 
     def __init__(self):
         wma = self.p._movav(self.data, period=self.params.period)
@@ -63,4 +64,4 @@ class HullMovingAverage(MovingAverageBase):
         self.lines.hma = self.p._movav(wma2 - wma, period=int(sqrtperiod))
 
         # Done after calc to ensure coop inheritance and composition work
-        super(HullMovingAverage, self).__init__()
+        super().__init__()

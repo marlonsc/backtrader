@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import argparse
 import datetime
@@ -52,11 +51,11 @@ class ManualStopOrStopTrail(BaseStrategy):
             return  # discard any other notification
 
         if not self.position:  # we left the market
-            print('SELL@price: {:.2f}'.format(order.executed.price))
+            print("SELL@price: {:.2f}".format(order.executed.price))
             return
 
         # We have entered the market
-        print('BUY @price: {:.2f}'.format(order.executed.price))
+        print("BUY @price: {:.2f}".format(order.executed.price))
 
         if not self.p.trail:
             stop_price = order.executed.price * (1.0 - self.p.stop_loss)
@@ -85,11 +84,11 @@ class ManualStopOrStopTrailCheat(BaseStrategy):
             return  # discard any other notification
 
         if not self.position:  # we left the market
-            print('SELL@price: {:.2f}'.format(order.executed.price))
+            print("SELL@price: {:.2f}".format(order.executed.price))
             return
 
         # We have entered the market
-        print('BUY @price: {:.2f}'.format(order.executed.price))
+        print("BUY @price: {:.2f}".format(order.executed.price))
 
     def next(self):
         if not self.position and self.crossup > 0:
@@ -100,8 +99,7 @@ class ManualStopOrStopTrailCheat(BaseStrategy):
                 stop_price = self.data.close[0] * (1.0 - self.p.stop_loss)
                 self.sell(exectype=bt.Order.Stop, price=stop_price)
             else:
-                self.sell(exectype=bt.Order.StopTrail,
-                          trailamount=self.p.trail)
+                self.sell(exectype=bt.Order.StopTrail, trailamount=self.p.trail)
 
 
 class AutoStopOrStopTrail(BaseStrategy):
@@ -115,19 +113,22 @@ class AutoStopOrStopTrail(BaseStrategy):
 
     def notify_order(self, order):
         if order.status == order.Cancelled:
-            print('CANCEL@price: {:.2f} {}'.format(
-                order.executed.price, 'buy' if order.isbuy() else 'sell'))
+            print(
+                "CANCEL@price: {:.2f} {}".format(
+                    order.executed.price, "buy" if order.isbuy() else "sell"
+                )
+            )
             return
 
         if not order.status == order.Completed:
             return  # discard any other notification
 
         if not self.position:  # we left the market
-            print('SELL@price: {:.2f}'.format(order.executed.price))
+            print("SELL@price: {:.2f}".format(order.executed.price))
             return
 
         # We have entered the market
-        print('BUY @price: {:.2f}'.format(order.executed.price))
+        print("BUY @price: {:.2f}".format(order.executed.price))
 
     def next(self):
         if not self.position and self.crossup > 0:
@@ -141,18 +142,22 @@ class AutoStopOrStopTrail(BaseStrategy):
                 price = self.data.close[0] * (1.0 - self.p.buy_limit)
 
                 # transmit = False ... await child order before transmission
-                self.buy_order = self.buy(price=price, exectype=bt.Order.Limit,
-                                          transmit=False)
+                self.buy_order = self.buy(
+                    price=price, exectype=bt.Order.Limit, transmit=False
+                )
 
             # Setting parent=buy_order ... sends both together
             if not self.p.trail:
                 stop_price = self.data.close[0] * (1.0 - self.p.stop_loss)
-                self.sell(exectype=bt.Order.Stop, price=stop_price,
-                          parent=self.buy_order)
+                self.sell(
+                    exectype=bt.Order.Stop, price=stop_price, parent=self.buy_order
+                )
             else:
-                self.sell(exectype=bt.Order.StopTrail,
-                          trailamount=self.p.trail,
-                          parent=self.buy_order)
+                self.sell(
+                    exectype=bt.Order.StopTrail,
+                    trailamount=self.p.trail,
+                    parent=self.buy_order,
+                )
 
 
 APPROACHES = dict(
@@ -171,72 +176,109 @@ def runstrat(args=None):
     kwargs = dict()
 
     # Parse from/to-date
-    dtfmt, tmfmt = '%Y-%m-%d', 'T%H:%M:%S'
-    for a, d in ((getattr(args, x), x) for x in ['fromdate', 'todate']):
+    dtfmt, tmfmt = "%Y-%m-%d", "T%H:%M:%S"
+    for a, d in ((getattr(args, x), x) for x in ["fromdate", "todate"]):
         if a:
-            strpfmt = dtfmt + tmfmt * ('T' in a)
+            strpfmt = dtfmt + tmfmt * ("T" in a)
             kwargs[d] = datetime.datetime.strptime(a, strpfmt)
 
     data0 = bt.feeds.BacktraderCSVData(dataname=args.data0, **kwargs)
     cerebro.adddata(data0)
 
     # Broker
-    cerebro.broker = bt.brokers.BackBroker(**eval('dict(' + args.broker + ')'))
+    cerebro.broker = bt.brokers.BackBroker(**eval("dict(" + args.broker + ")"))
 
     # Sizer
-    cerebro.addsizer(bt.sizers.FixedSize, **eval('dict(' + args.sizer + ')'))
+    cerebro.addsizer(bt.sizers.FixedSize, **eval("dict(" + args.sizer + ")"))
 
     # Strategy
     StClass = APPROACHES[args.approach]
-    cerebro.addstrategy(StClass, **eval('dict(' + args.strat + ')'))
+    cerebro.addstrategy(StClass, **eval("dict(" + args.strat + ")"))
 
     # Execute
-    cerebro.run(**eval('dict(' + args.cerebro + ')'))
+    cerebro.run(**eval("dict(" + args.cerebro + ")"))
 
     if args.plot:  # Plot if requested to
-        cerebro.plot(**eval('dict(' + args.plot + ')'))
+        cerebro.plot(**eval("dict(" + args.plot + ")"))
 
 
 def parse_args(pargs=None):
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        description=(
-            'Stop-Loss Approaches'
-        )
+        description=("Stop-Loss Approaches"),
     )
 
-    parser.add_argument('--data0', default='../../datas/2005-2006-day-001.txt',
-                        required=False, help='Data to read in')
+    parser.add_argument(
+        "--data0",
+        default="../../datas/2005-2006-day-001.txt",
+        required=False,
+        help="Data to read in",
+    )
 
     # Strategy to choose
-    parser.add_argument('approach', choices=APPROACHES.keys(),
-                        help='Stop approach to use')
+    parser.add_argument(
+        "approach", choices=APPROACHES.keys(), help="Stop approach to use"
+    )
 
     # Defaults for dates
-    parser.add_argument('--fromdate', required=False, default='',
-                        help='Date[time] in YYYY-MM-DD[THH:MM:SS] format')
+    parser.add_argument(
+        "--fromdate",
+        required=False,
+        default="",
+        help="Date[time] in YYYY-MM-DD[THH:MM:SS] format",
+    )
 
-    parser.add_argument('--todate', required=False, default='',
-                        help='Date[time] in YYYY-MM-DD[THH:MM:SS] format')
+    parser.add_argument(
+        "--todate",
+        required=False,
+        default="",
+        help="Date[time] in YYYY-MM-DD[THH:MM:SS] format",
+    )
 
-    parser.add_argument('--cerebro', required=False, default='',
-                        metavar='kwargs', help='kwargs in key=value format')
+    parser.add_argument(
+        "--cerebro",
+        required=False,
+        default="",
+        metavar="kwargs",
+        help="kwargs in key=value format",
+    )
 
-    parser.add_argument('--broker', required=False, default='',
-                        metavar='kwargs', help='kwargs in key=value format')
+    parser.add_argument(
+        "--broker",
+        required=False,
+        default="",
+        metavar="kwargs",
+        help="kwargs in key=value format",
+    )
 
-    parser.add_argument('--sizer', required=False, default='',
-                        metavar='kwargs', help='kwargs in key=value format')
+    parser.add_argument(
+        "--sizer",
+        required=False,
+        default="",
+        metavar="kwargs",
+        help="kwargs in key=value format",
+    )
 
-    parser.add_argument('--strat', required=False, default='',
-                        metavar='kwargs', help='kwargs in key=value format')
+    parser.add_argument(
+        "--strat",
+        required=False,
+        default="",
+        metavar="kwargs",
+        help="kwargs in key=value format",
+    )
 
-    parser.add_argument('--plot', required=False, default='',
-                        nargs='?', const='{}',
-                        metavar='kwargs', help='kwargs in key=value format')
+    parser.add_argument(
+        "--plot",
+        required=False,
+        default="",
+        nargs="?",
+        const="{}",
+        metavar="kwargs",
+        help="kwargs in key=value format",
+    )
 
     return parser.parse_args(pargs)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     runstrat()

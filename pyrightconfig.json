@@ -1,0 +1,20 @@
+{
+  // Copyright (c) 2025 backtrader contributors
+  // Pyright config: fully permissive for legacy/dynamic codebases. Adjust for stricter typing.
+  "include": ["backtrader"],
+  "exclude": ["dist", "build", ".venv", "tests", "contrib","typings"],
+  "typeCheckingMode": "off",
+  "reportUnknownMemberType": false,
+  "reportMissingTypeStubs": false,
+  "reportMissingImports": false,
+  "reportMissingModuleSource": false,
+  "reportPrivateImportUsage": false,
+  "reportMissingParameterType": false,
+  "reportMissingTypeArgument": false,
+  "reportMissingReturnType": false,
+  "reportIncompatibleMethodOverride": false,
+  "reportIncompatibleVariableOverride": false,
+  "reportGeneralTypeIssues": false,
+  "reportUntypedFunctionDecorator": false,
+  "reportUntypedClassDecorator": false
+}

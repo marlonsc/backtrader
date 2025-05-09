@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import argparse
 import datetime
@@ -40,13 +39,12 @@ def runstrat():
     cerebro.addstrategy(bt.Strategy)
 
     # Get the dates from the args
-    fromdate = datetime.datetime.strptime(args.fromdate, '%Y-%m-%d')
-    todate = datetime.datetime.strptime(args.todate, '%Y-%m-%d')
+    fromdate = datetime.datetime.strptime(args.fromdate, "%Y-%m-%d")
+    todate = datetime.datetime.strptime(args.todate, "%Y-%m-%d")
 
     data = btfeeds.YahooFinanceData(
-        dataname=args.data,
-        fromdate=fromdate,
-        todate=todate)
+        dataname=args.data, fromdate=fromdate, todate=todate
+    )
 
     # Add the resample data instead of the original
     cerebro.adddata(data)
@@ -63,43 +61,56 @@ def runstrat():
 
     # Plot if requested
     if args.plot:
-        cerebro.plot(style='bar', numfigs=args.numfigs, volume=False)
+        cerebro.plot(style="bar", numfigs=args.numfigs, volume=False)
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        description='Calendar Days Filter Sample')
+        description="Calendar Days Filter Sample",
+    )
 
-    parser.add_argument('--data', '-d',
-                        default='YHOO',
-                        help='Ticker to download from Yahoo')
+    parser.add_argument(
+        "--data", "-d", default="YHOO", help="Ticker to download from Yahoo"
+    )
 
-    parser.add_argument('--fromdate', '-f',
-                        default='2006-01-01',
-                        help='Starting date in YYYY-MM-DD format')
+    parser.add_argument(
+        "--fromdate",
+        "-f",
+        default="2006-01-01",
+        help="Starting date in YYYY-MM-DD format",
+    )
 
-    parser.add_argument('--todate', '-t',
-                        default='2006-12-31',
-                        help='Starting date in YYYY-MM-DD format')
+    parser.add_argument(
+        "--todate",
+        "-t",
+        default="2006-12-31",
+        help="Starting date in YYYY-MM-DD format",
+    )
 
-    parser.add_argument('--period', default=15, type=int,
-                        help='Period to apply to the Simple Moving Average')
+    parser.add_argument(
+        "--period",
+        default=15,
+        type=int,
+        help="Period to apply to the Simple Moving Average",
+    )
 
-    parser.add_argument('--writer', '-w', action='store_true',
-                        help='Add a writer to cerebro')
+    parser.add_argument(
+        "--writer", "-w", action="store_true", help="Add a writer to cerebro"
+    )
 
-    parser.add_argument('--wrcsv', '-wc', action='store_true',
-                        help='Enable CSV Output in the writer')
+    parser.add_argument(
+        "--wrcsv", "-wc", action="store_true", help="Enable CSV Output in the writer"
+    )
 
-    parser.add_argument('--plot', '-p', action='store_true',
-                        help='Plot the read data')
+    parser.add_argument("--plot", "-p", action="store_true", help="Plot the read data")
 
-    parser.add_argument('--numfigs', '-n', default=1, type=int,
-                        help='Plot using numfigs figures')
+    parser.add_argument(
+        "--numfigs", "-n", default=1, type=int, help="Plot using numfigs figures"
+    )
 
     return parser.parse_args()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     runstrat()

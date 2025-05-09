@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,8 +17,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
 import math
 
@@ -29,8 +26,7 @@ from backtrader.utils import AutoOrderedDict
 
 
 class SQN(Analyzer):
-    '''SQN or SystemQualityNumber. Defined by Van K. Tharp to categorize trading
-    systems.
+    """SQN or SystemQualityNumber. Defined by Van K. Tharp to categorize trading systems.
 
       - 1.6 - 1.9 Below average
       - 2.0 - 2.4 Average
@@ -51,17 +47,17 @@ class SQN(Analyzer):
 
         Returns a dictionary with keys "sqn" and "trades" (number of
         considered trades)
+    """
 
-    '''
-    alias = ('SystemQualityNumber',)
+    alias = ("SystemQualityNumber",)
 
     def create_analysis(self):
-        '''Replace default implementation to instantiate an AutoOrdereDict
-        rather than an OrderedDict'''
+        """Replace default implementation to instantiate an AutoOrdereDict rather than an
+        OrderedDict."""
         self.rets = AutoOrderedDict()
 
     def start(self):
-        super(SQN, self).start()
+        super().start()
         self.pnl = list()
         self.count = 0
 

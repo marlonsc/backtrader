@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
 #
 # Copyright (C) 2015-2023 Daniel Rodriguez
@@ -18,19 +17,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
 
-import backtrader as bt
 from backtrader.utils.py3 import MAXINT
 
-
-from . import MovingAverageBase, MovAv
+from . import MovAv, MovingAverageBase
 
 
 class ZeroLagIndicator(MovingAverageBase):
-    '''By John Ehlers and Ric Way
+    """By John Ehlers and Ric Way.
 
     The zero-lag indicator (ZLIndicator) is a variation of the EMA
     which modifies the EMA by trying to minimize the error (distance price -
@@ -52,18 +47,23 @@ class ZeroLagIndicator(MovingAverageBase):
 
     See also:
       - http://www.mesasoftware.com/papers/ZeroLag.pdf
+    """
 
-    '''
-    alias = ('ZLIndicator', 'ZLInd', 'EC', 'ErrorCorrecting',)
-    lines = ('ec',)
+    alias = (
+        "ZLIndicator",
+        "ZLInd",
+        "EC",
+        "ErrorCorrecting",
+    )
+    lines = ("ec",)
     params = (
-        ('gainlimit', 50),
-        ('_movav', MovAv.EMA),
+        ("gainlimit", 50),
+        ("_movav", MovAv.EMA),
     )
 
     def _plotlabel(self):
         plabels = [self.p.period, self.p.gainlimit]
-        plabels += [self.p._movav] * self.p.notdefault('_movav')
+        plabels += [self.p._movav] * self.p.notdefault("_movav")
         return plabels
 
     def __init__(self):
@@ -71,7 +71,7 @@ class ZeroLagIndicator(MovingAverageBase):
         self.limits = [-self.p.gainlimit, self.p.gainlimit + 1]
 
         # To make mixins work - super at the end for cooperative inheritance
-        super(ZeroLagIndicator, self).__init__()
+        super().__init__()
 
     def next(self):
         leasterror = MAXINT  # 1000000 in original code
