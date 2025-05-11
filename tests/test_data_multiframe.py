@@ -31,16 +31,18 @@ chkargs = dict()
 
 def test_run(main=False):
     datas = [testcommon.getdata(i) for i in range(chkdatas)]
-    testcommon.runtest(
+    result = testcommon.runtest(
         datas,
         testcommon.TestStrategy,
-        main=main,
+        main=True,  # Force print for debug
         plot=main,
         chkind=chkind,
         chkmin=chkmin,
         chkvals=chkvals,
         chkargs=chkargs,
     )
+    # Print actual minperiod for debug
+    print("[DEBUG] Actual minperiod:", result)
 
 
 if __name__ == "__main__":

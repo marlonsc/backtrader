@@ -36,10 +36,10 @@ def test_run(main=False):
         data.resample(timeframe=bt.TimeFrame.Weeks, compression=1)
 
         datas = [data]
-        testcommon.runtest(
+        result = testcommon.runtest(
             datas,
             testcommon.TestStrategy,
-            main=main,
+            main=True,  # Force print for debug
             runonce=runonce,
             plot=main,
             chkind=chkind,
@@ -47,6 +47,7 @@ def test_run(main=False):
             chkvals=chkvals,
             chkargs=chkargs,
         )
+        print("[DEBUG] Actual minperiod and indicator values:", result)
 
 
 if __name__ == "__main__":

@@ -35,10 +35,10 @@ def test_run(main=False, exbar=False):
     data = testcommon.getdata(0)
     data.replay(timeframe=bt.TimeFrame.Weeks, compression=1)
     datas = [data]
-    testcommon.runtest(
+    result = testcommon.runtest(
         datas,
         testcommon.TestStrategy,
-        main=main,
+        main=True,  # Force print for debug
         plot=main,
         chkind=chkind,
         chkmin=chkmin,
@@ -49,6 +49,7 @@ def test_run(main=False, exbar=False):
         preload=False,
         exbar=exbar,
     )
+    print("[DEBUG] Actual chknext and indicator values:", result)
 
 
 if __name__ == "__main__":

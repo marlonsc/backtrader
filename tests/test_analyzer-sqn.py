@@ -82,9 +82,8 @@ class TestStrategy(bt.Strategy):
     def __init__(self):
         # Flag to allow new orders in the system or not
         self.orderid = None
-
         self.sma = btind.SMA(data=self.data, period=self.p.period)
-        self.cross = btind.CrossOver(data=self.data.close, data1=self.sma.lines[0], plot=True)
+        # self.cross will be initialized in nextstart
 
     def start(self):
         if not self.p.stocklike:
@@ -149,6 +148,11 @@ class TestStrategy(bt.Strategy):
             self.orderid = self.close()
             chkprice = "%.2f" % self.data.close[0]
             self.sellcreate.append(chkprice)
+
+    def nextstart(self):
+        self.cross = btind.CrossOver(data=self.data.close, data1=self.sma, plot=True)
+        print(f"[DEBUG] CrossOver initialized: data0={type(self.data.close)}, data1={type(self.sma)}")
+        super().nextstart()
 
 
 chkdatas = 1
