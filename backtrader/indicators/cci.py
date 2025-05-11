@@ -58,14 +58,17 @@ class CommodityChannelIndex(Indicator):
         self.plotinfo.plotyhlines = [0.0, self.p.upperband, self.p.lowerband]
 
     def __init__(self):
+        # CCI theoretical minperiod is period*2-1 (for mean deviation)
+        self.addminperiod(self.p.period * 2 - 1)
         tp = (self.data.high + self.data.low + self.data.close) / 3.0
         tpmean = self.p.movav(tp, period=self.p.period)
-
         dev = tp - tpmean
         meandev = MeanDev(data=tp, data1=tpmean, period=self.p.period)
-
-        self.lines.cci = dev / (self.p.factor * meandev)
-
+        # Avoid division by zero
+        cci = dev / (self.p.factor * meandev)
+        self.lines.cci = cci
+        if len(self.data) < self.p.period * 2 - 1:
+            self.lines.cci[0] = 0.0
         super().__init__()
 
 CCI = CommodityChannelIndex

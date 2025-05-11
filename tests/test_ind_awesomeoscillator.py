@@ -26,6 +26,7 @@ chkvals = [["50.804206", "72.983735", "33.655941"]]
 
 chkmin = 34
 chkind = bt.ind.AO
+chkargs = dict(fast=5, slow=34)
 
 
 def test_run(main=False):
@@ -38,6 +39,7 @@ def test_run(main=False):
         chkind=chkind,
         chkmin=chkmin,
         chkvals=chkvals,
+        chkargs=chkargs,
     )
 
 

@@ -86,24 +86,18 @@ class _DirectionalIndicator(Indicator):
 
     def __init__(self, _plus=True, _minus=True):
         atr = ATR(data=self.data, period=self.p.period, movav=self.p.movav)
-
         upmove = self.data.high - self.data.high(-1)
         downmove = self.data.low(-1) - self.data.low
-
         if _plus:
             plus = And(upmove > downmove, upmove > 0.0)
             plusDM = If(plus, upmove, 0.0)
             plusDMav = self.p.movav(plusDM, period=self.p.period)
-
-            self.DIplus = 100.0 * plusDMav / atr
-
+            self.DIplus = If(atr != 0, 100.0 * plusDMav / atr, 0.0)
         if _minus:
             minus = And(downmove > upmove, downmove > 0.0)
             minusDM = If(minus, downmove, 0.0)
             minusDMav = self.p.movav(minusDM, period=self.p.period)
-
-            self.DIminus = 100.0 * minusDMav / atr
-
+            self.DIminus = If(atr != 0, 100.0 * minusDMav / atr, 0.0)
         super().__init__()
 
 
@@ -381,3 +375,15 @@ class DirectionalMovement(AverageDirectionalMovementIndexRating, DirectionalIndi
     """
 
     alias = ("DM",)
+
+    def __init__(self):
+        super().__init__()
+        self.addminperiod(self.p.period)
+
+    def next(self):
+        # Add division by zero guard
+        try:
+            super().next()
+        except ZeroDivisionError:
+            for line in self.lines:
+                line[0] = 0.0

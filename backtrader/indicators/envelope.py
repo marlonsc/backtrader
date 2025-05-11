@@ -54,12 +54,10 @@ class EnvelopeMixIn:
 
     def __init__(self):
         # Mix-in & directly from object -> does not necessarily need super
-        # super(EnvelopeMixIn, self).__init__()
         perc = self.p.perc / 100.0
-
         self.lines.top = self.lines[0] * (1.0 + perc)
         self.lines.bot = self.lines[0] * (1.0 - perc)
-
+        self.addminperiod(self.p.period)
         super().__init__()
 
 

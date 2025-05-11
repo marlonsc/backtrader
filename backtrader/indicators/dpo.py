@@ -59,10 +59,10 @@ class DetrendedPriceOscillator(Indicator):
     def __init__(self):
         # Create the Moving Average
         ma = self.p.movav(self.data, period=self.p.period)
-
         # Calculate value (look back period/2 + 1 in MA) and bind to 'dpo' line
-        self.lines.dpo = self.data - ma(-self.p.period // 2 + 1)
-
+        dpo = self.data - ma(-self.p.period // 2 + 1)
+        self.lines.dpo = dpo
+        self.addminperiod(self.p.period)
         super().__init__()
 
 DPO = DetrendedPriceOscillator

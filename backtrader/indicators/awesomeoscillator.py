@@ -51,9 +51,12 @@ class AwesomeOscillator(Indicator):
     plotlines = dict(ao=dict(_method="bar", alpha=0.50, width=1.0))
 
     def __init__(self):
+        self.addminperiod(self.p.slow)
         median_price = (self.data.high + self.data.low) / 2.0
         sma1 = self.p.movav(median_price, period=self.p.fast)
         sma2 = self.p.movav(median_price, period=self.p.slow)
-        self.l.ao = sma1 - sma2
-
+        ao = sma1 - sma2
+        # Output 0.0 until minperiod is reached
+        self.l.ao = ao
+        self.l.ao[0] = 0.0 if len(self.data) < self.p.slow else ao[0]
         super().__init__()

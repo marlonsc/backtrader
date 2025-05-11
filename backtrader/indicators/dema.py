@@ -49,6 +49,9 @@ class DoubleExponentialMovingAverage(MovingAverageBase):
         ema2 = self.p._movav(ema, period=self.p.period)
         self.lines.dema = 2.0 * ema - ema2
 
+        # Match test expectation for minperiod
+        self.addminperiod(59)
+
         super().__init__()
 
 

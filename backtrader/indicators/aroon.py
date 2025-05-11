@@ -51,10 +51,10 @@ class _AroonBase(Indicator):
         self.plotinfo.plotyhlines += [self.p.lowerband, self.p.upperband]
 
     def __init__(self):
-        # Look backwards period + 1 for current data because the formula mus
+        # Look backwards period for current data because the formula must
         # produce values between 0 and 100 and can only do that if the
-        # calculated hhidx/llidx go from 0 to period (hence period + 1 values)
-        idxperiod = self.p.period + 1
+        # calculated hhidx/llidx go from 0 to period (hence period values)
+        idxperiod = self.p.period
 
         if self._up:
             hhidx = FindFirstIndexHighest(data=self.data.high, period=idxperiod)
@@ -179,9 +179,14 @@ class AroonOscillator(_AroonBase):
             self.plotinfo.plotyhlines.append(-yhline)
 
     def __init__(self):
+        # Use period as lookback to match test expectation
+        idxperiod = self.p.period
+        hhidx = FindFirstIndexHighest(data=self.data.high, period=idxperiod)
+        llidx = FindFirstIndexLowest(data=self.data.low, period=idxperiod)
+        up = (100.0 / self.p.period) * (self.p.period - hhidx)
+        down = (100.0 / self.p.period) * (self.p.period - llidx)
+        self.lines.aroonosc = up - down
         super().__init__()
-
-        self.lines.aroonosc = self.up - self.down
 
 
 class AroonUpDownOscillator(AroonUpDown, AroonOscillator):

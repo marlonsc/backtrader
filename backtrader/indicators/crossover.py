@@ -21,8 +21,6 @@
 import numpy as np
 from backtrader.indicators.basicops import And
 from backtrader.indicator import Indicator
-from backtrader.dataseries import DataSeries
-from backtrader.indicator import Indicator as BaseIndicator
 from backtrader.lineseries import LineSeries, LineSeriesMaker
 from backtrader.linebuffer import LineBuffer
 from backtrader.lineseries import LineSeriesStub

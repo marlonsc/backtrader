@@ -62,13 +62,18 @@ class BollingerBands(Indicator):
         return plabels
 
     def __init__(self):
-        self.lines.mid = ma = self.p.movav(self.data, period=self.p.period)
+        self.addminperiod(self.p.period)
+        ma = self.p.movav(self.data, period=self.p.period)
         stddev = self.p.devfactor * StdDev(
             data=self.data, data1=ma, period=self.p.period, movav=self.p.movav
         )
+        self.lines.mid = ma
         self.lines.top = ma + stddev
         self.lines.bot = ma - stddev
-
+        if len(self.data) < self.p.period:
+            self.lines.mid[0] = 0.0
+            self.lines.top[0] = 0.0
+            self.lines.bot[0] = 0.0
         super().__init__()
 
 

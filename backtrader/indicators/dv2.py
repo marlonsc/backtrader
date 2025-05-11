@@ -49,5 +49,7 @@ class DV2(Indicator):
     def __init__(self):
         chl = self.data.close / ((self.data.high + self.data.low) / 2.0)
         dvu = self.p._movav(chl, period=self.p.maperiod)
-        self.lines.dv2 = PercentRank(dvu, period=self.p.period) * 100
+        dv2 = PercentRank(dvu, period=self.p.period) * 100
+        self.lines.dv2 = dv2
+        self.addminperiod(self.p.period)
         super().__init__()

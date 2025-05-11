@@ -26,6 +26,7 @@ chkvals = [["35.714286", "-50.000000", "57.142857"]]
 
 chkmin = 15
 chkind = btind.AroonOscillator
+chkargs = dict(period=15)
 
 
 def test_run(main=False):
@@ -38,6 +39,7 @@ def test_run(main=False):
         chkind=chkind,
         chkmin=chkmin,
         chkvals=chkvals,
+        chkargs=chkargs,
     )
 
 

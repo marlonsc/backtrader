@@ -543,7 +543,6 @@ class WeightedAverage(PeriodN):
 
 def And(*args):
     import functools
-    from backtrader.linebuffer import LineBuffer
     def is_line(obj):
         return hasattr(obj, 'array')
     if all(is_line(arg) for arg in args):
