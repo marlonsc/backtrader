@@ -28,11 +28,20 @@ __all__ = [
     "analyzers",
     "Cerebro",
     "BrokerBase",
+    "Broker",
     "MetaParams",
     "LineSeries",
     "Sizer",
     "sizers",
     "errors",
+    "CommissionInfo",
+    "CommInfoBase",
+    "TimeReturn",
+    "TimeFrame",
+    "TimeFrameAnalyzerBase",
+    "Observer",
+    "BuyOrder",
+    "WriterStringIO",
 ]
 
 # Load contributed indicators and studies
@@ -50,3 +59,12 @@ from backtrader.lineseries import LineSeries
 import backtrader.sizers as sizers
 import backtrader.errors as errors
 from backtrader.sizer import Sizer
+from backtrader.comminfo import CommissionInfo, CommInfoBase
+from backtrader.analyzers.timereturn import TimeReturn
+from backtrader.dataseries import TimeFrame
+from backtrader.analyzer import TimeFrameAnalyzerBase
+from backtrader.observer import Observer
+from backtrader.order import BuyOrder
+from backtrader.writer import WriterStringIO
+
+Broker = BrokerBase

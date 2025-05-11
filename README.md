@@ -20,7 +20,7 @@ sizers, commissions, optimizers, and much more.
 
 ## Directory Structure
 
-```
+```asciidoc
 backtrader/           # Main framework source code
   analyzers/          # Performance and risk analyzers
   brokers/            # Brokers and simulations
@@ -84,6 +84,19 @@ cerebro.plot()
 
 See the `Makefile` for more commands.
 
+## TODOs
+
+- [ ] Review and update all packaging files (`setup.py`, `pyproject.toml`, `MANIFEST.in`)
+- [ ] Fix all linter/formatter/test issues
+- [ ] Modernize build system and CI
+- [ ] Validate documentation and examples
+- [ ] Prepare and test release artifacts
+- [ ] Ensure all public code is documented and ≤ 90 columns
+- [ ] Update version numbers and changelog for next release
+- [ ] Tag release and perform PyPI upload (dry-run first)
+- [ ] Maintain a running log of all changes, decisions, and issues
+- [ ] Archive all relevant docs and context for future reference
+
 ## License
 
 GPL-3.0. See the [LICENSE](LICENSE) file for details.
@@ -105,4 +118,4 @@ Contributions are welcome! Please follow these guidelines:
 
 ---
 
-For more details, see the [official documentation](https://www.backtrader.com/docu/). 
+For more details, see the [official documentation](https://www.backtrader.com/docu/).

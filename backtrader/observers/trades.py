@@ -20,7 +20,7 @@
 
 import uuid
 
-from .. import Observer
+from backtrader.observer import Observer
 from ..utils.py3 import with_metaclass
 
 

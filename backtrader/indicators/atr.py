@@ -39,9 +39,9 @@ class TrueHigh(Indicator):
 
     lines = ("truehigh",)
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         self.lines.truehigh = Highest(data=self.data.high, period=1)
-        super().__init__()
+        super().__init__(*args, **kwargs)
 
 
 class TrueLow(Indicator):
@@ -60,9 +60,9 @@ class TrueLow(Indicator):
 
     lines = ("truelow",)
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         self.lines.truelow = Lowest(data=self.data.low, period=1)
-        super().__init__()
+        super().__init__(*args, **kwargs)
 
 
 class TrueRange(Indicator):
@@ -87,9 +87,9 @@ class TrueRange(Indicator):
 
     lines = ("tr",)
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         self.lines.tr = TrueHigh(data=self.data) - TrueLow(data=self.data)
-        super().__init__()
+        super().__init__(*args, **kwargs)
 
 
 class AverageTrueRange(Indicator):
@@ -116,8 +116,8 @@ class AverageTrueRange(Indicator):
         plabels += [self.p.movav] * self.p.notdefault("movav")
         return plabels
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         self.lines.atr = self.p.movav(TrueRange(data=self.data), period=self.p.period)
-        super().__init__()
+        super().__init__(*args, **kwargs)
 
 ATR = AverageTrueRange

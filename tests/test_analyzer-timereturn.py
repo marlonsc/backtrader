@@ -77,7 +77,7 @@ class TestStrategy(bt.Strategy):
         self.orderid = None
 
         self.sma = btind.SMA(data=self.data, period=self.p.period)
-        self.cross = btind.CrossOver(data=self.data.close, data1=self.sma, plot=True)
+        self.cross = btind.CrossOver(data=self.data.close, data1=self.sma.lines[0], plot=True)
 
     def start(self):
         if not self.p.stocklike:

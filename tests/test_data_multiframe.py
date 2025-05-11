@@ -22,7 +22,7 @@ import backtrader.indicators as btind
 import testcommon
 
 chkdatas = 2
-chkvals = []
+chkvals = []  # Update if actual output differs
 
 chkmin = 151  # because of the weekly data
 chkind = [btind.SMA]

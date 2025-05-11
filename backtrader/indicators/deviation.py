@@ -57,7 +57,7 @@ class StandardDeviation(Indicator):
         plabels += [self.p.movav] * self.p.notdefault("movav")
         return plabels
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         if len(self.datas) > 1:
             mean = self.data1
         else:
@@ -70,6 +70,7 @@ class StandardDeviation(Indicator):
             self.lines.stddev = pow(abs(meansq - sqmean), 0.5)
         else:
             self.lines.stddev = pow(meansq - sqmean, 0.5)
+        super().__init__(*args, **kwargs)
 
 
 class MeanDeviation(Indicator):
@@ -103,7 +104,7 @@ class MeanDeviation(Indicator):
         plabels += [self.p.movav] * self.p.notdefault("movav")
         return plabels
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         if len(self.datas) > 1:
             mean = self.data1
         else:
@@ -111,3 +112,4 @@ class MeanDeviation(Indicator):
 
         absdev = abs(self.data - mean)
         self.lines.meandev = self.p.movav(absdev, period=self.p.period)
+        super().__init__(*args, **kwargs)

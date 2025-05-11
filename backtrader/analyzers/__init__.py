@@ -22,5 +22,6 @@
 # or prepend an "_" (underscore) to private classes/variables
 
 from .sqn import SQN
+from .timereturn import TimeReturn
 
-__all__ = ["SQN"]
+__all__ = ["SQN", "TimeReturn"]

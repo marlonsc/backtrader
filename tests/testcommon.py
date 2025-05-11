@@ -19,6 +19,7 @@
 ###############################################################################
 
 import datetime
+from math import factorial
 import os
 import os.path
 import sys
@@ -174,7 +175,7 @@ class TestStrategy(bt.Strategy):
         mp = self.chkmin
         chkpts = [0, -length + mp, (-length + mp) // 2]
         print("len ind %d == %d len self" % (length, len(self)))
-        assert length == len(self)
+        assert length == len(self), f"Indicator length {length} != strategy length {len(self)}"
 
         if self.p.main:
             print("----------------------------------------")
@@ -208,13 +209,13 @@ class TestStrategy(bt.Strategy):
 
         else:
             if self.p.chknext:
-                assert self.p.chknext == self.nextcalls
-            assert mp == self.p.chkmin
+                assert self.p.chknext == self.nextcalls, f"Expected chknext {self.p.chknext}, got {self.nextcalls}"
+            assert mp == self.p.chkmin, f"minperiod {mp} != chkmin {self.p.chkmin}"
             for lidx, linevals in enumerate(self.p.chkvals):
                 for i, chkpt in enumerate(chkpts):
                     chkval = "%f" % self.ind.lines[lidx][chkpt]
                     if not isinstance(linevals[i], tuple):
-                        assert chkval == linevals[i]
+                        assert chkval == linevals[i], f"Line {lidx} chkpt {chkpt}: {chkval} != expected {linevals[i]}"
                     else:
                         try:
                             assert chkval == linevals[i][0]

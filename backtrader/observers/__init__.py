@@ -20,3 +20,9 @@
 
 # The modules below should/must define __all__ with the Indicator objects
 # of prepend an "_" (underscore) to private classes/variables
+
+from .broker import Broker
+from .buysell import BuySell
+from .trades import Trades, DataTrades
+
+__all__ = ["Broker", "BuySell", "Trades", "DataTrades"]

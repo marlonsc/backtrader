@@ -18,7 +18,7 @@
 #
 ###############################################################################
 
-from backtrader import TimeFrameAnalyzerBase
+from backtrader.analyzer import TimeFrameAnalyzerBase
 
 
 class TimeReturn(TimeFrameAnalyzerBase):

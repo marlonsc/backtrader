@@ -75,7 +75,7 @@ class LaguerreRSI(PeriodN):
             cd += l3 - l2
 
         den = cu + cd
-        self.lines.lrsi[0] = 1.0 if not den else cu / den
+        self.lines.lrsi[0] = float('nan') if den == 0 else cu / den
 
 
 class LaguerreFilter(PeriodN):

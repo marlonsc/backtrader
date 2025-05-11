@@ -18,7 +18,7 @@
 #
 ###############################################################################
 
-from .. import Observer
+from backtrader.observer import Observer
 
 
 class Cash(Observer):

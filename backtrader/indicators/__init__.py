@@ -102,6 +102,7 @@ __all__ = [
     "ZLEMA",
     "ZeroLagIndicator",
     "CrossOver",
+    "MovAv",
 ]
 
 from .sma import MovingAverageSimple as SMA
@@ -119,7 +120,6 @@ from .dma import DMA
 from .dpo import DPO
 from .dv2 import DV2
 from .ema import ExponentialMovingAverage as EMA
-from .envelope import Envelope
 from .heikinashi import HeikinAshi
 from .basicops import Highest, Lowest, SumN
 from .hma import HullMovingAverage as HMA
@@ -143,13 +143,39 @@ from .trix import Trix
 from .tsi import TrueStrengthIndicator as TSI
 from .ultimateoscillator import UltimateOscillator
 from .vortex import Vortex
-from .basicops import SumN
 from .williams import WilliamsAD
 from .williams import WilliamsR
 from .wma import WeightedMovingAverage as WMA
 from .zlema import ZeroLagExponentialMovingAverage as ZLEMA
 from .zlind import ZeroLagIndicator
 from .crossover import CrossOver
+from .mabase import MovAv
+
+# Import Envelope after all moving averages are registered
+from .envelope import Envelope
+# Dynamically fetch and reexport Envelope classes from envelope module
+import backtrader.indicators.envelope as _envmod
+_envelope_names = [
+    "DEMAEnvelope", "EMAEnvelope", "KAMAEnvelope", "SMAEnvelope", "SMMAEnvelope", "TEMAEnvelope", "WMAEnvelope"
+]
+for _cls in _envelope_names:
+    _obj = getattr(_envmod, _cls, None)
+    if _obj is not None:
+        globals()[_cls] = _obj
+        if _cls not in __all__:
+            __all__.append(_cls)
+
+# Dynamically fetch and reexport Oscillator classes from oscillator module
+import backtrader.indicators.oscillator as _osmod
+_oscillator_names = [
+    "DEMAOsc", "EMAOsc", "KAMAOsc", "SMAOsc", "SMMAOsc", "TEMAOsc", "WMAOsc"
+]
+for _cls in _oscillator_names:
+    _obj = getattr(_osmod, _cls, None)
+    if _obj is not None:
+        globals()[_cls] = _obj
+        if _cls not in __all__:
+            __all__.append(_cls)
 
 AO = AwesomeOscillator
 DEMAEnvelope = getattr(sys.modules[__name__], "DEMAEnvelope", None)

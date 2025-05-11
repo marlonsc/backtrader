@@ -50,7 +50,16 @@ __all__ = [
     "Max",
 ]
 
-Max = max
+def elementwise_max(*args):
+    """Elementwise max for Backtrader line objects and scalars."""
+    if len(args) == 1:
+        return args[0]
+    def _bt_max_op(a, b):
+        # (a > b) * a + (b >= a) * b is the elementwise max for Backtrader lines
+        return (a > b) * a + (b >= a) * b
+    return functools.reduce(_bt_max_op, args)
+
+Max = elementwise_max
 
 class PeriodN(Indicator):
     """Base class for indicators which take a period (__init__ has to be called either via
@@ -61,8 +70,8 @@ class PeriodN(Indicator):
 
     params = (("period", 1),)
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.addminperiod(self.p.period)
 
 
@@ -78,6 +87,9 @@ class OperationN(PeriodN):
     Formula:
       - line = func(data, period)
     """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     def next(self):
         self.line[0] = self.func(self.data.get(size=self.p.period))
@@ -380,7 +392,10 @@ class Average(PeriodN):
     lines = ("av",)
 
     def next(self):
-        self.line[0] = math.fsum(self.data.get(size=self.p.period)) / self.p.period
+        if self.p.period == 0:
+            self.line[0] = float('nan')
+        else:
+            self.line[0] = math.fsum(self.data.get(size=self.p.period)) / self.p.period
 
     def once(self, start, end):
         src = self.data.array
@@ -388,7 +403,10 @@ class Average(PeriodN):
         period = self.p.period
 
         for i in range(start, end):
-            dst[i] = math.fsum(src[i - period + 1: i + 1]) / period
+            if period == 0:
+                dst[i] = float('nan')
+            else:
+                dst[i] = math.fsum(src[i - period + 1: i + 1]) / period
 
 
 class ExponentialSmoothing(Average):
@@ -407,14 +425,14 @@ class ExponentialSmoothing(Average):
     alias = ("ExpSmoothing",)
     params = (("alpha", None),)
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         self.alpha = self.p.alpha
         if self.alpha is None:
             self.alpha = 2.0 / (1.0 + self.p.period)  # def EMA value
 
         self.alpha1 = 1.0 - self.alpha
 
-        super().__init__()
+        super().__init__(*args, **kwargs)
 
     def nextstart(self):
         # Fetch the seed value from the base class calculation
@@ -457,8 +475,8 @@ class ExponentialSmoothingDynamic(ExponentialSmoothing):
 
     alias = ("ExpSmoothingDynamic",)
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
         # Hack: alpha is a "line" and carries a minperiod which is not being
         # considered because this indicator makes no line assignment. It has
@@ -503,8 +521,8 @@ class WeightedAverage(PeriodN):
         ("weights", tuple()),
     )
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     def next(self):
         data = self.data.get(size=self.p.period)
@@ -524,7 +542,21 @@ class WeightedAverage(PeriodN):
 
 
 def And(*args):
-    return all(args)
+    import functools
+    from backtrader.linebuffer import LineBuffer
+    def is_line(obj):
+        return hasattr(obj, 'array')
+    if all(is_line(arg) for arg in args):
+        def _bt_and_op(a, b):
+            return (a > 0) * (b > 0)
+        return functools.reduce(_bt_and_op, args)
+    else:
+        return all(args)
 
 def If(cond, true_val, false_val):
-    return true_val if cond else false_val
+    try:
+        # If cond is a Backtrader line object, do elementwise selection
+        return cond * true_val + (1.0 - cond) * false_val
+    except Exception:
+        # Fallback to Python ternary for scalars
+        return true_val if cond else false_val
